@@ -25,9 +25,15 @@ Publications
 
 Sources
 ======
+## AML
+
+## ML in general 
+1. [Pytorch implementation of minimum norm solvers](https://github.com/tuananhbui89/min_norm_solvers)
+2. [Measuring ensemble diversity of an ensemble of multiple classifiers](https://github.com/tuananhbui89/ensemble-diversity-measure)
+  
+## Other sources 
 1. [Practicing Leetcode's problems](https://github.com/tuananhbui89/leetcode)
-2. [Pytorch implementation of minimum norm solvers](https://github.com/tuananhbui89/min_norm_solvers)
-3. [Measuring ensemble diversity](https://github.com/tuananhbui89/ensemble-diversity-measure)
+2. [Generate a list of publications in Markdown from a Bibtex file for publishing a personal website](https://github.com/tuananhbui89/gen_list_pub_from_bibtex)
 
 Teaching
 ======
