@@ -37,4 +37,6 @@ Sources
 
 Teaching
 ======
-1. Deep Learning, Master of Data Science, Monash University, 2020, 2021, 2022.
+1. Deep Learning, Master of Data Science, Monash University, since 2020.
+2. Intelligent image and video analysis, Master of Data Science, Monash University, since 2023. 
+3. Advanced Computer Vision, VietAI, since 2023. 
