@@ -24,6 +24,21 @@ Publications
 [8]  [Ngoc-Trung Tran](https://scholar.google.com/citations?user=9SE3GYMAAAAJ&hl=en),  [**Tuan-Anh Bui**](https://tuananhbui89.github.io/),  [Ngai-Man Cheung](https://sites.google.com/site/mancheung0407/), 'Dist-gan: An improved gan using distance constraints', Proceedings of the European conference on computer vision (ECCV), 2018. [paper](https://openaccess.thecvf.com/content_ECCV_2018/html/Ngoc-Trung_Tran_Generative_Adversarial_Autoencoder_ECCV_2018_paper.html) [code](https://github.com/tntrung/gan)<br>
 [9]  [Ngoc-Trung Tran](https://scholar.google.com/citations?user=9SE3GYMAAAAJ&hl=en),  Dang-Khoa Le,  Anh-Dzung Doan,  Thanh-Toan Do,  [**Tuan-Anh Bui**](https://tuananhbui89.github.io/),  Mengxuan Tan,  [Ngai-Man Cheung](https://sites.google.com/site/mancheung0407/), 'On-device scalable image-based localization via prioritized cascade search and fast one-many ransac', IEEE Transactions on Image Processing, 2018. [paper](https://arxiv.org/pdf/1802.03510.pdf)<br>
 
+
+Talks and Presentations 
+======
+
+1. Exploring Controllability of (Conditioned) Diffusion Models, DAAD, Postdoc AINet, 2023. [slides](https://www.dropbox.com/s/mrqa4s98l0rnm0k/2023-Apr-Postdoc-AINet.pdf?dl=0). 
+
+2. Holistic View of Adversarial Machine Learning, Monash University, 2023. [slides](https://www.dropbox.com/s/u00xkq2n3d4w8gp/2023-Jan-Phenikaa-Presentation.pdf?dl=0). 
+
+3. Sharpness Aware Minimization: Recent Advances and Applications, Monash University, 2022. [slides](https://www.dropbox.com/s/kpejf28udm7emcq/2022_Oct_SAM.pdf?dl=0).
+
+4. Decision-Based Blackbox Adversarial Attacks, Monash University, 2021. [slides](https://www.dropbox.com/scl/fi/nrv60hkkvdvb7gg1mpu14/2021-June-Boundary-Attack.pptx?dl=0&rlkey=hcffd2p51ne9jgdbugxlga9wf).
+
+5. Improving Adversarial Robustness by Enforcing Local and Global Compactness, FIT, Monash University, 2020 and ECCV 2020. [slides](https://www.dropbox.com/s/m7kdbte0rxh0qra/FIT_presentation_Sep_20.pdf?dl=0).
+
+
 Sources
 ======
 ## AML
