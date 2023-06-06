@@ -12,6 +12,8 @@ I am a Ph.D. student at the Faculty of Information Technology, Monash University
 
 Before that, I had one year working as Research Engineer at Credit AI Lab, Trusting Social, and two years working as Research Assistant at Singapore University of Technology and Design with [Prof. Ngai Man Cheung](https://sites.google.com/site/mancheung0407/) and [Dr. Trung Tran](https://scholar.google.com/citations?user=9SE3GYMAAAAJ&hl=en).
 
+*I am completing my Ph.D. study and actively looking for an opportunity either Postdoc or Research Engineer. Please refer [my CV](files/TuanAnhBui_CV.pdf) and reach out if you think I am a good fit.*
+
 Publications
 ======
 [1]  [**Anh Bui**](https://tuananhbui89.github.io/),  [Trung Le](https://scholar.google.com/citations?user=gysdMxwAAAAJ&hl=en),  [He Zhao](https://ethanhezhao.github.io/),  Quan Tran,  Paul Montague,  [Dinh Phung](http://dinhphung.ml/), 'Generating Adversarial Examples with Task Oriented Multi-Objective Optimization', Transactions on Machine Learning Research, 2023. [paper](https://openreview.net/pdf?id=2f81Q622ww) [code](https://github.com/tuananhbui89/TAMOO)<br>
@@ -44,7 +46,7 @@ Sources
 ## AML
 1. [Dummy AML ideas that I have thought of](https://github.com/tuananhbui89/dummy-aml-ideas)
 2. [Generating adversarial examples for pretrained models](https://github.com/tuananhbui89/demo_attack)
-3. [AML Researchers]()
+3. [AML Researchers](https://github.com/tuananhbui89/AML-Leaders): A personal list of AML researchers that I follow their works. 
 
 ## ML in general 
 1. [Pytorch implementation of minimum norm solvers](https://github.com/tuananhbui89/min_norm_solvers)
