@@ -12,7 +12,7 @@ I am a Ph.D. student at the Faculty of Information Technology, Monash University
 
 Before that, I had one year working as Research Engineer at Credit AI Lab, Trusting Social, and two years working as Research Assistant at Singapore University of Technology and Design with [Prof. Ngai Man Cheung](https://sites.google.com/site/mancheung0407/) and [Dr. Trung Tran](https://scholar.google.com/citations?user=9SE3GYMAAAAJ&hl=en).
 
-*I am completing my Ph.D. study and actively looking for an opportunity either Postdoc or Research Engineer. Please refer [my CV](files/TuanAnhBui_CV.pdf) and reach out if you think I am a good fit.*
+*I am completing my Ph.D. study and actively looking for an opportunity for either Postdoc or Research Engineer. Please refer to [my CV](files/TuanAnhBui_CV.pdf) and reach out if you think I am a good fit.*
 
 Publications
 ======
