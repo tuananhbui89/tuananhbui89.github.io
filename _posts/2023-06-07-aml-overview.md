@@ -7,9 +7,8 @@ tags:
   - tutorial
 ---
 
-# Contents 
+Contents 
 
-- [Contents](#contents)
 - [Trustworthy Machine Learning vs Adversarial Machine Learning](#trustworthy-machine-learning-vs-adversarial-machine-learning)
 - [Adversarial Attacks - Manipulating ML Models](#adversarial-attacks---manipulating-ml-models)
   - [Poisoning Attacks](#poisoning-attacks)
