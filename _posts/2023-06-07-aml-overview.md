@@ -6,7 +6,7 @@ tags:
   - AML
   - tutorial
 ---
-
+<br>
 Contents 
 
 - [Trustworthy Machine Learning vs Adversarial Machine Learning](#trustworthy-machine-learning-vs-adversarial-machine-learning)
@@ -22,7 +22,7 @@ Contents
 - [AML for Good - Practical Applications and Positive Impacts](#aml-for-good---practical-applications-and-positive-impacts)
 - [References](#references)
 
-Reference: This post is inspired by the tutorial "Adversarial Machine Learning for Good" by Dr. [Pin-Yu Chen](https://sites.google.com/site/pinyuchenpage/home) (IBM Research) at the AAAI 2022 conference. Link to the tutorial: https://sites.google.com/view/advml4good
+Reference: This post is inspired by the tutorial "Adversarial Machine Learning for Good" by Dr. [Pin-Yu Chen](https://sites.google.com/site/pinyuchenpage/home) (IBM Research) at the AAAI 2022 conference. Link to the tutorial: [https://sites.google.com/view/advml4good](https://sites.google.com/view/advml4good)
 
 Trustworthy Machine Learning vs Adversarial Machine Learning
 ======
@@ -112,8 +112,11 @@ While adversarial attacks are definitely a big issue when it comes to deploying 
 
 When it comes to poisoning attacks and backdoor attacks, attackers need access to the training data or the training process, which isn't always possible. They can't control how a model is trained. In model extraction attacks, attackers have to submit a bunch of queries to the target model, which isn't always doable. And let's talk about privacy attacks - current research successfully extracts some training data, but guess what? That data is already out there on the internet, so it's not really a big deal. Adversarial examples, on the other hand, are a real headache when deploying machine learning models. But white-box attacks? They're not practical because the attacker needs to know everything about the target model. Black-box attacks are more realistic, but even then, they either require a ton of queries or rely on transferability.
 
-So, while adversarial attacks are a genuine concern, I think it's important to see the bigger picture. Many companies don't prioritize defending against these attacks. Certain limitations exist for different types of attacks, which can make them less feasible or impactful. Adversarial examples remain a significant challenge, but let's not forget that ongoing research is working on developing stronger defenses. As the industry grapples with these attacks, I hope we'll see more secure and reliable machine learning models in the future.
+So what's the point of all this? 
 
+- From academic perspective, adversarial attacks were a hot and important research topic and they still are.
+- From industrial perspective, companies are aware of adversarial attacks, but they don't take proper actions.
+- We still wait for a real super villain to show up and prove that adversarial attacks are a real threat.
 
 Adversarial Defenses - Protecting ML Models
 ======
