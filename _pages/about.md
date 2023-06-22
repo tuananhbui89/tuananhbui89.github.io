@@ -41,6 +41,17 @@ Talks and Presentations
 5. Improving Adversarial Robustness by Enforcing Local and Global Compactness, FIT, Monash University, 2020 and ECCV 2020. [slides](https://www.dropbox.com/s/m7kdbte0rxh0qra/FIT_presentation_Sep_20.pdf?dl=0).
 
 
+Awards
+======
+1. [DAAD Postdoc AINet Fellowship, 2023](https://www.daad.de/en/the-daad/postdocnet/fellows/fellows/#Bui).
+2. Top 10\% Reviewer at AISTATS 2022.
+3. Faculty of Information Technology's Scholarship, Monash University, 2019.
+4. Creative Idea Award for Research and Management at Viettel R\&D Institute, 2012-2015.
+5. Merit for excellent graduate student, HUST, 2012.
+6. Best Thesis Award in Thesis Defence, SET, HUST, 2012.
+7. Third prize in Student Conference on Scientific Research, HUST, 2012.
+8. Second prize in National Physics Olympiad for High School Students, Vietnam, 2007.
+
 Sources
 ======
 ## AML
