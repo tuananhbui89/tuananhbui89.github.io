@@ -30,7 +30,7 @@ Publications
 Talks and Presentations 
 ======
 
-1. Exploring Controllability of (Conditioned) Diffusion Models, DAAD, Postdoc AINet, 2023. [slides](https://www.dropbox.com/s/mrqa4s98l0rnm0k/2023-Apr-Postdoc-AINet.pdf?dl=0). 
+1. Exploring Controllability of (Conditioned) Diffusion Models, DAAD, Postdoc AINet, 2023. [slides](https://www.dropbox.com/s/299og2x7gx64nko/2023-June-Postdoc-AINet_v3.pdf?dl=0). 
 
 2. Holistic View of Adversarial Machine Learning, Monash University, 2023. [slides](https://www.dropbox.com/s/u00xkq2n3d4w8gp/2023-Jan-Phenikaa-Presentation.pdf?dl=0). 
 
