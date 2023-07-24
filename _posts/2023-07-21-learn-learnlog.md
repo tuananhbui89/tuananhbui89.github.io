@@ -7,6 +7,14 @@ tags:
 ---
 <br>
 
+2023-07-24
+--------------------------
+
+(#Productivity) How to present a slide and take notes on the same screen simultaneously (e.g., it is very useful when teaching or giving a talk). At Monash, the lecture theatre has MirrorOp installed on all screens that can connect wirelessly with a laptop but it is not convenient when we want to take notes. 
+- Best solution: connect Ipad to the screen and use Ipad to present the slide. We can also see the slide's note on the Ipad (required an adapter USB-C to HDMI and a HDMI cable).
+- Alternative solution: join Zoom meeting on personal computer (for presentation) and on Ipad (for taking notes) and share screen from Ipad on Zoom if needed. PC can connect to the screen using HDMI cable or MirrorOp. 
+
+
 2023-07-23
 --------------------------
 
@@ -28,7 +36,10 @@ Reference:
 (#AML) Rethinking Backdoor Attacks, Mardy's group. 
 https://arxiv.org/pdf/2307.10163.pdf
 
-(#Office) How to synchonize PowerPoint in Teams among multiple editers working simultaneously (i.e., share file in Teams, and open file in local using PowerPoint), in this way can retain the math equations.
+(#Productivity) How to synchonize PowerPoint in Teams among multiple editers working simultaneously (i.e., share file in Teams, and open file in local using PowerPoint), in this way can retain the math equations. 
+
+If you have some math equations in your PowerPoint, and open it on Google Slide, the equations will be converted to images. If you accidently sync the file with your original file, all math equations will be lost. 
+
 
 2023-07-21
 --------------------------
