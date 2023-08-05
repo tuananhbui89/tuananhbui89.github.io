@@ -9,11 +9,9 @@ tags:
   - TML
 ---
 <br>
-Contents 
 
 - [About the paper](#about-the-paper)
 - [How to preprocess the data](#how-to-preprocess-the-data)
-- [How to iteratively generate the perturbation](#how-to-iteratively-generate-the-perturbation)
 
 
 About the paper 
@@ -77,6 +75,7 @@ def load_data(data_dir, size=512, center_crop=True) -> torch.Tensor:
 ```
 
 The overall pipeline is as the snippet code below: 
+- Load the data from the `instance_data_dir_for_adversarial` directory. Output is a tensor of shape [N, H, W, C]? should it be [N, C, H, W]?
 ```
     # Load data from the instance data directory 
     # output: tensor of shape [N, H, W, C]? should it be [N, C, H, W]?
@@ -86,54 +85,10 @@ The overall pipeline is as the snippet code below:
         center_crop=args.center_crop,
     )
 ```
-
-```
-    # Apply PGD attack in each step of the training loop 
-    # input: perturbed_data: the entire data tensor not just a batch! 
-    # output: new perturbed data tensor 
-    perturbed_data = pgd_attack(
-        args,
-        f_sur,
-        tokenizer,
-        noise_scheduler,
-        vae,
-        perturbed_data,
-        original_data,
-        target_latent_tensor,
-        args.max_adv_train_steps,
-    )
-```
-
-```
-    # Train the model with the perturbed data
-    f = train_one_epoch(
-        args,
-        f,
-        tokenizer,
-        noise_scheduler,
-        vae,
-        perturbed_data,
-        args.max_f_train_steps,
-    )
-```
-
-Inside the `train_one_epoch` function, the `DreamBoothDatasetFromTensor` class is called to associate the data (i.e., perturbed data) with the corresponding textual prompt.
-```
-    train_dataset = DreamBoothDatasetFromTensor(
-        data_tensor,
-        args.instance_prompt,
-        tokenizer,
-        args.class_data_dir,
-        args.class_prompt,
-        args.resolution,
-        args.center_crop,
-    )
-```
-
-At the end, the perturbed image is saved in the `instance_data_dir_for_adversarial` directory. 
-
-How to iteratively generate the perturbation
-=====
+- Clone the current model to avoid the in-place operation
+- Train the model with the clean data 
+- Learn the perturbation with the updated model f_sur. Input is the entire data tensor not just a batch! Output is the new perturbed data tensor.
+- Restore the model and train with perturbed data
 
 ```
     f = [unet, text_encoder]
@@ -173,3 +128,18 @@ How to iteratively generate the perturbation
             args.max_f_train_steps,
         )
 ```
+
+Inside the `train_one_epoch` function, the `DreamBoothDatasetFromTensor` class is called to associate the data (i.e., perturbed data) with the corresponding textual prompt.
+```
+    train_dataset = DreamBoothDatasetFromTensor(
+        data_tensor,
+        args.instance_prompt,
+        tokenizer,
+        args.class_data_dir,
+        args.class_prompt,
+        args.resolution,
+        args.center_crop,
+    )
+```
+
+At the end, the perturbed image is saved in the `instance_data_dir_for_adversarial` directory. 

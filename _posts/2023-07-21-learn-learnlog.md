@@ -23,7 +23,7 @@ Short-term targets (Updated on July 2023):
 
 2023-08-05
 --------------------------
-(#Research) Understand the implementation of the Anti-Dreambooth project. Ref to the blog post: /posts/2023/08/papers/antidreambooth/
+(#Research) Understand the implementation of the [Anti-Dreambooth project](https://anti-dreambooth.github.io/). Ref to the [blog post](https://tuananhbui89.github.io/posts/2023/08/papers/antidreambooth/)
 
 
 2023-08-04 
