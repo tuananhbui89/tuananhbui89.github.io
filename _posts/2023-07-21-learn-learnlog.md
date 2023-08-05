@@ -7,6 +7,75 @@ tags:
 ---
 <br>
 
+Learning targets 
+--------------------------
+This is a learning log to keep track of what I have learned each day. To avoid distraction and fluctuation, I will set some long-term learning targets that needed a disciplined and consistent effort to achieve. 
+- #Productivity: learn how to be more productive and effective in work and life. (effective != efficient, outcome != output, proactive > active > reactive, 1.01^365 = 37.8, 0.99^365 = 0.03)
+- #AML: learn more about adversarial machine learning. 
+- #GenAI: learn more about generative AI, more specifically, personalized AI. 
+- #F4T: food for thought, learn more about philosophy, history, and humanity. 
+- #Finance: learn more about finance, investment, and business. 
+
+Short-term targets (Updated on July 2023): 
+- #Coding: Textual Inversion and Dreambooth 
+- #Research: Writing a paper about TML in GenAI 
+
+
+2023-08-05
+--------------------------
+(#Research) Understand the implementation of the Anti-Dreambooth project. Ref to the blog post: /posts/2023/08/papers/antidreambooth/
+
+
+2023-08-04 
+--------------------------
+(#Research) Three views of Diffusion Models: 
+- Probabilistic view point as in DDPM 
+- Denoising Score matching 
+- Stochastic Differential Equations (SDE) view point (which is the most general one)
+
+2023-08-03
+--------------------------
+(#Research) Trusted Autonomous Systems 
+- Trusted Autonomous Systems (TAS) is Australia’s first Defence Cooperative Research Centre.
+- There are many trustworthy related projects undergoing in this center.  
+- Reference: [https://tasdcrc.com.au/ ](https://tasdcrc.com.au/about-us/)
+
+2023-08-01
+--------------------------
+(#Research) Helmholtz Visiting Researcher Grant
+- https://www.helmholtz-hida.de/en/new-horizons/hida-visiting-program/ 
+- 1-3 months visiting grant for Ph.D. students and postdocs in one of 18 Helmholtz centers in Germany. 
+- Deadline: 16 August 2023 and will end on 15 October 2023.
+- CISPA - Helmholtz Center for Information Security https://cispa.de/en/people 
+
+2023-07-31
+--------------------------
+(#Research) Australia Research Council (ARC) Discovery Project (DP) 2023. 
+- The ARC DP is a very competitive grant in Australia. 
+- List of successful funded projects in 2023: https://rms.arc.gov.au/RMS/Report/Download/Report/1b0c8b2e-7bb0-4f2d-8f52-ad207cfbb41d/243 
+- This is a good source to find potential postdoc positions or Ph.D. scholarships as well as to find potential collaborators. 
+- For example, regarding Trustworthy Machine Learning, there are two projects including Dinh's project. 
+
+
+
+2023-07-30
+--------------------------
+() First Home Buyer Super Saver Scheme. 
+- Save mony for first home buyer inside superannuation fund. Apply 15% tax rate instead of marginal tax rate. When withdraw, apply another 15% tax rate. Each individual can save up to 50k for cross all years. 
+
+
+2023-07-27
+--------------------------
+
+(#GenAI) How to run textual inversion using Huggingface library locally without login to Huggingface with token. Including: 
+- How to install git-lfs on Linux to download large files from Github. Reference: https://github.com/git-lfs/git-lfs/blob/main/INSTALLING.md 
+- How to download pretrained model from Huggingface model hub. Reference: https://huggingface.co/docs/hub/models-downloading 
+- Setup environment to run textual inversion locally. Setup dependencies. 
+- Setup script 
+
+
+
+
 2023-07-24
 --------------------------
 
