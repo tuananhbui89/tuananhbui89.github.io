@@ -7,7 +7,6 @@ tags:
   - tutorial
 ---
 <br>
-Contents 
 
 - [Trustworthy Machine Learning vs Adversarial Machine Learning](#trustworthy-machine-learning-vs-adversarial-machine-learning)
 - [Adversarial Attacks - Manipulating ML Models](#adversarial-attacks---manipulating-ml-models)
