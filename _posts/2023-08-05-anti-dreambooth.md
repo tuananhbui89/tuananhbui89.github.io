@@ -1,12 +1,12 @@
 ---
-title: 'On Reading: Anti-Dreambooth'
+title: 'On Reading: Anti-DreamBooth: Protecting users from personalized text-to-image synthesis'
 date: 2023-08-05
 permalink: /posts/2023/08/papers/antidreambooth/
 tags:
   - Generative model
   - Diffusion model
   - Paper reading
-  - TML
+  - Trustworthy machine learning
 ---
 <br>
 
@@ -22,9 +22,9 @@ About the paper
 
 How to preprocess the data
 =====
-It is worth noting that in adversarial examples, the perturbation is added to the post-processed image while in this project the perturbation should be added to the pre-processed image and robust to the pre-processing step. However, in the current implementation, the perturbation is added to the post-processed image. 
+It is worth noting that in adversarial examples, the perturbation is added to the post-processed image while in this project the perturbation should be added to the pre-processed image and robust to the pre-processing step. However, in the current implementation, the perturbation is added to the post-processed image.
 
-- It first call the `load_data` function that read PIL image and apply some transformations (e.g., resize, crop, normalize) and return a tensor (shape = [N, H, W, C], channel last format???). Ref: https://github.com/VinAIResearch/Anti-DreamBooth/blob/0d1ed6ff4766a876e65753f8c00fad8bf48f37c6/attacks/aspl.py#L360 
+- It first call the `load_data` function that read PIL image and apply some transformations (e.g., resize, crop, normalize) and return a tensor (shape = [N, H, W, C], channel last format???). Ref: [Line 360](https://github.com/VinAIResearch/Anti-DreamBooth/blob/0d1ed6ff4766a876e65753f8c00fad8bf48f37c6/attacks/aspl.py#L360)  
 
 <!-- Insert code block -->
 ```
@@ -43,7 +43,7 @@ def load_data(data_dir, size=512, center_crop=True) -> torch.Tensor:
     return images
 ```
 
-- It then call the `DreamBoothDatasetFromTensor` class with input argument `instance_images_tensor` which is the tensor returned from the `load_data` function. In this class, when `__getitem__` function is called, the data will be associated with a corresponding textual prompt. There is **no transformation applied** in this class. Ref: https://github.com/VinAIResearch/Anti-DreamBooth/blob/0d1ed6ff4766a876e65753f8c00fad8bf48f37c6/attacks/aspl.py#L31
+- It then call the `DreamBoothDatasetFromTensor` class with input argument `instance_images_tensor` which is the tensor returned from the `load_data` function. In this class, when `__getitem__` function is called, the data will be associated with a corresponding textual prompt. There is **no transformation applied** in this class. Ref: [Line 31](https://github.com/VinAIResearch/Anti-DreamBooth/blob/0d1ed6ff4766a876e65753f8c00fad8bf48f37c6/attacks/aspl.py#L31) 
 
 ```
     def __getitem__(self, index):
@@ -143,3 +143,7 @@ Inside the `train_one_epoch` function, the `DreamBoothDatasetFromTensor` class i
 ```
 
 At the end, the perturbed image is saved in the `instance_data_dir_for_adversarial` directory. 
+
+Some notes: 
+- In the original Dreambooth project, the data is loaded from the `DataLoader` class and is shuffled. However, in the Anti-Dreambooth project, the data is loaded from the `DreamBoothDatasetFromTensor` class and is not shuffled. Ref: [Line 1061](https://github.com/huggingface/diffusers/blob/ea1fcc28a458739771f5112767f70d281511d2a2/examples/dreambooth/train_dreambooth.py#L1061)
+- The reason for the above modification is that the author want to change on the fly the perturbed data after each epoch, which will be harder in control if using `DataLoader` class.
