@@ -12,6 +12,7 @@ tags:
 
 - [About the paper](#about-the-paper)
 - [How to preprocess the data](#how-to-preprocess-the-data)
+- [PGD attack](#pgd-attack)
 
 
 About the paper 
@@ -147,3 +148,92 @@ At the end, the perturbed image is saved in the `instance_data_dir_for_adversari
 Some notes: 
 - In the original Dreambooth project, the data is loaded from the `DataLoader` class and is shuffled. However, in the Anti-Dreambooth project, the data is loaded from the `DreamBoothDatasetFromTensor` class and is not shuffled. Ref: [Line 1061](https://github.com/huggingface/diffusers/blob/ea1fcc28a458739771f5112767f70d281511d2a2/examples/dreambooth/train_dreambooth.py#L1061)
 - The reason for the above modification is that the author want to change on the fly the perturbed data after each epoch, which will be harder in control if using `DataLoader` class.
+
+PGD attack 
+=====
+
+The PGD attack is implemented in the `pgd_attack` function. The input is the perturbed data tensor and the output is the new perturbed data tensor. 
+
+Some notes: 
+- weight type is `torch.bfloat16` instead of `torch.float32`
+- unet, vae, text_encoder are in `train` mode (because they were set in `train_one_epoch` function)
+- Learn for the entire data tensor not just a batch
+- The whole process is quite similar to the standard PGD attack without the random initialization.
+
+```
+    # Create a copy of data and set requires_grad to True
+    perturbed_images = data_tensor.detach().clone()
+    perturbed_images.requires_grad_(True)
+
+    # Repeat the input_ids to match the batch size
+    input_ids = tokenizer(
+        args.instance_prompt,
+        truncation=True,
+        padding="max_length",
+        max_length=tokenizer.model_max_length,
+        return_tensors="pt",
+    ).input_ids.repeat(len(data_tensor), 1)
+
+    # Loop over the number of steps
+    for step in range(num_steps):
+
+        # Reset requires_grad to True because it was set to False in the last step
+        perturbed_images.requires_grad = True
+        latents = vae.encode(perturbed_images.to(device, dtype=weight_dtype)).latent_dist.sample()
+        latents = latents * vae.config.scaling_factor
+
+        # Sample noise that we'll add to the latents
+        noise = torch.randn_like(latents)
+        bsz = latents.shape[0]
+        # Sample a random timestep for each image
+        timesteps = torch.randint(0, noise_scheduler.config.num_train_timesteps, (bsz,), device=latents.device)
+        timesteps = timesteps.long()
+        # Add noise to the latents according to the noise magnitude at each timestep
+        # (this is the forward diffusion process)
+        noisy_latents = noise_scheduler.add_noise(latents, noise, timesteps)
+
+        # Get the text embedding for conditioning
+        encoder_hidden_states = text_encoder(input_ids.to(device))[0]
+
+        # Predict the noise residual
+        model_pred = unet(noisy_latents, timesteps, encoder_hidden_states).sample
+
+        # Get the target for loss depending on the prediction type
+        if noise_scheduler.config.prediction_type == "epsilon":
+            target = noise
+        elif noise_scheduler.config.prediction_type == "v_prediction":
+            target = noise_scheduler.get_velocity(latents, noise, timesteps)
+        else:
+            raise ValueError(f"Unknown prediction type {noise_scheduler.config.prediction_type}")
+
+        unet.zero_grad()
+        text_encoder.zero_grad()
+        loss = F.mse_loss(model_pred.float(), target.float(), reduction="mean")
+
+        # target-shift loss
+        if target_tensor is not None:
+            xtm1_pred = torch.cat(
+                [
+                    noise_scheduler.step(
+                        model_pred[idx : idx + 1],
+                        timesteps[idx : idx + 1],
+                        noisy_latents[idx : idx + 1],
+                    ).prev_sample
+                    for idx in range(len(model_pred))
+                ]
+            )
+            xtm1_target = noise_scheduler.add_noise(target_tensor, noise, timesteps - 1)
+            loss = loss - F.mse_loss(xtm1_pred, xtm1_target)
+
+        loss.backward()
+
+        alpha = args.pgd_alpha
+        eps = args.pgd_eps
+
+        # Project to valid range
+        adv_images = perturbed_images + alpha * perturbed_images.grad.sign()
+        eta = torch.clamp(adv_images - original_images, min=-eps, max=+eps)
+        perturbed_images = torch.clamp(original_images + eta, min=-1, max=+1).detach_()
+        print(f"PGD loss - step {step}, loss: {loss.detach().item()}")
+    return perturbed_images
+```

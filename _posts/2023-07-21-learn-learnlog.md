@@ -20,6 +20,9 @@ Short-term targets (Updated on July 2023):
 - #Coding: Textual Inversion and Dreambooth 
 - #Research: Writing a paper about TML in GenAI 
 
+2023-08-06
+--------------------------
+(#Research) Strange Bug in generating adversarial examples using Huggingface.
 
 2023-08-05
 --------------------------
