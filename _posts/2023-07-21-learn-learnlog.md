@@ -22,11 +22,15 @@ Short-term targets (Updated on July 2023):
 
 2023-08-06
 --------------------------
-(#Research) Strange Bug in generating adversarial examples using Huggingface.
+(#Coding) Strange bug in generating adversarial examples using Huggingface.
+- Context: I am trying to implement similar idea as in the [Anti-Dreambooth project](https://anti-dreambooth.github.io/) to generate adversarial perturbation for the Textual Inversion project. However, I got this bug which cost me 2 days to figure out. 
+- Bug: the gradient on the input tensor is None, even required_grad is set to True. 
+- Cause: Because of the Huggingface accelerator. (Ref: [gradient_accumulation](https://huggingface.co/docs/accelerate/usage_guides/gradient_accumulation)). The accelerator is to help to accelerate the training process by accumulating the gradient over multiple batches. It requires the model and the train dataloader to be prepared with function `accelerator.prepare()`. However, in our case, we do not use the train dataloader (see the [blog post about Anti-Dreambooth](https://tuananhbui89.github.io/posts/2023/08/papers/antidreambooth/)). Therefore, when we still use the accelerator.accumulate() in the training loop, the gradient is accumulated over multiple batches, and the gradient on the input tensor is None.
+- Fix: remove the accelerator.accumulate() in the training loop. 
 
 2023-08-05
 --------------------------
-(#Research) Understand the implementation of the [Anti-Dreambooth project](https://anti-dreambooth.github.io/). Ref to the [blog post](https://tuananhbui89.github.io/posts/2023/08/papers/antidreambooth/)
+(#Coding) Understand the implementation of the [Anti-Dreambooth project](https://anti-dreambooth.github.io/). Ref to the [blog post](https://tuananhbui89.github.io/posts/2023/08/papers/antidreambooth/)
 
 
 2023-08-04 

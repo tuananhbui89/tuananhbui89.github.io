@@ -28,7 +28,7 @@ It is worth noting that in adversarial examples, the perturbation is added to th
 - It first call the `load_data` function that read PIL image and apply some transformations (e.g., resize, crop, normalize) and return a tensor (shape = [N, H, W, C], channel last format???). Ref: [Line 360](https://github.com/VinAIResearch/Anti-DreamBooth/blob/0d1ed6ff4766a876e65753f8c00fad8bf48f37c6/attacks/aspl.py#L360)  
 
 <!-- Insert code block -->
-```
+```python
 def load_data(data_dir, size=512, center_crop=True) -> torch.Tensor:
     image_transforms = transforms.Compose(
         [
@@ -46,7 +46,7 @@ def load_data(data_dir, size=512, center_crop=True) -> torch.Tensor:
 
 - It then call the `DreamBoothDatasetFromTensor` class with input argument `instance_images_tensor` which is the tensor returned from the `load_data` function. In this class, when `__getitem__` function is called, the data will be associated with a corresponding textual prompt. There is **no transformation applied** in this class. Ref: [Line 31](https://github.com/VinAIResearch/Anti-DreamBooth/blob/0d1ed6ff4766a876e65753f8c00fad8bf48f37c6/attacks/aspl.py#L31) 
 
-```
+```python
     def __getitem__(self, index):
         example = {}
         instance_image = self.instance_images_tensor[index % self.num_instance_images]
@@ -91,7 +91,7 @@ The overall pipeline is as the snippet code below:
 - Learn the perturbation with the updated model f_sur. Input is the entire data tensor not just a batch! Output is the new perturbed data tensor.
 - Restore the model and train with perturbed data
 
-```
+```python
     f = [unet, text_encoder]
     for i in range(args.max_train_steps):
         # Clone the current model to avoid the in-place operation
@@ -131,7 +131,8 @@ The overall pipeline is as the snippet code below:
 ```
 
 Inside the `train_one_epoch` function, the `DreamBoothDatasetFromTensor` class is called to associate the data (i.e., perturbed data) with the corresponding textual prompt.
-```
+
+```python
     train_dataset = DreamBoothDatasetFromTensor(
         data_tensor,
         args.instance_prompt,
@@ -160,7 +161,7 @@ Some notes:
 - Learn for the entire data tensor not just a batch
 - The whole process is quite similar to the standard PGD attack without the random initialization.
 
-```
+```python
     # Create a copy of data and set requires_grad to True
     perturbed_images = data_tensor.detach().clone()
     perturbed_images.requires_grad_(True)
