@@ -13,7 +13,7 @@ tags:
 - [How to implement](#how-to-implement)
   - [How to set up the specific token and the input prompt](#how-to-set-up-the-specific-token-and-the-input-prompt)
     - [Tokenizer thing](#tokenizer-thing)
-  - [How to prepare the dataset](#how-to-prepare-the-dataset)
+  - [How to process the dataset](#how-to-process-the-dataset)
   - [How to train and learn the specific token](#how-to-train-and-learn-the-specific-token)
   - [How to package the learned token and use it for inference (or upload to the hub)](#how-to-package-the-learned-token-and-use-it-for-inference-or-upload-to-the-hub)
 
@@ -106,7 +106,7 @@ with torch.no_grad():
         token_embeds[token_id] = token_embeds[initializer_token_id].clone()
 ```
 
-The `placeholder_token_ids` is then used to specify the position in the embedding matrix to be updated (corresponding to our specific token)
+The `placeholder_token_ids` is then used to specify the position in the embedding matrix to be updated (corresponding to our specific token). In the end, the only thing we need to learn is the embedding matrix (actually only several specific rows in the embedding matrix, but the entire embedding matrix is small enough to store/save unlike the unet' weights where it is much compacted using [LORA](https://huggingface.co/blog/lora)). Later, we will learn how to use the learned embedding matrix to generate new images or upload to the hub.
 
 ```python
 # Let's make sure we don't update any embedding weights besides the newly added token
@@ -119,7 +119,9 @@ with torch.no_grad():
     ] = orig_embeds_params[index_no_updates]
 ```
 
-## How to prepare the dataset 
+## How to process the dataset 
+
+The above step shows how the specific token is processed. In this step, we will see in a higher level of how the training dataset is processed.
 
 
 ## How to train and learn the specific token 
