@@ -21,6 +21,7 @@ Short-term targets (Updated on July 2023):
 
 - #Coding: Textual Inversion and Dreambooth
 - #Research: Writing a paper about TML in GenAI
+
 <!-- 
 Recording ideas
 --------------------------
@@ -43,7 +44,9 @@ Mitigating Inappropriate Degeneration in Diffusion Models](https://arxiv.org/abs
 2023-08-14
 --------------------------
 (#Research) Some trends in KDD 2023: Graph Neural Networks and Casual Inference from Industrial Applications.
+
 (#Research) Graph Neural Networks, definition of neighborhood aggregation. Most of GNN methods work on million of nodes, to scale to billion of nodes, there are a lot of tricks under the hood (from Dinh's working experience in Trustingsocial).
+
 (#Research) (With Trung and Van Anh) We derive a nice framework that connect data-space distributional robustness (as in our ICLR 2022 paper) and model-space distributional robustness (as in SAM).
 
 2023-08-08
