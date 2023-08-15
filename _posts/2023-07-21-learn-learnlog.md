@@ -31,6 +31,15 @@ Disclaimer:
 - Originality: I would also like to emphasize that most of my research ideas come to mind when I am reading papers or watching lectures, and I do not always have the time to do a thorough literature review. Therefore, it is possible that some of my ideas have already been proposed by someone else without my knowledge.
 - Stupidity: when I say dumb ideas, I mean that they are not well thought out, and even so they came from a not-so-smart with limited knowledge person. Therefore, I would also like to emphasize that I am not responsible for any damage caused by them :D. -->
 
+2023-08-16
+--------------------------
+(#Research) The Inaproppriate Image Prompts (I2P) benchmark.
+
+- Including 4703 unique prompts to generate inappropriate images with Stable Diffusion. There are combinations of 7 categories including: hate, harrassment, violence, self-harm, sexual, shocking and illegal activities.
+- Research paper: [Safe Latent Diffusion:
+Mitigating Inappropriate Degeneration in Diffusion Models](https://arxiv.org/abs/2211.05105), CVPR 2023.
+- Huggingface page: [https://huggingface.co/datasets/AIML-TUDA/i2p](https://huggingface.co/datasets/AIML-TUDA/i2p)
+
 2023-08-14
 --------------------------
 (#Research) Some trends in KDD 2023: Graph Neural Networks and Casual Inference from Industrial Applications.
