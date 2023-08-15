@@ -31,6 +31,12 @@ Disclaimer:
 - Originality: I would also like to emphasize that most of my research ideas come to mind when I am reading papers or watching lectures, and I do not always have the time to do a thorough literature review. Therefore, it is possible that some of my ideas have already been proposed by someone else without my knowledge.
 - Stupidity: when I say dumb ideas, I mean that they are not well thought out, and even so they came from a not-so-smart with limited knowledge person. Therefore, I would also like to emphasize that I am not responsible for any damage caused by them :D. -->
 
+2023-08-14
+--------------------------
+(#Research) Some trends in KDD 2023: Graph Neural Networks and Casual Inference from Industrial Applications.
+(#Research) Graph Neural Networks, definition of neighborhood aggregation. Most of GNN methods work on million of nodes, to scale to billion of nodes, there are a lot of tricks under the hood (from Dinh's working experience in Trustingsocial).
+(#Research) (With Trung and Van Anh) We derive a nice framework that connect data-space distributional robustness (as in our ICLR 2022 paper) and model-space distributional robustness (as in SAM).
+
 2023-08-08
 --------------------------
 (#Research) On reading: Erasing Concepts from Diffusion Models (ICCV 2023).  [https://erasing.baulab.info/](https://erasing.baulab.info/)
@@ -44,7 +50,7 @@ Disclaimer:
 - Context: I am trying to implement similar idea as in the [Anti-Dreambooth project](https://anti-dreambooth.github.io/) to generate adversarial perturbation for the Textual Inversion project. However, I got this bug which cost me 2 days to figure out. 
 - Bug: the gradient on the input tensor is None, even required_grad is set to True.
 - Cause: Because of the Huggingface accelerator. (Ref: [gradient_accumulation](https://huggingface.co/docs/accelerate/usage_guides/gradient_accumulation)). The accelerator is to help to accelerate the training process by accumulating the gradient over multiple batches. It requires the model and the train dataloader to be prepared with function `accelerator.prepare()`. However, in our case, we do not use the train dataloader (see the [blog post about Anti-Dreambooth](https://tuananhbui89.github.io/posts/2023/08/papers/antidreambooth/)). Therefore, when we still use the accelerator.accumulate() in the training loop, the gradient is accumulated over multiple batches, and the gradient on the input tensor is None.
-- Fix: remove the accelerator.accumulate() in the training loop. 
+- Fix: remove the accelerator.accumulate() in the training loop. No it doesn't work! 
 
 2023-08-05
 --------------------------

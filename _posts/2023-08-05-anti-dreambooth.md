@@ -12,6 +12,7 @@ tags:
 
 - [About the paper](#about-the-paper)
 - [How to preprocess the data](#how-to-preprocess-the-data)
+    - [Difference in prompting process between "Textual Inversion" and "Dreambooth" projects](#difference-in-prompting-process-between-textual-inversion-and-dreambooth-projects)
 - [PGD attack](#pgd-attack)
 
 
@@ -149,6 +150,26 @@ At the end, the perturbed image is saved in the `instance_data_dir_for_adversari
 Some notes: 
 - In the original Dreambooth project, the data is loaded from the `DataLoader` class and is shuffled. However, in the Anti-Dreambooth project, the data is loaded from the `DreamBoothDatasetFromTensor` class and is not shuffled. Ref: [Line 1061](https://github.com/huggingface/diffusers/blob/ea1fcc28a458739771f5112767f70d281511d2a2/examples/dreambooth/train_dreambooth.py#L1061)
 - The reason for the above modification is that the author want to change on the fly the perturbed data after each epoch, which will be harder in control if using `DataLoader` class.
+
+### Difference in prompting process between "Textual Inversion" and "Dreambooth" projects
+
+In Dreambooth, there is an argument `instance_prompt` which is used as a neural prompt to associate with the given images. For example, the default value is `a photo of sks dog`, where `sks` is the unique identifier to specify the learned concept. The `instance_prompt` is then tokenized by the tokenizer and the token ids are used to specify the position in the embedding matrix to be updated (corresponding to the specific token).
+
+```python
+    # In the DreamBoothDataset class
+    if self.encoder_hidden_states is not None:
+        example["instance_prompt_ids"] = self.encoder_hidden_states
+    else:
+        text_inputs = tokenize_prompt(
+            self.tokenizer, self.instance_prompt, tokenizer_max_length=self.tokenizer_max_length
+        )
+        example["instance_prompt_ids"] = text_inputs.input_ids
+        example["instance_attention_mask"] = text_inputs.attention_mask
+```
+
+So the difference between the two projects is that:
+- In Dreambooth, only one neural prompt is used, while in Textual Inversion, there is a list of neural prompts
+- In Textual Inversion, it is important to specify the `placeholder_token` to reuse the same token in other prompts, while in Dreambooth, the identifier (i.e., `sks`) is used to specify the position in the embedding matrix to be updated (corresponding to the specific token). In inferencce, a prompt with the same identifier will be used to generate images, for example, `a photo of sks dog in the beach`. So to me, the whole prompt in Dreambooth is like a placeholder token in Textual Inversion. However, in this case, how the output looks like if we use a prompt that not contains the whole `instance_prompt`? For example, `a sks dog walking on the beach`?
 
 PGD attack 
 =====
