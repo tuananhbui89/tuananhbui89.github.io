@@ -32,6 +32,31 @@ Disclaimer:
 - Originality: I would also like to emphasize that most of my research ideas come to mind when I am reading papers or watching lectures, and I do not always have the time to do a thorough literature review. Therefore, it is possible that some of my ideas have already been proposed by someone else without my knowledge.
 - Stupidity: when I say dumb ideas, I mean that they are not well thought out, and even so they came from a not-so-smart with limited knowledge person. Therefore, I would also like to emphasize that I am not responsible for any damage caused by them :D. -->
 
+2023-08-17
+--------------------------
+(#Code) How to disable NSFW detection in Huggingface.
+
+- context: I am trying to generate inappropriate images using Stable Diffusion with prompts from the I2P benchmark. However, the NSFW detection in Huggingface is too sensitive and it filters out all of the images, and return a black image instead. Therefore, I need to disable it.
+- solution: modify the pipeline_stable_diffusion.py file in the Huggingface library. just return image and None in the run_safety_checker function.
+
+```python
+    # line 426 in the pipeline_stable_diffusion.py
+    def run_safety_checker(self, image, device, dtype):
+        return image, None
+        if self.safety_checker is None:
+            has_nsfw_concept = None
+        else:
+            if torch.is_tensor(image):
+                feature_extractor_input = self.image_processor.postprocess(image, output_type="pil")
+            else:
+                feature_extractor_input = self.image_processor.numpy_to_pil(image)
+            safety_checker_input = self.feature_extractor(feature_extractor_input, return_tensors="pt").to(device)
+            image, has_nsfw_concept = self.safety_checker(
+                images=image, clip_input=safety_checker_input.pixel_values.to(dtype)
+            )
+        return image, has_nsfw_concept
+```
+
 2023-08-16
 --------------------------
 (#Research) The Inaproppriate Image Prompts (I2P) benchmark.
@@ -40,6 +65,7 @@ Disclaimer:
 - Research paper: [Safe Latent Diffusion:
 Mitigating Inappropriate Degeneration in Diffusion Models](https://arxiv.org/abs/2211.05105), CVPR 2023.
 - Huggingface page: [https://huggingface.co/datasets/AIML-TUDA/i2p](https://huggingface.co/datasets/AIML-TUDA/i2p)
+
 
 2023-08-14
 --------------------------
