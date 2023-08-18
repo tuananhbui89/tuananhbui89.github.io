@@ -32,6 +32,11 @@ Disclaimer:
 - Originality: I would also like to emphasize that most of my research ideas come to mind when I am reading papers or watching lectures, and I do not always have the time to do a thorough literature review. Therefore, it is possible that some of my ideas have already been proposed by someone else without my knowledge.
 - Stupidity: when I say dumb ideas, I mean that they are not well thought out, and even so they came from a not-so-smart with limited knowledge person. Therefore, I would also like to emphasize that I am not responsible for any damage caused by them :D. -->
 
+2023-08-19
+--------------------------
+(#Coding) How to show an image in Github page. Reference to this post: [https://tuananhbui89.github.io/blog/2023-08-19-showingimage/](https://tuananhbui89.github.io/blog/2023-08-19-showingimage/)
+
+
 2023-08-18
 --------------------------
 (#Research) On Reading: DDGR: Continual Learning with Deep Diffusion-based Generative Replay
@@ -49,24 +54,6 @@ Disclaimer:
   - It has class-guidance mechanism that can guild diffusion model to learn new distribution from new task and not overlapping with previous tasks. (so generator doesn't face a serious catastrophic forgetting problem)
 
 (#Idea) We can use Class-Guidance Diffusion model to learn mixup data and then can use that model to generate not only data from pure classes but also from mixup classes. It is well accepted that mixup technique can improve the generalization of classifier, so it can be applied to CL setting as well.
-
-![DPRG](../images/DPRG.png) DPRG Method 1
-
-![DPRG](./images/DPRG.png) DPRG Method 2
-
-![DPRG](images/DPRG.png) DPRG Method 3
-
-![DPRG]({{ site.baseurl }}/../../images/DPRG.png) DPRG Method 4
-
-![DPRG](../../images/DPRG.png) DPRG Method 5
-
-![DPRG]({{ site.baseurl }}/./images/DPRG.png) DPRG Method 6
-
-![DPRG]({{ site.baseurl }}/../images/DPRG.png) DPRG Method 7
-
-![DPRG]({{ site.baseurl }}/images/DPRG.png) DPRG Method 8
-
-![DPRG]({{ site.url }}/images/DPRG.png) DPRG Method 9
 
 2023-08-17
 --------------------------
