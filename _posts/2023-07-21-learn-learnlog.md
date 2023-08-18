@@ -51,6 +51,9 @@ Disclaimer:
 (#Idea) We can use Class-Guidance Diffusion model to learn mixup data and then can use that model to generate not only data from pure classes but also from mixup classes. It is well accepted that mixup technique can improve the generalization of classifier, so it can be applied to CL setting as well.
 
 
+![DPRG](../images/DPRG.PNG "DPRG")
+
+
 2023-08-17
 --------------------------
 (#Code) How to disable NSFW detection in Huggingface.
