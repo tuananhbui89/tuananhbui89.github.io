@@ -39,14 +39,14 @@ Disclaimer:
 - Paper link: [https://openreview.net/pdf?id=RlqgQXZx6r](https://openreview.net/pdf?id=RlqgQXZx6r)
 - Problem setting: Continual learning, more specific, task incremental learning. For example, CIFAR100 dataset with new task is each 5 classes to be learned sequentially.
 - Questions:
-  - Do we know the number of tasks in advance?
+  - Do we know the number of tasks in advance? 
   - Do we need to change the model architecture for each task?
   - Can we access the data from previous tasks? Normally, we cannot. But there is a variant of CL called CL with repitition (or replay) where we can access the data from previous tasks but in different forms.
 - Main Idea: Using Class-Guidance Diffusion model to generate data from previous tasks to be used to train classifier and also reinforce the generative model.
 - The main point is that the Diffusion model has some advantages over GAN or VAE in specific CL setting: 
-  - 1. It does not have mode collapse problem compared to GAN.
-  - 2. It can generate (overfitting) data from previous tasks quite well.
-  - 3. It has class-guidance mechanism that can guild diffusion model to learn new distribution from new task and not overlapping with previous tasks. (so generator doesn't face a serious catastrophic forgetting problem)
+  - It does not have mode collapse problem compared to GAN.
+  - It can generate (overfitting) data from previous tasks quite well.
+  - It has class-guidance mechanism that can guild diffusion model to learn new distribution from new task and not overlapping with previous tasks. (so generator doesn't face a serious catastrophic forgetting problem)
 
 (#Idea) We can use Class-Guidance Diffusion model to learn mixup data and then can use that model to generate not only data from pure classes but also from mixup classes. It is well accepted that mixup technique can improve the generalization of classifier, so it can be applied to CL setting as well.
 
