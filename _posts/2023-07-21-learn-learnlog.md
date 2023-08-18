@@ -32,6 +32,25 @@ Disclaimer:
 - Originality: I would also like to emphasize that most of my research ideas come to mind when I am reading papers or watching lectures, and I do not always have the time to do a thorough literature review. Therefore, it is possible that some of my ideas have already been proposed by someone else without my knowledge.
 - Stupidity: when I say dumb ideas, I mean that they are not well thought out, and even so they came from a not-so-smart with limited knowledge person. Therefore, I would also like to emphasize that I am not responsible for any damage caused by them :D. -->
 
+2023-08-18
+--------------------------
+(#Research) On Reading: DDGR: Continual Learning with Deep Diffusion-based Generative Replay
+
+- Paper link: [https://openreview.net/pdf?id=RlqgQXZx6r](https://openreview.net/pdf?id=RlqgQXZx6r)
+- Problem setting: Continual learning, more specific, task incremental learning. For example, CIFAR100 dataset with new task is each 5 classes to be learned sequentially.
+- Questions:
+  - Do we know the number of tasks in advance?
+  - Do we need to change the model architecture for each task?
+  - Can we access the data from previous tasks? Normally, we cannot. But there is a variant of CL called CL with repitition (or replay) where we can access the data from previous tasks but in different forms.
+- Main Idea: Using Class-Guidance Diffusion model to generate data from previous tasks to be used to train classifier and also reinforce the generative model.
+- The main point is that the Diffusion model has some advantages over GAN or VAE in specific CL setting: 
+  - 1. It does not have mode collapse problem compared to GAN.
+  - 2. It can generate (overfitting) data from previous tasks quite well.
+  - 3. It has class-guidance mechanism that can guild diffusion model to learn new distribution from new task and not overlapping with previous tasks. (so generator doesn't face a serious catastrophic forgetting problem)
+
+(#Idea) We can use Class-Guidance Diffusion model to learn mixup data and then can use that model to generate not only data from pure classes but also from mixup classes. It is well accepted that mixup technique can improve the generalization of classifier, so it can be applied to CL setting as well.
+
+
 2023-08-17
 --------------------------
 (#Code) How to disable NSFW detection in Huggingface.
@@ -56,6 +75,11 @@ Disclaimer:
             )
         return image, has_nsfw_concept
 ```
+
+(#Idea, #GenAI, #TML) Completely erase a concept (i.e., NSFW) from latent space of Stable Diffusion.
+
+- Problem: Current methods such as ESD (Erasing Concepts from Diffusion Models) can erase quite well a concept from the Stable Diffusion. However, recent work (Circumventing Concept Erasure Methods for Text-to-Image Generative Models) has shown that it is possible to recover the erased concept by using a simple Textual Inversion method.
+- Firstly, personally, I think that the approach in Pham et al. (2023) is not very convincing. Because, they need to use additional data (25 samples/concept) to learn a new token associated with the removed concept. So, it is not surprising that they can generate images with the removed concept. It is becaused of the power of the personalized method, not because of the weakness of the ESD method. It would be better if we can compare performance on recovering concept A (concept A is totally new to the base Stable Diffusion model such as your personal images) on two models: a SD model injected with concept A and a model fine-tuned with concept A and then erased concept A and then injected concept A back. If the latter model can not generate images with concept A better than inject concept A directly to the base model, then we can say that the ESD method is effective.
 
 2023-08-16
 --------------------------
