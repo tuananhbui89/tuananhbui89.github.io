@@ -50,7 +50,23 @@ Disclaimer:
 
 (#Idea) We can use Class-Guidance Diffusion model to learn mixup data and then can use that model to generate not only data from pure classes but also from mixup classes. It is well accepted that mixup technique can improve the generalization of classifier, so it can be applied to CL setting as well.
 
-![DPRG](../images/DPRG.png) DPRG
+![DPRG](../images/DPRG.png) DPRG Method 1
+
+![DPRG](./images/DPRG.png) DPRG Method 2
+
+![DPRG](images/DPRG.png) DPRG Method 3
+
+![DPRG]({{ site.baseurl }}/../../images/DPRG.png) DPRG Method 4
+
+![DPRG](../../images/DPRG.png) DPRG Method 5
+
+![DPRG]({{ site.baseurl }}/./images/DPRG.png) DPRG Method 6
+
+![DPRG]({{ site.baseurl }}/../images/DPRG.png) DPRG Method 7
+
+![DPRG]({{ site.baseurl }}/images/DPRG.png) DPRG Method 8
+
+![DPRG]({{ site.url }}/images/DPRG.png) DPRG Method 9
 
 2023-08-17
 --------------------------
