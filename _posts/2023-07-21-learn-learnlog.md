@@ -50,7 +50,7 @@ Disclaimer:
 - Paper link: [https://arxiv.org/abs/2207.12598](https://arxiv.org/abs/2207.12598)
 - Motivation: Training a diffusion model to generate images from a specific class.
 Dhariwal \& Nichol (2021) proposed classifier guidance method, which uses an auxiliary classifier
-- Previous work (i.e., [Classifier Guided Diffusion](https://arxiv.org/abs/2105.05233)) train a classifier $`f_\phi(y|x_t,t)`$ on noisy images $`x_t`$ and use the gradient $`\nabla_{x}logf_{\phi}(x_t)`$ to guide the sampling process towards the target class $`y`$. However, this method requires a classifier jointly trained with the diffusion model.
+- Previous work (i.e., [Classifier Guided Diffusion](https://arxiv.org/abs/2105.05233)) train a classifier $f\_\phi(y|x\_t,t)$ on noisy images $x\_t$ and use the gradient $\nabla\_{x}logf\_{\phi}(x\_t)$ to guide the sampling process towards the target class $y$. However, this method requires a classifier jointly trained with the diffusion model.
 
 (#Idea) Mixup Class-Guidance Diffusion model.
 
