@@ -25,28 +25,28 @@ tags:
   - Tried with different image paths as follows:
 
 Approach 1:
-![Avatar](../images/utils/Avatar.jpg)
+<!-- ![Avatar](../images/utils/Avatar.jpg) -->
 `![Avatar](../images/utils/Avatar.jpg)`
 Can show locally but not on Github page. It is because the image path is relative to the root folder. However, in html code, `<img src="../utils/Avatar.jpg" alt="Avatar" />` is generated, which is not correct.
 
 Approach 2:
-![Avatar](../../images/utils/Avatar.jpg)
+<!-- ![Avatar](../../images/utils/Avatar.jpg) -->
 `![Avatar](../../images/utils/Avatar.jpg)` Cannot work locally and but on Github page.
 
 Approach 3:
-![Avatar](./images/utils/Avatar.jpg)
+<!-- ![Avatar](./images/utils/Avatar.jpg) -->
 `![Avatar](./images/utils/Avatar.jpg)` Cannot work locally and on Github page.
 
 Approach 4:
-![Avatar]({{ site.baseurl }}/../../images/utils/Avatar.jpg)
+<!-- ![Avatar]({{ site.baseurl }}/../../images/utils/Avatar.jpg) -->
 `![Avatar]({{ site.baseurl }}/../../images/utils/Avatar.jpg)` Works on Github page but not locally (markdown preview). The html code is `<img src="/../../images/utils/Avatar.jpg" alt="Avatar" />`.
 
 Approach 5:
-![Avatar]({{ site.baseurl }}/./images/utils/Avatar.jpg)
+<!-- ![Avatar]({{ site.baseurl }}/./images/utils/Avatar.jpg) -->
 `![Avatar]({{ site.baseurl }}/./images/utils/Avatar.jpg)` Works on Github page but not locally (markdown preview). The html code is `<img src="/./images/utils/Avatar.jpg" alt="Avatar" />`.
 
 Approach 6:
-![Avatar]({{ site.baseurl }}/../images/utils/Avatar.jpg)
+<!-- ![Avatar]({{ site.baseurl }}/../images/utils/Avatar.jpg) -->
 `![Avatar]({{ site.baseurl }}/../images/utils/Avatar.jpg)` Works on Github page but not locally (markdown preview). The html code is `<img src="/../images/utils/Avatar.jpg" alt="Avatar" />`.
 
 Approach 7:
@@ -54,10 +54,10 @@ Approach 7:
 `![Avatar]({{ site.baseurl }}/images/utils/Avatar.jpg)` Works on Github page but not locally (markdown preview). The html code is `<img src="/images/utils/Avatar.jpg" alt="Avatar" />`.
 
 Approach 8:
-![Avatar]({{ site.url }}/images/utils/Avatar.jpg)
+<!-- ![Avatar]({{ site.url }}/images/utils/Avatar.jpg) -->
 `![Avatar]({{ site.url }}/images/utils/Avatar.jpg)` Works on Github page but not locally (markdown preview). The html code is `<img src="https://tuananhbui89.github.io/images/utils/Avatar.jpg" alt="Avatar" />`.
 
 Approach 9:
-![Avatar](https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/utils/Avatar.jpg)
+<!-- ![Avatar](https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/utils/Avatar.jpg) -->
 `![Avatar](https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/utils/Avatar.jpg)` Works on Github page and locally (markdown preview). The html code is `<img src="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/utils/Avatar.jpg" alt="Avatar" />`.
 
