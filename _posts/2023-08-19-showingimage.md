@@ -50,7 +50,7 @@ Approach 6:
 `![Avatar]({{ site.baseurl }}/../images/utils/Avatar.jpg)` Works on Github page but not locally (markdown preview). The html code is `<img src="/../images/utils/Avatar.jpg" alt="Avatar" />`.
 
 Approach 7:
-![Avatar]({{ site.baseurl }}/images/utils/Avatar.jpg)
+<!-- ![Avatar]({{ site.baseurl }}/images/utils/Avatar.jpg) -->
 `![Avatar]({{ site.baseurl }}/images/utils/Avatar.jpg)` Works on Github page but not locally (markdown preview). The html code is `<img src="/images/utils/Avatar.jpg" alt="Avatar" />`.
 
 Approach 8:
