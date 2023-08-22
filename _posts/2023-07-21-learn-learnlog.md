@@ -42,7 +42,8 @@ Disclaimer:
 |![Decoupled Kullback-Leibler (DKL)](https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/AML/DecoupledKL.png)|
 |:--:|
 |*Decoupled Kullback-Leibler (DKL) [(reference)](https://arxiv.org/abs/2305.13948)*|
-<!-- 
+
+
 2023-08-20
 --------------------------
 (#Research) On reading: [Classifier-Free Diffusion Guidance](https://arxiv.org/abs/2207.12598).
@@ -56,16 +57,19 @@ Dhariwal \& Nichol (2021) proposed classifier guidance method, which uses an aux
 (#Idea) Mixup Class-Guidance Diffusion model.
 
 - Main idea: Train a diffusion model that can generate not only images from a specific class but also images from a mixup of two classes. It can be applied to Continual Learning setting as in [DDGR](https://openreview.net/pdf?id=RlqgQXZx6r) or Domain Generalization setting.
-- Nice way to generate mixup labels with just y and lambda. Normally, we need to have two classes $y_i,y_j$ and a parameter $\lambda$ to generate a mixup label $y_{mixup} = \lambda y_i + (1-\lambda) y_j$. However, we can have another way to generate mixup label, with one label $y$, and one parameter $\gamma$ to control the mixup ratio. For example, given a set of all labels $Y=\{y_i\}_{i=1}^N$, we can arrange them in a circle, and then we can generate a mixup label $y_{mixup}$ by moving $\gamma$ steps clockwise from $y$. What is the benefit of this method?
-    - Recall the equation in Classifier-Free Guidance paper $\nabla_{x_t} \log p(y|x_t)=\nabla_{x_t} \log p(x_t|y) - \nabla_{x_t} \log p(x_t)$, where $\nabla_{x_t} \log p(y|x_t)$ is the gradient of the implicit classifier.
-    - In case of mixup label, we have $\nabla_{x_t} \log p(y_{mixup}|x_t)=\nabla_{x_t} \log p(x_t|y_{mixup}) - \nabla_{x_t} \log p(x_t)$, where $y_{mixup} = \gamma y_i + (1-\gamma) y_j$, which requires two gradients $\nabla_{x_t} \log p(y_{i}|x_t)$ and $\nabla_{x_t} \log p(y_{j}|x_t)$.
+- Nice way to generate mixup labels with just y and lambda. Normally, we need to have two classes $y_i,y_j$ and a parameter $\lambda$ to generate a mixup label $y_{mixup} = \lambda y_i + (1-\lambda) y_j$. However, we can have another way to generate mixup label, with one label $y$, and one parameter $\gamma$ to control the mixup ratio. For example, given a set of all labels $Y=\{ y\_i \}\_{i=1}^N$, we can arrange them in a circle, and then we can generate a mixup label $y_{mixup}$ by moving $\gamma$ steps clockwise from $y$. What is the benefit of this method?
+    - Recall the equation in Classifier-Free Guidance paper 
+  $$\nabla_{x_t} \log p(y|x_t)=\nabla_{x_t} \log p(x_t|y) - \nabla_{x_t} \log p(x_t)$$, 
+  where $\nabla\_{x\_t} \log p(y \mid x\_t)$ is the gradient of the implicit classifier.
+    - In case of mixup label, we have $$\nabla_{x_t} \log p(y_{mixup}|x_t)=\nabla_{x_t} \log p(x_t|y_{mixup}) - \nabla_{x_t} \log p(x_t)$$, 
+  where $y_{mixup} = \gamma y_i + (1-\gamma) y_j$, which requires two gradients $\nabla_{x_t} \log p(y_{i}  \mid x_t)$ and $\nabla_{x_t} \log p(y_{j} \mid x_t)$.
 - Some observations/ideas from other work can be applied:
-  - [PixelAsParam: A Gradient View on Diffusion Sampling with Guidance](https://proceedings.mlr.press/v202/dinh23a/dinh23a.pdf): In this paper, the authors observed that the gradient of the auxiliary classifier $\nabla_{x_t} \log p(y|x_t)$ and the gradient of the denoising process $\nabla_{x_t} \log p(x_t)$ are conflicting (refer to Figure 2). It can be interpreted as the gradient of the auxiliary classifier is trying to move the sample towards a target class, while the gradient of the denoising process is trying to make the sample more diverse, i.e., their goals are contradictory. In this paper, they applied a multi-objective optimization method to project the gradient of auxiliary classifier onto a direction that is less conflicting. The result is that the generated images are in target class but still diverse. (better in both FID - distinguish between synthetic and real images - and Inception Score - distinguish between different classes of synthetic images). The time when the conflicting happens is also interesting. It is more conflicting at the beginning of the sampling process, and then it becomes less conflicting.
+  - [PixelAsParam: A Gradient View on Diffusion Sampling with Guidance](https://proceedings.mlr.press/v202/dinh23a/dinh23a.pdf): In this paper, the authors observed that the gradient of the auxiliary classifier $\nabla_{x_t} \log p(y \mid x_t)$ and the gradient of the denoising process $\nabla_{x_t} \log p(x_t)$ are conflicting (refer to Figure 2). It can be interpreted as the gradient of the auxiliary classifier is trying to move the sample towards a target class, while the gradient of the denoising process is trying to make the sample more diverse, i.e., their goals are contradictory. In this paper, they applied a multi-objective optimization method to project the gradient of auxiliary classifier onto a direction that is less conflicting. The result is that the generated images are in target class but still diverse. (better in both FID - distinguish between synthetic and real images - and Inception Score - distinguish between different classes of synthetic images). The time when the conflicting happens is also interesting. It is more conflicting at the beginning of the sampling process, and then it becomes less conflicting.
   - Mixing between background and foreground using FFT/IFFT transformation.
   
 |![Confliction of gradients](https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/diffusion/confliction_gradient_diffusion.png)|
 |:--:|
-|*Confliction of gradients [(reference)](https://proceedings.mlr.press/v202/dinh23a/dinh23a.pdf)*| -->
+|*Confliction of gradients [(reference)](https://proceedings.mlr.press/v202/dinh23a/dinh23a.pdf)*|
 
 
 2023-08-19
