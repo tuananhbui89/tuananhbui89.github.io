@@ -39,10 +39,10 @@ Disclaimer:
 - Paper link: [https://arxiv.org/abs/2305.13948](https://arxiv.org/abs/2305.13948)
 - Main idea: Minimize the difference between two logit distributions (weighted MSE loss)
 
-|![Decoupled Kullback-Leibler (DKL)](https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/diffusion/confliction_gradient_diffusion.png)|
+|![Decoupled Kullback-Leibler (DKL)](https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/AML/DecoupledKL.png)|
 |:--:|
 |*Decoupled Kullback-Leibler (DKL) [(reference)](https://arxiv.org/abs/2305.13948)*|
-
+<!-- 
 2023-08-20
 --------------------------
 (#Research) On reading: [Classifier-Free Diffusion Guidance](https://arxiv.org/abs/2207.12598).
@@ -50,7 +50,8 @@ Disclaimer:
 - Paper link: [https://arxiv.org/abs/2207.12598](https://arxiv.org/abs/2207.12598)
 - Motivation: Training a diffusion model to generate images from a specific class.
 Dhariwal \& Nichol (2021) proposed classifier guidance method, which uses an auxiliary classifier
-- Previous work (i.e., [Classifier Guided Diffusion](https://arxiv.org/abs/2105.05233)) train a classifier $f_\phi (y|x_t,t)$ on noisy images x and use the gradient $\nabla_{x}logf_{\phi}(x_t)$ to guide the sampling process towards the target class y. However, this method requires a classifier jointly trained with the diffusion model.
+- Previous work (i.e., [Classifier Guided Diffusion](https://arxiv.org/abs/2105.05233)) train a classifier $f_\phi (y \mid x_t,t)$ on noisy images x and use the gradient $\nabla_{x} log f_{\phi}(x_t)$ to guide the sampling process towards the target class y. However, this method requires a classifier jointly trained with the diffusion model.
+
 
 (#Idea) Mixup Class-Guidance Diffusion model.
 
@@ -64,7 +65,7 @@ Dhariwal \& Nichol (2021) proposed classifier guidance method, which uses an aux
   
 |![Confliction of gradients](https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/diffusion/confliction_gradient_diffusion.png)|
 |:--:|
-|*Confliction of gradients [(reference)](https://proceedings.mlr.press/v202/dinh23a/dinh23a.pdf)*|
+|*Confliction of gradients [(reference)](https://proceedings.mlr.press/v202/dinh23a/dinh23a.pdf)*| -->
 
 
 2023-08-19
