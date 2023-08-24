@@ -1,6 +1,6 @@
 ---
 title: 'Learning and Thinking Log'
-date: 2023-07-21
+date: 2023-08-23
 permalink: /blog/learninglog/
 tags:
   - Learning
@@ -21,16 +21,6 @@ Short-term targets (Updated on July 2023):
 
 - #Coding: Textual Inversion and Dreambooth
 - #Research: Writing a paper about TML in GenAI
-
-<!-- 
-Recording ideas
---------------------------
-Starting on 08/08/2023, I have decided to log all of my **dumb** ideas and thoughts here. In the past three years, since I began my Ph.D., I have recorded many ideas in my OneNote but have not shared them with anyone. It was because I thought that: A- they were just too dumb to share and B- (very few) they were just too good to share :D. However, after revisting old notes, I have come to realize that A- some of them were not that dumb, and even dumb so who cares, and B- some of them were not that good, and after a while, I still did not do anything with them. Therefore, instead of letting these ideas die in my notebook, I believe it is better to expose them to the light of the Internet. I hope this experiment will be long-lasting, fun, and useful.
-
-Disclaimer:
-
-- Originality: I would also like to emphasize that most of my research ideas come to mind when I am reading papers or watching lectures, and I do not always have the time to do a thorough literature review. Therefore, it is possible that some of my ideas have already been proposed by someone else without my knowledge.
-- Stupidity: when I say dumb ideas, I mean that they are not well thought out, and even so they came from a not-so-smart with limited knowledge person. Therefore, I would also like to emphasize that I am not responsible for any damage caused by them :D. -->
 
 2023-08-21
 --------------------------
