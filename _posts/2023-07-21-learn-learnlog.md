@@ -22,6 +22,46 @@ Short-term targets (Updated on July 2023):
 - #Coding: Textual Inversion and Dreambooth
 - #Research: Writing a paper about TML in GenAI
 
+2023-08-30
+--------------------------
+(#Research) NVIDIA event: Transforming Your Development and Business with Large Language Models
+
+- Link to the event: [https://transformingthefuturelargelang.splashthat.com/](https://transformingthefuturelargelang.splashthat.com/)
+- Speaker: Dr. Ettikan Kandasamy Karuppiah and Dr. Johan Barthelemy
+
+Introduction, Demystifying LLM and Data Curation
+
+- Except researchers, now almost everyone (developers) just care about API provided by Big Tech, i.e., OpenAI ChatGPT API?
+- GenAI Ecosystem: Language, Media, Biology, Tools and Platforms (1600+ companies building their GenAI on Nvidia platform)
+- Ratio of various data that LLMs are trained on. [Ref](https://arxiv.org/abs/2303.18223).
+
+LLM Training and Inference at Scale. Customized LLM with Prompt-Learning
+
+- Why do data curation? E.g., Duplication, Low quality, Bad unicode
+- NeMo provides tools to quality filtering or reformating.
+- Currently, the data curator works on CPUs only.
+- Data Blending: Learnings from Bloomberg GPT, use specific data, even small amount of data does help alot to customize to specific domain, application (i.e., Bloomberg GPT for finance)
+- 3D parallelism techniques: Data parallelism, Tensor and Pipeline parallelism, Sequence parallelism or Selective Adaptative Recomputation?
+- Auto-Configuarator tool: Auto search and optimize model configurations on any given compute or time constraints. (something like recommendation given an experience precomputed on a common used model, i.e., GPT3, not something like can optimize on-time, e.g., changing learning rate, optimizer based on data and current performance).
+- Most important part of the tool is supporting model customization (see the slide)
+  - Prompt learning: Prompt tuning, p-tuning, tune companion model
+  - prompt engineering: few-shot learning, chain-of-thought reasoning
+  - Parameter efficient fine-tuning: LoRA, IA3, Adapters
+  - Fine-tuning: SFT, RLHF
+
+
+Questions:
+
+- What is Nvidia platform that alot companies based on?
+- If every developers use the same API, where is the difference between them? If using the same suggestions from GenerativeAI?
+- Free GPU? Does Nvidia provide any free GPU or support for research?
+
+Nvidia Framework:
+
+- NeMo [https://developer.nvidia.com/nemo](https://developer.nvidia.com/nemo)
+- BioNeMo
+- Picasso
+
 2023-08-26
 --------------------------
 (#F4T) Review 10 best ideas/concepts from Charlie Munger. Link to the blog post: [https://tuananhbui89.github.io/blog/f4t/](https://tuananhbui89.github.io/blog/f4t/)
