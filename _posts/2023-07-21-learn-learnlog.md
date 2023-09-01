@@ -1,6 +1,6 @@
 ---
 title: 'Learning and Thinking Log'
-date: 2023-08-23
+date: 2023-09-01
 permalink: /blog/learninglog/
 tags:
   - Learning
