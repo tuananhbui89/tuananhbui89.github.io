@@ -22,6 +22,34 @@ Short-term targets (Updated on July 2023):
 - #Coding: Textual Inversion and Dreambooth
 - #Research: Writing a paper about TML in GenAI
 
+
+2023-09-01
+--------------------------
+(#Research) On reading: [TRADING INFORMATION BETWEEN LATENTS IN HIERARCHICAL VARIATIONAL AUTOENCODERS](https://openreview.net/forum?id=eWtMdr6yCmL) published on ICLR 2023.
+
+Revisit Rate-Distortion trade-off theory:
+
+- Problem setting of Rate-Distortion trade-off
+  - How to learn a "useful" representation of data for downstream tasks?
+  - Using powerful encoder-decoder such as VAE, PixelCNN, etc. can easily ignore $z$ and still obtain high marginal likelihood $p(x \mid \theta)$. Therefore, we need to use a regularization term to encourage the encoder to learn a "useful" representation of $z$, for example, as in Beta-VAE.
+
+Rate distortion theory?
+$$ H - D \leq I(z,x) \leq R $$
+
+where $H$ is the entropy of data $x$ and $D$ is the distortion of the reconstruction $x$ from $z$. $R$ is the rate of the latent code $z$ (e.g., compression rate).
+
+$R = \log \frac{e(z \mid x)}{m(z)}$ where $e(z \mid x)$ is the encoder and $m(z)$ is the prior distribution of $z$. The higher the rate, the more information of $x$ is preserved in $z$. However, if the rate is high, it lessen the generalization ability of the $\log p(x \mid z, \theta)$.
+
+The mutual information has upper bound by the rate of the latent code $z$. For example, if $R=0$ then $I(z,x)=0$. This is because $e(z \mid x) = m(z)$, which means that the encoder cannot learn anything from the data $x$.
+
+Motivation of the paper:
+
+- Reconsider the rate distortion theory in the context of hierarchical VAEs where there are multiple levels of latent codes $z_1, z_2, \dots, z_L$.
+- The authors proposed a direct links between the input $x$ and the latent codes $z_1, z_2, \dots, z_L$. With this architecture, they can decompose the total rate to the rate of each latent code $z_1, z_2, \dots, z_L$. Unlike the standard hierarchical VAEs, where the rate of each latent code is not directly related to the input $x$ but the previous latent code $z_{l-1}$.
+
+![Hierarchical VAE](https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/230901/230901-vae.png)
+
+
 2023-08-30
 --------------------------
 (#Research) NVIDIA event: Transforming Your Development and Business with Large Language Models
