@@ -45,7 +45,7 @@ Disclaimer: Rui gave a great talk and I want to take notes on it. However, becau
   - Second thought: What are other fields in ML that works but not in the way we think it works? Style-content disentanglement.
   - [Challenging Common Assumptions in the Unsupervised Learning of Disentangled Representations](https://arxiv.org/abs/1811.12359)
 
-![Style-content disentanglement](../../images/2309/ruishu_talk/disentanglement.png)
+![Style-content disentanglement](https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/ruishu_talk/disentanglement.png)
 
 **Part 3:**
 
@@ -54,7 +54,7 @@ Yang Song's paper on estimating gradient of data distribution to learn generativ
 - [Generative Modeling by Estimating Gradients of the Data Distribution (Song et al. 2019)](https://arxiv.org/abs/1907.05600)
 - Sensitive to the choice of the model architecture which makes Rui thought that it might not going to far compared to VAEs or GANs. And he then really regretted about this thought. Because this paper is the foundation of the current hype of Generative Models, i.e., Diffusion Models.
 
-![Thought on Diffusion Model](../../images/2309/ruishu_talk/diffusion.png)
+![Thought on Diffusion Model](https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/ruishu_talk/diffusion.png)
 
 Rui's thought after his lesson on Diffusion Model:
 
@@ -68,11 +68,11 @@ Rui's thought after his lesson on Diffusion Model:
 - Transformer powers GPT-4, and change the mantra "Garbage in, garbage out" to "Garbage in, Diamond out".
 - We are really close to AGI but not solve yet. GPT-4, ChatGPT sometime shows responses that look like it has reasoning ability but it is not really.
 
-![GPT-4 Drawing](../../images/2309/ruishu_talk/gpt-drawing.png)
+![GPT-4 Drawing](https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/ruishu_talk/gpt-drawing.png)
 
 - The last step before AGI: Reasoning? But it is the hardest step.
 
-![The last step](../../images/2309/ruishu_talk/the-last-step.png)
+![The last step](https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/ruishu_talk/the-last-step.png)
 
 **How to get there?**
 
@@ -88,12 +88,19 @@ Rui's thought after his lesson on Diffusion Model:
 
 - So important research direction is to make model's inference more efficient.
 
-**Advice:**
+**Final Advice**
 
 - Learn probability theory and applied probability. (Build a strong background/foundation)
 - Learn experimental design and how to science (e.g., Adversarial examples are not bugs, they are features. Where the authors proposed way to explore the way model making prediction based on invisible features)
 - Familiar with working with big codebase (Learn modern skills)
 - Keep thing simple (inspired by Rich Sutton's The Bitter Lesson): The human-knowledge approach tends to complicated methods in the way that makes them less suited to leverage the power of computation. The simple approach which can be scaled up to large data and large computation is better.
+
+(#Research) Connection between Latent Diffusion formulation and the Rate-Distortion theory (Trung's idea). Below are some personal notes for memorization without leaking the idea.
+
+- The Rate-Distortion theory is a theory that describes the trade-off between the rate of the latent code and the distortion of the reconstruction. The higher the rate, the more information of $x$ is preserved in $z$. However, if the rate is high, it lessen the generalization ability of the $\log p(x \mid z, \theta)$.
+- In latent diffusion formulation, the distortion $D$ is measured on the first latent code $z_1$ encoded from $x$ by the encode-decoder architecture.
+- The rate $R$ measures the different between the forward process and the backward process in diffusion model, eventually it is the matching term that trains the diffusion model.
+- There is a closed-form of the mutual information $I(Z,X)$. We can utilize this formulation to design a specific regularization term to control the rate-distortion trade-off benefiting downstream tasks.
 
 2023-09-01
 --------------------------
