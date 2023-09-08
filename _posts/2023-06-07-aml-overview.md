@@ -1,5 +1,5 @@
 ---
-title: 'An Overview of Adversarial Machine Learning - Part 1'
+title: 'TML: An Overview of Adversarial Machine Learning - Part 1'
 date: 2023-06-07
 permalink: /posts/2023/06/overview/
 tags:

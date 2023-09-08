@@ -1,5 +1,5 @@
 ---
-title: 'How to display an image on Github Page'
+title: 'Coding: How to display an image on Github Page'
 date: 2023-08-19
 permalink: /blog/2023-08-19-showingimage/
 tags:

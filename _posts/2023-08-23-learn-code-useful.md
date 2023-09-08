@@ -1,5 +1,5 @@
 ---
-title: 'Useful code snippets'
+title: 'Coding: Useful code snippets'
 date: 2023-08-23
 permalink: /blog/usefulcode/
 tags:
