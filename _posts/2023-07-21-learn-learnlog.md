@@ -22,6 +22,11 @@ Short-term targets (Updated on July 2023):
 - #Coding: Textual Inversion and Dreambooth
 - #Research: Writing a paper about TML in GenAI
 
+2023-09-08
+--------------------------
+
+(#Idea) Erasing a concept from a generative model by given a set of images.
+
 
 2023-09-04
 --------------------------
