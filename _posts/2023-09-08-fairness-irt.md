@@ -51,6 +51,14 @@ $$P(X_{ij} = 1 \mid \theta_i, \alpha_j, \beta_j) = \frac{1}{1 + e^{- \alpha_j (\
 
 where $X_{ij}$ is the response of person $i$ to item $j$, $\theta_i$ is the ability of person $i$, $\beta_j$ is the difficulty of item $j$, and $\alpha_j$ is the discrimination parameter.
 
+3PL: introducing one additional guesing parameter $\gamma_j$ to the model:
+
+$$P(X_{ij} = 1 \mid \theta_i, \alpha_j, \beta_j, \gamma_j) = \gamma_j + (1 - \gamma_j) \frac{1}{1 + e^{- \alpha_j (\theta_i - \beta_j)}}$$
+
+Figure below shows the probability of a person to answer a question correctly as a function of the person's ability $\theta_i$ given the item's parameters $\alpha_j, \beta_j, \gamma_j$.
+
+![3PL](https://raw.githubusercontent.com/tuananhbui89/website_images/master/posts/irt/3PL.png)
+
 ### Polytomous IRT model
 
 The polytomous IRT model is an extension of the dichotomous IRT model that allows for more than two response categories (e.g., an answer is marked not just correct/incorrect but with score from 1 to K). The most common polytomous IRT model is the graded response model (GRM), in which the cummulative probabilities of a person to get a higher or equal to score $k$ is formulated as follows:
@@ -131,6 +139,8 @@ More specifically, if we consider the continuous IRT model and the inverted mapp
 
 Framework
 =====
+
+![AIRT framework](https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/algorithm.png)
 
 The AIRT framework can be found in page 28 of the paper, which consists of 3 main stages:
 
