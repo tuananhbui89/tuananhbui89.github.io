@@ -57,7 +57,7 @@ $$P(X_{ij} = 1 \mid \theta_i, \alpha_j, \beta_j, \gamma_j) = \gamma_j + (1 - \ga
 
 Figure below shows the probability of a person to answer a question correctly as a function of the person's ability $\theta_i$ given the item's parameters $\alpha_j, \beta_j, \gamma_j$.
 
-![3PL](https://raw.githubusercontent.com/tuananhbui89/website_images/master/posts/irt/3PL.png)
+![3PL](https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/3PL.png)
 
 ### Polytomous IRT model
 
