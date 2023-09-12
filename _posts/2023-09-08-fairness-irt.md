@@ -73,6 +73,8 @@ $$P(X_{ij} = k \mid \theta_i, \alpha_j, \beta_j) = P(X_{ij} \geq k \mid \theta_i
 
 Given parameters $\alpha_j, \beta_j$ are known and fixed, the probability of a person to get a score $k$ is a curve that is a function of the person's ability $\theta_i$. And given the person's ability $\theta_i$ and the item's parameters $\alpha_j, \beta_j$, we can estimate the most likely score $k$ of the person which is the score that maximizes the probability $P(X_{ij} = k \mid \theta_i, \alpha_j, \beta_j)$.
 
+![Polytomous IRT](https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/poly-IRT.png)
+
 ### Continuous IRT model
 
 The continuous IRT model is an extension of the dichotomous IRT model that allows for continuous responses (e.g., the response is a real number between 0 and 1). The density function of the continuous IRT model is formulated as follows:
@@ -205,6 +207,7 @@ To adapt the IRT model to the context of machine learning, we need to consider t
 - **The dataset** is to mention the test set which is used to evaluate the algorithm. The dataset can be sampled from the same distribution as the training set or from a different distribution.
 - The algorithms are assumed to be independent even are trained on the same training set. The algorithms also have the same task on the test set (e.g., the pretrained ResNet50, VGG19 models to predict an image into 1 of 10 classes).
 - The dataset are assumed to be disjoint. The datasets also are served for the same task (e.g., to test performance of classification models)
+- **The data bias** problem in this context is the bias of the test item which is used to evaluated the algorithm (not the bias of the training set as in ML literature). For example, let's consider education system where a test item is a set of questions and an algorithm is a student. We want to evaluate diverse knowledge of students on several subjects, i.e., math, physics, chemistry, literature, etc. The data bias problem in this context is that the test item is only able to evaluate on a specific subject (e.g., math) but not on all subjects. **The algorithmic bias** problem in this specific example is that the student is only good at math but not good at other subjects.
 
 Problem setting: Given $n$ algorithms and $N$ datasets, the goal is to identify which algorithm/dataset has bias problem. On the other words, how to distinguish a good algorithm performing poorly on a biased dataset from an equally performed bad algorithm?
 
