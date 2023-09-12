@@ -191,7 +191,7 @@ Future work: IRT-based Disentanglement Learning
 
 ## Introduction
 
-This project aims to disentangle ML-bias into algorithmic and data bias focussing on intersectional subgroups. The techniques developed can then be used to analyse biases in threatened species management and human-machine collaboration
+This project aims to disentangle ML-bias into algorithmic and data bias focussing on intersectional subgroups. 
 
 So what are algorithmic bias and data bias in the context of machine learning?
 
