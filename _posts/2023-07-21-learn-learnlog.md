@@ -1,6 +1,6 @@
 ---
 title: 'Learning and Thinking Log'
-date: 2023-09-04
+date: 2023-09-14
 permalink: /blog/learninglog/
 tags:
   - Learning
@@ -21,6 +21,11 @@ Short-term targets (Updated on July 2023):
 
 - #Coding: Textual Inversion and Dreambooth
 - #Research: Writing a paper about TML in GenAI
+
+
+2023-09-14
+--------------------------
+(#Research) On Reading: Diffusion Models Beat GANs on Image Synthesis. Link to [blog post](https://tuananhbui89.github.io/posts/2023/09/papers/conditional-diffusion/)
 
 2023-09-08
 --------------------------
