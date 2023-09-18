@@ -13,6 +13,8 @@ tags:
 - [Understanding Conditional Diffusion Process](#understanding-conditional-diffusion-process)
 - [Classifier Guidance](#classifier-guidance)
 - [How to implement](#how-to-implement)
+  - [How to train the diffusion model](#how-to-train-the-diffusion-model)
+  - [How to train the classifier](#how-to-train-the-classifier)
 - [References](#references)
 
 About the paper
@@ -59,7 +61,7 @@ In the paper, the authors proposed two sampling approaches:
 - **Conditional Reverse Noising Process**: which factorizes the conditional transition $p_{\theta, \phi}(x_t \mid x_{t+1}, y) = Z p_\theta(x_t \mid x_{t+1} p_\phi (y \mid x_t))$. This can be approximated by a Gaussian similar to the unconditional reverse process, but with its mean shifted by $\Sigma g$
 - **Conditional Sampling for DDIM**: which can be applied for deterministic sampling methods like DDIM. This can be done by using the conditioning trick adapted from Song et al. (2021). 
 
-![Two sampling methods](https://raw.githubusercontent.com/rohitgandikota/rohitgandikota.github.io/master/images/2309/classifier_guidance/two_sampling_methods.png)
+![Two sampling methods](https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/classifier_guidance/two_sampling_methods.png)
 
 How to implement
 =====
@@ -191,6 +193,16 @@ def ddim_sample(self, model, x, t, clip_denoised, denoised_fn, cond_fn, model_kw
     return {"sample": sample, "pred_xstart": out["pred_xstart"]}    
 ```
 
+## How to train the diffusion model
+
+Training the diffusion model in this project is similar as in the DDPM or DDIM papers. Because even using auxiliary classifier, they are trained independently. The minimal code to train the diffusion model is as follows, which is based on the code from file [`image_train.py`](https://github.com/openai/guided-diffusion/blob/main/scripts/image_train.py) and [`train_util.py`](https://github.com/openai/guided-diffusion/blob/main/guided_diffusion/train_util.py#L22)
+
+
+```python
+
+```
+
+## How to train the classifier
 
 References
 =====
