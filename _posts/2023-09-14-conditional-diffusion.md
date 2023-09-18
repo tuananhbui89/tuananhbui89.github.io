@@ -156,7 +156,10 @@ def p_sample(self, model, x, t, clip_denoised, denoised_fn, cond_fn, model_kwarg
 
 ```
 
-The Algorithm 2 (Conditional Sampling for DDIM, i.e., `ddim_sample_loop`) can be implemented as below. However, one point that I am still not understand is that the DDIM is the deterministic sampling method, however, in the code, at the end, we still sample from a Gaussian distribution with the mean as calculated in Algorithm 2. The sigma is controlled by additional parameter `eta`, where `eta=0` means truly deterministic sampling.
+The Algorithm 2 (Conditional Sampling for DDIM, i.e., `ddim_sample_loop`) can be implemented as below. As described in the paper, the stochastic process can be controlled by the parameter `eta`. When `eta=0`, the sampling process is truly deterministic, while `eta > 0`, the sampling process is stochastic.
+
+<!-- However, one point that I am still not understand is that the DDIM is the deterministic sampling method, however, in the code, at the end, we still sample from a Gaussian distribution with the mean as calculated in Algorithm 2. The sigma is controlled by additional parameter `eta`, where `eta=0` means truly deterministic sampling. -->
+
 
 ```python
 
@@ -193,6 +196,51 @@ def ddim_sample(self, model, x, t, clip_denoised, denoised_fn, cond_fn, model_kw
     return {"sample": sample, "pred_xstart": out["pred_xstart"]}    
 ```
 
+The main component of the above code is the unconditional reverse process `p_mean_variance` which is defined as follows in the file `gaussian_diffusion.py`. It is worth noting that this function not only returns the $x_{t-1}$ but also the prediction of the initial $x_0$, i.e., `pred_xstart`. 
+
+
+```python
+
+def p_mean_variance(
+        self, model, x, t, clip_denoised=True, denoised_fn=None, model_kwargs=None
+    ):
+
+    """
+    Apply the model to get p(x_{t-1} | x_t), as well as a prediction of
+    the initial x, x_0.
+
+    :param model: the model, which takes a signal and a batch of timesteps
+                    as input.
+    :param x: the [N x C x ...] tensor at time t.
+    :param t: a 1-D Tensor of timesteps.
+    :param clip_denoised: if True, clip the denoised signal into [-1, 1].
+    :param denoised_fn: if not None, a function which applies to the
+        x_start prediction before it is used to sample. Applies before
+        clip_denoised.
+    :param model_kwargs: if not None, a dict of extra keyword arguments to
+        pass to the model. This can be used for conditioning.
+    :return: a dict with the following keys:
+                - 'mean': the model mean output.
+                - 'variance': the model variance output.
+                - 'log_variance': the log of 'variance'.
+                - 'pred_xstart': the prediction for x_0.
+    """
+
+    model_output = model(x, self._scale_timesteps(t), **model_kwargs)
+
+    # really long process 
+    ... 
+
+
+    return {
+        "mean": model_mean,
+        "variance": model_variance,
+        "log_variance": model_log_variance,
+        "pred_xstart": pred_xstart,
+    }
+```
+
+
 ## How to train the diffusion model
 
 Training the diffusion model in this project is similar as in the DDPM or DDIM papers. Because even using auxiliary classifier, they are trained independently. The minimal code to train the diffusion model is as follows, which is based on the code from file [`image_train.py`](https://github.com/openai/guided-diffusion/blob/main/scripts/image_train.py) and [`train_util.py`](https://github.com/openai/guided-diffusion/blob/main/guided_diffusion/train_util.py#L22)
@@ -200,9 +248,100 @@ Training the diffusion model in this project is similar as in the DDPM or DDIM p
 
 ```python
 
+# run loop
+def run_loop(self):
+    while some_conditions:
+        batch, cond = next(self.data)
+        # run one step
+        self.forward_backward(batch, cond)
+        took_step = self.mp_trainer.optimize(self.opt)
+        if took_step:
+            self._update_ema()
+        self._anneal_lr()
+        self.log_step()
+    return None
+
+# forward and backward
+def forward_backward(self, batch, cond):
+    self.mp_trainer.zero_grad()
+
+    for i in range(0, batch.shape[0], self.microbatch):
+        micro, micro_cond = ... 
+
+        # sampling time step t and the weights from a schedule sampler (e.g, uniform))
+        t, weights = self.schedule_sampler.sample(micro.shape[0], dist_util.dev())
+
+        compute_losses = functools.partial(
+                self.diffusion.training_losses,
+                self.ddp_model,
+                micro,
+                t,
+                model_kwargs=micro_cond,
+            )
+        losses = compute_losses()
+
+        loss = (losses["loss"] * weights).mean()
+
+        self.mp_trainer.backward(loss)
+    
+    return None
+
+# where the diffusion.training_losses is defined as follows in the file gaussian_diffusion.py
+
+def training_losses(self, model, x_start, t, model_kwargs=None, noise=None):
+
+    # sample x_t from the unconditional forward process
+    x_t = self.q_sample(x_start, t, noise=noise)
+
+    # consider the MSE loss only 
+    model_output = model(x_t, self._scale_timesteps(t), **model_kwargs)
+
+    # get target from the reverse process
+    target = {
+                ModelMeanType.PREVIOUS_X: self.q_posterior_mean_variance(
+                    x_start=x_start, x_t=x_t, t=t
+                )[0],
+                ModelMeanType.START_X: x_start,
+                ModelMeanType.EPSILON: noise,
+            }[self.model_mean_type]
+    
+
+    terms["mse"] = mean_flat((target - model_output) ** 2)
+    return terms
+
 ```
 
 ## How to train the classifier
+
+In the following code snippet, we will go through the minimal code to train the classifier. The code is based on the file `classifier_train.py`. It is worth noting that the classifier can be trained on either training set or generated images from the diffusion model, controlled by the parameter `args.noised`
+
+```python
+
+def main():
+    # create unet and scheduler of the diffusion model
+    model, diffusion = create_model_and_diffusion()
+
+    # init schedule sampler
+    if args.noised:
+        schedule_sampler = create_named_schedule_sampler(
+            args.schedule_sampler, diffusion)
+
+    # create optimizer
+    mp_trainer = MixedPrecisionTrainer(
+        model=model, use_fp16=args.classifier_use_fp16, initial_lg_loss_scale=16.0)
+
+    # create unet model? repeat from previous step
+    model = DDP(model, ...)
+
+    # create data loader 
+    data = load_data(...)
+
+    # create optimizer
+    opt = AdamW(mp_trainer.master_params, lr=args.lr, weight_decay=args.weight_decay)
+
+
+```
+
 
 References
 =====
