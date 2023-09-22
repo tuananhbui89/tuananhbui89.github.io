@@ -104,7 +104,7 @@ def main():
         return model(x, t, y if args.class_cond else None)
 
     # main loop 
-    while inrange:
+    while gothrough_all_images:
         # random target classes
         classes = torch.randint()
 
@@ -132,6 +132,7 @@ The Algorithm 1 (Conditional Reverse Noising Process, i.e., `p_sample_loop`) can
 
 ```python
 
+# one step of the sampling process
 def p_sample(self, model, x, t, clip_denoised, denoised_fn, cond_fn, model_kwargs):
 
     # sample from the unconditional reverse process
@@ -154,6 +155,27 @@ def p_sample(self, model, x, t, clip_denoised, denoised_fn, cond_fn, model_kwarg
     sample = out["mean"] + nonzero_mask * torch.exp(0.5 * out["log_variance"]) * torch.randn_like(out["mean"])
     return {"sample": sample, "pred_xstart": out["pred_xstart"]}
 
+# the progressive sampling loop from T to 0, where the $x_t$ will be used to sample $x_{t-1}$
+
+def p_sample_loop_progressive():
+
+    ...
+
+    for i in indices:
+        t = th.tensor([i] * shape[0], device=device)
+        with th.no_grad():
+            out = self.p_sample(
+                model,
+                img,
+                t,
+                clip_denoised=clip_denoised,
+                denoised_fn=denoised_fn,
+                cond_fn=cond_fn,
+                model_kwargs=model_kwargs,
+            )
+            yield out
+            img = out["sample"]
+
 ```
 
 The Algorithm 2 (Conditional Sampling for DDIM, i.e., `ddim_sample_loop`) can be implemented as below. As described in the paper, the stochastic process can be controlled by the parameter `eta`. When `eta=0`, the sampling process is truly deterministic, while `eta > 0`, the sampling process is stochastic.
@@ -163,6 +185,7 @@ The Algorithm 2 (Conditional Sampling for DDIM, i.e., `ddim_sample_loop`) can be
 
 ```python
 
+# one step of the sampling process
 def ddim_sample(self, model, x, t, clip_denoised, denoised_fn, cond_fn, model_kwargs, eta):
 
     # sample from the unconditional reverse process

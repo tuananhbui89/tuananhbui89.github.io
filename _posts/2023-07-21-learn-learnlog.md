@@ -1,6 +1,6 @@
 ---
 title: 'Learning and Thinking Log'
-date: 2023-09-14
+date: 2023-09-23
 permalink: /blog/learninglog/
 tags:
   - Learning
@@ -17,11 +17,43 @@ This is a learning log to keep track of what I have learned each day. To avoid d
 - #F4T: food for thought, learn more about philosophy, history, and humanity.
 - #Finance: learn more about finance, investment, and business.
 
-Short-term targets (Updated on July 2023):
+<!-- Short-term targets (Updated on July 2023):
 
 - #Coding: Textual Inversion and Dreambooth
-- #Research: Writing a paper about TML in GenAI
+- #Research: Writing a paper about TML in GenAI -->
 
+
+2023-09-23
+--------------------------
+
+(#Finance) Reading [My solopreneur story: zero to $45K/mo in 2 years](https://news.tonydinh.com/p/my-solopreneur-story-zero-to-45kmo)
+
+This is a very inspring story about how Tony Dinh built his side project to a profitable software product and become a solopreneur. Some key takeaways:
+
+- The unfair advantage: What is the unfair advantage? To me, it is the thing that you can do better than others in the same field and it is hard for others to catch up. In Tony's case when the goal is to build a profitable software product, at first I thought that his unfair advantage is his software engineering skills. It is no doubt that Tony has a great skill set that enables him to build a product really fast. However, when reading his story again, I realized that his true unfair advantage is his ability to write and share his knowledge and experiences and from that build up his follower-community. It can be seen that his very first product DevUtils started to fly when he discovered Twitter and started to share funny interesting stuff on that platform. Compared to other software engineers who might have the same tech skills as Tony, Tony has a much better skill in writing and sharing, while compared to other writers, Tony has a much better skill in software engineering. So his unfair advantage in getting a profitable software product is the combination of these two skill sets. So what is my unfair advantage? In the context of being a researcher? I am still on the way to find out.
+- Start small, commit to the process, and be consistent. Tony's first "real" business - Black Magic is a very interesting story and a good demonstration for this lesson. The product at first was very simple which is just a bar on Twitter's avatar that shows progress on getting 1k followers. He did that because of a very human reason: to celebrate of getting hist first 1k followers. It turned out that people loved this idea and even happy to pay for the subscription. Tony started to get recurring revenue from that. However, he didn't stop there. He kept improving the product and adding more features to it that help users create more engagements. The product became more and more complex and useful that attracted more users. After just few months, the Black Magic from a fun side project became a profitable business generate 4K USD per month. This story brings me a lot of thoughts. First, think big but start small and do not wait to be perfect. Second, be committed and consistent to the process.
+
+
+2023-09-22
+--------------------------
+
+(#Research) On Reading: FLOW MATCHING FOR GENERATIVE MODELING (ICLR 2023)
+
+- Link to the paper: [https://openreview.net/pdf?id=PqvMRDCJT9t](https://openreview.net/pdf?id=PqvMRDCJT9t)
+- Link to my blog post: [https://tuananhbui89.github.io/posts/2023/09/papers/flowmatching/](https://tuananhbui89.github.io/posts/2023/09/papers/flowmatching/)
+
+
+
+2023-09-17
+--------------------------
+
+(#Research) Parameter-Efficient Fine-Tuning. [Link to Youtube video](https://youtu.be/StdrAJZsmw4?si=1lVR7I_we48_DUhJ)
+
+(#Research) Tree of Thoughts: Deliberate Problem Solving with Large Language Models. [Link to Yannic's video](https://youtu.be/ut5kp56wW_4?si=i9ZVAMMBJ0PZpRao)
+
+- From Chain-of-Thought, Self-Consistency CoT, to Tree of Thoughts.
+- Intuition: LLMs are good at self-evaluation given a specific goal, for example, given a set of several intermediate thoughts, which one is the best to achieve the goal. So, we can integrate classical tree search algorithm (BFS, DFS, etc.) with LLMs to find the best path to achieve the goal.
+- The paper is also good at experimental design when choosing specific tasks to best fit to the algorithm, i.e., Ga
 
 2023-09-14
 --------------------------
