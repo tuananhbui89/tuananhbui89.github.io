@@ -2,7 +2,7 @@
 layout: about
 title: about
 permalink: /
-subtitle: Machine Learning Researcher/Engineer/Educator
+subtitle: Interested in the intersection of Trustworthy Machine Learning and Generative Models.
 
 profile:
   align: right
@@ -18,7 +18,7 @@ social: true  # includes social icons at the bottom of the page
 ---
 
 
-I am Research Fellow at the Department of Data Science and AI, Monash University, working with [Prof. Dinh Phung](http://dinhphung.ml/) and [Dr. Trung Le](https://scholar.google.com/citations?user=gysdMxwAAAAJ&hl=en). I am still a Ph.D. student at the Faculty of Information Technology, Monash University, waiting for the thesis examination. My research interests are Adversarial Machine Learning (i.e., understanding ML models's behaviour and making them more robust against the changing of data) and Representation Learning (i.e., how to learn/disentangle a more meaningful/robust latent representation which can benefit downstream tasks).
+I am Research Fellow at the Department of Data Science and AI, Monash University, working with [Prof. Dinh Phung](http://dinhphung.ml/) and [Dr. Trung Le](https://scholar.google.com/citations?user=gysdMxwAAAAJ&hl=en). I am still a Ph.D. student at the Faculty of Information Technology, Monash University, waiting for the thesis examination. My research interests are Adversarial Machine Learning (i.e., understanding ML models's behaviour and making them more robust against the changing of data) and Generative Models (i.e., GAN, VAE and Diffusion Models).
 
 Before that, I had one year working as Research Engineer at Credit AI Lab, Trusting Social, and two years working as Research Assistant at Singapore University of Technology and Design with [Prof. Ngai Man Cheung](https://sites.google.com/site/mancheung0407/) and [Dr. Trung Tran](https://scholar.google.com/citations?user=9SE3GYMAAAAJ&hl=en).
 
