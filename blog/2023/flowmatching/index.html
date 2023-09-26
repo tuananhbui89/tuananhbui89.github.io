@@ -3,17 +3,16 @@
 
   <!-- Head -->
   <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta http-equiv="refresh" content="3; url=/blog/">    <!-- Metadata, OpenGraph and Schema.org -->
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    <!-- Metadata, OpenGraph and Schema.org -->
     
 
     <!-- Standard metadata -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Page not found | Tuan-Anh  Bui</title>
+    <title>On Reading - Flow Matching for Generative Modeling | Tuan-Anh  Bui</title>
     <meta name="author" content="Tuan-Anh  Bui">
-    <meta name="description" content="Looks like there has been a mistake. Nothing exists here.">
+    <meta name="description" content="A cool paper about continuous normalizing flows">
     <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
 
 
@@ -39,7 +38,7 @@
     <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
     
     <link rel="stylesheet" href="/blog/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
-    <link rel="canonical" href="https://tuananhbui89.github.io/blog/404.html">
+    <link rel="canonical" href="https://tuananhbui89.github.io/blog/blog/2023/flowmatching/">
 
     <!-- Dark Mode -->
     
@@ -77,8 +76,8 @@
               </li>
               
               <!-- Blog -->
-              <li class="nav-item ">
-                <a class="nav-link" href="/blog/blog/">blog</a>
+              <li class="nav-item active">
+                <a class="nav-link" href="/blog/blog/">blog<span class="sr-only">(current)</span></a>
               </li>
 
               <!-- Other pages -->
@@ -116,18 +115,196 @@
     <!-- Content -->
     <div class="container mt-5">
       
-        <!-- page.html -->
-        <div class="post">
+        <!-- _layouts/post.html -->
 
-          <header class="post-header">
-            <h1 class="post-title">Page not found</h1>
-            <p class="post-description">Looks like there has been a mistake. Nothing exists here.</p>
-          </header>
+<div class="post">
 
-          <article>
-            <p>You will be redirected to the main page within 3 seconds. If not redirected, please go back to the <a href="/blog/">home page</a>.</p>
+  <header class="post-header">
+    <h1 class="post-title">On Reading - Flow Matching for Generative Modeling</h1>
+    <p class="post-meta">September 22, 2023</p>
+    <p class="post-tags">
+      <a href="/blog/blog/2023"> <i class="fas fa-calendar fa-sm"></i> 2023 </a>
+        ·  
+        <a href="/blog/blog/tag/reading">
+          <i class="fas fa-hashtag fa-sm"></i> reading</a>  
+          <a href="/blog/blog/tag/genai">
+          <i class="fas fa-hashtag fa-sm"></i> genai</a>  
+          
 
-          </article>
+    </p>
+  </header>
+
+  <article class="post-content">
+    
+    <div id="table-of-contents">
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h2"><a href="#about-the-paper">About the paper</a></li>
+<li class="toc-entry toc-h2"><a href="#introduction">Introduction</a></li>
+</ul>
+    </div>
+    <hr>
+    
+    <div id="markdown-content">
+      <h2 id="about-the-paper">About the paper</h2>
+
+<ul>
+  <li>Published at ICLR 2023 (splotlight, top 5%)</li>
+  <li>Affiliations: Meta AI, Weizmann Institute of Science</li>
+  <li>Link to the paper: <a href="https://openreview.net/pdf?id=PqvMRDCJT9t" rel="external nofollow noopener" target="_blank">https://openreview.net/pdf?id=PqvMRDCJT9t</a>
+</li>
+</ul>
+
+<h2 id="introduction">Introduction</h2>
+
+<p>Continuous Normalizing Flows (CNF) is a class of generative models that can be trained by maximum likelihood. The main idea is to transform a simple distribution (e.g., Gaussian) to a complex distribution (e.g., ImageNet dataset) by a series of invertible transformations. The main challenge is to design a transformation that is invertible and can be computed efficiently.</p>
+
+<p>The flow $\phi_t(x)$ presents a time-dependent diffeomorphic map that transforms the input $x$ to the output $y$ at time $t$. The flow is defined as follows:</p>
+
+\[\frac{d}{dt} \phi_t(x) = v_t(\phi_t(x))\]
+
+<p>where $v_t$ is a time-dependent vector field. $\phi_0(x) = x$ means that the flow at time $t=0$ is the identity map.</p>
+
+<p>Given $p_0$ is the simple distribution (e.g., Gaussian), the flow $\phi_t$ transforms $p_0$ to $p_t$ as follows:</p>
+
+\[p_t = [ \phi_t ] * p_0\]
+
+<p>where $[ \phi_t ] * p_0$ is the push-forward measure of $p_0$ under the map $\phi_t$. 
+The push-forward measure is defined as follows:</p>
+
+\[[ \phi_t ] * p_0(A) = p_0(\phi_t^{-1}(A))\]
+
+<p>where $A$ is a subset of the output space. The push-forward measure can be interpreted as the probability of the output $y$ falls into the subset $A$.</p>
+
+\[p_t(x) = p_0(\phi_t^{-1}(x)) \left| \det \frac{d \phi_t^{-1}(x)}{dx} \right|\]
+
+<p>The function $v_t$ can be intepreted as the velocity of the flow at time $t$, i.e., how fast the flow moves at time $t$. In comparison with diffusion process, the velocity $v_t$ is similar as the denoising function that is used to denoise the image $x$ at time $t$, where $\phi_t(x)$ is the distribution of the denoised images at time $t$.</p>
+
+<!-- The flow is invertible because it is a diffeomorphic map. The inverse flow is defined as follows:
+
+$$ \frac{d}{dt} \phi_t^{-1}(y) = -v_t(\phi_t^{-1}(y)) $$
+ -->
+
+<p><strong>Flow matching objective</strong>: Given a target probability density path $p_t(x)$ and a corresponding vector field $u_t(x)$ which generates $p_t(x)$, the flow matching objective is to find a flow $\phi_t(x)$ and a corresponding vector field $v_t(x)$ that generates $p_t(x)$.</p>
+
+\[\mathcal{L}_{FM} (\theta) = \mathbb{E}_{t, p_t(x)} \| v_t(x) - u_t(x) \|\]
+
+<p>It is a bit confusing in notation here, so $u_t(x)$ can be understand as the target vector field that generates the target probability density path $p_t(x)$, while $v_t(x)$ is the vector field to be learned to approximate $u_t(x)$.</p>
+
+<p>It can be seen that the Flow Matching objective is a simple and attractive objective but intractable to use because we don’t know the target vector field $u_t(x)$.
+The main contribution of the paper is to propose the way to simplify the above objective function. And their approach is quite similar as in DDPM where the solution relies on conditioning to a previous point in the sequence.</p>
+
+<p>The marginal probability path</p>
+
+\[p_t(x) = \int p_t(x \mid x_1) q(x_1) dx_1\]
+
+<p>where $x_1$ is a particular data sample, and $p_t(x \mid x_1)$ is the conditional probability path such that $p_t(x \mid x_1) = p_t(x)$ at time $t=0$. 
+The important point is that they design the $p_1(x \mid x_1)$ at time $t=1$ to be a normal distribution around $x_1$ with a small variance, i.e., $p_1 (x \mid x_1) = \mathcal{N}(x_1, \sigma^2 I)$. In the above equation, $q(x_1)$ is the prior distribution of $x_1$.</p>
+
+<p>Where in particular at time $t=1$, the marginal probability path $p_!$ will approximate the data distribution $q$,</p>
+
+\[p_1(x) = \int p_1(x \mid x_1) q(x_1) dx_1 \approx q(x)\]
+
+<p>And the vector field $u_t(x)$ can be defined as follows:</p>
+
+\[u_t(x) = \int u_t(x \mid x_1) \frac{p_t (x \mid x_1) q(x_1)}{p_t(x)} dx_1\]
+
+<p>Theorem 1: Given vector fields $u_t(x \mid x_t)$ that generate conditional probability paths $p_t(x \mid x_t)$ for any distribution $q(x_1)$, the marginal vector field $u_t(x)$ in the above equation generates the marginal probability path $p_t(x)$.</p>
+
+<p>So it means that if we can learn $u_t (x \mid x_t)$ we can obtain $u_t(x)$ and then we can use $u_t(x)$ to generate $p_t(x)$.</p>
+
+<p>Now we can rewrite the Flow Matching objective to Conditional Flow Matching objective as follows:</p>
+
+\[\mathcal{L}_{CFM} (\theta) = \mathbb{E}_{t, q(x_1), p_t(x \mid x_1)} \| v_t(x) - u_t(x \mid x_1) \|\]
+
+<p>where $v_t(x)$ is the vector field to be learned to approximate $u_t(x \mid x_1)$. 
+Now the question is how can we obtain $u_t(x \mid x_1)$?</p>
+
+<p>In the work, they consider conditional probability paths</p>
+
+\[p_t(x \mid x_1) = \mathcal{N} (x \mid \mu_t (x_1), \sigma_t (x_1)^2 I)\]
+
+<p>where $\mu_t (x_1)$ and $\sigma_t (x_1)$ are the mean and variance of the conditional probability path $p_t(x \mid x_1)$, and they are time-dependent. Later, they will show that we can choose $\mu_t (x_1)$ and $\sigma_t (x_1)$ very flexiblely, as long as they can satisfy some conditions, for example, $\mu_0 (x_1) = 0$ and $\sigma_0 (x_1) = 1$, and $\mu_1 (x_1) = x_1$ and $\sigma_1 (x_1) = \sigma_{min}$, which is set sufficiently small so that $p_1 (x \mid x_1)$ is a concentrated distribution around $x_1$.</p>
+
+<p>The canonical transformation for Gaussian distributions is defined as follows:</p>
+
+\[\psi_t (x) = \mu_t (x_1) + \sigma_t (x_1) \odot x\]
+
+<p>where $\psi_t (x)$ is the canonical transformation of $p_t(x \mid x_1)$, and $\odot$ is the element-wise multiplication.</p>
+
+<p>to be continued…</p>
+
+    </div>
+  </article>
+
+
+  
+    
+    <br>
+    <hr>
+    <br>
+    <ul class="list-disc pl-8"></ul>
+
+    <!-- Adds related posts to the end of an article -->
+    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
+    <p class="mb-2">Here are some more articles you might like to read next:</p>
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/blog/2023/learn-learnlog/">A Learning Log</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/blog/2023/fairness-irt/">On Reading - Comprehensive Algorithm Portfolio Evaluation using Item Response Theory</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/blog/2023/conditional-diffusion/">On Reading - Diffusion Models Beat GANs on Image Synthesis</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/blog/2023/erasing-concepts/">On Reading - Erasing Concepts from Diffusion Models</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/blog/2023/aml-overview/">Tutorial on Adversarial Machine Learning - Part 2</a>
+  </li>
+
+<div id="giscus_thread" style="max-width: 800px; margin: 0 auto;">
+  <script>
+    let giscusTheme = localStorage.getItem("theme");
+    let giscusAttributes = {
+        "src": "https://giscus.app/client.js",
+        "data-repo": "alshedivat/al-folio",
+        "data-repo-id": "MDEwOlJlcG9zaXRvcnk2MDAyNDM2NQ==",
+        "data-category": "Comments",
+        "data-category-id": "DIC_kwDOA5PmLc4CTBt6",
+        "data-mapping": "title",
+        "data-strict": "1",
+        "data-reactions-enabled": "1",
+        "data-emit-metadata": "0",
+        "data-input-position": "bottom",
+        "data-theme": giscusTheme,
+        "data-lang": "en",
+        "crossorigin": "anonymous",
+        "async": "",
+    };
+
+
+    let giscusScript = document.createElement("script");
+    Object.entries(giscusAttributes).forEach(([key, value]) => giscusScript.setAttribute(key, value));
+    document.getElementById("giscus_thread").appendChild(giscusScript);
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://giscus.app/?ref_noscript" rel="external nofollow noopener" target="_blank">comments powered by giscus.</a>
+</noscript>
+</div>
 </div>
 
       

@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <!-- Head -->
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    <!-- Metadata, OpenGraph and Schema.org -->
+    
+
+    <!-- Standard metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>On Reading - Diffusion Models Beat GANs on Image Synthesis | Tuan-Anh  Bui</title>
+    <meta name="author" content="Tuan-Anh  Bui">
+    <meta name="description" content="Try to understand classifier guidance and how to implement it">
+    <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
+
+
+    <!-- Bootstrap & MDB -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+    <!-- Bootstrap Table -->
+    <link defer rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+
+    <!-- Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
+
+    
+
+    <!-- Styles -->
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
+    
+    <link rel="stylesheet" href="/blog/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+    <link rel="canonical" href="https://tuananhbui89.github.io/blog/blog/2023/conditional-diffusion/">
+
+    <!-- Dark Mode -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark">
+    <script src="/blog/assets/js/theme.js?96d6b3e1c3604aca8b6134c7afdd5db6"></script>
+    <script src="/blog/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script>
+    
+
+  </head>
+
+  <!-- Body -->
+  <body class="fixed-top-nav ">
+
+    <!-- Header -->
+    <header>
+
+      <!-- Nav Bar -->
+      <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top">
+        <div class="container">
+          <a class="navbar-brand title font-weight-lighter" href="/blog/"><span class="font-weight-bold">Tuan-Anh </span>Bui</a>
+          <!-- Navbar Toggle -->
+          <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar top-bar"></span>
+            <span class="icon-bar middle-bar"></span>
+            <span class="icon-bar bottom-bar"></span>
+          </button>
+
+          <div class="collapse navbar-collapse text-right" id="navbarNav">
+            <ul class="navbar-nav ml-auto flex-nowrap">
+
+              <!-- About -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/blog/">about</a>
+              </li>
+              
+              <!-- Blog -->
+              <li class="nav-item active">
+                <a class="nav-link" href="/blog/blog/">blog<span class="sr-only">(current)</span></a>
+              </li>
+
+              <!-- Other pages -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/blog/publications/">publications</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/blog/repositories/">repositories</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/blog/teaching/">teaching</a>
+              </li>
+
+              <!-- Toogle theme mode -->
+              <li class="toggle-container">
+                <button id="light-toggle" title="Change theme">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Scrolling Progress Bar -->
+      <progress id="progress" value="0">
+        <div class="progress-container">
+          <span class="progress-bar"></span>
+        </div>
+      </progress>
+    </header>
+
+
+    <!-- Content -->
+    <div class="container mt-5">
+      
+        <!-- _layouts/post.html -->
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">On Reading - Diffusion Models Beat GANs on Image Synthesis</h1>
+    <p class="post-meta">September 14, 2023</p>
+    <p class="post-tags">
+      <a href="/blog/blog/2023"> <i class="fas fa-calendar fa-sm"></i> 2023 </a>
+        ·  
+        <a href="/blog/blog/tag/reading">
+          <i class="fas fa-hashtag fa-sm"></i> reading</a>  
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    
+    <div id="table-of-contents">
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h2"><a href="#about-the-paper">About the paper</a></li>
+<li class="toc-entry toc-h2"><a href="#understanding-conditional-diffusion-process">Understanding Conditional Diffusion Process</a></li>
+<li class="toc-entry toc-h2"><a href="#classifier-guidance">Classifier Guidance</a></li>
+<li class="toc-entry toc-h2">
+<a href="#how-to-implement">How to implement</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#how-to-train-the-diffusion-model">How to train the diffusion model</a></li>
+<li class="toc-entry toc-h3"><a href="#how-to-train-the-classifier">How to train the classifier</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#references">References</a></li>
+</ul>
+    </div>
+    <hr>
+    
+    <div id="markdown-content">
+      <h2 id="about-the-paper">About the paper</h2>
+
+<ul>
+  <li>Published at NeurIPS 2021</li>
+  <li>Affiliations: OpenAI</li>
+  <li>One of the very first works on diffusion model. Showing that diffusion model can be used for image synthesis and outperform GANs on FID score. One important contribution of the paper is proposing conditional diffusion process by using gradient from an auxiliary classifier, which is used to sample images from a specific class</li>
+  <li>Link to the paper: <a href="https://arxiv.org/pdf/2105.05233.pdf" rel="external nofollow noopener" target="_blank">https://arxiv.org/pdf/2105.05233.pdf</a>
+</li>
+  <li>Link to the code: <a href="https://github.com/openai/guided-diffusion" rel="external nofollow noopener" target="_blank">https://github.com/openai/guided-diffusion</a>
+</li>
+</ul>
+
+<h2 id="understanding-conditional-diffusion-process">Understanding Conditional Diffusion Process</h2>
+
+<p>In this section, we will go through the Conditional Diffusion Process introduced in Appendix H of the paper.</p>
+
+<p>We start by defining a conditional Markovian noising process $\hat{q}$ similar to $q$, and assume that $\hat{q}(y \mid x_0)$ is a known and readily available label distribution for each sample.</p>
+
+<ul>
+  <li>$\hat{q}(x_0) = q(x_0)$: the initial distribution of the process is the same as the unconditional process.</li>
+  <li>$\hat{q}(y \mid x_0)$ is the label distribution for each sample $x_0$ which is known and readily available.</li>
+  <li>$\hat{q}(x_{t+1} \mid x_t, y) = q(x_{t+1} \mid x_t)$: <strong>This is the key point that will later enable us to derive the conditional diffusion process</strong>. This explains that the transition distribution is the same as the unconditional process, i.e., the noise adding in the forward diffusiion process is independent to label $y$. However, this might not neccessary be the case. If using SDE (Stochastic Differential Equation) to model the diffusion process, then the forward diffusion process can be conditioned on $y$. <strong>This can be a future work to explore.</strong>
+</li>
+  <li>$\hat{q}(x_{1:T} \mid x_0, y) = \prod_{t=1}^T \hat{q}(x_t \mid x_{t-1}, y)$</li>
+</ul>
+
+<p>From the above definition, we can derive the following properties:</p>
+
+<ul>
+  <li>$\hat{q}(x_{t+1} \mid x_t, y) = \hat{q}(x_{t+1} \mid x_t) = q(x_{t+1} \mid x_t)$ the forward process conditioned on $y$ is the same as the unconditional forward process.</li>
+  <li>$\hat{q}(y \mid x_t, x_{t+1}) = \hat{q}(y \mid x_t)$: the label distribution is independent of the next sample $x_{t+1}$.</li>
+  <li>$\hat{q}(y \mid x_t, x_{t+1}) \neq \hat{q}(y \mid x_{t+1})$: Need confirmation on this. But if this is true, then it means that $\hat{q}(y \mid x_t) \neq \hat{q}(y \mid x_{t+1})$ or the label distribution has changed after adding noise at each step. Then we cannot use the same classifier to approximate the label distribution at each step. <strong>However, in the paper, the authors still use the same classifier!!!</strong>. One possible idea is that we can consider a classifier that is conditioned to time step $t$.</li>
+</ul>
+
+<p>Based on the above properties, we now can derive the conditional reverse process as follows:</p>
+
+\[\hat{q}(x_{t} \mid x_{t+1}, y) = \frac{\hat{q}(x_{t} \mid x_{t+1}) \hat{q}(y \mid x_{t}, x_{t+1})}{\hat{q}(y \mid x_{t+1})}\]
+
+\[\hat{q}(x_{t} \mid x_{t+1}, y) = \frac{q(x_{t} \mid x_{t+1}) \hat{q}(y \mid x_{t})}{\hat{q}(y \mid x_{t+1})}\]
+
+<p>The term $\hat{q}(y \mid x_{t+1})$ is considered as constant w.r.t. $x_t$. So $x_t$ can be sampled from the above distribution, where $\hat{q}(y \mid x_{t})$ is approximated by an auxiliary classifier, which is trained to predict the label $y$ from the sample $x_t$. And $q(x_{t} \mid x_{t+1})$ is the reverse process of the unconditional diffusion process which has been trained.</p>
+
+<h2 id="classifier-guidance">Classifier Guidance</h2>
+
+<p>After understanding the conditional diffusion process, we now go through the classifier guidance to see how to use the classifier to guide the sampling process.
+In the paper, the authors proposed two sampling approaches:</p>
+
+<ul>
+  <li>
+<strong>Conditional Reverse Noising Process</strong>: which factorizes the conditional transition $p_{\theta, \phi}(x_t \mid x_{t+1}, y) = Z p_\theta(x_t \mid x_{t+1} p_\phi (y \mid x_t))$. This can be approximated by a Gaussian similar to the unconditional reverse process, but with its mean shifted by $\Sigma g$</li>
+  <li>
+<strong>Conditional Sampling for DDIM</strong>: which can be applied for deterministic sampling methods like DDIM. This can be done by using the conditioning trick adapted from Song et al. (2021).</li>
+</ul>
+
+<p><img src="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/classifier_guidance/two_sampling_methods.png" alt="Two sampling methods"></p>
+
+<h2 id="how-to-implement">How to implement</h2>
+
+<p>Link to the original implementation: <a href="https://github.com/openai/guided-diffusion" rel="external nofollow noopener" target="_blank">https://github.com/openai/guided-diffusion</a></p>
+
+<p>Minimal code to implement the classifier guidance diffusion as follows, which is based on the code from file <a href="https://github.com/openai/guided-diffusion/blob/main/scripts/classifier_sample.py" rel="external nofollow noopener" target="_blank"><code class="language-plaintext highlighter-rouge">classifier_sample.py</code></a></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># create unet and scheduler of the diffusion model
+</span>    <span class="n">model</span><span class="p">,</span> <span class="n">diffusion</span> <span class="o">=</span> <span class="nf">create_model_and_diffusion</span><span class="p">()</span>
+
+    <span class="c1"># load the pretrained unet 
+</span>    <span class="n">model</span><span class="p">.</span><span class="nf">load_state_dict</span><span class="p">()</span>
+    <span class="n">model</span><span class="p">.</span><span class="nf">eval</span><span class="p">()</span>
+
+    <span class="c1"># create classifier which is Unet's encoder with linear layer on top
+</span>    <span class="n">classifier</span> <span class="o">=</span> <span class="nf">create_classifier</span><span class="p">()</span>
+
+    <span class="c1"># load the pretrained classifier
+</span>    <span class="n">classifier</span><span class="p">.</span><span class="nf">load_state_dict</span><span class="p">()</span>
+    <span class="n">classifier</span><span class="p">.</span><span class="nf">eval</span><span class="p">()</span>
+
+    <span class="c1"># define the gradient of the classifier w.r.t. the input as guidance for sampling 
+</span>    <span class="k">def</span> <span class="nf">cond_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">enable_grad</span><span class="p">():</span>
+            <span class="n">x_in</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="nf">detach</span><span class="p">().</span><span class="nf">requires_grad_</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">logits</span> <span class="o">=</span> <span class="nf">classifier</span><span class="p">(</span><span class="n">x_in</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+            <span class="n">log_probs</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="nf">log_softmax</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">selected</span> <span class="o">=</span> <span class="n">log_probs</span><span class="p">[</span><span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">logits</span><span class="p">)),</span> <span class="n">y</span><span class="p">.</span><span class="nf">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+            <span class="k">return</span> <span class="n">torch</span><span class="p">.</span><span class="n">autograd</span><span class="p">.</span><span class="nf">grad</span><span class="p">(</span><span class="n">selected</span><span class="p">.</span><span class="nf">sum</span><span class="p">(),</span> <span class="n">x_in</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">args</span><span class="p">.</span><span class="n">classifier_scale</span>   
+    
+
+    <span class="k">def</span> <span class="nf">model_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="nf">model</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">y</span> <span class="k">if</span> <span class="n">args</span><span class="p">.</span><span class="n">class_cond</span> <span class="k">else</span> <span class="bp">None</span><span class="p">)</span>
+
+    <span class="c1"># main loop 
+</span>    <span class="k">while</span> <span class="n">gothrough_all_images</span><span class="p">:</span>
+        <span class="c1"># random target classes
+</span>        <span class="n">classes</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randint</span><span class="p">()</span>
+
+        <span class="c1"># calling sample function with the classifier guidance 
+</span>        <span class="n">sample_fn</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">diffusion</span><span class="p">.</span><span class="n">p_sample_loop</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="p">.</span><span class="n">use_ddim</span> <span class="k">else</span> <span class="n">diffusion</span><span class="p">.</span><span class="n">ddim_sample_loop</span>
+        <span class="p">)</span>
+        <span class="n">sample</span> <span class="o">=</span> <span class="nf">sample_fn</span><span class="p">(</span>
+            <span class="n">model_fn</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">args</span><span class="p">.</span><span class="n">image_size</span><span class="p">,</span> <span class="n">args</span><span class="p">.</span><span class="n">image_size</span><span class="p">),</span>
+            <span class="n">clip_denoised</span><span class="o">=</span><span class="n">args</span><span class="p">.</span><span class="n">clip_denoised</span><span class="p">,</span>
+            <span class="n">model_kwargs</span><span class="o">=</span><span class="n">model_kwargs</span><span class="p">,</span>
+            <span class="n">cond_fn</span><span class="o">=</span><span class="n">cond_fn</span><span class="p">,</span> <span class="c1"># classifier guidance
+</span>            <span class="n">device</span><span class="o">=</span><span class="n">dist_util</span><span class="p">.</span><span class="nf">dev</span><span class="p">(),</span>
+        <span class="p">)</span>
+
+        <span class="c1"># save the output 
+</span></code></pre></div></div>
+
+<p>The crucial part of the above code is the <code class="language-plaintext highlighter-rouge">cond_fn</code> function which defines the gradient of the classifier w.r.t. the input as guidance for sampling. Another important part is the <code class="language-plaintext highlighter-rouge">diffusion.p_sample_loop</code> or <code class="language-plaintext highlighter-rouge">diffusion.ddim_sample_loop</code> which will use the classifier guidance to sample images from the diffusion model.</p>
+
+<p>The diffusion model with these above sampling methods can be found in the file <a href="https://github.com/openai/guided-diffusion/blob/main/guided_diffusion/script_util.py#L74" rel="external nofollow noopener" target="_blank"><code class="language-plaintext highlighter-rouge">script_util.py</code></a> and the sampling methods are defined in the file <a href="https://github.com/openai/guided-diffusion/blob/main/guided_diffusion/gaussian_diffusion.py" rel="external nofollow noopener" target="_blank"><code class="language-plaintext highlighter-rouge">gaussian_diffusion.py</code></a></p>
+
+<p>The Algorithm 1 (Conditional Reverse Noising Process, i.e., <code class="language-plaintext highlighter-rouge">p_sample_loop</code>) can be implemented as follows:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="c1"># one step of the sampling process
+</span><span class="k">def</span> <span class="nf">p_sample</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">clip_denoised</span><span class="p">,</span> <span class="n">denoised_fn</span><span class="p">,</span> <span class="n">cond_fn</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="p">):</span>
+
+    <span class="c1"># sample from the unconditional reverse process
+</span>    <span class="c1"># the output includes "mean" and "log_variance" of the Gaussian distribution
+</span>    <span class="c1"># the output also includes "pred_xstart"
+</span>    <span class="n">out</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">p_mean_variance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">clip_denoised</span><span class="p">,</span> <span class="n">denoised_fn</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="p">)</span>
+
+    <span class="c1"># Shift the mean by the gradient of the classifier w.r.t. the input
+</span>    <span class="c1"># equation: new_mean = mean + sigma * g 
+</span>    <span class="c1"># where sigma is the standard deviation of the Gaussian distribution, i.e., out["varaince"]
+</span>    <span class="k">if</span> <span class="n">cond_fn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">mean</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">condition_mean</span><span class="p">(</span><span class="n">cond_fn</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="p">)</span>
+    
+    <span class="c1"># create nonzero mask
+</span>    <span class="n">nonzero_mask</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">t</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">).</span><span class="nf">float</span><span class="p">().</span><span class="nf">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="p">([</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="p">)</span>  <span class="c1"># no noise when t == 0
+</span>
+    <span class="c1"># sample from the shifted Gaussian distribution
+</span>    <span class="n">sample</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">mean</span><span class="sh">"</span><span class="p">]</span> <span class="o">+</span> <span class="n">nonzero_mask</span> <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="nf">exp</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">log_variance</span><span class="sh">"</span><span class="p">])</span> <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randn_like</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">mean</span><span class="sh">"</span><span class="p">])</span>
+    <span class="k">return</span> <span class="p">{</span><span class="sh">"</span><span class="s">sample</span><span class="sh">"</span><span class="p">:</span> <span class="n">sample</span><span class="p">,</span> <span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">:</span> <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">]}</span>
+
+<span class="c1"># the progressive sampling loop from T to 0, where the $x_t$ will be used to sample $x_{t-1}$
+</span>
+<span class="k">def</span> <span class="nf">p_sample_loop_progressive</span><span class="p">():</span>
+
+    <span class="bp">...</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">th</span><span class="p">.</span><span class="nf">tensor</span><span class="p">([</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">th</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">p_sample</span><span class="p">(</span>
+                <span class="n">model</span><span class="p">,</span>
+                <span class="n">img</span><span class="p">,</span>
+                <span class="n">t</span><span class="p">,</span>
+                <span class="n">clip_denoised</span><span class="o">=</span><span class="n">clip_denoised</span><span class="p">,</span>
+                <span class="n">denoised_fn</span><span class="o">=</span><span class="n">denoised_fn</span><span class="p">,</span>
+                <span class="n">cond_fn</span><span class="o">=</span><span class="n">cond_fn</span><span class="p">,</span>
+                <span class="n">model_kwargs</span><span class="o">=</span><span class="n">model_kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">yield</span> <span class="n">out</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">sample</span><span class="sh">"</span><span class="p">]</span>
+
+</code></pre></div></div>
+
+<p>The Algorithm 2 (Conditional Sampling for DDIM, i.e., <code class="language-plaintext highlighter-rouge">ddim_sample_loop</code>) can be implemented as below. As described in the paper, the stochastic process can be controlled by the parameter <code class="language-plaintext highlighter-rouge">eta</code>. When <code class="language-plaintext highlighter-rouge">eta=0</code>, the sampling process is truly deterministic, while <code class="language-plaintext highlighter-rouge">eta &gt; 0</code>, the sampling process is stochastic.</p>
+
+<!-- However, one point that I am still not understand is that the DDIM is the deterministic sampling method, however, in the code, at the end, we still sample from a Gaussian distribution with the mean as calculated in Algorithm 2. The sigma is controlled by additional parameter `eta`, where `eta=0` means truly deterministic sampling. -->
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="c1"># one step of the sampling process
+</span><span class="k">def</span> <span class="nf">ddim_sample</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">clip_denoised</span><span class="p">,</span> <span class="n">denoised_fn</span><span class="p">,</span> <span class="n">cond_fn</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="p">,</span> <span class="n">eta</span><span class="p">):</span>
+
+    <span class="c1"># sample from the unconditional reverse process
+</span>    <span class="c1"># the output includes "mean" and "log_variance" of the Gaussian distribution
+</span>    <span class="c1"># the output also includes "pred_xstart"
+</span>    <span class="n">out</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">p_mean_variance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">clip_denoised</span><span class="p">,</span> <span class="n">denoised_fn</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="p">)</span>
+
+    <span class="c1"># calculate score 
+</span>    <span class="k">if</span> <span class="n">cond_fn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">condition_score</span><span class="p">(</span><span class="n">cond_fn</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="o">=</span><span class="n">model_kwargs</span><span class="p">)</span>    
+    
+    <span class="c1"># calculate epsilon_t 
+</span>    <span class="n">eps</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_predict_eps_from_xstart</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">])</span>
+
+    <span class="c1"># calculate alpha_bar_t and alpha_bar_prev and sigma 
+</span>    <span class="n">sigma</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">eta</span>
+        <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha_bar_prev</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha_bar</span><span class="p">))</span>
+        <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha_bar</span> <span class="o">/</span> <span class="n">alpha_bar_prev</span><span class="p">)</span>
+    <span class="p">)</span>    
+
+    <span class="c1"># calculate x_{t-1} as in Algorithm 2
+</span>    <span class="n">mean_pred</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">]</span> <span class="o">*</span> <span class="n">th</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="n">alpha_bar_prev</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha_bar_prev</span> <span class="o">-</span> <span class="n">sigma</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">eps</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Still random sample from a Gaussian distribution 
+</span>    <span class="c1"># but the mean is calculated as above
+</span>    <span class="n">sample</span> <span class="o">=</span> <span class="n">mean_pred</span> <span class="o">+</span> <span class="n">nonzero_mask</span> <span class="o">*</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randn_like</span><span class="p">(</span><span class="n">mean_pred</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="sh">"</span><span class="s">sample</span><span class="sh">"</span><span class="p">:</span> <span class="n">sample</span><span class="p">,</span> <span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">:</span> <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">]}</span>    
+</code></pre></div></div>
+
+<p>The main component of the above code is the unconditional reverse process <code class="language-plaintext highlighter-rouge">p_mean_variance</code> which is defined as follows in the file <code class="language-plaintext highlighter-rouge">gaussian_diffusion.py</code>. It is worth noting that this function not only returns the $x_{t-1}$ but also the prediction of the initial $x_0$, i.e., <code class="language-plaintext highlighter-rouge">pred_xstart</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="k">def</span> <span class="nf">p_mean_variance</span><span class="p">(</span>
+        <span class="n">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">clip_denoised</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">denoised_fn</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="o">=</span><span class="bp">None</span>
+    <span class="p">):</span>
+
+    <span class="sh">"""</span><span class="s">
+    Apply the model to get p(x_{t-1} | x_t), as well as a prediction of
+    the initial x, x_0.
+
+    :param model: the model, which takes a signal and a batch of timesteps
+                    as input.
+    :param x: the [N x C x ...] tensor at time t.
+    :param t: a 1-D Tensor of timesteps.
+    :param clip_denoised: if True, clip the denoised signal into [-1, 1].
+    :param denoised_fn: if not None, a function which applies to the
+        x_start prediction before it is used to sample. Applies before
+        clip_denoised.
+    :param model_kwargs: if not None, a dict of extra keyword arguments to
+        pass to the model. This can be used for conditioning.
+    :return: a dict with the following keys:
+                - </span><span class="sh">'</span><span class="s">mean</span><span class="sh">'</span><span class="s">: the model mean output.
+                - </span><span class="sh">'</span><span class="s">variance</span><span class="sh">'</span><span class="s">: the model variance output.
+                - </span><span class="sh">'</span><span class="s">log_variance</span><span class="sh">'</span><span class="s">: the log of </span><span class="sh">'</span><span class="s">variance</span><span class="sh">'</span><span class="s">.
+                - </span><span class="sh">'</span><span class="s">pred_xstart</span><span class="sh">'</span><span class="s">: the prediction for x_0.
+    </span><span class="sh">"""</span>
+
+    <span class="n">model_output</span> <span class="o">=</span> <span class="nf">model</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="nf">_scale_timesteps</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="o">**</span><span class="n">model_kwargs</span><span class="p">)</span>
+
+    <span class="c1"># really long process 
+</span>    <span class="p">...</span> 
+
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="sh">"</span><span class="s">mean</span><span class="sh">"</span><span class="p">:</span> <span class="n">model_mean</span><span class="p">,</span>
+        <span class="sh">"</span><span class="s">variance</span><span class="sh">"</span><span class="p">:</span> <span class="n">model_variance</span><span class="p">,</span>
+        <span class="sh">"</span><span class="s">log_variance</span><span class="sh">"</span><span class="p">:</span> <span class="n">model_log_variance</span><span class="p">,</span>
+        <span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">:</span> <span class="n">pred_xstart</span><span class="p">,</span>
+    <span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="how-to-train-the-diffusion-model">How to train the diffusion model</h3>
+
+<p>Training the diffusion model in this project is similar as in the DDPM or DDIM papers. Because even using auxiliary classifier, they are trained independently. The minimal code to train the diffusion model is as follows, which is based on the code from file <a href="https://github.com/openai/guided-diffusion/blob/main/scripts/image_train.py" rel="external nofollow noopener" target="_blank"><code class="language-plaintext highlighter-rouge">image_train.py</code></a> and <a href="https://github.com/openai/guided-diffusion/blob/main/guided_diffusion/train_util.py#L22" rel="external nofollow noopener" target="_blank"><code class="language-plaintext highlighter-rouge">train_util.py</code></a></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="c1"># run loop
+</span><span class="k">def</span> <span class="nf">run_loop</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+    <span class="k">while</span> <span class="n">some_conditions</span><span class="p">:</span>
+        <span class="n">batch</span><span class="p">,</span> <span class="n">cond</span> <span class="o">=</span> <span class="nf">next</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="c1"># run one step
+</span>        <span class="n">self</span><span class="p">.</span><span class="nf">forward_backward</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">cond</span><span class="p">)</span>
+        <span class="n">took_step</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">mp_trainer</span><span class="p">.</span><span class="nf">optimize</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">opt</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">took_step</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="nf">_update_ema</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="nf">_anneal_lr</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="nf">log_step</span><span class="p">()</span>
+    <span class="k">return</span> <span class="bp">None</span>
+
+<span class="c1"># forward and backward
+</span><span class="k">def</span> <span class="nf">forward_backward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">cond</span><span class="p">):</span>
+    <span class="n">self</span><span class="p">.</span><span class="n">mp_trainer</span><span class="p">.</span><span class="nf">zero_grad</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">batch</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">self</span><span class="p">.</span><span class="n">microbatch</span><span class="p">):</span>
+        <span class="n">micro</span><span class="p">,</span> <span class="n">micro_cond</span> <span class="o">=</span> <span class="p">...</span> 
+
+        <span class="c1"># sampling time step t and the weights from a schedule sampler (e.g, uniform))
+</span>        <span class="n">t</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">schedule_sampler</span><span class="p">.</span><span class="nf">sample</span><span class="p">(</span><span class="n">micro</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dist_util</span><span class="p">.</span><span class="nf">dev</span><span class="p">())</span>
+
+        <span class="n">compute_losses</span> <span class="o">=</span> <span class="n">functools</span><span class="p">.</span><span class="nf">partial</span><span class="p">(</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">diffusion</span><span class="p">.</span><span class="n">training_losses</span><span class="p">,</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">ddp_model</span><span class="p">,</span>
+                <span class="n">micro</span><span class="p">,</span>
+                <span class="n">t</span><span class="p">,</span>
+                <span class="n">model_kwargs</span><span class="o">=</span><span class="n">micro_cond</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="n">losses</span> <span class="o">=</span> <span class="nf">compute_losses</span><span class="p">()</span>
+
+        <span class="n">loss</span> <span class="o">=</span> <span class="p">(</span><span class="n">losses</span><span class="p">[</span><span class="sh">"</span><span class="s">loss</span><span class="sh">"</span><span class="p">]</span> <span class="o">*</span> <span class="n">weights</span><span class="p">).</span><span class="nf">mean</span><span class="p">()</span>
+
+        <span class="n">self</span><span class="p">.</span><span class="n">mp_trainer</span><span class="p">.</span><span class="nf">backward</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="bp">None</span>
+
+<span class="c1"># where the diffusion.training_losses is defined as follows in the file gaussian_diffusion.py
+</span>
+<span class="k">def</span> <span class="nf">training_losses</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">x_start</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+    <span class="c1"># sample x_t from the unconditional forward process
+</span>    <span class="n">x_t</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">q_sample</span><span class="p">(</span><span class="n">x_start</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="n">noise</span><span class="p">)</span>
+
+    <span class="c1"># consider the MSE loss only 
+</span>    <span class="n">model_output</span> <span class="o">=</span> <span class="nf">model</span><span class="p">(</span><span class="n">x_t</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="nf">_scale_timesteps</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="o">**</span><span class="n">model_kwargs</span><span class="p">)</span>
+
+    <span class="c1"># get target from the reverse process
+</span>    <span class="n">target</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">ModelMeanType</span><span class="p">.</span><span class="n">PREVIOUS_X</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">q_posterior_mean_variance</span><span class="p">(</span>
+                    <span class="n">x_start</span><span class="o">=</span><span class="n">x_start</span><span class="p">,</span> <span class="n">x_t</span><span class="o">=</span><span class="n">x_t</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="n">t</span>
+                <span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">ModelMeanType</span><span class="p">.</span><span class="n">START_X</span><span class="p">:</span> <span class="n">x_start</span><span class="p">,</span>
+                <span class="n">ModelMeanType</span><span class="p">.</span><span class="n">EPSILON</span><span class="p">:</span> <span class="n">noise</span><span class="p">,</span>
+            <span class="p">}[</span><span class="n">self</span><span class="p">.</span><span class="n">model_mean_type</span><span class="p">]</span>
+    
+
+    <span class="n">terms</span><span class="p">[</span><span class="sh">"</span><span class="s">mse</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="nf">mean_flat</span><span class="p">((</span><span class="n">target</span> <span class="o">-</span> <span class="n">model_output</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">terms</span>
+
+</code></pre></div></div>
+
+<h3 id="how-to-train-the-classifier">How to train the classifier</h3>
+
+<p>In the following code snippet, we will go through the minimal code to train the classifier. The code is based on the file <code class="language-plaintext highlighter-rouge">classifier_train.py</code>. It is worth noting that the classifier can be trained on either training set or generated images from the diffusion model, controlled by the parameter <code class="language-plaintext highlighter-rouge">args.noised</code></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># create unet and scheduler of the diffusion model
+</span>    <span class="n">model</span><span class="p">,</span> <span class="n">diffusion</span> <span class="o">=</span> <span class="nf">create_model_and_diffusion</span><span class="p">()</span>
+
+    <span class="c1"># init schedule sampler
+</span>    <span class="k">if</span> <span class="n">args</span><span class="p">.</span><span class="n">noised</span><span class="p">:</span>
+        <span class="n">schedule_sampler</span> <span class="o">=</span> <span class="nf">create_named_schedule_sampler</span><span class="p">(</span>
+            <span class="n">args</span><span class="p">.</span><span class="n">schedule_sampler</span><span class="p">,</span> <span class="n">diffusion</span><span class="p">)</span>
+
+    <span class="c1"># create optimizer
+</span>    <span class="n">mp_trainer</span> <span class="o">=</span> <span class="nc">MixedPrecisionTrainer</span><span class="p">(</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">use_fp16</span><span class="o">=</span><span class="n">args</span><span class="p">.</span><span class="n">classifier_use_fp16</span><span class="p">,</span> <span class="n">initial_lg_loss_scale</span><span class="o">=</span><span class="mf">16.0</span><span class="p">)</span>
+
+    <span class="c1"># create unet model? repeat from previous step
+</span>    <span class="n">model</span> <span class="o">=</span> <span class="nc">DDP</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">...)</span>
+
+    <span class="c1"># create data loader 
+</span>    <span class="n">data</span> <span class="o">=</span> <span class="nf">load_data</span><span class="p">(...)</span>
+
+    <span class="c1"># create optimizer
+</span>    <span class="n">opt</span> <span class="o">=</span> <span class="nc">AdamW</span><span class="p">(</span><span class="n">mp_trainer</span><span class="p">.</span><span class="n">master_params</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="n">args</span><span class="p">.</span><span class="n">lr</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="n">args</span><span class="p">.</span><span class="n">weight_decay</span><span class="p">)</span>
+
+
+</code></pre></div></div>
+
+<h2 id="references">References</h2>
+
+<p>Yang Song, Jascha Sohl-Dickstein, Diederik P. Kingma, Abhishek Kumar, Stefano Ermon, and Ben Poole. Score-based generative modeling through stochastic differential equations. ICLR 2021.</p>
+
+    </div>
+  </article>
+
+
+  
+    
+    <br>
+    <hr>
+    <br>
+    <ul class="list-disc pl-8"></ul>
+
+    <!-- Adds related posts to the end of an article -->
+    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
+    <p class="mb-2">Here are some more articles you might like to read next:</p>
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/blog/2023/learn-learnlog/">A Learning Log</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/blog/2023/erasing-concepts/">On Reading - Erasing Concepts from Diffusion Models</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/blog/2023/fairness-irt/">On Reading - Comprehensive Algorithm Portfolio Evaluation using Item Response Theory</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/blog/2023/anti-dreambooth/">On Reading - Anti-Dreambooth</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/blog/2023/aml-overview/">Tutorial on Adversarial Machine Learning - Part 2</a>
+  </li>
+
+<div id="giscus_thread" style="max-width: 800px; margin: 0 auto;">
+  <script>
+    let giscusTheme = localStorage.getItem("theme");
+    let giscusAttributes = {
+        "src": "https://giscus.app/client.js",
+        "data-repo": "alshedivat/al-folio",
+        "data-repo-id": "MDEwOlJlcG9zaXRvcnk2MDAyNDM2NQ==",
+        "data-category": "Comments",
+        "data-category-id": "DIC_kwDOA5PmLc4CTBt6",
+        "data-mapping": "title",
+        "data-strict": "1",
+        "data-reactions-enabled": "1",
+        "data-emit-metadata": "0",
+        "data-input-position": "bottom",
+        "data-theme": giscusTheme,
+        "data-lang": "en",
+        "crossorigin": "anonymous",
+        "async": "",
+    };
+
+
+    let giscusScript = document.createElement("script");
+    Object.entries(giscusAttributes).forEach(([key, value]) => giscusScript.setAttribute(key, value));
+    document.getElementById("giscus_thread").appendChild(giscusScript);
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://giscus.app/?ref_noscript" rel="external nofollow noopener" target="_blank">comments powered by giscus.</a>
+</noscript>
+</div>
+</div>
+
+      
+    </div>
+
+    <!-- Footer -->    
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        © Copyright 2023 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+
+      </div>
+    </footer>
+
+    <!-- JavaScripts -->
+    <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- Bootsrap & MDB scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    <!-- Masonry & imagesLoaded -->
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/blog/assets/js/masonry.js" type="text/javascript"></script>
+    
+  <!-- Medium Zoom JS -->
+  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script defer src="/blog/assets/js/zoom.js"></script>
+
+  <!-- Bootstrap Table -->
+  <script defer src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+
+  <!-- Load Common JS -->
+  <script src="/blog/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
+  <script defer src="/blog/assets/js/common.js?acdb9690d7641b2f8d40529018c71a01"></script>
+  <script defer src="/blog/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    <!-- MathJax -->
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        tags: 'ams'
+      }
+    };
+  </script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
+    
+    
+
+<!-- Scrolling Progress Bar -->
+<script type="text/javascript">
+  /*
+   * This JavaScript code has been adapted from the article 
+   * https://css-tricks.com/reading-position-indicator/ authored by Pankaj Parashar, 
+   * published on the website https://css-tricks.com on the 7th of May, 2014.
+   * Couple of changes were made to the original code to make it compatible 
+   * with the `al-foio` theme.
+   */
+  const progressBar = $("#progress");
+  /*
+   * We set up the bar after all elements are done loading.
+   * In some cases, if the images in the page are larger than the intended
+   * size they'll have on the page, they'll be resized via CSS to accomodate
+   * the desired size. This mistake, however, breaks the computations as the
+   * scroll size is computed as soon as the elements finish loading.
+   * To account for this, a minimal delay was introduced before computing the
+   * values.
+   */
+  window.onload = function () {
+    setTimeout(progressBarSetup, 50);
+  };
+  /*
+   * We set up the bar according to the browser.
+   * If the browser supports the progress element we use that.
+   * Otherwise, we resize the bar thru CSS styling
+   */
+  function progressBarSetup() {
+    if ("max" in document.createElement("progress")) {
+      initializeProgressElement();
+      $(document).on("scroll", function() {
+        progressBar.attr({ value: getCurrentScrollPosition() });
+      });
+      $(window).on("resize", initializeProgressElement);
+    } else {
+      resizeProgressBar();
+      $(document).on("scroll", resizeProgressBar);
+      $(window).on("resize", resizeProgressBar);
+    }
+  }
+  /*
+   * The vertical scroll position is the same as the number of pixels that
+   * are hidden from view above the scrollable area. Thus, a value > 0 is
+   * how much the user has scrolled from the top
+   */
+  function getCurrentScrollPosition() {
+    return $(window).scrollTop();
+  }
+
+  function initializeProgressElement() {
+    let navbarHeight = $("#navbar").outerHeight(true);
+    $("body").css({ "padding-top": navbarHeight });
+    $("progress-container").css({ "padding-top": navbarHeight });
+    progressBar.css({ top: navbarHeight });
+    progressBar.attr({
+      max: getDistanceToScroll(),
+      value: getCurrentScrollPosition(),
+    });
+  }
+  /*
+   * The offset between the html document height and the browser viewport
+   * height will be greater than zero if vertical scroll is possible.
+   * This is the distance the user can scroll
+   */
+  function getDistanceToScroll() {
+    return $(document).height() - $(window).height();
+  }
+
+  function resizeProgressBar() {
+    progressBar.css({ width: getWidthPercentage() + "%" });
+  }
+  // The scroll ratio equals the percentage to resize the bar
+  function getWidthPercentage() {
+    return (getCurrentScrollPosition() / getDistanceToScroll()) * 100;
+  }
+</script>
+
+    
+  </body>
+</html>

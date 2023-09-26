@@ -1,0 +1,1535 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/blog/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/blog/" rel="alternate" type="text/html" hreflang="en" /><updated>2023-09-26T15:50:19+10:00</updated><id>https://tuananhbui89.github.io/blog/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI, Trustworthy AI
+</subtitle><entry><title type="html">On Reading - Flow Matching for Generative Modeling</title><link href="https://tuananhbui89.github.io/blog/blog/2023/flowmatching/" rel="alternate" type="text/html" title="On Reading - Flow Matching for Generative Modeling" /><published>2023-09-22T00:00:00+10:00</published><updated>2023-09-22T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/blog/2023/flowmatching</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/blog/2023/flowmatching/"><![CDATA[<h2 id="about-the-paper">About the paper</h2>
+
+<ul>
+  <li>Published at ICLR 2023 (splotlight, top 5%)</li>
+  <li>Affiliations: Meta AI, Weizmann Institute of Science</li>
+  <li>Link to the paper: <a href="https://openreview.net/pdf?id=PqvMRDCJT9t">https://openreview.net/pdf?id=PqvMRDCJT9t</a></li>
+</ul>
+
+<h2 id="introduction">Introduction</h2>
+
+<p>Continuous Normalizing Flows (CNF) is a class of generative models that can be trained by maximum likelihood. The main idea is to transform a simple distribution (e.g., Gaussian) to a complex distribution (e.g., ImageNet dataset) by a series of invertible transformations. The main challenge is to design a transformation that is invertible and can be computed efficiently.</p>
+
+<p>The flow $\phi_t(x)$ presents a time-dependent diffeomorphic map that transforms the input $x$ to the output $y$ at time $t$. The flow is defined as follows:</p>
+
+\[\frac{d}{dt} \phi_t(x) = v_t(\phi_t(x))\]
+
+<p>where $v_t$ is a time-dependent vector field. $\phi_0(x) = x$ means that the flow at time $t=0$ is the identity map.</p>
+
+<p>Given $p_0$ is the simple distribution (e.g., Gaussian), the flow $\phi_t$ transforms $p_0$ to $p_t$ as follows:</p>
+
+\[p_t = [ \phi_t ] * p_0\]
+
+<p>where $[ \phi_t ] * p_0$ is the push-forward measure of $p_0$ under the map $\phi_t$. 
+The push-forward measure is defined as follows:</p>
+
+\[[ \phi_t ] * p_0(A) = p_0(\phi_t^{-1}(A))\]
+
+<p>where $A$ is a subset of the output space. The push-forward measure can be interpreted as the probability of the output $y$ falls into the subset $A$.</p>
+
+\[p_t(x) = p_0(\phi_t^{-1}(x)) \left| \det \frac{d \phi_t^{-1}(x)}{dx} \right|\]
+
+<p>The function $v_t$ can be intepreted as the velocity of the flow at time $t$, i.e., how fast the flow moves at time $t$. In comparison with diffusion process, the velocity $v_t$ is similar as the denoising function that is used to denoise the image $x$ at time $t$, where $\phi_t(x)$ is the distribution of the denoised images at time $t$.</p>
+
+<!-- The flow is invertible because it is a diffeomorphic map. The inverse flow is defined as follows:
+
+$$ \frac{d}{dt} \phi_t^{-1}(y) = -v_t(\phi_t^{-1}(y)) $$
+ -->
+
+<p><strong>Flow matching objective</strong>: Given a target probability density path $p_t(x)$ and a corresponding vector field $u_t(x)$ which generates $p_t(x)$, the flow matching objective is to find a flow $\phi_t(x)$ and a corresponding vector field $v_t(x)$ that generates $p_t(x)$.</p>
+
+\[\mathcal{L}_{FM} (\theta) = \mathbb{E}_{t, p_t(x)} \| v_t(x) - u_t(x) \|\]
+
+<p>It is a bit confusing in notation here, so $u_t(x)$ can be understand as the target vector field that generates the target probability density path $p_t(x)$, while $v_t(x)$ is the vector field to be learned to approximate $u_t(x)$.</p>
+
+<p>It can be seen that the Flow Matching objective is a simple and attractive objective but intractable to use because we don’t know the target vector field $u_t(x)$.
+The main contribution of the paper is to propose the way to simplify the above objective function. And their approach is quite similar as in DDPM where the solution relies on conditioning to a previous point in the sequence.</p>
+
+<p>The marginal probability path</p>
+
+\[p_t(x) = \int p_t(x \mid x_1) q(x_1) dx_1\]
+
+<p>where $x_1$ is a particular data sample, and $p_t(x \mid x_1)$ is the conditional probability path such that $p_t(x \mid x_1) = p_t(x)$ at time $t=0$. 
+The important point is that they design the $p_1(x \mid x_1)$ at time $t=1$ to be a normal distribution around $x_1$ with a small variance, i.e., $p_1 (x \mid x_1) = \mathcal{N}(x_1, \sigma^2 I)$. In the above equation, $q(x_1)$ is the prior distribution of $x_1$.</p>
+
+<p>Where in particular at time $t=1$, the marginal probability path $p_!$ will approximate the data distribution $q$,</p>
+
+\[p_1(x) = \int p_1(x \mid x_1) q(x_1) dx_1 \approx q(x)\]
+
+<p>And the vector field $u_t(x)$ can be defined as follows:</p>
+
+\[u_t(x) = \int u_t(x \mid x_1) \frac{p_t (x \mid x_1) q(x_1)}{p_t(x)} dx_1\]
+
+<p>Theorem 1: Given vector fields $u_t(x \mid x_t)$ that generate conditional probability paths $p_t(x \mid x_t)$ for any distribution $q(x_1)$, the marginal vector field $u_t(x)$ in the above equation generates the marginal probability path $p_t(x)$.</p>
+
+<p>So it means that if we can learn $u_t (x \mid x_t)$ we can obtain $u_t(x)$ and then we can use $u_t(x)$ to generate $p_t(x)$.</p>
+
+<p>Now we can rewrite the Flow Matching objective to Conditional Flow Matching objective as follows:</p>
+
+\[\mathcal{L}_{CFM} (\theta) = \mathbb{E}_{t, q(x_1), p_t(x \mid x_1)} \| v_t(x) - u_t(x \mid x_1) \|\]
+
+<p>where $v_t(x)$ is the vector field to be learned to approximate $u_t(x \mid x_1)$. 
+Now the question is how can we obtain $u_t(x \mid x_1)$?</p>
+
+<p>In the work, they consider conditional probability paths</p>
+
+\[p_t(x \mid x_1) = \mathcal{N} (x \mid \mu_t (x_1), \sigma_t (x_1)^2 I)\]
+
+<p>where $\mu_t (x_1)$ and $\sigma_t (x_1)$ are the mean and variance of the conditional probability path $p_t(x \mid x_1)$, and they are time-dependent. Later, they will show that we can choose $\mu_t (x_1)$ and $\sigma_t (x_1)$ very flexiblely, as long as they can satisfy some conditions, for example, $\mu_0 (x_1) = 0$ and $\sigma_0 (x_1) = 1$, and $\mu_1 (x_1) = x_1$ and $\sigma_1 (x_1) = \sigma_{min}$, which is set sufficiently small so that $p_1 (x \mid x_1)$ is a concentrated distribution around $x_1$.</p>
+
+<p>The canonical transformation for Gaussian distributions is defined as follows:</p>
+
+\[\psi_t (x) = \mu_t (x_1) + \sigma_t (x_1) \odot x\]
+
+<p>where $\psi_t (x)$ is the canonical transformation of $p_t(x \mid x_1)$, and $\odot$ is the element-wise multiplication.</p>
+
+<p>to be continued…</p>]]></content><author><name></name></author><category term="reading" /><category term="genai" /><summary type="html"><![CDATA[A cool paper about continuous normalizing flows]]></summary></entry><entry><title type="html">On Reading - Diffusion Models Beat GANs on Image Synthesis</title><link href="https://tuananhbui89.github.io/blog/blog/2023/conditional-diffusion/" rel="alternate" type="text/html" title="On Reading - Diffusion Models Beat GANs on Image Synthesis" /><published>2023-09-14T00:00:00+10:00</published><updated>2023-09-14T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/blog/2023/conditional-diffusion</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/blog/2023/conditional-diffusion/"><![CDATA[<h2 id="about-the-paper">About the paper</h2>
+
+<ul>
+  <li>Published at NeurIPS 2021</li>
+  <li>Affiliations: OpenAI</li>
+  <li>One of the very first works on diffusion model. Showing that diffusion model can be used for image synthesis and outperform GANs on FID score. One important contribution of the paper is proposing conditional diffusion process by using gradient from an auxiliary classifier, which is used to sample images from a specific class</li>
+  <li>Link to the paper: <a href="https://arxiv.org/pdf/2105.05233.pdf">https://arxiv.org/pdf/2105.05233.pdf</a></li>
+  <li>Link to the code: <a href="https://github.com/openai/guided-diffusion">https://github.com/openai/guided-diffusion</a></li>
+</ul>
+
+<h2 id="understanding-conditional-diffusion-process">Understanding Conditional Diffusion Process</h2>
+
+<p>In this section, we will go through the Conditional Diffusion Process introduced in Appendix H of the paper.</p>
+
+<p>We start by defining a conditional Markovian noising process $\hat{q}$ similar to $q$, and assume that $\hat{q}(y \mid x_0)$ is a known and readily available label distribution for each sample.</p>
+
+<ul>
+  <li>$\hat{q}(x_0) = q(x_0)$: the initial distribution of the process is the same as the unconditional process.</li>
+  <li>$\hat{q}(y \mid x_0)$ is the label distribution for each sample $x_0$ which is known and readily available.</li>
+  <li>$\hat{q}(x_{t+1} \mid x_t, y) = q(x_{t+1} \mid x_t)$: <strong>This is the key point that will later enable us to derive the conditional diffusion process</strong>. This explains that the transition distribution is the same as the unconditional process, i.e., the noise adding in the forward diffusiion process is independent to label $y$. However, this might not neccessary be the case. If using SDE (Stochastic Differential Equation) to model the diffusion process, then the forward diffusion process can be conditioned on $y$. <strong>This can be a future work to explore.</strong></li>
+  <li>$\hat{q}(x_{1:T} \mid x_0, y) = \prod_{t=1}^T \hat{q}(x_t \mid x_{t-1}, y)$</li>
+</ul>
+
+<p>From the above definition, we can derive the following properties:</p>
+
+<ul>
+  <li>$\hat{q}(x_{t+1} \mid x_t, y) = \hat{q}(x_{t+1} \mid x_t) = q(x_{t+1} \mid x_t)$ the forward process conditioned on $y$ is the same as the unconditional forward process.</li>
+  <li>$\hat{q}(y \mid x_t, x_{t+1}) = \hat{q}(y \mid x_t)$: the label distribution is independent of the next sample $x_{t+1}$.</li>
+  <li>$\hat{q}(y \mid x_t, x_{t+1}) \neq \hat{q}(y \mid x_{t+1})$: Need confirmation on this. But if this is true, then it means that $\hat{q}(y \mid x_t) \neq \hat{q}(y \mid x_{t+1})$ or the label distribution has changed after adding noise at each step. Then we cannot use the same classifier to approximate the label distribution at each step. <strong>However, in the paper, the authors still use the same classifier!!!</strong>. One possible idea is that we can consider a classifier that is conditioned to time step $t$.</li>
+</ul>
+
+<p>Based on the above properties, we now can derive the conditional reverse process as follows:</p>
+
+\[\hat{q}(x_{t} \mid x_{t+1}, y) = \frac{\hat{q}(x_{t} \mid x_{t+1}) \hat{q}(y \mid x_{t}, x_{t+1})}{\hat{q}(y \mid x_{t+1})}\]
+
+\[\hat{q}(x_{t} \mid x_{t+1}, y) = \frac{q(x_{t} \mid x_{t+1}) \hat{q}(y \mid x_{t})}{\hat{q}(y \mid x_{t+1})}\]
+
+<p>The term $\hat{q}(y \mid x_{t+1})$ is considered as constant w.r.t. $x_t$. So $x_t$ can be sampled from the above distribution, where $\hat{q}(y \mid x_{t})$ is approximated by an auxiliary classifier, which is trained to predict the label $y$ from the sample $x_t$. And $q(x_{t} \mid x_{t+1})$ is the reverse process of the unconditional diffusion process which has been trained.</p>
+
+<h2 id="classifier-guidance">Classifier Guidance</h2>
+
+<p>After understanding the conditional diffusion process, we now go through the classifier guidance to see how to use the classifier to guide the sampling process.
+In the paper, the authors proposed two sampling approaches:</p>
+
+<ul>
+  <li><strong>Conditional Reverse Noising Process</strong>: which factorizes the conditional transition $p_{\theta, \phi}(x_t \mid x_{t+1}, y) = Z p_\theta(x_t \mid x_{t+1} p_\phi (y \mid x_t))$. This can be approximated by a Gaussian similar to the unconditional reverse process, but with its mean shifted by $\Sigma g$</li>
+  <li><strong>Conditional Sampling for DDIM</strong>: which can be applied for deterministic sampling methods like DDIM. This can be done by using the conditioning trick adapted from Song et al. (2021).</li>
+</ul>
+
+<p><img src="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/classifier_guidance/two_sampling_methods.png" alt="Two sampling methods" /></p>
+
+<h2 id="how-to-implement">How to implement</h2>
+
+<p>Link to the original implementation: <a href="https://github.com/openai/guided-diffusion">https://github.com/openai/guided-diffusion</a></p>
+
+<p>Minimal code to implement the classifier guidance diffusion as follows, which is based on the code from file <a href="https://github.com/openai/guided-diffusion/blob/main/scripts/classifier_sample.py"><code class="language-plaintext highlighter-rouge">classifier_sample.py</code></a></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># create unet and scheduler of the diffusion model
+</span>    <span class="n">model</span><span class="p">,</span> <span class="n">diffusion</span> <span class="o">=</span> <span class="nf">create_model_and_diffusion</span><span class="p">()</span>
+
+    <span class="c1"># load the pretrained unet 
+</span>    <span class="n">model</span><span class="p">.</span><span class="nf">load_state_dict</span><span class="p">()</span>
+    <span class="n">model</span><span class="p">.</span><span class="nf">eval</span><span class="p">()</span>
+
+    <span class="c1"># create classifier which is Unet's encoder with linear layer on top
+</span>    <span class="n">classifier</span> <span class="o">=</span> <span class="nf">create_classifier</span><span class="p">()</span>
+
+    <span class="c1"># load the pretrained classifier
+</span>    <span class="n">classifier</span><span class="p">.</span><span class="nf">load_state_dict</span><span class="p">()</span>
+    <span class="n">classifier</span><span class="p">.</span><span class="nf">eval</span><span class="p">()</span>
+
+    <span class="c1"># define the gradient of the classifier w.r.t. the input as guidance for sampling 
+</span>    <span class="k">def</span> <span class="nf">cond_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">enable_grad</span><span class="p">():</span>
+            <span class="n">x_in</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="nf">detach</span><span class="p">().</span><span class="nf">requires_grad_</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">logits</span> <span class="o">=</span> <span class="nf">classifier</span><span class="p">(</span><span class="n">x_in</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+            <span class="n">log_probs</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="nf">log_softmax</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">selected</span> <span class="o">=</span> <span class="n">log_probs</span><span class="p">[</span><span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">logits</span><span class="p">)),</span> <span class="n">y</span><span class="p">.</span><span class="nf">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+            <span class="k">return</span> <span class="n">torch</span><span class="p">.</span><span class="n">autograd</span><span class="p">.</span><span class="nf">grad</span><span class="p">(</span><span class="n">selected</span><span class="p">.</span><span class="nf">sum</span><span class="p">(),</span> <span class="n">x_in</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">args</span><span class="p">.</span><span class="n">classifier_scale</span>   
+    
+
+    <span class="k">def</span> <span class="nf">model_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="nf">model</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">y</span> <span class="k">if</span> <span class="n">args</span><span class="p">.</span><span class="n">class_cond</span> <span class="k">else</span> <span class="bp">None</span><span class="p">)</span>
+
+    <span class="c1"># main loop 
+</span>    <span class="k">while</span> <span class="n">gothrough_all_images</span><span class="p">:</span>
+        <span class="c1"># random target classes
+</span>        <span class="n">classes</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randint</span><span class="p">()</span>
+
+        <span class="c1"># calling sample function with the classifier guidance 
+</span>        <span class="n">sample_fn</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">diffusion</span><span class="p">.</span><span class="n">p_sample_loop</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="p">.</span><span class="n">use_ddim</span> <span class="k">else</span> <span class="n">diffusion</span><span class="p">.</span><span class="n">ddim_sample_loop</span>
+        <span class="p">)</span>
+        <span class="n">sample</span> <span class="o">=</span> <span class="nf">sample_fn</span><span class="p">(</span>
+            <span class="n">model_fn</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">args</span><span class="p">.</span><span class="n">image_size</span><span class="p">,</span> <span class="n">args</span><span class="p">.</span><span class="n">image_size</span><span class="p">),</span>
+            <span class="n">clip_denoised</span><span class="o">=</span><span class="n">args</span><span class="p">.</span><span class="n">clip_denoised</span><span class="p">,</span>
+            <span class="n">model_kwargs</span><span class="o">=</span><span class="n">model_kwargs</span><span class="p">,</span>
+            <span class="n">cond_fn</span><span class="o">=</span><span class="n">cond_fn</span><span class="p">,</span> <span class="c1"># classifier guidance
+</span>            <span class="n">device</span><span class="o">=</span><span class="n">dist_util</span><span class="p">.</span><span class="nf">dev</span><span class="p">(),</span>
+        <span class="p">)</span>
+
+        <span class="c1"># save the output 
+</span></code></pre></div></div>
+
+<p>The crucial part of the above code is the <code class="language-plaintext highlighter-rouge">cond_fn</code> function which defines the gradient of the classifier w.r.t. the input as guidance for sampling. Another important part is the <code class="language-plaintext highlighter-rouge">diffusion.p_sample_loop</code> or <code class="language-plaintext highlighter-rouge">diffusion.ddim_sample_loop</code> which will use the classifier guidance to sample images from the diffusion model.</p>
+
+<p>The diffusion model with these above sampling methods can be found in the file <a href="https://github.com/openai/guided-diffusion/blob/main/guided_diffusion/script_util.py#L74"><code class="language-plaintext highlighter-rouge">script_util.py</code></a> and the sampling methods are defined in the file <a href="https://github.com/openai/guided-diffusion/blob/main/guided_diffusion/gaussian_diffusion.py"><code class="language-plaintext highlighter-rouge">gaussian_diffusion.py</code></a></p>
+
+<p>The Algorithm 1 (Conditional Reverse Noising Process, i.e., <code class="language-plaintext highlighter-rouge">p_sample_loop</code>) can be implemented as follows:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="c1"># one step of the sampling process
+</span><span class="k">def</span> <span class="nf">p_sample</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">clip_denoised</span><span class="p">,</span> <span class="n">denoised_fn</span><span class="p">,</span> <span class="n">cond_fn</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="p">):</span>
+
+    <span class="c1"># sample from the unconditional reverse process
+</span>    <span class="c1"># the output includes "mean" and "log_variance" of the Gaussian distribution
+</span>    <span class="c1"># the output also includes "pred_xstart"
+</span>    <span class="n">out</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">p_mean_variance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">clip_denoised</span><span class="p">,</span> <span class="n">denoised_fn</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="p">)</span>
+
+    <span class="c1"># Shift the mean by the gradient of the classifier w.r.t. the input
+</span>    <span class="c1"># equation: new_mean = mean + sigma * g 
+</span>    <span class="c1"># where sigma is the standard deviation of the Gaussian distribution, i.e., out["varaince"]
+</span>    <span class="k">if</span> <span class="n">cond_fn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">mean</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">condition_mean</span><span class="p">(</span><span class="n">cond_fn</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="p">)</span>
+    
+    <span class="c1"># create nonzero mask
+</span>    <span class="n">nonzero_mask</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">t</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">).</span><span class="nf">float</span><span class="p">().</span><span class="nf">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="p">([</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="p">)</span>  <span class="c1"># no noise when t == 0
+</span>
+    <span class="c1"># sample from the shifted Gaussian distribution
+</span>    <span class="n">sample</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">mean</span><span class="sh">"</span><span class="p">]</span> <span class="o">+</span> <span class="n">nonzero_mask</span> <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="nf">exp</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">log_variance</span><span class="sh">"</span><span class="p">])</span> <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randn_like</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">mean</span><span class="sh">"</span><span class="p">])</span>
+    <span class="k">return</span> <span class="p">{</span><span class="sh">"</span><span class="s">sample</span><span class="sh">"</span><span class="p">:</span> <span class="n">sample</span><span class="p">,</span> <span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">:</span> <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">]}</span>
+
+<span class="c1"># the progressive sampling loop from T to 0, where the $x_t$ will be used to sample $x_{t-1}$
+</span>
+<span class="k">def</span> <span class="nf">p_sample_loop_progressive</span><span class="p">():</span>
+
+    <span class="bp">...</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">th</span><span class="p">.</span><span class="nf">tensor</span><span class="p">([</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">th</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">p_sample</span><span class="p">(</span>
+                <span class="n">model</span><span class="p">,</span>
+                <span class="n">img</span><span class="p">,</span>
+                <span class="n">t</span><span class="p">,</span>
+                <span class="n">clip_denoised</span><span class="o">=</span><span class="n">clip_denoised</span><span class="p">,</span>
+                <span class="n">denoised_fn</span><span class="o">=</span><span class="n">denoised_fn</span><span class="p">,</span>
+                <span class="n">cond_fn</span><span class="o">=</span><span class="n">cond_fn</span><span class="p">,</span>
+                <span class="n">model_kwargs</span><span class="o">=</span><span class="n">model_kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">yield</span> <span class="n">out</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">sample</span><span class="sh">"</span><span class="p">]</span>
+
+</code></pre></div></div>
+
+<p>The Algorithm 2 (Conditional Sampling for DDIM, i.e., <code class="language-plaintext highlighter-rouge">ddim_sample_loop</code>) can be implemented as below. As described in the paper, the stochastic process can be controlled by the parameter <code class="language-plaintext highlighter-rouge">eta</code>. When <code class="language-plaintext highlighter-rouge">eta=0</code>, the sampling process is truly deterministic, while <code class="language-plaintext highlighter-rouge">eta &gt; 0</code>, the sampling process is stochastic.</p>
+
+<!-- However, one point that I am still not understand is that the DDIM is the deterministic sampling method, however, in the code, at the end, we still sample from a Gaussian distribution with the mean as calculated in Algorithm 2. The sigma is controlled by additional parameter `eta`, where `eta=0` means truly deterministic sampling. -->
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="c1"># one step of the sampling process
+</span><span class="k">def</span> <span class="nf">ddim_sample</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">clip_denoised</span><span class="p">,</span> <span class="n">denoised_fn</span><span class="p">,</span> <span class="n">cond_fn</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="p">,</span> <span class="n">eta</span><span class="p">):</span>
+
+    <span class="c1"># sample from the unconditional reverse process
+</span>    <span class="c1"># the output includes "mean" and "log_variance" of the Gaussian distribution
+</span>    <span class="c1"># the output also includes "pred_xstart"
+</span>    <span class="n">out</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">p_mean_variance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">clip_denoised</span><span class="p">,</span> <span class="n">denoised_fn</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="p">)</span>
+
+    <span class="c1"># calculate score 
+</span>    <span class="k">if</span> <span class="n">cond_fn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">condition_score</span><span class="p">(</span><span class="n">cond_fn</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="o">=</span><span class="n">model_kwargs</span><span class="p">)</span>    
+    
+    <span class="c1"># calculate epsilon_t 
+</span>    <span class="n">eps</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_predict_eps_from_xstart</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">])</span>
+
+    <span class="c1"># calculate alpha_bar_t and alpha_bar_prev and sigma 
+</span>    <span class="n">sigma</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">eta</span>
+        <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha_bar_prev</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha_bar</span><span class="p">))</span>
+        <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha_bar</span> <span class="o">/</span> <span class="n">alpha_bar_prev</span><span class="p">)</span>
+    <span class="p">)</span>    
+
+    <span class="c1"># calculate x_{t-1} as in Algorithm 2
+</span>    <span class="n">mean_pred</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">]</span> <span class="o">*</span> <span class="n">th</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="n">alpha_bar_prev</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha_bar_prev</span> <span class="o">-</span> <span class="n">sigma</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">eps</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Still random sample from a Gaussian distribution 
+</span>    <span class="c1"># but the mean is calculated as above
+</span>    <span class="n">sample</span> <span class="o">=</span> <span class="n">mean_pred</span> <span class="o">+</span> <span class="n">nonzero_mask</span> <span class="o">*</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randn_like</span><span class="p">(</span><span class="n">mean_pred</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="sh">"</span><span class="s">sample</span><span class="sh">"</span><span class="p">:</span> <span class="n">sample</span><span class="p">,</span> <span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">:</span> <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">]}</span>    
+</code></pre></div></div>
+
+<p>The main component of the above code is the unconditional reverse process <code class="language-plaintext highlighter-rouge">p_mean_variance</code> which is defined as follows in the file <code class="language-plaintext highlighter-rouge">gaussian_diffusion.py</code>. It is worth noting that this function not only returns the $x_{t-1}$ but also the prediction of the initial $x_0$, i.e., <code class="language-plaintext highlighter-rouge">pred_xstart</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="k">def</span> <span class="nf">p_mean_variance</span><span class="p">(</span>
+        <span class="n">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">clip_denoised</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">denoised_fn</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="o">=</span><span class="bp">None</span>
+    <span class="p">):</span>
+
+    <span class="sh">"""</span><span class="s">
+    Apply the model to get p(x_{t-1} | x_t), as well as a prediction of
+    the initial x, x_0.
+
+    :param model: the model, which takes a signal and a batch of timesteps
+                    as input.
+    :param x: the [N x C x ...] tensor at time t.
+    :param t: a 1-D Tensor of timesteps.
+    :param clip_denoised: if True, clip the denoised signal into [-1, 1].
+    :param denoised_fn: if not None, a function which applies to the
+        x_start prediction before it is used to sample. Applies before
+        clip_denoised.
+    :param model_kwargs: if not None, a dict of extra keyword arguments to
+        pass to the model. This can be used for conditioning.
+    :return: a dict with the following keys:
+                - </span><span class="sh">'</span><span class="s">mean</span><span class="sh">'</span><span class="s">: the model mean output.
+                - </span><span class="sh">'</span><span class="s">variance</span><span class="sh">'</span><span class="s">: the model variance output.
+                - </span><span class="sh">'</span><span class="s">log_variance</span><span class="sh">'</span><span class="s">: the log of </span><span class="sh">'</span><span class="s">variance</span><span class="sh">'</span><span class="s">.
+                - </span><span class="sh">'</span><span class="s">pred_xstart</span><span class="sh">'</span><span class="s">: the prediction for x_0.
+    </span><span class="sh">"""</span>
+
+    <span class="n">model_output</span> <span class="o">=</span> <span class="nf">model</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="nf">_scale_timesteps</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="o">**</span><span class="n">model_kwargs</span><span class="p">)</span>
+
+    <span class="c1"># really long process 
+</span>    <span class="p">...</span> 
+
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="sh">"</span><span class="s">mean</span><span class="sh">"</span><span class="p">:</span> <span class="n">model_mean</span><span class="p">,</span>
+        <span class="sh">"</span><span class="s">variance</span><span class="sh">"</span><span class="p">:</span> <span class="n">model_variance</span><span class="p">,</span>
+        <span class="sh">"</span><span class="s">log_variance</span><span class="sh">"</span><span class="p">:</span> <span class="n">model_log_variance</span><span class="p">,</span>
+        <span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">:</span> <span class="n">pred_xstart</span><span class="p">,</span>
+    <span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="how-to-train-the-diffusion-model">How to train the diffusion model</h3>
+
+<p>Training the diffusion model in this project is similar as in the DDPM or DDIM papers. Because even using auxiliary classifier, they are trained independently. The minimal code to train the diffusion model is as follows, which is based on the code from file <a href="https://github.com/openai/guided-diffusion/blob/main/scripts/image_train.py"><code class="language-plaintext highlighter-rouge">image_train.py</code></a> and <a href="https://github.com/openai/guided-diffusion/blob/main/guided_diffusion/train_util.py#L22"><code class="language-plaintext highlighter-rouge">train_util.py</code></a></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="c1"># run loop
+</span><span class="k">def</span> <span class="nf">run_loop</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+    <span class="k">while</span> <span class="n">some_conditions</span><span class="p">:</span>
+        <span class="n">batch</span><span class="p">,</span> <span class="n">cond</span> <span class="o">=</span> <span class="nf">next</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="c1"># run one step
+</span>        <span class="n">self</span><span class="p">.</span><span class="nf">forward_backward</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">cond</span><span class="p">)</span>
+        <span class="n">took_step</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">mp_trainer</span><span class="p">.</span><span class="nf">optimize</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">opt</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">took_step</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="nf">_update_ema</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="nf">_anneal_lr</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="nf">log_step</span><span class="p">()</span>
+    <span class="k">return</span> <span class="bp">None</span>
+
+<span class="c1"># forward and backward
+</span><span class="k">def</span> <span class="nf">forward_backward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">cond</span><span class="p">):</span>
+    <span class="n">self</span><span class="p">.</span><span class="n">mp_trainer</span><span class="p">.</span><span class="nf">zero_grad</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">batch</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">self</span><span class="p">.</span><span class="n">microbatch</span><span class="p">):</span>
+        <span class="n">micro</span><span class="p">,</span> <span class="n">micro_cond</span> <span class="o">=</span> <span class="p">...</span> 
+
+        <span class="c1"># sampling time step t and the weights from a schedule sampler (e.g, uniform))
+</span>        <span class="n">t</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">schedule_sampler</span><span class="p">.</span><span class="nf">sample</span><span class="p">(</span><span class="n">micro</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dist_util</span><span class="p">.</span><span class="nf">dev</span><span class="p">())</span>
+
+        <span class="n">compute_losses</span> <span class="o">=</span> <span class="n">functools</span><span class="p">.</span><span class="nf">partial</span><span class="p">(</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">diffusion</span><span class="p">.</span><span class="n">training_losses</span><span class="p">,</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">ddp_model</span><span class="p">,</span>
+                <span class="n">micro</span><span class="p">,</span>
+                <span class="n">t</span><span class="p">,</span>
+                <span class="n">model_kwargs</span><span class="o">=</span><span class="n">micro_cond</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="n">losses</span> <span class="o">=</span> <span class="nf">compute_losses</span><span class="p">()</span>
+
+        <span class="n">loss</span> <span class="o">=</span> <span class="p">(</span><span class="n">losses</span><span class="p">[</span><span class="sh">"</span><span class="s">loss</span><span class="sh">"</span><span class="p">]</span> <span class="o">*</span> <span class="n">weights</span><span class="p">).</span><span class="nf">mean</span><span class="p">()</span>
+
+        <span class="n">self</span><span class="p">.</span><span class="n">mp_trainer</span><span class="p">.</span><span class="nf">backward</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="bp">None</span>
+
+<span class="c1"># where the diffusion.training_losses is defined as follows in the file gaussian_diffusion.py
+</span>
+<span class="k">def</span> <span class="nf">training_losses</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">x_start</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+    <span class="c1"># sample x_t from the unconditional forward process
+</span>    <span class="n">x_t</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">q_sample</span><span class="p">(</span><span class="n">x_start</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="n">noise</span><span class="p">)</span>
+
+    <span class="c1"># consider the MSE loss only 
+</span>    <span class="n">model_output</span> <span class="o">=</span> <span class="nf">model</span><span class="p">(</span><span class="n">x_t</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="nf">_scale_timesteps</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="o">**</span><span class="n">model_kwargs</span><span class="p">)</span>
+
+    <span class="c1"># get target from the reverse process
+</span>    <span class="n">target</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">ModelMeanType</span><span class="p">.</span><span class="n">PREVIOUS_X</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">q_posterior_mean_variance</span><span class="p">(</span>
+                    <span class="n">x_start</span><span class="o">=</span><span class="n">x_start</span><span class="p">,</span> <span class="n">x_t</span><span class="o">=</span><span class="n">x_t</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="n">t</span>
+                <span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">ModelMeanType</span><span class="p">.</span><span class="n">START_X</span><span class="p">:</span> <span class="n">x_start</span><span class="p">,</span>
+                <span class="n">ModelMeanType</span><span class="p">.</span><span class="n">EPSILON</span><span class="p">:</span> <span class="n">noise</span><span class="p">,</span>
+            <span class="p">}[</span><span class="n">self</span><span class="p">.</span><span class="n">model_mean_type</span><span class="p">]</span>
+    
+
+    <span class="n">terms</span><span class="p">[</span><span class="sh">"</span><span class="s">mse</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="nf">mean_flat</span><span class="p">((</span><span class="n">target</span> <span class="o">-</span> <span class="n">model_output</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">terms</span>
+
+</code></pre></div></div>
+
+<h3 id="how-to-train-the-classifier">How to train the classifier</h3>
+
+<p>In the following code snippet, we will go through the minimal code to train the classifier. The code is based on the file <code class="language-plaintext highlighter-rouge">classifier_train.py</code>. It is worth noting that the classifier can be trained on either training set or generated images from the diffusion model, controlled by the parameter <code class="language-plaintext highlighter-rouge">args.noised</code></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># create unet and scheduler of the diffusion model
+</span>    <span class="n">model</span><span class="p">,</span> <span class="n">diffusion</span> <span class="o">=</span> <span class="nf">create_model_and_diffusion</span><span class="p">()</span>
+
+    <span class="c1"># init schedule sampler
+</span>    <span class="k">if</span> <span class="n">args</span><span class="p">.</span><span class="n">noised</span><span class="p">:</span>
+        <span class="n">schedule_sampler</span> <span class="o">=</span> <span class="nf">create_named_schedule_sampler</span><span class="p">(</span>
+            <span class="n">args</span><span class="p">.</span><span class="n">schedule_sampler</span><span class="p">,</span> <span class="n">diffusion</span><span class="p">)</span>
+
+    <span class="c1"># create optimizer
+</span>    <span class="n">mp_trainer</span> <span class="o">=</span> <span class="nc">MixedPrecisionTrainer</span><span class="p">(</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">use_fp16</span><span class="o">=</span><span class="n">args</span><span class="p">.</span><span class="n">classifier_use_fp16</span><span class="p">,</span> <span class="n">initial_lg_loss_scale</span><span class="o">=</span><span class="mf">16.0</span><span class="p">)</span>
+
+    <span class="c1"># create unet model? repeat from previous step
+</span>    <span class="n">model</span> <span class="o">=</span> <span class="nc">DDP</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">...)</span>
+
+    <span class="c1"># create data loader 
+</span>    <span class="n">data</span> <span class="o">=</span> <span class="nf">load_data</span><span class="p">(...)</span>
+
+    <span class="c1"># create optimizer
+</span>    <span class="n">opt</span> <span class="o">=</span> <span class="nc">AdamW</span><span class="p">(</span><span class="n">mp_trainer</span><span class="p">.</span><span class="n">master_params</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="n">args</span><span class="p">.</span><span class="n">lr</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="n">args</span><span class="p">.</span><span class="n">weight_decay</span><span class="p">)</span>
+
+
+</code></pre></div></div>
+
+<h2 id="references">References</h2>
+
+<p>Yang Song, Jascha Sohl-Dickstein, Diederik P. Kingma, Abhishek Kumar, Stefano Ermon, and Ben Poole. Score-based generative modeling through stochastic differential equations. ICLR 2021.</p>]]></content><author><name></name></author><category term="reading" /><summary type="html"><![CDATA[Try to understand classifier guidance and how to implement it]]></summary></entry><entry><title type="html">On Reading - Comprehensive Algorithm Portfolio Evaluation using Item Response Theory</title><link href="https://tuananhbui89.github.io/blog/blog/2023/fairness-irt/" rel="alternate" type="text/html" title="On Reading - Comprehensive Algorithm Portfolio Evaluation using Item Response Theory" /><published>2023-09-01T00:00:00+10:00</published><updated>2023-09-01T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/blog/2023/fairness-irt</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/blog/2023/fairness-irt/"><![CDATA[<h2 id="about-the-paper">About the paper</h2>
+
+<ul>
+  <li>Link to the paper: <a href="https://arxiv.org/abs/2307.15850">https://arxiv.org/abs/2307.15850</a></li>
+  <li>Authors: Sevvandi Kandanaarachchi, Kate Smith-Miles, CSIRO, Uni Melb</li>
+  <li><a href="https://www.youtube.com/watch?v=gA-Ds1PEP_o&amp;ab_channel=OPTIMAARC">Talk at OPTIMA ARC</a> and <a href="https://www.slideshare.net/SevvandiKandanaarach/algorithm-evaluation-using-item-response-theorypptx?from_action=save">its slide</a></li>
+</ul>
+
+<h2 id="summary">Summary</h2>
+
+<p>The paper proposed a framework to evaluate a portfolio of algorithms using Item Response Theory (IRT). Instead of using the standard IRT mapping, the authors proposed to invert the mapping by considering the datasets as agents and the algorithms as items. By using this mapping, the IRT model now can give more insights about the characteristics of algorithms including the algorithm anomalousness, consistency, and dataset difficulty. In addition, the framework also provides analysis of strengths and weaknesses of algorithms in the problem space which can be used to select the best algorithm for a given dataset.</p>
+
+<h2 id="item-response-theory">Item Response Theory</h2>
+
+<p>Item Response Theory (IRT) is a psychometric theory that models the relationship between the latent trait (such as verbal or mathematical ability, that cannot be directly measured) of a person and the probability of a person to answer a question correctly. Using the participant responses to the test items, an IRT model is fitted to estimate the discrimination and difficulty of test items and the ability of participants.</p>
+
+<h3 id="family-of-irt-models">Family of IRT models</h3>
+
+<h4 id="dichotomous-irt-model">Dichotomous IRT model</h4>
+
+<p>The simplest IRT model is the dichotomous IRT model, which assumes that the probability of a person to answer a question correctly is a logistic function of the difference between the person’s ability and the item’s difficulty. The model is formulated as follows:</p>
+
+\[P(X_{ij} = 1 \mid \theta_i, \alpha_j, \beta_j) = \frac{1}{1 + e^{- \alpha_j (\theta_i - \beta_j)}}\]
+
+<p>where $X_{ij}$ is the response of person $i$ to item $j$, $\theta_i$ is the ability of person $i$, $\beta_j$ is the difficulty of item $j$, and $\alpha_j$ is the discrimination parameter.</p>
+
+<p>3PL: introducing one additional guesing parameter $\gamma_j$ to the model:</p>
+
+\[P(X_{ij} = 1 \mid \theta_i, \alpha_j, \beta_j, \gamma_j) = \gamma_j + (1 - \gamma_j) \frac{1}{1 + e^{- \alpha_j (\theta_i - \beta_j)}}\]
+
+<p>Figure below shows the probability of a person to answer a question correctly as a function of the person’s ability $\theta_i$ given the item’s parameters $\alpha_j, \beta_j, \gamma_j$.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/3PL-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/3PL-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/3PL-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/3PL.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    3PL
+</div>
+
+<h4 id="polytomous-irt-model">Polytomous IRT model</h4>
+
+<p>The polytomous IRT model is an extension of the dichotomous IRT model that allows for more than two response categories (e.g., an answer is marked not just correct/incorrect but with score from 1 to K). The most common polytomous IRT model is the graded response model (GRM), in which the cummulative probabilities of a person to get a higher or equal to score $k$ is formulated as follows:</p>
+
+\[P(X_{ij} \geq k \mid \theta_i, \alpha_j, \beta_j^k) = \frac{1}{1 + e^{- \alpha_j (\theta_i - \beta_j^k)}}\]
+
+<p>where $X_{ij}$ is the response of person $i$ to item $j$, $\theta_i$ is the ability of person $i$, $\beta_j^k$ is the difficulty of item $j$ for response category $k$, and $\alpha_j$ is the discrimination parameter. Each item $j$ has a set of difficulties $\beta_j = { \beta_j^k }_{k=1}^K$ which is making sense because the difficulty of an item is different for different response categories.</p>
+
+<p>The probability of a person to get a score $k$ is formulated as follows:</p>
+
+\[P(X_{ij} = k \mid \theta_i, \alpha_j, \beta_j) = P(X_{ij} \geq k \mid \theta_i, \alpha_j, \beta_j^k) - P(X_{ij} \geq k+1 \mid \theta_i, \alpha_j, \beta_j^{k+1})\]
+
+<p>Given parameters $\alpha_j, \beta_j$ are known and fixed, the probability of a person to get a score $k$ is a curve that is a function of the person’s ability $\theta_i$. And given the person’s ability $\theta_i$ and the item’s parameters $\alpha_j, \beta_j$, we can estimate the most likely score $k$ of the person which is the score that maximizes the probability $P(X_{ij} = k \mid \theta_i, \alpha_j, \beta_j)$.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/poly-IRT-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/poly-IRT-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/poly-IRT-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/poly-IRT.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Polytomous IRT
+</div>
+
+<h4 id="continuous-irt-model">Continuous IRT model</h4>
+
+<p>The continuous IRT model is an extension of the dichotomous IRT model that allows for continuous responses (e.g., the response is a real number between 0 and 1). The density function of the continuous IRT model is formulated as follows:</p>
+
+\[f(z_{ij} \mid \theta_i) = \frac{\alpha_j \gamma_j}{2 \pi} \exp(- \frac{\alpha_j^2}{2}(\theta_i - \beta_j - \gamma_j z_j))\]
+
+<p>where $\theta_i$ is the ability of person $i$, $\beta_j$ is the difficulty of item $j$, $\alpha_j$ is the discrimination parameter, and $\gamma_j$ is the scaling factor. $z_{ij}$ is the normalized response of person $i$ to item $j$ which is formulated as follows:</p>
+
+\[z_{j} = \ln \frac{x_{j}}{ k_j -  x_j}\]
+
+<p>where $x_{j}$ is a continuous score between 0 and $k_j$ and $k_j$ is the maximum score of item $j$. $z_j$ has a range between $-\infty$ and $\infty$.</p>
+
+<p>In this model, these are total 3 parameters for each item $j$ (i.e., $\beta_j, \alpha_j, \gamma_j$) and 1 parameter for each person $i$ (i.e., $\theta_i$). Unlike the polytomous IRT model, the difficulty $\beta_j$ of an item $j$ is the same for all response categories.</p>
+
+<h2 id="mapping-algorithm-evaluation-to-irt">Mapping algorithm evaluation to IRT</h2>
+
+<!-- Given a group of students (i.e., algorithms) and a set of items/questions (i.e., datasets), the goal of IRT is to estimate the ability of each student and the difficulty of each question. The ability of a student is the probability of the student to answer a question correctly. -->
+
+<p>To understand the mapping better, let’s consider the following components of IRT:</p>
+
+<ul>
+  <li>The agents: a group of students or algorithms in which each agent is associated with a set of characteristics (e.g., ability of a student, parameters of an algorithm)</li>
+  <li>The items: a set of questions or datasets in which each item is associated with a set of characteristics (e.g., difficulty, discrimination, bias)</li>
+  <li>The responses: the responses of agents to items (e.g., the responses of students to questions, the performance of algorithms on datasets)</li>
+</ul>
+
+<p>IRT models the relationship between the characteristics of agents and items and the responses of agents to items. The goal of IRT is to estimate the characteristics of agents and items given the responses of agents to items, with the primary goal of estimating the characteristics of items (e.g., the difficulty of questions which is broader interest than the ability of each individual student).</p>
+
+<p>It can be seen that, in the dichotomous IRT model, there are two parameters of an item (i.e., difficulty and discrimination) and one parameter of an agent (i.e., ability). In the polytomous IRT model, for each item, there are $K$ parameters of difficulty (i.e., ${\beta_j^k}_{k=1}^K$) and one parameter $\alpha_j$ for discrimination, while there is only one parameter of an agent (i.e., ability $\theta_i$).</p>
+
+<p><strong>Mapping algorithm evaluation to IRT</strong>:</p>
+
+<p>In the context of algorithm evaluation, the agents are algorithms and the items are datasets. The responses are the performance of algorithms on datasets. Let $f_{\theta_i}$ is an agent (i.e., an algorithm) parameterized by $\theta_i$. $x_j$ is an item (i.e., a dataset) belonging to set of items $X$, each dataset $x_j$ is associated with a set of characteristics $c_j$ (e.g., difficulty, discrimination, bias).</p>
+
+<p>Within the context, the IRT model now estimates the probability of an algorithm $f_{\theta_i}$ to solve a dataset $x_j$ given the characteristics $c_j$ of the dataset and the ability $\theta_i$ of the algorithm.</p>
+
+<p>However, as the authors mentioned in the paper, with this standard mapping, the IRT model is focusing on evaluating the characteristics of datasets (i.e., items) rather than the characteristics of algorithms (i.e., agents). Therefore, the authors proposed to invert the mapping by considering the datasets as agents and the algorithms as items.</p>
+
+<p>By using the inverted mapping, the IRT model now can give more insights about the characteristics of algorithms rather than the characteristics of datasets, thanks to the fact that there are more parameters to be estimated for each algorithm (i.e., 3 parameters for each algorithm in the continuous IRT model) than for each dataset (i.e., 1 parameter for each dataset in the continuous IRT model).</p>
+
+<p>More specifically, if we consider the continuous IRT model and the inverted mapping, the following are the parameters of the model:</p>
+
+<ul>
+  <li>$\beta_j$ is the difficulty of item $j$, in this case, the (reversed) difficulty limit of algorithm $j$.</li>
+  <li>$\alpha_j$ is the discrimination parameter of item $j$, in this case, the (reversed) algorithm anomalousness and consistency.</li>
+  <li>$\gamma_j$ is the scaling factor of item $j$, in this case, the algorithm bias (I am not sure about this because it was not mentioned in the paper).</li>
+  <li>$\theta_i$ is the ability of agent $i$, in this case, the (reversed) dataset difficulty.</li>
+</ul>
+
+<h2 id="characteristics-of-algorithms-estimated-by-irt-model">Characteristics of algorithms estimated by IRT model</h2>
+
+<ul>
+  <li>
+    <p><strong>Dataset difficulty</strong>: It is estimated by $\delta_i = -\theta_i$ which is the ability of agent $i$, in this case the dataset difficulty. Given a fixed algorithm’s characteristics, the probability of a dataset to be solved by the algorithm will increase as $\theta_i$ increases. Therefore, an dataset $i$ is considered to be easy if $\theta_i$ is large or vice versa.</p>
+  </li>
+  <li>
+    <p><strong>Algorithm anomalousness</strong>: It is estimated by $sign(\alpha_j)$ (i.e., TRUE if $\alpha_j &lt; 0$ and FALSE if $\alpha_j &gt; 0$) show whether the algorithm is anomalous or not. It is because in the logistic function, if $\alpha_j &lt; 0$, then the probability of the agent (i.e., a dataset) act on the item (i.e., an algorithm) is decreasing as the ability of the agent increases (i.e., $\theta_i$ or easiness of a dataset). In other words, the algorithm is more likely to fail on a easy dataset than on a hard dataset which is an anomalous behavior.</p>
+  </li>
+  <li>
+    <p><strong>Algorithm consistency</strong>: It is estimated by $1/|\alpha_j|$ (i.e., inverse of the absolute value of $\alpha_j$), which shows the consistency of the algorithm. It is because in the logistic function, the $\alpha_j$ is the slope of the curve, therefore, the larger the $\alpha_j$, the steeper the curve, which means that the algorithm is changing its behavior more rapidly as the ability of the agent changes (i.e., $\theta_i$ or easiness of a dataset). In other words, large $\alpha_j$ or small $1/|\alpha_j|$ means that the algorithm is less consistent/stable/robust against the change of the difficulty of a dataset.</p>
+  </li>
+  <li>
+    <p><strong>Difficulty limit of algorithm</strong>: It is estimated by $-\beta_j$ which is the difficulty of item $j$. In this case, the difficulty limit of algorithm $j$. It is because in the logistic function, the $\beta_j$ is the point at which the probability of the agent (i.e., a dataset) act on the item (i.e., an algorithm) is 0.5. In other words, the difficulty limit of algorithm $j$ is the difficulty of a dataset $i$ at which the algorithm $j$ has 50% chance to solve the dataset $i$. The higher difficulty limit of algorithm $j$, the more difficult dataset that the algorithm $j$ can solve.</p>
+  </li>
+  <li>
+    <p><strong>Algorithm bias</strong>: (This was not mentioned in the paper but just my analysis) It is estimated by $\gamma_j$ which is the scaling factor of item $j$. In this case, the algorithm bias. It can be seen that in the continuous IRT model, the $\gamma_j$ has to be same sign as $\alpha_j$ (i.e., $\alpha_j \gamma_j &gt; 0$). Just consider the case when $\gamma_j &gt; 0$, then the higher the $\gamma_j$, the higher the probability that the dataset is solved by the algorithm. More interestingly, the $\gamma_j$ is the scaling factor of the response $z_j = \ln \frac{x_j}{k_j - x_j}$ which will be very large if $x_j$ is close to $k_j$ (i.e., the maximum score of item $j$). Therefore, the density function $f(z_{ij} \mid \theta_i)$ will be very large if $x_j$ is close to $k_j$ which means that the probability of the dataset to be solved by the algorithm is very high if $x_j$ is close to $k_j$ which is makes sense because the dataset is easy. In contrast, the density function $f(z_{ij} \mid \theta_i)$ will be very small if $x_j$ is close to 0. Therefore, the continuous IRT model is strongly biased towards the extreme values of the response $x_j$ (i.e., $x_j = 0$ or $x_j = k_j$) which is not good. However, if the scaling factor $\gamma_j$ is small, it reduces this bias issue, vice versa. Therefore, the $\gamma_j$ can be used to measure the bias of the algorithm.</p>
+  </li>
+  <li>
+    <p><strong>Performance-Dataset Difficulty Curve</strong>: after getting all the above parameteres of $n$ algorithms on $N$ datasets/problems, we can estimate the performance-dataset difficulty curve $h_j(\delta)$ of each algorithm $j$ by using function estimation method (i.e., smoothing spline as proposed in the paper).</p>
+  </li>
+</ul>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/smoothing-spline-2-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/smoothing-spline-2-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/smoothing-spline-2-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/smoothing-spline-2.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Smoothing spline
+</div>
+
+<ul>
+  <li><strong>Strengths and weaknesses of algorithm</strong>: based on the performance-dataset difficulty curve $h_j(\delta)$, we can identify the strengths and weaknesses of each algorithm $j$ by comparing between curves/algorithms. For example, if the curve of algorithm $j$ is above the curve of algorithm $k$ for all $\delta$, then algorithm $j$ is better than algorithm $k$ for all $\delta$. Given a dataset difficulty $\delta$, we can find the best algorithm which has the highest value of $h_j(\delta)$. We also can define a region where an algorithm can be considered as algorithm’s strengths or weaknesses.</li>
+</ul>
+
+<h2 id="framework">Framework</h2>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/algorithm-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/algorithm-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/algorithm-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/algorithm.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    AIRT framework
+</div>
+
+<p>The AIRT framework can be found in page 28 of the paper, which consists of 3 main stages:</p>
+
+<ul>
+  <li><strong>Stage 1 - Fitting the IRT model with inverted mapping</strong> Given an input matrix $Y_{N \times n}$ containing accuracy measures of $n$ algorithms for $N$ datasets, the IRT model is fitted to estimate the parameters of the model (i.e., $\beta_j, \alpha_j, \gamma_j, \theta_i$). The authors proposed to use the continuous IRT model with the inverted mapping. The parameters of the model are estimated using the Expectation-Maximization (EM) algorithm.</li>
+  <li><strong>Stage 2 - Calculation of algorithm and dataset metrics</strong> For each algorithm $j$ compute the anomalous indicator, algorithm consistency score and difficulty limit. For each dataset $i$ compute the dataset difficulty $\delta_i = - \theta_i$.</li>
+  <li><strong>Stage 3 - Computing strengths and weaknesses and construct airt portfolio</strong></li>
+</ul>
+
+<h2 id="questions">Questions</h2>
+
+<ul>
+  <li>In IRT model, an agent (e.g., an algorithm) and an item (e.g., a dataset) are assumed to be independent. However, in the context of machine learning where an algorithm is trained on a training set and tested on a test set - which is the item in IRT model, the assumption of independence is not true.
+For example, a good algorithm but was trained on a biased training set will perform worse on a test set than a bad algorithm but was trained on an unbiased training set. Therefore, the performance of an algorithm on a test set is not only determined by the algorithm itself but also the training set it was trained on. So how to deal with this issue in IRT model?</li>
+  <li>Extend the above question, how to deal with the case when many algorithms were trained on the same training set?</li>
+</ul>
+
+<h2 id="future-work-irt-based-disentanglement-learning">Future work: IRT-based Disentanglement Learning</h2>
+
+<h3 id="introduction">Introduction</h3>
+
+<p>This project aims to disentangle ML-bias into algorithmic and data bias focussing on intersectional subgroups.</p>
+
+<p>So what are algorithmic bias and data bias in the context of machine learning?</p>
+
+<ul>
+  <li><strong>Data bias</strong> is the bias in the training data that is used to train the ML model. It occurs when the data used for training is not representative of the real-world population or when it contains inherent biases. For example, a dataset of images of people that is used to train a facial recognition system may contain more images of white people than people of color. This can lead to the facial recognition system being less accurate when identifying people of color.</li>
+  <li><strong>Algorithmic bias</strong> is the bias in the algorithm itself. It occurs when the algorithm is not designed to be fair or when it is not trained to be fair. For example, a facial recognition system that is trained with purpose to identify people in a specific demographic group (e.g., white people) will be less accurate when identifying people in other demographic groups (e.g., people of color).</li>
+</ul>
+
+<p>Recognizing data bias is a challenging task because the data bias is not always obvious and the dataset is usually large and complex.
+Equally complex is the task of recognizing algorithmic bias because the training process of a ML model is also complex where the bias can be introduced at any stage such as data collection, feature selection, or the choice of objective function.</p>
+
+<p>To adapt the IRT model to the context of machine learning, we need to consider the following:</p>
+
+<ul>
+  <li><strong>The algorithm</strong> is the pretrained model which is trained on a training set (which can be biased or unbiased but we don’t know)</li>
+  <li><strong>The dataset</strong> is to mention the test set which is used to evaluate the algorithm. The dataset can be sampled from the same distribution as the training set or from a different distribution.</li>
+  <li>The algorithms are assumed to be independent even are trained on the same training set. The algorithms also have the same task on the test set (e.g., the pretrained ResNet50, VGG19 models to predict an image into 1 of 10 classes).</li>
+  <li>The dataset are assumed to be disjoint. The datasets also are served for the same task (e.g., to test performance of classification models)</li>
+  <li><strong>The data bias</strong> problem in this context is the bias of the test item which is used to evaluated the algorithm (not the bias of the training set as in ML literature). For example, let’s consider education system where a test item is a set of questions and an algorithm is a student. We want to evaluate diverse knowledge of students on several subjects, i.e., math, physics, chemistry, literature, etc. The data bias problem in this context is that the test item is only able to evaluate on a specific subject (e.g., math) but not on all subjects. <strong>The algorithmic bias</strong> problem in this specific example is that the student is only good at math but not good at other subjects.</li>
+</ul>
+
+<p>Problem setting: Given $n$ algorithms and $N$ datasets, the goal is to identify which algorithm/dataset has bias problem. On the other words, how to distinguish a good algorithm performing poorly on a biased dataset from an equally performed bad algorithm?</p>
+
+<p><strong>Note:</strong></p>
+
+<ul>
+  <li>The term “disentangle learning” is commonly referred to the approach that learns disentangled representations of data in machine learning. However, in this project, the term “disentangle learning” is used to refer to the approach that disentangle ML-bias into algorithmic and data bias.</li>
+</ul>
+
+<h3 id="proposed-framework">Proposed framework</h3>
+
+<!-- Let $F_b, F_u$ be the set of biased and unbiased algorithms, and $D_b, D_u$ be the set of biased and unbiased datasets, respectively. $\|F_b\| + \|F_u\| = n$ and $\|D_b\| + \|D_u\| = N$. -->
+<p>We need to make some assumptions as follows:</p>
+
+<ul>
+  <li>an biased algorithm might perform poorly on an unbiased dataset.</li>
+  <li>an unbiased algorithm might perform poorly on a biased dataset.</li>
+  <li>an biased algorithm might not necessary perform well on an biased dataset because it might be trained on different biased training set.</li>
+  <li>in this project, a poor generalization algorithm which performs poorly on both biased and unbiased datasets might be different from a biased algorithm which might perform well on biased datasets but poorly on unbiased datasets.</li>
+</ul>
+
+<p>We consider two IRT models simultaneously, the standard IRT model and the IRT model with inverted mapping. The standard IRT model is used to estimate the characteristics of datasets (i.e., difficulty, discrimination) while the IRT model with inverted mapping is used to estimate the characteristics of algorithms (i.e., difficulty limit, anomalousness, consistency).</p>
+
+<p>For the IRT model with inverted mapping, we consider the performance-dataset difficulty curve $h^d_{a_j}(\delta_d)$ of each algorithm $a_j$, while for the standard IRT model, we consider the performance-algorithm difficulty curve $h^a_{d_i}(\delta_a)$ of each dataset $d_i$. With the two curves, we can identify a biased dataset as follows:</p>
+
+<ul>
+  <li>A dataset $d_i$ is considered to be biased if it is solved well by a biased algorithm $a_j \in F_b$ but poorly by an unbiased algorithm $a_j \in F_u$.</li>
+</ul>
+
+<p>\(h^d_{a_j} (\delta_d) \leq \epsilon_{low} \; \forall \; a_j \in F_u\)
+\(h^d_{a_j} (\delta_d) \geq \epsilon_{up} \; \forall \; a_j  \in F_b\)</p>
+
+<ul>
+  <li>An algorithm $a_j$ is considered to be biased if it performs well on a biased dataset $d_i \in D_b$ but poorly on an unbiased dataset $d_i \in D_u$.</li>
+</ul>
+
+<p>\(h^a_{d_i} (\delta_a) \leq \epsilon_{low} \; \forall \; d_i \in D_u\)
+\(h^a_{d_i} (\delta_a) \geq \epsilon_{up} \; \forall \; d_i \in D_b\)</p>
+
+<p>where $\epsilon_{low}$ and $\epsilon_{up}$ are the lower and upper thresholds, respectively.</p>
+
+<p>We can also a 3D map where the z-axis is the performance of an algorithm on a dataset, the x-axis is the difficulty of the dataset, and the y-axis is the difficulty limit of the algorithm.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/couple-IRT-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/couple-IRT-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/couple-IRT-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/couple-IRT.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    3D map
+</div>
+
+<!-- Central question is how to select an unbiased and sufficiently diverse set of datasets to evaluate an algorithm portfolio. -->
+
+<h2 id="references">References</h2>
+
+<p>Fernando Martínez-Plumed, Ricardo BC Prudêncio, Adolfo Martínez-Usó, and José HernándezOrallo. Item Response Theory in AI: Analysing machine learning classifiers at the instance level. Artificial Intelligence, 271:18–42, 2019.</p>
+
+<p>Yu Chen, Ricardo BC Prudêncio, Tom Diethe, Peter Flach, et al. β3-IRT: A New Item Response Model and its Applications. arXiv preprint, arXiv:1903.04016, 2019.</p>]]></content><author><name></name></author><category term="reading" /><category term="tml" /><summary type="html"><![CDATA[How to evaluate how good an algorithm is?]]></summary></entry><entry><title type="html">Fairness in Machine Learning</title><link href="https://tuananhbui89.github.io/blog/blog/2023/fairness-101/" rel="alternate" type="text/html" title="Fairness in Machine Learning" /><published>2023-09-01T00:00:00+10:00</published><updated>2023-09-01T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/blog/2023/fairness-101</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/blog/2023/fairness-101/"><![CDATA[<p>(Work in progress)</p>
+
+<h2 id="varieties-of-fairness">Varieties of Fairness</h2>
+
+<p>One of the hardest problems in fairness is that there is no consensus on the definition of fairness or what does it mean to be fair. Depending on the context or culture, the definition of fairness can be different <d-cite key="du2020fairness"></d-cite>.</p>
+
+<p>Researchers and designers at Google’s PAIR (People and AI Research) , <d-cite key="googlefairness"></d-cite> initiative created the What-If visualization tool as a pragmatic resource for developers of machine learning systems. The tool provides a set of fairness metrics that can be used to evaluate the fairness of a model. The metrics are grouped into five categories:</p>
+
+<ul>
+  <li>Group unaware: “group unaware” fairness is an approach that advocates for fairness by disregarding demographic characteristics like gender and making  decisions solely based on individual qualifications.</li>
+  <li>Group threshold: “group threshold” is a fairness mechanism that recognizes that not all groups are the same, and historical disparities or biases may warrant different decision thresholds for different groups to promote equitable outcomes. It’s a technique used to fine-tune the behavior of AI models to ensure that they do not disproportionately disadvantage certain demographic groups while still maintaining some level of predictive accuracy.</li>
+  <li>Demographic parity (or group fairness, statistical parity): is an approach to ensure that the composition of the selected or approved individuals or outcomes reflects the demographic composition of the overall population.</li>
+  <li>Equal opportunity: aims to promote fairness by ensuring that individuals from different demographic groups are treated equally when they have the same qualifications or attributes relevant to a decision, and their chances of success are not influenced by factors like race, gender, or age.</li>
+  <li>Equal accuracy: ensuring that the predictive accuracy of a model is similar across different demographic groups.</li>
+</ul>
+
+<p>It can be seen that, these proposed metrics are already complex and hard to understand. For example, in my opinion, the “group unware” and “equal opportunity” are quite similar to each other where both of them aim to ensure that the model does not discriminate based on “protected characteristics” like gender, age, race, etc. Overall, these metrics can be grouped into two categories: group fairness and individual fairness which are also the two main categories of fairness in machine learning.</p>
+
+<h2 id="learning-fair-representations">Learning Fair Representations</h2>
+
+<p>One of the milestone work in fairness is the paper “Learning Fair Representations” by Zemel et al. (2013) <d-cite key="zemel2013learning"></d-cite>. The authors proposed a method to learn fair representations by learning a latent representation that encodes the data well but obfuscates information about protected attributes. The method is based on the intuition that if the learned representation does not contain any information about the protected attribute, then any classifier based on these representation cannot use the protected attribute to make predictions.</p>
+
+<p>The authors formulated this using the notion of statistical parity, which requires that the probability that a random element from $X^+$ maps to a particular prototype is equal to the probability that a random element from
+$X^-$ maps to the same prototype</p>
+
+\[P(Z = k \mid x^+ \in X^+) = P(Z = k \mid x^- \in X^-) \; \forall k\]
+
+<p>Where $X^+$ and $X^-$ are the sets of protected and unprotected examples, respectively, and $Z$ is the latent representation with $K$ prototypes.</p>
+
+<!-- The authors proposed to use an adversarial network to learn the latent representation. The adversarial network is trained to predict the protected attribute from the latent representation while the main network is trained to predict the label from the latent representation. The authors also proposed to use a regularization term to ensure that the latent representation is close to the original representation. The authors evaluated their method on the Adult dataset and showed that their method can achieve a better fairness score than the baseline method. -->
+
+<h2 id="fairness-in-deep-learning">Fairness in Deep Learning?</h2>
+
+<h2 id="fairness-in-generative-models">Fairness in Generative Models</h2>
+
+<p>Fairness Machine Learning is mostly considered in the context of decision making models such as classification models. However, fairness is also an important issue in generative models, which is not well studied yet. Recently, the central problem of fairness in generative models is how to ensure diversity in the generated outputs. For example, a response to a question about famous musicians should not only include names or images of people of the same gender identity or skin tone <d-cite key="googlefairness"></d-cite>, <d-cite key="playingfairness"></d-cite>.</p>
+
+<p>Some of the following attributes will be highly considered when talking about fairness in generative models:</p>
+
+<ul>
+  <li>Gender identity</li>
+  <li>Cultural background and demographic</li>
+  <li>Physical appearance attributes</li>
+  <li>Political related attributes</li>
+</ul>
+
+<p>When evaluating the fairness of generative models, the authors of <d-cite key="googlefairness"></d-cite> suggest to consider the following metrics:</p>
+
+<ul>
+  <li>Diversity of the output: Given a set of prompts, the diversity along dimensions of identity attributes represented in the generated outputs. For example, given a set of prompts asking about “famous musicians”, the diversity of gender/culture/nationality  in the outputs will be measured. However, when asking about “famous men musicians”, the diversity of culture/nationality will be considered because the gender has been specified in the prompts.</li>
+  <li>Ability on maintaining fairness: Given a set of prompts that contain counterfactuals of a sensitive attribute, ability to provide the same quality of service. For example, an user revealed his personal demographic information to the system (e.g., an Asian guy), then when the user asks about “famous musicians”, the system should not only provide names of Asian musicians. A fair system should provide answers as the same quality as the case when the user does not reveal his personal demographic information or when the user is a white guy.</li>
+</ul>
+
+<p>In summary, we can think about two scenarios when evaluating the fairness of generative models: same input - diverse output and diverse input - same output.</p>]]></content><author><name>Tuan-Anh Bui</name></author><category term="tml" /><summary type="html"><![CDATA[Just some notes]]></summary></entry><entry><title type="html">On Reading - Anti-Personalization in Generative Models</title><link href="https://tuananhbui89.github.io/blog/blog/2023/anti-personalization/" rel="alternate" type="text/html" title="On Reading - Anti-Personalization in Generative Models" /><published>2023-08-23T00:00:00+10:00</published><updated>2023-08-23T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/blog/2023/anti-personalization</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/blog/2023/anti-personalization/"><![CDATA[<h2 id="anti-dreambooth">Anti-Dreambooth</h2>
+
+<p>Link to other post: <a href="https://tuananhbui89.github.io/blog/2023/anti-dreambooth/">https://tuananhbui89.github.io/blog/2023/anti-dreambooth/</a></p>
+
+<h2 id="generative-watermarking-against-unauthorized-subject-driven-image-synthesis">Generative Watermarking Against Unauthorized Subject-Driven Image Synthesis</h2>
+
+<h3 id="about-the-paper">About the paper</h3>
+
+<ul>
+  <li>Paper link: <a href="https://arxiv.org/abs/2306.07754">https://arxiv.org/abs/2306.07754</a></li>
+</ul>
+
+<h3 id="summary">Summary</h3>
+
+<ul>
+  <li>Problem setting: protection without sacrificing the utility of protected images for general (good) synthesis tasks. Unlike Anti-Dreambooth, where the goal is to completely prevent personalization, here the goal is to prevent unauthorized personalization with specific tasks (subject-driven synthesis).</li>
+  <li>Real-world scenarios of misusing personalization generative models:
+    <ul>
+      <li><strong>Copyright of Hollie Mengert</strong>: a Reddit user published a DreamBooth model that is fine-tuned based on the artwork from an American artist Hollie Mengert. <a href="https://www.reddit.com/r/StableDiffusion/comments/yaquby/2d_illustration_styles_are_scarce_on_stable/">link</a></li>
+      <li><strong>Elon Musk is dating GM CEO Mary Barra</strong>: <a href="https://twitter.com/blovereviews/status/1639988583863042050">link</a></li>
+    </ul>
+  </li>
+  <li>Threat Model:
+    <ul>
+      <li>What is a threat model in TML? Threat model is a description of the capabilities and goals of an adversary. It also can describe the environment in which the machine learning model and its adversary operate.</li>
+      <li>In this project, there are two parties involved: the subject owners and the subject synthesizers (benign or adversaries). The system includes a watermarking generator and a detector. There is also a public generative model (i.e., Stable Diffusion) that is used by the subject synthesizers.</li>
+      <li>The subject owners are the ones who want to protect their images from unauthorized personalization. In this project, the subject owners use the generative watermarking to generate watermarked images. Then they can track the potential unauthorized use by detecting if the watermark appears in synthesized images (then the watermark to be added and the watermark to be detected are different?). The subject owners have full access to the generator and the detector and can also further improve them by fine-tuning.</li>
+      <li>The subject synthesizers (benign or adversaries) are the ones who want to use the generative models to synthesize the target subject. The benign synthesizers are the ones who obtains authorization under the consent of the subject owners. The adversaries are the ones who want to synthesize the target subject without authorization. In this project, both benign and adversarial synthesizers have access to a public generative model (i.e., Stable Diffusion) and the protected/watermarked images.</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/blog/assets/img/AML/2306_07754_01-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/blog/assets/img/AML/2306_07754_01-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/blog/assets/img/AML/2306_07754_01-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/blog/assets/img/AML/2306_07754_01.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    The Framework
+</div>
+
+<p>Approach:</p>
+
+<p>Phase 1: Pre-training the watermarking generator and detector. Similar as GAN, there is an adversarial game between generator $G$ and detector $D$. The watermarked images denote as $x_w=x+w$. The goal of the generator is to generate watermarked images that are indistinguishable from the real images. Its objective loss:
+\(L_G = \text{max}(LPIPS(x,x_w) - p, 0)\)
+where <em>LPIPS</em> is the perceptual similarity metric [1], $p$ is a hyperparameter that controls the invisibility level, a smaller $p$ means a more invisible watermark.</p>
+
+<p>The detector $D$ is trained to distinguish the watermarked images from the real images. Its objective loss:
+\(L_D = -(1-y)\log(1-\hat{y}) - y \log(\hat{y})\)
+where $y$ is the ground truth label, $\hat{y}$ is the predicted label.</p>
+
+<p>Phase 2: Fine-tuning the detector with synthesized images. Using two set of images, $X$ and $X_w$, where $X_w$ is the watermarked images of $X$ to train corresponding personalized models $M$ and $M_w$ (i.e., with Textual Inversion or Dreambooth). Then using these models to generate synthesized images $S$ and $S_w$ with list of prompts. And use these images to fine-tune the detector $D$, where $S$ has label as real and $S_w$ has label as watermarked.</p>
+
+<p>[1] Richard Zhang, Phillip Isola, Alexei A. Efros, Eli Shechtman, and Oliver Wang. The Unreasonable Effectiveness of Deep Features as a Perceptual Metric. In IEEE Conference on Computer Vision and Pattern Recognition (CVPR), pages 586–595. IEEE, 2018.</p>]]></content><author><name></name></author><category term="reading" /><category term="diffusion" /><category term="genai" /><category term="tml" /><summary type="html"><![CDATA[But just two papers so far :(]]></summary></entry><entry><title type="html">On Reading - Erasing Concepts from Diffusion Models</title><link href="https://tuananhbui89.github.io/blog/blog/2023/erasing-concepts/" rel="alternate" type="text/html" title="On Reading - Erasing Concepts from Diffusion Models" /><published>2023-08-10T00:00:00+10:00</published><updated>2023-08-10T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/blog/2023/erasing-concepts</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/blog/2023/erasing-concepts/"><![CDATA[<h2 id="about-the-paper">About the paper</h2>
+
+<ul>
+  <li>Published at ICCV 2023</li>
+  <li>Affiliations: Northeastern University and MIT.</li>
+  <li>Motivation: Remove specific concepts from diffusion models weights. The concept can be a specific style (i.e., nudity, Van Gogh style, etc.) or a specific object (i.e., car, dog, etc.) while preserving capability on other concepts.</li>
+</ul>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="https://raw.githubusercontent.com/tuananhbui89/website_images/master/posts/erasing_concepts/examples-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="https://raw.githubusercontent.com/tuananhbui89/website_images/master/posts/erasing_concepts/examples-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="https://raw.githubusercontent.com/tuananhbui89/website_images/master/posts/erasing_concepts/examples-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="https://raw.githubusercontent.com/tuananhbui89/website_images/master/posts/erasing_concepts/examples.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Examples of erasing nudity, Van Gogh style or an objects from a Stable Diffusion model (Image source: <a href="https://erasing.baulab.info/">Gandikota et al. (2023)</a>).
+</div>
+
+<ul>
+  <li>Project page: <a href="https://erasing.baulab.info/">https://erasing.baulab.info/</a></li>
+</ul>
+
+<h2 id="approach">Approach</h2>
+
+<p>The central optimization problem is to reduce  the probability of generating an image $x$ according to the likelihood that is described by the concept, scaled by a power factor $\eta$.</p>
+
+\[P_\theta(x) \propto \frac{P_{\theta^*}(x)}{P_{\theta^*}(c \mid x)^\eta}\]
+
+<p>where \(P_{\theta^*}(x)\) is the distribution generated by the original model $\theta^*$ and \(P_{\theta^*}(c \mid x)\) is the probability of the concept $c$ given the image $x$. The power factor $\eta$ controls the strength of the concept erasure. A larger $\eta$ means a stronger erasure. $\theta$ is the parameters of the model after unlearning the concept $c$.</p>
+
+<p>It can be interpreted as: if the concept $c$ is present in the image $x$ in which \(P_{\theta^*} (c \mid x)\) is high, then the likelihood of the image $x$ under the new model \(P_{\theta} (x)\) will be reduced.
+While if the concept $c$ is not present in the image $x$ in which \(P_{\theta^*} (c \mid x)\) is low, then the likelihood of the image $x$ under the new model \(P_{\theta} (x)\) will be increased.</p>
+
+<p>Because of the conditional likelihood:</p>
+
+\[P_{\theta^*} (c \mid x) = \frac{P_{\theta^*} (x \mid c) P_{\theta^*} (c)}{P_{\theta^*} (x)}\]
+
+<p>Therefore, the above equation can be rewritten when taking the derivative w.r.t. $x$ as follows:</p>
+
+\[\nabla_{x} \log P_{\theta} (x) \propto \nabla_{x} \log P_{\theta^*} (x) - \eta \nabla_{x} \log P_{\theta^*} (c \mid x)\]
+
+\[\nabla_{x} \log P_{\theta} (x) \propto \nabla_{x} \log P_{\theta^*} (x) - \eta (\nabla_{x} \log P_{\theta^*} (x \mid c) + \nabla_{x} \log P_{\theta^*} (c) - \nabla_{x} \log P_{\theta^*} (x))\]
+
+\[\nabla_{x} \log P_{\theta} (x) \propto \nabla_{x} \log P_{\theta^*} (x) - \eta (\nabla_{x} \log P_{\theta^*} (x \mid c) - \nabla_{x} \log P_{\theta^*} (x))\]
+
+<p>Because in the diffusion model, each step has been approximated to a Gaussian distribution, therefore, the gradient of the log-likelihood is computed as follows:</p>
+
+\[\nabla_{x} \log P_{\theta^*} (x) = \frac{1}{\sigma^2} (x - \mu)\]
+
+<p>where $\mu$ is the mean of the diffusion model, $\sigma$ is the standard deviation of the diffusion model, and $c$ is the concept.
+Based on the repameterization trick, the gradient of the log-likelihood is correlated with the noise $\epsilon$ at each step as follows:</p>
+
+\[\epsilon_{\theta}(x_t,t) \propto \epsilon_{\theta^*} (x_t,t) - \eta (\epsilon_{\theta^*}(x_t,c,t) - \epsilon_{\theta^*} (x_t,t))\]
+
+<p>where $\epsilon_{\theta}(x_t,t)$ is the noise at step $t$ of the diffusion model after unlearning the concept $c$.
+Finally, to fine-tune the diffusion model from pretrained model $\theta^*$ to new cleaned model $\theta$, the authors proposed to minimize the following loss function:</p>
+
+\[\mathcal{L}(\theta) = \mathbb{E}_{x_0 \sim \mathcal{D}} \left[ \sum_{t=0}^{T-1} \left\| \epsilon_{\theta}(x_t,t) - \epsilon_{\theta^*} (x_t,t) + \eta (\epsilon_{\theta^*}(x_t,c,t) - \epsilon_{\theta^*} (x_t,t)) \right\|^2 \right]\]
+
+<p>where $x_0$ is the input image sampled from data distribution $\mathcal{D}$, $T$ is the number of steps of the diffusion model.</p>
+
+<p>Instead of recursively sampling the noise $\epsilon_{\theta}(x_t,t)$ at every step, we can sample the time step $t \sim \mathcal{U}(0, T-1)$ and then sample the noise $\epsilon_{\theta}(x_t,t)$ at that time step.
+Therefore, the loss function can be rewritten as follows:</p>
+
+\[\mathcal{L}(\theta) = \mathbb{E}_{x_0 \sim \mathcal{D}} \left[ \left\| \epsilon_{\theta}(x_t,t) - \epsilon_{\theta^*} (x_t,t) + \eta (\epsilon_{\theta^*}(x_t,c,t) - \epsilon_{\theta^*} (x_t,t)) \right\|^2 \right]\]
+
+<p>where $t \sim \mathcal{U}(0, T-1)$.</p>
+
+<p>However, in the paper, instead of using the above loss function, the author proposed to use the following loss function:</p>
+
+\[\mathcal{L}(\theta) = \mathbb{E}_{x_0 \sim \mathcal{D}} \left[  \left\| \epsilon_{\theta}(x_t,c,t) - \epsilon_{\theta^*} (x_t,t) + \eta (\epsilon_{\theta^*}(x_t,c,t) - \epsilon_{\theta^*} (x_t,t)) \right\|^2 \right]\]
+
+<p>where $t \sim \mathcal{U}(0, T-1)$.</p>
+
+<p>The difference between the two loss functions is that the first loss function is computed based on the unconditional noise $\epsilon_{\theta}(x_t,t)$ at the time step $t$ while the second loss function is computed based on the noise $\epsilon_{\theta}(x_t,c,t)$ at the time step $t$ conditioned on the concept $c$.</p>
+
+<p>Interpretation of the loss function: By minimizing the above loss function, we try to force the conditional noise $\epsilon_{\theta}(x_t,c,t)$ to be close to the unconditional noise $\epsilon_{\theta^*} (x_t,t)$ of the original model.</p>
+
+<p>Note: In the above objective function, $x_t$ is the image from the training set $\mathcal{D}$ at time step $t$. However, as mentioned in the paper “We exploit the model’s knowledge of the concept to synthesize training samples, thereby eliminating the need for data collection”. Therefore, in the implementation, $x_t$ is the image generated by the fine-tuned model at time step $t$.</p>
+
+<h2 id="how-to-implement">How to implement</h2>
+
+<p>Link to the original implementation: <a href="https://github.com/rohitgandikota/erasing">https://github.com/rohitgandikota/erasing</a></p>
+
+<p>The minimal code of this project is as follows:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="k">def</span> <span class="nf">train_esd</span><span class="p">():</span>
+
+  <span class="c1"># choose parameters to train based on train_method, 
+</span>  <span class="c1"># e.g., 'noxattn', 'selfattn', 'xattn', 'full'
+</span>  <span class="n">parameters</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">model</span><span class="p">.</span><span class="n">model</span><span class="p">.</span><span class="n">diffusion_model</span><span class="p">.</span><span class="nf">named_parameters</span><span class="p">():</span>
+    <span class="c1"># train all layers except x-attns and time_embed layers
+</span>    <span class="k">if</span> <span class="n">train_method</span> <span class="o">==</span> <span class="sh">'</span><span class="s">noxattn</span><span class="sh">'</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">name</span><span class="p">.</span><span class="nf">startswith</span><span class="p">(</span><span class="sh">'</span><span class="s">out.</span><span class="sh">'</span><span class="p">)</span> <span class="ow">or</span> <span class="sh">'</span><span class="s">attn2</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">name</span> <span class="ow">or</span> <span class="sh">'</span><span class="s">time_embed</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+        <span class="k">pass</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="nf">print</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">parameters</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+    <span class="c1"># and so on for other train_methods
+</span>  
+  <span class="c1"># set model to train mode
+</span>  <span class="n">model</span><span class="p">.</span><span class="nf">train</span><span class="p">()</span>
+
+  <span class="c1"># create a lambda function for cleaner use of sampling code (only denoising till time step t)
+</span>  <span class="n">quick_sample_till_t</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">conditioning</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">start_code</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nf">sample_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">sampler</span><span class="p">,</span> <span class="n">conditioning</span><span class="p">,</span> <span class="n">image_size</span><span class="p">,</span> <span class="n">image_size</span><span class="p">,</span> <span class="n">ddim_steps</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">ddim_eta</span><span class="p">,</span> <span class="n">start_code</span><span class="o">=</span><span class="n">start_code</span><span class="p">,</span> <span class="n">till_T</span><span class="o">=</span><span class="n">t</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+  <span class="c1"># set optimizer to learn only the parameters that we want
+</span>  <span class="n">opt</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">optim</span><span class="p">.</span><span class="nc">Adam</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="n">lr</span><span class="p">)</span>
+
+  <span class="c1"># train loop
+</span>  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">():</span>
+    <span class="c1"># sample concept from the list of concepts
+</span>    <span class="n">word</span> <span class="o">=</span> <span class="n">random</span><span class="p">.</span><span class="nf">sample</span><span class="p">(</span><span class="n">words</span><span class="p">,</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># get text embeddings for unconditional and conditional prompts
+</span>    <span class="c1"># What are the differences between positive and negative prompts?
+</span>    <span class="n">emb_0</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">get_learned_conditioning</span><span class="p">([</span><span class="sh">''</span><span class="p">])</span> <span class="c1"># unconditional
+</span>    <span class="n">emb_p</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">get_learned_conditioning</span><span class="p">([</span><span class="n">word</span><span class="p">])</span> <span class="c1"># positive
+</span>    <span class="n">emb_n</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">get_learned_conditioning</span><span class="p">([</span><span class="sa">f</span><span class="sh">'</span><span class="si">{</span><span class="n">word</span><span class="si">}</span><span class="sh">'</span><span class="p">])</span> <span class="c1"># negative
+</span>
+    <span class="c1"># clear gradients 
+</span>    <span class="n">opt</span><span class="p">.</span><span class="nf">zero_grad</span><span class="p">()</span>
+
+    <span class="c1"># get the time embedding with DDIM approach
+</span>    <span class="n">t_enc_ddpm</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randint</span><span class="p">()</span>
+
+    <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
+      <span class="c1"># generate an image with the concept from ESD model
+</span>      <span class="n">z</span> <span class="o">=</span> <span class="nf">quick_sample_till_t</span><span class="p">(</span><span class="n">emb_p</span><span class="p">,</span> <span class="n">start_guidance</span><span class="p">,</span> <span class="n">start_code</span><span class="p">,</span> <span class="nf">int</span><span class="p">(</span><span class="n">t_enc</span><span class="p">))</span>
+      <span class="c1"># get conditional and unconditional scores from frozen model at time step t and image z generated above
+</span>      <span class="n">e_0</span> <span class="o">=</span> <span class="n">model_orig</span><span class="p">.</span><span class="nf">apply_model</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">t_enc_ddpm</span><span class="p">,</span> <span class="n">emb_0</span><span class="p">)</span>
+      <span class="n">e_p</span> <span class="o">=</span> <span class="n">model_orig</span><span class="p">.</span><span class="nf">apply_model</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">t_enc_ddpm</span><span class="p">,</span> <span class="n">emb_p</span><span class="p">)</span>
+
+    <span class="c1"># get negative scores from the ESD model
+</span>    <span class="n">e_n</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">apply_model</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">t_enc_ddpm</span><span class="p">,</span> <span class="n">emb_d</span><span class="p">)</span>
+
+    <span class="c1"># Stop gradient of the unconditional and positive scores
+</span>    <span class="n">e_0</span> <span class="o">=</span> <span class="n">e_0</span><span class="p">.</span><span class="nf">detach</span><span class="p">()</span>
+    <span class="n">e_p</span> <span class="o">=</span> <span class="n">e_p</span><span class="p">.</span><span class="nf">detach</span><span class="p">()</span>
+
+    <span class="c1"># compute the loss function 
+</span>    <span class="n">loss</span> <span class="o">=</span> <span class="p">(</span><span class="n">e_n</span> <span class="o">-</span> <span class="n">e_0</span> <span class="o">+</span> <span class="n">negative_guidance</span> <span class="o">*</span> <span class="p">(</span><span class="n">e_p</span> <span class="o">-</span> <span class="n">e_0</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="c1"># update the model to erase the concept
+</span>    <span class="n">loss</span><span class="p">.</span><span class="nf">backward</span><span class="p">()</span>
+    <span class="n">opt</span><span class="p">.</span><span class="nf">step</span><span class="p">()</span>
+
+</code></pre></div></div>
+
+<h2 id="something-to-note">Something to note</h2>
+
+<ul>
+  <li>In the above objective function, $x_t$ is the image from the training set $\mathcal{D}$ at time step $t$. However, as mentioned in the paper “We exploit the model’s knowledge of the concept to synthesize training samples, thereby eliminating the need for data collection”. Therefore, in the implementation, $x_t$ is the image generated by the fine-tuned model at time step $t$.</li>
+  <li>When generating the image $x_t$ from the fine-tuned model, the authors used <code class="language-plaintext highlighter-rouge">emb_p</code> (embedding with conditional image) instead of <code class="language-plaintext highlighter-rouge">emb_0</code> (embedding with unconditional image). So $x_t \sim P_{\theta}(x_t \mid c)$ instead of $x_t \sim P_{\theta}(x_t)$.</li>
+</ul>
+
+<p>So the loss function in the implementation is as follows:</p>
+
+\[\mathcal{L}(\theta) = \mathbb{E}_{x_t \sim P_{\theta}(. \mid c)} \left[  \left\| \epsilon_{\theta}(x_t,c,t) - \epsilon_{\theta^*} (x_t,t) + \eta (\epsilon_{\theta^*}(x_t,c,t) - \epsilon_{\theta^*} (x_t,t)) \right\|^2 \right]\]
+
+<p>where $t \sim \mathcal{U}(0, T-1)$.</p>
+
+<p>However, this approach might lead to a problem that because sample $z$ is generated by the fine-tuned model $\theta$ which is later used to estimate the score $e_n$ of the fine-tuned model $\theta$, therefore, when do backpropagation, the gradient of the loss function will be backpropagated twice through the fine-tuned model $\theta$ which might lead to unstability.</p>]]></content><author><name></name></author><category term="reading" /><category term="tml" /><category term="diffusion" /><category term="genai" /><summary type="html"><![CDATA[How to erase harmful concepts from diffusion models]]></summary></entry><entry><title type="html">On Reading - Textual Inversion</title><link href="https://tuananhbui89.github.io/blog/blog/2023/textual-inversion/" rel="alternate" type="text/html" title="On Reading - Textual Inversion" /><published>2023-08-07T00:00:00+10:00</published><updated>2023-08-07T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/blog/2023/textual-inversion</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/blog/2023/textual-inversion/"><![CDATA[<h2 id="about-the-paper">About the paper</h2>
+
+<ul>
+  <li>Published at ICLR 2023</li>
+  <li>Affiliations: Tel Aviv University, Nvidia.</li>
+  <li>Main idea: Every visual concept can be represented by a paragraph of text. The authors propose a method to learn a specific token that can represent a visual concept (It can learned so that with this specific token, the text-to-image can reconstruct the input images). The token is then used to generate a new image that contains the visual concept.</li>
+</ul>
+
+<h2 id="how-to-implement">How to implement</h2>
+
+<p>In this blog post, I would like to break down some main steps in the implementation provided by Huggingface in the example code <a href="https://github.com/huggingface/diffusers/tree/main/examples/textual_inversion">here</a>. There are also two notebooks for training (learning conceptual token) and inference (using conceptual token to generate new images) <a href="https://colab.research.google.com/github/huggingface/notebooks/blob/main/diffusers/sd_textual_inversion_training.ipynb">here</a> and <a href="https://colab.research.google.com/github/huggingface/notebooks/blob/main/diffusers/stable_conceptualizer_inference.ipynb">here</a>.</p>
+
+<p>There are several main points as follows:</p>
+<ul>
+  <li>How to set up the specific token in the input prompt.</li>
+  <li>How to prepare the dataset</li>
+  <li>How to train and learn the specific token</li>
+</ul>
+
+<h3 id="how-to-set-up-the-specific-token-and-the-input-prompt">How to set up the specific token and the input prompt</h3>
+
+<p>In this project, there is an assumption that every visual concept can be represented by a paragraph of text. For example, the visual concept of your dog can be described as: “The Shiba dog boasts a striking and distinctive appearance that captivates all who gaze upon it. With a compact yet sturdy build, its confident stance exudes an air of self-assured elegance. A plush double coat of fur, often seen in shades of red, sesame, black and tan, or cream, adds to its allure. The fur frames a fox-like face, adorned with piercing almond-shaped eyes that gleam with intelligence and curiosity. Its erect, triangular ears stand at attention, poised to catch every sound that graces its surroundings. A tightly curled tail rests gracefully over its back, accentuating the Shiba’s poise and dignity.” (I use ChatGPT to write this paragraph about a Shiba dog)</p>
+
+<p>However, if we use the entire paragraph to represent the visual concept, it is not efficient. Fortunately, we can just represent the whole paragraph by a single token (in the paper they used the token <code class="language-plaintext highlighter-rouge">S*</code>). 
+So the first step is to set up a placeholder for the specific token in the input prompt. In the implementation, it can be set by the argument <code class="language-plaintext highlighter-rouge">placeholder_token</code> (default value is <code class="language-plaintext highlighter-rouge">&lt;cat-toy&gt;</code>).</p>
+
+<p>There is also an argument <code class="language-plaintext highlighter-rouge">learnable_property</code> (option <code class="language-plaintext highlighter-rouge">object</code> or <code class="language-plaintext highlighter-rouge">style</code>) which is used to choose type of neural prompt from two sets of templates <code class="language-plaintext highlighter-rouge">imagenet_templates_small</code> (if set to <code class="language-plaintext highlighter-rouge">object</code>) or <code class="language-plaintext highlighter-rouge">imagenet_style_templates_small</code> (if set to <code class="language-plaintext highlighter-rouge">style</code>). 
+Some examples of the templates are as follows:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">imagenet_templates_small</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="sh">"</span><span class="s">a photo of a {}</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">a rendering of a {}</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">a cropped photo of the {}</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">the photo of a {}</span><span class="sh">"</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="n">imagenet_style_templates_small</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="sh">"</span><span class="s">a painting in the style of {}</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">a rendering in the style of {}</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">a cropped painting in the style of {}</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">the painting in the style of {}</span><span class="sh">"</span><span class="p">,</span>
+<span class="p">]</span>
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">placeholder_token</code> will replace the <code class="language-plaintext highlighter-rouge">{}</code> in the templates. For example, if we set <code class="language-plaintext highlighter-rouge">placeholder_token</code> to <code class="language-plaintext highlighter-rouge">cat-toy</code> and <code class="language-plaintext highlighter-rouge">learnable_property</code> to <code class="language-plaintext highlighter-rouge">object</code>, the input prompt will be <code class="language-plaintext highlighter-rouge">a photo of a cat-toy</code>.
+The input prompt then will be tokenized by the tokenizer.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">self</span><span class="p">.</span><span class="n">templates</span> <span class="o">=</span> <span class="n">imagenet_style_templates_small</span> <span class="k">if</span> <span class="n">learnable_property</span> <span class="o">==</span> <span class="sh">"</span><span class="s">style</span><span class="sh">"</span> <span class="k">else</span> <span class="n">imagenet_templates_small</span>
+
+<span class="n">placeholder_string</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">placeholder_token</span>
+
+<span class="n">text</span> <span class="o">=</span> <span class="n">random</span><span class="p">.</span><span class="nf">choice</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">templates</span><span class="p">).</span><span class="nf">format</span><span class="p">(</span><span class="n">placeholder_string</span><span class="p">)</span>
+
+<span class="n">example</span><span class="p">[</span><span class="sh">"</span><span class="s">input_ids</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">tokenizer</span><span class="p">(</span>
+    <span class="n">text</span><span class="p">,</span>
+    <span class="n">padding</span><span class="o">=</span><span class="sh">"</span><span class="s">max_length</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">truncation</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">max_length</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">tokenizer</span><span class="p">.</span><span class="n">model_max_length</span><span class="p">,</span>
+    <span class="n">return_tensors</span><span class="o">=</span><span class="sh">"</span><span class="s">pt</span><span class="sh">"</span><span class="p">,</span>
+<span class="p">).</span><span class="n">input_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</code></pre></div></div>
+
+<h3 id="tokenizer-thing">Tokenizer thing</h3>
+
+<p>There is also an argument <code class="language-plaintext highlighter-rouge">initializer_token</code> (default value is <code class="language-plaintext highlighter-rouge">toy</code>) but not used anywhere else in the code.</p>
+
+<p>The <code class="language-plaintext highlighter-rouge">placeholder_token</code> (i.e., <code class="language-plaintext highlighter-rouge">&lt;cat-toy&gt;</code>) is converted to indexes by the tokenizer <a href="https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizer.convert_tokens_to_ids"><code class="language-plaintext highlighter-rouge">convert_tokens_to_ids</code></a> method. Basically, this method converts the a sequence of tokens (i.e., <code class="language-plaintext highlighter-rouge">&lt;cat-toy&gt;</code>) in a sequence of ids, using the vocabulary.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Convert the initializer_token, placeholder_token to ids
+</span><span class="n">token_ids</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">initializer_token</span><span class="p">,</span> <span class="n">add_special_tokens</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="c1"># Check if initializer_token is a single token or a sequence of tokens
+</span><span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">token_ids</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="nc">ValueError</span><span class="p">(</span><span class="sh">"</span><span class="s">The initializer token must be a single token.</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="n">initializer_token_id</span> <span class="o">=</span> <span class="n">token_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">placeholder_token_ids</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">.</span><span class="nf">convert_tokens_to_ids</span><span class="p">(</span><span class="n">placeholder_tokens</span><span class="p">)</span>
+
+<span class="c1"># Resize the token embeddings as we are adding new special tokens to the tokenizer
+</span><span class="n">text_encoder</span><span class="p">.</span><span class="nf">resize_token_embeddings</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">))</span>
+
+<span class="c1"># Initialise the newly added placeholder token with the embeddings of the initializer token
+</span><span class="n">token_embeds</span> <span class="o">=</span> <span class="n">text_encoder</span><span class="p">.</span><span class="nf">get_input_embeddings</span><span class="p">().</span><span class="n">weight</span><span class="p">.</span><span class="n">data</span>
+<span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">token_id</span> <span class="ow">in</span> <span class="n">placeholder_token_ids</span><span class="p">:</span>
+        <span class="n">token_embeds</span><span class="p">[</span><span class="n">token_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">token_embeds</span><span class="p">[</span><span class="n">initializer_token_id</span><span class="p">].</span><span class="nf">clone</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">placeholder_token_ids</code> is then used to specify the position in the embedding matrix to be updated (corresponding to our specific token). In the end, the only thing we need to learn is the embedding matrix (actually only several specific rows in the embedding matrix, but the entire embedding matrix is small enough to store/save unlike the unet’ weights where it is much compacted using <a href="https://huggingface.co/blog/lora">LORA</a>). Later, we will learn how to use the learned embedding matrix to generate new images or upload to the hub.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Let's make sure we don't update any embedding weights besides the newly added token
+</span><span class="n">index_no_updates</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">ones</span><span class="p">((</span><span class="nf">len</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">),),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="p">.</span><span class="nb">bool</span><span class="p">)</span>
+<span class="n">index_no_updates</span><span class="p">[</span><span class="nf">min</span><span class="p">(</span><span class="n">placeholder_token_ids</span><span class="p">)</span> <span class="p">:</span> <span class="nf">max</span><span class="p">(</span><span class="n">placeholder_token_ids</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+
+<span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
+    <span class="n">accelerator</span><span class="p">.</span><span class="nf">unwrap_model</span><span class="p">(</span><span class="n">text_encoder</span><span class="p">).</span><span class="nf">get_input_embeddings</span><span class="p">().</span><span class="n">weight</span><span class="p">[</span>
+        <span class="n">index_no_updates</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="n">orig_embeds_params</span><span class="p">[</span><span class="n">index_no_updates</span><span class="p">]</span>
+</code></pre></div></div>
+
+<h3 id="difference-in-prompting-process-between-textual-inversion-and-dreambooth-projects">Difference in prompting process between “Textual Inversion” and “Dreambooth” projects</h3>
+
+<p>In Dreambooth, there is an argument <code class="language-plaintext highlighter-rouge">instance_prompt</code> which is used as a neural prompt to associate with the given images. For example, the default value is <code class="language-plaintext highlighter-rouge">a photo of sks dog</code>, where <code class="language-plaintext highlighter-rouge">sks</code> is the unique identifier to specify the learned concept. The <code class="language-plaintext highlighter-rouge">instance_prompt</code> is then tokenized by the tokenizer and the token ids are used to specify the position in the embedding matrix to be updated (corresponding to the specific token).</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="c1"># In the DreamBoothDataset class
+</span>    <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">encoder_hidden_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">example</span><span class="p">[</span><span class="sh">"</span><span class="s">instance_prompt_ids</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">encoder_hidden_states</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">text_inputs</span> <span class="o">=</span> <span class="nf">tokenize_prompt</span><span class="p">(</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">instance_prompt</span><span class="p">,</span> <span class="n">tokenizer_max_length</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">tokenizer_max_length</span>
+        <span class="p">)</span>
+        <span class="n">example</span><span class="p">[</span><span class="sh">"</span><span class="s">instance_prompt_ids</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">text_inputs</span><span class="p">.</span><span class="n">input_ids</span>
+        <span class="n">example</span><span class="p">[</span><span class="sh">"</span><span class="s">instance_attention_mask</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">text_inputs</span><span class="p">.</span><span class="n">attention_mask</span>
+</code></pre></div></div>
+
+<p>So the difference between the two projects is that:</p>
+<ul>
+  <li>In Dreambooth, only one neural prompt is used, while in Textual Inversion, there is a list of neural prompts</li>
+  <li>In Textual Inversion, it is important to specify the <code class="language-plaintext highlighter-rouge">placeholder_token</code> to reuse the same token in other prompts, while in Dreambooth, the identifier (i.e., <code class="language-plaintext highlighter-rouge">sks</code>) is used to specify the position in the embedding matrix to be updated (corresponding to the specific token). In inferencce, a prompt with the same identifier will be used to generate images, for example, <code class="language-plaintext highlighter-rouge">a photo of sks dog in the beach</code>. So to me, the whole prompt in Dreambooth is like a placeholder token in Textual Inversion. However, in this case, how the output looks like if we use a prompt that not contains the whole <code class="language-plaintext highlighter-rouge">instance_prompt</code>? For example, <code class="language-plaintext highlighter-rouge">a sks dog walking on the beach</code>?</li>
+</ul>
+
+<h3 id="how-to-process-the-dataset">How to process the dataset</h3>
+
+<p>To be continued… :D</p>
+
+<h3 id="how-to-train-and-learn-the-specific-token">How to train and learn the specific token</h3>
+
+<p>To be continued… :D</p>
+
+<h3 id="how-to-package-the-learned-token-and-use-it-for-inference-or-upload-to-the-hub">How to package the learned token and use it for inference (or upload to the hub)</h3>
+
+<p>To be continued… :D</p>]]></content><author><name></name></author><category term="reading" /><category term="diffusion" /><category term="genai" /><summary type="html"><![CDATA[Personalizing Text-to-Image Generation using Textual Inversion]]></summary></entry><entry><title type="html">On Reading - Anti-Dreambooth</title><link href="https://tuananhbui89.github.io/blog/blog/2023/anti-dreambooth/" rel="alternate" type="text/html" title="On Reading - Anti-Dreambooth" /><published>2023-08-05T00:00:00+10:00</published><updated>2023-08-05T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/blog/2023/anti-dreambooth</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/blog/2023/anti-dreambooth/"><![CDATA[<h2 id="about-the-paper">About the paper</h2>
+
+<ul>
+  <li>Published at ICCV 2023</li>
+  <li>Affiliation: VinAI Research</li>
+  <li>Main idea: Generate invisible perturbation to add to the personal images before uploading to the internet. To prevent adversary from using the uploaded images to train a personalized model (specific to Dreambooth method) to generate harmful images (e.g., nude images) of the person.</li>
+</ul>
+
+<h2 id="how-to-implement">How to implement</h2>
+
+<h3 id="how-to-preprocess-the-data">How to preprocess the data</h3>
+
+<p>It is worth noting that in adversarial examples, the perturbation is added to the post-processed image while in this project the perturbation should be added to the pre-processed image and robust to the pre-processing step. However, in the current implementation, the perturbation is added to the post-processed image.</p>
+
+<ul>
+  <li>It first call the <code class="language-plaintext highlighter-rouge">load_data</code> function that read PIL image and apply some transformations (e.g., resize, crop, normalize) and return a tensor (shape = [N, H, W, C], channel last format???). Ref: <a href="https://github.com/VinAIResearch/Anti-DreamBooth/blob/0d1ed6ff4766a876e65753f8c00fad8bf48f37c6/attacks/aspl.py#L360">Line 360</a></li>
+</ul>
+
+<!-- Insert code block -->
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">center_crop</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="p">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="n">image_transforms</span> <span class="o">=</span> <span class="n">transforms</span><span class="p">.</span><span class="nc">Compose</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">transforms</span><span class="p">.</span><span class="nc">Resize</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="n">transforms</span><span class="p">.</span><span class="n">InterpolationMode</span><span class="p">.</span><span class="n">BILINEAR</span><span class="p">),</span>
+            <span class="n">transforms</span><span class="p">.</span><span class="nc">CenterCrop</span><span class="p">(</span><span class="n">size</span><span class="p">)</span> <span class="k">if</span> <span class="n">center_crop</span> <span class="k">else</span> <span class="n">transforms</span><span class="p">.</span><span class="nc">RandomCrop</span><span class="p">(</span><span class="n">size</span><span class="p">),</span>
+            <span class="n">transforms</span><span class="p">.</span><span class="nc">ToTensor</span><span class="p">(),</span>
+            <span class="n">transforms</span><span class="p">.</span><span class="nc">Normalize</span><span class="p">([</span><span class="mf">0.5</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">]),</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">images</span> <span class="o">=</span> <span class="p">[</span><span class="nf">image_transforms</span><span class="p">(</span><span class="n">Image</span><span class="p">.</span><span class="nf">open</span><span class="p">(</span><span class="n">i</span><span class="p">).</span><span class="nf">convert</span><span class="p">(</span><span class="sh">"</span><span class="s">RGB</span><span class="sh">"</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">list</span><span class="p">(</span><span class="nc">Path</span><span class="p">(</span><span class="n">data_dir</span><span class="p">).</span><span class="nf">iterdir</span><span class="p">())]</span>
+    <span class="n">images</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">stack</span><span class="p">(</span><span class="n">images</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">images</span>
+</code></pre></div></div>
+
+<ul>
+  <li>It then call the <code class="language-plaintext highlighter-rouge">DreamBoothDatasetFromTensor</code> class with input argument <code class="language-plaintext highlighter-rouge">instance_images_tensor</code> which is the tensor returned from the <code class="language-plaintext highlighter-rouge">load_data</code> function. In this class, when <code class="language-plaintext highlighter-rouge">__getitem__</code> function is called, the data will be associated with a corresponding textual prompt. There is <strong>no transformation applied</strong> in this class. Ref: <a href="https://github.com/VinAIResearch/Anti-DreamBooth/blob/0d1ed6ff4766a876e65753f8c00fad8bf48f37c6/attacks/aspl.py#L31">Line 31</a></li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="n">example</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">instance_image</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">instance_images_tensor</span><span class="p">[</span><span class="n">index</span> <span class="o">%</span> <span class="n">self</span><span class="p">.</span><span class="n">num_instance_images</span><span class="p">]</span>
+        <span class="n">example</span><span class="p">[</span><span class="sh">"</span><span class="s">instance_images</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">instance_image</span>
+        <span class="n">example</span><span class="p">[</span><span class="sh">"</span><span class="s">instance_prompt_ids</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">tokenizer</span><span class="p">(</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">instance_prompt</span><span class="p">,</span>
+            <span class="n">truncation</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+            <span class="n">padding</span><span class="o">=</span><span class="sh">"</span><span class="s">max_length</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">max_length</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">tokenizer</span><span class="p">.</span><span class="n">model_max_length</span><span class="p">,</span>
+            <span class="n">return_tensors</span><span class="o">=</span><span class="sh">"</span><span class="s">pt</span><span class="sh">"</span><span class="p">,</span>
+        <span class="p">).</span><span class="n">input_ids</span>
+
+        <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">class_data_root</span><span class="p">:</span>
+            <span class="n">class_image</span> <span class="o">=</span> <span class="n">Image</span><span class="p">.</span><span class="nf">open</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">class_images_path</span><span class="p">[</span><span class="n">index</span> <span class="o">%</span> <span class="n">self</span><span class="p">.</span><span class="n">num_class_images</span><span class="p">])</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">class_image</span><span class="p">.</span><span class="n">mode</span> <span class="o">==</span> <span class="sh">"</span><span class="s">RGB</span><span class="sh">"</span><span class="p">:</span>
+                <span class="n">class_image</span> <span class="o">=</span> <span class="n">class_image</span><span class="p">.</span><span class="nf">convert</span><span class="p">(</span><span class="sh">"</span><span class="s">RGB</span><span class="sh">"</span><span class="p">)</span>
+            <span class="n">example</span><span class="p">[</span><span class="sh">"</span><span class="s">class_images</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">image_transforms</span><span class="p">(</span><span class="n">class_image</span><span class="p">)</span>
+            <span class="n">example</span><span class="p">[</span><span class="sh">"</span><span class="s">class_prompt_ids</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">tokenizer</span><span class="p">(</span>
+                <span class="n">self</span><span class="p">.</span><span class="n">class_prompt</span><span class="p">,</span>
+                <span class="n">truncation</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                <span class="n">padding</span><span class="o">=</span><span class="sh">"</span><span class="s">max_length</span><span class="sh">"</span><span class="p">,</span>
+                <span class="n">max_length</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">tokenizer</span><span class="p">.</span><span class="n">model_max_length</span><span class="p">,</span>
+                <span class="n">return_tensors</span><span class="o">=</span><span class="sh">"</span><span class="s">pt</span><span class="sh">"</span><span class="p">,</span>
+            <span class="p">).</span><span class="n">input_ids</span>
+
+        <span class="k">return</span> <span class="n">example</span>
+</code></pre></div></div>
+
+<p>The overall pipeline is as the snippet code below:</p>
+<ul>
+  <li>Load the data from the <code class="language-plaintext highlighter-rouge">instance_data_dir_for_adversarial</code> directory. Output is a tensor of shape [N, H, W, C]? should it be [N, C, H, W]?
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  # Load data from the instance data directory 
+  # output: tensor of shape [N, H, W, C]? should it be [N, C, H, W]?
+  perturbed_data = load_data(
+      args.instance_data_dir_for_adversarial,
+      size=args.resolution,
+      center_crop=args.center_crop,
+  )
+</code></pre></div>    </div>
+  </li>
+  <li>Clone the current model to avoid the in-place operation</li>
+  <li>Train the model with the clean data</li>
+  <li>Learn the perturbation with the updated model f_sur. Input is the entire data tensor not just a batch! Output is the new perturbed data tensor.</li>
+  <li>Restore the model and train with perturbed data</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">f</span> <span class="o">=</span> <span class="p">[</span><span class="n">unet</span><span class="p">,</span> <span class="n">text_encoder</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">max_train_steps</span><span class="p">):</span>
+        <span class="c1"># Clone the current model to avoid the in-place operation
+</span>        <span class="n">f_sur</span> <span class="o">=</span> <span class="n">copy</span><span class="p">.</span><span class="nf">deepcopy</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="c1"># Train the model with the clean data
+</span>        <span class="n">f_sur</span> <span class="o">=</span> <span class="nf">train_one_epoch</span><span class="p">(</span>
+            <span class="n">args</span><span class="p">,</span>
+            <span class="n">f_sur</span><span class="p">,</span>
+            <span class="n">tokenizer</span><span class="p">,</span>
+            <span class="n">noise_scheduler</span><span class="p">,</span>
+            <span class="n">vae</span><span class="p">,</span>
+            <span class="n">clean_data</span><span class="p">,</span>
+            <span class="n">args</span><span class="p">.</span><span class="n">max_f_train_steps</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># Learn the perturbation with the updated model f_sur 
+</span>        <span class="n">perturbed_data</span> <span class="o">=</span> <span class="nf">pgd_attack</span><span class="p">(</span>
+            <span class="n">args</span><span class="p">,</span>
+            <span class="n">f_sur</span><span class="p">,</span>
+            <span class="n">tokenizer</span><span class="p">,</span>
+            <span class="n">noise_scheduler</span><span class="p">,</span>
+            <span class="n">vae</span><span class="p">,</span>
+            <span class="n">perturbed_data</span><span class="p">,</span>
+            <span class="n">original_data</span><span class="p">,</span>
+            <span class="n">target_latent_tensor</span><span class="p">,</span>
+            <span class="n">args</span><span class="p">.</span><span class="n">max_adv_train_steps</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># Restore the model and train with perturbed data 
+</span>        <span class="n">f</span> <span class="o">=</span> <span class="nf">train_one_epoch</span><span class="p">(</span>
+            <span class="n">args</span><span class="p">,</span>
+            <span class="n">f</span><span class="p">,</span>
+            <span class="n">tokenizer</span><span class="p">,</span>
+            <span class="n">noise_scheduler</span><span class="p">,</span>
+            <span class="n">vae</span><span class="p">,</span>
+            <span class="n">perturbed_data</span><span class="p">,</span>
+            <span class="n">args</span><span class="p">.</span><span class="n">max_f_train_steps</span><span class="p">,</span>
+        <span class="p">)</span>
+</code></pre></div></div>
+
+<p>Inside the <code class="language-plaintext highlighter-rouge">train_one_epoch</code> function, the <code class="language-plaintext highlighter-rouge">DreamBoothDatasetFromTensor</code> class is called to associate the data (i.e., perturbed data) with the corresponding textual prompt.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">train_dataset</span> <span class="o">=</span> <span class="nc">DreamBoothDatasetFromTensor</span><span class="p">(</span>
+        <span class="n">data_tensor</span><span class="p">,</span>
+        <span class="n">args</span><span class="p">.</span><span class="n">instance_prompt</span><span class="p">,</span>
+        <span class="n">tokenizer</span><span class="p">,</span>
+        <span class="n">args</span><span class="p">.</span><span class="n">class_data_dir</span><span class="p">,</span>
+        <span class="n">args</span><span class="p">.</span><span class="n">class_prompt</span><span class="p">,</span>
+        <span class="n">args</span><span class="p">.</span><span class="n">resolution</span><span class="p">,</span>
+        <span class="n">args</span><span class="p">.</span><span class="n">center_crop</span><span class="p">,</span>
+    <span class="p">)</span>
+</code></pre></div></div>
+
+<p>At the end, the perturbed image is saved in the <code class="language-plaintext highlighter-rouge">instance_data_dir_for_adversarial</code> directory.</p>
+
+<p>Some notes:</p>
+<ul>
+  <li>In the original Dreambooth project, the data is loaded from the <code class="language-plaintext highlighter-rouge">DataLoader</code> class and is shuffled. However, in the Anti-Dreambooth project, the data is loaded from the <code class="language-plaintext highlighter-rouge">DreamBoothDatasetFromTensor</code> class and is not shuffled. Ref: <a href="https://github.com/huggingface/diffusers/blob/ea1fcc28a458739771f5112767f70d281511d2a2/examples/dreambooth/train_dreambooth.py#L1061">Line 1061</a></li>
+  <li>The reason for the above modification is that the author want to change on the fly the perturbed data after each epoch, which will be harder in control if using <code class="language-plaintext highlighter-rouge">DataLoader</code> class.</li>
+</ul>
+
+<h3 id="difference-in-prompting-process-between-textual-inversion-and-dreambooth-projects">Difference in prompting process between “Textual Inversion” and “Dreambooth” projects</h3>
+
+<p>In Dreambooth, there is an argument <code class="language-plaintext highlighter-rouge">instance_prompt</code> which is used as a neural prompt to associate with the given images. For example, the default value is <code class="language-plaintext highlighter-rouge">a photo of sks dog</code>, where <code class="language-plaintext highlighter-rouge">sks</code> is the unique identifier to specify the learned concept. The <code class="language-plaintext highlighter-rouge">instance_prompt</code> is then tokenized by the tokenizer and the token ids are used to specify the position in the embedding matrix to be updated (corresponding to the specific token).</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="c1"># In the DreamBoothDataset class
+</span>    <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">encoder_hidden_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">example</span><span class="p">[</span><span class="sh">"</span><span class="s">instance_prompt_ids</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">encoder_hidden_states</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">text_inputs</span> <span class="o">=</span> <span class="nf">tokenize_prompt</span><span class="p">(</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">instance_prompt</span><span class="p">,</span> <span class="n">tokenizer_max_length</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">tokenizer_max_length</span>
+        <span class="p">)</span>
+        <span class="n">example</span><span class="p">[</span><span class="sh">"</span><span class="s">instance_prompt_ids</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">text_inputs</span><span class="p">.</span><span class="n">input_ids</span>
+        <span class="n">example</span><span class="p">[</span><span class="sh">"</span><span class="s">instance_attention_mask</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">text_inputs</span><span class="p">.</span><span class="n">attention_mask</span>
+</code></pre></div></div>
+
+<p>So the difference between the two projects is that:</p>
+<ul>
+  <li>In Dreambooth, only one neural prompt is used, while in Textual Inversion, there is a list of neural prompts</li>
+  <li>In Textual Inversion, it is important to specify the <code class="language-plaintext highlighter-rouge">placeholder_token</code> to reuse the same token in other prompts, while in Dreambooth, the identifier (i.e., <code class="language-plaintext highlighter-rouge">sks</code>) is used to specify the position in the embedding matrix to be updated (corresponding to the specific token). In inferencce, a prompt with the same identifier will be used to generate images, for example, <code class="language-plaintext highlighter-rouge">a photo of sks dog in the beach</code>. So to me, the whole prompt in Dreambooth is like a placeholder token in Textual Inversion. However, in this case, how the output looks like if we use a prompt that not contains the whole <code class="language-plaintext highlighter-rouge">instance_prompt</code>? For example, <code class="language-plaintext highlighter-rouge">a sks dog walking on the beach</code>?</li>
+</ul>
+
+<h3 id="pgd-attack">PGD attack</h3>
+
+<p>The PGD attack is implemented in the <code class="language-plaintext highlighter-rouge">pgd_attack</code> function. The input is the perturbed data tensor and the output is the new perturbed data tensor.</p>
+
+<p>Some notes:</p>
+<ul>
+  <li>weight type is <code class="language-plaintext highlighter-rouge">torch.bfloat16</code> instead of <code class="language-plaintext highlighter-rouge">torch.float32</code></li>
+  <li>unet, vae, text_encoder are in <code class="language-plaintext highlighter-rouge">train</code> mode (because they were set in <code class="language-plaintext highlighter-rouge">train_one_epoch</code> function)</li>
+  <li>Learn for the entire data tensor not just a batch</li>
+  <li>The whole process is quite similar to the standard PGD attack without the random initialization.</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="c1"># Create a copy of data and set requires_grad to True
+</span>    <span class="n">perturbed_images</span> <span class="o">=</span> <span class="n">data_tensor</span><span class="p">.</span><span class="nf">detach</span><span class="p">().</span><span class="nf">clone</span><span class="p">()</span>
+    <span class="n">perturbed_images</span><span class="p">.</span><span class="nf">requires_grad_</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="c1"># Repeat the input_ids to match the batch size
+</span>    <span class="n">input_ids</span> <span class="o">=</span> <span class="nf">tokenizer</span><span class="p">(</span>
+        <span class="n">args</span><span class="p">.</span><span class="n">instance_prompt</span><span class="p">,</span>
+        <span class="n">truncation</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="n">padding</span><span class="o">=</span><span class="sh">"</span><span class="s">max_length</span><span class="sh">"</span><span class="p">,</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="n">tokenizer</span><span class="p">.</span><span class="n">model_max_length</span><span class="p">,</span>
+        <span class="n">return_tensors</span><span class="o">=</span><span class="sh">"</span><span class="s">pt</span><span class="sh">"</span><span class="p">,</span>
+    <span class="p">).</span><span class="n">input_ids</span><span class="p">.</span><span class="nf">repeat</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">data_tensor</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Loop over the number of steps
+</span>    <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">num_steps</span><span class="p">):</span>
+
+        <span class="c1"># Reset requires_grad to True because it was set to False in the last step
+</span>        <span class="n">perturbed_images</span><span class="p">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">latents</span> <span class="o">=</span> <span class="n">vae</span><span class="p">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">perturbed_images</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">weight_dtype</span><span class="p">)).</span><span class="n">latent_dist</span><span class="p">.</span><span class="nf">sample</span><span class="p">()</span>
+        <span class="n">latents</span> <span class="o">=</span> <span class="n">latents</span> <span class="o">*</span> <span class="n">vae</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="n">scaling_factor</span>
+
+        <span class="c1"># Sample noise that we'll add to the latents
+</span>        <span class="n">noise</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randn_like</span><span class="p">(</span><span class="n">latents</span><span class="p">)</span>
+        <span class="n">bsz</span> <span class="o">=</span> <span class="n">latents</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># Sample a random timestep for each image
+</span>        <span class="n">timesteps</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">noise_scheduler</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="n">num_train_timesteps</span><span class="p">,</span> <span class="p">(</span><span class="n">bsz</span><span class="p">,),</span> <span class="n">device</span><span class="o">=</span><span class="n">latents</span><span class="p">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">timesteps</span> <span class="o">=</span> <span class="n">timesteps</span><span class="p">.</span><span class="nf">long</span><span class="p">()</span>
+        <span class="c1"># Add noise to the latents according to the noise magnitude at each timestep
+</span>        <span class="c1"># (this is the forward diffusion process)
+</span>        <span class="n">noisy_latents</span> <span class="o">=</span> <span class="n">noise_scheduler</span><span class="p">.</span><span class="nf">add_noise</span><span class="p">(</span><span class="n">latents</span><span class="p">,</span> <span class="n">noise</span><span class="p">,</span> <span class="n">timesteps</span><span class="p">)</span>
+
+        <span class="c1"># Get the text embedding for conditioning
+</span>        <span class="n">encoder_hidden_states</span> <span class="o">=</span> <span class="nf">text_encoder</span><span class="p">(</span><span class="n">input_ids</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Predict the noise residual
+</span>        <span class="n">model_pred</span> <span class="o">=</span> <span class="nf">unet</span><span class="p">(</span><span class="n">noisy_latents</span><span class="p">,</span> <span class="n">timesteps</span><span class="p">,</span> <span class="n">encoder_hidden_states</span><span class="p">).</span><span class="n">sample</span>
+
+        <span class="c1"># Get the target for loss depending on the prediction type
+</span>        <span class="k">if</span> <span class="n">noise_scheduler</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="n">prediction_type</span> <span class="o">==</span> <span class="sh">"</span><span class="s">epsilon</span><span class="sh">"</span><span class="p">:</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="n">noise</span>
+        <span class="k">elif</span> <span class="n">noise_scheduler</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="n">prediction_type</span> <span class="o">==</span> <span class="sh">"</span><span class="s">v_prediction</span><span class="sh">"</span><span class="p">:</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="n">noise_scheduler</span><span class="p">.</span><span class="nf">get_velocity</span><span class="p">(</span><span class="n">latents</span><span class="p">,</span> <span class="n">noise</span><span class="p">,</span> <span class="n">timesteps</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="nc">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Unknown prediction type </span><span class="si">{</span><span class="n">noise_scheduler</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="n">prediction_type</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+        <span class="n">unet</span><span class="p">.</span><span class="nf">zero_grad</span><span class="p">()</span>
+        <span class="n">text_encoder</span><span class="p">.</span><span class="nf">zero_grad</span><span class="p">()</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="nf">mse_loss</span><span class="p">(</span><span class="n">model_pred</span><span class="p">.</span><span class="nf">float</span><span class="p">(),</span> <span class="n">target</span><span class="p">.</span><span class="nf">float</span><span class="p">(),</span> <span class="n">reduction</span><span class="o">=</span><span class="sh">"</span><span class="s">mean</span><span class="sh">"</span><span class="p">)</span>
+
+        <span class="c1"># target-shift loss
+</span>        <span class="k">if</span> <span class="n">target_tensor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">xtm1_pred</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">cat</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">noise_scheduler</span><span class="p">.</span><span class="nf">step</span><span class="p">(</span>
+                        <span class="n">model_pred</span><span class="p">[</span><span class="n">idx</span> <span class="p">:</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+                        <span class="n">timesteps</span><span class="p">[</span><span class="n">idx</span> <span class="p">:</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+                        <span class="n">noisy_latents</span><span class="p">[</span><span class="n">idx</span> <span class="p">:</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+                    <span class="p">).</span><span class="n">prev_sample</span>
+                    <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">model_pred</span><span class="p">))</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">xtm1_target</span> <span class="o">=</span> <span class="n">noise_scheduler</span><span class="p">.</span><span class="nf">add_noise</span><span class="p">(</span><span class="n">target_tensor</span><span class="p">,</span> <span class="n">noise</span><span class="p">,</span> <span class="n">timesteps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span> <span class="o">-</span> <span class="n">F</span><span class="p">.</span><span class="nf">mse_loss</span><span class="p">(</span><span class="n">xtm1_pred</span><span class="p">,</span> <span class="n">xtm1_target</span><span class="p">)</span>
+
+        <span class="n">loss</span><span class="p">.</span><span class="nf">backward</span><span class="p">()</span>
+
+        <span class="n">alpha</span> <span class="o">=</span> <span class="n">args</span><span class="p">.</span><span class="n">pgd_alpha</span>
+        <span class="n">eps</span> <span class="o">=</span> <span class="n">args</span><span class="p">.</span><span class="n">pgd_eps</span>
+
+        <span class="c1"># Project to valid range
+</span>        <span class="n">adv_images</span> <span class="o">=</span> <span class="n">perturbed_images</span> <span class="o">+</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">perturbed_images</span><span class="p">.</span><span class="n">grad</span><span class="p">.</span><span class="nf">sign</span><span class="p">()</span>
+        <span class="n">eta</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">clamp</span><span class="p">(</span><span class="n">adv_images</span> <span class="o">-</span> <span class="n">original_images</span><span class="p">,</span> <span class="nb">min</span><span class="o">=-</span><span class="n">eps</span><span class="p">,</span> <span class="nb">max</span><span class="o">=+</span><span class="n">eps</span><span class="p">)</span>
+        <span class="n">perturbed_images</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">clamp</span><span class="p">(</span><span class="n">original_images</span> <span class="o">+</span> <span class="n">eta</span><span class="p">,</span> <span class="nb">min</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="o">=+</span><span class="mi">1</span><span class="p">).</span><span class="nf">detach_</span><span class="p">()</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">PGD loss - step </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s">, loss: </span><span class="si">{</span><span class="n">loss</span><span class="p">.</span><span class="nf">detach</span><span class="p">().</span><span class="nf">item</span><span class="p">()</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">perturbed_images</span>
+</code></pre></div></div>]]></content><author><name></name></author><category term="reading" /><category term="tml" /><category term="diffusion" /><category term="genai" /><summary type="html"><![CDATA[Protecting personal images from Dreambooth attack]]></summary></entry><entry><title type="html">Some useful code snippets</title><link href="https://tuananhbui89.github.io/blog/blog/2023/learn-code/" rel="alternate" type="text/html" title="Some useful code snippets" /><published>2023-08-01T00:00:00+10:00</published><updated>2023-08-01T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/blog/2023/learn-code</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/blog/2023/learn-code/"><![CDATA[<p>To log some useful code snippets that I have learned and used.</p>
+
+<h2 id="write-an-image-from-array">Write an image from array</h2>
+
+<p>Need to convert to uint8 before writing to image to avoid color shift.
+And using <code class="language-plaintext highlighter-rouge">cv2</code> will cause color shift (I didn’t try my best to find out why, there might be some other ways to use <code class="language-plaintext highlighter-rouge">cv2</code> to write image without color shift).</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/blog/assets/img/code/write_image_PIL-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/blog/assets/img/code/write_image_PIL-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/blog/assets/img/code/write_image_PIL-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/blog/assets/img/code/write_image_PIL.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/blog/assets/img/code/write_image_cv2-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/blog/assets/img/code/write_image_cv2-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/blog/assets/img/code/write_image_cv2-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/blog/assets/img/code/write_image_cv2.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Writing image using PIL and cv2.
+</div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="kn">from</span> <span class="n">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
+    <span class="kn">import</span> <span class="n">torch</span> 
+
+    <span class="k">def</span> <span class="nf">save_images</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="n">save_path</span><span class="p">):</span>
+        <span class="nf">assert</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">is_tensor</span><span class="p">(</span><span class="n">images</span><span class="p">))</span>
+        <span class="nf">assert</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">images</span><span class="p">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="nf">assert</span><span class="p">(</span><span class="n">images</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="nf">assert</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">min</span><span class="p">(</span><span class="n">images</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="nf">assert</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">max</span><span class="p">(</span><span class="n">images</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="nb">id</span><span class="p">,</span> <span class="n">img_pixel</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="n">images</span><span class="p">):</span>
+            <span class="n">save_path_id</span> <span class="o">=</span> <span class="n">save_path</span> <span class="o">+</span> <span class="nf">str</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span> <span class="o">+</span> <span class="sh">"</span><span class="s">.png</span><span class="sh">"</span>
+            <span class="n">Image</span><span class="p">.</span><span class="nf">fromarray</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">img_pixel</span> <span class="o">*</span> <span class="mf">127.5</span> <span class="o">+</span> <span class="mi">128</span><span class="p">).</span><span class="nf">clamp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">).</span><span class="nf">to</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="n">uint8</span><span class="p">).</span><span class="nf">permute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">).</span><span class="nf">cpu</span><span class="p">().</span><span class="nf">numpy</span><span class="p">()</span>
+                <span class="p">).</span><span class="nf">save</span><span class="p">(</span><span class="n">save_path_id</span><span class="p">)</span>
+
+            <span class="c1"># Using cv2 will cause color shift
+</span>            <span class="c1"># cv2.imwrite(save_path_id, (img_pixel * 127.5 + 128).clamp(0, 255).to(torch.uint8).permute(1, 2, 0).cpu().numpy())
+</span>    
+    <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
+        <span class="n">images</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">load</span><span class="p">(</span><span class="sh">"</span><span class="s">https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/files/images_tensor.pt</span><span class="sh">"</span><span class="p">)</span>
+        <span class="n">save_path</span> <span class="o">=</span> <span class="sh">"</span><span class="s">./test/</span><span class="sh">"</span>
+        <span class="nf">save_images</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="n">save_path</span><span class="p">)</span>
+</code></pre></div></div>]]></content><author><name></name></author><category term="coding" /><summary type="html"><![CDATA[Not something fancy]]></summary></entry><entry><title type="html">Q&amp;amp;A</title><link href="https://tuananhbui89.github.io/blog/blog/2023/qna/" rel="alternate" type="text/html" title="Q&amp;amp;A" /><published>2023-08-01T00:00:00+10:00</published><updated>2023-08-01T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/blog/2023/qna</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/blog/2023/qna/"><![CDATA[<p>This is a collection of questions and answers. The questions are from Internet, interviews, or my own thoughts. The answers are mostly from my own perspective and understanding. It is inspired by my supervisor Dinh, who has a excellent capability of asking questions and answering them. I think self-reflection is the key to unlock this capability that leads me to this collection.</p>
+
+<!-- Some questions are really personal which I am really embarrassed to share. -->
+
+<h2 id="questions">Questions</h2>
+
+<p><strong>Why do you want to do research?</strong></p>
+
+<p><strong>What do you want to do next? after PhD?</strong></p>
+
+<p><strong>If you have to organize a reading group about a new topic (e.g., Multimodal learning) what will you do? (asked in an interview)</strong></p>
+
+<p><strong>What is your most catastrophic/costly failure and what did you learn from it? (asked in an interview)</strong></p>
+
+<p><strong>Tell me about a time when you had a confliction with your supervisor on a project and how did you resolve it? (asked in an interview)</strong></p>
+
+<p><strong>How to engage with clients, supervisors, and colleagues?</strong></p>
+
+<p><strong>Tell me about a time when you had an obstacle in your research and how did you overcome it?</strong></p>
+
+<p><strong>Why do you want to do research in our group? Why do you want to do this project?</strong></p>
+
+<p><strong>Are you a researcher or an engineer?</strong></p>
+
+<p><strong>What is the difference between a good researcher and a great researcher?</strong></p>
+
+<p>A good researcher is someone who can push the field forward a little bit. A great researcher is someone who can hold the whole field back for several years. (a half-joke answer by Prof. Truyen Tran as I remember).</p>
+
+<p>A great researcher is someone who has his own research agenda and can inspire others to follow his agenda. He will not be affected by the trend, but just focus on his own idea and (slowly) prove that his idea is right (or wrong).</p>]]></content><author><name></name></author><category term="f4t" /><summary type="html"><![CDATA[But just for me :D]]></summary></entry></feed>
