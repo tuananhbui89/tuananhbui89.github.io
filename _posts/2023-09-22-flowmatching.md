@@ -1,28 +1,65 @@
 ---
-title: 'On Reading: Flow Matching for Generative Modeling'
+layout: post
+title: On Reading - Flow Matching for Generative Modeling
+description: A cool paper about continuous normalizing flows
+tags: reading genai
+giscus_comments: true
 date: 2023-09-22
-permalink: /posts/2023/09/papers/flowmatching/
-tags:
-  - Generative model
-  - Diffusion model
-  - Normalizing flow
-  - Paper reading
+featured: false
+
+# authors:
+#   - name: Tuan-Anh Bui
+#     url: "https://tuananhbui89.github.io/"
+#     affiliations:
+#       name: Monash University
+
+# bibliography: 2023-06-02-distill.bib
+
+# Optionally, you can add a table of contents to your post.
+# NOTES:
+#   - make sure that TOC names match the actual section names
+#     for hyperlinks within the post to work correctly.
+#   - we may want to automate TOC generation in the future using
+#     jekyll-toc plugin (https://github.com/toshimaru/jekyll-toc).
+# toc:
+#   - name: About the paper
+#     # if a section has subsections, you can add them as follows:
+#     # subsections:
+#     #   - name: Example Child Subsection 1
+#     #   - name: Example Child Subsection 2
+#   - name: Approach
+#   - name: How to implement
+#   - name: Notes
+
+# Below is an example of injecting additional post-specific styles.
+# If you use this post as a template, delete this _styles block.
+# _styles: >
+#   .fake-img {
+#     background: #bbb;
+#     border: 1px solid rgba(0, 0, 0, 0.1);
+#     box-shadow: 0 0px 4px rgba(0, 0, 0, 0.1);
+#     margin-bottom: 12px;
+#   }
+#   .fake-img p {
+#     font-family: monospace;
+#     color: white;
+#     text-align: left;
+#     margin: 12px 0;
+#     text-align: center;
+#     font-size: 16px;
+#   }
+
+toc:
+  beginning: true
 ---
-<br>
 
-- [About the paper](#about-the-paper)
-- [Introduction](#introduction)
-
-About the paper
-=====
+## About the paper
 
 - Published at ICLR 2023 (splotlight, top 5%)
 - Affiliations: Meta AI, Weizmann Institute of Science
 - Link to the paper: [https://openreview.net/pdf?id=PqvMRDCJT9t](https://openreview.net/pdf?id=PqvMRDCJT9t)
 
-
-Introduction
-=====
+## Introduction
 
 Continuous Normalizing Flows (CNF) is a class of generative models that can be trained by maximum likelihood. The main idea is to transform a simple distribution (e.g., Gaussian) to a complex distribution (e.g., ImageNet dataset) by a series of invertible transformations. The main challenge is to design a transformation that is invertible and can be computed efficiently.
 

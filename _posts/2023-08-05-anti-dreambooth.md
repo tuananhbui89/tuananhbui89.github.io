@@ -1,29 +1,71 @@
 ---
-title: 'On Reading: Anti-DreamBooth: Protecting users from personalized text-to-image synthesis'
+layout: post
+title: On Reading - Anti-Dreambooth
+description: Protecting personal images from Dreambooth attack
+tags: reading tml diffusion genai
+giscus_comments: true
 date: 2023-08-05
-permalink: /posts/2023/08/papers/antidreambooth/
-tags:
-  - Generative model
-  - Diffusion model
-  - Paper reading
-  - Trustworthy machine learning
+featured: false
+
+# authors:
+#   - name: Tuan-Anh Bui
+#     url: "https://tuananhbui89.github.io/"
+#     affiliations:
+#       name: Monash University
+
+# bibliography: 2023-06-02-distill.bib
+
+# Optionally, you can add a table of contents to your post.
+# NOTES:
+#   - make sure that TOC names match the actual section names
+#     for hyperlinks within the post to work correctly.
+#   - we may want to automate TOC generation in the future using
+#     jekyll-toc plugin (https://github.com/toshimaru/jekyll-toc).
+# toc:
+#   - name: About the paper
+#     # if a section has subsections, you can add them as follows:
+#     # subsections:
+#     #   - name: Example Child Subsection 1
+#     #   - name: Example Child Subsection 2
+#   - name: How to implement
+#     subsections:
+#       - name: Data Preprocessing
+#       - name: Prompting process
+#       - name: PGD attack
+
+# Below is an example of injecting additional post-specific styles.
+# If you use this post as a template, delete this _styles block.
+_styles: >
+#   .fake-img {
+#     background: #bbb;
+#     border: 1px solid rgba(0, 0, 0, 0.1);
+#     box-shadow: 0 0px 4px rgba(0, 0, 0, 0.1);
+#     margin-bottom: 12px;
+#   }
+#   .fake-img p {
+#     font-family: monospace;
+#     color: white;
+#     text-align: left;
+#     margin: 12px 0;
+#     text-align: center;
+#     font-size: 16px;
+#   }
+
+toc:
+  beginning: true
 ---
-<br>
-
-- [About the paper](#about-the-paper)
-- [How to preprocess the data](#how-to-preprocess-the-data)
-    - [Difference in prompting process between "Textual Inversion" and "Dreambooth" projects](#difference-in-prompting-process-between-textual-inversion-and-dreambooth-projects)
-- [PGD attack](#pgd-attack)
 
 
-About the paper 
-=====
-- Published at ICCV 2023 
-- Authors: VinAI 
-- Main idea: Generate invisible perturbation to add to the personal images before uploading to the internet. To prevent adversary from using the uploaded images to train a personalized model (specific to Dreambooth method) to generate harmful images (e.g., nude images) of the person. 
+## About the paper
 
-How to preprocess the data
-=====
+- Published at ICCV 2023
+- Affiliation: VinAI Research
+- Main idea: Generate invisible perturbation to add to the personal images before uploading to the internet. To prevent adversary from using the uploaded images to train a personalized model (specific to Dreambooth method) to generate harmful images (e.g., nude images) of the person.
+
+## How to implement
+
+### How to preprocess the data
+
 It is worth noting that in adversarial examples, the perturbation is added to the post-processed image while in this project the perturbation should be added to the pre-processed image and robust to the pre-processing step. However, in the current implementation, the perturbation is added to the post-processed image.
 
 - It first call the `load_data` function that read PIL image and apply some transformations (e.g., resize, crop, normalize) and return a tensor (shape = [N, H, W, C], channel last format???). Ref: [Line 360](https://github.com/VinAIResearch/Anti-DreamBooth/blob/0d1ed6ff4766a876e65753f8c00fad8bf48f37c6/attacks/aspl.py#L360)  
@@ -171,8 +213,7 @@ So the difference between the two projects is that:
 - In Dreambooth, only one neural prompt is used, while in Textual Inversion, there is a list of neural prompts
 - In Textual Inversion, it is important to specify the `placeholder_token` to reuse the same token in other prompts, while in Dreambooth, the identifier (i.e., `sks`) is used to specify the position in the embedding matrix to be updated (corresponding to the specific token). In inferencce, a prompt with the same identifier will be used to generate images, for example, `a photo of sks dog in the beach`. So to me, the whole prompt in Dreambooth is like a placeholder token in Textual Inversion. However, in this case, how the output looks like if we use a prompt that not contains the whole `instance_prompt`? For example, `a sks dog walking on the beach`?
 
-PGD attack 
-=====
+### PGD attack
 
 The PGD attack is implemented in the `pgd_attack` function. The input is the perturbed data tensor and the output is the new perturbed data tensor. 
 

@@ -1,15 +1,59 @@
 ---
-title: 'On Reading: Anti-Personalization in Generative Models'
-date: 2023-08-05
-permalink: /posts/2023/08/papers/antipersonalization/
-tags:
-  - Generative model
-  - Diffusion model
-  - Paper reading
-  - Trustworthy machine learning
----
-<br>
+layout: post
+title: On Reading - Anti-Personalization in Generative Models
+description: But just two papers so far :(
+tags: reading diffusion genai tml
+giscus_comments: true
+date: 2023-08-23
+featured: false
 
+# authors:
+#   - name: Tuan-Anh Bui
+#     url: "https://tuananhbui89.github.io/"
+#     affiliations:
+#       name: Monash University
+
+# bibliography: 2023-06-02-distill.bib
+
+# Optionally, you can add a table of contents to your post.
+# NOTES:
+#   - make sure that TOC names match the actual section names
+#     for hyperlinks within the post to work correctly.
+#   - we may want to automate TOC generation in the future using
+#     jekyll-toc plugin (https://github.com/toshimaru/jekyll-toc).
+# toc:
+#   - name: from Charlie Munger
+#   - name: from Naval Ravikant
+    # if a section has subsections, you can add them as follows:
+    # subsections:
+    #   - name: Example Child Subsection 1
+    #   - name: Example Child Subsection 2
+
+# Below is an example of injecting additional post-specific styles.
+# If you use this post as a template, delete this _styles block.
+# _styles: >
+#   .fake-img {
+#     background: #bbb;
+#     border: 1px solid rgba(0, 0, 0, 0.1);
+#     box-shadow: 0 0px 4px rgba(0, 0, 0, 0.1);
+#     margin-bottom: 12px;
+#   }
+#   .fake-img p {
+#     font-family: monospace;
+#     color: white;
+#     text-align: left;
+#     margin: 12px 0;
+#     text-align: center;
+#     font-size: 16px;
+#   }
+
+toc:
+  beginning: true
+---
+
+## Anti-Dreambooth
+
+Link to other post: [https://tuananhbui89.github.io/blog/2023/anti-dreambooth/](https://tuananhbui89.github.io/blog/2023/anti-dreambooth/)
 
 ## Generative Watermarking Against Unauthorized Subject-Driven Image Synthesis
 
@@ -30,7 +74,15 @@ tags:
   - The subject owners are the ones who want to protect their images from unauthorized personalization. In this project, the subject owners use the generative watermarking to generate watermarked images. Then they can track the potential unauthorized use by detecting if the watermark appears in synthesized images (then the watermark to be added and the watermark to be detected are different?). The subject owners have full access to the generator and the detector and can also further improve them by fine-tuning.
   - The subject synthesizers (benign or adversaries) are the ones who want to use the generative models to synthesize the target subject. The benign synthesizers are the ones who obtains authorization under the consent of the subject owners. The adversaries are the ones who want to synthesize the target subject without authorization. In this project, both benign and adversarial synthesizers have access to a public generative model (i.e., Stable Diffusion) and the protected/watermarked images.
 
-![Avatar](../../images/AML/2306_07754_01.png)
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        {% include figure.html path="assets/img/AML/2306_07754_01.png" class="img-fluid rounded z-depth-1" zoomable=true %}
+    </div>
+</div>
+<div class="caption">
+    The Framework
+</div>
 
 Approach: 
 

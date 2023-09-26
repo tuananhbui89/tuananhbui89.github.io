@@ -1,14 +1,59 @@
 ---
-title: 'Learning and Thinking Log'
-date: 2023-09-23
-permalink: /blog/learninglog/
-tags:
-  - Learning
----
-<br>
+layout: distill
+title: A Learning Log
+description: Too much personal stuff, don't read it!
+tags: aml
+giscus_comments: true
+date: 2023-07-21
+featured: true
 
-Learning targets 
---------------------------
+authors:
+  - name: Tuan-Anh Bui
+    url: "https://tuananhbui89.github.io/"
+    affiliations:
+      name: Monash University
+
+bibliography: 2023-06-02-distill.bib
+
+# Optionally, you can add a table of contents to your post.
+# NOTES:
+#   - make sure that TOC names match the actual section names
+#     for hyperlinks within the post to work correctly.
+#   - we may want to automate TOC generation in the future using
+#     jekyll-toc plugin (https://github.com/toshimaru/jekyll-toc).
+# toc:
+#   - name: The Good
+#     # if a section has subsections, you can add them as follows:
+#     # subsections:
+#     #   - name: Example Child Subsection 1
+#     #   - name: Example Child Subsection 2
+#   - name: The Bad
+#   - name: The Ugly
+#   - name: The Efforts
+#   - name: The Difficulties
+
+# Below is an example of injecting additional post-specific styles.
+# If you use this post as a template, delete this _styles block.
+_styles: >
+  .fake-img {
+    background: #bbb;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 12px;
+  }
+  .fake-img p {
+    font-family: monospace;
+    color: white;
+    text-align: left;
+    margin: 12px 0;
+    text-align: center;
+    font-size: 16px;
+  }
+
+---
+
+## Learning targets
+
 This is a learning log to keep track of what I have learned each day. To avoid distraction and fluctuation, I will set some long-term learning targets that needed a disciplined and consistent effort to achieve.
 
 - #Productivity: learn how to be more productive and effective in work and life. (effective != efficient, outcome != output, proactive > active > reactive, 1.01^365 = 37.8, 0.99^365 = 0.03)
@@ -22,9 +67,7 @@ This is a learning log to keep track of what I have learned each day. To avoid d
 - #Coding: Textual Inversion and Dreambooth
 - #Research: Writing a paper about TML in GenAI -->
 
-
-2023-09-23
---------------------------
+## 2023-09-23
 
 (#Finance) Reading [My solopreneur story: zero to $45K/mo in 2 years](https://news.tonydinh.com/p/my-solopreneur-story-zero-to-45kmo)
 
@@ -33,19 +76,28 @@ This is a very inspring story about how Tony Dinh built his side project to a pr
 - The unfair advantage: What is the unfair advantage? To me, it is the thing that you can do better than others in the same field and it is hard for others to catch up. In Tony's case when the goal is to build a profitable software product, at first I thought that his unfair advantage is his software engineering skills. It is no doubt that Tony has a great skill set that enables him to build a product really fast. However, when reading his story again, I realized that his true unfair advantage is his ability to write and share his knowledge and experiences and from that build up his follower-community. It can be seen that his very first product DevUtils started to fly when he discovered Twitter and started to share funny interesting stuff on that platform. Compared to other software engineers who might have the same tech skills as Tony, Tony has a much better skill in writing and sharing, while compared to other writers, Tony has a much better skill in software engineering. So his unfair advantage in getting a profitable software product is the combination of these two skill sets. So what is my unfair advantage? In the context of being a researcher? I am still on the way to find out.
 - Start small, commit to the process, and be consistent. Tony's first "real" business - Black Magic is a very interesting story and a good demonstration for this lesson. The product at first was very simple which is just a bar on Twitter's avatar that shows progress on getting 1k followers. He did that because of a very human reason: to celebrate of getting hist first 1k followers. It turned out that people loved this idea and even happy to pay for the subscription. Tony started to get recurring revenue from that. However, he didn't stop there. He kept improving the product and adding more features to it that help users create more engagements. The product became more and more complex and useful that attracted more users. After just few months, the Black Magic from a fun side project became a profitable business generate 4K USD per month. This story brings me a lot of thoughts. First, think big but start small and do not wait to be perfect. Second, be committed and consistent to the process.
 
+(#F4T) [How to get rich (without getting lucky) by Naval Ravikant](https://mcdonnellcallum.medium.com/naval-ravikant-how-to-get-rich-without-getting-lucky-e8d32bba14d1). Some I like with my current knowledge and experience:
 
-2023-09-22
---------------------------
+- You will get rich by giving society what it wants but does not yet know how to get. At scale.
+- Play iterated games. All the returns in life, whether in wealth, relationships, or knowledge, come from compound interest.
+- Arm yourself with specific knowledge, accountability, and leverage.
+- About specific knowledge:
+  - Specific knowledge is knowledge that you cannot be trained for. If society can train you, it can train someone else, and replace you.
+  - When specific knowledge is taught, it’s through apprenticeships, not schools.
+  - Specific knowledge is often highly technical or creative. It cannot be outsourced or automated.
+- Work as hard as you can. Even though who you work with and what you work on are more important than how hard you work.
+
+(#F4T) Less is More principle
+
+
+## 2023-09-22
 
 (#Research) On Reading: FLOW MATCHING FOR GENERATIVE MODELING (ICLR 2023)
 
 - Link to the paper: [https://openreview.net/pdf?id=PqvMRDCJT9t](https://openreview.net/pdf?id=PqvMRDCJT9t)
 - Link to my blog post: [https://tuananhbui89.github.io/posts/2023/09/papers/flowmatching/](https://tuananhbui89.github.io/posts/2023/09/papers/flowmatching/)
 
-
-
-2023-09-17
---------------------------
+## 2023-09-17
 
 (#Research) Parameter-Efficient Fine-Tuning. [Link to Youtube video](https://youtu.be/StdrAJZsmw4?si=1lVR7I_we48_DUhJ)
 
@@ -55,18 +107,18 @@ This is a very inspring story about how Tony Dinh built his side project to a pr
 - Intuition: LLMs are good at self-evaluation given a specific goal, for example, given a set of several intermediate thoughts, which one is the best to achieve the goal. So, we can integrate classical tree search algorithm (BFS, DFS, etc.) with LLMs to find the best path to achieve the goal.
 - The paper is also good at experimental design when choosing specific tasks to best fit to the algorithm, i.e., Ga
 
-2023-09-14
---------------------------
+## 2023-09-14
+
 (#Research) On Reading: Diffusion Models Beat GANs on Image Synthesis. Link to [blog post](https://tuananhbui89.github.io/posts/2023/09/papers/conditional-diffusion/)
 
-2023-09-08
---------------------------
+## 2023-09-08
+
 
 (#Idea) Erasing a concept from a generative model by given a set of images.
 
 
-2023-09-04
---------------------------
+## 2023-09-04
+
 
 (#Research) Chasing General Intelligence by [Dr. Rui Shu](https://ruishu.io/) (OpenAI) - Guest lecture at Monash FIT 3181 - Deep Learning Unit.
 
@@ -87,7 +139,14 @@ Disclaimer: Rui gave a great talk and I want to take notes on it. However, becau
   - Second thought: What are other fields in ML that works but not in the way we think it works? Style-content disentanglement.
   - [Challenging Common Assumptions in the Unsupervised Learning of Disentangled Representations](https://arxiv.org/abs/1811.12359)
 
-![Style-content disentanglement](https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/ruishu_talk/disentanglement.png)
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        {% include figure.html path="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/ruishu_talk/disentanglement.png" class="img-fluid rounded z-depth-1" zoomable=true %}
+    </div>
+</div>
+<div class="caption">
+    Style-content disentanglement (Image from Rui's talk
+</div>
 
 **Part 3:**
 
@@ -96,7 +155,14 @@ Yang Song's paper on estimating gradient of data distribution to learn generativ
 - [Generative Modeling by Estimating Gradients of the Data Distribution (Song et al. 2019)](https://arxiv.org/abs/1907.05600)
 - Sensitive to the choice of the model architecture which makes Rui thought that it might not going to far compared to VAEs or GANs. And he then really regretted about this thought. Because this paper is the foundation of the current hype of Generative Models, i.e., Diffusion Models.
 
-![Thought on Diffusion Model](https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/ruishu_talk/diffusion.png)
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        {% include figure.html path="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/ruishu_talk/diffusion.png" class="img-fluid rounded z-depth-1" zoomable=true %}
+    </div>
+</div>
+<div class="caption">
+    Thought on Diffusion Model (Image from Rui's talk)
+</div>
 
 Rui's thought after his lesson on Diffusion Model:
 
@@ -110,11 +176,25 @@ Rui's thought after his lesson on Diffusion Model:
 - Transformer powers GPT-4, and change the mantra "Garbage in, garbage out" to "Garbage in, Diamond out".
 - We are really close to AGI but not solve yet. GPT-4, ChatGPT sometime shows responses that look like it has reasoning ability but it is not really.
 
-![GPT-4 Drawing](https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/ruishu_talk/gpt-drawing.png)
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        {% include figure.html path="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/ruishu_talk/gpt-drawing.png" class="img-fluid rounded z-depth-1" zoomable=true %}
+    </div>
+</div>
+<div class="caption">
+    GPT-4 Drawing (Image from Rui's talk)
+</div>
 
 - The last step before AGI: Reasoning? But it is the hardest step.
 
-![The last step](https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/ruishu_talk/the-last-step.png)
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        {% include figure.html path="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/ruishu_talk/the-last-step.png" class="img-fluid rounded z-depth-1" zoomable=true %}
+    </div>
+</div>
+<div class="caption">
+    The last step before AGI (Image from Rui's talk)
+</div>
 
 **How to get there?**
 
@@ -139,44 +219,63 @@ Rui's thought after his lesson on Diffusion Model:
 
 (#Research) Connection between Latent Diffusion formulation and the Rate-Distortion theory (Trung's idea). Below are some personal notes for memorization without leaking the idea.
 
-- The Rate-Distortion theory is a theory that describes the trade-off between the rate of the latent code and the distortion of the reconstruction. The higher the rate, the more information of $x$ is preserved in $z$. However, if the rate is high, it lessen the generalization ability of the $\log p(x \mid z, \theta)$.
-- In latent diffusion formulation, the distortion $D$ is measured on the first latent code $z_1$ encoded from $x$ by the encode-decoder architecture.
-- The rate $R$ measures the different between the forward process and the backward process in diffusion model, eventually it is the matching term that trains the diffusion model.
-- There is a closed-form of the mutual information $I(Z,X)$. We can utilize this formulation to design a specific regularization term to control the rate-distortion trade-off benefiting downstream tasks.
+- The Rate-Distortion theory is a theory that describes the trade-off between the rate of the latent code and the distortion of the reconstruction. The higher the rate, the more information of $$x$$ is preserved in $$z$$. However, if the rate is high, it lessen the generalization ability of the $$\log p(x \mid z, \theta)$$.
+- In latent diffusion formulation, the distortion $D$ is measured on the first latent code $$z_1$$ encoded from $$x$$ by the encode-decoder architecture.
+- The rate $$R$$ measures the different between the forward process and the backward process in diffusion model, eventually it is the matching term that trains the diffusion model.
+- There is a closed-form of the mutual information $$I(Z,X)$$. We can utilize this formulation to design a specific regularization term to control the rate-distortion trade-off benefiting downstream tasks.
 
-2023-09-01
---------------------------
+## 2023-09-01
+
 (#Research) On reading: [TRADING INFORMATION BETWEEN LATENTS IN HIERARCHICAL VARIATIONAL AUTOENCODERS](https://openreview.net/forum?id=eWtMdr6yCmL) published on ICLR 2023.
 
 Revisit Rate-Distortion trade-off theory:
 
 - Problem setting of Rate-Distortion trade-off
   - How to learn a "useful" representation of data for downstream tasks?
-  - Using powerful encoder-decoder such as VAE, PixelCNN, etc. can easily ignore $z$ and still obtain high marginal likelihood $p(x \mid \theta)$. Therefore, we need to use a regularization term to encourage the encoder to learn a "useful" representation of $z$, for example, as in Beta-VAE.
+  - Using powerful encoder-decoder such as VAE, PixelCNN, etc. can easily ignore $z$ and still obtain high marginal likelihood $$p(x \mid \theta)$$. Therefore, we need to use a regularization term to encourage the encoder to learn a "useful" representation of $z$, for example, as in Beta-VAE.
 
 Rate distortion theory?
-$$ H - D \leq I(z,x) \leq R $$
 
-where $H$ is the entropy of data $x$ and $D$ is the distortion of the reconstruction $x$ from $z$. $R$ is the rate of the latent code $z$ (e.g., compression rate).
+$$
+H - D \leq I(z,x) \leq R
+$$
 
-$R = \log \frac{e(z \mid x)}{m(z)}$ where $e(z \mid x)$ is the encoder and $m(z)$ is the prior distribution of $z$. The higher the rate, the more information of $x$ is preserved in $z$. However, if the rate is high, it lessen the generalization ability of the $\log p(x \mid z, \theta)$.
+where $$H$$ is the entropy of data $x$ and $D$ is the distortion of the reconstruction $$x$$ from $$z$$. $$R$$ is the rate of the latent code $$z$$ (e.g., compression rate).
 
-The mutual information has upper bound by the rate of the latent code $z$. For example, if $R=0$ then $I(z,x)=0$. This is because $e(z \mid x) = m(z)$, which means that the encoder cannot learn anything from the data $x$.
+$$R = \log \frac{e(z \mid x)}{m(z)}$$ where $$e(z \mid x)$$ is the encoder and $$m(z)$$ is the prior distribution of $$z$$. The higher the rate, the more information of $$x$$ is preserved in $$z$$. However, if the rate is high, it lessen the generalization ability of the $$\log p(x \mid z, \theta)$$.
+
+The mutual information has upper bound by the rate of the latent code $$z$$. For example, if $$R=0$$ then $$I(z,x)=0$$. This is because $$e(z \mid x) = m(z)$$, which means that the encoder cannot learn anything from the data $x$.
 
 Motivation of the paper:
 
-- Reconsider the rate distortion theory in the context of hierarchical VAEs where there are multiple levels of latent codes $z_1, z_2, \dots, z_L$.
-- The authors proposed a direct links between the input $x$ and the latent codes $z_1, z_2, \dots, z_L$. With this architecture, they can decompose the total rate to the rate of each latent code $z_1, z_2, \dots, z_L$. Unlike the standard hierarchical VAEs, where the rate of each latent code is not directly related to the input $x$ but the previous latent code $z_{l-1}$.
+- Reconsider the rate distortion theory in the context of hierarchical VAEs where there are multiple levels of latent codes $$z_1, z_2, \dots, z_L$$.
+- The authors proposed a direct links between the input $$x$$ and the latent codes $$z_1, z_2, \dots, z_L$$. With this architecture, they can decompose the total rate to the rate of each latent code $$z_1, z_2, \dots, z_L$$. Unlike the standard hierarchical VAEs, where the rate of each latent code is not directly related to the input $$x$$ but the previous latent code $$z_{l-1}$$.
 - Then they can control the rate of each latent code.
 
 Standard hierarchical VAEs:
-![Standard HVAE](https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/230901/standard-hvae-objective.png)
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        {% include figure.html path="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/230901/standard-hvae-objective.png" class="img-fluid rounded z-depth-1" zoomable=true %}
+    </div>
+</div>
+<div class="caption">
+    Standard hierarchical VAEs
+</div>
 
 Generalized Hierarchical VAEs:
-![Hierarchical VAEs](https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/230901/all-three-hvae.png)
 
-2023-08-30
---------------------------
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        {% include figure.html path="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/230901/all-three-hvae.png" class="img-fluid rounded z-depth-1" zoomable=true %}
+    </div>
+</div>
+<div class="caption">
+    Generalized Hierarchical VAEs
+</div>
+
+## 2023-08-30
+
 (#Research) NVIDIA event: Transforming Your Development and Business with Large Language Models
 
 - Link to the event: [https://transformingthefuturelargelang.splashthat.com/](https://transformingthefuturelargelang.splashthat.com/)
@@ -202,7 +301,6 @@ LLM Training and Inference at Scale. Customized LLM with Prompt-Learning
   - Parameter efficient fine-tuning: LoRA, IA3, Adapters
   - Fine-tuning: SFT, RLHF
 
-
 Questions:
 
 - What is Nvidia platform that alot companies based on?
@@ -215,26 +313,28 @@ Nvidia Framework:
 - BioNeMo
 - Picasso
 
-2023-08-26
---------------------------
+## 2023-08-26
+
 (#F4T) Review 10 best ideas/concepts from Charlie Munger. Link to the blog post: [https://tuananhbui89.github.io/blog/f4t/](https://tuananhbui89.github.io/blog/f4t/)
 
-2023-08-25
---------------------------
+## 2023-08-25
+
 (#Research) Data-Free Knowledge Distillation
 
 - Reference: [Data-Free Model Extraction](https://arxiv.org/abs/2011.14779)
 - What is Data-Free KD? It is a method to transfer knowledge from a teacher model to a student model without using any data. The idea is learn a generator that can generate synthetic data that is similar to the data from the teacher model. Then, we can use the synthetic data to train the student model.
 $$L_S = L_{KL} (T(\hat{x}), S(\hat{x}))$$
 
-Where $T(\hat{x})$ is the teacher model and $S(\hat{x})$ is the student model. $\hat{x}$ is the synthetic data generated by generator $G$.
+Where $$T(\hat{x})$$ is the teacher model and $$S(\hat{x})$$ is the student model. $$\hat{x}$$ is the synthetic data generated by generator $G$.
 
-$$ L_G = L_{CE} (T(\hat{x}), y) - L_{KL} (T(\hat{x}), S(\hat{x})) $$
+$$
+L_G = L_{CE} (T(\hat{x}), y) - L_{KL} (T(\hat{x}), S(\hat{x}))
+$$
 
 Where $y$ is the label of the synthetic data. Minimizing first term encourages the generator generate data that fall into the target class $y$, while maximizing the second term encourages the generator generate diverse data? 
 Compared to GAN, we can think both teacher and student models are acted as discriminators.
 
-This adversarial game need to intergrate to the training process in each iteration. For example, after each iteration, you need to minimizing $L_G$ to generate a new synthetic data. And then using $\hat{x}$ to train the student. This is to ensure that the synthetic data is new to the student model.
+This adversarial game need to intergrate to the training process in each iteration. For example, after each iteration, you need to minimizing $$L_G$$ to generate a new synthetic data. And then using $$\hat{x}$$ to train the student. This is to ensure that the synthetic data is new to the student model.
 Therefore, one of the drawbacks of DFKD is that it is very slow.
 
 <!-- Tuan (Henry)' work on improving Data-Free KD:
@@ -243,53 +343,61 @@ Therefore, one of the drawbacks of DFKD is that it is very slow.
 - One important point is that the Noisy layer need to reset its weight every time we generate a new batch of synthetic data (while fixing the generator). This is to ensure the diversity of the synthetic data.
 - One interesting finding is that the noisy layer can be applied to all kinds of label-text embedding from different classes, while if using individual noise layers for each class, the performance is worse. -->
 
-2023-08-21
---------------------------
+## 2023-08-21
+
 (#Research) On reading: [Decoupled Kullback-Leibler Divergence Loss](https://arxiv.org/abs/2305.13948).
 
 - Paper link: [https://arxiv.org/abs/2305.13948](https://arxiv.org/abs/2305.13948)
 - Main idea: Minimize the difference between two logit distributions (weighted MSE loss)
 
-|![Decoupled Kullback-Leibler (DKL)](https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/AML/DecoupledKL.png)|
-|:--:|
-|*Decoupled Kullback-Leibler (DKL) [(reference)](https://arxiv.org/abs/2305.13948)*|
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        {% include figure.html path="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/AML/DecoupledKL.png" class="img-fluid rounded z-depth-1" zoomable=true %}
+    </div>
+</div>
+<div class="caption">
+    Decoupled Kullback-Leibler (DKL) <a href="https://arxiv.org/abs/2305.13948">(reference)</a>.
+</div>
 
+## 2023-08-20
 
-2023-08-20
---------------------------
 (#Research) On reading: [Classifier-Free Diffusion Guidance](https://arxiv.org/abs/2207.12598).
 
 - Paper link: [https://arxiv.org/abs/2207.12598](https://arxiv.org/abs/2207.12598)
 - Motivation: Training a diffusion model to generate images from a specific class.
 Dhariwal \& Nichol (2021) proposed classifier guidance method, which uses an auxiliary classifier
-- Previous work (i.e., [Classifier Guided Diffusion](https://arxiv.org/abs/2105.05233)) train a classifier $f_\phi (y \mid x_t,t)$ on noisy images x and use the gradient $\nabla_{x} log f_{\phi}(x_t)$ to guide the sampling process towards the target class y. However, this method requires a classifier jointly trained with the diffusion model.
+- Previous work (i.e., [Classifier Guided Diffusion](https://arxiv.org/abs/2105.05233)) train a classifier $$f_\phi (y \mid x_t,t)$$ on noisy images x and use the gradient $$\nabla_{x} log f_{\phi}(x_t)$$ to guide the sampling process towards the target class y. However, this method requires a classifier jointly trained with the diffusion model.
 
 
 (#Idea) Mixup Class-Guidance Diffusion model.
 
 - Main idea: Train a diffusion model that can generate not only images from a specific class but also images from a mixup of two classes. It can be applied to Continual Learning setting as in [DDGR](https://openreview.net/pdf?id=RlqgQXZx6r) or Domain Generalization setting.
-- Nice way to generate mixup labels with just y and lambda. Normally, we need to have two classes $y_i,y_j$ and a parameter $\lambda$ to generate a mixup label $y_{mixup} = \lambda y_i + (1-\lambda) y_j$. However, we can have another way to generate mixup label, with one label $y$, and one parameter $\gamma$ to control the mixup ratio. For example, given a set of all labels $Y=\{ y\_i \}\_{i=1}^N$, we can arrange them in a circle, and then we can generate a mixup label $y_{mixup}$ by moving $\gamma$ steps clockwise from $y$. What is the benefit of this method?
+- Nice way to generate mixup labels with just y and lambda. Normally, we need to have two classes $$y_i,y_j$$ and a parameter $$\lambda$$ to generate a mixup label $$y_{mixup} = \lambda y_i + (1-\lambda) y_j$$. However, we can have another way to generate mixup label, with one label $$y$$, and one parameter $\gamma$ to control the mixup ratio. For example, given a set of all labels $$Y=\{ y\_i \}\_{i=1}^N$$, we can arrange them in a circle, and then we can generate a mixup label $$y_{mixup}$$ by moving $$\gamma$$ steps clockwise from $$y$$. What is the benefit of this method?
     - Recall the equation in Classifier-Free Guidance paper 
   $$\nabla_{x_t} \log p(y|x_t)=\nabla_{x_t} \log p(x_t|y) - \nabla_{x_t} \log p(x_t)$$, 
-  where $\nabla\_{x\_t} \log p(y \mid x\_t)$ is the gradient of the implicit classifier.
+  where $$\nabla\_{x\_t} \log p(y \mid x\_t)$$ is the gradient of the implicit classifier.
     - In case of mixup label, we have $$\nabla_{x_t} \log p(y_{mixup}|x_t)=\nabla_{x_t} \log p(x_t|y_{mixup}) - \nabla_{x_t} \log p(x_t)$$, 
-  where $y_{mixup} = \gamma y_i + (1-\gamma) y_j$, which requires two gradients $\nabla_{x_t} \log p(y_{i}  \mid x_t)$ and $\nabla_{x_t} \log p(y_{j} \mid x_t)$.
+  where $$y_{mixup} = \gamma y_i + (1-\gamma) y_j$$, which requires two gradients $$\nabla_{x_t} \log p(y_{i}  \mid x_t)$$ and $$\nabla_{x_t} \log p(y_{j} \mid x_t)$$.
 - Some observations/ideas from other work can be applied:
-  - [PixelAsParam: A Gradient View on Diffusion Sampling with Guidance](https://proceedings.mlr.press/v202/dinh23a/dinh23a.pdf): In this paper, the authors observed that the gradient of the auxiliary classifier $\nabla_{x_t} \log p(y \mid x_t)$ and the gradient of the denoising process $\nabla_{x_t} \log p(x_t)$ are conflicting (refer to Figure 2). It can be interpreted as the gradient of the auxiliary classifier is trying to move the sample towards a target class, while the gradient of the denoising process is trying to make the sample more diverse, i.e., their goals are contradictory. In this paper, they applied a multi-objective optimization method to project the gradient of auxiliary classifier onto a direction that is less conflicting. The result is that the generated images are in target class but still diverse. (better in both FID - distinguish between synthetic and real images - and Inception Score - distinguish between different classes of synthetic images). The time when the conflicting happens is also interesting. It is more conflicting at the beginning of the sampling process, and then it becomes less conflicting.
+  - [PixelAsParam: A Gradient View on Diffusion Sampling with Guidance](https://proceedings.mlr.press/v202/dinh23a/dinh23a.pdf): In this paper, the authors observed that the gradient of the auxiliary classifier $$\nabla_{x_t} \log p(y \mid x_t)$$ and the gradient of the denoising process $$\nabla_{x_t} \log p(x_t)$$ are conflicting (refer to Figure 2). It can be interpreted as the gradient of the auxiliary classifier is trying to move the sample towards a target class, while the gradient of the denoising process is trying to make the sample more diverse, i.e., their goals are contradictory. In this paper, they applied a multi-objective optimization method to project the gradient of auxiliary classifier onto a direction that is less conflicting. The result is that the generated images are in target class but still diverse. (better in both FID - distinguish between synthetic and real images - and Inception Score - distinguish between different classes of synthetic images). The time when the conflicting happens is also interesting. It is more conflicting at the beginning of the sampling process, and then it becomes less conflicting.
   - Mixing between background and foreground using FFT/IFFT transformation.
-  
-|![Confliction of gradients](https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/diffusion/confliction_gradient_diffusion.png)|
-|:--:|
-|*Confliction of gradients [(reference)](https://proceedings.mlr.press/v202/dinh23a/dinh23a.pdf)*|
 
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        {% include figure.html path="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/diffusion/confliction_gradient_diffusion.png" class="img-fluid rounded z-depth-1" zoomable=true %}
+    </div>
+</div>
+<div class="caption">
+    Confliction of gradients <a href="https://proceedings.mlr.press/v202/dinh23a/dinh23a.pdf">(reference)</a>.
+</div>
 
-2023-08-19
---------------------------
+## 2023-08-19
+
 (#Coding) How to show an image in Github page. Reference to this post: [https://tuananhbui89.github.io/blog/2023-08-19-showingimage/](https://tuananhbui89.github.io/blog/2023-08-19-showingimage/)
 
 
-2023-08-18
---------------------------
+## 2023-08-18
+
 (#Research) On Reading: DDGR: Continual Learning with Deep Diffusion-based Generative Replay
 
 - Paper link: [https://openreview.net/pdf?id=RlqgQXZx6r](https://openreview.net/pdf?id=RlqgQXZx6r)
@@ -306,29 +414,31 @@ Dhariwal \& Nichol (2021) proposed classifier guidance method, which uses an aux
 
 (#Idea) We can use Class-Guidance Diffusion model to learn mixup data and then can use that model to generate not only data from pure classes but also from mixup classes. It is well accepted that mixup technique can improve the generalization of classifier, so it can be applied to CL setting as well.
 
-2023-08-17
---------------------------
+## 2023-08-17
+
 (#Code) How to disable NSFW detection in Huggingface.
 
 - context: I am trying to generate inappropriate images using Stable Diffusion with prompts from the I2P benchmark. However, the NSFW detection in Huggingface is too sensitive and it filters out all of the images, and return a black image instead. Therefore, I need to disable it.
 - solution: modify the pipeline_stable_diffusion.py file in the Huggingface library. just return image and None in the run_safety_checker function.
 
 ```python
-    # line 426 in the pipeline_stable_diffusion.py
-    def run_safety_checker(self, image, device, dtype):
-        return image, None
-        if self.safety_checker is None:
-            has_nsfw_concept = None
+# line 426 in the pipeline_stable_diffusion.py
+def run_safety_checker(self, image, device, dtype):
+    return image, None
+
+    # The following original code will be ignored
+    if self.safety_checker is None:
+        has_nsfw_concept = None
+    else:
+        if torch.is_tensor(image):
+            feature_extractor_input = self.image_processor.postprocess(image, output_type="pil")
         else:
-            if torch.is_tensor(image):
-                feature_extractor_input = self.image_processor.postprocess(image, output_type="pil")
-            else:
-                feature_extractor_input = self.image_processor.numpy_to_pil(image)
-            safety_checker_input = self.feature_extractor(feature_extractor_input, return_tensors="pt").to(device)
-            image, has_nsfw_concept = self.safety_checker(
-                images=image, clip_input=safety_checker_input.pixel_values.to(dtype)
-            )
-        return image, has_nsfw_concept
+            feature_extractor_input = self.image_processor.numpy_to_pil(image)
+        safety_checker_input = self.feature_extractor(feature_extractor_input, return_tensors="pt").to(device)
+        image, has_nsfw_concept = self.safety_checker(
+            images=image, clip_input=safety_checker_input.pixel_values.to(dtype)
+        )
+    return image, has_nsfw_concept
 ```
 
 (#Idea, #GenAI, #TML) Completely erase a concept (i.e., NSFW) from latent space of Stable Diffusion.
@@ -336,8 +446,8 @@ Dhariwal \& Nichol (2021) proposed classifier guidance method, which uses an aux
 - Problem: Current methods such as ESD (Erasing Concepts from Diffusion Models) can erase quite well a concept from the Stable Diffusion. However, recent work (Circumventing Concept Erasure Methods for Text-to-Image Generative Models) has shown that it is possible to recover the erased concept by using a simple Textual Inversion method.
 - Firstly, personally, I think that the approach in Pham et al. (2023) is not very convincing. Because, they need to use additional data (25 samples/concept) to learn a new token associated with the removed concept. So, it is not surprising that they can generate images with the removed concept. It is becaused of the power of the personalized method, not because of the weakness of the ESD method. It would be better if we can compare performance on recovering concept A (concept A is totally new to the base Stable Diffusion model such as your personal images) on two models: a SD model injected with concept A and a model fine-tuned with concept A and then erased concept A and then injected concept A back. If the latter model can not generate images with concept A better than inject concept A directly to the base model, then we can say that the ESD method is effective.
 
-2023-08-16
---------------------------
+## 2023-08-16
+
 (#Research) The Inaproppriate Image Prompts (I2P) benchmark.
 
 - Including 4703 unique prompts to generate inappropriate images with Stable Diffusion. There are combinations of 7 categories including: hate, harrassment, violence, self-harm, sexual, shocking and illegal activities.
@@ -346,22 +456,22 @@ Mitigating Inappropriate Degeneration in Diffusion Models](https://arxiv.org/abs
 - Huggingface page: [https://huggingface.co/datasets/AIML-TUDA/i2p](https://huggingface.co/datasets/AIML-TUDA/i2p)
 
 
-2023-08-14
---------------------------
+## 2023-08-14
+
 (#Research) Some trends in KDD 2023: Graph Neural Networks and Casual Inference from Industrial Applications.
 
 (#Research) Graph Neural Networks, definition of neighborhood aggregation. Most of GNN methods work on million of nodes, to scale to billion of nodes, there are a lot of tricks under the hood (from Dinh's working experience in Trustingsocial).
 
 (#Research) (With Trung and Van Anh) We derive a nice framework that connect data-space distributional robustness (as in our ICLR 2022 paper) and model-space distributional robustness (as in SAM).
 
-2023-08-08
---------------------------
+## 2023-08-08
+
 (#Research) On reading: Erasing Concepts from Diffusion Models (ICCV 2023).  [https://erasing.baulab.info/](https://erasing.baulab.info/)
 
 (#Research) On reading: CIRCUMVENTING CONCEPT ERASURE METHODS FOR TEXT-TO-IMAGE GENERATIVE MODELS. Project page: [https://nyu-dice-lab.github.io/CCE/](https://nyu-dice-lab.github.io/CCE/) 
 
-2023-08-06
---------------------------
+## 2023-08-06
+
 (#Coding) Strange bug in generating adversarial examples using Huggingface.
 
 - Context: I am trying to implement similar idea as in the [Anti-Dreambooth project](https://anti-dreambooth.github.io/) to generate adversarial perturbation for the Textual Inversion project. However, I got this bug which cost me 2 days to figure out. 
@@ -369,29 +479,29 @@ Mitigating Inappropriate Degeneration in Diffusion Models](https://arxiv.org/abs
 - Cause: Because of the Huggingface accelerator. (Ref: [gradient_accumulation](https://huggingface.co/docs/accelerate/usage_guides/gradient_accumulation)). The accelerator is to help to accelerate the training process by accumulating the gradient over multiple batches. It requires the model and the train dataloader to be prepared with function `accelerator.prepare()`. However, in our case, we do not use the train dataloader (see the [blog post about Anti-Dreambooth](https://tuananhbui89.github.io/posts/2023/08/papers/antidreambooth/)). Therefore, when we still use the accelerator.accumulate() in the training loop, the gradient is accumulated over multiple batches, and the gradient on the input tensor is None.
 - Fix: remove the accelerator.accumulate() in the training loop. No it doesn't work! 
 
-2023-08-05
---------------------------
+## 2023-08-05
+
 (#Coding) Understand the implementation of the [Anti-Dreambooth project](https://anti-dreambooth.github.io/). Ref to the [blog post](https://tuananhbui89.github.io/posts/2023/08/papers/antidreambooth/)
 
 
-2023-08-04 
---------------------------
+## 2023-08-04 
+
 (#Research) Three views of Diffusion Models:
 
 - Probabilistic view point as in DDPM
 - Denoising Score matching
 - Stochastic Differential Equations (SDE) view point (which is the most general one)
 
-2023-08-03
---------------------------
+## 2023-08-03
+
 (#Research) Trusted Autonomous Systems
 
 - Trusted Autonomous Systems (TAS) is Australia’s first Defence Cooperative Research Centre.
 - There are many trustworthy related projects undergoing in this center.  
 - Reference: [https://tasdcrc.com.au/ ](https://tasdcrc.com.au/about-us/)
 
-2023-08-01
---------------------------
+## 2023-08-01
+
 (#Research) Helmholtz Visiting Researcher Grant
 
 - https://www.helmholtz-hida.de/en/new-horizons/hida-visiting-program/ 
@@ -399,8 +509,8 @@ Mitigating Inappropriate Degeneration in Diffusion Models](https://arxiv.org/abs
 - Deadline: 16 August 2023 and will end on 15 October 2023.
 - CISPA - Helmholtz Center for Information Security https://cispa.de/en/people 
 
-2023-07-31
---------------------------
+## 2023-07-31
+
 (#Research) Australia Research Council (ARC) Discovery Project (DP) 2023.
 
 - The ARC DP is a very competitive grant in Australia. 
@@ -410,15 +520,15 @@ Mitigating Inappropriate Degeneration in Diffusion Models](https://arxiv.org/abs
 
 
 
-2023-07-30
---------------------------
+## 2023-07-30
+
 () First Home Buyer Super Saver Scheme.
 
 - Save mony for first home buyer inside superannuation fund. Apply 15% tax rate instead of marginal tax rate. When withdraw, apply another 15% tax rate. Each individual can save up to 50k for cross all years. 
 
 
-2023-07-27
---------------------------
+## 2023-07-27
+
 
 (#GenAI) How to run textual inversion using Huggingface library locally without login to Huggingface with token. Including:
 
@@ -427,8 +537,8 @@ Mitigating Inappropriate Degeneration in Diffusion Models](https://arxiv.org/abs
 - Setup environment to run textual inversion locally. Setup dependencies. 
 - Setup script
 
-2023-07-24
---------------------------
+## 2023-07-24
+
 
 (#Productivity) How to present a slide and take notes on the same screen simultaneously (e.g., it is very useful when teaching or giving a talk). At Monash, the lecture theatre has MirrorOp installed on all screens that can connect wirelessly with a laptop but it is not convenient when we want to take notes.
 
@@ -436,8 +546,8 @@ Mitigating Inappropriate Degeneration in Diffusion Models](https://arxiv.org/abs
 - Alternative solution: join Zoom meeting on personal computer (for presentation) and on Ipad (for taking notes) and share screen from Ipad on Zoom if needed. PC can connect to the screen using HDMI cable or MirrorOp. 
 
 
-2023-07-23
---------------------------
+## 2023-07-23
+
 
 Micromouse competition.
 
@@ -451,8 +561,7 @@ Reference:
 - [The Fastest Maze-Solving Competition On Earth by Veritasium.](https://youtu.be/ZMQbHMgK2rw)  
 - [The Fosbury Flop—A Game-Changing Technique](https://invention.si.edu/fosbury-flop-game-changing-technique)
 
-2023-07-22
---------------------------
+## 2023-07-22
 
 (#Parenting) ATAR and university admission. 
 
@@ -463,8 +572,7 @@ https://arxiv.org/pdf/2307.10163.pdf
 
 If you have some math equations in your PowerPoint, and open it on Google Slide, the equations will be converted to images. If you accidently sync the file with your original file, all math equations will be lost.
 
-2023-07-21
---------------------------
+## 2023-07-21
 
 (#F4T) You cannot solve a problem with the same thinking that created it. Albert Einstein. 
 
@@ -480,4 +588,3 @@ Context: I have just started my new position as a RF at the Department of Data S
 - Teaching matter (because new semester is about to start)
 - Head of departmemt's presentation about current activities (especially hiring and open positions, and budget)
 - Ph.D. student recruitment, how competitive it is and how to rank the candidates (some insights: academic record and research record)
-

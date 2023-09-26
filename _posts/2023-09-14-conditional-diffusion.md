@@ -1,24 +1,59 @@
 ---
-title: 'On Reading: Diffusion Models Beat GANs on Image Synthesis'
+layout: post
+title: On Reading - Diffusion Models Beat GANs on Image Synthesis
+description: Try to understand classifier guidance and how to implement it
+tags: reading 
+giscus_comments: true
 date: 2023-09-14
-permalink: /posts/2023/09/papers/conditional-diffusion/
-tags:
-  - Generative model
-  - Diffusion model
-  - Paper reading
+featured: false
+
+# authors:
+#   - name: Tuan-Anh Bui
+#     url: "https://tuananhbui89.github.io/"
+#     affiliations:
+#       name: Monash University
+
+# bibliography: 2023-06-02-distill.bib
+
+# Optionally, you can add a table of contents to your post.
+# NOTES:
+#   - make sure that TOC names match the actual section names
+#     for hyperlinks within the post to work correctly.
+#   - we may want to automate TOC generation in the future using
+#     jekyll-toc plugin (https://github.com/toshimaru/jekyll-toc).
+# toc:
+#   - name: About the paper
+#     # if a section has subsections, you can add them as follows:
+#     # subsections:
+#     #   - name: Example Child Subsection 1
+#     #   - name: Example Child Subsection 2
+#   - name: Approach
+#   - name: How to implement
+#   - name: Notes
+
+# Below is an example of injecting additional post-specific styles.
+# If you use this post as a template, delete this _styles block.
+# _styles: >
+#   .fake-img {
+#     background: #bbb;
+#     border: 1px solid rgba(0, 0, 0, 0.1);
+#     box-shadow: 0 0px 4px rgba(0, 0, 0, 0.1);
+#     margin-bottom: 12px;
+#   }
+#   .fake-img p {
+#     font-family: monospace;
+#     color: white;
+#     text-align: left;
+#     margin: 12px 0;
+#     text-align: center;
+#     font-size: 16px;
+#   }
+
+toc:
+  beginning: true
 ---
-<br>
 
-- [About the paper](#about-the-paper)
-- [Understanding Conditional Diffusion Process](#understanding-conditional-diffusion-process)
-- [Classifier Guidance](#classifier-guidance)
-- [How to implement](#how-to-implement)
-  - [How to train the diffusion model](#how-to-train-the-diffusion-model)
-  - [How to train the classifier](#how-to-train-the-classifier)
-- [References](#references)
-
-About the paper
-=====
+## About the paper
 
 - Published at NeurIPS 2021
 - Affiliations: OpenAI
@@ -26,8 +61,7 @@ About the paper
 - Link to the paper: [https://arxiv.org/pdf/2105.05233.pdf](https://arxiv.org/pdf/2105.05233.pdf)
 - Link to the code: [https://github.com/openai/guided-diffusion](https://github.com/openai/guided-diffusion)
 
-Understanding Conditional Diffusion Process
-=====
+## Understanding Conditional Diffusion Process
 
 In this section, we will go through the Conditional Diffusion Process introduced in Appendix H of the paper.
 
@@ -52,8 +86,7 @@ $$\hat{q}(x_{t} \mid x_{t+1}, y) = \frac{q(x_{t} \mid x_{t+1}) \hat{q}(y \mid x_
 
 The term $\hat{q}(y \mid x_{t+1})$ is considered as constant w.r.t. $x_t$. So $x_t$ can be sampled from the above distribution, where $\hat{q}(y \mid x_{t})$ is approximated by an auxiliary classifier, which is trained to predict the label $y$ from the sample $x_t$. And $q(x_{t} \mid x_{t+1})$ is the reverse process of the unconditional diffusion process which has been trained.
 
-Classifier Guidance
-=====
+## Classifier Guidance
 
 After understanding the conditional diffusion process, we now go through the classifier guidance to see how to use the classifier to guide the sampling process.
 In the paper, the authors proposed two sampling approaches: 
@@ -63,8 +96,7 @@ In the paper, the authors proposed two sampling approaches:
 
 ![Two sampling methods](https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/classifier_guidance/two_sampling_methods.png)
 
-How to implement
-=====
+## How to implement
 
 Link to the original implementation: [https://github.com/openai/guided-diffusion](https://github.com/openai/guided-diffusion)
 
@@ -263,8 +295,7 @@ def p_mean_variance(
     }
 ```
 
-
-## How to train the diffusion model
+### How to train the diffusion model
 
 Training the diffusion model in this project is similar as in the DDPM or DDIM papers. Because even using auxiliary classifier, they are trained independently. The minimal code to train the diffusion model is as follows, which is based on the code from file [`image_train.py`](https://github.com/openai/guided-diffusion/blob/main/scripts/image_train.py) and [`train_util.py`](https://github.com/openai/guided-diffusion/blob/main/guided_diffusion/train_util.py#L22)
 
@@ -334,7 +365,7 @@ def training_losses(self, model, x_start, t, model_kwargs=None, noise=None):
 
 ```
 
-## How to train the classifier
+### How to train the classifier
 
 In the following code snippet, we will go through the minimal code to train the classifier. The code is based on the file `classifier_train.py`. It is worth noting that the classifier can be trained on either training set or generated images from the diffusion model, controlled by the parameter `args.noised`
 
@@ -365,8 +396,6 @@ def main():
 
 ```
 
-
-References
-=====
+## References
 
 Yang Song, Jascha Sohl-Dickstein, Diederik P. Kingma, Abhishek Kumar, Stefano Ermon, and Ben Poole. Score-based generative modeling through stochastic differential equations. ICLR 2021.

@@ -1,33 +1,69 @@
 ---
-title: 'On Reading: An Image is Worth One Word: Personalizing Text-to-Image Generation using Textual Inversion'
-date: 2023-08-05
-permalink: /posts/2023/08/papers/textualinversion/
-tags:
-  - Generative model
-  - Diffusion model
-  - Paper reading
+layout: post
+title: On Reading - Textual Inversion
+description: Personalizing Text-to-Image Generation using Textual Inversion
+tags: reading diffusion genai
+giscus_comments: true
+date: 2023-08-07
+featured: false
+
+# authors:
+#   - name: Tuan-Anh Bui
+#     url: "https://tuananhbui89.github.io/"
+#     affiliations:
+#       name: Monash University
+
+# bibliography: 2023-06-02-distill.bib
+
+# Optionally, you can add a table of contents to your post.
+# NOTES:
+#   - make sure that TOC names match the actual section names
+#     for hyperlinks within the post to work correctly.
+#   - we may want to automate TOC generation in the future using
+#     jekyll-toc plugin (https://github.com/toshimaru/jekyll-toc).
+# toc:
+#   - name: About the paper
+#     # if a section has subsections, you can add them as follows:
+#     # subsections:
+#     #   - name: Example Child Subsection 1
+#     #   - name: Example Child Subsection 2
+#   - name: How to implement
+#     subsections:
+#       - name: Specific Token
+#       - name: Tokenizer thing
+#       - name: Prompting process
+
+# Below is an example of injecting additional post-specific styles.
+# If you use this post as a template, delete this _styles block.
+# _styles: >
+#   .fake-img {
+#     background: #bbb;
+#     border: 1px solid rgba(0, 0, 0, 0.1);
+#     box-shadow: 0 0px 4px rgba(0, 0, 0, 0.1);
+#     margin-bottom: 12px;
+#   }
+#   .fake-img p {
+#     font-family: monospace;
+#     color: white;
+#     text-align: left;
+#     margin: 12px 0;
+#     text-align: center;
+#     font-size: 16px;
+#   }
+
+toc:
+  beginning: true
 ---
-<br>
-
-- [About the paper](#about-the-paper)
-- [How to implement](#how-to-implement)
-  - [How to set up the specific token and the input prompt](#how-to-set-up-the-specific-token-and-the-input-prompt)
-    - [Tokenizer thing](#tokenizer-thing)
-    - [Difference in prompting process between "Textual Inversion" and "Dreambooth" projects](#difference-in-prompting-process-between-textual-inversion-and-dreambooth-projects)
-  - [How to process the dataset](#how-to-process-the-dataset)
-  - [How to train and learn the specific token](#how-to-train-and-learn-the-specific-token)
-  - [How to package the learned token and use it for inference (or upload to the hub)](#how-to-package-the-learned-token-and-use-it-for-inference-or-upload-to-the-hub)
 
 
-About the paper
-=====
+
+## About the paper
 
 - Published at ICLR 2023
 - Affiliations: Tel Aviv University, Nvidia.
 - Main idea: Every visual concept can be represented by a paragraph of text. The authors propose a method to learn a specific token that can represent a visual concept (It can learned so that with this specific token, the text-to-image can reconstruct the input images). The token is then used to generate a new image that contains the visual concept.  
 
-How to implement
-=====
+## How to implement
 
 In this blog post, I would like to break down some main steps in the implementation provided by Huggingface in the example code [here](https://github.com/huggingface/diffusers/tree/main/examples/textual_inversion). There are also two notebooks for training (learning conceptual token) and inference (using conceptual token to generate new images) [here](https://colab.research.google.com/github/huggingface/notebooks/blob/main/diffusers/sd_textual_inversion_training.ipynb) and [here](https://colab.research.google.com/github/huggingface/notebooks/blob/main/diffusers/stable_conceptualizer_inference.ipynb).
 
@@ -36,7 +72,7 @@ There are several main points as follows:
 - How to prepare the dataset 
 - How to train and learn the specific token 
 
-## How to set up the specific token and the input prompt
+### How to set up the specific token and the input prompt
 
 In this project, there is an assumption that every visual concept can be represented by a paragraph of text. For example, the visual concept of your dog can be described as: "The Shiba dog boasts a striking and distinctive appearance that captivates all who gaze upon it. With a compact yet sturdy build, its confident stance exudes an air of self-assured elegance. A plush double coat of fur, often seen in shades of red, sesame, black and tan, or cream, adds to its allure. The fur frames a fox-like face, adorned with piercing almond-shaped eyes that gleam with intelligence and curiosity. Its erect, triangular ears stand at attention, poised to catch every sound that graces its surroundings. A tightly curled tail rests gracefully over its back, accentuating the Shiba's poise and dignity." (I use ChatGPT to write this paragraph about a Shiba dog) 
 
@@ -140,12 +176,14 @@ So the difference between the two projects is that:
 - In Dreambooth, only one neural prompt is used, while in Textual Inversion, there is a list of neural prompts
 - In Textual Inversion, it is important to specify the `placeholder_token` to reuse the same token in other prompts, while in Dreambooth, the identifier (i.e., `sks`) is used to specify the position in the embedding matrix to be updated (corresponding to the specific token). In inferencce, a prompt with the same identifier will be used to generate images, for example, `a photo of sks dog in the beach`. So to me, the whole prompt in Dreambooth is like a placeholder token in Textual Inversion. However, in this case, how the output looks like if we use a prompt that not contains the whole `instance_prompt`? For example, `a sks dog walking on the beach`?
 
-## How to process the dataset 
+### How to process the dataset
 
-The above step shows how the specific token is processed. In this step, we will see in a higher level of how the training dataset is processed.
+To be continued... :D
 
+### How to train and learn the specific token
 
-## How to train and learn the specific token 
+To be continued... :D
 
+### How to package the learned token and use it for inference (or upload to the hub)
 
-## How to package the learned token and use it for inference (or upload to the hub)
+To be continued... :D
