@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2023-09-26T16:15:07+10:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2023-09-27T22:33:38+10:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
 </subtitle><entry><title type="html">On Reading - Flow Matching for Generative Modeling</title><link href="https://tuananhbui89.github.io/blog/2023/flowmatching/" rel="alternate" type="text/html" title="On Reading - Flow Matching for Generative Modeling" /><published>2023-09-22T00:00:00+10:00</published><updated>2023-09-22T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/2023/flowmatching</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2023/flowmatching/"><![CDATA[<h2 id="about-the-paper">About the paper</h2>
 
 <ul>
@@ -11,78 +11,78 @@
 
 <p>Continuous Normalizing Flows (CNF) is a class of generative models that can be trained by maximum likelihood. The main idea is to transform a simple distribution (e.g., Gaussian) to a complex distribution (e.g., ImageNet dataset) by a series of invertible transformations. The main challenge is to design a transformation that is invertible and can be computed efficiently.</p>
 
-<p>The flow $\phi_t(x)$ presents a time-dependent diffeomorphic map that transforms the input $x$ to the output $y$ at time $t$. The flow is defined as follows:</p>
+<p>The flow \(\phi_t(x)\) presents a time-dependent diffeomorphic map that transforms the input \(x\) to the output \(y\) at time \(t\). The flow is defined as follows:</p>
 
 \[\frac{d}{dt} \phi_t(x) = v_t(\phi_t(x))\]
 
-<p>where $v_t$ is a time-dependent vector field. $\phi_0(x) = x$ means that the flow at time $t=0$ is the identity map.</p>
+<p>where \(v_t\) is a time-dependent vector field. \(\phi_0(x) = x\) means that the flow at time \(t=0\) is the identity map.</p>
 
-<p>Given $p_0$ is the simple distribution (e.g., Gaussian), the flow $\phi_t$ transforms $p_0$ to $p_t$ as follows:</p>
+<p>Given \(p_0\) is the simple distribution (e.g., Gaussian), the flow \(\phi_t\) transforms \(p_0\) to \(p_t\) as follows:</p>
 
 \[p_t = [ \phi_t ] * p_0\]
 
-<p>where $[ \phi_t ] * p_0$ is the push-forward measure of $p_0$ under the map $\phi_t$. 
+<p>where \([ \phi_t ] * p_0\) is the push-forward measure of \(p_0\) under the map \(\phi_t\). 
 The push-forward measure is defined as follows:</p>
 
 \[[ \phi_t ] * p_0(A) = p_0(\phi_t^{-1}(A))\]
 
-<p>where $A$ is a subset of the output space. The push-forward measure can be interpreted as the probability of the output $y$ falls into the subset $A$.</p>
+<p>where \(A\) is a subset of the output space. The push-forward measure can be interpreted as the probability of the output \(y\) falls into the subset \(A\).</p>
 
 \[p_t(x) = p_0(\phi_t^{-1}(x)) \left| \det \frac{d \phi_t^{-1}(x)}{dx} \right|\]
 
-<p>The function $v_t$ can be intepreted as the velocity of the flow at time $t$, i.e., how fast the flow moves at time $t$. In comparison with diffusion process, the velocity $v_t$ is similar as the denoising function that is used to denoise the image $x$ at time $t$, where $\phi_t(x)$ is the distribution of the denoised images at time $t$.</p>
+<p>The function \(v_t\) can be intepreted as the velocity of the flow at time \(t\), i.e., how fast the flow moves at time \(t\). In comparison with diffusion process, the velocity \(v_t\) is similar as the denoising function that is used to denoise the image \(x\) at time \(t\), where \(\phi_t(x)\) is the distribution of the denoised images at time \(t\).</p>
 
 <!-- The flow is invertible because it is a diffeomorphic map. The inverse flow is defined as follows:
 
 $$ \frac{d}{dt} \phi_t^{-1}(y) = -v_t(\phi_t^{-1}(y)) $$
  -->
 
-<p><strong>Flow matching objective</strong>: Given a target probability density path $p_t(x)$ and a corresponding vector field $u_t(x)$ which generates $p_t(x)$, the flow matching objective is to find a flow $\phi_t(x)$ and a corresponding vector field $v_t(x)$ that generates $p_t(x)$.</p>
+<p><strong>Flow matching objective</strong>: Given a target probability density path \(p_t(x)\) and a corresponding vector field \(u_t(x)\) which generates \(p_t(x)\), the flow matching objective is to find a flow \(\phi_t(x)\) and a corresponding vector field \(v_t(x)\) that generates \(p_t(x)\).</p>
 
 \[\mathcal{L}_{FM} (\theta) = \mathbb{E}_{t, p_t(x)} \| v_t(x) - u_t(x) \|\]
 
-<p>It is a bit confusing in notation here, so $u_t(x)$ can be understand as the target vector field that generates the target probability density path $p_t(x)$, while $v_t(x)$ is the vector field to be learned to approximate $u_t(x)$.</p>
+<p>It is a bit confusing in notation here, so \(u_t(x)\) can be understand as the target vector field that generates the target probability density path \(p_t(x)\), while \(v_t(x)\) is the vector field to be learned to approximate \(u_t(x)\).</p>
 
-<p>It can be seen that the Flow Matching objective is a simple and attractive objective but intractable to use because we don’t know the target vector field $u_t(x)$.
+<p>It can be seen that the Flow Matching objective is a simple and attractive objective but intractable to use because we don’t know the target vector field \(u_t(x)\).
 The main contribution of the paper is to propose the way to simplify the above objective function. And their approach is quite similar as in DDPM where the solution relies on conditioning to a previous point in the sequence.</p>
 
 <p>The marginal probability path</p>
 
 \[p_t(x) = \int p_t(x \mid x_1) q(x_1) dx_1\]
 
-<p>where $x_1$ is a particular data sample, and $p_t(x \mid x_1)$ is the conditional probability path such that $p_t(x \mid x_1) = p_t(x)$ at time $t=0$. 
-The important point is that they design the $p_1(x \mid x_1)$ at time $t=1$ to be a normal distribution around $x_1$ with a small variance, i.e., $p_1 (x \mid x_1) = \mathcal{N}(x_1, \sigma^2 I)$. In the above equation, $q(x_1)$ is the prior distribution of $x_1$.</p>
+<p>where $x_1$ is a particular data sample, and \(p_t(x \mid x_1)\) is the conditional probability path such that \(p_t(x \mid x_1) = p_t(x)\) at time \(t=0\). 
+The important point is that they design the \(p_1(x \mid x_1)\) at time \(t=1\) to be a normal distribution around \(x_1\) with a small variance, i.e., \(p_1 (x \mid x_1) = \mathcal{N}(x_1, \sigma^2 I)\). In the above equation, \(q(x_1)\) is the prior distribution of \(x_1\).</p>
 
-<p>Where in particular at time $t=1$, the marginal probability path $p_!$ will approximate the data distribution $q$,</p>
+<p>Where in particular at time \(t=1\), the marginal probability path \(p_1\) will approximate the data distribution \(q\),</p>
 
 \[p_1(x) = \int p_1(x \mid x_1) q(x_1) dx_1 \approx q(x)\]
 
-<p>And the vector field $u_t(x)$ can be defined as follows:</p>
+<p>And the vector field \(u_t(x)\) can be defined as follows:</p>
 
 \[u_t(x) = \int u_t(x \mid x_1) \frac{p_t (x \mid x_1) q(x_1)}{p_t(x)} dx_1\]
 
-<p>Theorem 1: Given vector fields $u_t(x \mid x_t)$ that generate conditional probability paths $p_t(x \mid x_t)$ for any distribution $q(x_1)$, the marginal vector field $u_t(x)$ in the above equation generates the marginal probability path $p_t(x)$.</p>
+<p>Theorem 1: Given vector fields \(u_t(x \mid x_t)\) that generate conditional probability paths \(p_t(x \mid x_t)\) for any distribution \(q(x_1)\), the marginal vector field \(u_t(x)\) in the above equation generates the marginal probability path \(p_t(x)\).</p>
 
-<p>So it means that if we can learn $u_t (x \mid x_t)$ we can obtain $u_t(x)$ and then we can use $u_t(x)$ to generate $p_t(x)$.</p>
+<p>So it means that if we can learn \(u_t (x \mid x_t)\) we can obtain \(u_t(x)\) and then we can use \(u_t(x)\) to generate \(p_t(x)\).</p>
 
 <p>Now we can rewrite the Flow Matching objective to Conditional Flow Matching objective as follows:</p>
 
 \[\mathcal{L}_{CFM} (\theta) = \mathbb{E}_{t, q(x_1), p_t(x \mid x_1)} \| v_t(x) - u_t(x \mid x_1) \|\]
 
-<p>where $v_t(x)$ is the vector field to be learned to approximate $u_t(x \mid x_1)$. 
-Now the question is how can we obtain $u_t(x \mid x_1)$?</p>
+<p>where \(v_t(x)\) is the vector field to be learned to approximate \(u_t(x \mid x_1)\). 
+Now the question is how can we obtain \(u_t(x \mid x_1)\)?</p>
 
 <p>In the work, they consider conditional probability paths</p>
 
 \[p_t(x \mid x_1) = \mathcal{N} (x \mid \mu_t (x_1), \sigma_t (x_1)^2 I)\]
 
-<p>where $\mu_t (x_1)$ and $\sigma_t (x_1)$ are the mean and variance of the conditional probability path $p_t(x \mid x_1)$, and they are time-dependent. Later, they will show that we can choose $\mu_t (x_1)$ and $\sigma_t (x_1)$ very flexiblely, as long as they can satisfy some conditions, for example, $\mu_0 (x_1) = 0$ and $\sigma_0 (x_1) = 1$, and $\mu_1 (x_1) = x_1$ and $\sigma_1 (x_1) = \sigma_{min}$, which is set sufficiently small so that $p_1 (x \mid x_1)$ is a concentrated distribution around $x_1$.</p>
+<p>where \(\mu_t (x_1)\) and \(\sigma_t (x_1)\) are the mean and variance of the conditional probability path \(p_t(x \mid x_1)\), and they are time-dependent. Later, they will show that we can choose \(\mu_t (x_1)\) and \(\sigma_t (x_1)\) very flexiblely, as long as they can satisfy some conditions, for example, \(\mu_0 (x_1) = 0\) and \(\sigma_0 (x_1) = 1\), and \(\mu_1 (x_1) = x_1\) and \(\sigma_1 (x_1) = \sigma_{min}\), which is set sufficiently small so that \(p_1 (x \mid x_1)\) is a concentrated distribution around \(x_1\).</p>
 
 <p>The canonical transformation for Gaussian distributions is defined as follows:</p>
 
 \[\psi_t (x) = \mu_t (x_1) + \sigma_t (x_1) \odot x\]
 
-<p>where $\psi_t (x)$ is the canonical transformation of $p_t(x \mid x_1)$, and $\odot$ is the element-wise multiplication.</p>
+<p>where \(\psi_t (x)\) is the canonical transformation of \(p_t(x \mid x_1)\), and \(\odot\) is the element-wise multiplication.</p>
 
 <p>to be continued…</p>]]></content><author><name></name></author><category term="reading" /><category term="genai" /><summary type="html"><![CDATA[A cool paper about continuous normalizing flows]]></summary></entry><entry><title type="html">On Reading - Diffusion Models Beat GANs on Image Synthesis</title><link href="https://tuananhbui89.github.io/blog/2023/conditional-diffusion/" rel="alternate" type="text/html" title="On Reading - Diffusion Models Beat GANs on Image Synthesis" /><published>2023-09-14T00:00:00+10:00</published><updated>2023-09-14T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/2023/conditional-diffusion</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2023/conditional-diffusion/"><![CDATA[<h2 id="about-the-paper">About the paper</h2>
 
@@ -98,21 +98,23 @@ Now the question is how can we obtain $u_t(x \mid x_1)$?</p>
 
 <p>In this section, we will go through the Conditional Diffusion Process introduced in Appendix H of the paper.</p>
 
-<p>We start by defining a conditional Markovian noising process $\hat{q}$ similar to $q$, and assume that $\hat{q}(y \mid x_0)$ is a known and readily available label distribution for each sample.</p>
+<p>We start by defining a conditional Markovian noising process \(\hat{q}\) similar to \(q\), and assume that \(\hat{q}(y \mid x_0)\) is a known and readily available label distribution for each sample.</p>
 
 <ul>
-  <li>$\hat{q}(x_0) = q(x_0)$: the initial distribution of the process is the same as the unconditional process.</li>
-  <li>$\hat{q}(y \mid x_0)$ is the label distribution for each sample $x_0$ which is known and readily available.</li>
-  <li>$\hat{q}(x_{t+1} \mid x_t, y) = q(x_{t+1} \mid x_t)$: <strong>This is the key point that will later enable us to derive the conditional diffusion process</strong>. This explains that the transition distribution is the same as the unconditional process, i.e., the noise adding in the forward diffusiion process is independent to label $y$. However, this might not neccessary be the case. If using SDE (Stochastic Differential Equation) to model the diffusion process, then the forward diffusion process can be conditioned on $y$. <strong>This can be a future work to explore.</strong></li>
-  <li>$\hat{q}(x_{1:T} \mid x_0, y) = \prod_{t=1}^T \hat{q}(x_t \mid x_{t-1}, y)$</li>
+  <li>\(\hat{q}(x_0) = q(x_0)\): the initial distribution of the process is the same as the unconditional process.</li>
+  <li>\(\hat{q}(y \mid x_0)\) is the label distribution for each sample \(x_0\) which is known and readily available.</li>
+  <li>\(\hat{q}(x_{t+1} \mid x_t, y) = q(x_{t+1} \mid x_t)\)$: <strong>This is the key point that will later enable us to derive the conditional diffusion process</strong>. This explains that the transition distribution is the same as the unconditional process, i.e., the noise adding in the forward diffusiion process is independent to label \(y\). However, this might not neccessary be the case. If using SDE (Stochastic Differential Equation) to model the diffusion process, then the forward diffusion process can be conditioned on \(y\). <strong>This can be a future work to explore.</strong></li>
+  <li>
+\[\hat{q}(x_{1:T} \mid x_0, y) = \prod_{t=1}^T \hat{q}(x_t \mid x_{t-1}, y)\]
+  </li>
 </ul>
 
 <p>From the above definition, we can derive the following properties:</p>
 
 <ul>
-  <li>$\hat{q}(x_{t+1} \mid x_t, y) = \hat{q}(x_{t+1} \mid x_t) = q(x_{t+1} \mid x_t)$ the forward process conditioned on $y$ is the same as the unconditional forward process.</li>
-  <li>$\hat{q}(y \mid x_t, x_{t+1}) = \hat{q}(y \mid x_t)$: the label distribution is independent of the next sample $x_{t+1}$.</li>
-  <li>$\hat{q}(y \mid x_t, x_{t+1}) \neq \hat{q}(y \mid x_{t+1})$: Need confirmation on this. But if this is true, then it means that $\hat{q}(y \mid x_t) \neq \hat{q}(y \mid x_{t+1})$ or the label distribution has changed after adding noise at each step. Then we cannot use the same classifier to approximate the label distribution at each step. <strong>However, in the paper, the authors still use the same classifier!!!</strong>. One possible idea is that we can consider a classifier that is conditioned to time step $t$.</li>
+  <li>\(\hat{q}(x_{t+1} \mid x_t, y) = \hat{q}(x_{t+1} \mid x_t) = q(x_{t+1} \mid x_t)\) the forward process conditioned on \(y\) is the same as the unconditional forward process.</li>
+  <li>\(\hat{q}(y \mid x_t, x_{t+1}) = \hat{q}(y \mid x_t)\): the label distribution is independent of the next sample \(x_{t+1}\).</li>
+  <li>\(\hat{q}(y \mid x_t, x_{t+1}) \neq \hat{q}(y \mid x_{t+1})\): Need confirmation on this. But if this is true, then it means that \(\hat{q}(y \mid x_t) \neq \hat{q}(y \mid x_{t+1})\) or the label distribution has changed after adding noise at each step. Then we cannot use the same classifier to approximate the label distribution at each step. <strong>However, in the paper, the authors still use the same classifier!!!</strong>. One possible idea is that we can consider a classifier that is conditioned to time step \(t\).</li>
 </ul>
 
 <p>Based on the above properties, we now can derive the conditional reverse process as follows:</p>
@@ -121,7 +123,7 @@ Now the question is how can we obtain $u_t(x \mid x_1)$?</p>
 
 \[\hat{q}(x_{t} \mid x_{t+1}, y) = \frac{q(x_{t} \mid x_{t+1}) \hat{q}(y \mid x_{t})}{\hat{q}(y \mid x_{t+1})}\]
 
-<p>The term $\hat{q}(y \mid x_{t+1})$ is considered as constant w.r.t. $x_t$. So $x_t$ can be sampled from the above distribution, where $\hat{q}(y \mid x_{t})$ is approximated by an auxiliary classifier, which is trained to predict the label $y$ from the sample $x_t$. And $q(x_{t} \mid x_{t+1})$ is the reverse process of the unconditional diffusion process which has been trained.</p>
+<p>The term \(\hat{q}(y \mid x_{t+1})\) is considered as constant w.r.t. \(x_t\). So \(x_t\) can be sampled from the above distribution, where \(\hat{q}(y \mid x_{t})\) is approximated by an auxiliary classifier, which is trained to predict the label \(y\) from the sample \(x_t\). And \(q(x_{t} \mid x_{t+1})\) is the reverse process of the unconditional diffusion process which has been trained.</p>
 
 <h2 id="classifier-guidance">Classifier Guidance</h2>
 
@@ -129,7 +131,7 @@ Now the question is how can we obtain $u_t(x \mid x_1)$?</p>
 In the paper, the authors proposed two sampling approaches:</p>
 
 <ul>
-  <li><strong>Conditional Reverse Noising Process</strong>: which factorizes the conditional transition $p_{\theta, \phi}(x_t \mid x_{t+1}, y) = Z p_\theta(x_t \mid x_{t+1} p_\phi (y \mid x_t))$. This can be approximated by a Gaussian similar to the unconditional reverse process, but with its mean shifted by $\Sigma g$</li>
+  <li><strong>Conditional Reverse Noising Process</strong>: which factorizes the conditional transition \(p_{\theta, \phi}(x_t \mid x_{t+1}, y) = Z p_\theta(x_t \mid x_{t+1} p_\phi (y \mid x_t))\). This can be approximated by a Gaussian similar to the unconditional reverse process, but with its mean shifted by $$\Sigma g$</li>
   <li><strong>Conditional Sampling for DDIM</strong>: which can be applied for deterministic sampling methods like DDIM. This can be done by using the conditioning trick adapted from Song et al. (2021).</li>
 </ul>
 
@@ -223,7 +225,7 @@ In the paper, the authors proposed two sampling approaches:</p>
 </span>    <span class="n">sample</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">mean</span><span class="sh">"</span><span class="p">]</span> <span class="o">+</span> <span class="n">nonzero_mask</span> <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="nf">exp</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">log_variance</span><span class="sh">"</span><span class="p">])</span> <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randn_like</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">mean</span><span class="sh">"</span><span class="p">])</span>
     <span class="k">return</span> <span class="p">{</span><span class="sh">"</span><span class="s">sample</span><span class="sh">"</span><span class="p">:</span> <span class="n">sample</span><span class="p">,</span> <span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">:</span> <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">]}</span>
 
-<span class="c1"># the progressive sampling loop from T to 0, where the $x_t$ will be used to sample $x_{t-1}$
+<span class="c1"># the progressive sampling loop from T to 0, where the $$x_t$$ will be used to sample $$x_{t-1}$
 </span>
 <span class="k">def</span> <span class="nf">p_sample_loop_progressive</span><span class="p">():</span>
 
@@ -285,7 +287,7 @@ In the paper, the authors proposed two sampling approaches:</p>
     <span class="k">return</span> <span class="p">{</span><span class="sh">"</span><span class="s">sample</span><span class="sh">"</span><span class="p">:</span> <span class="n">sample</span><span class="p">,</span> <span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">:</span> <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">]}</span>    
 </code></pre></div></div>
 
-<p>The main component of the above code is the unconditional reverse process <code class="language-plaintext highlighter-rouge">p_mean_variance</code> which is defined as follows in the file <code class="language-plaintext highlighter-rouge">gaussian_diffusion.py</code>. It is worth noting that this function not only returns the $x_{t-1}$ but also the prediction of the initial $x_0$, i.e., <code class="language-plaintext highlighter-rouge">pred_xstart</code>.</p>
+<p>The main component of the above code is the unconditional reverse process <code class="language-plaintext highlighter-rouge">p_mean_variance</code> which is defined as follows in the file <code class="language-plaintext highlighter-rouge">gaussian_diffusion.py</code>. It is worth noting that this function not only returns the \(x_{t-1}\) but also the prediction of the initial \(x_0\), i.e., <code class="language-plaintext highlighter-rouge">pred_xstart</code>.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
 <span class="k">def</span> <span class="nf">p_mean_variance</span><span class="p">(</span>
@@ -451,13 +453,13 @@ In the paper, the authors proposed two sampling approaches:</p>
 
 \[P(X_{ij} = 1 \mid \theta_i, \alpha_j, \beta_j) = \frac{1}{1 + e^{- \alpha_j (\theta_i - \beta_j)}}\]
 
-<p>where $X_{ij}$ is the response of person $i$ to item $j$, $\theta_i$ is the ability of person $i$, $\beta_j$ is the difficulty of item $j$, and $\alpha_j$ is the discrimination parameter.</p>
+<p>where \(X_{ij}\) is the response of person \(i\) to item \(j\), \(\theta_i\) is the ability of person \(i\), \(\beta_j\) is the difficulty of item \(j\), and \(\alpha_j\) is the discrimination parameter.</p>
 
-<p>3PL: introducing one additional guesing parameter $\gamma_j$ to the model:</p>
+<p>3PL: introducing one additional guesing parameter \(\gamma_j\) to the model:</p>
 
 \[P(X_{ij} = 1 \mid \theta_i, \alpha_j, \beta_j, \gamma_j) = \gamma_j + (1 - \gamma_j) \frac{1}{1 + e^{- \alpha_j (\theta_i - \beta_j)}}\]
 
-<p>Figure below shows the probability of a person to answer a question correctly as a function of the person’s ability $\theta_i$ given the item’s parameters $\alpha_j, \beta_j, \gamma_j$.</p>
+<p>Figure below shows the probability of a person to answer a question correctly as a function of the person’s ability \(\theta_i\) given the item’s parameters \(\alpha_j, \beta_j, \gamma_j\).</p>
 
 <div class="row mt-3">
     <div class="col-sm mt-3 mt-md-0">
@@ -465,13 +467,13 @@ In the paper, the authors proposed two sampling approaches:</p>
 
   <picture>
     
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/3PL-480.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/3PL-800.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/3PL-1400.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/2309/fairness-irt/3PL-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/2309/fairness-irt/3PL-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/2309/fairness-irt/3PL-1400.webp" />
     
 
     <!-- Fallback to the original file -->
-    <img src="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/3PL.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+    <img src="/assets/img/2309/fairness-irt/3PL.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
   </picture>
 
 </figure>
@@ -484,17 +486,17 @@ In the paper, the authors proposed two sampling approaches:</p>
 
 <h4 id="polytomous-irt-model">Polytomous IRT model</h4>
 
-<p>The polytomous IRT model is an extension of the dichotomous IRT model that allows for more than two response categories (e.g., an answer is marked not just correct/incorrect but with score from 1 to K). The most common polytomous IRT model is the graded response model (GRM), in which the cummulative probabilities of a person to get a higher or equal to score $k$ is formulated as follows:</p>
+<p>The polytomous IRT model is an extension of the dichotomous IRT model that allows for more than two response categories (e.g., an answer is marked not just correct/incorrect but with score from 1 to K). The most common polytomous IRT model is the graded response model (GRM), in which the cummulative probabilities of a person to get a higher or equal to score \(k\) is formulated as follows:</p>
 
 \[P(X_{ij} \geq k \mid \theta_i, \alpha_j, \beta_j^k) = \frac{1}{1 + e^{- \alpha_j (\theta_i - \beta_j^k)}}\]
 
-<p>where $X_{ij}$ is the response of person $i$ to item $j$, $\theta_i$ is the ability of person $i$, $\beta_j^k$ is the difficulty of item $j$ for response category $k$, and $\alpha_j$ is the discrimination parameter. Each item $j$ has a set of difficulties $\beta_j = { \beta_j^k }_{k=1}^K$ which is making sense because the difficulty of an item is different for different response categories.</p>
+<p>where \(X_{ij}\) is the response of person \(i\) to item \(j\), \(\theta_i\) is the ability of person \(i\), \(\beta_j^k\) is the difficulty of item \(j\) for response category \(k\), and \(\alpha_j\) is the discrimination parameter. Each item \(j\) has a set of difficulties \(\beta_j = \{ \beta_j^k \}_{k=1}^K\) which is making sense because the difficulty of an item is different for different response categories.</p>
 
-<p>The probability of a person to get a score $k$ is formulated as follows:</p>
+<p>The probability of a person to get a score \(k\) is formulated as follows:</p>
 
 \[P(X_{ij} = k \mid \theta_i, \alpha_j, \beta_j) = P(X_{ij} \geq k \mid \theta_i, \alpha_j, \beta_j^k) - P(X_{ij} \geq k+1 \mid \theta_i, \alpha_j, \beta_j^{k+1})\]
 
-<p>Given parameters $\alpha_j, \beta_j$ are known and fixed, the probability of a person to get a score $k$ is a curve that is a function of the person’s ability $\theta_i$. And given the person’s ability $\theta_i$ and the item’s parameters $\alpha_j, \beta_j$, we can estimate the most likely score $k$ of the person which is the score that maximizes the probability $P(X_{ij} = k \mid \theta_i, \alpha_j, \beta_j)$.</p>
+<p>Given parameters \(\alpha_j, \beta_j\) are known and fixed, the probability of a person to get a score \(k\) is a curve that is a function of the person’s ability \(\theta_i\). And given the person’s ability \(\theta_i\) and the item’s parameters \(\alpha_j, \beta_j\), we can estimate the most likely score \(k\) of the person which is the score that maximizes the probability \(P(X_{ij} = k \mid \theta_i, \alpha_j, \beta_j)\).</p>
 
 <div class="row mt-3">
     <div class="col-sm mt-3 mt-md-0">
@@ -502,13 +504,13 @@ In the paper, the authors proposed two sampling approaches:</p>
 
   <picture>
     
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/poly-IRT-480.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/poly-IRT-800.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/poly-IRT-1400.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/2309/fairness-irt/poly-IRT-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/2309/fairness-irt/poly-IRT-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/2309/fairness-irt/poly-IRT-1400.webp" />
     
 
     <!-- Fallback to the original file -->
-    <img src="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/poly-IRT.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+    <img src="/assets/img/2309/fairness-irt/poly-IRT.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
   </picture>
 
 </figure>
@@ -525,13 +527,13 @@ In the paper, the authors proposed two sampling approaches:</p>
 
 \[f(z_{ij} \mid \theta_i) = \frac{\alpha_j \gamma_j}{2 \pi} \exp(- \frac{\alpha_j^2}{2}(\theta_i - \beta_j - \gamma_j z_j))\]
 
-<p>where $\theta_i$ is the ability of person $i$, $\beta_j$ is the difficulty of item $j$, $\alpha_j$ is the discrimination parameter, and $\gamma_j$ is the scaling factor. $z_{ij}$ is the normalized response of person $i$ to item $j$ which is formulated as follows:</p>
+<p>where \(\theta_i\) is the ability of person \(i\), \(\beta_j\) is the difficulty of item \(j\), \(\alpha_j\) is the discrimination parameter, and \(\gamma_j\) is the scaling factor. \(z_{ij}\) is the normalized response of person \(i\) to item \(j\) which is formulated as follows:</p>
 
 \[z_{j} = \ln \frac{x_{j}}{ k_j -  x_j}\]
 
-<p>where $x_{j}$ is a continuous score between 0 and $k_j$ and $k_j$ is the maximum score of item $j$. $z_j$ has a range between $-\infty$ and $\infty$.</p>
+<p>where \(x_{j}\) is a continuous score between 0 and \(k_j\) and \(k_j\) is the maximum score of item \(j\). \(z_j\) has a range between \(-\infty\) and \(\infty\).</p>
 
-<p>In this model, these are total 3 parameters for each item $j$ (i.e., $\beta_j, \alpha_j, \gamma_j$) and 1 parameter for each person $i$ (i.e., $\theta_i$). Unlike the polytomous IRT model, the difficulty $\beta_j$ of an item $j$ is the same for all response categories.</p>
+<p>In this model, these are total 3 parameters for each item \(j\) (i.e., \(\beta_j, \alpha_j, \gamma_j\)$) and 1 parameter for each person \(i\) (i.e., \(\theta_i\)$). Unlike the polytomous IRT model, the difficulty \(\beta_j\) of an item \(j\) is the same for all response categories.</p>
 
 <h2 id="mapping-algorithm-evaluation-to-irt">Mapping algorithm evaluation to IRT</h2>
 
@@ -547,13 +549,13 @@ In the paper, the authors proposed two sampling approaches:</p>
 
 <p>IRT models the relationship between the characteristics of agents and items and the responses of agents to items. The goal of IRT is to estimate the characteristics of agents and items given the responses of agents to items, with the primary goal of estimating the characteristics of items (e.g., the difficulty of questions which is broader interest than the ability of each individual student).</p>
 
-<p>It can be seen that, in the dichotomous IRT model, there are two parameters of an item (i.e., difficulty and discrimination) and one parameter of an agent (i.e., ability). In the polytomous IRT model, for each item, there are $K$ parameters of difficulty (i.e., ${\beta_j^k}_{k=1}^K$) and one parameter $\alpha_j$ for discrimination, while there is only one parameter of an agent (i.e., ability $\theta_i$).</p>
+<p>It can be seen that, in the dichotomous IRT model, there are two parameters of an item (i.e., difficulty and discrimination) and one parameter of an agent (i.e., ability). In the polytomous IRT model, for each item, there are \(K\) parameters of difficulty (i.e., \(\{\beta_j^k\}_{k=1}^K\)$) and one parameter \(\alpha_j\) for discrimination, while there is only one parameter of an agent (i.e., ability \(\theta_i\)$).</p>
 
 <p><strong>Mapping algorithm evaluation to IRT</strong>:</p>
 
-<p>In the context of algorithm evaluation, the agents are algorithms and the items are datasets. The responses are the performance of algorithms on datasets. Let $f_{\theta_i}$ is an agent (i.e., an algorithm) parameterized by $\theta_i$. $x_j$ is an item (i.e., a dataset) belonging to set of items $X$, each dataset $x_j$ is associated with a set of characteristics $c_j$ (e.g., difficulty, discrimination, bias).</p>
+<p>In the context of algorithm evaluation, the agents are algorithms and the items are datasets. The responses are the performance of algorithms on datasets. Let \(f_{\theta_i}\) is an agent (i.e., an algorithm) parameterized by \(\theta_i\). \(x_j\) is an item (i.e., a dataset) belonging to set of items \(X\), each dataset \(x_j\) is associated with a set of characteristics \(c_j\) (e.g., difficulty, discrimination, bias).</p>
 
-<p>Within the context, the IRT model now estimates the probability of an algorithm $f_{\theta_i}$ to solve a dataset $x_j$ given the characteristics $c_j$ of the dataset and the ability $\theta_i$ of the algorithm.</p>
+<p>Within the context, the IRT model now estimates the probability of an algorithm \(f_{\theta_i}\) to solve a dataset \(x_j\) given the characteristics \(c_j\) of the dataset and the ability \(\theta_i\) of the algorithm.</p>
 
 <p>However, as the authors mentioned in the paper, with this standard mapping, the IRT model is focusing on evaluating the characteristics of datasets (i.e., items) rather than the characteristics of algorithms (i.e., agents). Therefore, the authors proposed to invert the mapping by considering the datasets as agents and the algorithms as items.</p>
 
@@ -562,32 +564,32 @@ In the paper, the authors proposed two sampling approaches:</p>
 <p>More specifically, if we consider the continuous IRT model and the inverted mapping, the following are the parameters of the model:</p>
 
 <ul>
-  <li>$\beta_j$ is the difficulty of item $j$, in this case, the (reversed) difficulty limit of algorithm $j$.</li>
-  <li>$\alpha_j$ is the discrimination parameter of item $j$, in this case, the (reversed) algorithm anomalousness and consistency.</li>
-  <li>$\gamma_j$ is the scaling factor of item $j$, in this case, the algorithm bias (I am not sure about this because it was not mentioned in the paper).</li>
-  <li>$\theta_i$ is the ability of agent $i$, in this case, the (reversed) dataset difficulty.</li>
+  <li>\(\beta_j\) is the difficulty of item \(j\), in this case, the (reversed) difficulty limit of algorithm \(j\).</li>
+  <li>\(\alpha_j\) is the discrimination parameter of item \(j\), in this case, the (reversed) algorithm anomalousness and consistency.</li>
+  <li>\(\gamma_j\) is the scaling factor of item \(j\), in this case, the algorithm bias (I am not sure about this because it was not mentioned in the paper).</li>
+  <li>\(\theta_i\) is the ability of agent \(i\), in this case, the (reversed) dataset difficulty.</li>
 </ul>
 
 <h2 id="characteristics-of-algorithms-estimated-by-irt-model">Characteristics of algorithms estimated by IRT model</h2>
 
 <ul>
   <li>
-    <p><strong>Dataset difficulty</strong>: It is estimated by $\delta_i = -\theta_i$ which is the ability of agent $i$, in this case the dataset difficulty. Given a fixed algorithm’s characteristics, the probability of a dataset to be solved by the algorithm will increase as $\theta_i$ increases. Therefore, an dataset $i$ is considered to be easy if $\theta_i$ is large or vice versa.</p>
+    <p><strong>Dataset difficulty</strong>: It is estimated by \(\delta_i = -\theta_i\) which is the ability of agent \(i\), in this case the dataset difficulty. Given a fixed algorithm’s characteristics, the probability of a dataset to be solved by the algorithm will increase as \(\theta_i\) increases. Therefore, an dataset \(i\) is considered to be easy if \(\theta_i\) is large or vice versa.</p>
   </li>
   <li>
-    <p><strong>Algorithm anomalousness</strong>: It is estimated by $sign(\alpha_j)$ (i.e., TRUE if $\alpha_j &lt; 0$ and FALSE if $\alpha_j &gt; 0$) show whether the algorithm is anomalous or not. It is because in the logistic function, if $\alpha_j &lt; 0$, then the probability of the agent (i.e., a dataset) act on the item (i.e., an algorithm) is decreasing as the ability of the agent increases (i.e., $\theta_i$ or easiness of a dataset). In other words, the algorithm is more likely to fail on a easy dataset than on a hard dataset which is an anomalous behavior.</p>
+    <p><strong>Algorithm anomalousness</strong>: It is estimated by \(sign(\alpha_j)\) (i.e., TRUE if \(\alpha_j &lt; 0\) and FALSE if \(\alpha_j &gt; 0\)$) show whether the algorithm is anomalous or not. It is because in the logistic function, if \(\alpha_j &lt; 0\), then the probability of the agent (i.e., a dataset) act on the item (i.e., an algorithm) is decreasing as the ability of the agent increases (i.e., \(\theta_i\) or easiness of a dataset). In other words, the algorithm is more likely to fail on a easy dataset than on a hard dataset which is an anomalous behavior.</p>
   </li>
   <li>
-    <p><strong>Algorithm consistency</strong>: It is estimated by $1/|\alpha_j|$ (i.e., inverse of the absolute value of $\alpha_j$), which shows the consistency of the algorithm. It is because in the logistic function, the $\alpha_j$ is the slope of the curve, therefore, the larger the $\alpha_j$, the steeper the curve, which means that the algorithm is changing its behavior more rapidly as the ability of the agent changes (i.e., $\theta_i$ or easiness of a dataset). In other words, large $\alpha_j$ or small $1/|\alpha_j|$ means that the algorithm is less consistent/stable/robust against the change of the difficulty of a dataset.</p>
+    <p><strong>Algorithm consistency</strong>: It is estimated by \(1/\|\alpha_j\|\) (i.e., inverse of the absolute value of \(\alpha_j\)$), which shows the consistency of the algorithm. It is because in the logistic function, the \(\alpha_j\) is the slope of the curve, therefore, the larger the \(\alpha_j\), the steeper the curve, which means that the algorithm is changing its behavior more rapidly as the ability of the agent changes (i.e., \(\theta_i\) or easiness of a dataset). In other words, large \(\alpha_j\) or small \(1/\|\alpha_j\|\) means that the algorithm is less consistent/stable/robust against the change of the difficulty of a dataset.</p>
   </li>
   <li>
-    <p><strong>Difficulty limit of algorithm</strong>: It is estimated by $-\beta_j$ which is the difficulty of item $j$. In this case, the difficulty limit of algorithm $j$. It is because in the logistic function, the $\beta_j$ is the point at which the probability of the agent (i.e., a dataset) act on the item (i.e., an algorithm) is 0.5. In other words, the difficulty limit of algorithm $j$ is the difficulty of a dataset $i$ at which the algorithm $j$ has 50% chance to solve the dataset $i$. The higher difficulty limit of algorithm $j$, the more difficult dataset that the algorithm $j$ can solve.</p>
+    <p><strong>Difficulty limit of algorithm</strong>: It is estimated by \(-\beta_j\) which is the difficulty of item \(j\). In this case, the difficulty limit of algorithm \(j\). It is because in the logistic function, the \(\beta_j\) is the point at which the probability of the agent (i.e., a dataset) act on the item (i.e., an algorithm) is 0.5. In other words, the difficulty limit of algorithm \(j\) is the difficulty of a dataset \(i\) at which the algorithm \(j\) has 50% chance to solve the dataset \(i\). The higher difficulty limit of algorithm \(j\), the more difficult dataset that the algorithm \(j\) can solve.</p>
   </li>
   <li>
-    <p><strong>Algorithm bias</strong>: (This was not mentioned in the paper but just my analysis) It is estimated by $\gamma_j$ which is the scaling factor of item $j$. In this case, the algorithm bias. It can be seen that in the continuous IRT model, the $\gamma_j$ has to be same sign as $\alpha_j$ (i.e., $\alpha_j \gamma_j &gt; 0$). Just consider the case when $\gamma_j &gt; 0$, then the higher the $\gamma_j$, the higher the probability that the dataset is solved by the algorithm. More interestingly, the $\gamma_j$ is the scaling factor of the response $z_j = \ln \frac{x_j}{k_j - x_j}$ which will be very large if $x_j$ is close to $k_j$ (i.e., the maximum score of item $j$). Therefore, the density function $f(z_{ij} \mid \theta_i)$ will be very large if $x_j$ is close to $k_j$ which means that the probability of the dataset to be solved by the algorithm is very high if $x_j$ is close to $k_j$ which is makes sense because the dataset is easy. In contrast, the density function $f(z_{ij} \mid \theta_i)$ will be very small if $x_j$ is close to 0. Therefore, the continuous IRT model is strongly biased towards the extreme values of the response $x_j$ (i.e., $x_j = 0$ or $x_j = k_j$) which is not good. However, if the scaling factor $\gamma_j$ is small, it reduces this bias issue, vice versa. Therefore, the $\gamma_j$ can be used to measure the bias of the algorithm.</p>
+    <p><strong>Algorithm bias</strong>: (This was not mentioned in the paper but just my analysis) It is estimated by \(\gamma_j\) which is the scaling factor of item \(j\). In this case, the algorithm bias. It can be seen that in the continuous IRT model, the \(\gamma_j\) has to be same sign as \(\alpha_j\) (i.e., \(\alpha_j \gamma_j &gt; 0\)$). Just consider the case when \(\gamma_j &gt; 0\), then the higher the \(\gamma_j\), the higher the probability that the dataset is solved by the algorithm. More interestingly, the \(\gamma_j\) is the scaling factor of the response \(z_j = \ln \frac{x_j}{k_j - x_j}\) which will be very large if \(x_j\) is close to \(k_j\) (i.e., the maximum score of item \(j\)$). Therefore, the density function \(f(z_{ij} \mid \theta_i)\) will be very large if \(x_j\) is close to \(k_j\) which means that the probability of the dataset to be solved by the algorithm is very high if \(x_j\) is close to \(k_j\) which is makes sense because the dataset is easy. In contrast, the density function \(f(z_{ij} \mid \theta_i)\) will be very small if \(x_j\) is close to 0. Therefore, the continuous IRT model is strongly biased towards the extreme values of the response \(x_j\) (i.e., \(x_j = 0\) or \(x_j = k_j\)$) which is not good. However, if the scaling factor \(\gamma_j\) is small, it reduces this bias issue, vice versa. Therefore, the \(\gamma_j\) can be used to measure the bias of the algorithm.</p>
   </li>
   <li>
-    <p><strong>Performance-Dataset Difficulty Curve</strong>: after getting all the above parameteres of $n$ algorithms on $N$ datasets/problems, we can estimate the performance-dataset difficulty curve $h_j(\delta)$ of each algorithm $j$ by using function estimation method (i.e., smoothing spline as proposed in the paper).</p>
+    <p><strong>Performance-Dataset Difficulty Curve</strong>: after getting all the above parameteres of \(n\) algorithms on \(N\) datasets/problems, we can estimate the performance-dataset difficulty curve \(h_j(\delta)\) of each algorithm \(j\) by using function estimation method (i.e., smoothing spline as proposed in the paper).</p>
   </li>
 </ul>
 
@@ -597,13 +599,13 @@ In the paper, the authors proposed two sampling approaches:</p>
 
   <picture>
     
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/smoothing-spline-2-480.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/smoothing-spline-2-800.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/smoothing-spline-2-1400.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/2309/fairness-irt/smoothing-spline-2-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/2309/fairness-irt/smoothing-spline-2-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/2309/fairness-irt/smoothing-spline-2-1400.webp" />
     
 
     <!-- Fallback to the original file -->
-    <img src="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/smoothing-spline-2.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+    <img src="/assets/img/2309/fairness-irt/smoothing-spline-2.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
   </picture>
 
 </figure>
@@ -615,7 +617,7 @@ In the paper, the authors proposed two sampling approaches:</p>
 </div>
 
 <ul>
-  <li><strong>Strengths and weaknesses of algorithm</strong>: based on the performance-dataset difficulty curve $h_j(\delta)$, we can identify the strengths and weaknesses of each algorithm $j$ by comparing between curves/algorithms. For example, if the curve of algorithm $j$ is above the curve of algorithm $k$ for all $\delta$, then algorithm $j$ is better than algorithm $k$ for all $\delta$. Given a dataset difficulty $\delta$, we can find the best algorithm which has the highest value of $h_j(\delta)$. We also can define a region where an algorithm can be considered as algorithm’s strengths or weaknesses.</li>
+  <li><strong>Strengths and weaknesses of algorithm</strong>: based on the performance-dataset difficulty curve \(h_j(\delta)\), we can identify the strengths and weaknesses of each algorithm \(j\) by comparing between curves/algorithms. For example, if the curve of algorithm \(j\) is above the curve of algorithm \(k\) for all \(\delta\), then algorithm \(j\) is better than algorithm \(k\) for all \(\delta\). Given a dataset difficulty \(\delta\), we can find the best algorithm which has the highest value of \(h_j(\delta)\). We also can define a region where an algorithm can be considered as algorithm’s strengths or weaknesses.</li>
 </ul>
 
 <h2 id="framework">Framework</h2>
@@ -626,13 +628,13 @@ In the paper, the authors proposed two sampling approaches:</p>
 
   <picture>
     
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/algorithm-480.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/algorithm-800.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/algorithm-1400.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/2309/fairness-irt/algorithm-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/2309/fairness-irt/algorithm-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/2309/fairness-irt/algorithm-1400.webp" />
     
 
     <!-- Fallback to the original file -->
-    <img src="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/algorithm.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+    <img src="/assets/img/2309/fairness-irt/algorithm.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
   </picture>
 
 </figure>
@@ -646,8 +648,8 @@ In the paper, the authors proposed two sampling approaches:</p>
 <p>The AIRT framework can be found in page 28 of the paper, which consists of 3 main stages:</p>
 
 <ul>
-  <li><strong>Stage 1 - Fitting the IRT model with inverted mapping</strong> Given an input matrix $Y_{N \times n}$ containing accuracy measures of $n$ algorithms for $N$ datasets, the IRT model is fitted to estimate the parameters of the model (i.e., $\beta_j, \alpha_j, \gamma_j, \theta_i$). The authors proposed to use the continuous IRT model with the inverted mapping. The parameters of the model are estimated using the Expectation-Maximization (EM) algorithm.</li>
-  <li><strong>Stage 2 - Calculation of algorithm and dataset metrics</strong> For each algorithm $j$ compute the anomalous indicator, algorithm consistency score and difficulty limit. For each dataset $i$ compute the dataset difficulty $\delta_i = - \theta_i$.</li>
+  <li><strong>Stage 1 - Fitting the IRT model with inverted mapping</strong> Given an input matrix \(Y_{N \times n}\) containing accuracy measures of \(n\) algorithms for \(N\) datasets, the IRT model is fitted to estimate the parameters of the model (i.e., \(\beta_j, \alpha_j, \gamma_j, \theta_i\)). The authors proposed to use the continuous IRT model with the inverted mapping. The parameters of the model are estimated using the Expectation-Maximization (EM) algorithm.</li>
+  <li><strong>Stage 2 - Calculation of algorithm and dataset metrics</strong> For each algorithm \(j\) compute the anomalous indicator, algorithm consistency score and difficulty limit. For each dataset \(i\) compute the dataset difficulty \(\delta_i = - \theta_i\).</li>
   <li><strong>Stage 3 - Computing strengths and weaknesses and construct airt portfolio</strong></li>
 </ul>
 
@@ -685,7 +687,7 @@ Equally complex is the task of recognizing algorithmic bias because the training
   <li><strong>The data bias</strong> problem in this context is the bias of the test item which is used to evaluated the algorithm (not the bias of the training set as in ML literature). For example, let’s consider education system where a test item is a set of questions and an algorithm is a student. We want to evaluate diverse knowledge of students on several subjects, i.e., math, physics, chemistry, literature, etc. The data bias problem in this context is that the test item is only able to evaluate on a specific subject (e.g., math) but not on all subjects. <strong>The algorithmic bias</strong> problem in this specific example is that the student is only good at math but not good at other subjects.</li>
 </ul>
 
-<p>Problem setting: Given $n$ algorithms and $N$ datasets, the goal is to identify which algorithm/dataset has bias problem. On the other words, how to distinguish a good algorithm performing poorly on a biased dataset from an equally performed bad algorithm?</p>
+<p>Problem setting: Given \(n\) algorithms and \(N\) datasets, the goal is to identify which algorithm/dataset has bias problem. On the other words, how to distinguish a good algorithm performing poorly on a biased dataset from an equally performed bad algorithm?</p>
 
 <p><strong>Note:</strong></p>
 
@@ -695,7 +697,7 @@ Equally complex is the task of recognizing algorithmic bias because the training
 
 <h3 id="proposed-framework">Proposed framework</h3>
 
-<!-- Let $F_b, F_u$ be the set of biased and unbiased algorithms, and $D_b, D_u$ be the set of biased and unbiased datasets, respectively. $\|F_b\| + \|F_u\| = n$ and $\|D_b\| + \|D_u\| = N$. -->
+<!-- Let $$F_b, F_u$$ be the set of biased and unbiased algorithms, and $$D_b, D_u$$ be the set of biased and unbiased datasets, respectively. $$\|F_b\| + \|F_u\| = n$$ and $$\|D_b\| + \|D_u\| = N$$. -->
 <p>We need to make some assumptions as follows:</p>
 
 <ul>
@@ -707,23 +709,23 @@ Equally complex is the task of recognizing algorithmic bias because the training
 
 <p>We consider two IRT models simultaneously, the standard IRT model and the IRT model with inverted mapping. The standard IRT model is used to estimate the characteristics of datasets (i.e., difficulty, discrimination) while the IRT model with inverted mapping is used to estimate the characteristics of algorithms (i.e., difficulty limit, anomalousness, consistency).</p>
 
-<p>For the IRT model with inverted mapping, we consider the performance-dataset difficulty curve $h^d_{a_j}(\delta_d)$ of each algorithm $a_j$, while for the standard IRT model, we consider the performance-algorithm difficulty curve $h^a_{d_i}(\delta_a)$ of each dataset $d_i$. With the two curves, we can identify a biased dataset as follows:</p>
+<p>For the IRT model with inverted mapping, we consider the performance-dataset difficulty curve \(h^d_{a_j}(\delta_d)\) of each algorithm \(a_j\), while for the standard IRT model, we consider the performance-algorithm difficulty curve \(h^a_{d_i}(\delta_a)\) of each dataset \(d_i\). With the two curves, we can identify a biased dataset as follows:</p>
 
 <ul>
-  <li>A dataset $d_i$ is considered to be biased if it is solved well by a biased algorithm $a_j \in F_b$ but poorly by an unbiased algorithm $a_j \in F_u$.</li>
+  <li>A dataset \(d_i\) is considered to be biased if it is solved well by a biased algorithm \(a_j \in F_b\) but poorly by an unbiased algorithm \(a_j \in F_u\).</li>
 </ul>
 
 <p>\(h^d_{a_j} (\delta_d) \leq \epsilon_{low} \; \forall \; a_j \in F_u\)
 \(h^d_{a_j} (\delta_d) \geq \epsilon_{up} \; \forall \; a_j  \in F_b\)</p>
 
 <ul>
-  <li>An algorithm $a_j$ is considered to be biased if it performs well on a biased dataset $d_i \in D_b$ but poorly on an unbiased dataset $d_i \in D_u$.</li>
+  <li>An algorithm \(a_j\) is considered to be biased if it performs well on a biased dataset \(d_i \in D_b\) but poorly on an unbiased dataset \(d_i \in D_u\).</li>
 </ul>
 
 <p>\(h^a_{d_i} (\delta_a) \leq \epsilon_{low} \; \forall \; d_i \in D_u\)
 \(h^a_{d_i} (\delta_a) \geq \epsilon_{up} \; \forall \; d_i \in D_b\)</p>
 
-<p>where $\epsilon_{low}$ and $\epsilon_{up}$ are the lower and upper thresholds, respectively.</p>
+<p>where \(\epsilon_{low}\) and \(\epsilon_{up}\) are the lower and upper thresholds, respectively.</p>
 
 <p>We can also a 3D map where the z-axis is the performance of an algorithm on a dataset, the x-axis is the difficulty of the dataset, and the y-axis is the difficulty limit of the algorithm.</p>
 
@@ -733,13 +735,13 @@ Equally complex is the task of recognizing algorithmic bias because the training
 
   <picture>
     
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/couple-IRT-480.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/couple-IRT-800.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/couple-IRT-1400.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/2309/fairness-irt/couple-IRT-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/2309/fairness-irt/couple-IRT-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/2309/fairness-irt/couple-IRT-1400.webp" />
     
 
     <!-- Fallback to the original file -->
-    <img src="https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/images/2309/fairness-irt/couple-IRT.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+    <img src="/assets/img/2309/fairness-irt/couple-IRT.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
   </picture>
 
 </figure>
@@ -778,12 +780,12 @@ Equally complex is the task of recognizing algorithmic bias because the training
 
 <p>One of the milestone work in fairness is the paper “Learning Fair Representations” by Zemel et al. (2013) <d-cite key="zemel2013learning"></d-cite>. The authors proposed a method to learn fair representations by learning a latent representation that encodes the data well but obfuscates information about protected attributes. The method is based on the intuition that if the learned representation does not contain any information about the protected attribute, then any classifier based on these representation cannot use the protected attribute to make predictions.</p>
 
-<p>The authors formulated this using the notion of statistical parity, which requires that the probability that a random element from $X^+$ maps to a particular prototype is equal to the probability that a random element from
-$X^-$ maps to the same prototype</p>
+<p>The authors formulated this using the notion of statistical parity, which requires that the probability that a random element from \(X^+\) maps to a particular prototype is equal to the probability that a random element from
+\(X^-\) maps to the same prototype</p>
 
 \[P(Z = k \mid x^+ \in X^+) = P(Z = k \mid x^- \in X^-) \; \forall k\]
 
-<p>Where $X^+$ and $X^-$ are the sets of protected and unprotected examples, respectively, and $Z$ is the latent representation with $K$ prototypes.</p>
+<p>Where \(X^+\) and \(X^-\) are the sets of protected and unprotected examples, respectively, and \(Z\) is the latent representation with \(K\) prototypes.</p>
 
 <!-- The authors proposed to use an adversarial network to learn the latent representation. The adversarial network is trained to predict the protected attribute from the latent representation while the main network is trained to predict the label from the latent representation. The authors also proposed to use a regularization term to ensure that the latent representation is close to the original representation. The authors evaluated their method on the Adult dataset and showed that their method can achieve a better fairness score than the baseline method. -->
 
@@ -866,15 +868,15 @@ $X^-$ maps to the same prototype</p>
 
 <p>Approach:</p>
 
-<p>Phase 1: Pre-training the watermarking generator and detector. Similar as GAN, there is an adversarial game between generator $G$ and detector $D$. The watermarked images denote as $x_w=x+w$. The goal of the generator is to generate watermarked images that are indistinguishable from the real images. Its objective loss:
+<p>Phase 1: Pre-training the watermarking generator and detector. Similar as GAN, there is an adversarial game between generator \(G\) and detector \(D\). The watermarked images denote as \(x_w=x+w\). The goal of the generator is to generate watermarked images that are indistinguishable from the real images. Its objective loss:
 \(L_G = \text{max}(LPIPS(x,x_w) - p, 0)\)
-where <em>LPIPS</em> is the perceptual similarity metric [1], $p$ is a hyperparameter that controls the invisibility level, a smaller $p$ means a more invisible watermark.</p>
+where <em>LPIPS</em> is the perceptual similarity metric [1], \(p\) is a hyperparameter that controls the invisibility level, a smaller \(p\) means a more invisible watermark.</p>
 
-<p>The detector $D$ is trained to distinguish the watermarked images from the real images. Its objective loss:
+<p>The detector \(D\) is trained to distinguish the watermarked images from the real images. Its objective loss:
 \(L_D = -(1-y)\log(1-\hat{y}) - y \log(\hat{y})\)
-where $y$ is the ground truth label, $\hat{y}$ is the predicted label.</p>
+where \(y\) is the ground truth label, \(\hat{y}\) is the predicted label.</p>
 
-<p>Phase 2: Fine-tuning the detector with synthesized images. Using two set of images, $X$ and $X_w$, where $X_w$ is the watermarked images of $X$ to train corresponding personalized models $M$ and $M_w$ (i.e., with Textual Inversion or Dreambooth). Then using these models to generate synthesized images $S$ and $S_w$ with list of prompts. And use these images to fine-tune the detector $D$, where $S$ has label as real and $S_w$ has label as watermarked.</p>
+<p>Phase 2: Fine-tuning the detector with synthesized images. Using two set of images, \(X\) and \(X_w\), where \(X_w\) is the watermarked images of \(X\) to train corresponding personalized models \(M\) and \(M_w\) (i.e., with Textual Inversion or Dreambooth). Then using these models to generate synthesized images \(S\) and \(S_w\) with list of prompts. And use these images to fine-tune the detector \(D\), where \(S\) has label as real and \(S_w\) has label as watermarked.</p>
 
 <p>[1] Richard Zhang, Phillip Isola, Alexei A. Efros, Eli Shechtman, and Oliver Wang. The Unreasonable Effectiveness of Deep Features as a Perceptual Metric. In IEEE Conference on Computer Vision and Pattern Recognition (CVPR), pages 586–595. IEEE, 2018.</p>]]></content><author><name></name></author><category term="reading" /><category term="diffusion" /><category term="genai" /><category term="tml" /><summary type="html"><![CDATA[But just two papers so far :(]]></summary></entry><entry><title type="html">On Reading - Erasing Concepts from Diffusion Models</title><link href="https://tuananhbui89.github.io/blog/2023/erasing-concepts/" rel="alternate" type="text/html" title="On Reading - Erasing Concepts from Diffusion Models" /><published>2023-08-10T00:00:00+10:00</published><updated>2023-08-10T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/2023/erasing-concepts</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2023/erasing-concepts/"><![CDATA[<h2 id="about-the-paper">About the paper</h2>
 
@@ -890,13 +892,13 @@ where $y$ is the ground truth label, $\hat{y}$ is the predicted label.</p>
 
   <picture>
     
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="https://raw.githubusercontent.com/tuananhbui89/website_images/master/posts/erasing_concepts/examples-480.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="https://raw.githubusercontent.com/tuananhbui89/website_images/master/posts/erasing_concepts/examples-800.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="https://raw.githubusercontent.com/tuananhbui89/website_images/master/posts/erasing_concepts/examples-1400.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/2309/erasing_concepts/examples-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/2309/erasing_concepts/examples-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/2309/erasing_concepts/examples-1400.webp" />
     
 
     <!-- Fallback to the original file -->
-    <img src="https://raw.githubusercontent.com/tuananhbui89/website_images/master/posts/erasing_concepts/examples.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+    <img src="/assets/img/2309/erasing_concepts/examples.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
   </picture>
 
 </figure>
@@ -913,20 +915,20 @@ where $y$ is the ground truth label, $\hat{y}$ is the predicted label.</p>
 
 <h2 id="approach">Approach</h2>
 
-<p>The central optimization problem is to reduce  the probability of generating an image $x$ according to the likelihood that is described by the concept, scaled by a power factor $\eta$.</p>
+<p>The central optimization problem is to reduce  the probability of generating an image \(x\) according to the likelihood that is described by the concept, scaled by a power factor \(\eta\).</p>
 
 \[P_\theta(x) \propto \frac{P_{\theta^*}(x)}{P_{\theta^*}(c \mid x)^\eta}\]
 
-<p>where \(P_{\theta^*}(x)\) is the distribution generated by the original model $\theta^*$ and \(P_{\theta^*}(c \mid x)\) is the probability of the concept $c$ given the image $x$. The power factor $\eta$ controls the strength of the concept erasure. A larger $\eta$ means a stronger erasure. $\theta$ is the parameters of the model after unlearning the concept $c$.</p>
+<p>where \(P_{\theta^*}(x)\) is the distribution generated by the original model \(\theta^*\) and \(P_{\theta^*}(c \mid x)\) is the probability of the concept \(c\) given the image \(x\). The power factor \(\eta\) controls the strength of the concept erasure. A larger \(\eta\) means a stronger erasure. \(\theta\) is the parameters of the model after unlearning the concept \(c\).</p>
 
-<p>It can be interpreted as: if the concept $c$ is present in the image $x$ in which \(P_{\theta^*} (c \mid x)\) is high, then the likelihood of the image $x$ under the new model \(P_{\theta} (x)\) will be reduced.
-While if the concept $c$ is not present in the image $x$ in which \(P_{\theta^*} (c \mid x)\) is low, then the likelihood of the image $x$ under the new model \(P_{\theta} (x)\) will be increased.</p>
+<p>It can be interpreted as: if the concept \(c\) is present in the image \(x\) in which \(P_{\theta^*} (c \mid x)\) is high, then the likelihood of the image \(x\) under the new model \(P_{\theta} (x)\) will be reduced.
+While if the concept \(c\) is not present in the image \(x\) in which \(P_{\theta^*} (c \mid x)\) is low, then the likelihood of the image \(x\) under the new model \(P_{\theta} (x)\) will be increased.</p>
 
 <p>Because of the conditional likelihood:</p>
 
 \[P_{\theta^*} (c \mid x) = \frac{P_{\theta^*} (x \mid c) P_{\theta^*} (c)}{P_{\theta^*} (x)}\]
 
-<p>Therefore, the above equation can be rewritten when taking the derivative w.r.t. $x$ as follows:</p>
+<p>Therefore, the above equation can be rewritten when taking the derivative w.r.t. \(x\) as follows:</p>
 
 \[\nabla_{x} \log P_{\theta} (x) \propto \nabla_{x} \log P_{\theta^*} (x) - \eta \nabla_{x} \log P_{\theta^*} (c \mid x)\]
 
@@ -938,36 +940,36 @@ While if the concept $c$ is not present in the image $x$ in which \(P_{\theta^*}
 
 \[\nabla_{x} \log P_{\theta^*} (x) = \frac{1}{\sigma^2} (x - \mu)\]
 
-<p>where $\mu$ is the mean of the diffusion model, $\sigma$ is the standard deviation of the diffusion model, and $c$ is the concept.
-Based on the repameterization trick, the gradient of the log-likelihood is correlated with the noise $\epsilon$ at each step as follows:</p>
+<p>where \(\mu\) is the mean of the diffusion model, \(\sigma\) is the standard deviation of the diffusion model, and \(c\) is the concept.
+Based on the repameterization trick, the gradient of the log-likelihood is correlated with the noise \(\epsilon\) at each step as follows:</p>
 
 \[\epsilon_{\theta}(x_t,t) \propto \epsilon_{\theta^*} (x_t,t) - \eta (\epsilon_{\theta^*}(x_t,c,t) - \epsilon_{\theta^*} (x_t,t))\]
 
-<p>where $\epsilon_{\theta}(x_t,t)$ is the noise at step $t$ of the diffusion model after unlearning the concept $c$.
-Finally, to fine-tune the diffusion model from pretrained model $\theta^*$ to new cleaned model $\theta$, the authors proposed to minimize the following loss function:</p>
+<p>where \(\epsilon_{\theta}(x_t,t)\) is the noise at step \(t\) of the diffusion model after unlearning the concept \(c\).
+Finally, to fine-tune the diffusion model from pretrained model \(\theta^*\) to new cleaned model \(\theta\), the authors proposed to minimize the following loss function:</p>
 
 \[\mathcal{L}(\theta) = \mathbb{E}_{x_0 \sim \mathcal{D}} \left[ \sum_{t=0}^{T-1} \left\| \epsilon_{\theta}(x_t,t) - \epsilon_{\theta^*} (x_t,t) + \eta (\epsilon_{\theta^*}(x_t,c,t) - \epsilon_{\theta^*} (x_t,t)) \right\|^2 \right]\]
 
-<p>where $x_0$ is the input image sampled from data distribution $\mathcal{D}$, $T$ is the number of steps of the diffusion model.</p>
+<p>where \(x_0\) is the input image sampled from data distribution \(\mathcal{D}\), \(T\) is the number of steps of the diffusion model.</p>
 
-<p>Instead of recursively sampling the noise $\epsilon_{\theta}(x_t,t)$ at every step, we can sample the time step $t \sim \mathcal{U}(0, T-1)$ and then sample the noise $\epsilon_{\theta}(x_t,t)$ at that time step.
+<p>Instead of recursively sampling the noise \(\epsilon_{\theta}(x_t,t)\) at every step, we can sample the time step \(t \sim \mathcal{U}(0, T-1)\) and then sample the noise \(\epsilon_{\theta}(x_t,t)\) at that time step.
 Therefore, the loss function can be rewritten as follows:</p>
 
 \[\mathcal{L}(\theta) = \mathbb{E}_{x_0 \sim \mathcal{D}} \left[ \left\| \epsilon_{\theta}(x_t,t) - \epsilon_{\theta^*} (x_t,t) + \eta (\epsilon_{\theta^*}(x_t,c,t) - \epsilon_{\theta^*} (x_t,t)) \right\|^2 \right]\]
 
-<p>where $t \sim \mathcal{U}(0, T-1)$.</p>
+<p>where \(t \sim \mathcal{U}(0, T-1)\).</p>
 
 <p>However, in the paper, instead of using the above loss function, the author proposed to use the following loss function:</p>
 
 \[\mathcal{L}(\theta) = \mathbb{E}_{x_0 \sim \mathcal{D}} \left[  \left\| \epsilon_{\theta}(x_t,c,t) - \epsilon_{\theta^*} (x_t,t) + \eta (\epsilon_{\theta^*}(x_t,c,t) - \epsilon_{\theta^*} (x_t,t)) \right\|^2 \right]\]
 
-<p>where $t \sim \mathcal{U}(0, T-1)$.</p>
+<p>where \(t \sim \mathcal{U}(0, T-1)\).</p>
 
-<p>The difference between the two loss functions is that the first loss function is computed based on the unconditional noise $\epsilon_{\theta}(x_t,t)$ at the time step $t$ while the second loss function is computed based on the noise $\epsilon_{\theta}(x_t,c,t)$ at the time step $t$ conditioned on the concept $c$.</p>
+<p>The difference between the two loss functions is that the first loss function is computed based on the unconditional noise \(\epsilon_{\theta}(x_t,t)\) at the time step \(t\) while the second loss function is computed based on the noise \(\epsilon_{\theta}(x_t,c,t)\) at the time step \(t\) conditioned on the concept \(c\).</p>
 
-<p>Interpretation of the loss function: By minimizing the above loss function, we try to force the conditional noise $\epsilon_{\theta}(x_t,c,t)$ to be close to the unconditional noise $\epsilon_{\theta^*} (x_t,t)$ of the original model.</p>
+<p>Interpretation of the loss function: By minimizing the above loss function, we try to force the conditional noise \(\epsilon_{\theta}(x_t,c,t)\) to be close to the unconditional noise \(\epsilon_{\theta^*} (x_t,t)\) of the original model.</p>
 
-<p>Note: In the above objective function, $x_t$ is the image from the training set $\mathcal{D}$ at time step $t$. However, as mentioned in the paper “We exploit the model’s knowledge of the concept to synthesize training samples, thereby eliminating the need for data collection”. Therefore, in the implementation, $x_t$ is the image generated by the fine-tuned model at time step $t$.</p>
+<p>Note: In the above objective function, \(x_t\) is the image from the training set \(\mathcal{D}\) at time step \(t\). However, as mentioned in the paper “We exploit the model’s knowledge of the concept to synthesize training samples, thereby eliminating the need for data collection”. Therefore, in the implementation, \(x_t\) is the image generated by the fine-tuned model at time step \(t\).</p>
 
 <h2 id="how-to-implement">How to implement</h2>
 
@@ -1043,17 +1045,17 @@ Therefore, the loss function can be rewritten as follows:</p>
 <h2 id="something-to-note">Something to note</h2>
 
 <ul>
-  <li>In the above objective function, $x_t$ is the image from the training set $\mathcal{D}$ at time step $t$. However, as mentioned in the paper “We exploit the model’s knowledge of the concept to synthesize training samples, thereby eliminating the need for data collection”. Therefore, in the implementation, $x_t$ is the image generated by the fine-tuned model at time step $t$.</li>
-  <li>When generating the image $x_t$ from the fine-tuned model, the authors used <code class="language-plaintext highlighter-rouge">emb_p</code> (embedding with conditional image) instead of <code class="language-plaintext highlighter-rouge">emb_0</code> (embedding with unconditional image). So $x_t \sim P_{\theta}(x_t \mid c)$ instead of $x_t \sim P_{\theta}(x_t)$.</li>
+  <li>In the above objective function, \(x_t\) is the image from the training set \(\mathcal{D}\) at time step \(t\). However, as mentioned in the paper “We exploit the model’s knowledge of the concept to synthesize training samples, thereby eliminating the need for data collection”. Therefore, in the implementation, \(x_t\) is the image generated by the fine-tuned model at time step \(t\).</li>
+  <li>When generating the image \(x_t\) from the fine-tuned model, the authors used <code class="language-plaintext highlighter-rouge">emb_p</code> (embedding with conditional image) instead of <code class="language-plaintext highlighter-rouge">emb_0</code> (embedding with unconditional image). So \(x_t \sim P_{\theta}(x_t \mid c)\) instead of \(x_t \sim P_{\theta}(x_t)\).</li>
 </ul>
 
 <p>So the loss function in the implementation is as follows:</p>
 
 \[\mathcal{L}(\theta) = \mathbb{E}_{x_t \sim P_{\theta}(. \mid c)} \left[  \left\| \epsilon_{\theta}(x_t,c,t) - \epsilon_{\theta^*} (x_t,t) + \eta (\epsilon_{\theta^*}(x_t,c,t) - \epsilon_{\theta^*} (x_t,t)) \right\|^2 \right]\]
 
-<p>where $t \sim \mathcal{U}(0, T-1)$.</p>
+<p>where \(t \sim \mathcal{U}(0, T-1)\).</p>
 
-<p>However, this approach might lead to a problem that because sample $z$ is generated by the fine-tuned model $\theta$ which is later used to estimate the score $e_n$ of the fine-tuned model $\theta$, therefore, when do backpropagation, the gradient of the loss function will be backpropagated twice through the fine-tuned model $\theta$ which might lead to unstability.</p>]]></content><author><name></name></author><category term="reading" /><category term="tml" /><category term="diffusion" /><category term="genai" /><summary type="html"><![CDATA[How to erase harmful concepts from diffusion models]]></summary></entry><entry><title type="html">On Reading - Textual Inversion</title><link href="https://tuananhbui89.github.io/blog/2023/textual-inversion/" rel="alternate" type="text/html" title="On Reading - Textual Inversion" /><published>2023-08-07T00:00:00+10:00</published><updated>2023-08-07T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/2023/textual-inversion</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2023/textual-inversion/"><![CDATA[<h2 id="about-the-paper">About the paper</h2>
+<p>However, this approach might lead to a problem that because sample \(z\) is generated by the fine-tuned model \(\theta\) which is later used to estimate the score \(e_n\) of the fine-tuned model \(\theta\), therefore, when do backpropagation, the gradient of the loss function will be backpropagated twice through the fine-tuned model \(\theta\) which might lead to unstability.</p>]]></content><author><name></name></author><category term="reading" /><category term="tml" /><category term="diffusion" /><category term="genai" /><summary type="html"><![CDATA[How to erase harmful concepts from diffusion models]]></summary></entry><entry><title type="html">On Reading - Textual Inversion</title><link href="https://tuananhbui89.github.io/blog/2023/textual-inversion/" rel="alternate" type="text/html" title="On Reading - Textual Inversion" /><published>2023-08-07T00:00:00+10:00</published><updated>2023-08-07T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/2023/textual-inversion</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2023/textual-inversion/"><![CDATA[<h2 id="about-the-paper">About the paper</h2>
 
 <ul>
   <li>Published at ICLR 2023</li>

@@ -168,22 +168,24 @@
 
 <p>In this section, we will go through the Conditional Diffusion Process introduced in Appendix H of the paper.</p>
 
-<p>We start by defining a conditional Markovian noising process $\hat{q}$ similar to $q$, and assume that $\hat{q}(y \mid x_0)$ is a known and readily available label distribution for each sample.</p>
+<p>We start by defining a conditional Markovian noising process \(\hat{q}\) similar to \(q\), and assume that \(\hat{q}(y \mid x_0)\) is a known and readily available label distribution for each sample.</p>
 
 <ul>
-  <li>$\hat{q}(x_0) = q(x_0)$: the initial distribution of the process is the same as the unconditional process.</li>
-  <li>$\hat{q}(y \mid x_0)$ is the label distribution for each sample $x_0$ which is known and readily available.</li>
-  <li>$\hat{q}(x_{t+1} \mid x_t, y) = q(x_{t+1} \mid x_t)$: <strong>This is the key point that will later enable us to derive the conditional diffusion process</strong>. This explains that the transition distribution is the same as the unconditional process, i.e., the noise adding in the forward diffusiion process is independent to label $y$. However, this might not neccessary be the case. If using SDE (Stochastic Differential Equation) to model the diffusion process, then the forward diffusion process can be conditioned on $y$. <strong>This can be a future work to explore.</strong>
+  <li>\(\hat{q}(x_0) = q(x_0)\): the initial distribution of the process is the same as the unconditional process.</li>
+  <li>\(\hat{q}(y \mid x_0)\) is the label distribution for each sample \(x_0\) which is known and readily available.</li>
+  <li>\(\hat{q}(x_{t+1} \mid x_t, y) = q(x_{t+1} \mid x_t)\)$: <strong>This is the key point that will later enable us to derive the conditional diffusion process</strong>. This explains that the transition distribution is the same as the unconditional process, i.e., the noise adding in the forward diffusiion process is independent to label \(y\). However, this might not neccessary be the case. If using SDE (Stochastic Differential Equation) to model the diffusion process, then the forward diffusion process can be conditioned on \(y\). <strong>This can be a future work to explore.</strong>
 </li>
-  <li>$\hat{q}(x_{1:T} \mid x_0, y) = \prod_{t=1}^T \hat{q}(x_t \mid x_{t-1}, y)$</li>
+  <li>
+\[\hat{q}(x_{1:T} \mid x_0, y) = \prod_{t=1}^T \hat{q}(x_t \mid x_{t-1}, y)\]
+  </li>
 </ul>
 
 <p>From the above definition, we can derive the following properties:</p>
 
 <ul>
-  <li>$\hat{q}(x_{t+1} \mid x_t, y) = \hat{q}(x_{t+1} \mid x_t) = q(x_{t+1} \mid x_t)$ the forward process conditioned on $y$ is the same as the unconditional forward process.</li>
-  <li>$\hat{q}(y \mid x_t, x_{t+1}) = \hat{q}(y \mid x_t)$: the label distribution is independent of the next sample $x_{t+1}$.</li>
-  <li>$\hat{q}(y \mid x_t, x_{t+1}) \neq \hat{q}(y \mid x_{t+1})$: Need confirmation on this. But if this is true, then it means that $\hat{q}(y \mid x_t) \neq \hat{q}(y \mid x_{t+1})$ or the label distribution has changed after adding noise at each step. Then we cannot use the same classifier to approximate the label distribution at each step. <strong>However, in the paper, the authors still use the same classifier!!!</strong>. One possible idea is that we can consider a classifier that is conditioned to time step $t$.</li>
+  <li>\(\hat{q}(x_{t+1} \mid x_t, y) = \hat{q}(x_{t+1} \mid x_t) = q(x_{t+1} \mid x_t)\) the forward process conditioned on \(y\) is the same as the unconditional forward process.</li>
+  <li>\(\hat{q}(y \mid x_t, x_{t+1}) = \hat{q}(y \mid x_t)\): the label distribution is independent of the next sample \(x_{t+1}\).</li>
+  <li>\(\hat{q}(y \mid x_t, x_{t+1}) \neq \hat{q}(y \mid x_{t+1})\): Need confirmation on this. But if this is true, then it means that \(\hat{q}(y \mid x_t) \neq \hat{q}(y \mid x_{t+1})\) or the label distribution has changed after adding noise at each step. Then we cannot use the same classifier to approximate the label distribution at each step. <strong>However, in the paper, the authors still use the same classifier!!!</strong>. One possible idea is that we can consider a classifier that is conditioned to time step \(t\).</li>
 </ul>
 
 <p>Based on the above properties, we now can derive the conditional reverse process as follows:</p>
@@ -192,7 +194,7 @@
 
 \[\hat{q}(x_{t} \mid x_{t+1}, y) = \frac{q(x_{t} \mid x_{t+1}) \hat{q}(y \mid x_{t})}{\hat{q}(y \mid x_{t+1})}\]
 
-<p>The term $\hat{q}(y \mid x_{t+1})$ is considered as constant w.r.t. $x_t$. So $x_t$ can be sampled from the above distribution, where $\hat{q}(y \mid x_{t})$ is approximated by an auxiliary classifier, which is trained to predict the label $y$ from the sample $x_t$. And $q(x_{t} \mid x_{t+1})$ is the reverse process of the unconditional diffusion process which has been trained.</p>
+<p>The term \(\hat{q}(y \mid x_{t+1})\) is considered as constant w.r.t. \(x_t\). So \(x_t\) can be sampled from the above distribution, where \(\hat{q}(y \mid x_{t})\) is approximated by an auxiliary classifier, which is trained to predict the label \(y\) from the sample \(x_t\). And \(q(x_{t} \mid x_{t+1})\) is the reverse process of the unconditional diffusion process which has been trained.</p>
 
 <h2 id="classifier-guidance">Classifier Guidance</h2>
 
@@ -201,7 +203,7 @@ In the paper, the authors proposed two sampling approaches:</p>
 
 <ul>
   <li>
-<strong>Conditional Reverse Noising Process</strong>: which factorizes the conditional transition $p_{\theta, \phi}(x_t \mid x_{t+1}, y) = Z p_\theta(x_t \mid x_{t+1} p_\phi (y \mid x_t))$. This can be approximated by a Gaussian similar to the unconditional reverse process, but with its mean shifted by $\Sigma g$</li>
+<strong>Conditional Reverse Noising Process</strong>: which factorizes the conditional transition \(p_{\theta, \phi}(x_t \mid x_{t+1}, y) = Z p_\theta(x_t \mid x_{t+1} p_\phi (y \mid x_t))\). This can be approximated by a Gaussian similar to the unconditional reverse process, but with its mean shifted by $$\Sigma g$</li>
   <li>
 <strong>Conditional Sampling for DDIM</strong>: which can be applied for deterministic sampling methods like DDIM. This can be done by using the conditioning trick adapted from Song et al. (2021).</li>
 </ul>
@@ -296,7 +298,7 @@ In the paper, the authors proposed two sampling approaches:</p>
 </span>    <span class="n">sample</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">mean</span><span class="sh">"</span><span class="p">]</span> <span class="o">+</span> <span class="n">nonzero_mask</span> <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="nf">exp</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">log_variance</span><span class="sh">"</span><span class="p">])</span> <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randn_like</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">mean</span><span class="sh">"</span><span class="p">])</span>
     <span class="k">return</span> <span class="p">{</span><span class="sh">"</span><span class="s">sample</span><span class="sh">"</span><span class="p">:</span> <span class="n">sample</span><span class="p">,</span> <span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">:</span> <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">]}</span>
 
-<span class="c1"># the progressive sampling loop from T to 0, where the $x_t$ will be used to sample $x_{t-1}$
+<span class="c1"># the progressive sampling loop from T to 0, where the $$x_t$$ will be used to sample $$x_{t-1}$
 </span>
 <span class="k">def</span> <span class="nf">p_sample_loop_progressive</span><span class="p">():</span>
 
@@ -358,7 +360,7 @@ In the paper, the authors proposed two sampling approaches:</p>
     <span class="k">return</span> <span class="p">{</span><span class="sh">"</span><span class="s">sample</span><span class="sh">"</span><span class="p">:</span> <span class="n">sample</span><span class="p">,</span> <span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">:</span> <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">]}</span>    
 </code></pre></div></div>
 
-<p>The main component of the above code is the unconditional reverse process <code class="language-plaintext highlighter-rouge">p_mean_variance</code> which is defined as follows in the file <code class="language-plaintext highlighter-rouge">gaussian_diffusion.py</code>. It is worth noting that this function not only returns the $x_{t-1}$ but also the prediction of the initial $x_0$, i.e., <code class="language-plaintext highlighter-rouge">pred_xstart</code>.</p>
+<p>The main component of the above code is the unconditional reverse process <code class="language-plaintext highlighter-rouge">p_mean_variance</code> which is defined as follows in the file <code class="language-plaintext highlighter-rouge">gaussian_diffusion.py</code>. It is worth noting that this function not only returns the \(x_{t-1}\) but also the prediction of the initial \(x_0\), i.e., <code class="language-plaintext highlighter-rouge">pred_xstart</code>.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
 <span class="k">def</span> <span class="nf">p_mean_variance</span><span class="p">(</span>
