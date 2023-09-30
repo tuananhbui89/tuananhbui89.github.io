@@ -124,7 +124,7 @@
 
   <header class="post-header">
     <h1 class="post-title">Practicing 75 Leetcode Questions</h1>
-    <p class="post-meta">September 30, 2023</p>
+    <p class="post-meta">October 1, 2023</p>
     <p class="post-tags">
       <a href="/blog/2023"> <i class="fas fa-calendar fa-sm"></i> 2023 </a>
         ·  
@@ -143,6 +143,8 @@
 <li class="toc-entry toc-h2"><a href="#100-same-tree">100. Same Tree</a></li>
 <li class="toc-entry toc-h2"><a href="#226-invert-binary-tree">226. Invert Binary Tree</a></li>
 <li class="toc-entry toc-h2"><a href="#124-binary-tree-maximum-path-sum">124. Binary Tree Maximum Path Sum</a></li>
+<li class="toc-entry toc-h2"><a href="#102-binary-tree-level-order-traversal">102. Binary Tree Level Order Traversal</a></li>
+<li class="toc-entry toc-h2"><a href="#297-serialize-and-deserialize-binary-tree">297. Serialize and Deserialize Binary Tree</a></li>
 <li class="toc-entry toc-h2"><a href="#reflection-binary-tree-problems">Reflection: Binary Tree Problems?</a></li>
 </ul>
     </div>
@@ -469,6 +471,274 @@ However, with this perspective, it is still not clear how to find the optimal su
   <li>Then the optimal path sum rooted at the node is the maximum of <code class="language-plaintext highlighter-rouge">node.val</code> and <code class="language-plaintext highlighter-rouge">node.val + left</code> and <code class="language-plaintext highlighter-rouge">node.val + right</code>. It is worth noting that we must not consider the value <code class="language-plaintext highlighter-rouge">node.val + left + right</code> even though it might be the maximum. It is because if we consider this value, we will recursively consider a sub-tree in the node’s children as a valid path, which is not correct.</li>
 </ul>
 
+<h2 id="102-binary-tree-level-order-traversal"><a href="https://leetcode.com/problems/binary-tree-level-order-traversal/" rel="external nofollow noopener" target="_blank">102. Binary Tree Level Order Traversal</a></h2>
+
+<font size="6"> Description </font>
+
+<p>Given the root of a binary tree, return the level order traversal of its nodes’ values. (i.e., from left to right, level by level).</p>
+
+<p>Example 1:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: root = [3,9,20,null,null,15,7]
+Output: [[3],[9,20],[15,7]]
+</code></pre></div></div>
+
+<p>Example 2:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: root = [1]
+Output: [[1]]
+</code></pre></div></div>
+
+<p>Example 3:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: root = []
+Output: []
+</code></pre></div></div>
+
+<p>Constraints:</p>
+
+<ul>
+  <li>The number of nodes in the tree is in the range [0, 2000].</li>
+  <li>-1000 &lt;= Node.val &lt;= 1000</li>
+</ul>
+
+<font size="6"> Solution </font>
+
+<blockquote class="block-warning">
+  <p><strong>What is level order traversal?</strong></p>
+
+  <p>The level order traversal of a binary tree is a traversal that visits the nodes level by level.</p>
+</blockquote>
+
+<p>The idea of the solution is to traverse the tree and store the nodes in a list of lists. The first list contains the nodes at level 0, the second list contains the nodes at level 1, and so on. Instead of using DFS, we use BFS to traverse the tree.</p>
+
+<blockquote class="block-warning">
+  <p><strong>What is BFS?</strong></p>
+
+  <p>BFS stands for Breadth First Search. It is a graph traversal algorithm. The idea is to traverse the graph by going level by level. The BFS algorithm can be implemented using a queue.</p>
+</blockquote>
+
+<p>The following code snippet shows how to implement a queue using a list. The queue is a data structure that supports two operations: enqueue and dequeue. The enqueue operation adds an item to the queue. The dequeue operation removes an item from the queue. The first item that is added to the queue is the first item that is removed from the queue. This is called First In First Out (FIFO).</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Simple implementation of a queue using a list
+</span><span class="k">class</span> <span class="nc">Queue</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">def</span> <span class="nf">enqueue</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">items</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">dequeue</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="n">items</span><span class="p">.</span><span class="nf">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">is_empty</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nf">len</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">items</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+</code></pre></div></div>
+
+<!-- The following code snippet shows how to implement the BFS algorithm to traverse the tree.
+
+```python
+# Simple BFS implementation
+def bfs(root):
+    queue = Queue()
+    queue.enqueue(root)
+    while not queue.is_empty():
+        node = queue.dequeue()
+        print(node.val)
+        if node.left is not None:
+            queue.enqueue(node.left)
+        if node.right is not None:
+            queue.enqueue(node.right)
+``` -->
+
+<p>Here is the solution to the problem.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">levelOrder</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TreeNode</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+        <span class="k">if</span> <span class="n">root</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">queue</span> <span class="o">=</span> <span class="nc">Queue</span><span class="p">()</span>
+            <span class="n">queue</span><span class="p">.</span><span class="nf">enqueue</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+            <span class="n">levels</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">while</span> <span class="ow">not</span> <span class="n">queue</span><span class="p">.</span><span class="nf">is_empty</span><span class="p">():</span>
+                <span class="n">level</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">queue</span><span class="p">.</span><span class="n">items</span><span class="p">)):</span>
+                    <span class="n">node</span> <span class="o">=</span> <span class="n">queue</span><span class="p">.</span><span class="nf">dequeue</span><span class="p">()</span>
+                    <span class="n">level</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">node</span><span class="p">.</span><span class="n">val</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">node</span><span class="p">.</span><span class="n">left</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">queue</span><span class="p">.</span><span class="nf">enqueue</span><span class="p">(</span><span class="n">node</span><span class="p">.</span><span class="n">left</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">node</span><span class="p">.</span><span class="n">right</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">queue</span><span class="p">.</span><span class="nf">enqueue</span><span class="p">(</span><span class="n">node</span><span class="p">.</span><span class="n">right</span><span class="p">)</span>
+                <span class="n">levels</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">levels</span>
+</code></pre></div></div>
+
+<p>Explanation:</p>
+
+<ul>
+  <li>The base case is when the root is None, we return an empty list.</li>
+  <li>If the root is not None, we then create a queue and enqueue the root to the queue.</li>
+  <li>In each level, we iteratively dequeue all the nodes in the queue and append their values to the level list. Then we enqueue the left and right children of the nodes to the queue. The size of the queue is the number of nodes in the current level. The for loop iterates over the nodes in the current level. It is worth noting that we must not use <code class="language-plaintext highlighter-rouge">for node in queue.items</code> because the size of the queue changes when we enqueue the left and right children of the nodes. Instead, we use <code class="language-plaintext highlighter-rouge">for _ in range(len(queue.items))</code> which iterates over the exact number of nodes in the current level.</li>
+  <li>The algorithm terminates when the queue is empty. Then we return the levels list.</li>
+</ul>
+
+<h2 id="297-serialize-and-deserialize-binary-tree"><a href="https://leetcode.com/problems/serialize-and-deserialize-binary-tree/" rel="external nofollow noopener" target="_blank">297. Serialize and Deserialize Binary Tree</a></h2>
+
+<font size="6"> Description </font>
+
+<p>Serialization is the process of converting a data structure or object into a sequence of bits so that it can be stored in a file or memory buffer, or transmitted across a network connection link to be reconstructed later in the same or another computer environment.</p>
+
+<p>Design an algorithm to serialize and deserialize a binary tree. There is no restriction on how your serialization/deserialization algorithm should work. You just need to ensure that a binary tree can be serialized to a string and this string can be deserialized to the original tree structure.</p>
+
+<p>Clarification: The input/output format is the same as <a href="https://support.leetcode.com/hc/en-us/articles/360011883654-What-does-1-null-2-3-mean-in-binary-tree-representation-" rel="external nofollow noopener" target="_blank">how LeetCode serializes a binary tree</a>. You do not necessarily need to follow this format, so please be creative and come up with different approaches yourself.</p>
+
+<p>Example 1:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: root = [1,2,3,null,null,4,5]
+Output: [1,2,3,null,null,4,5]
+</code></pre></div></div>
+
+<p>Example 2:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: root = []
+Output: []
+</code></pre></div></div>
+
+<p>Example 3:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: root = [1]
+Output: [1]
+</code></pre></div></div>
+
+<p>Constraints:</p>
+
+<ul>
+  <li>The number of nodes in the tree is in the range [0, 10^4].</li>
+  <li>-1000 &lt;= Node.val &lt;= 1000</li>
+</ul>
+
+<font size="6"> Solution </font>
+
+<p>The idea of the solution is to traverse the tree and store the nodes in a list and then reconstruct the tree from the list in the deserializer. I will use both DFS and BFS in the solution.</p>
+
+<p><strong>Solution with BFS</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Definition for a binary tree node.
+# class TreeNode(object):
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+</span>
+<span class="k">class</span> <span class="nc">Codec</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">root</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Encodes a tree to a single string.
+        
+        :type root: TreeNode
+        :rtype: str
+        </span><span class="sh">"""</span>
+        <span class="n">levels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">queue</span> <span class="o">=</span> <span class="nc">Queue</span><span class="p">()</span>
+        <span class="n">queue</span><span class="p">.</span><span class="nf">enqueue</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">queue</span><span class="p">.</span><span class="nf">is_empty</span><span class="p">():</span>
+            <span class="n">level</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">queue</span><span class="p">.</span><span class="n">items</span><span class="p">)):</span>
+                <span class="n">node</span> <span class="o">=</span> <span class="n">queue</span><span class="p">.</span><span class="nf">dequeue</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">level</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">level</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">node</span><span class="p">.</span><span class="n">val</span><span class="p">)</span>
+                    <span class="n">queue</span><span class="p">.</span><span class="nf">enqueue</span><span class="p">(</span><span class="n">node</span><span class="p">.</span><span class="n">left</span><span class="p">)</span>
+                    <span class="n">queue</span><span class="p">.</span><span class="nf">enqueue</span><span class="p">(</span><span class="n">node</span><span class="p">.</span><span class="n">right</span><span class="p">)</span>
+            <span class="n">levels</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">levels</span>
+
+    <span class="k">def</span> <span class="nf">deserialize</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Decodes your encoded data to tree.
+        
+        :type data: str
+        :rtype: TreeNode
+        </span><span class="sh">"""</span>
+        <span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">root</span> <span class="o">=</span> <span class="nc">TreeNode</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">queue</span> <span class="o">=</span> <span class="nc">Queue</span><span class="p">()</span>
+            <span class="n">queue</span><span class="p">.</span><span class="nf">enqueue</span><span class="p">(</span><span class="n">root</span><span class="p">.</span><span class="n">left</span><span class="p">)</span>
+            <span class="n">queue</span><span class="p">.</span><span class="nf">enqueue</span><span class="p">(</span><span class="n">root</span><span class="p">.</span><span class="n">right</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">level</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">parent_child</span> <span class="o">=</span> <span class="n">queue</span><span class="p">.</span><span class="nf">dequeue</span><span class="p">()</span>
+                        <span class="n">parent_child</span> <span class="o">=</span> <span class="bp">None</span>
+                        <span class="n">queue</span><span class="p">.</span><span class="nf">enqueue</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+                        <span class="n">queue</span><span class="p">.</span><span class="nf">enqueue</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">current_node</span> <span class="o">=</span> <span class="nc">TreeNode</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                        <span class="n">parent_child</span> <span class="o">=</span> <span class="n">queue</span><span class="p">.</span><span class="nf">dequeue</span><span class="p">()</span>
+                        <span class="n">parent_child</span> <span class="o">=</span> <span class="n">current_node</span>
+                        <span class="n">queue</span><span class="p">.</span><span class="nf">enqueue</span><span class="p">(</span><span class="n">current_node</span><span class="p">.</span><span class="n">left</span><span class="p">)</span>
+                        <span class="n">queue</span><span class="p">.</span><span class="nf">enqueue</span><span class="p">(</span><span class="n">current_node</span><span class="p">.</span><span class="n">right</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">root</span>
+        
+
+<span class="c1"># Your Codec object will be instantiated and called as such:
+# ser = Codec()
+# deser = Codec()
+# ans = deser.deserialize(ser.serialize(root))
+</span></code></pre></div></div>
+
+<p>Explanation:</p>
+
+<p>In the serializer, it is the BFS algorithm that is similar to the previous problem. So this explanation is mostly for the deserializer. Let’s consider the following example:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: root = [1,2,3,null,null,4,5]
+Output: [1,2,3,null,null,4,5]
+Encoded: [[1], [2, 3], [None, None, 4, 5]]
+</code></pre></div></div>
+
+<p>Let’s go through the deserializer step by step.</p>
+
+<ul>
+  <li>The base case is when the data is an empty list, we return None.</li>
+  <li>If the data is not an empty list, we then create a root node with the value of the first element in the first level of the data list. The data always starts with the root node.</li>
+  <li>Because it is a binary tree, therefore, each node always have two children (None is also considered as a child) except the leaf nodes. Therefore, it is safe to assume that the length of the data list is: <code class="language-plaintext highlighter-rouge">2^0 + 2^1 + 2^2 + ... + 2^(n-1) = 2^n - 1</code> where <code class="language-plaintext highlighter-rouge">n</code> is the number of levels in the tree. The first level has 1 node, the second level has 2 nodes, the third level has 4 nodes, and so on. In the example, the length of the data list is 7 which is equal to <code class="language-plaintext highlighter-rouge">2^3 - 1</code> where <code class="language-plaintext highlighter-rouge">n = 3</code>.</li>
+  <li>After creating the root node, we then create a queue to manage which node we are adding the children to. We start by enqueueing the root’s left and right children to the queue. So after this step, we have a tree - to be built - with only the root node and a queue - to manage the parent nodes - with two children of the root node.</li>
+  <li>Then we iterate over the data list from the second level to the last level. In each level, we iterate over the nodes in the level. We have the following actions:
+    <ul>
+      <li>We create a TreeNode with the value of the current node in the data list. If the value is None, we still create a TreeNode with the value of None.</li>
+      <li>We dequeue the parent’s children from the queue. It can be the left or right child of the parent node</li>
+      <li>We assign the current node to the the dequeued child. If the value of the current node is None, we assign None to the child.</li>
+      <li>We enqueue the left and right children of the current node to the queue. If the value of the current node is None, we enqueue two None values instead.</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Let’s go through the example step by step.</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: root = [1,2,3,null,null,4,5]
+Encoded: [[1], [2, 3], [None, None, 4, 5]]
+Iter 1: tree = [1], queue = [1's left child, 1's right child]
+Iter 2: node = 2, deque 1's left child, assign 2 to 1's left child, enqueue 2's left and right children. tree = [1, 2], queue = [1's right child, 2's left child, 2's right child]
+Iter 3: node = 3, deque 1's right child, assign 3 to 1's right child, enqueue 3's left and right children. tree = [1, 2, 3], queue = [2's left child, 2's right child, 3's left child, 3's right child]
+Iter 4: node = None, deque 2's left child, assign None to 2's left child, enqueue 2's left and right children. tree = [1, 2, 3, None], queue = [2's right child, 3's left child, 3's right child, None, None]
+Iter 5: node = None, deque 2's right child, assign None to 2's right child, enqueue 3's left and right children. tree = [1, 2, 3, None, None], queue = [3's left child, 3's right child, None, None, None, None]
+Iter 6: node = 4, deque 3's left child, assign 4 to 3's left child, enqueue 4's left and right children. tree = [1, 2, 3, None, None, 4], queue = [3's right child, None, None, None, None, 4's left child, 4's right child]
+Iter 7: node = 5, deque 3's right child, assign 5 to 3's right child, enqueue 5's left and right children. tree = [1, 2, 3, None, None, 4, 5], queue = [None, None, None, None, 4's left child, 4's right child, 5's left child, 5's right child]
+Terminated because the data list is empty.
+</code></pre></div></div>
+
+<p><strong>Turn out that the above solution doesn’t work <img class="emoji" title=":joy:" alt=":joy:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f602.png" height="20" width="20"><img class="emoji" title=":joy:" alt=":joy:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f602.png" height="20" width="20"><img class="emoji" title=":joy:" alt=":joy:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f602.png" height="20" width="20"></strong> The reason is that, I misunderstood the problem. The problem requires us to serialize the tree to a string, not a list of lists. So I need to change the solution to the following…</p>
+
+<p>Extension: How to serialize a binary tree to a string with minimal length?</p>
+
+<ul>
+  <li>The first idea is to use level order traversal to serialize the tree. Whenever we encounter a sequence of <code class="language-plaintext highlighter-rouge">None</code> values, we replace it with 2 values <code class="language-plaintext highlighter-rouge">None</code> and <code class="language-plaintext highlighter-rouge">numbers_of_None</code> where <code class="language-plaintext highlighter-rouge">numbers_of_None</code> is the number of <code class="language-plaintext highlighter-rouge">None</code> values in the sequence. For example, the sequence <code class="language-plaintext highlighter-rouge">[1, 2, None, None, None, 3, 4, None, None, None, None]</code> will be serialized to <code class="language-plaintext highlighter-rouge">[1, 2, None, 3, 4, None, 4]</code>. This approach will be beneficial when the tree is sparse.</li>
+  <li>The second idea is to pre-define a set of encode-decode rules that know in both sides. We then self-analyze the tree and encode it with optimal rules. The optimal rule also be sent to the other side to decode the tree. For example, the outer tree <code class="language-plaintext highlighter-rouge">[1, 2, 3, 4, None, None, 5]</code> can be encode as <code class="language-plaintext highlighter-rouge">out [1, 2, 3, 4, 5]</code>.</li>
+</ul>
+
 <h2 id="reflection-binary-tree-problems">Reflection: Binary Tree Problems?</h2>
 
 <p>This is a placeholder for me to reflect what I have learned to solve the binary tree problems. So far</p>
@@ -534,7 +804,7 @@ However, with this perspective, it is still not clear how to find the optimal su
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/f4t/">Principles of Life</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/erasing-concepts/">On Reading - Erasing Concepts from Diffusion Models</a>
   </li>
 
 </div>
