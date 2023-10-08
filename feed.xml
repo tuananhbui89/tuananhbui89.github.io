@@ -1,5 +1,95 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2023-10-05T13:29:22+11:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
-</subtitle><entry><title type="html">A Tutorial on Diffusion Models with Tensorflow 2</title><link href="https://tuananhbui89.github.io/blog/2023/diffusion-tutorial/" rel="alternate" type="text/html" title="A Tutorial on Diffusion Models with Tensorflow 2" /><published>2023-10-03T00:00:00+11:00</published><updated>2023-10-03T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2023/diffusion-tutorial</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2023/diffusion-tutorial/"><![CDATA[<p>I have been asked by Dinh to develop a short tutorial/lecture on diffusion models for the course “Deep Learning” at Monash University (FIT3181). And, here it is.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2023-10-09T07:20:41+11:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
+</subtitle><entry><title type="html">On Adversarial Robustness of Multimodal Generative Models</title><link href="https://tuananhbui89.github.io/blog/2023/multimodal-tml/" rel="alternate" type="text/html" title="On Adversarial Robustness of Multimodal Generative Models" /><published>2023-10-06T00:00:00+11:00</published><updated>2023-10-06T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2023/multimodal-tml</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2023/multimodal-tml/"><![CDATA[<h2 id="introduction">Introduction</h2>
+
+<p>Recent Text-to-Image Generative Models (GMs) such as Stable Diffusion, Dall-E, Midjourney have shown impressive results in generating high-quality images from text descriptions. Not stopping there, recent Multimodal GMs such as Google’s Bard or GPT-4 or ControlNet allow users to control the generated images by providing additional visual prompts, i.e., a sketch or a reference image. And, we know that, every time a new model is proposed, there will be a new attack to hack it. (It is a privilege of Trustworthy Machine Learning, which will be never die)</p>
+
+<p><strong>The new Adversarial Game</strong>: The game between attackers and defenders is not new. Most of the time, this game is on the image classification task, or, more generally, on the decision-making task or discriminative models. However, with the emergence of GMs, the adversarial game is now extended to the generative setting.</p>
+
+<p>In this post, we will discuss three papers on this emerging topic (all appeared on Arxiv just since August 2023):</p>
+
+<ul>
+  <li><a href="https://arxiv.org/pdf/2308.10741.pdf">On Adversarial Robustness of Multimodal Generative Models</a> by Schlarmann et al <d-cite key="schlarmann2023adversarial"></d-cite>.</li>
+  <li><a href="https://arxiv.org/pdf/2309.00236.pdf">Image Hijacking: Adversarial Images can Control Generative Models at Runtime</a> by Bailey et al <d-cite key="bailey2023image"></d-cite>.</li>
+  <li><a href="https://arxiv.org/pdf/2309.11751.pdf">How Robust is Google’s Bard to Adversarial Image Attacks?</a> by Dong et al <d-cite key="dong2023robust"></d-cite>.</li>
+</ul>
+
+<h2 id="on-adversarial-robustness-of-multimodal-generative-models">On Adversarial Robustness of Multimodal Generative Models</h2>
+
+<p>In this work, the authors proposed an white-box attack on <a href="https://github.com/mlfoundations/open_flamingo">OpenFlamingo</a> model which is an open source implementation of DeepMind’s <a href="https://www.deepmind.com/blog/tackling-multiple-tasks-with-a-single-visual-language-model">Flamingo</a>.</p>
+
+<p><strong>OpenFlamingo</strong>:
+In a nutshell, OpenFlamingo is a conditional language model formulated as follows:</p>
+
+\[p(y \mid x) = \prod_{l=1}^{L} p (y_l \mid y_{&lt; l}, x)\]
+
+<p>where \(x\) is the input image, \(y\) is the output text, \(y_l\) is the l-th language token. Similar as <a href="https://www.deepmind.com/blog/tackling-multiple-tasks-with-a-single-visual-language-model">Flamingo</a> <a href="https://storage.googleapis.com/deepmind-media/DeepMind.com/Blog/tackling-multiple-tasks-with-a-single-visual-language-model/flamingo.pdf">paper</a> (its Closed twin), OpenFlamingo can perform multiple multimodal tasks such as image captioning, visual question answering, etc, by few-shot learning.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        
+
+<figure>
+
+  
+
+  <video src="https://storage.googleapis.com/deepmind-media/DeepMind.com/Blog/tackling-multiple-tasks-with-a-single-visual-language-model/Fig_01.mp4" class="img-fluid rounded z-depth-1" width="auto" height="auto" autoplay="" controls="" />
+
+  
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Given the two examples of animal pictures and a text identifying their name and a comment about where they can be found, Flamingo can mimic this style given a new image to output a relevant description: “This is a flamingo. They are found in the Caribbean.” (Image source: <a href="https://www.deepmind.com/blog/tackling-multiple-tasks-with-a-single-visual-language-model">DeepMind</a>)
+</div>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/multimodal/flamingo-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/multimodal/flamingo-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/multimodal/flamingo-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/multimodal/flamingo.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Examples of inputs and outputs obtained from Flamingo (image source <a href="(https://storage.googleapis.com/deepmind-media/DeepMind.com/Blog/tackling-multiple-tasks-with-a-single-visual-language-model/flamingo.pdf">DeepMind's paper</a>)
+</div>
+
+<p><strong>Proposed Attack</strong></p>
+
+<p>The authors proposed two attacks:</p>
+
+<ul>
+  <li><strong>Untargeted attack</strong>:</li>
+  <li><strong>Targeted attack</strong>:</li>
+</ul>
+
+<p>Given a query image \(q\) and a ground truth caption \(y\) as well as context images \(c\) and context text \(z\), the goal of the attacker is to find a perturbation \(\delta_q\) and \(\delta_c\) such that the perturbed query image \(q + \delta_q\) and context image \(c + \delta_c\) can fool the model to not generate the ground truth caption \(y\) anymore. The attack is formulated as follows:</p>
+
+\[\max \underset{\max}{\delta_q, \delta_c} - \sum_{l=1}^{m} \log \; p(y_l \mid y_{&lt; l}, z, q + \delta_q, c + \delta_c) \\
+\text{s.t} \| \delta_q \|_\infty \leq \epsilon_q, \| \delta_c \|_\infty \leq \epsilon_c\]
+
+<p>Note that, in this setting, they only attack query image but not context image.</p>
+
+<h2 id="image-hijacking-adversarial-images-can-control-generative-models-at-runtime">Image Hijacking Adversarial Images can Control Generative Models at Runtime</h2>
+
+<h2 id="how-robust-is-googles-bard-to-adversarial-image-attacks">How Robust is Google’s Bard to Adversarial Image Attacks?</h2>
+
+<h2 id="should-we-be-worried-yet">Should we be worried yet?</h2>
+
+<p>All three papers have shown some serious loophole in the current MGMs, which might make you scared. However, <d-cite key="schlarmann2023adversarial"></d-cite> and <d-cite key="bailey2023image"></d-cite> are white-box setting, which means that the attackers have full access to the model. In practice, this is not the case.</p>]]></content><author><name>Tuan-Anh Bui</name></author><category term="reading" /><category term="genai" /><category term="tml" /><summary type="html"><![CDATA[How to attack Google's Bard]]></summary></entry><entry><title type="html">A Tutorial on Diffusion Models with Tensorflow 2</title><link href="https://tuananhbui89.github.io/blog/2023/diffusion-tutorial/" rel="alternate" type="text/html" title="A Tutorial on Diffusion Models with Tensorflow 2" /><published>2023-10-03T00:00:00+11:00</published><updated>2023-10-03T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2023/diffusion-tutorial</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2023/diffusion-tutorial/"><![CDATA[<p>I have been asked by Dinh to develop a short tutorial/lecture on diffusion models for the course “Deep Learning” at Monash University (FIT3181). And, here it is.</p>
 
 <ul>
   <li>The Jupyter notebook with Tensorflow2 implementation is available on <a href="https://github.com/tuananhbui89/diffusion_tf2">Github</a>.</li>
@@ -17,7 +107,7 @@
   style="position: relative; width: 100%; margin: 0 auto;">
   <div class="jupyter-notebook-iframe-container">
     <iframe
-      src="/assets/jupyter/diffusion_models_tf2_fixed.ipynb.html"
+      src="/assets/jupyter/diffusion_models_tf2_fixed_v2.ipynb.html"
       style="position: absolute; top: 0; left: 0; border-style: none;"
       width="100%"
       height="100%"
@@ -1481,74 +1571,4 @@ The input prompt then will be tokenized by the tokenizer.</p>
         <span class="n">perturbed_images</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">clamp</span><span class="p">(</span><span class="n">original_images</span> <span class="o">+</span> <span class="n">eta</span><span class="p">,</span> <span class="nb">min</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="o">=+</span><span class="mi">1</span><span class="p">).</span><span class="nf">detach_</span><span class="p">()</span>
         <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">PGD loss - step </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s">, loss: </span><span class="si">{</span><span class="n">loss</span><span class="p">.</span><span class="nf">detach</span><span class="p">().</span><span class="nf">item</span><span class="p">()</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">perturbed_images</span>
-</code></pre></div></div>]]></content><author><name></name></author><category term="reading" /><category term="tml" /><category term="diffusion" /><category term="genai" /><summary type="html"><![CDATA[Protecting personal images from Dreambooth attack]]></summary></entry><entry><title type="html">Some useful code snippets</title><link href="https://tuananhbui89.github.io/blog/2023/learn-code/" rel="alternate" type="text/html" title="Some useful code snippets" /><published>2023-08-01T00:00:00+10:00</published><updated>2023-08-01T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/2023/learn-code</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2023/learn-code/"><![CDATA[<p>To log some useful code snippets that I have learned and used.</p>
-
-<h2 id="write-an-image-from-array">Write an image from array</h2>
-
-<p>Need to convert to uint8 before writing to image to avoid color shift.
-And using <code class="language-plaintext highlighter-rouge">cv2</code> will cause color shift (I didn’t try my best to find out why, there might be some other ways to use <code class="language-plaintext highlighter-rouge">cv2</code> to write image without color shift).</p>
-
-<div class="row mt-3">
-    <div class="col-sm mt-3 mt-md-0">
-        <figure>
-
-  <picture>
-    
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/code/write_image_PIL-480.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/code/write_image_PIL-800.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/code/write_image_PIL-1400.webp" />
-    
-
-    <!-- Fallback to the original file -->
-    <img src="/assets/img/code/write_image_PIL.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
-  </picture>
-
-</figure>
-
-    </div>
-    <div class="col-sm mt-3 mt-md-0">
-        <figure>
-
-  <picture>
-    
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/code/write_image_cv2-480.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/code/write_image_cv2-800.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/code/write_image_cv2-1400.webp" />
-    
-
-    <!-- Fallback to the original file -->
-    <img src="/assets/img/code/write_image_cv2.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
-  </picture>
-
-</figure>
-
-    </div>
-</div>
-<div class="caption">
-    Writing image using PIL and cv2.
-</div>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="kn">from</span> <span class="n">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
-    <span class="kn">import</span> <span class="n">torch</span> 
-
-    <span class="k">def</span> <span class="nf">save_images</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="n">save_path</span><span class="p">):</span>
-        <span class="nf">assert</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">is_tensor</span><span class="p">(</span><span class="n">images</span><span class="p">))</span>
-        <span class="nf">assert</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">images</span><span class="p">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">)</span>
-        <span class="nf">assert</span><span class="p">(</span><span class="n">images</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">)</span>
-        <span class="nf">assert</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">min</span><span class="p">(</span><span class="n">images</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="nf">assert</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">max</span><span class="p">(</span><span class="n">images</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
-
-        <span class="k">for</span> <span class="nb">id</span><span class="p">,</span> <span class="n">img_pixel</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="n">images</span><span class="p">):</span>
-            <span class="n">save_path_id</span> <span class="o">=</span> <span class="n">save_path</span> <span class="o">+</span> <span class="nf">str</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span> <span class="o">+</span> <span class="sh">"</span><span class="s">.png</span><span class="sh">"</span>
-            <span class="n">Image</span><span class="p">.</span><span class="nf">fromarray</span><span class="p">(</span>
-                <span class="p">(</span><span class="n">img_pixel</span> <span class="o">*</span> <span class="mf">127.5</span> <span class="o">+</span> <span class="mi">128</span><span class="p">).</span><span class="nf">clamp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">).</span><span class="nf">to</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="n">uint8</span><span class="p">).</span><span class="nf">permute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">).</span><span class="nf">cpu</span><span class="p">().</span><span class="nf">numpy</span><span class="p">()</span>
-                <span class="p">).</span><span class="nf">save</span><span class="p">(</span><span class="n">save_path_id</span><span class="p">)</span>
-
-            <span class="c1"># Using cv2 will cause color shift
-</span>            <span class="c1"># cv2.imwrite(save_path_id, (img_pixel * 127.5 + 128).clamp(0, 255).to(torch.uint8).permute(1, 2, 0).cpu().numpy())
-</span>    
-    <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
-        <span class="n">images</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">load</span><span class="p">(</span><span class="sh">"</span><span class="s">https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/files/images_tensor.pt</span><span class="sh">"</span><span class="p">)</span>
-        <span class="n">save_path</span> <span class="o">=</span> <span class="sh">"</span><span class="s">./test/</span><span class="sh">"</span>
-        <span class="nf">save_images</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="n">save_path</span><span class="p">)</span>
-</code></pre></div></div>]]></content><author><name></name></author><category term="coding" /><summary type="html"><![CDATA[Not something fancy]]></summary></entry></feed>
+</code></pre></div></div>]]></content><author><name></name></author><category term="reading" /><category term="tml" /><category term="diffusion" /><category term="genai" /><summary type="html"><![CDATA[Protecting personal images from Dreambooth attack]]></summary></entry></feed>
