@@ -124,7 +124,7 @@
 
   <header class="post-header">
     <h1 class="post-title">HackerRank Interview Preparation Kit</h1>
-    <p class="post-meta">October 9, 2023</p>
+    <p class="post-meta">October 10, 2023</p>
     <p class="post-tags">
       <a href="/blog/2023"> <i class="fas fa-calendar fa-sm"></i> 2023 </a>
         ·  
@@ -142,6 +142,9 @@
 <li class="toc-entry toc-h2"><a href="#tower-breakers">Tower Breakers</a></li>
 <li class="toc-entry toc-h2"><a href="#caesar-cipher">Caesar Cipher</a></li>
 <li class="toc-entry toc-h2"><a href="#palindrome-index">Palindrome Index</a></li>
+<li class="toc-entry toc-h2"><a href="#grid-challenge">Grid Challenge</a></li>
+<li class="toc-entry toc-h2"><a href="#recursive-digit-sum">Recursive Digit Sum</a></li>
+<li class="toc-entry toc-h2"><a href="#new-year-chaos">New Year Chaos</a></li>
 </ul>
     </div>
     <hr>
@@ -279,6 +282,206 @@ Alphabet rotated +3:    defghijklmnopqrstuvwxyzabc
                 <span class="k">return</span> <span class="nf">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">-</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span>
 </code></pre></div></div>
 
+<h2 id="grid-challenge"><a href="https://www.hackerrank.com/challenges/one-week-preparation-kit-grid-challenge/problem?isFullScreen=true&amp;h_l=interview&amp;playlist_slugs%5B%5D=preparation-kits&amp;playlist_slugs%5B%5D=one-week-preparation-kit&amp;playlist_slugs%5B%5D=one-week-day-four" rel="external nofollow noopener" target="_blank">Grid Challenge</a></h2>
+
+<font size="6"> Description </font>
+
+<p>Given a square grid of characters in the range ascii[a-z], rearrange elements of each row alphabetically, ascending. Determine if the columns are also in ascending alphabetical order, top to bottom. Return YES if they are or NO if they are not.</p>
+
+<p>For example, given the grid <code class="language-plaintext highlighter-rouge">grid=['abc', 'ade', 'efg']</code></p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>a b c
+a d e
+e f g
+</code></pre></div></div>
+
+<p>The rows are already in alphabetical order. The columns \(a\), \(a\), and \(e\) are also in alphabetical order, so the answer would be YES. Only elements within the same row can be rearranged. They cannot be moved to a different row.</p>
+
+<font size="6"> Solution </font>
+
+<p>Map each character to an integer, sort each row, then calculate the different (gradient) between two adjacent characters in each row. If the gradient is negative, then the row is not in ascending order. If all rows are in ascending order, then check the columns.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">gridChallenge</span><span class="p">(</span><span class="n">grid</span><span class="p">):</span>
+    <span class="c1"># Write your code here
+</span>    <span class="n">n</span> <span class="o">=</span> <span class="nf">len</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="nf">len</span><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">grid_int</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">grid</span><span class="p">:</span>
+        <span class="n">grid_int</span><span class="p">.</span><span class="nf">append</span><span class="p">([</span><span class="nf">ord</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">row</span><span class="p">])</span>
+    
+    <span class="c1"># sorting
+</span>    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">grid_int</span><span class="p">:</span>
+        <span class="n">row</span><span class="p">.</span><span class="nf">sort</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">grid_int</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">row</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="sh">'</span><span class="s">NO</span><span class="sh">'</span>
+    
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">grid_int</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">grid_int</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="sh">'</span><span class="s">NO</span><span class="sh">'</span>
+    
+    <span class="k">return</span> <span class="sh">'</span><span class="s">YES</span><span class="sh">'</span>
+</code></pre></div></div>
+
+<p>Another solution is convert to 2D numpy array (but Hackerrank does not support numpy!)</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">gridChallenge</span><span class="p">(</span><span class="n">grid</span><span class="p">):</span>
+    <span class="c1"># Write your code here
+</span>    <span class="n">n</span> <span class="o">=</span> <span class="nf">len</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="nf">len</span><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">grid_int</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">grid</span><span class="p">:</span>
+        <span class="n">grid_int</span><span class="p">.</span><span class="nf">append</span><span class="p">([</span><span class="nf">ord</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">row</span><span class="p">])</span>
+    
+    <span class="n">grid_int</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">(</span><span class="n">grid_int</span><span class="p">)</span>
+    <span class="n">grid_int</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">reshape</span><span class="p">(</span><span class="n">grid_int</span><span class="p">,</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">))</span>
+
+    <span class="c1"># sorting
+</span>    <span class="n">grid_int</span><span class="p">.</span><span class="nf">sort</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">row_diff</span> <span class="o">=</span> <span class="n">grid_int</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">grid_int</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">np</span><span class="p">.</span><span class="nf">any</span><span class="p">(</span><span class="n">row_diff</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sh">'</span><span class="s">NO</span><span class="sh">'</span>
+    <span class="n">col_diff</span> <span class="o">=</span> <span class="n">grid_int</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">grid_int</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="k">if</span> <span class="n">np</span><span class="p">.</span><span class="nf">any</span><span class="p">(</span><span class="n">col_diff</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sh">'</span><span class="s">NO</span><span class="sh">'</span>
+    <span class="k">return</span> <span class="sh">'</span><span class="s">YES</span><span class="sh">'</span>
+</code></pre></div></div>
+
+<h2 id="recursive-digit-sum"><a href="https://www.hackerrank.com/challenges/one-week-preparation-kit-recursive-digit-sum/problem?isFullScreen=true&amp;h_l=interview&amp;playlist_slugs%5B%5D=preparation-kits&amp;playlist_slugs%5B%5D=one-week-preparation-kit&amp;playlist_slugs%5B%5D=one-week-day-four" rel="external nofollow noopener" target="_blank">Recursive Digit Sum</a></h2>
+
+<font size="6"> Description </font>
+
+<p>We define super digit of an integer \(x\) using the following rules:</p>
+
+<ul>
+  <li>If \(x\) has only \(1\) digit, then its super digit is \(x\).</li>
+  <li>Otherwise, the super digit of \(x\) is equal to the super digit of the digit-sum of \(x\). Here, digit-sum of a number is defined as the sum of its digits.</li>
+</ul>
+
+<p>For example, super digit of \(x=9875\) will be calculated as:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	super_digit(9875)   9+8+7+5 = 29 
+	super_digit(29) 	2 + 9 = 11
+	super_digit(11)		1 + 1 = 2
+	super_digit(2)		= 2 
+</code></pre></div></div>
+
+<p>You are given two numbers \(n\) and \(k\). You have to calculate the super digit of \(P\). \(P\) is created when number \(n\) is concatenated \(k\) times. That is, if \(n=9875\) and \(k=4\), then \(P=9875987598759875\).</p>
+
+<font size="6"> Solution </font>
+
+<p>Some observations:</p>
+
+<ul>
+  <li>The super digit of \(P\) is the super digit of the super digit of \(n\) multiplied by \(k\).</li>
+  <li>We can recursively calculate the super digit of \(n\) until it has only one digit.</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">superDigit</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+    <span class="c1"># Write your code here
+</span>    <span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nf">int</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">digit_sum</span> <span class="o">=</span> <span class="nf">sum</span><span class="p">([</span><span class="nf">int</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">n</span><span class="p">])</span>
+        <span class="k">return</span> <span class="nf">superDigit</span><span class="p">(</span><span class="nf">str</span><span class="p">(</span><span class="n">digit_sum</span> <span class="o">*</span> <span class="n">k</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="new-year-chaos"><a href="https://www.hackerrank.com/challenges/one-week-preparation-kit-new-year-chaos/problem?isFullScreen=true&amp;h_l=interview&amp;playlist_slugs%5B%5D=preparation-kits&amp;playlist_slugs%5B%5D=one-week-preparation-kit&amp;playlist_slugs%5B%5D=one-week-day-four" rel="external nofollow noopener" target="_blank">New Year Chaos</a></h2>
+
+<font size="6"> Description </font>
+
+<p>It’s New Year’s Day and everyone’s in line for the Wonderland rollercoaster ride! There are a number of people queued up, and each person wears a sticker indicating their initial position in the queue. Initial positions increment by \(1\) from \(1\) at the front of the line to \(n\) at the back.</p>
+
+<p>Any person in the queue can bribe the person directly in front of them to swap positions. If two people swap positions, they still wear the same sticker denoting their original places in line. One person can bribe at most two others. For example, if \(n=8\) and \(Person 5\) bribes \(Person 4\), the queue will look like this: \(1,2,3,5,4,6,7,8\).</p>
+
+<p>Fascinated by this chaotic queue, you decide you must know the minimum number of bribes that took place to get the queue into its current state!</p>
+
+<p>Examples:</p>
+
+<ul>
+  <li>\(q=[1,2,3,5,4,6,7,8]\) If person \(5\) bribes person \(4\), the queue will look like this: \(1,2,3,5,4,6,7,8\). Only \(1\) bribe is required. Print 1.</li>
+  <li>\(q=[4,1,2,3]\) Too chaotic: more than \(2\) bribes required. Print Too chaotic.</li>
+</ul>
+
+<font size="6"> Solution </font>
+
+<p>Some observations: Let’s consider <code class="language-plaintext highlighter-rouge">q=[1, 2, 5, 3, 7, 8, 6, 4]</code></p>
+
+<ul>
+  <li>Any one can bribe the person directly in front of them to swap positions. So \(P5\) can bribe \(P3\) to swap positions. And this bribe is counted as 1 only.</li>
+  <li>\(P8\) can bribe \(P6\) and \(P4\) to swap positions. And this bribe is counted as 2 only.</li>
+  <li>Even the \(P4\) is in position 8 at first (i.e., 4 positions away from his correct position), he no need any bribe to get to his correct position. Because along the bribing process of \(P8\) and \(P7\), \(P5\), he will be pushed to his correct position.</li>
+  <li>\(P5\) always need to swap positions to $P3\(and\)P4$$ to get to his correct position. The number of bribes for a person is the number of people in front of him that are smaller than him.</li>
+</ul>
+
+<p>So the idea is to find the one in the wrong position and count number of people in front of him that are smaller than him. For example, \(P5\) is in the wrong position and there are 2 people in front of him that are smaller than him, so the total brides for him is 2. The total brides for the whole queue is the sum of brides for each person. The queue is too chaotic if any person in wrong position and located in number less than 2 positions away from his correct position.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">minimumBribes</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">is_chaotic</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span> <span class="o">!=</span> <span class="n">n</span><span class="p">:</span> <span class="c1"># wrong position
+</span>            <span class="n">sub_total</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nf">len</span><span class="p">(</span><span class="n">q</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">:</span>
+                    <span class="n">sub_total</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">sub_total</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">is_chaotic</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">total</span> <span class="o">+=</span> <span class="n">sub_total</span>
+    <span class="k">if</span> <span class="n">is_chaotic</span><span class="p">:</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sh">'</span><span class="s">Too chaotic</span><span class="sh">'</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nf">print</span><span class="p">(</span><span class="n">total</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Another solution is use bubble sort to sort and count the number of swaps. But this solution is not efficient enough to pass the time limit.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">minimumBribes</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">is_chaotic</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nf">len</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">q</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">q</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">count</span><span class="p">[</span><span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="n">total</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">count</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">c</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">is_chaotic</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">break</span>
+    <span class="k">if</span> <span class="n">is_chaotic</span><span class="p">:</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sh">'</span><span class="s">Too chaotic</span><span class="sh">'</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nf">print</span><span class="p">(</span><span class="n">total</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">minimumBribes</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">is_chaotic</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nf">len</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">q</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">q</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">count</span><span class="p">[</span><span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">count</span><span class="p">[</span><span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">is_chaotic</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="k">break</span>
+                <span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="n">total</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">is_chaotic</span><span class="p">:</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sh">'</span><span class="s">Too chaotic</span><span class="sh">'</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nf">print</span><span class="p">(</span><span class="n">total</span><span class="p">)</span>
+</code></pre></div></div>
+
+
     </div>
   </article>
 
@@ -320,7 +523,7 @@ Alphabet rotated +3:    defghijklmnopqrstuvwxyzabc
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/conditional-diffusion/">On Reading - Diffusion Models Beat GANs on Image Synthesis</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/f4t/">Principles of Life</a>
   </li>
 
 </div>
