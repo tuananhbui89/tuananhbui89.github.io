@@ -145,6 +145,7 @@
 <li class="toc-entry toc-h2"><a href="#grid-challenge">Grid Challenge</a></li>
 <li class="toc-entry toc-h2"><a href="#recursive-digit-sum">Recursive Digit Sum</a></li>
 <li class="toc-entry toc-h2"><a href="#new-year-chaos">New Year Chaos</a></li>
+<li class="toc-entry toc-h2"><a href="#truck-tour">Truck Tour</a></li>
 </ul>
     </div>
     <hr>
@@ -418,7 +419,8 @@ e f g
   <li>\(P5\) always need to swap positions to $P3\(and\)P4$$ to get to his correct position. The number of bribes for a person is the number of people in front of him that are smaller than him.</li>
 </ul>
 
-<p>So the idea is to find the one in the wrong position and count number of people in front of him that are smaller than him. For example, \(P5\) is in the wrong position and there are 2 people in front of him that are smaller than him, so the total brides for him is 2. The total brides for the whole queue is the sum of brides for each person. The queue is too chaotic if any person in wrong position and located in number less than 2 positions away from his correct position.</p>
+<p>So the idea is to find the one in the wrong position and count number of people in front of him that are smaller than him. For example, \(P5\) is in the wrong position and there are 2 people in front of him that are smaller than him, so the total brides for him is 2. The total brides for the whole queue is the sum of brides for each person. The queue is too chaotic if any person in wrong position and located in number less than 2 positions away from his correct position.
+(Update: This approach is not correct! I will go back to this problem later!)</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">minimumBribes</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
     <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
@@ -440,7 +442,7 @@ e f g
         <span class="nf">print</span><span class="p">(</span><span class="n">total</span><span class="p">)</span>
 </code></pre></div></div>
 
-<p>Another solution is use bubble sort to sort and count the number of swaps. But this solution is not efficient enough to pass the time limit.</p>
+<p>Another solution is use bubble sort to sort and count the number of swaps. But this solution is not efficient enough to pass the time limit (This method works but slow!)</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">minimumBribes</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
     <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
@@ -462,25 +464,65 @@ e f g
         <span class="nf">print</span><span class="p">(</span><span class="n">total</span><span class="p">)</span>
 </code></pre></div></div>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">minimumBribes</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
-    <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">is_chaotic</span> <span class="o">=</span> <span class="bp">False</span>
-    <span class="n">count</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nf">len</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">q</span><span class="p">)):</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">q</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]:</span>
-                <span class="n">count</span><span class="p">[</span><span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="k">if</span> <span class="n">count</span><span class="p">[</span><span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="n">is_chaotic</span> <span class="o">=</span> <span class="bp">True</span>
-                    <span class="k">break</span>
-                <span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
-                <span class="n">total</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="k">if</span> <span class="n">is_chaotic</span><span class="p">:</span>
-        <span class="nf">print</span><span class="p">(</span><span class="sh">'</span><span class="s">Too chaotic</span><span class="sh">'</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="nf">print</span><span class="p">(</span><span class="n">total</span><span class="p">)</span>
+<h2 id="truck-tour"><a href="https://www.hackerrank.com/challenges/truck-tour/problem" rel="external nofollow noopener" target="_blank">Truck Tour</a></h2>
+
+<font size="6"> Description </font>
+
+<p>Suppose there is a circle. There are \(N\) petrol pumps on that circle. Petrol pumps are numbered \(0\) to \((N-1)\) (both inclusive). You have two pieces of information corresponding to each of the petrol pump: (1) the amount of petrol that particular petrol pump will give, and (2) the distance from that petrol pump to the next petrol pump.</p>
+
+<p>Initially, you have a tank of infinite capacity carrying no petrol. You can start the tour at any of the petrol pumps. Calculate the first point from where the truck will be able to complete the circle. Consider that the truck will stop at each of the petrol pumps. The truck will move one kilometer for each litre of the petrol.</p>
+
+<p>Sample Input</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>3 # N
+1 5 # pump 1: petrol, distance 
+10 3 # pump 2: petrol, distance
+3 4 # pump 3: petrol, distance
 </code></pre></div></div>
 
+<font size="6"> Solution </font>
+
+<p>Clarification:</p>
+
+<ul>
+  <li>Output: An integer which will be the smallest index of the petrol pump from which we can start the tour.</li>
+  <li>There is guaranteed to be a unique solution.</li>
+</ul>
+
+<p>Some observations:</p>
+
+<ul>
+  <li>The truck has infinite tank capacity. So it should get petrol at every pump.</li>
+  <li>Given the above example, let’s work out each scenario:
+    <ul>
+      <li>If starting at \(P0\), its petro \(p=1\), while the distance to the next pump is $d=5$. So the truck will run out of petrol at \(P1\). So we can not start at \(P0\).</li>
+      <li>If starting at \(P1\), its petro \(10\), \(d=3\). It has \(7\) petrol left after reaching \(P2\). It then loads \(p=P1+P2-d1\) while the distance is \(d2\).</li>
+    </ul>
+  </li>
+  <li>The petrol will be cummulatively added, if starting from $P0$, at pump $t$-th, the petro is  \(p_t=P0 - d0 + P1 - d1 + ... + P_t\), and the condition at each pump is \(p_t \geq d_t\).</li>
+  <li>If the truck starts at pump $s$ (shifted), the petro at pump $t$-th is \(p_t=P_s - d_s + P_{s+1} - d_{s+1} + ... + P_{s+t}\), and the condition at each pump is \(p_t \geq d_t\). The condition is satisfied if \(p_t - d_t \geq 0\) for all \(t\)</li>
+  <li>We need to compare element-wise of two lists: petro at time $t$ and distance at time $t$. If the petro is always greater than or equal to the distance, then we can start at that pump. The first pump that satisfies the condition is the answer.</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">truckTour</span><span class="p">(</span><span class="n">petrolpumps</span><span class="p">):</span>
+    <span class="c1"># Write your code here 
+</span>    <span class="n">n</span> <span class="o">=</span> <span class="nf">len</span><span class="p">(</span><span class="n">petrolpumps</span><span class="p">)</span>
+    <span class="n">petro</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">distance</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">petrolpumps</span><span class="p">:</span>
+        <span class="n">petro</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="n">distance</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+    <span class="n">petro</span> <span class="o">=</span> <span class="n">petro</span> <span class="o">+</span> <span class="n">petro</span>
+    <span class="n">distance</span> <span class="o">=</span> <span class="n">distance</span> <span class="o">+</span> <span class="n">distance</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">cum_petro</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">cum_petro</span> <span class="o">+=</span> <span class="n">petro</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">distance</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">cum_petro</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="n">cum_petrol</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">i</span>
+</code></pre></div></div>
 
     </div>
   </article>
@@ -517,13 +559,13 @@ e f g
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/aml-intro/">Tutorial on Adversarial Machine Learning - Part 1</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/conditional-diffusion/">On Reading - Diffusion Models Beat GANs on Image Synthesis</a>
   </li>
 
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/f4t/">Principles of Life</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/aml-intro/">Tutorial on Adversarial Machine Learning - Part 1</a>
   </li>
 
 </div>
