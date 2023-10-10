@@ -124,7 +124,7 @@
 
   <header class="post-header">
     <h1 class="post-title">HackerRank Interview Preparation Kit</h1>
-    <p class="post-meta">October 10, 2023</p>
+    <p class="post-meta">October 11, 2023</p>
     <p class="post-tags">
       <a href="/blog/2023"> <i class="fas fa-calendar fa-sm"></i> 2023 </a>
         ·  
@@ -146,6 +146,12 @@
 <li class="toc-entry toc-h2"><a href="#recursive-digit-sum">Recursive Digit Sum</a></li>
 <li class="toc-entry toc-h2"><a href="#new-year-chaos">New Year Chaos</a></li>
 <li class="toc-entry toc-h2"><a href="#truck-tour">Truck Tour</a></li>
+<li class="toc-entry toc-h2"><a href="#merge-two-sorted-linked-lists">Merge two sorted linked lists</a></li>
+<li class="toc-entry toc-h2"><a href="#queue-using-two-stacks">Queue using Two Stacks</a></li>
+<li class="toc-entry toc-h2"><a href="#pairs">[Pairs]</a></li>
+<li class="toc-entry toc-h2"><a href="#breadth-first-search-shortest-reach">Breadth First Search: Shortest Reach</a></li>
+<li class="toc-entry toc-h2"><a href="#tree-preorder-traversal">Tree: Preorder Traversal</a></li>
+<li class="toc-entry toc-h2"><a href="#tree-huffman-coding">Tree: Huffman Coding</a></li>
 </ul>
     </div>
     <hr>
@@ -174,16 +180,17 @@
 <p>Some observations:</p>
 
 <ul>
-  <li>Regardless the height of a tower, the player can always reduce it to \(1\) and make it out of the valid towers.</li>
-  <li>If the height of a tower is an even number (except 2), the player can always have at least two choices, i.e., reduce it to \(1\) or \(2\). If reduce to \(2\) then it is still a valid tower but only 1 move left.</li>
-  <li>Let’s define a winning move is a move that reduce the height of a tower to \(1\), i.e., the tower is out of the game.</li>
-  <li>So if the height of a towers is an even number (except 2), we can consider one or two winning moves, otherwise, it is only one winning move.</li>
+  <li>Regardless the height of a tower, the player can always reduce it to \(1\) and make it out of the games.
+<!-- - If the height of a tower is an even number (except 2), the player can always have at least two choices, i.e., reduce it to $$1$$ or $$2$$. If reduce to $$2$$ then it is still a valid tower but only 1 move left. -->
+<!-- - Let's define a winning move is a move that reduce the height of a tower to $$1$$, i.e., the tower is out of the game. -->
+<!-- - So if the height of a towers is an even number (except 2), we can consider one or two winning moves, otherwise, it is only one winning move. -->
+</li>
   <li>If there are only 2 towers with even height, the second player can always adjust the height of the towers to be the same so that the total winning moves after his move is even number. So the first player will lose.</li>
   <li>Similarly if there are only 2 towers with odd height, the second player can also adjust the height and win.</li>
   <li>In general, if there are even number of towers with the same height (i.e., number of winning moves), the second player will win.</li>
 </ul>
 
-<p>Given the above obseravtions, let us work out strategy for the first player.</p>
+<p>Given the above obseravtions, let’s work out strategy for the first player.</p>
 
 <ul>
   <li>If $n$ is odd, P1 plays the first move to reduce the height of the first tower to 1. The number of towers left is even, so P1 will win.</li>
@@ -524,6 +531,305 @@ e f g
             <span class="k">return</span> <span class="n">i</span>
 </code></pre></div></div>
 
+<h2 id="merge-two-sorted-linked-lists"><a href="https://www.hackerrank.com/challenges/merge-two-sorted-linked-lists/problem" rel="external nofollow noopener" target="_blank">Merge two sorted linked lists</a></h2>
+
+<font size="6"> Description </font>
+
+<p>You’re given the pointer to the head nodes of two sorted linked lists. The data in both lists will be sorted in ascending order. Change the next pointers to obtain a single, merged linked list which also has data in ascending order. Either head pointer given may be null meaning that the corresponding list is empty.</p>
+
+<p>Sample Input</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1 -&gt; 3 -&gt; 5 -&gt; 6 -&gt; NULL
+2 -&gt; 4 -&gt; 7 -&gt; NULL
+</code></pre></div></div>
+
+<p>Sample Output</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1 -&gt; 2 -&gt; 3 -&gt; 4 -&gt; 5 -&gt; 6 -&gt; 7 -&gt; NULL
+</code></pre></div></div>
+
+<font size="6"> Solution </font>
+
+<p>Solution with recursion:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">mergeLists</span><span class="p">(</span><span class="n">head1</span><span class="p">,</span> <span class="n">head2</span><span class="p">):</span>
+    <span class="c1"># Write your code here
+</span>    <span class="k">if</span> <span class="n">head1</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">head2</span>
+    <span class="k">if</span> <span class="n">head2</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">head1</span>
+    
+    <span class="k">if</span> <span class="n">head1</span><span class="p">.</span><span class="n">data</span> <span class="o">&lt;</span> <span class="n">head2</span><span class="p">.</span><span class="n">data</span><span class="p">:</span>
+        <span class="n">head1</span><span class="p">.</span><span class="nb">next</span> <span class="o">=</span> <span class="nf">mergeLists</span><span class="p">(</span><span class="n">head1</span><span class="p">.</span><span class="nb">next</span><span class="p">,</span> <span class="n">head2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">head1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">head2</span><span class="p">.</span><span class="nb">next</span> <span class="o">=</span> <span class="nf">mergeLists</span><span class="p">(</span><span class="n">head1</span><span class="p">,</span> <span class="n">head2</span><span class="p">.</span><span class="nb">next</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">head2</span>
+</code></pre></div></div>
+
+<p>Solution by iteratively merging two lists:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">mergeLists</span><span class="p">(</span><span class="n">head1</span><span class="p">,</span> <span class="n">head2</span><span class="p">):</span>
+    <span class="c1"># Write your code here
+</span>    <span class="k">if</span> <span class="n">head1</span><span class="p">.</span><span class="n">data</span> <span class="o">&lt;</span> <span class="n">head2</span><span class="p">.</span><span class="n">data</span><span class="p">:</span>
+        <span class="n">head</span> <span class="o">=</span> <span class="n">head1</span>
+        <span class="n">head1</span> <span class="o">=</span> <span class="n">head1</span><span class="p">.</span><span class="nb">next</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">head</span> <span class="o">=</span> <span class="n">head2</span>
+        <span class="n">head2</span> <span class="o">=</span> <span class="n">head2</span><span class="p">.</span><span class="nb">next</span>
+    <span class="n">current</span> <span class="o">=</span> <span class="n">head</span>
+    <span class="k">while</span> <span class="n">head1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">head2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">head1</span><span class="p">.</span><span class="n">data</span> <span class="o">&lt;</span> <span class="n">head2</span><span class="p">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="n">current</span><span class="p">.</span><span class="nb">next</span> <span class="o">=</span> <span class="n">head1</span>
+            <span class="n">head1</span> <span class="o">=</span> <span class="n">head1</span><span class="p">.</span><span class="nb">next</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">current</span><span class="p">.</span><span class="nb">next</span> <span class="o">=</span> <span class="n">head2</span>
+            <span class="n">head2</span> <span class="o">=</span> <span class="n">head2</span><span class="p">.</span><span class="nb">next</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="n">current</span><span class="p">.</span><span class="nb">next</span>
+    <span class="k">if</span> <span class="n">head1</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">current</span><span class="p">.</span><span class="nb">next</span> <span class="o">=</span> <span class="n">head2</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">current</span><span class="p">.</span><span class="nb">next</span> <span class="o">=</span> <span class="n">head1</span>
+    <span class="k">return</span> <span class="n">head</span>
+</code></pre></div></div>
+
+<h2 id="queue-using-two-stacks"><a href="https://www.hackerrank.com/challenges/queue-using-two-stacks/problem" rel="external nofollow noopener" target="_blank">Queue using Two Stacks</a></h2>
+
+<font size="6"> Description </font>
+
+<p>A queue is an abstract data type that maintains the order in which elements were added to it, allowing the oldest elements to be removed from the front and new elements to be added to the rear. This is called a First-In-First-Out (FIFO) data structure because the first element added to the queue (i.e., the one that has been waiting the longest) is always the first one to be removed.</p>
+
+<p>A basic queue has the following operations:</p>
+
+<ul>
+  <li>Enqueue: add a new element to the end of the queue.</li>
+  <li>Dequeue: remove the element from the front of the queue and return it.</li>
+</ul>
+
+<p>In this challenge, you must first implement a queue using two stacks. Then process \(q\) queries, where each query is one of the following  types:</p>
+
+<ul>
+  <li>1: Enqueue element \(x\) into the end of the queue.</li>
+  <li>2: Dequeue the element at the front of the queue.</li>
+  <li>3: Print the element at the front of the queue.</li>
+</ul>
+
+<h2 id="pairs"><a href="https://www.hackerrank.com/challenges/pairs/problem" rel="external nofollow noopener" target="_blank">[Pairs]</a></h2>
+
+<font size="6"> Description </font>
+
+<p>You will be given an array of integers and a target value. Determine the number of pairs of array elements that have a difference equal to a target value.</p>
+
+<p>For example, given an array of \([1, 2, 3, 4]\) and a target value of \(1\), we have three values meeting the condition: \(2-1=1\), \(3-2=1\), and \(4-3=1\).</p>
+
+<font size="6"> Solution </font>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">pairs</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">arr</span><span class="p">):</span>
+    <span class="c1"># Write your code here
+</span>    <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">valid_dict</span> <span class="o">=</span> <span class="nf">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">arr</span><span class="p">)):</span>
+        <span class="n">valid_dict</span><span class="p">[</span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">if</span> <span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">valid_dict</span><span class="p">:</span>
+            <span class="n">total</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">valid_dict</span><span class="p">:</span>
+            <span class="n">total</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">total</span>
+</code></pre></div></div>
+
+<h2 id="breadth-first-search-shortest-reach"><a href="https://www.hackerrank.com/challenges/bfsshortreach/problem" rel="external nofollow noopener" target="_blank">Breadth First Search: Shortest Reach</a></h2>
+
+<font size="6"> Description </font>
+
+<p>Consider an undirected graph consisting of \(n\) nodes where each node is labeled from \(1\) to \(n\) and the edge between any two nodes is always of length \(6\). We define node \(s\) to be the starting position for a BFS. Given a graph, determine the distances from the start node to each of its descendants and return the list in node number order, ascending. If a node is disconnected, it’s distance should be \(-1\).</p>
+
+<p>For example, there are \(n=5\) nodes in the graph with a starting node \(s=1\). The list of \(edges=[[1,2],[1,3],[3,4]]\), and each has a weight of \(6\).</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="https://s3.amazonaws.com/hr-assets/0/1533831000-8723efab01-bfsexample-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="https://s3.amazonaws.com/hr-assets/0/1533831000-8723efab01-bfsexample-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="https://s3.amazonaws.com/hr-assets/0/1533831000-8723efab01-bfsexample-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="https://s3.amazonaws.com/hr-assets/0/1533831000-8723efab01-bfsexample.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+
+<p>All distances are from the start node \(1\). Outputs are calculated for distances to nodes \(2\) through \(5\): <code class="language-plaintext highlighter-rouge">[6,6,12,-1]</code>. Each edge is  units, and the unreachable node  has the required return distance of \(-1\).</p>
+
+<font size="6"> Solution </font>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="k">class</span> <span class="nc">TreeNode</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">val</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">val</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">visited</span> <span class="o">=</span> <span class="bp">False</span>
+
+<span class="k">def</span> <span class="nf">bfs</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+    <span class="c1"># Write your code here
+</span>    <span class="c1"># n: number of nodes
+</span>    <span class="c1"># m: number of edges
+</span>    <span class="c1"># edges: list of edges, for example, [[1,2], [1,3], [3,4]]
+</span>    <span class="c1"># s: starting node
+</span>
+    <span class="c1"># Step 1: Build a graph
+</span>    <span class="n">graph</span> <span class="o">=</span> <span class="nf">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">graph</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nc">TreeNode</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">:</span>
+        <span class="n">graph</span><span class="p">[</span><span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]].</span><span class="n">children</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">graph</span><span class="p">[</span><span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+        <span class="n">graph</span><span class="p">[</span><span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">]].</span><span class="n">children</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">graph</span><span class="p">[</span><span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+    
+    <span class="c1"># Step 2: BFS
+</span>    <span class="n">queue</span> <span class="o">=</span> <span class="p">[</span><span class="n">graph</span><span class="p">[</span><span class="n">s</span><span class="p">]]</span>
+    <span class="n">graph</span><span class="p">[</span><span class="n">s</span><span class="p">].</span><span class="n">visited</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">distance</span> <span class="o">=</span> <span class="nf">dict</span><span class="p">()</span>
+    <span class="n">distance</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="nf">len</span><span class="p">(</span><span class="n">queue</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="n">queue</span><span class="p">.</span><span class="nf">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="p">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">child</span><span class="p">.</span><span class="n">visited</span><span class="p">:</span>
+                <span class="n">child</span><span class="p">.</span><span class="n">visited</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="n">queue</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+                <span class="n">distance</span><span class="p">[</span><span class="n">child</span><span class="p">.</span><span class="n">val</span><span class="p">]</span> <span class="o">=</span> <span class="n">distance</span><span class="p">[</span><span class="n">node</span><span class="p">.</span><span class="n">val</span><span class="p">]</span> <span class="o">+</span> <span class="mi">6</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">s</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">distance</span><span class="p">:</span>
+                <span class="n">result</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">distance</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">result</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
+</code></pre></div></div>
+
+<h2 id="tree-preorder-traversal"><a href="https://www.hackerrank.com/challenges/tree-preorder-traversal/problem" rel="external nofollow noopener" target="_blank">Tree: Preorder Traversal</a></h2>
+
+<font size="6"> Description </font>
+
+<p>Complete the preOrder function in your editor below, which has  parameter: a pointer to the root of a binary tree. It must print the values in the tree’s preorder traversal as a single line of space-separated values.</p>
+
+<font size="6"> Solution </font>
+
+<p>HackerRank provides definition of the tree node and a function to create a tree from a list of values as follows:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Node</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span> 
+        <span class="n">self</span><span class="p">.</span><span class="n">info</span> <span class="o">=</span> <span class="n">info</span>  
+        <span class="n">self</span><span class="p">.</span><span class="n">left</span> <span class="o">=</span> <span class="bp">None</span>  
+        <span class="n">self</span><span class="p">.</span><span class="n">right</span> <span class="o">=</span> <span class="bp">None</span> 
+        <span class="n">self</span><span class="p">.</span><span class="n">level</span> <span class="o">=</span> <span class="bp">None</span> 
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nf">str</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">info</span><span class="p">)</span> 
+
+<span class="k">class</span> <span class="nc">BinarySearchTree</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span> 
+        <span class="n">self</span><span class="p">.</span><span class="n">root</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>  
+        <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">root</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">root</span> <span class="o">=</span> <span class="nc">Node</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">root</span>
+         
+            <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">val</span> <span class="o">&lt;</span> <span class="n">current</span><span class="p">.</span><span class="n">info</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">current</span><span class="p">.</span><span class="n">left</span><span class="p">:</span>
+                        <span class="n">current</span> <span class="o">=</span> <span class="n">current</span><span class="p">.</span><span class="n">left</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">current</span><span class="p">.</span><span class="n">left</span> <span class="o">=</span> <span class="nc">Node</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+                        <span class="k">break</span>
+                <span class="k">elif</span> <span class="n">val</span> <span class="o">&gt;</span> <span class="n">current</span><span class="p">.</span><span class="n">info</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">current</span><span class="p">.</span><span class="n">right</span><span class="p">:</span>
+                        <span class="n">current</span> <span class="o">=</span> <span class="n">current</span><span class="p">.</span><span class="n">right</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">current</span><span class="p">.</span><span class="n">right</span> <span class="o">=</span> <span class="nc">Node</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+                        <span class="k">break</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">break</span>
+</code></pre></div></div>
+
+<p>Given this setting, we can use recursion to traverse the tree in preorder which is root -&gt; left -&gt; right.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">preOrder</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+    <span class="c1">#Write your code here
+</span>    <span class="k">def</span> <span class="nf">_dfs</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="nf">print</span><span class="p">(</span><span class="n">node</span><span class="p">.</span><span class="n">info</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="sh">'</span><span class="s"> </span><span class="sh">'</span><span class="p">)</span>
+        <span class="nf">_dfs</span><span class="p">(</span><span class="n">node</span><span class="p">.</span><span class="n">left</span><span class="p">)</span>
+        <span class="nf">_dfs</span><span class="p">(</span><span class="n">node</span><span class="p">.</span><span class="n">right</span><span class="p">)</span>
+    <span class="nf">_dfs</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+
+</code></pre></div></div>
+
+<h2 id="tree-huffman-coding"><a href="https://www.hackerrank.com/challenges/tree-huffman-decoding/problem" rel="external nofollow noopener" target="_blank">Tree: Huffman Coding</a></h2>
+
+<font size="6"> Description </font>
+
+<p>Huffman coding assigns variable length codewords to fixed length input characters based on their frequencies. More frequent characters are assigned shorter codewords and less frequent characters are assigned longer codewords. All edges along the path to a character contain a code digit. If they are on the left side of the tree, they will be a 0 (zero). If on the right, they’ll be a 1 (one). Only the leaves will contain a letter and its frequency count. All other nodes will contain a null instead of a character, and the count of the frequency of all of it and its descendant characters.</p>
+
+<p>For instance, consider the string ABRACADABRA. There are a total of \(11\) characters in the string. This number should match the count in the ultimately determined root of the tree. Our frequencies are \(A=5, B=2, R=2, C=1\) and \(D=1\). The two smallest frequencies are for \(C\) and \(D\), both equal to \(1\), so we’ll create a tree with them. The root node will contain the sum of the counts of its descendants, in this case \(1+1=2\). The left node will be the first character encountered, \(C\), and the right will contain \(D\). Next we have \(3\) items with a character count of \(2\): the tree we just created, the character \(B\) and the character \(R\). The tree came first, so it will go on the left of our new root node. \(B\) will go on the right. Repeat until the tree is complete, then fill in the ‘1’ and ‘0’ values for the edges. The finished graph looks like:</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="https://s3.amazonaws.com/hr-assets/0/1528128577-d4e3a24f3e-huffmanExample-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="https://s3.amazonaws.com/hr-assets/0/1528128577-d4e3a24f3e-huffmanExample-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="https://s3.amazonaws.com/hr-assets/0/1528128577-d4e3a24f3e-huffmanExample-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="https://s3.amazonaws.com/hr-assets/0/1528128577-d4e3a24f3e-huffmanExample.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+
+<p>Example:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>S="1001011"
+Processing the string from left to right.
+S[0]='1' : we move to the right child of the root. We encounter a leaf node with value 'A'. We add 'A' to the decoded string.
+We move back to the root.
+
+S[1]='0' : we move to the left child. 
+S[2]='0' : we move to the left child. We encounter a leaf node with value 'B'. We add 'B' to the decoded string.
+We move back to the root.
+
+S[3] = '1' : we move to the right child of the root. We encounter a leaf node with value 'A'. We add 'A' to the decoded string.
+We move back to the root.
+
+S[4]='0' : we move to the left child. 
+S[5]='1' : we move to the right child. We encounter a leaf node with value C'. We add 'C' to the decoded string.
+We move back to the root.
+
+ S[6] = '1' : we move to the right child of the root. We encounter a leaf node with value 'A'. We add 'A' to the decoded string.
+We move back to the root.
+
+Decoded String = "ABACA"
+</code></pre></div></div>
+
+<font size="6"> Solution </font>
+
+<p>It takes quite a bit of time to understand the problem. In the above example, I could not understand why we could know a leaf node with value <code class="language-plaintext highlighter-rouge">A</code> there.</p>
+
     </div>
   </article>
 
@@ -559,13 +865,13 @@ e f g
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/conditional-diffusion/">On Reading - Diffusion Models Beat GANs on Image Synthesis</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/aml-intro/">Tutorial on Adversarial Machine Learning - Part 1</a>
   </li>
 
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/aml-intro/">Tutorial on Adversarial Machine Learning - Part 1</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/conditional-diffusion/">On Reading - Diffusion Models Beat GANs on Image Synthesis</a>
   </li>
 
 </div>
