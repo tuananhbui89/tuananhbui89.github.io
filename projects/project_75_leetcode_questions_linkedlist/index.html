@@ -124,7 +124,7 @@
 
   <header class="post-header">
     <h1 class="post-title">Practicing 75 Leetcode Questions - Linked List</h1>
-    <p class="post-meta">October 11, 2023</p>
+    <p class="post-meta">October 13, 2023</p>
     <p class="post-tags">
       <a href="/blog/2023"> <i class="fas fa-calendar fa-sm"></i> 2023 </a>
         ·  
@@ -139,6 +139,12 @@
     
     <div id="table-of-contents">
       <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h2"><a href="#206-reverse-linked-list">206. Reverse Linked List</a></li>
+<li class="toc-entry toc-h2"><a href="#141-linked-list-cycle">141. Linked List Cycle</a></li>
+<li class="toc-entry toc-h2"><a href="#21-merge-two-sorted-lists">21. Merge Two Sorted Lists</a></li>
+<li class="toc-entry toc-h2"><a href="#23-merge-k-sorted-lists">23. Merge k Sorted Lists</a></li>
+<li class="toc-entry toc-h2"><a href="#19-remove-nth-node-from-end-of-list">19. Remove Nth Node From End of List</a></li>
+<li class="toc-entry toc-h2"><a href="#143-reorder-list">143. Reorder List</a></li>
 </ul>
     </div>
     <hr>
@@ -146,6 +152,393 @@
     <div id="markdown-content">
       <p>In this project, I will try to solve 75 Leetcode questions as listed in this <a href="https://www.teamblind.com/post/New-Year-Gift---Curated-List-of-Top-75-LeetCode-Questions-to-Save-Your-Time-OaM1orEU" rel="external nofollow noopener" target="_blank">link</a>. The goal is to solve at least one question per day or until I get a job <img class="emoji" title=":joy:" alt=":joy:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f602.png" height="20" width="20">.</p>
 
+<h2 id="206-reverse-linked-list"><a href="https://leetcode.com/problems/reverse-linked-list/" rel="external nofollow noopener" target="_blank">206. Reverse Linked List</a></h2>
+
+<font size="6"> Description </font>
+
+<p>Given the head of a singly linked list, reverse the list, and return the reversed list.</p>
+
+<p>Example 1:</p>
+
+<p><img src="https://assets.leetcode.com/uploads/2021/02/19/rev1ex1.jpg" alt="img"></p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: head = [1,2,3,4,5]
+Output: [5,4,3,2,1]
+</code></pre></div></div>
+
+<p>Example 2:</p>
+
+<p><img src="https://assets.leetcode.com/uploads/2021/02/19/rev1ex2.jpg" alt="img"></p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: head = [1,2]
+Output: [2,1]
+</code></pre></div></div>
+
+<p>Example 3:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: head = []
+Output: []
+</code></pre></div></div>
+
+<p>Constraints:</p>
+
+<ul>
+  <li>The number of nodes in the list is the range [0, 5000].</li>
+  <li>-5000 &lt;= Node.val &lt;= 5000</li>
+</ul>
+
+<font size="6"> Solution </font>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+</span><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">reverseList</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">head</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ListNode</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ListNode</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">head</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="n">prev</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">curr</span> <span class="o">=</span> <span class="n">head</span>
+        <span class="k">while</span> <span class="n">curr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="nb">next</span> <span class="o">=</span> <span class="n">curr</span><span class="p">.</span><span class="nb">next</span> <span class="c1"># save the next node
+</span>            <span class="n">curr</span><span class="p">.</span><span class="nb">next</span> <span class="o">=</span> <span class="n">prev</span> <span class="c1"># reverse the link
+</span>            <span class="n">prev</span> <span class="o">=</span> <span class="n">curr</span> <span class="c1"># move backward one step
+</span>            <span class="n">curr</span> <span class="o">=</span> <span class="nb">next</span> <span class="c1"># move to the next node in the original list
+</span>        <span class="k">return</span> <span class="n">prev</span>
+</code></pre></div></div>
+
+<!-- **Recursive solution**
+
+```python
+class Solution:
+    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        if head is None or head.next is None:
+            return head
+        new_head = self.reverseList(head.next)
+        head.next.next = head
+        head.next = None
+        return new_head
+``` -->
+
+<h2 id="141-linked-list-cycle"><a href="https://leetcode.com/problems/linked-list-cycle/" rel="external nofollow noopener" target="_blank">141. Linked List Cycle</a></h2>
+
+<font size="6"> Description </font>
+
+<p>Given head, the head of a linked list, determine if the linked list has a cycle in it.</p>
+
+<p>There is a cycle in a linked list if there is some node in the list that can be reached again by continuously following the next pointer. Internally, pos is used to denote the index of the node that tail’s next pointer is connected to. Note that pos is not passed as a parameter.</p>
+
+<p>Return true if there is a cycle in the linked list. Otherwise, return false.</p>
+
+<p>Example 1:</p>
+
+<p><img src="https://assets.leetcode.com/uploads/2018/12/07/circularlinkedlist.png" alt="img"></p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: head = [3,2,0,-4], pos = 1
+Output: true
+Explanation: There is a cycle in the linked list, where the tail connects to the 1st node (0-indexed).
+</code></pre></div></div>
+
+<p>Example 2:</p>
+
+<p><img src="https://assets.leetcode.com/uploads/2018/12/07/circularlinkedlist_test2.png" alt="img"></p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: head = [1,2], pos = 0
+Output: true
+Explanation: There is a cycle in the linked list, where the tail connects to the 0th node.
+</code></pre></div></div>
+
+<p>Example 3:</p>
+
+<p><img src="https://assets.leetcode.com/uploads/2018/12/07/circularlinkedlist_test3.png" alt="img"></p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: head = [1], pos = -1
+Output: false
+Explanation: There is no cycle in the linked list.
+</code></pre></div></div>
+
+<p>Constraints:</p>
+
+<ul>
+  <li>The number of the nodes in the list is in the range [0, 104].</li>
+  <li>-105 &lt;= Node.val &lt;= 105</li>
+  <li>pos is -1 or a valid index in the linked-list.</li>
+</ul>
+
+<font size="6"> Solution </font>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">hasCycle</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">head</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ListNode</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="c1"># add a new attribute to the node when visited
+</span>        <span class="k">while</span> <span class="n">head</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nf">hasattr</span><span class="p">(</span><span class="n">head</span><span class="p">,</span> <span class="sh">'</span><span class="s">visited</span><span class="sh">'</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">True</span>
+            <span class="n">head</span><span class="p">.</span><span class="n">visited</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">head</span> <span class="o">=</span> <span class="n">head</span><span class="p">.</span><span class="nb">next</span>
+        <span class="k">return</span> <span class="bp">False</span>
+</code></pre></div></div>
+
+<h2 id="21-merge-two-sorted-lists"><a href="https://leetcode.com/problems/merge-two-sorted-lists/" rel="external nofollow noopener" target="_blank">21. Merge Two Sorted Lists</a></h2>
+
+<font size="6"> Description </font>
+
+<p>Merge two sorted linked lists and return it as a sorted list. The list should be made by splicing together the nodes of the first two lists.</p>
+
+<p>Example 1:</p>
+
+<p><img src="https://assets.leetcode.com/uploads/2020/10/03/merge_ex1.jpg" alt="img"></p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: l1 = [1,2,4], l2 = [1,3,4]
+Output: [1,1,2,3,4,4]
+</code></pre></div></div>
+
+<p>Example 2:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: l1 = [], l2 = []
+Output: []
+</code></pre></div></div>
+
+<p>Example 3:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: l1 = [], l2 = [0]
+Output: [0]
+</code></pre></div></div>
+
+<p>Constraints:</p>
+
+<ul>
+  <li>The number of nodes in both lists is in the range [0, 50].</li>
+  <li>-100 &lt;= Node.val &lt;= 100</li>
+  <li>Both l1 and l2 are sorted in non-decreasing order.</li>
+</ul>
+
+<font size="6"> Solution </font>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">mergeTwoLists</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">list1</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ListNode</span><span class="p">],</span> <span class="n">list2</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ListNode</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ListNode</span><span class="p">]:</span>
+        <span class="n">merged</span> <span class="o">=</span> <span class="nc">ListNode</span><span class="p">()</span>
+        <span class="n">head</span> <span class="o">=</span> <span class="n">merged</span>
+        <span class="k">while</span> <span class="n">list1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">list2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">list1</span><span class="p">.</span><span class="n">val</span> <span class="o">&lt;</span> <span class="n">list2</span><span class="p">.</span><span class="n">val</span><span class="p">:</span>
+                <span class="n">merged</span><span class="p">.</span><span class="nb">next</span> <span class="o">=</span> <span class="n">list1</span>
+                <span class="n">list1</span> <span class="o">=</span> <span class="n">list1</span><span class="p">.</span><span class="nb">next</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">merged</span><span class="p">.</span><span class="nb">next</span> <span class="o">=</span> <span class="n">list2</span>
+                <span class="n">list2</span> <span class="o">=</span> <span class="n">list2</span><span class="p">.</span><span class="nb">next</span>
+            <span class="n">merged</span> <span class="o">=</span> <span class="n">merged</span><span class="p">.</span><span class="nb">next</span>
+        <span class="k">if</span> <span class="n">list1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">merged</span><span class="p">.</span><span class="nb">next</span> <span class="o">=</span> <span class="n">list1</span>
+        <span class="k">if</span> <span class="n">list2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">merged</span><span class="p">.</span><span class="nb">next</span> <span class="o">=</span> <span class="n">list2</span>
+        <span class="k">return</span> <span class="n">head</span><span class="p">.</span><span class="nb">next</span>
+</code></pre></div></div>
+
+<h2 id="23-merge-k-sorted-lists"><a href="https://leetcode.com/problems/merge-k-sorted-lists/" rel="external nofollow noopener" target="_blank">23. Merge k Sorted Lists</a></h2>
+
+<font size="6"> Description </font>
+
+<p>You are given an array of k linked-lists lists, each linked-list is sorted in ascending order.</p>
+
+<p>Merge all the linked-lists into one sorted linked-list and return it.</p>
+
+<p>Example 1:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: lists = [[1,4,5],[1,3,4],[2,6]]
+Output: [1,1,2,3,4,4,5,6]
+Explanation: The linked-lists are:
+[
+  1-&gt;4-&gt;5,
+  1-&gt;3-&gt;4,
+  2-&gt;6
+]
+merging them into one sorted list:
+1-&gt;1-&gt;2-&gt;3-&gt;4-&gt;4-&gt;5-&gt;6
+</code></pre></div></div>
+
+<p>Example 2:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: lists = []
+Output: []
+</code></pre></div></div>
+
+<p>Example 3:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: lists = [[]]
+Output: []
+</code></pre></div></div>
+
+<p>Constraints:</p>
+
+<ul>
+  <li>k == lists.length</li>
+  <li>0 &lt;= k &lt;= 10^4</li>
+  <li>0 &lt;= lists[i].length &lt;= 500</li>
+  <li>-10^4 &lt;= lists[i][j] &lt;= 10^4</li>
+  <li>lists[i] is sorted in ascending order.</li>
+  <li>The sum of lists[i].length won’t exceed 10^4.</li>
+</ul>
+
+<font size="6"> Solution </font>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">def</span> <span class="nf">mergeKLists</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">lists</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">ListNode</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ListNode</span><span class="p">]:</span>
+        <span class="k">def</span> <span class="nf">mergeTwoLists</span><span class="p">(</span><span class="n">list1</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ListNode</span><span class="p">],</span> <span class="n">list2</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ListNode</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ListNode</span><span class="p">]:</span>
+            <span class="n">merged</span> <span class="o">=</span> <span class="nc">ListNode</span><span class="p">()</span>
+            <span class="n">head</span> <span class="o">=</span> <span class="n">merged</span>
+            <span class="k">while</span> <span class="n">list1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">list2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">list1</span><span class="p">.</span><span class="n">val</span> <span class="o">&lt;</span> <span class="n">list2</span><span class="p">.</span><span class="n">val</span><span class="p">:</span>
+                    <span class="n">merged</span><span class="p">.</span><span class="nb">next</span> <span class="o">=</span> <span class="n">list1</span>
+                    <span class="n">list1</span> <span class="o">=</span> <span class="n">list1</span><span class="p">.</span><span class="nb">next</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">merged</span><span class="p">.</span><span class="nb">next</span> <span class="o">=</span> <span class="n">list2</span>
+                    <span class="n">list2</span> <span class="o">=</span> <span class="n">list2</span><span class="p">.</span><span class="nb">next</span>
+                <span class="n">merged</span> <span class="o">=</span> <span class="n">merged</span><span class="p">.</span><span class="nb">next</span>
+            <span class="k">if</span> <span class="n">list1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">merged</span><span class="p">.</span><span class="nb">next</span> <span class="o">=</span> <span class="n">list1</span>
+            <span class="k">if</span> <span class="n">list2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">merged</span><span class="p">.</span><span class="nb">next</span> <span class="o">=</span> <span class="n">list2</span>
+            <span class="k">return</span> <span class="n">head</span><span class="p">.</span><span class="nb">next</span>
+        <span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">lists</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">lists</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">lists</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">merged</span> <span class="o">=</span> <span class="n">lists</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nf">len</span><span class="p">(</span><span class="n">lists</span><span class="p">)):</span>
+            <span class="n">merged</span> <span class="o">=</span> <span class="nf">mergeTwoLists</span><span class="p">(</span><span class="n">merged</span><span class="p">,</span> <span class="n">lists</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">merged</span>
+</code></pre></div></div>
+
+<h2 id="19-remove-nth-node-from-end-of-list"><a href="https://leetcode.com/problems/remove-nth-node-from-end-of-list/" rel="external nofollow noopener" target="_blank">19. Remove Nth Node From End of List</a></h2>
+
+<font size="6"> Description </font>
+
+<p>Given the head of a linked list, remove the nth node from the end of the list and return its head.</p>
+
+<p>Follow up: Could you do this in one pass?</p>
+
+<p>Example 1:</p>
+
+<p><img src="https://assets.leetcode.com/uploads/2020/10/03/remove_ex1.jpg" alt="img"></p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: head = [1,2,3,4,5], n = 2
+Output: [1,2,3,5]
+</code></pre></div></div>
+
+<p>Example 2:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: head = [1], n = 1
+Output: []
+</code></pre></div></div>
+
+<p>Example 3:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: head = [1,2], n = 1
+Output: [1]
+</code></pre></div></div>
+
+<p>Constraints:</p>
+
+<ul>
+  <li>The number of nodes in the list is sz.</li>
+  <li>1 &lt;= sz &lt;= 30</li>
+  <li>0 &lt;= Node.val &lt;= 100</li>
+  <li>1 &lt;= n &lt;= sz</li>
+</ul>
+
+<font size="6"> Solution </font>
+
+<p>Using two pointers method, with the distance between two pointers is n.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">removeNthFromEnd</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">head</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ListNode</span><span class="p">],</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ListNode</span><span class="p">]:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">head</span>
+        <span class="n">second</span> <span class="o">=</span> <span class="n">head</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">second</span> <span class="o">=</span> <span class="n">second</span><span class="p">.</span><span class="nb">next</span>
+        <span class="k">if</span> <span class="n">second</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">head</span><span class="p">.</span><span class="nb">next</span>
+        <span class="k">while</span> <span class="n">second</span><span class="p">.</span><span class="nb">next</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">head</span> <span class="o">=</span> <span class="n">head</span><span class="p">.</span><span class="nb">next</span>
+            <span class="n">second</span> <span class="o">=</span> <span class="n">second</span><span class="p">.</span><span class="nb">next</span>
+        <span class="n">head</span><span class="p">.</span><span class="nb">next</span> <span class="o">=</span> <span class="n">head</span><span class="p">.</span><span class="nb">next</span><span class="p">.</span><span class="nb">next</span>
+        <span class="k">return</span> <span class="n">output</span>
+</code></pre></div></div>
+
+<h2 id="143-reorder-list"><a href="https://leetcode.com/problems/reorder-list/" rel="external nofollow noopener" target="_blank">143. Reorder List</a></h2>
+
+<font size="6"> Description </font>
+
+<p>You are given the head of a singly linked-list. The list can be represented as:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>L0 → L1 → … → Ln - 1 → Ln
+</code></pre></div></div>
+
+<p>Reorder the list to be on the following form:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>L0 → Ln → L1 → Ln - 1 → L2 → Ln - 2 → …
+</code></pre></div></div>
+
+<p>You may not modify the values in the list’s nodes. Only nodes themselves may be changed.</p>
+
+<p>Example 1:</p>
+
+<p><img src="https://assets.leetcode.com/uploads/2021/03/04/reorder1linked-list.jpg" alt="img"></p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: head = [1,2,3,4]
+Output: [1,4,2,3]
+</code></pre></div></div>
+
+<p>Example 2:</p>
+
+<p><img src="https://assets.leetcode.com/uploads/2021/03/09/reorder2-linked-list.jpg" alt="img"></p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: head = [1,2,3,4,5]
+Output: [1,5,2,4,3]
+</code></pre></div></div>
+
+<p>Constraints:</p>
+
+<ul>
+  <li>The number of nodes in the list is in the range [1, 5 * 10^4].</li>
+  <li>1 &lt;= Node.val &lt;= 1000</li>
+</ul>
+
+<p>Follow up: Can you solve the problem in O(1) extra space complexity and O(n) runtime complexity?</p>
+
+<font size="6"> Solution </font>
+
+<p>Reverse the second half of the list, then merge two lists.
+Using two pointers method to find the middle of the list.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">reorderList</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">head</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ListNode</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="sh">"""</span><span class="s">
+        Do not return anything, modify head in-place instead.
+        </span><span class="sh">"""</span>
+        <span class="c1"># find the middle of the list
+</span>        <span class="n">slow</span> <span class="o">=</span> <span class="n">head</span> <span class="c1"># slow pointer
+</span>        <span class="n">fast</span> <span class="o">=</span> <span class="n">head</span> <span class="c1"># fast pointer
+</span>        <span class="k">while</span> <span class="n">fast</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">fast</span><span class="p">.</span><span class="nb">next</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">slow</span> <span class="o">=</span> <span class="n">slow</span><span class="p">.</span><span class="nb">next</span>
+            <span class="n">fast</span> <span class="o">=</span> <span class="n">fast</span><span class="p">.</span><span class="nb">next</span><span class="p">.</span><span class="nb">next</span>
+        <span class="c1"># reverse the second half of the list
+</span>        <span class="n">prev</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">while</span> <span class="n">slow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="nb">next</span> <span class="o">=</span> <span class="n">slow</span><span class="p">.</span><span class="nb">next</span> <span class="c1"># save the next node
+</span>            <span class="n">slow</span><span class="p">.</span><span class="nb">next</span> <span class="o">=</span> <span class="n">prev</span> <span class="c1"># reverse the link
+</span>            <span class="n">prev</span> <span class="o">=</span> <span class="n">slow</span> <span class="c1"># move backward one step
+</span>            <span class="n">slow</span> <span class="o">=</span> <span class="nb">next</span> <span class="c1"># move to the next node in the original list
+</span>        <span class="c1"># merge two lists
+</span>        <span class="c1"># head is the first half of the list
+</span>        <span class="c1"># prev is the second half of the list
+</span>        <span class="k">while</span> <span class="n">prev</span><span class="p">.</span><span class="nb">next</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">temp</span> <span class="o">=</span> <span class="n">head</span><span class="p">.</span><span class="nb">next</span> <span class="c1"># save the next node in the first half
+</span>            <span class="n">head</span><span class="p">.</span><span class="nb">next</span> <span class="o">=</span> <span class="n">prev</span> <span class="c1"># link the first half to the second half
+</span>            <span class="n">head</span> <span class="o">=</span> <span class="n">temp</span> <span class="c1"># move to the next node in the first half
+</span>            <span class="n">temp</span> <span class="o">=</span> <span class="n">prev</span><span class="p">.</span><span class="nb">next</span> <span class="c1"># save the next node in the second half
+</span>            <span class="n">prev</span><span class="p">.</span><span class="nb">next</span> <span class="o">=</span> <span class="n">head</span> <span class="c1"># link the second half to the first half
+</span>            <span class="n">prev</span> <span class="o">=</span> <span class="n">temp</span> <span class="c1"># move to the next node in the second half
+</span></code></pre></div></div>
 
     </div>
   </article>
@@ -164,19 +557,19 @@
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/fairness-irt/">On Reading - Comprehensive Algorithm Portfolio Evaluation using Item Response Theory</a>
-  </li>
-
-  
-
-  <li class="my-2">
     <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/learn-learnlog/">A Learning Log</a>
   </li>
 
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/f4t/">Principles of Life</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/fairness-irt/">On Reading - Comprehensive Algorithm Portfolio Evaluation using Item Response Theory</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/conditional-diffusion/">On Reading - Diffusion Models Beat GANs on Image Synthesis</a>
   </li>
 
   
@@ -188,7 +581,7 @@
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/anti-personalization/">On Reading - Anti-Personalization in Generative Models</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/aml-intro/">Tutorial on Adversarial Machine Learning - Part 1</a>
   </li>
 
 </div>
