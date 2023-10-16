@@ -124,7 +124,7 @@
 
   <header class="post-header">
     <h1 class="post-title">Practicing 75 Leetcode Questions - Linked List</h1>
-    <p class="post-meta">October 15, 2023</p>
+    <p class="post-meta">October 17, 2023</p>
     <p class="post-tags">
       <a href="/blog/2023"> <i class="fas fa-calendar fa-sm"></i> 2023 </a>
         ·  
@@ -145,6 +145,9 @@
 <li class="toc-entry toc-h2"><a href="#23-merge-k-sorted-lists">23. Merge k Sorted Lists</a></li>
 <li class="toc-entry toc-h2"><a href="#19-remove-nth-node-from-end-of-list">19. Remove Nth Node From End of List</a></li>
 <li class="toc-entry toc-h2"><a href="#143-reorder-list">143. Reorder List</a></li>
+<li class="toc-entry toc-h2"><a href="#203-remove-linked-list-elements">203. Remove Linked List Elements</a></li>
+<li class="toc-entry toc-h2"><a href="#160-intersection-of-two-linked-lists">160. Intersection of Two Linked Lists</a></li>
+<li class="toc-entry toc-h2"><a href="#2-add-two-numbers">2. Add Two Numbers</a></li>
 <li class="toc-entry toc-h2"><a href="#reflection-linked-list-problems">Reflection: Linked List Problems</a></li>
 </ul>
     </div>
@@ -541,13 +544,328 @@ Using two-pointer method to find the middle of the list.</p>
 </span>            <span class="n">prev</span> <span class="o">=</span> <span class="n">temp</span> <span class="c1"># move to the next node in the second half
 </span></code></pre></div></div>
 
+<h2 id="203-remove-linked-list-elements"><a href="https://leetcode.com/problems/remove-linked-list-elements/" rel="external nofollow noopener" target="_blank">203. Remove Linked List Elements</a></h2>
+
+<font size="6"> Description </font>
+
+<p>Given the head of a linked list and an integer val, remove all the nodes of the linked list that has Node.val == val, and return the new head.</p>
+
+<p>Example 1:</p>
+
+<p><img src="https://assets.leetcode.com/uploads/2021/03/06/removelinked-list.jpg" alt="img"></p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: head = [1,2,6,3,4,5,6], val = 6
+Output: [1,2,3,4,5]
+</code></pre></div></div>
+
+<p>Example 2:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: head = [], val = 1
+Output: []
+</code></pre></div></div>
+
+<p>Example 3:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: head = [7,7,7,7], val = 7
+Output: []
+</code></pre></div></div>
+
+<p>Constraints:</p>
+
+<ul>
+  <li>The number of nodes in the list is in the range [0, 10^4].</li>
+  <li>1 &lt;= Node.val &lt;= 50</li>
+  <li>0 &lt;= k &lt;= 50</li>
+</ul>
+
+<font size="6"> Solution </font>
+
+<p><strong>Iterative solution</strong></p>
+
+<p>There might be a case that:</p>
+
+<ul>
+  <li>
+<code class="language-plaintext highlighter-rouge">[1, x, x, 2, 3, 4]</code>: two or more consecutive nodes have to be removed. Therefore, we need two pointers, <code class="language-plaintext highlighter-rouge">curr</code> to traverse the list, and <code class="language-plaintext highlighter-rouge">prev</code> to keep track of the previous <code class="language-plaintext highlighter-rouge">valid</code> node. If <code class="language-plaintext highlighter-rouge">curr == val</code>, then we move <code class="language-plaintext highlighter-rouge">curr</code> to the next node but keep <code class="language-plaintext highlighter-rouge">prev</code> unchanged. If <code class="language-plaintext highlighter-rouge">curr != val</code>, then we link <code class="language-plaintext highlighter-rouge">prev</code> to <code class="language-plaintext highlighter-rouge">curr</code> and move <code class="language-plaintext highlighter-rouge">curr</code> to the next node.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">[x, 1, 2, 3]</code>: the first node has to be removed. To handle this case, we need to create a dummy node and link it to the head of the list.</li>
+</ul>
+
+<p>So in total we need three pointers: <code class="language-plaintext highlighter-rouge">dummy</code>, <code class="language-plaintext highlighter-rouge">prev</code> and <code class="language-plaintext highlighter-rouge">curr</code>. We can use <code class="language-plaintext highlighter-rouge">head</code> as <code class="language-plaintext highlighter-rouge">curr</code> to save memory.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">removeElements</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">head</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ListNode</span><span class="p">],</span> <span class="n">val</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ListNode</span><span class="p">]:</span>
+        <span class="n">dummy</span> <span class="o">=</span> <span class="nc">ListNode</span><span class="p">()</span>
+        <span class="n">dummy</span><span class="p">.</span><span class="nb">next</span> <span class="o">=</span> <span class="n">head</span>
+        <span class="n">prev</span> <span class="o">=</span> <span class="n">dummy</span>
+        <span class="k">while</span> <span class="n">head</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">head</span><span class="p">.</span><span class="n">val</span> <span class="o">==</span> <span class="n">val</span><span class="p">:</span>
+                <span class="n">prev</span><span class="p">.</span><span class="nb">next</span> <span class="o">=</span> <span class="n">head</span><span class="p">.</span><span class="nb">next</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">prev</span> <span class="o">=</span> <span class="n">head</span>
+            <span class="n">head</span> <span class="o">=</span> <span class="n">head</span><span class="p">.</span><span class="nb">next</span>
+        <span class="k">return</span> <span class="n">dummy</span><span class="p">.</span><span class="nb">next</span>
+</code></pre></div></div>
+
+<p><strong>Recursive solution</strong></p>
+
+<p>Because we do the same task for <code class="language-plaintext highlighter-rouge">head</code> or <code class="language-plaintext highlighter-rouge">head.next</code>, we can use recursion to simplify the code.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">removeElements</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">head</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ListNode</span><span class="p">],</span> <span class="n">val</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ListNode</span><span class="p">]:</span>
+        <span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="n">head</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ListNode</span><span class="p">],</span> <span class="n">val</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ListNode</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">head</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">None</span>
+            <span class="n">head</span><span class="p">.</span><span class="nb">next</span> <span class="o">=</span> <span class="nf">remove</span><span class="p">(</span><span class="n">head</span><span class="p">.</span><span class="nb">next</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">head</span><span class="p">.</span><span class="n">val</span> <span class="o">==</span> <span class="n">val</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">head</span><span class="p">.</span><span class="nb">next</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">head</span>
+
+        <span class="nf">remove</span><span class="p">(</span><span class="n">head</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+        <span class="c1"># There is still a case when the first node has to be removed.
+</span>        <span class="k">if</span> <span class="n">head</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">head</span><span class="p">.</span><span class="n">val</span> <span class="o">==</span> <span class="n">val</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">head</span><span class="p">.</span><span class="nb">next</span>
+        <span class="k">return</span> <span class="n">head</span>
+</code></pre></div></div>
+
+<p>or even simpler:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">removeElements</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">head</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ListNode</span><span class="p">],</span> <span class="n">val</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ListNode</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">head</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="n">head</span><span class="p">.</span><span class="nb">next</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">removeElements</span><span class="p">(</span><span class="n">head</span><span class="p">.</span><span class="nb">next</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">head</span><span class="p">.</span><span class="n">val</span> <span class="o">==</span> <span class="n">val</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">head</span><span class="p">.</span><span class="nb">next</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">head</span>
+</code></pre></div></div>
+
+<p>But the recursive solution is slower and uses more memory than the iterative solution.</p>
+
+<h2 id="160-intersection-of-two-linked-lists">
+<a name="160"></a><a href="https://leetcode.com/problems/intersection-of-two-linked-lists/" rel="external nofollow noopener" target="_blank">160. Intersection of Two Linked Lists</a>
+</h2>
+
+<font size="6"> Description </font>
+
+<p>Given the heads of two singly linked-lists headA and headB, return the node at which the two lists intersect. If the two linked lists have no intersection at all, return null.</p>
+
+<p>For example, the following two linked lists begin to intersect at node c1:</p>
+
+<p><img src="https://assets.leetcode.com/uploads/2021/03/05/160_statement.png" alt="img"></p>
+
+<p>It is guaranteed that there are no cycles anywhere in the entire linked structure.</p>
+
+<p>Note that the linked lists must retain their original structure after the function returns.</p>
+
+<p>Custom Judge:</p>
+
+<p>The inputs to the judge are given as follows (your program is not given these inputs):</p>
+
+<ul>
+  <li>intersectVal - The value of the node where the intersection occurs. This is 0 if there is no intersected node.</li>
+  <li>listA - The first linked list.</li>
+  <li>listB - The second linked list.</li>
+  <li>skipA - The number of nodes to skip ahead in listA (starting from the head) to get to the intersected node.</li>
+  <li>skipB - The number of nodes to skip ahead in listB (starting from the head) to get to the intersected node.</li>
+</ul>
+
+<p>The judge will then create the linked structure based on these inputs and pass the two heads, headA and headB to your program. If you correctly return the intersected node, then your solution will be accepted.</p>
+
+<p>Example 1:</p>
+
+<p><img src="https://assets.leetcode.com/uploads/2021/03/05/160_example_1_1.png" alt="img"></p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: intersectVal = 8, listA = [4,1,8,4,5], listB = [5,6,1,8,4,5], skipA = 2, skipB = 3
+Output: Intersected at '8'
+Explanation: The intersected node's value is 8 (note that this must not be 0 if the two lists intersect).
+From the head of A, it reads as [4,1,8,4,5]. From the head of B, it reads as [5,6,1,8,4,5]. 
+There are 2 nodes before the intersected node in A; There are 3 nodes before the intersected node in B.
+<span class="p">-</span> Note that the intersected node's value is not 1 because the nodes with value 1 in A and B (2nd node in A and 3rd node in B) are different node references. 
+In other words, they point to two different locations in memory, while the nodes with value 8 in A and B (3rd node in A and 4th node in B) point to the same location in memory.
+</code></pre></div></div>
+
+<p>Example 2:</p>
+
+<p><img src="https://assets.leetcode.com/uploads/2021/03/05/160_example_2.png" alt="img"></p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: intersectVal = 2, listA = [1,9,1,2,4], listB = [3,2,4], skipA = 3, skipB = 1
+Output: Intersected at '2'
+Explanation: The intersected node's value is 2 (note that this must not be 0 if the two lists intersect).
+From the head of A, it reads as [1,9,1,2,4]. From the head of B, it reads as [3,2,4]. 
+There are 3 nodes before the intersected node in A; There are 1 node before the intersected node in B.
+</code></pre></div></div>
+
+<p>Example 3:</p>
+
+<p><img src="https://assets.leetcode.com/uploads/2021/03/05/160_example_3.png" alt="img"></p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: intersectVal = 0, listA = [2,6,4], listB = [1,5], skipA = 3, skipB = 2
+Output: No intersection
+Explanation: From the head of A, it reads as [2,6,4]. 
+From the head of B, it reads as [1,5]. Since the two lists do not intersect, intersectVal must be 0, while skipA and skipB can be arbitrary values.
+Explanation: The two lists do not intersect, so return null.
+</code></pre></div></div>
+
+<p>Constraints:</p>
+
+<ul>
+  <li>The number of nodes of <code class="language-plaintext highlighter-rouge">listA</code> is in the <code class="language-plaintext highlighter-rouge">m</code>.</li>
+  <li>The number of nodes of <code class="language-plaintext highlighter-rouge">listB</code> is in the <code class="language-plaintext highlighter-rouge">n</code>.</li>
+  <li><code class="language-plaintext highlighter-rouge">1 &lt;= m, n &lt;= 3 * 104</code></li>
+  <li><code class="language-plaintext highlighter-rouge">1 &lt;= Node.val &lt;= 105</code></li>
+  <li><code class="language-plaintext highlighter-rouge">0 &lt;= skipA &lt; m</code></li>
+  <li><code class="language-plaintext highlighter-rouge">0 &lt;= skipB &lt; n</code></li>
+  <li>
+<code class="language-plaintext highlighter-rouge">intersectVal</code> is <code class="language-plaintext highlighter-rouge">0</code> if <code class="language-plaintext highlighter-rouge">listA</code> and <code class="language-plaintext highlighter-rouge">listB</code> do not intersect.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">intersectVal == listA[skipA] == listB[skipB]</code> if <code class="language-plaintext highlighter-rouge">listA</code> and <code class="language-plaintext highlighter-rouge">listB</code> intersect.</li>
+</ul>
+
+<p>Follow up: Could you write a solution that runs in O(n) time and use only O(1) memory?</p>
+
+<font size="6"> Solution </font>
+
+<!-- 
+The simplest solution is to reverse the two lists, then traverse the two lists to find the first different node. The intersection is the previous node.
+
+```python
+def reverse_and_count(head: Optional[ListNode]) -> Optional[ListNode]:
+    prev = None
+    count = 0
+    while head is not None:
+        count += 1
+        next = head.next
+        head.next = prev
+        prev = head
+        head = next
+    return prev, count
+
+class Solution:
+    def getIntersectionNode(self, headA: ListNode, headB: ListNode) -> Optional[ListNode]:
+        pA = headA
+        pB = headB
+        reversedA, countA = reverse_and_count(pA)
+        reversedB, countB = reverse_and_count(pB)
+        count_diff = 0
+        while reversedA is not None and reversedB is not None:
+            if reversedA != reversedB:
+                break
+            count_diff += 1
+            reversedA = reversedA.next
+            reversedB = reversedB.next
+        if count_diff == 0:
+            return None
+        else:
+            for i in range(countA - count_diff):
+                headA = headA.next
+            return headA
+``` -->
+
+<p>I gave up on this problem and found this beautiful solution <a href="https://leetcode.com/problems/intersection-of-two-linked-lists/solutions/49785/java-solution-without-knowing-the-difference-in-len/" rel="external nofollow noopener" target="_blank">here</a>. The idea is to use two pointers, <code class="language-plaintext highlighter-rouge">pA</code> and <code class="language-plaintext highlighter-rouge">pB</code>, to traverse the two lists. When <code class="language-plaintext highlighter-rouge">pA</code> reaches the end of the list, we move it to the head of <code class="language-plaintext highlighter-rouge">listB</code>. Similarly, when <code class="language-plaintext highlighter-rouge">pB</code> reaches the end of the list, we move it to the head of <code class="language-plaintext highlighter-rouge">listA</code>. If there is an intersection, <code class="language-plaintext highlighter-rouge">pA</code> and <code class="language-plaintext highlighter-rouge">pB</code> will meet at the intersection. If there is no intersection, <code class="language-plaintext highlighter-rouge">pA</code> and <code class="language-plaintext highlighter-rouge">pB</code> will reach the end of the list at the same time.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">getIntersectionNode</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">headA</span><span class="p">:</span> <span class="n">ListNode</span><span class="p">,</span> <span class="n">headB</span><span class="p">:</span> <span class="n">ListNode</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ListNode</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">headA</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">headB</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="n">pA</span> <span class="o">=</span> <span class="n">headA</span>
+        <span class="n">pB</span> <span class="o">=</span> <span class="n">headB</span>
+        <span class="k">while</span> <span class="n">pA</span> <span class="o">!=</span> <span class="n">pB</span><span class="p">:</span>
+            <span class="n">pA</span> <span class="o">=</span> <span class="n">headB</span> <span class="k">if</span> <span class="n">pA</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">pA</span><span class="p">.</span><span class="nb">next</span>
+            <span class="n">pB</span> <span class="o">=</span> <span class="n">headA</span> <span class="k">if</span> <span class="n">pB</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">pB</span><span class="p">.</span><span class="nb">next</span>
+        <span class="k">return</span> <span class="n">pA</span>
+</code></pre></div></div>
+
+<h2 id="2-add-two-numbers">
+<a name="2"></a><a href="https://leetcode.com/problems/add-two-numbers/" rel="external nofollow noopener" target="_blank">2. Add Two Numbers</a>
+</h2>
+
+<font size="6"> Description </font>
+
+<p>You are given two non-empty linked lists representing two non-negative integers. The digits are stored in reverse order, and each of their nodes contains a single digit. Add the two numbers and return the sum as a linked list.</p>
+
+<p>You may assume the two numbers do not contain any leading zero, except the number 0 itself.</p>
+
+<p>Example 1:</p>
+
+<p><img src="https://assets.leetcode.com/uploads/2020/10/02/addtwonumber1.jpg" alt="img"></p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: l1 = [2,4,3], l2 = [5,6,4]
+Output: [7,0,8]
+Explanation: 342 + 465 = 807.
+</code></pre></div></div>
+
+<p>Example 2:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: l1 = [0], l2 = [0]
+Output: [0]
+</code></pre></div></div>
+
+<p>Example 3:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: l1 = [9,9,9,9,9,9,9], l2 = [9,9,9,9]
+Output: [8,9,9,9,0,0,0,1]
+</code></pre></div></div>
+
+<p>Constraints:</p>
+
+<ul>
+  <li>The number of nodes in each linked list is in the range [1, 100].</li>
+  <li>0 &lt;= Node.val &lt;= 9</li>
+  <li>It is guaranteed that the list represents a number that does not have leading zeros.</li>
+</ul>
+
+<font size="6"> Solution </font>
+
+<p>A simple solution is traverse the two lists and add the two numbers. The carry is passed to the next node.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">get_sum</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span> 
+    <span class="k">if</span> <span class="n">s</span> <span class="o">&gt;=</span> <span class="mi">10</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">s</span> <span class="o">-</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">s</span><span class="p">,</span> <span class="mi">0</span>
+<span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">addTwoNumbers</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">l1</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ListNode</span><span class="p">],</span> <span class="n">l2</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ListNode</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ListNode</span><span class="p">]:</span>
+        <span class="n">sum_head</span> <span class="o">=</span> <span class="nc">ListNode</span><span class="p">()</span>
+        <span class="n">curr</span> <span class="o">=</span> <span class="n">sum_head</span>
+        <span class="n">carry</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">l1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">l2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">val</span><span class="p">,</span> <span class="n">carry</span> <span class="o">=</span> <span class="nf">get_sum</span><span class="p">(</span><span class="n">l1</span><span class="p">.</span><span class="n">val</span> <span class="o">+</span> <span class="n">carry</span><span class="p">,</span> <span class="n">l2</span><span class="p">.</span><span class="n">val</span><span class="p">)</span>
+            <span class="n">curr</span><span class="p">.</span><span class="nb">next</span> <span class="o">=</span> <span class="nc">ListNode</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+            <span class="n">curr</span> <span class="o">=</span> <span class="n">curr</span><span class="p">.</span><span class="nb">next</span>
+            <span class="n">l1</span> <span class="o">=</span> <span class="n">l1</span><span class="p">.</span><span class="nb">next</span> 
+            <span class="n">l2</span> <span class="o">=</span> <span class="n">l2</span><span class="p">.</span><span class="nb">next</span>
+        <span class="k">if</span> <span class="n">l1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">while</span> <span class="n">l1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">val</span><span class="p">,</span> <span class="n">carry</span> <span class="o">=</span> <span class="nf">get_sum</span><span class="p">(</span><span class="n">l1</span><span class="p">.</span><span class="n">val</span> <span class="o">+</span> <span class="n">carry</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">curr</span><span class="p">.</span><span class="nb">next</span> <span class="o">=</span> <span class="nc">ListNode</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+                <span class="n">curr</span> <span class="o">=</span> <span class="n">curr</span><span class="p">.</span><span class="nb">next</span>
+                <span class="n">l1</span> <span class="o">=</span> <span class="n">l1</span><span class="p">.</span><span class="nb">next</span>
+        <span class="k">if</span> <span class="n">l2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">while</span> <span class="n">l2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">val</span><span class="p">,</span> <span class="n">carry</span> <span class="o">=</span> <span class="nf">get_sum</span><span class="p">(</span><span class="n">l2</span><span class="p">.</span><span class="n">val</span> <span class="o">+</span> <span class="n">carry</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">curr</span><span class="p">.</span><span class="nb">next</span> <span class="o">=</span> <span class="nc">ListNode</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+                <span class="n">curr</span> <span class="o">=</span> <span class="n">curr</span><span class="p">.</span><span class="nb">next</span>
+                <span class="n">l2</span> <span class="o">=</span> <span class="n">l2</span><span class="p">.</span><span class="nb">next</span>
+        <span class="k">if</span> <span class="n">carry</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">curr</span><span class="p">.</span><span class="nb">next</span> <span class="o">=</span> <span class="nc">ListNode</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">sum_head</span><span class="p">.</span><span class="nb">next</span>
+</code></pre></div></div>
+
 <h2 id="reflection-linked-list-problems">Reflection: Linked List Problems</h2>
 
 <p>This is a placeholder for me to reflect what I have learned to solve the linked list problems. So far:</p>
 
 <ul>
-  <li>two-pointer method: using two-pointer to traverse the list, one pointer is faster than the other one. This method is used to find the middle of the list, or to find the nth node from the end of the list. This can also be used to find the intersection of two lists.</li>
-  <li>need to familiar with the basic operations of linked list: insert, delete, reverse, merge, etc.</li>
+  <li>Two-pointer method: using two-pointer to traverse the list, one pointer is faster than the other one. This method is used to find the middle of the list, or to find the nth node from the end of the list. This can also be used to find the intersection of two lists (see problem <a href="#160">160</a> above).</li>
+  <li>Need to familiar with the basic operations of linked list: insert, delete, reverse, merge, etc.
+<!-- - Need to consider the last node of the list. For example, `while head is not None` is used to check if the current node is the last node of the list. We should not use `while head.next is not None` because we will miss the last node. -->
+</li>
 </ul>
 
 
