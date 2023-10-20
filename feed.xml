@@ -1,11 +1,527 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2023-10-17T07:41:23+11:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
-</subtitle><entry><title type="html">A Tutorial on Diffusion Models with Tensorflow 2</title><link href="https://tuananhbui89.github.io/blog/2023/diffusion-tutorial/" rel="alternate" type="text/html" title="A Tutorial on Diffusion Models with Tensorflow 2" /><published>2023-10-03T00:00:00+11:00</published><updated>2023-10-03T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2023/diffusion-tutorial</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2023/diffusion-tutorial/"><![CDATA[<p>I have been asked by Dinh to develop a short tutorial/lecture on diffusion models for the course “Deep Learning” at Monash University (FIT3181). And, here it is.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2023-10-20T11:34:35+11:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
+</subtitle><entry><title type="html">Tree-Ring Watermarks - Fingerprints for Diffusion Images that are Invisible and Robust</title><link href="https://tuananhbui89.github.io/blog/2023/watermark-diffusion/" rel="alternate" type="text/html" title="Tree-Ring Watermarks - Fingerprints for Diffusion Images that are Invisible and Robust" /><published>2023-10-17T00:00:00+11:00</published><updated>2023-10-17T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2023/watermark-diffusion</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2023/watermark-diffusion/"><![CDATA[<h2 id="about-the-paper">About the paper</h2>
+
+<ul>
+  <li>Published at NeurIPS 2023</li>
+  <li>Affiliation: University of Maryland. Tom Goldstein’s group</li>
+  <li>Link to the paper: <a href="https://arxiv.org/pdf/2305.20030.pdf">https://arxiv.org/pdf/2305.20030.pdf</a></li>
+  <li>Link to Github: <a href="https://github.com/YuxinWenRick/tree-ring-watermark">https://github.com/YuxinWenRick/tree-ring-watermark</a></li>
+  <li>Link to Yannic Kilcher’s video: <a href="https://youtu.be/WncUlZYpdq4?si=thX3fiKHS59SQ1IG">https://youtu.be/WncUlZYpdq4?si=thX3fiKHS59SQ1IG</a></li>
+</ul>
+
+<p><strong>Side information</strong>: Tom is one of the most famous and active researchers in the field of Trustworthy Machine Learning, particulaly Adversarial Machine Learning.
+His group has published several notable papers, such as <a href="https://arxiv.org/abs/1910.14667">Invisible Cloak</a><d-cite key="wu2020making"></d-cite>, <a href="https://proceedings.neurips.cc/paper_files/paper/2018/file/22722a343513ed45f14905eb07621686-Paper.pdf">clean-label data poisoning</a><d-cite key="shafahi2018poison"></d-cite>, <a href="https://arxiv.org/abs/1904.12843">adversarial training for free</a><d-cite key="shafahi2019adversarial"></d-cite>, <a href="https://arxiv.org/abs/1712.09913">visualizing the loss landscape of neural networks</a><d-cite key="li2018visualizing"></d-cite>. Recently, his group has (moved) explored TML aspects of modern generative models, such as Diffusion Models <d-cite key="wen2023tree"></d-cite>, LLMs <d-cite key="jain2023baseline, shu2023exploitability, kirchenbauer2023watermark"></d-cite>.</p>
+
+<p><strong>Summary</strong>:</p>
+
+<ul>
+  <li><strong>Problem setting</strong>: How to insert a watermark into a generated image such that the watermark is robust to the attack and invisible to the human eye?</li>
+  <li><strong>Approach</strong>: The authors proposed a simple yet effective watermarking framework for diffusion models which consits generation phase and detection phase. The method is based on the idea of <strong>diffusion inversion</strong> which allows us to invert the diffusion process. The key idea is to embed a watermark into the initial noise in frequency domain and then use the diffusion inversion to extract the watermark from the generated image in detection phase.</li>
+  <li><strong>Limitation</strong>: The method is evaluated under a quite weak black-box attack. This method is only applicable to DDIM (deterministic version of DDPM) and not applicable to other generative models such as VAEs or Flow-based models.</li>
+</ul>
+
+<p><strong>Follow-up ideas</strong>:</p>
+
+<ul>
+  <li>How to fine-tune the foundation model (i.e., Stable Diffusion which does not have the watermark) to a new model with watermarking capability naturally?</li>
+  <li>How about stochastic diffusion model like DDPM?</li>
+</ul>
+
+<p>After all, we still don’t know whether an image is real or fake :joy:.</p>
+
+<h2 id="background">Background</h2>
+
+<h3 id="watermarking">Watermarking</h3>
+
+<p><strong>What is Watermarking?</strong> Watermarking is a technique to embed some information into a signal (image, audio, video, etc.) in a way that the signal is not changed much, but the information can be extracted later. The information can be used for many purposes, such as authentication, copyright.</p>
+
+<p><strong>Watermarking: Attack and Defense Game</strong> The watermarking process can be seen as an adversarial game between two parties: <strong>attacker and defender</strong>. The attacker tries to remove the watermark from the signal, while the defender tries to make the watermark robust to the attacker’s removal process. The game is illustrated in the following figure.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/watermark/watermark-attack-defense-flow-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/watermark/watermark-attack-defense-flow-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/watermark/watermark-attack-defense-flow-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/watermark/watermark-attack-defense-flow.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Watermarking: Attack and Defense Game (image source <a href="https://www.researchgate.net/publication/343385316_Digital_Watermarking_-_Comparison_of_DCT_and_DWT_methods">Jovanovic et al. 2009</a>)
+</div>
+
+<p>The defender has two main goals: (1) to make the watermark <strong>robust to the attacker</strong>’s removal process, and (2) to make the watermark <strong>invisible to the human eye</strong>. The first goal is measured by the robustness of the watermark, while the second goal is measured by the fidelity of the watermark. Similar as the trade-off between accuracy and robustness in the adversarial machine learning, the <strong>robustness and fidelity are usually conflicting</strong>, i.e., the more robust the watermark is, the more visible it is.</p>
+
+<p>To extract the watermark, the defender needs a secret key and a secret decoder which are usually known only to the defender. There are two types of attack settings: <strong>white-box</strong> and <strong>black-box</strong> attacks depending on whether the attacker knows the secret key and decoder or not. Again, similar as the adversarial machine learning, the white-box attack is usually more powerful but less practical than the black-box attack.</p>
+
+<p><strong>Adaptive Attack</strong> is a special type of attack where the attacker knows everything about the defender, i.e., the secret key, decoder, and the defense algorithm and can adaptively change the attack strategy based on the defender’s strategy. This type of attack is usually the most powerful and the most difficult to defend (and almost impossible to defend in the adversarial machine learning). In this paper, the authors evaluated their method under non-adaptive white-box attack.</p>
+
+<p><strong>Why Watermarking in Generative Models?</strong> Originally, watermarking is to protect the ownership of the authors on their digital products. However, in the context of generative models, where a product is generated from a model with users’ input, the ownership is not clear. Recently, (as far as I known) published pre-trained generative models such as Stable Diffusion give the ownership to the users who gives the input/prompt to generate the product. Therefore, in this context, the watermarking is to protect the ownership of the users on their generated products.</p>
+
+<p>However, it is a much more interesting implication of watermarking in generative models than just authentication. If we can robustly and reliably detect a watermark in a generated image, we can know whether the image is real or fake, which is a very important problem in the field of Trustworthy Machine Learning.</p>
+
+<p><strong>What is DFT and why watermarking loves DFT?</strong></p>
+
+<p>Reference: <a href="https://vincmazet.github.io/bip/filtering/fourier.html">https://vincmazet.github.io/bip/filtering/fourier.html</a> and <a href="https://www.cs.unm.edu/~brayer/vision/fourier.html">https://www.cs.unm.edu/~brayer/vision/fourier.html</a></p>
+
+<!-- ### DDPM and DDIM
+
+One very important note is that this framework has been based on the DDIM <d-cite key="song2020denoising"></d-cite>, which is a deterministic version of DDPM <d-cite key="ho2020denoising"></d-cite>. In the DDPM framework, the forward diffusion process has a nice property that:
+
+$$x_t = \sqrt{\bar{\alpha}_t} x_0 + \sqrt{1-\bar{\alpha}_t} \epsilon_t$$
+
+where $$x_0$$ is the initial image, $$\epsilon_t \sim \mathcal{N}(0, I)$$ is the noise at time $$t$$. This property allows us to `predict` noisy version of $$x_0$$ at any arbitrary time $$t$$. On the other hand, given $$\epsilon_t = \epsilon_\theta(x_t, t)$$ is the predicted noise at time $$t$$ by the denoising network $$\epsilon_\theta$$ and $$x_t$$, we can `predict` $$\tilde{x_0}$$ as follows:
+
+$$\tilde{x}_0 = \frac{x_t - \sqrt{1-\bar{\alpha}_t} \epsilon_\theta(x_t, t)}{\sqrt{\bar{\alpha}_t}}$$
+
+Based on this observation, the authors <d-cite key="song2020denoising"></d-cite> proposed to sample $$x_{t-1}$$ from $$x_t$$ as follows:
+
+$$x_{t-1} = \sqrt{\bar{\alpha}_{t-1}} \tilde{x}_0 + \sqrt{1 - \bar{\alpha}_{t-1} - \sigma_t^2} \epsilon_\theta(x_t, t) + \sigma_t \epsilon_t$$
+
+where $$\epsilon_t \sim \mathcal{N}(0, I)$$ is the noise at time $$t$$.
+
+So $$x_{t-1} \sim q(x_{t-1} \mid x_t, x_0) = \mathcal{N} (x_{t-1}; \sqrt{\bar{\alpha}_{t-1}} \tilde{x}_0 + \sqrt{1 - \bar{\alpha}_{t-1} - \sigma_t^2} \epsilon_\theta(x_t, t), \sigma_t^2 I)$$ -->
+
+<h3 id="diffusion-inversion">Diffusion Inversion</h3>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/watermark/gan-inversion-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/watermark/gan-inversion-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/watermark/gan-inversion-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/watermark/gan-inversion.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+     Illustration of GAN inversion (Image source <d-cite key="xia2022gan"></d-cite>).
+</div>
+
+<p>Generative inversion is a technique that allows us to invert the generation process. In other words, given a pre-trained generative model \(g_\theta(z)\) and an image \(x\) which can be either real image or generated one, we can find the noise \(z\) such that \(g_\theta(z)\) is close to \(x\). This technique was first proposed for GANs in Zhu et al. (2016) <d-cite key="zhu2016generative"></d-cite>, Creswell et al. (2016) <d-cite key="creswell2018inverting"></d-cite> not long after the introduction of GAN in 2014. It can be seen that, obtaining the inverted latent code brings many useful implications such as capability to edit/manipulate generated images by editing the latent code, or adversarial perturbation removal <d-cite key="samangouei2018defense"></d-cite>.</p>
+
+<p>Because requring the deterministic property: one noise \(z\) always generates the same image \(x\), this technique is not trivial to apply to other generative models such as VAEs or Flow-based models. For Diffusion Models, thanks to the deterministic property in DDIM, we can apply this technique to invert the diffusion process, i.e., given an image \(x_0\), we can find the noise \(x_T\) to reconstruct \(x_0\). And with the blooming of Diffusion Models in the last two years, we can see many cool applications of this technique such as Textual Inversion <d-cite key="gal2022image"></d-cite>, Image Editing <d-cite key="mokady2023null"></d-cite> or the work we are discussing - Watermarking <d-cite key="wen2023tree"></d-cite>).</p>
+
+<p>In the DDPM framework, the forward diffusion process has a nice property that:</p>
+
+\[x_t = \sqrt{\bar{\alpha}_t} x_0 + \sqrt{1-\bar{\alpha}_t} \epsilon_t\]
+
+<p>where \(x_0\) is the initial image, \(\epsilon_t \sim \mathcal{N}(0, I)\) is the noise at time \(t\). This property allows us to <code class="language-plaintext highlighter-rouge">predict</code> noisy version of \(x_0\) at any arbitrary time \(t\). On the other hand, given \(\epsilon_t = \epsilon_\theta(x_t, t)\) is the predicted noise at time \(t\) by the denoising network \(\epsilon_\theta\) and \(x_t\), we can <code class="language-plaintext highlighter-rouge">predict</code> \(\tilde{x_0}\) as follows:</p>
+
+\[\tilde{x}_0 = \frac{x_t - \sqrt{1-\bar{\alpha}_t} \epsilon_\theta(x_t, t)}{\sqrt{\bar{\alpha}_t}}\]
+
+<p>Now we consider the next step in the forward diffusion process:</p>
+
+\[x_{t+1} = \sqrt{\bar{\alpha}_{t+1}} x_0 + \sqrt{1 - \bar{\alpha}_{t+1}} \epsilon_{t+1}\]
+
+<p>where \(\epsilon_{t+1} \sim \mathcal{N}(0, I)\) is the noise at time \(t+1\). If we replace the original \(x_0\) with the predicted \(\tilde{x}_0\) and assume that the diffusion process is large enough so that \(\epsilon_{t+1} \approx \epsilon_\theta(x_t, t)\), we can obtain the inverted diffusion process as follows:</p>
+
+\[x_{t+1} = \sqrt{\bar{\alpha}_{t+1}} \frac{x_t - \sqrt{1-\bar{\alpha}_t} \epsilon_\theta(x_t, t)}{\sqrt{\bar{\alpha}_t}} + \sqrt{1 - \bar{\alpha}_{t+1}} \epsilon_\theta(x_t, t)\]
+
+<p>which now depends only on \(x_t\) and \(\epsilon_\theta(x_t, t)\). Repeating this process from \(t=0\) to \(t=T\), we can obtain the inverted code \(x_T\) that reconstructs \(x_0\) (again it works for DDIM model only). This is the key technique used in this watermarking method.</p>
+
+<h2 id="tree-ring-watermark">Tree-Ring Watermark</h2>
+
+<h3 id="threat-model">Threat Model</h3>
+
+<p>In adversarial machine learning, a threat model is a description of capabilities and objectives of all parties in the attack and defense game. From that, we can narrow down the defense space and scope to this specific threat model (It is because in the real world, we cannot know every possible attack and defend against it). In this paper, the authors considered the following threat model:</p>
+
+<ul>
+  <li>Model owner (generative phase): The generative model owner generates an image \(x\) with a secret watermark \(k\). The constraint is that the watermarking algorithm  should have a negligible effect on the generation process, so that quality is maintained and watermarking leaves no visible trace.</li>
+  <li>Attacker or Forger (attack phase): The attacker tries to remove the watermark from the generated image \(x\) to get \(x'\) (and then can claim his ownership on \(x'\), etc.). The attacker uses data augmentations only and knows nothing about the watermarking algorithm and the generative model (a <strong>quite weak black-box attack</strong>).</li>
+  <li>Model owner (detection phase): The model owner tries to detect the watermark in the image \(x'\) to know whether it was modified from the original image \(x\) or not. The model owner knows nothing about the attack including its techniques and hyper-parameters.</li>
+</ul>
+
+<h3 id="watermarking-process">Watermarking Process</h3>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/watermark/fig1-pipeline-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/watermark/fig1-pipeline-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/watermark/fig1-pipeline-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/watermark/fig1-pipeline.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+
+<p>The watermarking process is illustrated in the above figure. The watermarking process consists of two main steps: <strong>watermark embedding</strong> and <strong>watermark detection</strong>.</p>
+
+<p>In the watermark embedding step, an initial Gaussian noise \(x_T\) is first converted to the frequency domain using DFT \(\mathcal{F}\). Then, a pre-defined watermark \(k\) is embedded into the frequency domain of \(x_T\) by a simple binary masking operation. The watermarked noise \(x_T^k\) is then converted back to the time domain using inverse DFT \(\mathcal{IF}\). Finally, the watermarked noise \(x_T^k\) is used to generate the watermarked image \(x_0^k\) (now call \(x\)) using the standard <strong>DDIM model</strong> (again not stochastic one like DDPM).</p>
+
+<p>In the watermark detection, the transformed image \(x'=\mathcal{A}(x_0^k)\) is first inverted to obtain the <strong>approximated</strong> noise \(x'_T\) using the <strong>DDIM inversion</strong>. Then, the watermark \(k'\) is extracted from the frequency domain of \(x'_T\) using the same binary masking operation as in the watermark embedding step. Finally, the extracted watermark \(k'\) is compared with the original watermark \(k\) to determine whether the image \(x'\) is from the original image \(x\) or not.</p>
+
+<p>The simple process can be describe as follows:</p>
+
+<blockquote class="block-quote">
+  <p><strong>Watermark Embedding</strong></p>
+
+  <p>Input: initial noise \(x_T\), secret key \(k\), mask \(M\), DDIM model \(\mathcal{D}\) <br />
+\(x_T^f = \mathcal{F}(x_T)\) <br />
+\(x_T^k = Masking(x_T^f, k, M)\) <br />
+\(x_0^k = \mathcal{D}(\mathcal{IF}(x_T^k))\) <br />
+Output: watermarked image \(x_0^k\) or \(x\)</p>
+</blockquote>
+
+<blockquote class="block-quote">
+  <p><strong>Watermark Detection</strong></p>
+
+  <p>Input: transformed image \(x'\), secret key \(k\), mask \(M\), DDIM inversion \(\mathcal{D}^I\) <br />
+\(x'_T = \mathcal{D}^I (x')\) <br />
+\({x'}_T^f = \mathcal{F}(x'_T)\) <br />
+\(k' = UnMasking({x'}_T^f, k, M)\) <br />
+calculate distance \(d(k, k')\) between \(k'\) and \(k\) <br />
+Output: \(d(k, k')\)</p>
+</blockquote>
+
+<p>As described in the paper, the masking opearation will produce output:</p>
+
+\[x_{i,T}^k \sim \left\{
+  \begin{array}{ c l }
+    k_i &amp; \quad \textrm{if } i \in M \\
+    \mathcal{N} (0,1)                 &amp; \quad \textrm{otherwise}
+  \end{array}
+\right.\]
+
+<p>where \(k_i\) is the \(i\)-th element of the key \(k\), \(M\) is the mask. Note that the Fourier transform of a Gaussian noise array is also distributed as
+Gaussian noise. The distance function is the L1 distance \(d(k, k') = \frac{1}{\mid M \mid} \sum_{i \in M} \mid k_i - k'_i \mid\).</p>
+
+<h3 id="constructing-the-key">Constructing the key</h3>
+
+<p>As mentioned in the paper, choosing the key pattern \(k\)  (as similar the binary mask \(M\)) strongly effects the robustness and visibility of the watermark. The authors proposed to use a <strong>tree-ring pattern</strong> which is a circular mask with radius \(r\) centered on the low frequency modes as the key pattern. This pattern brings several benefits such as invariant to rotation, translation, and dilation (which was studied in classical watermarking literature). The authors proposed three variants of the tree-ring pattern:</p>
+
+<ul>
+  <li>Tree-ring Zero: all elements in the tree-ring pattern are zero.</li>
+  <li>Tree-ring Rands: all elements in the tree-ring pattern are randomly sampled from \(\mathcal{N}(0,1)\).</li>
+  <li>Tree-ring Rings: multiple rings with different radiuses.</li>
+</ul>
+
+<p><strong>Why ring pattern?</strong></p>
+
+<h3 id="how-to-detect-the-watermark">How to detect the watermark?</h3>
+
+<p>Given an image \(x'\) and from the watermark detection process, we can obtain \(k'\) which is the extracted pattern from \(x'\). Now, how we can decide whether \(k'\) is the same as the original pattern \(k\) or not?</p>
+
+<p>To do that, the authors defined a null hypothesis \(H_0\) and find the P-value of the null hypothesis. The null hypothesis is defined as follows:</p>
+
+\[H_0: k' \sim \mathcal{N}(0, \sigma^2 I)\]
+
+<p>Here, the variance \(\sigma^2\) is unknown and be estimated from each image as \(\sigma^2 = \frac{1}{\mid M \mid} \sum_{i \in M} \mid k'_i \mid^2\).</p>
+
+<blockquote class="block-quote">
+  <p><strong>What is Null Hypothesis?</strong></p>
+
+  <p>Null hypothesis is the claim that no relationship exists between two sets of data or variables being analyzed. For example, in the context of watermarking, the null hypothesis is a statement that the extracted pattern \(k'\) is just a random noise and not related to the original pattern \(k\). On the other hand, the alternative hypothesis is a statement that the extracted pattern \(k'\) is related to the original pattern \(k\).</p>
+</blockquote>
+
+<blockquote class="block-quote">
+  <p><strong>What is P-value?</strong></p>
+
+  <p>The P-value is the probability of obtaining results as extreme as the observed results of a statistical hypothesis test, assuming that the null hypothesis is correct. The smaller the P-value, the stronger the evidence against the null hypothesis. The P-value is calculated from the null hypothesis and the observed data using a statistical test. For example, in the context of watermarking, the P-value is the probability of obtaining the extracted pattern \(k'\) from the null hypothesis \(H_0\).</p>
+</blockquote>
+
+<p>The P-value is calculated as follows:</p>
+
+\[p = Pr \left( \chi^2_{\mid M \mid, \lambda} \leq \eta \mid H_0 \right) = \Phi_{\chi^2} (z)\]
+
+<p>where \(\chi^2_{\mid M \mid, \lambda}\) is the chi-squared distribution with \(\mid M \mid\) degrees of freedom and non-centrality parameter \(\lambda\), \(\eta = \frac{1}{\sigma^2} \sum_{i \in M} \mid k_i - k'_i \mid^2\), \(z = \frac{\eta - \lambda}{\sqrt{2 \lambda}}\), and \(\Phi_{\chi^2}\) is the cumulative distribution function of the chi-squared distribution.</p>
+
+<p>From that, an image is considered as a forgery if \(p &lt; \alpha\) where \(\alpha\) is a pre-defined threshold (too small \(\alpha\) will lead to many false positives, while too large \(\alpha\) will lead to many false negatives).</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/watermark/fig3-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/watermark/fig3-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/watermark/fig3-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/watermark/fig3.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/watermark/fig3-attack-watermark-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/watermark/fig3-attack-watermark-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/watermark/fig3-attack-watermark-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/watermark/fig3-attack-watermark.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+     Measuring P-value in different settings (w/o watermark, w/ watermark, w/ watermark and attack). The extreme low P-value in the last setting indicates that the watermark is robust to the attack.
+</div>
+
+<p>The figure above shows the P-value of the null hypothesis in three different settings including (1) without watermark, (2) with watermark, and (3) with watermark and attack. As we can see, the P-value of image with watermark is much lower than that of image without watermark, and the P-value in the last setting is extremely low, which indicates that the watermark is robust to the attack. The authors also provided a more quantitative analysis as Table 1 in the paper.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/watermark/tab1-main-results-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/watermark/tab1-main-results-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/watermark/tab1-main-results-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/watermark/tab1-main-results.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+
+<p>The metric was used to measure the performance is <strong>AUC/TPR@1%FPR</strong> which is the area under the ROC curve (AUC) or the true positive rate (TPR) at 1% false positive rate (FPR). The authors also used FID score to measure the quality of the generated images and CLIP score to measure the semantic similarity between the generated images and the prompts.</p>
+
+<p><strong>That’s all for the paper!</strong> There are still many experiments and analysis in the paper, but the post is already too long and I am tired already :joy:. Further details can be found in the paper.</p>
+
+<h2 id="how-to-implement">How to implement</h2>
+
+<h2 id="summary">Summary</h2>
+
+<p><strong>Summary</strong>:</p>
+
+<ul>
+  <li><strong>Problem setting</strong>: How to insert a watermark into a generated image such that the watermark is robust to the attack and invisible to the human eye?</li>
+  <li><strong>Approach</strong>: The authors proposed a simple yet effective watermarking framework for diffusion models which consits generation phase and detection phase. The method is based on the idea of <strong>diffusion inversion</strong> which allows us to invert the diffusion process. The key idea is to embed a watermark into the initial noise in frequency domain and then use the diffusion inversion to extract the watermark from the generated image in detection phase.</li>
+  <li><strong>Limitation</strong>: The method is evaluated under a quite weak black-box attack. This method is only applicable to DDIM (deterministic version of DDPM) and not applicable to other generative models such as VAEs or Flow-based models.</li>
+</ul>
+
+<p><strong>Follow-up ideas</strong>:</p>
+
+<ul>
+  <li>How to fine-tune the foundation model (i.e., Stable Diffusion which does not have the watermark) to a new model with watermarking capability naturally?</li>
+  <li>How about stochastic diffusion model like DDPM?</li>
+</ul>]]></content><author><name>Tuan-Anh Bui</name></author><category term="reading" /><category term="genai" /><category term="tml" /><summary type="html"><![CDATA[How to know whether an image is real or fake?]]></summary></entry><entry><title type="html">A Tutorial on Diffusion Models with Tensorflow 2</title><link href="https://tuananhbui89.github.io/blog/2023/diffusion-tutorial/" rel="alternate" type="text/html" title="A Tutorial on Diffusion Models with Tensorflow 2" /><published>2023-10-03T00:00:00+11:00</published><updated>2023-10-03T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2023/diffusion-tutorial</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2023/diffusion-tutorial/"><![CDATA[<!-- I have been asked by Dinh to develop a short tutorial/lecture on diffusion models for the course "Deep Learning" at Monash University (FIT3181). And, here it is. -->
+
+<h2 id="resources">Resources</h2>
 
 <ul>
   <li>The Jupyter notebook with Tensorflow2 implementation is available on <a href="https://github.com/tuananhbui89/diffusion_tf2">Github</a>.</li>
-  <li>The slide can be found <a href="https://www.dropbox.com/scl/fi/kqsvl79asitnh4equ7cys/A-short-tutorial-on-Diffusion.pdf?rlkey=0d32tac2xrn4pmkdvkunaap3v&amp;dl=0">here</a>.</li>
+  <li>The slide can be found here: <a href="https://www.dropbox.com/scl/fi/x7ucu2reluvv0v7rahw75/A-short-tutorial-on-Diffusion_v2.pdf?rlkey=yplk7jib1fx1wqg39fdibwlh3&amp;dl=0">(Dinh’s revision)</a>.</li>
   <li>The lecture about Generative Models which includes VAE, GAN and Diffusion Models that I taught at VietAI is available <a href="https://docs.google.com/presentation/d/1WT0OeAuTrRpCWq0agIbfaSh5VCuscUND85i3WT-ggZs/edit?usp=sharing">here</a>.</li>
 </ul>
+
+<h2 id="ddpm">DDPM</h2>
+
+<p>When talking about diffusion models, we usually refer to three notable works including Sohl-Dickstein et al., 2015 <d-cite key="sohl2015deep"></d-cite>, Yang &amp; Ermo, 2019 <d-cite key="song2019generative"></d-cite>, and maybe the most popular one DDPM by Ho et al., 2020 <d-cite key="ho2020denoising"></d-cite>.</p>
+
+<p>The general diffusion framework includes two processes: the <strong>forward diffusion process</strong> in which a random noise is added to an input image to destruct the image, and the <strong>backward (reverse) diffusion process</strong> in which the image is denoised by removing the noise added in the forward diffusion process to reconstruct the original image.</p>
+
+<h3 id="forward-diffusion-process">Forward Diffusion Process</h3>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion/forward-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion/forward-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion/forward-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/diffusion/forward.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Forward Diffusion Process (image source <a href="https://cvpr2023-tutorial-diffusion-models.github.io/ ">https://cvpr2023-tutorial-diffusion-models.github.io/ </a>)
+</div>
+
+<p>In the DDPM model, the forward diffusion process is formulated as Markov chain with T steps such that at each time step \(t\), the image \(x_t\) is distributed according to a Gaussian distribution \(x_t \sim q(x_t \mid x_{t-1}) = \mathcal{N}(x_t \mid \mu_t, \sigma_t^2)\) with mean \(\mu_t=\sqrt{1-\beta_t} x_{t-1}\) and variance \(\sigma_t^2 = \beta_t I\), where \(0&lt; \beta_t &lt; 1\) is the diffusion coefficient at time step \(t\).</p>
+
+<p>Intuitively, in the input space, data points are usually not uniformly distributed in the entire space, but they are usually concentrated in some regions with high density (as illustrated in the following figure). Therefore, the diffusion process can be seen as a process to <strong>spread out the data points</strong> in the input space, which is similar as the process of <strong>diffusion</strong> in physics. Analogy speaking, we can imagine that the entire possible input space is a room filled with air, and the data points are some heat sources in the room. The air molecules will <strong>move randomly (Brownian motion) in all directions</strong> and collide with neighboring molecules. As a result, the heat will be <strong>spread out from the high density regions to the low density regions</strong>. This process will continue until the temperature is uniform in the room (reaching the equilibrium state). Back to the forward diffusion process in DDPM, at the time step \(t\), the image \(x_{t-1}\) is added with some noise so that \(x_t \sim \mathcal{N}(x_t \mid \mu_t, \sigma_t^2)\) with <strong>the variance is a little bit larger</strong> than previous step (lower density). This process will continue until the image \(x_T\) is completely destroyed (reaching the equilibrium state).</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion/forward_distribution_shift-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion/forward_distribution_shift-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion/forward_distribution_shift-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/diffusion/forward_distribution_shift.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Forward Diffusion Process as Distribution Shift (image source <a href="https://handbook.monash.edu/2022/units/FIT3181">FIT 3181, Deep Learning, Monash University</a>)
+</div>
+
+<p><strong>How to sample \(x_t\).</strong> While it is possible to form a Gaussian distribution \(q(x_t \mid x_{t-1})\) and sample \(x_t\) from this distribution, it is computationally expensive. Scaling to the Markov chain with \(T\) steps, this is obviously not a nice solution. Instead, by using <strong>reparameterization trick</strong>, the authors proposed a more efficient way to sample \(x_t\) as follows:</p>
+
+\[x_t = \sqrt{1-\beta_t} x_{t-1} + \sqrt{\beta_t} \epsilon_t\]
+
+<p>where \(\epsilon_t \sim \mathcal{N}(0, I)\) is a standard Gaussian noise.
+This simple trick not only allows us to sample \(x_t\) efficiently from \(q(x_t \mid x_{t-1})\), but magically also allows us to jump to any arbitrary time step \(t\) and sample \(x_t\) from that. Details of this trick can be found in the original paper. Basically, \(x_t \sim q(x_t \mid x_0) = \mathcal{N}(x_t; \sqrt{\bar{\alpha}_t} x_0, (1-\bar{\alpha}_t)I)\) where \(\bar{\alpha}_t = \prod_{i=1}^{t} (1-\beta_i)\).</p>
+
+<p>Let’s define \(\alpha_t = 1 - \beta_t\), then \(\bar{\alpha}_t = \prod_{i=1}^{t} \alpha_i\). With \(\epsilon_t \sim \mathcal{N}(0, I) \; \forall t \in [1, 2, ..., T]\), we have:</p>
+
+\[x_t = \sqrt{\alpha_t} x_{t-1} + \sqrt{1-\alpha_t} \epsilon_t\]
+
+\[x_{t-1} = \sqrt{\alpha_{t-1}} x_{t-2} + \sqrt{1-\alpha_{t-1}} \epsilon_{t-1}\]
+
+\[...\]
+
+\[x_1 = \sqrt{\alpha_1} x_0 + \sqrt{1-\alpha_1} \epsilon_1\]
+
+<p>Replacing \(x_{t-1}\) in the first equation with the second equation, we have:</p>
+
+\[x_t = \sqrt{\alpha_t} (\sqrt{\alpha_{t-1}} x_{t-2} + \sqrt{1-\alpha_{t-1}} \epsilon_{t-1}) + \sqrt{1-\alpha_t} \epsilon_t\]
+
+\[x_t = \sqrt{\alpha_t \alpha_{t-1}} x_{t-2} + \sqrt{\alpha_t (1-\alpha_{t-1})} \epsilon_{t-1} + \sqrt{1-\alpha_t} \epsilon_t\]
+
+<!-- We know that sum of two Gaussian distributions $$\mathcal{N}(\mu_1, \sigma_1^2)$$ and $$\mathcal{N}(\mu_2, \sigma_2^2)$$ is also a Gaussian distribution $$\mathcal{N}(\mu_1 + \mu_2, \sigma_1^2 + \sigma_2^2)$$, therefore, in our case, $$\mathcal{N}(\sqrt{\alpha_t} x_{t-1}, 1-\alpha_t)$$ shifted by factor $$\sqrt{\alpha_{t-1}}/2$$ and $$\mathcal{N}(\sqrt{\alpha_{t-1}} x_{t-2}, 1-\alpha_{t-1})$$ shifted by factor $$\sqrt{\alpha_t}/2$$ is also a Gaussian distribution with mean $$\sqrt{\alpha_t \alpha_{t-1}} x_{t-2}$$ and variance $$1 - \alpha_t \alpha_{t-1}$$.
+
+$$x_t = \sqrt{\alpha_t \alpha_{t-1}} x_{t-2} + \sqrt{1 - \alpha_t \alpha_{t-1}} \epsilon$$ -->
+
+<p>As mentioned very briefly in the paper <d-cite key="ho2020denoising"></d-cite> that the forward process has a nice property that the distribution of \(x_t\) is a Gaussian distribution with mean \(\sqrt{\alpha_t \alpha_{t-1}} x_{t-2}\) and variance \(1 - \alpha_t \alpha_{t-1}\) (I couldn’t prove it :joy:). Applying the same reparemeterization trick, we can have:</p>
+
+\[x_t = \sqrt{\alpha_t \alpha_{t-1}} x_{t-2} + \sqrt{1 - \alpha_t \alpha_{t-1}} \epsilon\]
+
+<p>where \(\epsilon \sim \mathcal{N}(0, I)\).</p>
+
+<p>Finally, we have:</p>
+
+\[x_t = \sqrt{\bar{\alpha}_t} x_0 + \sqrt{1-\bar{\alpha}_t} \epsilon\]
+
+<p>where \(\bar{\alpha}_t = \prod_{i=1}^{t} \alpha_i\). This allows us to jump to any arbitrary time step \(t\) and sample \(x_t\) from that.</p>
+
+<p><strong>Properties of the forward diffusion process</strong>:</p>
+
+<ul>
+  <li>At any arbitrary time step \(t\), we have \(q(x_t \mid x_0) = \mathcal{N}(x_t; \sqrt{\bar{\alpha}_t} x_0, (1-\bar{\alpha}_t)I)\).</li>
+  <li>\(\sqrt{\bar{\alpha}_t}\) is a bit smaller than \(\sqrt{\bar{\alpha}_{t-1}}\), while \((1-\bar{\alpha}_t)\) is a bit larger than \((1-\bar{\alpha}_{t-1})\). Which is similar as the process of diffusion in physics when the temperature is spread out from the high density regions \(\mathcal{N}(x_{t-1}; \sqrt{\bar{\alpha}_{t-1}} x_0, (1-\bar{\alpha}_{t-1})I)\) to the low density regions \(\mathcal{N}(x_t; \sqrt{\bar{\alpha}_t} x_0, (1-\bar{\alpha}_t)I)\).</li>
+  <li>If T is large enough, \(\bar{\alpha}_t \approx 0\), therefore, \(q(x_T \mid x_0) \approx \mathcal{N}(x_t; 0, I)\) which is the equilibrium state of the diffusion process.</li>
+</ul>
+
+<h3 id="backward-diffusion-process">Backward Diffusion Process</h3>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion/backward-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion/backward-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion/backward-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/diffusion/backward.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Backward Diffusion Process (image source <a href="https://cvpr2023-tutorial-diffusion-models.github.io/ ">https://cvpr2023-tutorial-diffusion-models.github.io/ </a>)
+</div>
+
+<p>In the backward process, the goal is to remove the noise added in the forward process to reconstruct the original image. The backward process is also formulated as Markov chain with T steps as illustrated in the above figure. At each time step \(t\), the denoised image \(x_{t-1}\) is distributed according a distribution \(q(x_{t-1} \mid x_t)\), which is approximated by \(p_\theta(x_{t-1} \mid x_t)\) parameterized by a neural network \(f_\theta\).</p>
+
+<p>To learn the reverse process, we can minimize the variational bound on negative log likelihood as follows:</p>
+
+\[L = \mathbb{E}_q \left[ - \log \frac{p_\theta (x_{0:T})}{q(x_{1:T} \mid x_0)} \right]\]
+
+\[L = \mathbb{E}_q \left[ - \log p(x_T) - \sum_{t \geq 1} \log \frac{p_\theta (x_{t-1} \mid x_t)}{q (x_t \mid x_{t-1})} \right]\]
+
+<p>As derived in Appendix A of the paper <d-cite key="ho2020denoising"></d-cite>, the objective function can be rewritten as follows:</p>
+
+\[L = \mathbb{E}_q \left[ D_{KL} \left( q(x_T \mid x_0) \| p(x_T) \right) + \sum_{t \geq 1} D_{KL} \left( q(x_{t-1} \mid x_t, x_0) \| p_\theta (x_{t-1} \mid x_t) \right) - \log p_\theta (x_0 \mid x_1) \right]\]
+
+<p>The three terms in the above equation can be interpreted as follows:</p>
+
+<ul>
+  <li>The \(L_{T} = \mathbb{E}_q \left[ D_{KL} \left( q(x_T \mid x_0) \| p(x_T) \right) \right]\) is to make the distribution in the equilibrium state \(q(x_T \mid x_0)\) close to the prior distribution \(p(x_T)\). In learning process, this term is usually ignored because it is a constant regarding to the model parameters \(\theta\).</li>
+  <li>The \(L_{1:T-1} =  \mathbb{E}_q \left[ \sum_{t \geq 1} D_{KL} \left( q(x_{t-1} \mid x_t, x_0) \| p_\theta (x_{t-1} \mid x_t) \right) \right]\) is to make the distribution in the backward process \(q(x_{t-1} \mid x_t, x_0)\) close to its approximation \(p_\theta (x_{t-1} \mid x_t)\).</li>
+  <li>The \(L_{0} = \mathbb{E}_q \left[ - \log p_\theta (x_0 \mid x_1) \right]\) can be understood as the reconstruction loss to reconstruct the original image \(x_0\) from the denoised image \(x_1\). In learning model parameters \(\theta\), this term is also ignored.</li>
+</ul>
+
+<h3 id="magic-simplification">Magic Simplification</h3>
+
+<p>So after all, the only term that we need to care about is the \(L_{1:T-1}\). However, simplifying the \(L_{1:T-1}\) is not easy (please refer the <a href="https://lilianweng.github.io/posts/2021-07-11-diffusion-models/">Lil’s tutorial</a> for more details). High-level speaking, the authors showed that \(q(x_{t-1} \mid x_t, x_0)\) can be refactored as a Gaussian distribution \(\mathcal{N} (x_{t-1}; \tilde{\mu} (x_t, x_0), \tilde{\beta}_t I)\) with \(\tilde{\mu} (x_t, x_0) = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \epsilon_t \right)\) and \(\tilde{\beta}_t = \frac{1 - \bar{\alpha}_{t-1}}{1 - \bar{\alpha}_t}\).</p>
+
+<p>Because \(p_\theta (x_{t-1} \mid x_t)\) is also a Gaussian distribution \(\mathcal{N} (x_{t-1}; \mu_\theta(x_t, t), \beta_\theta(x_t, t) I)\). Therefore, by simplifying that the two Gaussian distribution have the same variance, the KL-divergence between \(q(x_{t-1} \mid x_t, x_0)\) and \(p_\theta (x_{t-1} \mid x_t)\) can be simplified as matching the two means \(\tilde{\mu} (x_t, x_0)\) and \(\mu_\theta(x_t, t)\) as follows:</p>
+
+\[L_{1:T-1} = \mathbb{E}_q \left[ \sum_{t \geq 1} \frac{1}{2 \sigma_t^2} \| \tilde{\mu} (x_t, x_0) - \mu_\theta(x_t, t) \|^2 \right]\]
+
+<p>Since \(\tilde{\mu} (x_t, x_0) = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \epsilon_t \right)\), we can introduce a denoising network \(\epsilon_\theta (x_t, t)\) so that \(\mu_\theta(x_t, t)\) has the same form as \(\tilde{\mu} (x_t, x_0)\) as \(\mu_\theta (x_t, t) = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \epsilon_\theta (x_t, t) \right)\)</p>
+
+<p>Finally, after all the magic, the objective function becomes a simple form of matching the predicted noise \(\epsilon_\theta (x_t, t)\) and the true noise \(\epsilon_t\) as follows:</p>
+
+\[L_{1:T-1} = \mathbb{E}_q \left[ \sum_{t \geq 1} \frac{ (1-\alpha_t)^2 }{2 \sigma_t^2 \alpha_t (1 - \bar{\alpha}_t) } \| \epsilon_\theta (x_t, t) - \epsilon_t \|^2 \right]\]
+
+<p>To further simplifying and avoid expensive computation, we can uniformly sample time step \(t\) from \([1, 2, ..., T]\) and ignore scaling factor, we come to the final objective function:</p>
+
+\[L_{1:T-1} = \mathbb{E}_{x_0 \sim q(x_0), t \sim U \{1, T\}, \epsilon \sim \mathcal{N}(0, I)} \left[ \| \epsilon_\theta (x_t, t) - \epsilon \|^2 \right]\]
+
+<p>where \(x_t = \sqrt{\bar{\alpha}_t} x_0 + \sqrt{1-\bar{\alpha}_t} \epsilon\) as in the forward diffusion process.</p>
+
+<!-- ## DDIM 
+
+One of the main drawbacks of DDPM is that training process requires a large $$T$$ to reach the equilibrium state. In inference, to obtain a sample $$x_0$$, we need to run through $$T$$ reverse steps, sequentially, which is very slow.  -->
 
 <h2 id="implementation">Implementation</h2>
 
@@ -25,7 +541,7 @@
       height="100%"
       onload="this.parentElement.style.paddingBottom = (this.contentWindow.document.documentElement.scrollHeight + 10) + 'px'"></iframe>
   </div>
-</div>]]></content><author><name></name></author><category term="reading" /><category term="genai" /><summary type="html"><![CDATA[My assignment for the course "Deep Learning" at Monash University]]></summary></entry><entry><title type="html">On Reading - Flow Matching for Generative Modeling</title><link href="https://tuananhbui89.github.io/blog/2023/flowmatching/" rel="alternate" type="text/html" title="On Reading - Flow Matching for Generative Modeling" /><published>2023-09-22T00:00:00+10:00</published><updated>2023-09-22T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/2023/flowmatching</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2023/flowmatching/"><![CDATA[<h2 id="about-the-paper">About the paper</h2>
+</div>]]></content><author><name>Tuan-Anh Bui</name></author><category term="reading" /><category term="genai" /><summary type="html"><![CDATA[Another!]]></summary></entry><entry><title type="html">On Reading - Flow Matching for Generative Modeling</title><link href="https://tuananhbui89.github.io/blog/2023/flowmatching/" rel="alternate" type="text/html" title="On Reading - Flow Matching for Generative Modeling" /><published>2023-09-22T00:00:00+10:00</published><updated>2023-09-22T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/2023/flowmatching</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2023/flowmatching/"><![CDATA[<h2 id="about-the-paper">About the paper</h2>
 
 <ul>
   <li>Published at ICLR 2023 (splotlight, top 5%)</li>
@@ -1483,90 +1999,4 @@ The input prompt then will be tokenized by the tokenizer.</p>
         <span class="n">perturbed_images</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">clamp</span><span class="p">(</span><span class="n">original_images</span> <span class="o">+</span> <span class="n">eta</span><span class="p">,</span> <span class="nb">min</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="o">=+</span><span class="mi">1</span><span class="p">).</span><span class="nf">detach_</span><span class="p">()</span>
         <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">PGD loss - step </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s">, loss: </span><span class="si">{</span><span class="n">loss</span><span class="p">.</span><span class="nf">detach</span><span class="p">().</span><span class="nf">item</span><span class="p">()</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">perturbed_images</span>
-</code></pre></div></div>]]></content><author><name></name></author><category term="reading" /><category term="tml" /><category term="diffusion" /><category term="genai" /><summary type="html"><![CDATA[Protecting personal images from Dreambooth attack]]></summary></entry><entry><title type="html">Some useful code snippets</title><link href="https://tuananhbui89.github.io/blog/2023/learn-code/" rel="alternate" type="text/html" title="Some useful code snippets" /><published>2023-08-01T00:00:00+10:00</published><updated>2023-08-01T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/2023/learn-code</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2023/learn-code/"><![CDATA[<p>To log some useful code snippets that I have learned and used.</p>
-
-<h2 id="write-an-image-from-array">Write an image from array</h2>
-
-<p>Need to convert to uint8 before writing to image to avoid color shift.
-And using <code class="language-plaintext highlighter-rouge">cv2</code> will cause color shift (I didn’t try my best to find out why, there might be some other ways to use <code class="language-plaintext highlighter-rouge">cv2</code> to write image without color shift).</p>
-
-<div class="row mt-3">
-    <div class="col-sm mt-3 mt-md-0">
-        <figure>
-
-  <picture>
-    
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/code/write_image_PIL-480.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/code/write_image_PIL-800.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/code/write_image_PIL-1400.webp" />
-    
-
-    <!-- Fallback to the original file -->
-    <img src="/assets/img/code/write_image_PIL.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
-  </picture>
-
-</figure>
-
-    </div>
-    <div class="col-sm mt-3 mt-md-0">
-        <figure>
-
-  <picture>
-    
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/code/write_image_cv2-480.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/code/write_image_cv2-800.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/code/write_image_cv2-1400.webp" />
-    
-
-    <!-- Fallback to the original file -->
-    <img src="/assets/img/code/write_image_cv2.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
-  </picture>
-
-</figure>
-
-    </div>
-</div>
-<div class="caption">
-    Writing image using PIL and cv2.
-</div>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="kn">from</span> <span class="n">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
-    <span class="kn">import</span> <span class="n">torch</span> 
-
-    <span class="k">def</span> <span class="nf">save_images</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="n">save_path</span><span class="p">):</span>
-        <span class="nf">assert</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">is_tensor</span><span class="p">(</span><span class="n">images</span><span class="p">))</span>
-        <span class="nf">assert</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">images</span><span class="p">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">)</span>
-        <span class="nf">assert</span><span class="p">(</span><span class="n">images</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">)</span>
-        <span class="nf">assert</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">min</span><span class="p">(</span><span class="n">images</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="nf">assert</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">max</span><span class="p">(</span><span class="n">images</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
-
-        <span class="k">for</span> <span class="nb">id</span><span class="p">,</span> <span class="n">img_pixel</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="n">images</span><span class="p">):</span>
-            <span class="n">save_path_id</span> <span class="o">=</span> <span class="n">save_path</span> <span class="o">+</span> <span class="nf">str</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span> <span class="o">+</span> <span class="sh">"</span><span class="s">.png</span><span class="sh">"</span>
-            <span class="n">Image</span><span class="p">.</span><span class="nf">fromarray</span><span class="p">(</span>
-                <span class="p">(</span><span class="n">img_pixel</span> <span class="o">*</span> <span class="mf">127.5</span> <span class="o">+</span> <span class="mi">128</span><span class="p">).</span><span class="nf">clamp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">).</span><span class="nf">to</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="n">uint8</span><span class="p">).</span><span class="nf">permute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">).</span><span class="nf">cpu</span><span class="p">().</span><span class="nf">numpy</span><span class="p">()</span>
-                <span class="p">).</span><span class="nf">save</span><span class="p">(</span><span class="n">save_path_id</span><span class="p">)</span>
-
-            <span class="c1"># Using cv2 will cause color shift
-</span>            <span class="c1"># cv2.imwrite(save_path_id, (img_pixel * 127.5 + 128).clamp(0, 255).to(torch.uint8).permute(1, 2, 0).cpu().numpy())
-</span>    
-    <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
-        <span class="n">images</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">load</span><span class="p">(</span><span class="sh">"</span><span class="s">https://raw.githubusercontent.com/tuananhbui89/tuananhbui89.github.io/master/files/images_tensor.pt</span><span class="sh">"</span><span class="p">)</span>
-        <span class="n">save_path</span> <span class="o">=</span> <span class="sh">"</span><span class="s">./test/</span><span class="sh">"</span>
-        <span class="nf">save_images</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="n">save_path</span><span class="p">)</span>
-</code></pre></div></div>
-
-<h2 id="github-pages">Github pages</h2>
-
-<h3 id="jupyter-notebook">Jupyter notebook</h3>
-
-<ul>
-  <li>Clear Notebook Widgets State to show the notebook on Github pages: <code class="language-plaintext highlighter-rouge">jq -M 'del(.metadata.widgets)' 001_vector_search.ipynb &gt; 001_vector_search.fixed.ipynb</code> <a href="https://github.com/jupyter/nbconvert/issues/1731#issuecomment-1157006081">source</a></li>
-  <li>Convert notebook to markdown to show on Github repos as README: <code class="language-plaintext highlighter-rouge">jupyter nbconvert --to markdown notebook.ipynb</code></li>
-</ul>
-
-<h2 id="coding-convention-for-python">Coding Convention for Python</h2>
-
-<ul>
-  <li><a href="https://google.github.io/styleguide/pyguide.html">Google Python Style Guide</a></li>
-  <li><a href="https://realpython.com/python-pep8/">PEP 8 – Style Guide for Python Code</a></li>
-</ul>]]></content><author><name></name></author><category term="coding" /><summary type="html"><![CDATA[Not something fancy]]></summary></entry></feed>
+</code></pre></div></div>]]></content><author><name></name></author><category term="reading" /><category term="tml" /><category term="diffusion" /><category term="genai" /><summary type="html"><![CDATA[Protecting personal images from Dreambooth attack]]></summary></entry></feed>

@@ -1,7 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
-
-  <!-- Head -->
+<!-- _layouts/distill.html --><html>
   <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    <!-- Metadata, OpenGraph and Schema.org -->
     
@@ -12,7 +10,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>A Tutorial on Diffusion Models with Tensorflow 2 | Tuan-Anh  Bui</title>
     <meta name="author" content="Tuan-Anh  Bui">
-    <meta name="description" content="My assignment for the course " deep learning at monash university>
+    <meta name="description" content="Another!">
     <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
 
 
@@ -47,10 +45,82 @@
     <script src="/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script>
     
 
+
+    <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- MathJax -->
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        tags: 'ams'
+      }
+    };
+  </script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
+    <!-- Distill js -->
+    <script src="/assets/js/distillpub/template.v2.js"></script>
+    <script src="/assets/js/distillpub/transforms.v2.js"></script>
+    <script src="/assets/js/distillpub/overrides.js"></script>
+    
+    <!-- Page/Post style -->
+    <style type="text/css">
+      .fake-img {
+  background: #bbb;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 12px;
+} .fake-img p {
+  font-family: monospace;
+  color: white;
+  text-align: left;
+  margin: 12px 0;
+  text-align: center;
+  font-size: 16px;
+}
+
+    </style>
   </head>
 
-  <!-- Body -->
-  <body class="fixed-top-nav ">
+  <body>
+<d-front-matter>
+    <script async type="text/json">{
+      "title": "A Tutorial on Diffusion Models with Tensorflow 2",
+      "description": "Another!",
+      "published": "October 3, 2023",
+      "authors": [
+        {
+          "author": "Tuan-Anh Bui",
+          "authorURL": "https://tuananhbui89.github.io/",
+          "affiliations": [
+            {
+              "name": "Monash University",
+              "url": ""
+            }
+          ]
+        }
+        
+      ],
+      "katex": {
+        "delimiters": [
+          {
+            "left": "$",
+            "right": "$",
+            "display": false
+          },
+          {
+            "left": "$$",
+            "right": "$$",
+            "display": true
+          }
+        ]
+      }
+    }</script>
+  </d-front-matter>
+
+  
 
     <!-- Header -->
     <header>
@@ -116,37 +186,214 @@
 
 
     <!-- Content -->
-    <div class="container mt-5">
-      
-        <!-- _layouts/post.html -->
+    <div class="post distill">
 
-<div class="post">
+      <d-title>
+        <h1>A Tutorial on Diffusion Models with Tensorflow 2</h1>
+        <p>Another!</p>
+      </d-title>
 
-  <header class="post-header">
-    <h1 class="post-title">A Tutorial on Diffusion Models with Tensorflow 2</h1>
-    <p class="post-meta">October 3, 2023</p>
-    <p class="post-tags">
-      <a href="/blog/2023"> <i class="fas fa-calendar fa-sm"></i> 2023 </a>
-        ·  
-        <a href="/blog/tag/reading">
-          <i class="fas fa-hashtag fa-sm"></i> reading</a>  
-          <a href="/blog/tag/genai">
-          <i class="fas fa-hashtag fa-sm"></i> genai</a>  
-          
+      <d-byline></d-byline>
 
-    </p>
-  </header>
+      <d-article>
+        <d-contents>
+          <nav class="l-text figcaption">
+          <h3>Contents</h3>
+            <div><a href="#ddpm">DDPM</a></div>
+            <ul>
+              <li><a href="#forward-diffusion-process">Forward Diffusion Process</a></li>
+              <li><a href="#backward-diffusion-process">Backward Diffusion Process</a></li>
+              <li><a href="#magic-simplification">Magic Simplification</a></li>
+              
+            </ul>
+<div><a href="#implementation">Implementation</a></div>
+            
+          </nav>
+        </d-contents>
 
-  <article class="post-content">
-    
-    <div id="markdown-content">
-      <p>I have been asked by Dinh to develop a short tutorial/lecture on diffusion models for the course “Deep Learning” at Monash University (FIT3181). And, here it is.</p>
+        <!-- I have been asked by Dinh to develop a short tutorial/lecture on diffusion models for the course "Deep Learning" at Monash University (FIT3181). And, here it is. -->
+
+<h2 id="resources">Resources</h2>
 
 <ul>
   <li>The Jupyter notebook with Tensorflow2 implementation is available on <a href="https://github.com/tuananhbui89/diffusion_tf2" rel="external nofollow noopener" target="_blank">Github</a>.</li>
-  <li>The slide can be found <a href="https://www.dropbox.com/scl/fi/kqsvl79asitnh4equ7cys/A-short-tutorial-on-Diffusion.pdf?rlkey=0d32tac2xrn4pmkdvkunaap3v&amp;dl=0" rel="external nofollow noopener" target="_blank">here</a>.</li>
+  <li>The slide can be found here: <a href="https://www.dropbox.com/scl/fi/x7ucu2reluvv0v7rahw75/A-short-tutorial-on-Diffusion_v2.pdf?rlkey=yplk7jib1fx1wqg39fdibwlh3&amp;dl=0" rel="external nofollow noopener" target="_blank">(Dinh’s revision)</a>.</li>
   <li>The lecture about Generative Models which includes VAE, GAN and Diffusion Models that I taught at VietAI is available <a href="https://docs.google.com/presentation/d/1WT0OeAuTrRpCWq0agIbfaSh5VCuscUND85i3WT-ggZs/edit?usp=sharing" rel="external nofollow noopener" target="_blank">here</a>.</li>
 </ul>
+
+<h2 id="ddpm">DDPM</h2>
+
+<p>When talking about diffusion models, we usually refer to three notable works including Sohl-Dickstein et al., 2015 <d-cite key="sohl2015deep"></d-cite>, Yang &amp; Ermo, 2019 <d-cite key="song2019generative"></d-cite>, and maybe the most popular one DDPM by Ho et al., 2020 <d-cite key="ho2020denoising"></d-cite>.</p>
+
+<p>The general diffusion framework includes two processes: the <strong>forward diffusion process</strong> in which a random noise is added to an input image to destruct the image, and the <strong>backward (reverse) diffusion process</strong> in which the image is denoised by removing the noise added in the forward diffusion process to reconstruct the original image.</p>
+
+<h3 id="forward-diffusion-process">Forward Diffusion Process</h3>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion/forward-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion/forward-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion/forward-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/diffusion/forward.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Forward Diffusion Process (image source <a href="https://cvpr2023-tutorial-diffusion-models.github.io/%20" rel="external nofollow noopener" target="_blank">https://cvpr2023-tutorial-diffusion-models.github.io/ </a>)
+</div>
+
+<p>In the DDPM model, the forward diffusion process is formulated as Markov chain with T steps such that at each time step \(t\), the image \(x_t\) is distributed according to a Gaussian distribution \(x_t \sim q(x_t \mid x_{t-1}) = \mathcal{N}(x_t \mid \mu_t, \sigma_t^2)\) with mean \(\mu_t=\sqrt{1-\beta_t} x_{t-1}\) and variance \(\sigma_t^2 = \beta_t I\), where \(0&lt; \beta_t &lt; 1\) is the diffusion coefficient at time step \(t\).</p>
+
+<p>Intuitively, in the input space, data points are usually not uniformly distributed in the entire space, but they are usually concentrated in some regions with high density (as illustrated in the following figure). Therefore, the diffusion process can be seen as a process to <strong>spread out the data points</strong> in the input space, which is similar as the process of <strong>diffusion</strong> in physics. Analogy speaking, we can imagine that the entire possible input space is a room filled with air, and the data points are some heat sources in the room. The air molecules will <strong>move randomly (Brownian motion) in all directions</strong> and collide with neighboring molecules. As a result, the heat will be <strong>spread out from the high density regions to the low density regions</strong>. This process will continue until the temperature is uniform in the room (reaching the equilibrium state). Back to the forward diffusion process in DDPM, at the time step \(t\), the image \(x_{t-1}\) is added with some noise so that \(x_t \sim \mathcal{N}(x_t \mid \mu_t, \sigma_t^2)\) with <strong>the variance is a little bit larger</strong> than previous step (lower density). This process will continue until the image \(x_T\) is completely destroyed (reaching the equilibrium state).</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion/forward_distribution_shift-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion/forward_distribution_shift-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion/forward_distribution_shift-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/diffusion/forward_distribution_shift.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Forward Diffusion Process as Distribution Shift (image source <a href="https://handbook.monash.edu/2022/units/FIT3181" rel="external nofollow noopener" target="_blank">FIT 3181, Deep Learning, Monash University</a>)
+</div>
+
+<p><strong>How to sample \(x_t\).</strong> While it is possible to form a Gaussian distribution \(q(x_t \mid x_{t-1})\) and sample \(x_t\) from this distribution, it is computationally expensive. Scaling to the Markov chain with \(T\) steps, this is obviously not a nice solution. Instead, by using <strong>reparameterization trick</strong>, the authors proposed a more efficient way to sample \(x_t\) as follows:</p>
+
+\[x_t = \sqrt{1-\beta_t} x_{t-1} + \sqrt{\beta_t} \epsilon_t\]
+
+<p>where \(\epsilon_t \sim \mathcal{N}(0, I)\) is a standard Gaussian noise.
+This simple trick not only allows us to sample \(x_t\) efficiently from \(q(x_t \mid x_{t-1})\), but magically also allows us to jump to any arbitrary time step \(t\) and sample \(x_t\) from that. Details of this trick can be found in the original paper. Basically, \(x_t \sim q(x_t \mid x_0) = \mathcal{N}(x_t; \sqrt{\bar{\alpha}_t} x_0, (1-\bar{\alpha}_t)I)\) where \(\bar{\alpha}_t = \prod_{i=1}^{t} (1-\beta_i)\).</p>
+
+<p>Let’s define \(\alpha_t = 1 - \beta_t\), then \(\bar{\alpha}_t = \prod_{i=1}^{t} \alpha_i\). With \(\epsilon_t \sim \mathcal{N}(0, I) \; \forall t \in [1, 2, ..., T]\), we have:</p>
+
+\[x_t = \sqrt{\alpha_t} x_{t-1} + \sqrt{1-\alpha_t} \epsilon_t\]
+
+\[x_{t-1} = \sqrt{\alpha_{t-1}} x_{t-2} + \sqrt{1-\alpha_{t-1}} \epsilon_{t-1}\]
+
+\[...\]
+
+\[x_1 = \sqrt{\alpha_1} x_0 + \sqrt{1-\alpha_1} \epsilon_1\]
+
+<p>Replacing \(x_{t-1}\) in the first equation with the second equation, we have:</p>
+
+\[x_t = \sqrt{\alpha_t} (\sqrt{\alpha_{t-1}} x_{t-2} + \sqrt{1-\alpha_{t-1}} \epsilon_{t-1}) + \sqrt{1-\alpha_t} \epsilon_t\]
+
+\[x_t = \sqrt{\alpha_t \alpha_{t-1}} x_{t-2} + \sqrt{\alpha_t (1-\alpha_{t-1})} \epsilon_{t-1} + \sqrt{1-\alpha_t} \epsilon_t\]
+
+<!-- We know that sum of two Gaussian distributions $$\mathcal{N}(\mu_1, \sigma_1^2)$$ and $$\mathcal{N}(\mu_2, \sigma_2^2)$$ is also a Gaussian distribution $$\mathcal{N}(\mu_1 + \mu_2, \sigma_1^2 + \sigma_2^2)$$, therefore, in our case, $$\mathcal{N}(\sqrt{\alpha_t} x_{t-1}, 1-\alpha_t)$$ shifted by factor $$\sqrt{\alpha_{t-1}}/2$$ and $$\mathcal{N}(\sqrt{\alpha_{t-1}} x_{t-2}, 1-\alpha_{t-1})$$ shifted by factor $$\sqrt{\alpha_t}/2$$ is also a Gaussian distribution with mean $$\sqrt{\alpha_t \alpha_{t-1}} x_{t-2}$$ and variance $$1 - \alpha_t \alpha_{t-1}$$.
+
+$$x_t = \sqrt{\alpha_t \alpha_{t-1}} x_{t-2} + \sqrt{1 - \alpha_t \alpha_{t-1}} \epsilon$$ -->
+
+<p>As mentioned very briefly in the paper <d-cite key="ho2020denoising"></d-cite> that the forward process has a nice property that the distribution of \(x_t\) is a Gaussian distribution with mean \(\sqrt{\alpha_t \alpha_{t-1}} x_{t-2}\) and variance \(1 - \alpha_t \alpha_{t-1}\) (I couldn’t prove it <img class="emoji" title=":joy:" alt=":joy:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f602.png" height="20" width="20">). Applying the same reparemeterization trick, we can have:</p>
+
+\[x_t = \sqrt{\alpha_t \alpha_{t-1}} x_{t-2} + \sqrt{1 - \alpha_t \alpha_{t-1}} \epsilon\]
+
+<p>where \(\epsilon \sim \mathcal{N}(0, I)\).</p>
+
+<p>Finally, we have:</p>
+
+\[x_t = \sqrt{\bar{\alpha}_t} x_0 + \sqrt{1-\bar{\alpha}_t} \epsilon\]
+
+<p>where \(\bar{\alpha}_t = \prod_{i=1}^{t} \alpha_i\). This allows us to jump to any arbitrary time step \(t\) and sample \(x_t\) from that.</p>
+
+<p><strong>Properties of the forward diffusion process</strong>:</p>
+
+<ul>
+  <li>At any arbitrary time step \(t\), we have \(q(x_t \mid x_0) = \mathcal{N}(x_t; \sqrt{\bar{\alpha}_t} x_0, (1-\bar{\alpha}_t)I)\).</li>
+  <li>\(\sqrt{\bar{\alpha}_t}\) is a bit smaller than \(\sqrt{\bar{\alpha}_{t-1}}\), while \((1-\bar{\alpha}_t)\) is a bit larger than \((1-\bar{\alpha}_{t-1})\). Which is similar as the process of diffusion in physics when the temperature is spread out from the high density regions \(\mathcal{N}(x_{t-1}; \sqrt{\bar{\alpha}_{t-1}} x_0, (1-\bar{\alpha}_{t-1})I)\) to the low density regions \(\mathcal{N}(x_t; \sqrt{\bar{\alpha}_t} x_0, (1-\bar{\alpha}_t)I)\).</li>
+  <li>If T is large enough, \(\bar{\alpha}_t \approx 0\), therefore, \(q(x_T \mid x_0) \approx \mathcal{N}(x_t; 0, I)\) which is the equilibrium state of the diffusion process.</li>
+</ul>
+
+<h3 id="backward-diffusion-process">Backward Diffusion Process</h3>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion/backward-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion/backward-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion/backward-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/diffusion/backward.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Backward Diffusion Process (image source <a href="https://cvpr2023-tutorial-diffusion-models.github.io/%20" rel="external nofollow noopener" target="_blank">https://cvpr2023-tutorial-diffusion-models.github.io/ </a>)
+</div>
+
+<p>In the backward process, the goal is to remove the noise added in the forward process to reconstruct the original image. The backward process is also formulated as Markov chain with T steps as illustrated in the above figure. At each time step \(t\), the denoised image \(x_{t-1}\) is distributed according a distribution \(q(x_{t-1} \mid x_t)\), which is approximated by \(p_\theta(x_{t-1} \mid x_t)\) parameterized by a neural network \(f_\theta\).</p>
+
+<p>To learn the reverse process, we can minimize the variational bound on negative log likelihood as follows:</p>
+
+\[L = \mathbb{E}_q \left[ - \log \frac{p_\theta (x_{0:T})}{q(x_{1:T} \mid x_0)} \right]\]
+
+\[L = \mathbb{E}_q \left[ - \log p(x_T) - \sum_{t \geq 1} \log \frac{p_\theta (x_{t-1} \mid x_t)}{q (x_t \mid x_{t-1})} \right]\]
+
+<p>As derived in Appendix A of the paper <d-cite key="ho2020denoising"></d-cite>, the objective function can be rewritten as follows:</p>
+
+\[L = \mathbb{E}_q \left[ D_{KL} \left( q(x_T \mid x_0) \| p(x_T) \right) + \sum_{t \geq 1} D_{KL} \left( q(x_{t-1} \mid x_t, x_0) \| p_\theta (x_{t-1} \mid x_t) \right) - \log p_\theta (x_0 \mid x_1) \right]\]
+
+<p>The three terms in the above equation can be interpreted as follows:</p>
+
+<ul>
+  <li>The \(L_{T} = \mathbb{E}_q \left[ D_{KL} \left( q(x_T \mid x_0) \| p(x_T) \right) \right]\) is to make the distribution in the equilibrium state \(q(x_T \mid x_0)\) close to the prior distribution \(p(x_T)\). In learning process, this term is usually ignored because it is a constant regarding to the model parameters \(\theta\).</li>
+  <li>The \(L_{1:T-1} =  \mathbb{E}_q \left[ \sum_{t \geq 1} D_{KL} \left( q(x_{t-1} \mid x_t, x_0) \| p_\theta (x_{t-1} \mid x_t) \right) \right]\) is to make the distribution in the backward process \(q(x_{t-1} \mid x_t, x_0)\) close to its approximation \(p_\theta (x_{t-1} \mid x_t)\).</li>
+  <li>The \(L_{0} = \mathbb{E}_q \left[ - \log p_\theta (x_0 \mid x_1) \right]\) can be understood as the reconstruction loss to reconstruct the original image \(x_0\) from the denoised image \(x_1\). In learning model parameters \(\theta\), this term is also ignored.</li>
+</ul>
+
+<h3 id="magic-simplification">Magic Simplification</h3>
+
+<p>So after all, the only term that we need to care about is the \(L_{1:T-1}\). However, simplifying the \(L_{1:T-1}\) is not easy (please refer the <a href="https://lilianweng.github.io/posts/2021-07-11-diffusion-models/" rel="external nofollow noopener" target="_blank">Lil’s tutorial</a> for more details). High-level speaking, the authors showed that \(q(x_{t-1} \mid x_t, x_0)\) can be refactored as a Gaussian distribution \(\mathcal{N} (x_{t-1}; \tilde{\mu} (x_t, x_0), \tilde{\beta}_t I)\) with \(\tilde{\mu} (x_t, x_0) = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \epsilon_t \right)\) and \(\tilde{\beta}_t = \frac{1 - \bar{\alpha}_{t-1}}{1 - \bar{\alpha}_t}\).</p>
+
+<p>Because \(p_\theta (x_{t-1} \mid x_t)\) is also a Gaussian distribution \(\mathcal{N} (x_{t-1}; \mu_\theta(x_t, t), \beta_\theta(x_t, t) I)\). Therefore, by simplifying that the two Gaussian distribution have the same variance, the KL-divergence between \(q(x_{t-1} \mid x_t, x_0)\) and \(p_\theta (x_{t-1} \mid x_t)\) can be simplified as matching the two means \(\tilde{\mu} (x_t, x_0)\) and \(\mu_\theta(x_t, t)\) as follows:</p>
+
+\[L_{1:T-1} = \mathbb{E}_q \left[ \sum_{t \geq 1} \frac{1}{2 \sigma_t^2} \| \tilde{\mu} (x_t, x_0) - \mu_\theta(x_t, t) \|^2 \right]\]
+
+<p>Since \(\tilde{\mu} (x_t, x_0) = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \epsilon_t \right)\), we can introduce a denoising network \(\epsilon_\theta (x_t, t)\) so that \(\mu_\theta(x_t, t)\) has the same form as \(\tilde{\mu} (x_t, x_0)\) as \(\mu_\theta (x_t, t) = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \epsilon_\theta (x_t, t) \right)\)</p>
+
+<p>Finally, after all the magic, the objective function becomes a simple form of matching the predicted noise \(\epsilon_\theta (x_t, t)\) and the true noise \(\epsilon_t\) as follows:</p>
+
+\[L_{1:T-1} = \mathbb{E}_q \left[ \sum_{t \geq 1} \frac{ (1-\alpha_t)^2 }{2 \sigma_t^2 \alpha_t (1 - \bar{\alpha}_t) } \| \epsilon_\theta (x_t, t) - \epsilon_t \|^2 \right]\]
+
+<p>To further simplifying and avoid expensive computation, we can uniformly sample time step \(t\) from \([1, 2, ..., T]\) and ignore scaling factor, we come to the final objective function:</p>
+
+\[L_{1:T-1} = \mathbb{E}_{x_0 \sim q(x_0), t \sim U \{1, T\}, \epsilon \sim \mathcal{N}(0, I)} \left[ \| \epsilon_\theta (x_t, t) - \epsilon \|^2 \right]\]
+
+<p>where \(x_t = \sqrt{\bar{\alpha}_t} x_0 + \sqrt{1-\bar{\alpha}_t} \epsilon\) as in the forward diffusion process.</p>
+
+<!-- ## DDIM 
+
+One of the main drawbacks of DDPM is that training process requires a large $$T$$ to reach the equilibrium state. In inference, to obtain a sample $$x_0$$, we need to run through $$T$$ reverse steps, sequentially, which is very slow.  -->
 
 <h2 id="implementation">Implementation</h2>
 
@@ -164,51 +411,14 @@
 
 
 
-    </div>
-  </article>
+      </d-article>
 
+      <d-appendix>
+        <d-footnote-list></d-footnote-list>
+        <d-citation-list></d-citation-list>
+      </d-appendix>
 
-  
-    
-    <br>
-    <hr>
-    <br>
-    <ul class="list-disc pl-8"></ul>
-
-    <!-- Adds related posts to the end of an article -->
-    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
-    <p class="mb-2">Here are some more articles you might like to read next:</p>
-  
-
-  <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/learn-learnlog/">A Learning Log</a>
-  </li>
-
-  
-
-  <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/conditional-diffusion/">On Reading - Diffusion Models Beat GANs on Image Synthesis</a>
-  </li>
-
-  
-
-  <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/erasing-concepts/">On Reading - Erasing Concepts from Diffusion Models</a>
-  </li>
-
-  
-
-  <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/fairness-101/">Fairness in Machine Learning</a>
-  </li>
-
-  
-
-  <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/fairness-irt/">On Reading - Comprehensive Algorithm Portfolio Evaluation using Item Response Theory</a>
-  </li>
-
-<div id="giscus_thread" style="max-width: 800px; margin: 0 auto;">
+      <d-bibliography src="/assets/bibliography/2023-10-17-watermark.bib"></d-bibliography><div id="giscus_thread" style="max-width: 800px; margin: 0 auto;">
   <script>
     let giscusTheme = localStorage.getItem("theme");
     let giscusAttributes = {
@@ -238,9 +448,6 @@
 </div>
 </div>
 
-      
-    </div>
-
     <!-- Footer -->    
     <footer class="fixed-bottom">
       <div class="container mt-0">
@@ -249,45 +456,9 @@
       </div>
     </footer>
 
-    <!-- JavaScripts -->
-    <!-- jQuery -->
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-
     <!-- Bootsrap & MDB scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
-
-    <!-- Masonry & imagesLoaded -->
-  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
-  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
-    
-  <!-- Medium Zoom JS -->
-  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
-  <script defer src="/assets/js/zoom.js"></script>
-
-  <!-- Bootstrap Table -->
-  <script defer src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
-
-  <!-- Load Common JS -->
-  <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
-  <script defer src="/assets/js/common.js?acdb9690d7641b2f8d40529018c71a01"></script>
-  <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
-
-    
-  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
-  <script async src="https://badge.dimensions.ai/badge.js"></script>
-
-    <!-- MathJax -->
-  <script type="text/javascript">
-    window.MathJax = {
-      tex: {
-        tags: 'ams'
-      }
-    };
-  </script>
-  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
-  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KGSMMS9MS"></script>
@@ -376,6 +547,6 @@
   }
 </script>
 
-    
-  </body>
+  
+</body>
 </html>
