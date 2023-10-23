@@ -10,7 +10,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>On Reading - Diffusion Models Beat GANs on Image Synthesis | Tuan-Anh  Bui</title>
+    <title>Diffusion Models Beat GANs on Image Synthesis | Tuan-Anh  Bui</title>
     <meta name="author" content="Tuan-Anh  Bui">
     <meta name="description" content="Try to understand classifier guidance and how to implement it">
     <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
@@ -123,7 +123,7 @@
 <div class="post">
 
   <header class="post-header">
-    <h1 class="post-title">On Reading - Diffusion Models Beat GANs on Image Synthesis</h1>
+    <h1 class="post-title">Diffusion Models Beat GANs on Image Synthesis</h1>
     <p class="post-meta">September 14, 2023</p>
     <p class="post-tags">
       <a href="/blog/2023"> <i class="fas fa-calendar fa-sm"></i> 2023 </a>
@@ -149,6 +149,7 @@
 <li class="toc-entry toc-h2">
 <a href="#how-to-implement">How to implement</a>
 <ul>
+<li class="toc-entry toc-h3"><a href="#conditional-sampling-for-ddpm-and-ddim">Conditional Sampling for DDPM and DDIM</a></li>
 <li class="toc-entry toc-h3"><a href="#how-to-train-the-diffusion-model">How to train the diffusion model</a></li>
 <li class="toc-entry toc-h3"><a href="#how-to-train-the-classifier">How to train the classifier</a></li>
 </ul>
@@ -351,8 +352,6 @@ In the paper, the authors proposed two sampling approaches:</p>
 
 <p>The Algorithm 2 (Conditional Sampling for DDIM, i.e., <code class="language-plaintext highlighter-rouge">ddim_sample_loop</code>) can be implemented as below. As described in the paper, the stochastic process can be controlled by the parameter <code class="language-plaintext highlighter-rouge">eta</code>. When <code class="language-plaintext highlighter-rouge">eta=0</code>, the sampling process is truly deterministic, while <code class="language-plaintext highlighter-rouge">eta &gt; 0</code>, the sampling process is stochastic.</p>
 
-<!-- However, one point that I am still not understand is that the DDIM is the deterministic sampling method, however, in the code, at the end, we still sample from a Gaussian distribution with the mean as calculated in Algorithm 2. The sigma is controlled by additional parameter `eta`, where `eta=0` means truly deterministic sampling. -->
-
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
 <span class="c1"># one step of the sampling process
 </span><span class="k">def</span> <span class="nf">ddim_sample</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">clip_denoised</span><span class="p">,</span> <span class="n">denoised_fn</span><span class="p">,</span> <span class="n">cond_fn</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="p">,</span> <span class="n">eta</span><span class="p">):</span>
@@ -429,6 +428,86 @@ In the paper, the authors proposed two sampling approaches:</p>
         <span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">:</span> <span class="n">pred_xstart</span><span class="p">,</span>
     <span class="p">}</span>
 </code></pre></div></div>
+
+<h3 id="conditional-sampling-for-ddpm-and-ddim">Conditional Sampling for DDPM and DDIM</h3>
+
+<p>Another important component of the above code is the <code class="language-plaintext highlighter-rouge">condition_mean()</code> and <code class="language-plaintext highlighter-rouge">condition_score()</code> which are two conditioning functions that are used to condition the diffusion model on the gradient of the classifier w.r.t. the input as described in Algorithm 1 and 2, respectively. They are the main force to shift the output from uncondition to condition.
+The two functions are defined as follows in the file <a href="https://github.com/openai/guided-diffusion/blob/main/guided_diffusion/gaussian_diffusion.p" rel="external nofollow noopener" target="_blank"><code class="language-plaintext highlighter-rouge">gaussian_diffusion.py</code></a>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">condition_mean</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">cond_fn</span><span class="p">,</span> <span class="n">p_mean_var</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">
+    Compute the mean for the previous step, given a function cond_fn that
+    computes the gradient of a conditional log probability with respect to
+    x. In particular, cond_fn computes grad(log(p(y|x))), and we want to
+    condition on y.
+
+    This uses the conditioning strategy from Sohl-Dickstein et al. (2015).
+    </span><span class="sh">"""</span>
+    <span class="n">gradient</span> <span class="o">=</span> <span class="nf">cond_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="nf">_scale_timesteps</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="o">**</span><span class="n">model_kwargs</span><span class="p">)</span>
+    <span class="n">new_mean</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">p_mean_var</span><span class="p">[</span><span class="sh">"</span><span class="s">mean</span><span class="sh">"</span><span class="p">].</span><span class="nf">float</span><span class="p">()</span> <span class="o">+</span> <span class="n">p_mean_var</span><span class="p">[</span><span class="sh">"</span><span class="s">variance</span><span class="sh">"</span><span class="p">]</span> <span class="o">*</span> <span class="n">gradient</span><span class="p">.</span><span class="nf">float</span><span class="p">()</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">new_mean</span>
+
+<span class="k">def</span> <span class="nf">condition_score</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">cond_fn</span><span class="p">,</span> <span class="n">p_mean_var</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">
+    Compute what the p_mean_variance output would have been, should the
+    model</span><span class="sh">'</span><span class="s">s score function be conditioned by cond_fn.
+
+    See condition_mean() for details on cond_fn.
+
+    Unlike condition_mean(), this instead uses the conditioning strategy
+    from Song et al (2020).
+    </span><span class="sh">"""</span>
+    <span class="n">alpha_bar</span> <span class="o">=</span> <span class="nf">_extract_into_tensor</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">alphas_cumprod</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">.</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="n">eps</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_predict_eps_from_xstart</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">p_mean_var</span><span class="p">[</span><span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">])</span>
+    <span class="n">eps</span> <span class="o">=</span> <span class="n">eps</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha_bar</span><span class="p">).</span><span class="nf">sqrt</span><span class="p">()</span> <span class="o">*</span> <span class="nf">cond_fn</span><span class="p">(</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="nf">_scale_timesteps</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="o">**</span><span class="n">model_kwargs</span>
+    <span class="p">)</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="n">p_mean_var</span><span class="p">.</span><span class="nf">copy</span><span class="p">()</span>
+    <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_predict_xstart_from_eps</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">eps</span><span class="p">)</span>
+    <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">mean</span><span class="sh">"</span><span class="p">],</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">q_posterior_mean_variance</span><span class="p">(</span>
+        <span class="n">x_start</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">],</span> <span class="n">x_t</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="n">t</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span>
+</code></pre></div></div>
+
+<p>While the <code class="language-plaintext highlighter-rouge">condition_mean</code> is quite simple \(\hat{\mu} = \mu + \Sigma g\), the <code class="language-plaintext highlighter-rouge">condition_score</code> is more complicated. It is based on the DDIM model from <a href="https://openreview.net/forum?id=St1giarCHLP" rel="external nofollow noopener" target="_blank">Song et al. (2020)</a> which I have introduced in another <a href="https://tuananhbui89.github.io/blog/2023/diffusion-tutorial/#diffusion-inversion">blog post</a>. The following code is based on a nice property of the forward process such that:</p>
+
+\[x_t = \sqrt{\bar{\alpha}_t} x_0 + \sqrt{1-\bar{\alpha}_t} \epsilon_t\]
+
+<p>where \(x_0\) is the initial image, \(\epsilon_t \sim \mathcal{N}(0, I)\) is the noise at time \(t\). This property allows us to <code class="language-plaintext highlighter-rouge">predict</code> noisy version \(x_t\) of \(x_0\) at any arbitrary time \(t\). On the other hand, given \(\epsilon_t = \epsilon_\theta(x_t, t)\) is the predicted noise at time \(t\) by the denoising network \(\epsilon_\theta\) and \(x_t\), we can <code class="language-plaintext highlighter-rouge">predict</code> \(\tilde{x_0}\) as follows:</p>
+
+\[\tilde{x}_0 = \frac{x_t - \sqrt{1-\bar{\alpha}_t} \epsilon_\theta(x_t, t)}{\sqrt{\bar{\alpha}_t}}\]
+
+<p>Therefore, we can see the following functions in the code:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">_predict_eps_from_xstart</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x_t</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">pred_xstart</span><span class="p">):</span>
+    <span class="nf">return </span><span class="p">(</span>
+        <span class="nf">_extract_into_tensor</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">sqrt_recip_alphas_cumprod</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">x_t</span><span class="p">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">*</span> <span class="n">x_t</span>
+        <span class="o">-</span> <span class="n">pred_xstart</span>
+    <span class="p">)</span> <span class="o">/</span> <span class="nf">_extract_into_tensor</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">sqrt_recipm1_alphas_cumprod</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">x_t</span><span class="p">.</span><span class="n">shape</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">_predict_eps_from_xstart</code> function is equivalent to the following equation which allows us to <code class="language-plaintext highlighter-rouge">predict</code> the noise at time \(t\) from the predicted initial image \(\tilde{x}_0\) and the image \(x_t\):</p>
+
+\[\hat{\epsilon}_t = \frac{ 1/\sqrt{\bar{\alpha}_t} x_t - \tilde{x}_0}{\sqrt{1/\bar{\alpha}_t - 1}} = \frac{x_t - \sqrt{\bar{\alpha}_t} \tilde{x}_0}{\sqrt{1 - \bar{\alpha}_t}}\]
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">_predict_xstart_from_eps</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x_t</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">eps</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">x_t</span><span class="p">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">eps</span><span class="p">.</span><span class="n">shape</span>
+    <span class="nf">return </span><span class="p">(</span>
+        <span class="nf">_extract_into_tensor</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">sqrt_recip_alphas_cumprod</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">x_t</span><span class="p">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">*</span> <span class="n">x_t</span>
+        <span class="o">-</span> <span class="nf">_extract_into_tensor</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">sqrt_recipm1_alphas_cumprod</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">x_t</span><span class="p">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">*</span> <span class="n">eps</span>
+    <span class="p">)</span>
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">_predict_xstart_from_eps</code> function is equivalent to the following equation which allows us to <code class="language-plaintext highlighter-rouge">predict</code> the initial image \(\tilde{x}_0\) from the image \(x_t\) at time \(t\) and the noise \(\epsilon_t\):</p>
+
+\[\tilde{x}_0 = \frac{x_t}{\sqrt{\bar{\alpha}_t}} - \sqrt{1/\bar{\alpha}_t - 1} \epsilon_t = \frac{x_t - \sqrt{1 - \bar{\alpha}_t} \epsilon_t}{\sqrt{\bar{\alpha}_t}}\]
+
+<p>With that, now we can understand how the <code class="language-plaintext highlighter-rouge">condition_score</code> reflect Algorithm 2.</p>
 
 <h3 id="how-to-train-the-diffusion-model">How to train the diffusion model</h3>
 
@@ -532,6 +611,8 @@ In the paper, the authors proposed two sampling approaches:</p>
 
 <p>Yang Song, Jascha Sohl-Dickstein, Diederik P. Kingma, Abhishek Kumar, Stefano Ermon, and Ben Poole. Score-based generative modeling through stochastic differential equations. ICLR 2021.</p>
 
+<p>Song, Jiaming, Chenlin Meng, and Stefano Ermon. “Denoising Diffusion Implicit Models.” ICLR. 2020.</p>
+
     </div>
   </article>
 
@@ -567,13 +648,13 @@ In the paper, the authors proposed two sampling approaches:</p>
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/erasing-concepts/">On Reading - Erasing Concepts from Diffusion Models</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/erasing-concepts/">Erasing Concepts from Diffusion Models</a>
   </li>
 
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/fairness-irt/">On Reading - Comprehensive Algorithm Portfolio Evaluation using Item Response Theory</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/fairness-irt/">Comprehensive Algorithm Portfolio Evaluation using Item Response Theory</a>
   </li>
 
 <div id="giscus_thread" style="max-width: 800px; margin: 0 auto;">
