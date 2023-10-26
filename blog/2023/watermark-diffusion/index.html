@@ -293,13 +293,35 @@ His group has published several notable papers, such as <a href="https://arxiv.o
 
 <p><strong>Adaptive Attack</strong> is a special type of attack where the attacker knows everything about the defender, i.e., the secret key, decoder, and the defense algorithm and can adaptively change the attack strategy based on the defender’s strategy. This type of attack is usually the most powerful and the most difficult to defend (and almost impossible to defend in the adversarial machine learning). In this paper, the authors evaluated their method under non-adaptive white-box attack.</p>
 
-<p><strong>Why Watermarking in Generative Models?</strong> Originally, watermarking is to protect the ownership of the authors on their digital products. However, in the context of generative models, where a product is generated from a model with users’ input, the ownership is not clear. Recently, (as far as I known) published pre-trained generative models such as Stable Diffusion give the ownership to the users who gives the input/prompt to generate the product. Therefore, in this context, the watermarking is to protect the ownership of the users on their generated products.</p>
+<p><strong>Why Watermarking in Generative Models?</strong> Originally, watermarking is to protect the ownership of the authors on their digital products. However, in the context of generative models, where a product is generated from a model with users’ input, the ownership is not clear. And when digging deeper, I found that copyright of AI art is complicated. Some important points that I got from this article <a href="https://www.yankodesign.com/2023/05/27/who-owns-ai-generated-content-understanding-ownership-copyrighting-and-how-the-law-interprets-ai-generated-art/#:~:text=As%20far%20as%20art%20goes,of%20it%20or%20copyright%20it." rel="external nofollow noopener" target="_blank">WHO OWNS AI-GENERATED CONTENT? UNDERSTANDING OWNERSHIP, COPYRIGHTING, AND HOW THE LAW INTERPRETS AI-GENERATED ART</a></p>
+
+<ul>
+  <li>According to (US) copyright law, only humans can be granted copyrights. If it’s created by AI, nobody can claim ownership of it or copyright it.</li>
+  <li>But, if a person uses AI as a tool and gives very distinct/creative inputs in the process to create something, then the person can (again, as my understanding) claim ownership of the final product. For example, as mentioned in the arcticle, <code class="language-plaintext highlighter-rouge">graphic-novel artist Kris Kashtanova was granted copyright for their AI-generated comic book “Zarya of the Dawn” for the simple reason that there was human input in creating the entire comic book and its underlying storyline. The entire comic book was “AI-assisted” and not “AI-generated”, which is why it was eligible for copyright.</code>
+</li>
+  <li>Specific to text-to-image models as Stable Diffusion, Dall-E, MidJourney, etc, the answer depends from case to case and if you care about the ownership, the first thing to do is read the <code class="language-plaintext highlighter-rouge">Terms and Conditons</code> carefully. In general, there are common points from these models:
+    <ul>
+      <li>User own all Assets the user create with the Services, <strong>to the extent possible under current law</strong>.</li>
+      <li>However, user’s input (e.g., text prompt, input images) is granted to the company to use to improve and maintain their services.</li>
+      <li>User is responsible for the content and ensuring that it does not violate any laws or intellectual property rights</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Now, given the above points, back to the question: <strong>Why Watermarking in Generative Models?</strong>, I think the main purpose of the watermarking is to protect the ownership of the users on their generated products.</p>
 
 <p>However, it is a much more interesting implication of watermarking in generative models than just authentication. If we can robustly and reliably detect a watermark in a generated image, we can know whether the image is real or fake, which is a very important problem in the field of Trustworthy Machine Learning.</p>
 
 <p><strong>What is DFT and why watermarking loves DFT?</strong></p>
 
 <p>Reference: <a href="https://vincmazet.github.io/bip/filtering/fourier.html" rel="external nofollow noopener" target="_blank">https://vincmazet.github.io/bip/filtering/fourier.html</a> and <a href="https://www.cs.unm.edu/~brayer/vision/fourier.html" rel="external nofollow noopener" target="_blank">https://www.cs.unm.edu/~brayer/vision/fourier.html</a></p>
+
+<p>As studied in the classical watermarking literature, the watermarking process is usually done in the frequency domain. Some important points about the frequency domain are (to my understanding):</p>
+
+<ul>
+  <li>Modification in the frequency domain is more robust to image transformation such as rotation, translation, scaling, etc. than modification in the spatial domain (<a href="https://www.cs.unm.edu/~brayer/vision/fourier.html" rel="external nofollow noopener" target="_blank">ref</a>)</li>
+  <li>Modification in the frequency domain is easier to make the watermark invisible to the human eye. DFT transformation converts an image to a phase and an amplitude. The amplitude represents the intensity of the different frequencies in the image while the phase represents the location of the frequencies. The human vision comprehends the shape of an object better than its intensity, therefore, the phase is more important than the amplitude. This is the reason why we can remove/add the watermark by modifying the amplitude while keeping the phase unchanged.</li>
+</ul>
 
 <!-- ### DDPM and DDIM
 
