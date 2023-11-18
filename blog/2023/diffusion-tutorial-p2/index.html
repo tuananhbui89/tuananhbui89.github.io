@@ -202,7 +202,11 @@
             <div><a href="#ddim">DDIM</a></div>
             <div><a href="#diffusion-inversion">Diffusion Inversion</a></div>
             <div><a href="#implementation">Implementation</a></div>
-            
+            <ul>
+              <li><a href="#predicting-x-0-from-x-t">Predicting $$x_0$$ from $$x_t$$</a></li>
+              <li><a href="#notebooks">Notebooks</a></li>
+              
+            </ul>
           </nav>
         </d-contents>
 
@@ -211,9 +215,7 @@
 <h2 id="resources">Resources</h2>
 
 <ul>
-  <li>The Jupyter notebook with Tensorflow2 implementation is available on <a href="https://github.com/tuananhbui89/diffusion_tf2" rel="external nofollow noopener" target="_blank">Github</a>.</li>
-  <li>The slide can be found here: <a href="https://www.dropbox.com/scl/fi/x7ucu2reluvv0v7rahw75/A-short-tutorial-on-Diffusion_v2.pdf?rlkey=yplk7jib1fx1wqg39fdibwlh3&amp;dl=0" rel="external nofollow noopener" target="_blank">(Dinh’s revision)</a>.</li>
-  <li>The lecture about Generative Models which includes VAE, GAN and Diffusion Models that I taught at VietAI is available <a href="https://docs.google.com/presentation/d/1WT0OeAuTrRpCWq0agIbfaSh5VCuscUND85i3WT-ggZs/edit?usp=sharing" rel="external nofollow noopener" target="_blank">here</a>.</li>
+  <li>The Jupyter notebooks associated with this tutorial can be found <a href="https://github.com/tuananhbui89/diffusion_demo" rel="external nofollow noopener" target="_blank">here</a>.</li>
   <li>The first part of this tutorial can be found <a href="https://tuananhbui89.github.io/blog/2023/diffusion-tutorial/">here</a>.</li>
 </ul>
 
@@ -272,9 +274,7 @@
 
 <h2 id="implementation">Implementation</h2>
 
-<h3 id="ddim-1">DDIM</h3>
-
-<h3 id="predicting-x_0-from-x_t">Predicting \(x_0\) from \(x_t\)</h3>
+<h3 id="jumping-prediction">Jumping Prediction</h3>
 
 <p><strong>Standard Diffusion Model</strong> In the first part, I use the<a href="https://github.com/openai/guided-diffusion" rel="external nofollow noopener" target="_blank"> Guided-Diffusion</a> by OpenAI as the codebase to demonstrate this technique (i.e., predicting \(x_0\) from \(x_t\)). The codebase is for the <a href="http://arxiv.org/abs/2105.05233" rel="external nofollow noopener" target="_blank">Diffusion Models Beat GANS on Image Synthesis</a> paper. I have blogged about this paper and some important components of the codebase <a href="https://tuananhbui89.github.io/blog/2023/conditional-diffusion/">here</a>.</p>
 
@@ -321,7 +321,9 @@
         <span class="k">return</span> <span class="n">eps</span><span class="p">,</span> <span class="n">x_0</span>
 </code></pre></div></div>
 
-<p><strong>Latent Diffusion Model</strong> In this part, I will use the codebase from the paper <a href="https://erasing.baulab.info/" rel="external nofollow noopener" target="_blank">Erasing Concepts from Diffusion Models</a> which is based on the <a href="https://github.com/CompVis/stable-diffusion" rel="external nofollow noopener" target="_blank">Stable Diffusion Model</a> by <a href="https://github.com/CompVis" rel="external nofollow noopener" target="_blank">CompVis lab</a> as the codebase to demonstrate this technique. Unlike the previous codebase, the latent diffusion model has three main components: encoder \(\mathcal{E}\) and decoder \(\mathcal{D}\), U-Net \(\epsilon_\theta\), and the conditioning mechanism \(\tau\), in which the diffusion process is on the latent space instead of the image space.</p>
+<p><strong>Latent Diffusion Model</strong> 
+<!-- In this part, I will use the codebase from the paper [Erasing Concepts from Diffusion Models](https://erasing.baulab.info/) which is based on the [Stable Diffusion Model](https://github.com/CompVis/stable-diffusion) by [CompVis lab](https://github.com/CompVis) as the codebase to demonstrate this technique.  -->
+Unlike the previous codebase, the latent diffusion model has three main components: encoder \(\mathcal{E}\) and decoder \(\mathcal{D}\), U-Net \(\epsilon_\theta\), and the conditioning mechanism \(\tau\), in which the diffusion process is on the latent space instead of the image space.</p>
 
 <div class="row mt-3">
     <div class="col-sm mt-3 mt-md-0">
@@ -363,76 +365,43 @@
 
 \[\tilde{x}_0 = \mathcal{D}(\tilde{z}_0)\]
 
-<p>Detailed implementation as follows:</p>
+<!-- Detailed implementation as follows:
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">quick_sample_till_t</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">c</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">start_code</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nf">sample_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">sampler</span><span class="p">,</span>
-                                                                 <span class="n">c</span><span class="p">,</span> <span class="n">image_size</span><span class="p">,</span> <span class="n">image_size</span><span class="p">,</span> <span class="n">ddim_steps</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">ddim_eta</span><span class="p">,</span>
-                                                                 <span class="n">start_code</span><span class="o">=</span><span class="n">start_code</span><span class="p">,</span> <span class="n">till_T</span><span class="o">=</span><span class="n">t</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+```python
+quick_sample_till_t = lambda c, s, start_code, t: sample_model(model, sampler,
+                                                                 c, image_size, image_size, ddim_steps, s, ddim_eta,
+                                                                 start_code=start_code, till_T=t, verbose=False)
 
-<span class="c1"># Step 1: get z_t
-</span><span class="n">z_t</span> <span class="o">=</span> <span class="nf">quick_sample_till_t</span><span class="p">(</span><span class="n">emb_c</span><span class="p">,</span> <span class="n">start_guidance</span><span class="p">,</span> <span class="n">start_code</span><span class="p">,</span> <span class="n">t_enc</span><span class="p">)</span>
+# Step 1: get z_t
+z_t = quick_sample_till_t(emb_c, start_guidance, start_code, t_enc)
 
-<span class="c1"># Step 2a: predict epsilon_t
-</span><span class="n">e_t</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">apply_model</span><span class="p">(</span><span class="n">z_t</span><span class="p">,</span> <span class="n">t_enc_ddpm</span><span class="p">,</span> <span class="n">emb_c</span><span class="p">)</span>
+# Step 2a: predict epsilon_t
+e_t = model.apply_model(z_t, t_enc_ddpm, emb_c)
 
-<span class="c1"># Step 2b: predict z_0
-</span><span class="n">z_0_tilde</span> <span class="o">=</span> <span class="p">(</span><span class="n">z_t</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha_bar</span><span class="p">).</span><span class="nf">sqrt</span><span class="p">()</span> <span class="o">*</span> <span class="n">e_t</span><span class="p">)</span> <span class="o">/</span> <span class="n">alpha_bar</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">()</span>
+# Step 2b: predict z_0
+z_0_tilde = (z_t - (1 - alpha_bar).sqrt() * e_t) / alpha_bar.sqrt()
 
-<span class="c1"># Step 3: predict x_0
-</span></code></pre></div></div>
+# Step 3: predict x_0
+``` -->
 
 <p>It is a worth noting that, in the inference process of the LDM (with <code class="language-plaintext highlighter-rouge">diffusers</code>) (which can be found in the <a href="https://github.com/rohitgandikota/erasing/blob/a2189e9ae677aca22a00c361bde25d3d320d8a61/eval-scripts/generate-images.py#L132" rel="external nofollow noopener" target="_blank"><code class="language-plaintext highlighter-rouge">generate-images.py</code></a>) in each inference step, the U-Net outputs the unconditional noise \(\epsilon_u\) and the conditional noise \(\epsilon_c\). And the final noise \(\epsilon = \epsilon_u + \text{guidance_scale} (\epsilon_c - \epsilon_u)\) is used to sample the next latent code \(z_{t+1}\).</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># random a timestep to stop at, so that we can predict the image at that timestep
-# note 1: the scheduler.timesteps is in reverse order, i.e., [999, 998, ..., 1, 0] if num_inference_steps=1000 
-# note 2: if num_inference_steps = 100, then the scheduler.timesteps is [999, 989, 979, ..., 19, 9, 0]
-</span>
-<span class="n">stop_timestep</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_inference_steps</span><span class="p">)</span>
-<span class="n">count_timestep</span> <span class="o">=</span> <span class="n">num_inference_steps</span>
+<h3 id="notebooks">Notebooks</h3>
 
-<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nf">tqdm</span><span class="p">(</span><span class="n">scheduler</span><span class="p">.</span><span class="n">timesteps</span><span class="p">):</span>
-    <span class="n">count_timestep</span> <span class="o">-=</span> <span class="mi">1</span>
-    <span class="c1"># expand the latents if we are doing classifier-free guidance to avoid doing two forward passes.
-</span>    <span class="n">latent_model_input</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">cat</span><span class="p">([</span><span class="n">latents</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+<p>Here is the embedded Jupyter notebook. The result is really interesting. In this example, I use a prompt <code class="language-plaintext highlighter-rouge">Image of cassette player</code> to generate images with Stable Diffusion version 1.4 with DDIM and 100 steps. Each row shows the <code class="language-plaintext highlighter-rouge">Predicted image</code> \(\tilde{x}_0 = \mathcal{D}(\tilde{z}_0)\), <code class="language-plaintext highlighter-rouge">Generated image using the current latent code</code> \(\tilde{x}_t = \mathcal{D}(\tilde{z}_t)\), and <code class="language-plaintext highlighter-rouge">Scaled Difference</code> between two images \(\delta = \frac{\tilde{x}_0 - \tilde{x}_t}{\max (\tilde{x}_0 - \tilde{x}_t)}\), respectively.</p>
 
-    <span class="n">latent_model_input</span> <span class="o">=</span> <span class="n">scheduler</span><span class="p">.</span><span class="nf">scale_model_input</span><span class="p">(</span><span class="n">latent_model_input</span><span class="p">,</span> <span class="n">timestep</span><span class="o">=</span><span class="n">t</span><span class="p">)</span>
+<p>We can see that, at early steps (i.e., \(t &gt; 80\)) the two images look very noisy and do not show any sign of desired object in the prompt. However, if looking to the difference image (i.e., <code class="language-plaintext highlighter-rouge">delta</code>), we can still see some patterns of the object. It shows that the prediction technique works even at very early steps of the diffusion process. And, through the diffusion process, the difference becomes smaller and smaller and the two images nearly identical at the end of the process.</p>
 
-    <span class="c1"># predict the noise residual
-</span>    <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
-        <span class="n">noise_pred</span> <span class="o">=</span> <span class="nf">unet</span><span class="p">(</span><span class="n">latent_model_input</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">encoder_hidden_states</span><span class="o">=</span><span class="n">text_embeddings</span><span class="p">).</span><span class="n">sample</span>
 
-    <span class="c1"># perform guidance
-</span>    <span class="n">noise_pred_uncond</span><span class="p">,</span> <span class="n">noise_pred_text</span> <span class="o">=</span> <span class="n">noise_pred</span><span class="p">.</span><span class="nf">chunk</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-    <span class="n">noise_pred</span> <span class="o">=</span> <span class="n">noise_pred_uncond</span> <span class="o">+</span> <span class="n">guidance_scale</span> <span class="o">*</span> <span class="p">(</span><span class="n">noise_pred_text</span> <span class="o">-</span> <span class="n">noise_pred_uncond</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">count_timestep</span> <span class="o">&gt;</span> <span class="n">stop_timestep</span><span class="p">:</span>
-        <span class="c1"># compute the previous noisy sample x_t -&gt; x_t-1
-</span>        <span class="n">latents</span> <span class="o">=</span> <span class="n">scheduler</span><span class="p">.</span><span class="nf">step</span><span class="p">(</span><span class="n">noise_pred</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">latents</span><span class="p">).</span><span class="n">prev_sample</span>
-    <span class="k">elif</span> <span class="n">count_timestep</span> <span class="o">==</span> <span class="n">stop_timestep</span><span class="p">:</span>
-        <span class="c1"># Predict the latent code $$z_0$$ from $$z_t$$
-</span>        <span class="c1"># $$\tilde{z}_0 = \frac{z_t - \sqrt{1-\bar{\alpha}_t} \epsilon_\theta(z_t, t, \tau(c))}{\sqrt{\bar{\alpha}_t}}$$
-</span>        <span class="n">alpha_bar_t</span> <span class="o">=</span> <span class="n">scheduler</span><span class="p">.</span><span class="n">alphas_cumprod</span><span class="p">[</span><span class="n">stop_timestep</span><span class="p">]</span>
 
-        <span class="n">latents</span> <span class="o">=</span> <span class="n">latents</span> <span class="o">-</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha_bar_t</span><span class="p">)</span> <span class="o">*</span> <span class="n">noise_pred</span><span class="o">/</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="n">alpha_bar_t</span><span class="p">)</span>
+    <div class="jupyter-notebook" style="position: relative; width: 100%; margin: 0 auto;">
+  <div class="jupyter-notebook-iframe-container">
+    <iframe src="/assets/jupyter/demo_ddim_jump.ipynb.html" style="position: absolute; top: 0; left: 0; border-style: none;" width="100%" height="100%" onload="this.parentElement.style.paddingBottom = (this.contentWindow.document.documentElement.scrollHeight + 10) + 'px'"></iframe>
+  </div>
+</div>
 
-        <span class="c1"># break out of the loop
-</span>        <span class="k">break</span>                
-    <span class="k">else</span><span class="p">:</span>
-        <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Something went wrong, the stop timestep is smaller than the current timestep</span><span class="sh">"</span><span class="p">,</span> <span class="n">count_timestep</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">stop_timestep</span><span class="p">,</span> <span class="n">num_inference_steps</span><span class="p">)</span>
-        <span class="nf">exit</span><span class="p">()</span>
 
-<span class="c1"># scale and decode the image latents with vae
-</span><span class="n">latents</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="mf">0.18215</span> <span class="o">*</span> <span class="n">latents</span>
-<span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
-    <span class="n">image</span> <span class="o">=</span> <span class="n">vae</span><span class="p">.</span><span class="nf">decode</span><span class="p">(</span><span class="n">latents</span><span class="p">).</span><span class="n">sample</span>
-
-<span class="n">image</span> <span class="o">=</span> <span class="p">(</span><span class="n">image</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">).</span><span class="nf">clamp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-<span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="p">.</span><span class="nf">detach</span><span class="p">().</span><span class="nf">cpu</span><span class="p">().</span><span class="nf">permute</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">).</span><span class="nf">numpy</span><span class="p">()</span>
-<span class="n">images</span> <span class="o">=</span> <span class="p">(</span><span class="n">image</span> <span class="o">*</span> <span class="mi">255</span><span class="p">).</span><span class="nf">round</span><span class="p">().</span><span class="nf">astype</span><span class="p">(</span><span class="sh">"</span><span class="s">uint8</span><span class="sh">"</span><span class="p">)</span>
-<span class="n">pil_images</span> <span class="o">=</span> <span class="p">[</span><span class="n">Image</span><span class="p">.</span><span class="nf">fromarray</span><span class="p">(</span><span class="n">image</span><span class="p">)</span> <span class="k">for</span> <span class="n">image</span> <span class="ow">in</span> <span class="n">images</span><span class="p">]</span>
-<span class="k">for</span> <span class="n">num</span><span class="p">,</span> <span class="n">im</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="n">pil_images</span><span class="p">):</span>
-    <span class="n">im</span><span class="p">.</span><span class="nf">save</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">folder_path</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="n">prompts_name</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="n">case_number</span><span class="si">}</span><span class="s">_</span><span class="si">{</span><span class="n">num</span><span class="si">}</span><span class="s">_</span><span class="si">{</span><span class="n">stop_timestep</span><span class="si">}</span><span class="s">.png</span><span class="sh">"</span><span class="p">)</span>
-</code></pre></div></div>
 
       </d-article>
 
