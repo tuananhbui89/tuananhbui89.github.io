@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2023-11-18T12:00:56+11:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
-</subtitle><entry><title type="html">Collection of Tutorials and Showcases</title><link href="https://tuananhbui89.github.io/blog/2023/showcases/" rel="alternate" type="text/html" title="Collection of Tutorials and Showcases" /><published>2023-11-01T00:00:00+11:00</published><updated>2023-11-01T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2023/showcases</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2023/showcases/"><![CDATA[<h2 id="tutorials-on-diffusion-models">Tutorials on Diffusion Models</h2>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2023-11-23T11:22:14+11:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
+</subtitle><entry><title type="html">Diffusion Models and Adversarial Machine Learning</title><link href="https://tuananhbui89.github.io/blog/2023/showcases/" rel="alternate" type="text/html" title="Diffusion Models and Adversarial Machine Learning" /><published>2023-11-01T00:00:00+11:00</published><updated>2023-11-01T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2023/showcases</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2023/showcases/"><![CDATA[<h2 id="tutorials-on-diffusion-models">Tutorials on Diffusion Models</h2>
 
 <ul>
   <li><a href="https://tuananhbui89.github.io/blog/2023/diffusion-tutorial/">Part 1: Denoising Diffusion Probabilistic Models (DDPM)</a></li>
@@ -541,6 +541,8 @@ $$x_t = \sqrt{\alpha_t \alpha_{t-1}} x_{t-2} + \sqrt{1 - \alpha_t \alpha_{t-1}} 
 
 <p>So after all, the only term that we need to care about is the \(L_{1:T-1}\). However, simplifying the \(L_{1:T-1}\) is not easy (please refer the <a href="https://lilianweng.github.io/posts/2021-07-11-diffusion-models/">Lil’s tutorial</a> for more details). High-level speaking, the authors showed that \(q(x_{t-1} \mid x_t, x_0)\) can be refactored as a Gaussian distribution \(\mathcal{N} (x_{t-1}; \tilde{\mu} (x_t, x_0), \tilde{\beta}_t I)\) with \(\tilde{\mu} (x_t, x_0) = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \epsilon_t \right)\) and \(\tilde{\beta}_t = \frac{1 - \bar{\alpha}_{t-1}}{1 - \bar{\alpha}_t}\).</p>
 
+<p><span style="color:blue">It is a nice property that \(\tilde{\mu} (x_t, x_0)\) does not depend on \(x_0\), therefore, we can generate new images without knowing the original image \(x_0\) (obvious but important)</span>.</p>
+
 <p>Because \(p_\theta (x_{t-1} \mid x_t)\) is also a Gaussian distribution \(\mathcal{N} (x_{t-1}; \mu_\theta(x_t, t), \beta_\theta(x_t, t) I)\). Therefore, by simplifying that the two Gaussian distribution have the same variance, the KL-divergence between \(q(x_{t-1} \mid x_t, x_0)\) and \(p_\theta (x_{t-1} \mid x_t)\) can be simplified as matching the two means \(\tilde{\mu} (x_t, x_0)\) and \(\mu_\theta(x_t, t)\) as follows:</p>
 
 \[L_{1:T-1} = \mathbb{E}_q \left[ \sum_{t \geq 1} \frac{1}{2 \sigma_t^2} \| \tilde{\mu} (x_t, x_0) - \mu_\theta(x_t, t) \|^2 \right]\]
@@ -556,6 +558,45 @@ $$x_t = \sqrt{\alpha_t \alpha_{t-1}} x_{t-2} + \sqrt{1 - \alpha_t \alpha_{t-1}} 
 \[L_{1:T-1} = \mathbb{E}_{x_0 \sim q(x_0), t \sim U \{1, T\}, \epsilon \sim \mathcal{N}(0, I)} \left[ \| \epsilon_\theta (x_t, t) - \epsilon \|^2 \right]\]
 
 <p>where \(x_t = \sqrt{\bar{\alpha}_t} x_0 + \sqrt{1-\bar{\alpha}_t} \epsilon\) as in the forward diffusion process.</p>
+
+<h3 id="generating-new-images">Generating New Images</h3>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion/algorithm_sampling-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion/algorithm_sampling-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion/algorithm_sampling-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/diffusion/algorithm_sampling.png" class="img-fluid rounded z-depth-1" width="100" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Sampling algorithm (image source <d-cite key="ho2020denoising"></d-cite>)
+</div>
+
+<p>It is worth to remind that \(x_{t-1}\) is sampled from \(\mathcal{N} (x_{t-1}; \tilde{\mu} (x_t, x_0), \tilde{\beta}_t I)\) with \(\tilde{\mu} (x_t, x_0) = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \epsilon_t \right)\) and \(\tilde{\beta}_t = \frac{1 - \bar{\alpha}_{t-1}}{1 - \bar{\alpha}_t}\). By using the reparameterization trick again, we can sample \(x_{t-1}\) as follows:</p>
+
+\[x_{t-1} = \tilde{\mu} (x_t, x_0) + \sqrt{\tilde{\beta}_t} z\]
+
+<p>where \(z \sim \mathcal{N}(0, I)\). From now, we will call \(\sigma_t = \sqrt{\tilde{\beta}_t} = \sqrt{\frac{1 - \bar{\alpha}_{t-1}}{1 - \bar{\alpha}_t}}\)</p>
+
+<p>After training and obtaining the denoising network \(\epsilon_\theta (x_t, t)\), we can approximate \(\tilde{\mu} (x_t, x_0) \approx \mu_\theta(x_t, t) =  \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \epsilon_\theta (x_t, t) \right)\).</p>
+
+<p>So, the final equation to sample \(x_{t-1}\) for us :joy: is:</p>
+
+\[x_{t-1} = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \epsilon_\theta (x_t, t) \right) + \sigma_t z\]
+
+<p>where \(z \sim \mathcal{N}(0, I)\).</p>
 
 <h2 id="implementation">Implementation</h2>
 
@@ -582,11 +623,115 @@ $$x_t = \sqrt{\alpha_t \alpha_{t-1}} x_{t-2} + \sqrt{1 - \alpha_t \alpha_{t-1}} 
 <ul>
   <li>The Jupyter notebooks associated with this tutorial can be found <a href="https://github.com/tuananhbui89/diffusion_demo">here</a>.</li>
   <li>The first part of this tutorial can be found <a href="https://tuananhbui89.github.io/blog/2023/diffusion-tutorial/">here</a>.</li>
+  <li>FastAI tutorial about DDIM can be found <a href="https://course.fast.ai/Lessons/lesson21.html">here</a>.</li>
 </ul>
 
 <h2 id="ddim">DDIM</h2>
 
-<p>One of the main drawbacks of DDPM is that training process requires a large \(T\) to reach the equilibrium state. In inference, to obtain a sample \(x_0\), we need to run through \(T\) reverse steps, sequentially, which is very slow. To address this issue, Song et al. <d-cite key="song2020denoising"></d-cite> proposed a new diffusion model called DDIM (Denoising Diffusion Implicit Model) which allows us to accelerate the inference process while using the same training process as DDPM (it means that you can use the pre-trained DDPM model to inference).</p>
+<p>One of the main drawbacks of DDPM is that training process requires a large \(T\) to reach the equilibrium state. In inference, to obtain a sample \(x_0\), we need to run through \(T\) reverse steps, sequentially, which is very slow. To address this issue, Song et al. <d-cite key="song2020denoising"></d-cite> proposed a new diffusion model called DDIM (Denoising Diffusion Implicit Model) which allows us to accelerate the inference process while using the same training process as DDPM (it means that you can use the pre-trained DDPM model to inference with DDIM method).</p>
+
+<h3 id="change-of-notation">Change of Notation</h3>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion/notation-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion/notation-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion/notation-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/diffusion/notation.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Meme stealing from <a href="https://www.tanishq.ai/">Tanishq</a> at <a href="https://course.fast.ai/Lessons/lesson21.html">https://course.fast.ai/Lessons/lesson21.html</a>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th>DDPM</th>
+      <th>DDIM</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>atomic</strong> params :joy:</td>
+      <td>\(0 &lt; \alpha_t &lt; 1, \beta_t = 1 - \alpha_t\)</td>
+      <td>\(0 &lt; \bar{\alpha}_t &lt; 1, \beta_t = 1 - \bar{\alpha}_t\)</td>
+    </tr>
+    <tr>
+      <td><strong>cummulative</strong> params</td>
+      <td>\(\bar{\alpha}_t = \prod_{i=1}^{t} \alpha_i\)</td>
+      <td>\(\alpha_t = \prod_{i=1}^{t} \bar{\alpha}_i\)</td>
+    </tr>
+    <tr>
+      <td>\(q(x_t \mid x_{t-1})\)</td>
+      <td>\(\mathcal{N} (x_t, \sqrt{\alpha_t} x_t, (1 - \alpha_t) I)\)</td>
+      <td>\(\mathcal{N} (x_t, \sqrt{\bar{\alpha}_t} x_t, (1 - \bar{\alpha}_t) I)\)</td>
+    </tr>
+    <tr>
+      <td>\(q(x_t \mid x_0)\)</td>
+      <td>\(\mathcal{N} (x_t, \sqrt{\bar{\alpha}_t} x_0, (1 - \bar{\alpha}_t) I)\)</td>
+      <td>\(\mathcal{N} (x_t, \sqrt{\alpha_t} x_0, (1 - \alpha_t) I)\)</td>
+    </tr>
+    <tr>
+      <td>(forward) sampling \(x_t\)</td>
+      <td>\(x_t = \sqrt{\bar{\alpha}_t} x_0 + \sqrt{1-\bar{\alpha}_t} \epsilon\)</td>
+      <td>\(x_t = \sqrt{\alpha_t} x_0 + \sqrt{1-\alpha_t} \epsilon\)</td>
+    </tr>
+    <tr>
+      <td>(reverse) sampling \(x_{t-1}\)</td>
+      <td>\(\frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \epsilon_\theta (x_t, t) \right) + \sigma_t z\)</td>
+      <td>\(\frac{1}{\sqrt{\bar{\alpha}_t}} \left( x_t - \frac{1 - \bar{\alpha}_t}{\sqrt{1 - \alpha_t}} \epsilon_\theta (x_t, t) \right) + \sigma_t z\)</td>
+    </tr>
+    <tr>
+      <td>\(\sigma_t\)</td>
+      <td>\(\frac{1 - \bar{\alpha}_{t-1}}{1 - \bar{\alpha}_t}\)</td>
+      <td>\(\frac{1 - \alpha_{t-1}}{1 - \alpha_t}\)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>With this in mind, let us go through the notation in the <code class="language-plaintext highlighter-rouge">LDM</code> implementation which can be found here: <a href="https://github.com/Stability-AI/stablediffusion/blob/main/ldm/models/diffusion/ddpm.py#L155">https://github.com/Stability-AI/stablediffusion/blob/main/ldm/models/diffusion/ddpm.py#L155</a></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">to_torch</span> <span class="o">=</span> <span class="nf">partial</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="p">.</span><span class="n">float32</span><span class="p">)</span>
+
+    <span class="n">self</span><span class="p">.</span><span class="nf">register_buffer</span><span class="p">(</span><span class="sh">'</span><span class="s">betas</span><span class="sh">'</span><span class="p">,</span> <span class="nf">to_torch</span><span class="p">(</span><span class="n">betas</span><span class="p">))</span>
+    <span class="n">self</span><span class="p">.</span><span class="nf">register_buffer</span><span class="p">(</span><span class="sh">'</span><span class="s">alphas_cumprod</span><span class="sh">'</span><span class="p">,</span> <span class="nf">to_torch</span><span class="p">(</span><span class="n">alphas_cumprod</span><span class="p">))</span>
+    <span class="n">self</span><span class="p">.</span><span class="nf">register_buffer</span><span class="p">(</span><span class="sh">'</span><span class="s">alphas_cumprod_prev</span><span class="sh">'</span><span class="p">,</span> <span class="nf">to_torch</span><span class="p">(</span><span class="n">alphas_cumprod_prev</span><span class="p">))</span>
+
+    <span class="c1"># calculations for diffusion q(x_t | x_{t-1}) and others
+</span>    <span class="n">self</span><span class="p">.</span><span class="nf">register_buffer</span><span class="p">(</span><span class="sh">'</span><span class="s">sqrt_alphas_cumprod</span><span class="sh">'</span><span class="p">,</span> <span class="nf">to_torch</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="n">alphas_cumprod</span><span class="p">)))</span>
+    <span class="n">self</span><span class="p">.</span><span class="nf">register_buffer</span><span class="p">(</span><span class="sh">'</span><span class="s">sqrt_one_minus_alphas_cumprod</span><span class="sh">'</span><span class="p">,</span> <span class="nf">to_torch</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">alphas_cumprod</span><span class="p">)))</span>
+    <span class="n">self</span><span class="p">.</span><span class="nf">register_buffer</span><span class="p">(</span><span class="sh">'</span><span class="s">log_one_minus_alphas_cumprod</span><span class="sh">'</span><span class="p">,</span> <span class="nf">to_torch</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">alphas_cumprod</span><span class="p">)))</span>
+    <span class="n">self</span><span class="p">.</span><span class="nf">register_buffer</span><span class="p">(</span><span class="sh">'</span><span class="s">sqrt_recip_alphas_cumprod</span><span class="sh">'</span><span class="p">,</span> <span class="nf">to_torch</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="mf">1.</span> <span class="o">/</span> <span class="n">alphas_cumprod</span><span class="p">)))</span>
+    <span class="n">self</span><span class="p">.</span><span class="nf">register_buffer</span><span class="p">(</span><span class="sh">'</span><span class="s">sqrt_recipm1_alphas_cumprod</span><span class="sh">'</span><span class="p">,</span> <span class="nf">to_torch</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="mf">1.</span> <span class="o">/</span> <span class="n">alphas_cumprod</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
+</code></pre></div></div>
+
+<p>Fortunately, in the implementation of <code class="language-plaintext highlighter-rouge">DDIM</code>, the authors keep the same notation of the <code class="language-plaintext highlighter-rouge">DDPM</code> implementation and introduce some new variables just for the <code class="language-plaintext highlighter-rouge">DDIM</code> model.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="c1"># ddim sampling parameters
+</span>    <span class="n">ddim_sigmas</span><span class="p">,</span> <span class="n">ddim_alphas</span><span class="p">,</span> <span class="n">ddim_alphas_prev</span> <span class="o">=</span> <span class="nf">make_ddim_sampling_parameters</span><span class="p">(</span><span class="n">alphacums</span><span class="o">=</span><span class="n">alphas_cumprod</span><span class="p">.</span><span class="nf">cpu</span><span class="p">(),</span>
+                                                                                <span class="n">ddim_timesteps</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">ddim_timesteps</span><span class="p">,</span>
+                                                                                <span class="n">eta</span><span class="o">=</span><span class="n">ddim_eta</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+    <span class="n">self</span><span class="p">.</span><span class="nf">register_buffer</span><span class="p">(</span><span class="sh">'</span><span class="s">ddim_sigmas</span><span class="sh">'</span><span class="p">,</span> <span class="n">ddim_sigmas</span><span class="p">)</span>
+    <span class="n">self</span><span class="p">.</span><span class="nf">register_buffer</span><span class="p">(</span><span class="sh">'</span><span class="s">ddim_alphas</span><span class="sh">'</span><span class="p">,</span> <span class="n">ddim_alphas</span><span class="p">)</span>
+    <span class="n">self</span><span class="p">.</span><span class="nf">register_buffer</span><span class="p">(</span><span class="sh">'</span><span class="s">ddim_alphas_prev</span><span class="sh">'</span><span class="p">,</span> <span class="n">ddim_alphas_prev</span><span class="p">)</span>
+    <span class="n">self</span><span class="p">.</span><span class="nf">register_buffer</span><span class="p">(</span><span class="sh">'</span><span class="s">ddim_sqrt_one_minus_alphas</span><span class="sh">'</span><span class="p">,</span> <span class="n">np</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">ddim_alphas</span><span class="p">))</span>
+    <span class="n">sigmas_for_original_sampling_steps</span> <span class="o">=</span> <span class="n">ddim_eta</span> <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span>
+        <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">self</span><span class="p">.</span><span class="n">alphas_cumprod_prev</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">self</span><span class="p">.</span><span class="n">alphas_cumprod</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
+                    <span class="mi">1</span> <span class="o">-</span> <span class="n">self</span><span class="p">.</span><span class="n">alphas_cumprod</span> <span class="o">/</span> <span class="n">self</span><span class="p">.</span><span class="n">alphas_cumprod_prev</span><span class="p">))</span>
+</code></pre></div></div>
 
 <p>(To be continued)</p>
 

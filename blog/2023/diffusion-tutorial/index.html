@@ -204,6 +204,7 @@
               <li><a href="#forward-diffusion-process">Forward Diffusion Process</a></li>
               <li><a href="#backward-diffusion-process">Backward Diffusion Process</a></li>
               <li><a href="#magic-simplification">Magic Simplification</a></li>
+              <li><a href="#training-and-generating-new-images">Training and Generating New Images</a></li>
               
             </ul>
 <div><a href="#implementation">Implementation</a></div>
@@ -376,6 +377,8 @@ $$x_t = \sqrt{\alpha_t \alpha_{t-1}} x_{t-2} + \sqrt{1 - \alpha_t \alpha_{t-1}} 
 
 <p>So after all, the only term that we need to care about is the \(L_{1:T-1}\). However, simplifying the \(L_{1:T-1}\) is not easy (please refer the <a href="https://lilianweng.github.io/posts/2021-07-11-diffusion-models/" rel="external nofollow noopener" target="_blank">Lil’s tutorial</a> for more details). High-level speaking, the authors showed that \(q(x_{t-1} \mid x_t, x_0)\) can be refactored as a Gaussian distribution \(\mathcal{N} (x_{t-1}; \tilde{\mu} (x_t, x_0), \tilde{\beta}_t I)\) with \(\tilde{\mu} (x_t, x_0) = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \epsilon_t \right)\) and \(\tilde{\beta}_t = \frac{1 - \bar{\alpha}_{t-1}}{1 - \bar{\alpha}_t}\).</p>
 
+<p><span style="color:blue">It is a nice property that \(\tilde{\mu} (x_t, x_0)\) does not depend on \(x_0\), therefore, we can generate new images without knowing the original image \(x_0\) (obvious but important)</span>.</p>
+
 <p>Because \(p_\theta (x_{t-1} \mid x_t)\) is also a Gaussian distribution \(\mathcal{N} (x_{t-1}; \mu_\theta(x_t, t), \beta_\theta(x_t, t) I)\). Therefore, by simplifying that the two Gaussian distribution have the same variance, the KL-divergence between \(q(x_{t-1} \mid x_t, x_0)\) and \(p_\theta (x_{t-1} \mid x_t)\) can be simplified as matching the two means \(\tilde{\mu} (x_t, x_0)\) and \(\mu_\theta(x_t, t)\) as follows:</p>
 
 \[L_{1:T-1} = \mathbb{E}_q \left[ \sum_{t \geq 1} \frac{1}{2 \sigma_t^2} \| \tilde{\mu} (x_t, x_0) - \mu_\theta(x_t, t) \|^2 \right]\]
@@ -391,6 +394,45 @@ $$x_t = \sqrt{\alpha_t \alpha_{t-1}} x_{t-2} + \sqrt{1 - \alpha_t \alpha_{t-1}} 
 \[L_{1:T-1} = \mathbb{E}_{x_0 \sim q(x_0), t \sim U \{1, T\}, \epsilon \sim \mathcal{N}(0, I)} \left[ \| \epsilon_\theta (x_t, t) - \epsilon \|^2 \right]\]
 
 <p>where \(x_t = \sqrt{\bar{\alpha}_t} x_0 + \sqrt{1-\bar{\alpha}_t} \epsilon\) as in the forward diffusion process.</p>
+
+<h3 id="generating-new-images">Generating New Images</h3>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion/algorithm_sampling-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion/algorithm_sampling-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion/algorithm_sampling-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/diffusion/algorithm_sampling.png" class="img-fluid rounded z-depth-1" width="100" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Sampling algorithm (image source <d-cite key="ho2020denoising"></d-cite>)
+</div>
+
+<p>It is worth to remind that \(x_{t-1}\) is sampled from \(\mathcal{N} (x_{t-1}; \tilde{\mu} (x_t, x_0), \tilde{\beta}_t I)\) with \(\tilde{\mu} (x_t, x_0) = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \epsilon_t \right)\) and \(\tilde{\beta}_t = \frac{1 - \bar{\alpha}_{t-1}}{1 - \bar{\alpha}_t}\). By using the reparameterization trick again, we can sample \(x_{t-1}\) as follows:</p>
+
+\[x_{t-1} = \tilde{\mu} (x_t, x_0) + \sqrt{\tilde{\beta}_t} z\]
+
+<p>where \(z \sim \mathcal{N}(0, I)\). From now, we will call \(\sigma_t = \sqrt{\tilde{\beta}_t} = \sqrt{\frac{1 - \bar{\alpha}_{t-1}}{1 - \bar{\alpha}_t}}\)</p>
+
+<p>After training and obtaining the denoising network \(\epsilon_\theta (x_t, t)\), we can approximate \(\tilde{\mu} (x_t, x_0) \approx \mu_\theta(x_t, t) =  \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \epsilon_\theta (x_t, t) \right)\).</p>
+
+<p>So, the final equation to sample \(x_{t-1}\) for us <img class="emoji" title=":joy:" alt=":joy:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f602.png" height="20" width="20"> is:</p>
+
+\[x_{t-1} = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \epsilon_\theta (x_t, t) \right) + \sigma_t z\]
+
+<p>where \(z \sim \mathcal{N}(0, I)\).</p>
 
 <h2 id="implementation">Implementation</h2>
 

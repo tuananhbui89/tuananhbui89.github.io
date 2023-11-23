@@ -217,11 +217,118 @@
 <ul>
   <li>The Jupyter notebooks associated with this tutorial can be found <a href="https://github.com/tuananhbui89/diffusion_demo" rel="external nofollow noopener" target="_blank">here</a>.</li>
   <li>The first part of this tutorial can be found <a href="https://tuananhbui89.github.io/blog/2023/diffusion-tutorial/">here</a>.</li>
+  <li>FastAI tutorial about DDIM can be found <a href="https://course.fast.ai/Lessons/lesson21.html" rel="external nofollow noopener" target="_blank">here</a>.</li>
 </ul>
 
 <h2 id="ddim">DDIM</h2>
 
-<p>One of the main drawbacks of DDPM is that training process requires a large \(T\) to reach the equilibrium state. In inference, to obtain a sample \(x_0\), we need to run through \(T\) reverse steps, sequentially, which is very slow. To address this issue, Song et al. <d-cite key="song2020denoising"></d-cite> proposed a new diffusion model called DDIM (Denoising Diffusion Implicit Model) which allows us to accelerate the inference process while using the same training process as DDPM (it means that you can use the pre-trained DDPM model to inference).</p>
+<p>One of the main drawbacks of DDPM is that training process requires a large \(T\) to reach the equilibrium state. In inference, to obtain a sample \(x_0\), we need to run through \(T\) reverse steps, sequentially, which is very slow. To address this issue, Song et al. <d-cite key="song2020denoising"></d-cite> proposed a new diffusion model called DDIM (Denoising Diffusion Implicit Model) which allows us to accelerate the inference process while using the same training process as DDPM (it means that you can use the pre-trained DDPM model to inference with DDIM method).</p>
+
+<h3 id="change-of-notation">Change of Notation</h3>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion/notation-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion/notation-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion/notation-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/diffusion/notation.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Meme stealing from <a href="https://www.tanishq.ai/" rel="external nofollow noopener" target="_blank">Tanishq</a> at <a href="https://course.fast.ai/Lessons/lesson21.html" rel="external nofollow noopener" target="_blank">https://course.fast.ai/Lessons/lesson21.html</a>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th>DDPM</th>
+      <th>DDIM</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+<strong>atomic</strong> params <img class="emoji" title=":joy:" alt=":joy:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f602.png" height="20" width="20">
+</td>
+      <td>\(0 &lt; \alpha_t &lt; 1, \beta_t = 1 - \alpha_t\)</td>
+      <td>\(0 &lt; \bar{\alpha}_t &lt; 1, \beta_t = 1 - \bar{\alpha}_t\)</td>
+    </tr>
+    <tr>
+      <td>
+<strong>cummulative</strong> params</td>
+      <td>\(\bar{\alpha}_t = \prod_{i=1}^{t} \alpha_i\)</td>
+      <td>\(\alpha_t = \prod_{i=1}^{t} \bar{\alpha}_i\)</td>
+    </tr>
+    <tr>
+      <td>\(q(x_t \mid x_{t-1})\)</td>
+      <td>\(\mathcal{N} (x_t, \sqrt{\alpha_t} x_t, (1 - \alpha_t) I)\)</td>
+      <td>\(\mathcal{N} (x_t, \sqrt{\bar{\alpha}_t} x_t, (1 - \bar{\alpha}_t) I)\)</td>
+    </tr>
+    <tr>
+      <td>\(q(x_t \mid x_0)\)</td>
+      <td>\(\mathcal{N} (x_t, \sqrt{\bar{\alpha}_t} x_0, (1 - \bar{\alpha}_t) I)\)</td>
+      <td>\(\mathcal{N} (x_t, \sqrt{\alpha_t} x_0, (1 - \alpha_t) I)\)</td>
+    </tr>
+    <tr>
+      <td>(forward) sampling \(x_t\)</td>
+      <td>\(x_t = \sqrt{\bar{\alpha}_t} x_0 + \sqrt{1-\bar{\alpha}_t} \epsilon\)</td>
+      <td>\(x_t = \sqrt{\alpha_t} x_0 + \sqrt{1-\alpha_t} \epsilon\)</td>
+    </tr>
+    <tr>
+      <td>(reverse) sampling \(x_{t-1}\)</td>
+      <td>\(\frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \epsilon_\theta (x_t, t) \right) + \sigma_t z\)</td>
+      <td>\(\frac{1}{\sqrt{\bar{\alpha}_t}} \left( x_t - \frac{1 - \bar{\alpha}_t}{\sqrt{1 - \alpha_t}} \epsilon_\theta (x_t, t) \right) + \sigma_t z\)</td>
+    </tr>
+    <tr>
+      <td>\(\sigma_t\)</td>
+      <td>\(\frac{1 - \bar{\alpha}_{t-1}}{1 - \bar{\alpha}_t}\)</td>
+      <td>\(\frac{1 - \alpha_{t-1}}{1 - \alpha_t}\)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>With this in mind, let us go through the notation in the <code class="language-plaintext highlighter-rouge">LDM</code> implementation which can be found here: <a href="https://github.com/Stability-AI/stablediffusion/blob/main/ldm/models/diffusion/ddpm.py#L155" rel="external nofollow noopener" target="_blank">https://github.com/Stability-AI/stablediffusion/blob/main/ldm/models/diffusion/ddpm.py#L155</a></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">to_torch</span> <span class="o">=</span> <span class="nf">partial</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="p">.</span><span class="n">float32</span><span class="p">)</span>
+
+    <span class="n">self</span><span class="p">.</span><span class="nf">register_buffer</span><span class="p">(</span><span class="sh">'</span><span class="s">betas</span><span class="sh">'</span><span class="p">,</span> <span class="nf">to_torch</span><span class="p">(</span><span class="n">betas</span><span class="p">))</span>
+    <span class="n">self</span><span class="p">.</span><span class="nf">register_buffer</span><span class="p">(</span><span class="sh">'</span><span class="s">alphas_cumprod</span><span class="sh">'</span><span class="p">,</span> <span class="nf">to_torch</span><span class="p">(</span><span class="n">alphas_cumprod</span><span class="p">))</span>
+    <span class="n">self</span><span class="p">.</span><span class="nf">register_buffer</span><span class="p">(</span><span class="sh">'</span><span class="s">alphas_cumprod_prev</span><span class="sh">'</span><span class="p">,</span> <span class="nf">to_torch</span><span class="p">(</span><span class="n">alphas_cumprod_prev</span><span class="p">))</span>
+
+    <span class="c1"># calculations for diffusion q(x_t | x_{t-1}) and others
+</span>    <span class="n">self</span><span class="p">.</span><span class="nf">register_buffer</span><span class="p">(</span><span class="sh">'</span><span class="s">sqrt_alphas_cumprod</span><span class="sh">'</span><span class="p">,</span> <span class="nf">to_torch</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="n">alphas_cumprod</span><span class="p">)))</span>
+    <span class="n">self</span><span class="p">.</span><span class="nf">register_buffer</span><span class="p">(</span><span class="sh">'</span><span class="s">sqrt_one_minus_alphas_cumprod</span><span class="sh">'</span><span class="p">,</span> <span class="nf">to_torch</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">alphas_cumprod</span><span class="p">)))</span>
+    <span class="n">self</span><span class="p">.</span><span class="nf">register_buffer</span><span class="p">(</span><span class="sh">'</span><span class="s">log_one_minus_alphas_cumprod</span><span class="sh">'</span><span class="p">,</span> <span class="nf">to_torch</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">alphas_cumprod</span><span class="p">)))</span>
+    <span class="n">self</span><span class="p">.</span><span class="nf">register_buffer</span><span class="p">(</span><span class="sh">'</span><span class="s">sqrt_recip_alphas_cumprod</span><span class="sh">'</span><span class="p">,</span> <span class="nf">to_torch</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="mf">1.</span> <span class="o">/</span> <span class="n">alphas_cumprod</span><span class="p">)))</span>
+    <span class="n">self</span><span class="p">.</span><span class="nf">register_buffer</span><span class="p">(</span><span class="sh">'</span><span class="s">sqrt_recipm1_alphas_cumprod</span><span class="sh">'</span><span class="p">,</span> <span class="nf">to_torch</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="mf">1.</span> <span class="o">/</span> <span class="n">alphas_cumprod</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
+</code></pre></div></div>
+
+<p>Fortunately, in the implementation of <code class="language-plaintext highlighter-rouge">DDIM</code>, the authors keep the same notation of the <code class="language-plaintext highlighter-rouge">DDPM</code> implementation and introduce some new variables just for the <code class="language-plaintext highlighter-rouge">DDIM</code> model.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="c1"># ddim sampling parameters
+</span>    <span class="n">ddim_sigmas</span><span class="p">,</span> <span class="n">ddim_alphas</span><span class="p">,</span> <span class="n">ddim_alphas_prev</span> <span class="o">=</span> <span class="nf">make_ddim_sampling_parameters</span><span class="p">(</span><span class="n">alphacums</span><span class="o">=</span><span class="n">alphas_cumprod</span><span class="p">.</span><span class="nf">cpu</span><span class="p">(),</span>
+                                                                                <span class="n">ddim_timesteps</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">ddim_timesteps</span><span class="p">,</span>
+                                                                                <span class="n">eta</span><span class="o">=</span><span class="n">ddim_eta</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+    <span class="n">self</span><span class="p">.</span><span class="nf">register_buffer</span><span class="p">(</span><span class="sh">'</span><span class="s">ddim_sigmas</span><span class="sh">'</span><span class="p">,</span> <span class="n">ddim_sigmas</span><span class="p">)</span>
+    <span class="n">self</span><span class="p">.</span><span class="nf">register_buffer</span><span class="p">(</span><span class="sh">'</span><span class="s">ddim_alphas</span><span class="sh">'</span><span class="p">,</span> <span class="n">ddim_alphas</span><span class="p">)</span>
+    <span class="n">self</span><span class="p">.</span><span class="nf">register_buffer</span><span class="p">(</span><span class="sh">'</span><span class="s">ddim_alphas_prev</span><span class="sh">'</span><span class="p">,</span> <span class="n">ddim_alphas_prev</span><span class="p">)</span>
+    <span class="n">self</span><span class="p">.</span><span class="nf">register_buffer</span><span class="p">(</span><span class="sh">'</span><span class="s">ddim_sqrt_one_minus_alphas</span><span class="sh">'</span><span class="p">,</span> <span class="n">np</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">ddim_alphas</span><span class="p">))</span>
+    <span class="n">sigmas_for_original_sampling_steps</span> <span class="o">=</span> <span class="n">ddim_eta</span> <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span>
+        <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">self</span><span class="p">.</span><span class="n">alphas_cumprod_prev</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">self</span><span class="p">.</span><span class="n">alphas_cumprod</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
+                    <span class="mi">1</span> <span class="o">-</span> <span class="n">self</span><span class="p">.</span><span class="n">alphas_cumprod</span> <span class="o">/</span> <span class="n">self</span><span class="p">.</span><span class="n">alphas_cumprod_prev</span><span class="p">))</span>
+</code></pre></div></div>
 
 <p>(To be continued)</p>
 
