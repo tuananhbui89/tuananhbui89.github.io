@@ -36,7 +36,7 @@
     <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
     
     <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
-    <link rel="canonical" href="https://tuananhbui89.github.io/blog/2023/diffusion-tutorial-p2/">
+    <link rel="canonical" href="http://localhost:4000/blog/2023/diffusion-tutorial-p2/">
 
     <!-- Dark Mode -->
     
@@ -216,7 +216,7 @@
 
 <ul>
   <li>The Jupyter notebooks associated with this tutorial can be found <a href="https://github.com/tuananhbui89/diffusion_demo" rel="external nofollow noopener" target="_blank">here</a>.</li>
-  <li>The first part of this tutorial can be found <a href="https://tuananhbui89.github.io/blog/2023/diffusion-tutorial/">here</a>.</li>
+  <li>The first part of this tutorial can be found <a href="https://tuananhbui89.github.io/blog/2023/diffusion-tutorial/" rel="external nofollow noopener" target="_blank">here</a>.</li>
   <li>FastAI tutorial about DDIM can be found <a href="https://course.fast.ai/Lessons/lesson21.html" rel="external nofollow noopener" target="_blank">here</a>.</li>
 </ul>
 
@@ -260,26 +260,26 @@
   <tbody>
     <tr>
       <td>
-<strong>atomic</strong> params <img class="emoji" title=":joy:" alt=":joy:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f602.png" height="20" width="20">
+<strong>atomic</strong> param <img class="emoji" title=":joy:" alt=":joy:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f602.png" height="20" width="20">
 </td>
       <td>\(0 &lt; \alpha_t &lt; 1, \beta_t = 1 - \alpha_t\)</td>
       <td>\(0 &lt; \bar{\alpha}_t &lt; 1, \beta_t = 1 - \bar{\alpha}_t\)</td>
     </tr>
     <tr>
       <td>
-<strong>cummulative</strong> params</td>
+<strong>cummulative</strong> param</td>
       <td>\(\bar{\alpha}_t = \prod_{i=1}^{t} \alpha_i\)</td>
       <td>\(\alpha_t = \prod_{i=1}^{t} \bar{\alpha}_i\)</td>
     </tr>
     <tr>
       <td>\(q(x_t \mid x_{t-1})\)</td>
-      <td>\(\mathcal{N} (x_t, \sqrt{\alpha_t} x_t, (1 - \alpha_t) I)\)</td>
-      <td>\(\mathcal{N} (x_t, \sqrt{\bar{\alpha}_t} x_t, (1 - \bar{\alpha}_t) I)\)</td>
+      <td>\(\mathcal{N} (x_t; \sqrt{\alpha_t} x_t, (1 - \alpha_t) I)\)</td>
+      <td>\(\mathcal{N} (x_t; \sqrt{\frac{\alpha_t}{\alpha_{t-1}}}x_{t-1}, (1 - \frac{\alpha_t}{\alpha_{t-1}})I)\)  \(^{\star}\)</td>
     </tr>
     <tr>
       <td>\(q(x_t \mid x_0)\)</td>
-      <td>\(\mathcal{N} (x_t, \sqrt{\bar{\alpha}_t} x_0, (1 - \bar{\alpha}_t) I)\)</td>
-      <td>\(\mathcal{N} (x_t, \sqrt{\alpha_t} x_0, (1 - \alpha_t) I)\)</td>
+      <td>\(\mathcal{N} (x_t; \sqrt{\bar{\alpha}_t} x_0, (1 - \bar{\alpha}_t) I)\)</td>
+      <td>\(\mathcal{N} (x_t; \sqrt{\alpha_t} x_0, (1 - \alpha_t) I)\)</td>
     </tr>
     <tr>
       <td>(forward) sampling \(x_t\)</td>
@@ -299,7 +299,9 @@
   </tbody>
 </table>
 
-<p>With this in mind, let us go through the notation in the <code class="language-plaintext highlighter-rouge">LDM</code> implementation which can be found here: <a href="https://github.com/Stability-AI/stablediffusion/blob/main/ldm/models/diffusion/ddpm.py#L155" rel="external nofollow noopener" target="_blank">https://github.com/Stability-AI/stablediffusion/blob/main/ldm/models/diffusion/ddpm.py#L155</a></p>
+<p>\(^{\star}\) In the DDIM paper, the authors made a note that <code class="language-plaintext highlighter-rouge">covariance matrix is ensured to have positive terms on its diagonal</code>. The \(\alpha_{1:T} \in  (0, 1]^T\) is a decreasing sequence, i.e., \(\alpha_{t+1} \leq \alpha_t\), \(\alpha_1 = 1\) and \(\alpha_T \approx 0\) where \(T \rightarrow \infty\).</p>
+
+<p>With this in mind, I believe that the variable naming in the <code class="language-plaintext highlighter-rouge">LDM</code> implementation (which can be found here: <a href="https://github.com/Stability-AI/stablediffusion/blob/main/ldm/models/diffusion/ddpm.py#" rel="external nofollow noopener" target="_blank">https://github.com/Stability-AI/stablediffusion/blob/main/ldm/models/diffusion/ddpm.py</a> cannot confuse you anymore <img class="emoji" title=":smile:" alt=":smile:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f604.png" height="20" width="20">.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">to_torch</span> <span class="o">=</span> <span class="nf">partial</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="p">.</span><span class="n">float32</span><span class="p">)</span>
 
@@ -329,6 +331,10 @@
         <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">self</span><span class="p">.</span><span class="n">alphas_cumprod_prev</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">self</span><span class="p">.</span><span class="n">alphas_cumprod</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
                     <span class="mi">1</span> <span class="o">-</span> <span class="n">self</span><span class="p">.</span><span class="n">alphas_cumprod</span> <span class="o">/</span> <span class="n">self</span><span class="p">.</span><span class="n">alphas_cumprod_prev</span><span class="p">))</span>
 </code></pre></div></div>
+
+<h3 id="motivation">Motivation</h3>
+
+<h3 id="ddim-sampling">DDIM Sampling</h3>
 
 <p>(To be continued)</p>
 
@@ -383,7 +389,15 @@
 
 <h3 id="jumping-prediction">Jumping Prediction</h3>
 
-<p><strong>Standard Diffusion Model</strong> In the first part, I use the<a href="https://github.com/openai/guided-diffusion" rel="external nofollow noopener" target="_blank"> Guided-Diffusion</a> by OpenAI as the codebase to demonstrate this technique (i.e., predicting \(x_0\) from \(x_t\)). The codebase is for the <a href="http://arxiv.org/abs/2105.05233" rel="external nofollow noopener" target="_blank">Diffusion Models Beat GANS on Image Synthesis</a> paper. I have blogged about this paper and some important components of the codebase <a href="https://tuananhbui89.github.io/blog/2023/conditional-diffusion/">here</a>.</p>
+<p>In this demo, I will show you one of the applications of diffusion inversion - jumping prediction. The goal is to predict the initial image \(x_0\) from the image \(x_t\) at any arbitrary time \(t\) in the diffusion process. It can be done by using the following equation:</p>
+
+\[\tilde{x}_0 = \frac{x_t - \sqrt{1-\bar{\alpha}_t} \epsilon_\theta(x_t, t)}{\sqrt{\bar{\alpha}_t}}\]
+
+<p>where \(\tilde{x}_0\) is the predicted image at time \(t=0\) given the image \(x_t\) at time \(t\) and the noise \(\epsilon_\theta(x_t, t)\).</p>
+
+<p><strong>Why care about this?</strong></p>
+
+<p><strong>Standard Diffusion Model</strong> In the first part, I use the <a href="https://github.com/openai/guided-diffusion" rel="external nofollow noopener" target="_blank">Guided-Diffusion</a> by OpenAI as the codebase to demonstrate this technique (i.e., predicting \(x_0\) from \(x_t\)). The codebase is for the <a href="http://arxiv.org/abs/2105.05233" rel="external nofollow noopener" target="_blank">Diffusion Models Beat GANS on Image Synthesis</a> paper. I have blogged about this paper and some important components of the codebase <a href="https://tuananhbui89.github.io/blog/2023/conditional-diffusion/" rel="external nofollow noopener" target="_blank">here</a>.</p>
 
 <p>The main function to predict \(x_0\) from \(x_t\) as follows:</p>
 
@@ -509,6 +523,8 @@ z_0_tilde = (z_t - (1 - alpha_bar).sqrt() * e_t) / alpha_bar.sqrt()
 </div>
 
 
+
+<h3 id="how-to-generate-an-image-with-a-gaussian-noise">How to generate an image with a Gaussian noise?</h3>
 
       </d-article>
 

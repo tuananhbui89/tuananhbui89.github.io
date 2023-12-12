@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<!-- _layouts/distill.html --><html>
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    <!-- Metadata, OpenGraph and Schema.org -->
+    
+
+    <!-- Standard metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Erasing Undesired Concepts from Diffusion Models with Multi-Optimization Objective | Tuan-Anh  Bui</title>
+    <meta name="author" content="Tuan-Anh  Bui">
+    <meta name="description" content="Researcher in Generative AI and Trustworthy AI
+">
+    <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
+
+
+    <!-- Bootstrap & MDB -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+    <!-- Bootstrap Table -->
+    <link defer rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+
+    <!-- Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
+
+    
+
+    <!-- Styles -->
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
+    
+    <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+    <link rel="canonical" href="http://localhost:4000/blog/2023/proj_erasing_concepts_diffusion_MOO/">
+
+    <!-- Dark Mode -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark">
+    <script src="/assets/js/theme.js?96d6b3e1c3604aca8b6134c7afdd5db6"></script>
+    <script src="/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script>
+    
+
+
+    <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- MathJax -->
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        tags: 'ams'
+      }
+    };
+  </script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
+    <!-- Distill js -->
+    <script src="/assets/js/distillpub/template.v2.js"></script>
+    <script src="/assets/js/distillpub/transforms.v2.js"></script>
+    <script src="/assets/js/distillpub/overrides.js"></script>
+    
+    <!-- Page/Post style -->
+    <style type="text/css">
+      .fake-img {
+  background: #bbb;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 12px;
+} .fake-img p {
+  font-family: monospace;
+  color: white;
+  text-align: left;
+  margin: 12px 0;
+  text-align: center;
+  font-size: 16px;
+}
+
+    </style>
+  </head>
+
+  <body>
+<d-front-matter>
+    <script async type="text/json">{
+      "title": "Erasing Undesired Concepts from Diffusion Models with Multi-Optimization Objective",
+      "description": "",
+      "published": "November 20, 2023",
+      "authors": [
+        {
+          "author": "Tuan-Anh Bui",
+          "authorURL": "https://tuananhbui89.github.io/",
+          "affiliations": [
+            {
+              "name": "Monash University",
+              "url": ""
+            }
+          ]
+        }
+        
+      ],
+      "katex": {
+        "delimiters": [
+          {
+            "left": "$",
+            "right": "$",
+            "display": false
+          },
+          {
+            "left": "$$",
+            "right": "$$",
+            "display": true
+          }
+        ]
+      }
+    }</script>
+  </d-front-matter>
+
+  
+
+    <!-- Header -->
+    <header>
+
+      <!-- Nav Bar -->
+      <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top">
+        <div class="container">
+          <a class="navbar-brand title font-weight-lighter" href="/"><span class="font-weight-bold">Tuan-Anh </span>Bui</a>
+          <!-- Navbar Toggle -->
+          <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar top-bar"></span>
+            <span class="icon-bar middle-bar"></span>
+            <span class="icon-bar bottom-bar"></span>
+          </button>
+
+          <div class="collapse navbar-collapse text-right" id="navbarNav">
+            <ul class="navbar-nav ml-auto flex-nowrap">
+
+              <!-- About -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/">about</a>
+              </li>
+              
+              <!-- Blog -->
+              <li class="nav-item active">
+                <a class="nav-link" href="/blog/">blog<span class="sr-only">(current)</span></a>
+              </li>
+
+              <!-- Other pages -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/publications/">publications</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/projects/">projects</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/repositories/">repositories</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/teaching/">teaching</a>
+              </li>
+
+              <!-- Toogle theme mode -->
+              <li class="toggle-container">
+                <button id="light-toggle" title="Change theme">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Scrolling Progress Bar -->
+      <progress id="progress" value="0">
+        <div class="progress-container">
+          <span class="progress-bar"></span>
+        </div>
+      </progress>
+    </header>
+
+
+    <!-- Content -->
+    <div class="post distill">
+
+      <d-title>
+        <h1>Erasing Undesired Concepts from Diffusion Models with Multi-Optimization Objective</h1>
+        <p></p>
+      </d-title>
+
+      <d-byline></d-byline>
+
+      <d-article>
+        
+
+        <!-- ---
+layout: page
+title: Erasing Undesired Concepts from Diffusion Models with Multi-Optimization Objective
+description: 
+img: 
+importance: 2
+category: work
+giscus_comments: false
+draft: true
+--- -->
+
+<h2 id="introduction">Introduction</h2>
+
+<p>Given a pre-trained generative model such as Stable Diffusion, we aim to remove a generation capability of the model regarding specific concept or keyword, for example “Barack Obama”.
+By unlearning that concept, the model cannot generate meaningful output image whenever a prompt with this specific keyword while still retain its capability for all other things.</p>
+
+<p>This idea has been proposed in the paper “Erasing Concepts from Diffusion Models”. However, there are some limitations of this paper:</p>
+
+<ul>
+  <li>The concept is erased not completely, but only reduced its probability of generating an image according to the likelihood that is described by the concept, scaled by a power factor \(\eta\).</li>
+  <li>The concept to be erased needs to be associated with a specific keyword (e.g., “Barack Obama” or “nudity” or “gun”). However, a concept can be described in many different ways, for example, “Barack Obama” can be described as “the 44th president of the United States” or “the first African American president of the United States”. Therefore, it is not possible to erase all concepts related to “Barack Obama” by just erasing the keyword “Barack Obama”.</li>
+  <li>When erasing a specific concept (e.g., “Barack Obama”), related concepts (e.g., “Donald Trump”) can be also erased.</li>
+  <li>This erased concept can be recovered by an adversary by crawling images with this concept from the Internet and use Textual Inversion to recover the erased concept.</li>
+</ul>
+
+<p>Therefore, we propose a new idea to erase a specific concept completely, without effecting other related concepts. The idea is to utilize an auxiliary classifier to classify the concept (or set of concepts) and then use the gradient of the classifier to guide the unlearning process in the diffusion model.</p>
+
+<h2 id="review-of-the-paper-unified-concept-editing-in-diffusion-models">Review of the paper “Unified Concept Editing in Diffusion Models”</h2>
+
+<p>Given a pretrain layer \(W^{*}\), a set of concepts to be edited \(E\) and a set of concepts to be preserved \(P\), the goal is to find a new layer \(W\) that is close to \(W^{*}\) but does not contain any concept in \(E\) and preserve all concepts in \(P\).</p>
+
+<p>To do that, <d-cite key="orgad2023editing"></d-cite> proposed to use the following optimization problem:</p>
+
+\[\underset{W}{\min} \sum_{c_i \in E} \| W c_i - v_i^* \|^2_2 + \sum_{c_j \in P} \| W c_j - W^* c_j \|^2_2\]
+
+<p>where \(v_i^*\) is the targeted vector for concept \(c_i\).</p>
+
+<p>As derived in <d-cite key="orgad2023editing"></d-cite>, the solution of this optimization problem is:</p>
+
+\[W = \left( \sum_{c_i \in E} v_i^* c_i^T + \sum_{c_j \in P} W^* c_j cj^T \right) \left( \sum_{c_i \in E} c_i c_i^T + \sum_{c_j \in P} c_j c_j^T \right)^{-1}\]
+
+<p>By defining \(v^*\) differently, the authors proposed 3 types of editing:</p>
+
+<ul>
+  <li>
+<strong>Erasing/Moderation</strong>: Choose \(v^* = W c^*\), where \(c^*\) is the targeted concept different from the concepts to be earased \(c_i \in E\)$. For example, harmful concept like “nudity” or “gun” can be erased to “safe/neutrual” concept like “flower” or “cat”, or artistic concept like “Kelly Mckernan” or “Van Gogh” to “non-artistic” concept like “art” or “ “.</li>
+  <li>
+<strong>Debiasing</strong>: Choose \(v^* = W (c_i + \sum_{t=1}^p \alpha_t a_t)\) where \(c_i\) is “doctor” and \(a_t\) is attributes that we want to distribute across such as “white”, “asian”, “black”. By this way, the original concept “doctor” no longer only associated with “white” but also with “asian” and “black”.</li>
+</ul>
+
+<p><strong>Limitations</strong>:</p>
+
+<p><strong>Poor performance</strong>
+The performance on erasing concepts is still limited. As I reproduced the experiment to erase artist concept call “Kelly Mckernan” and compare with the original model, the two generated images from two models are still very similar.</p>
+
+<p><strong>Limited Expressiveness</strong>
+The authors use textual prompt as the input to specify the concept to be erased, e.g., “Kelly Mckernan” or “Barack Obama” or “nudity”. However, a concept can be described in many different ways, for example, “Barack Obama” can be described as “the 44th president of the United States” or “the first African American president of the United States”. Therefore, it is not possible to erase all concepts related to “Barack Obama” by just erasing the keyword “Barack Obama”.</p>
+
+<p><strong>Unaware of the time step</strong>
+In this formulation, the authors just proposed to rewrite the projection matrices \(W_K\) and \(W_V\) of the attention layer \(W\) independently and ignore the query matrix \(W_Q\). However, the query ouput \(W_Q x\) has the information about the time step \(t\) of the diffusion model.</p>
+
+<p><strong>Unknown preserved concepts</strong>
+In term of methodology, while there is a closed-form solution for the optimization problem, it is not clear how to solve the optimization problem when the number of preserved concepts is large and even uncountable (i.e., how we can know how many concept that Stable Diffusion can generate?).</p>
+
+<p><strong>Invertibility issue</strong>
+If we just ignore the preserved concepts, the optimization problem is still problematic.</p>
+
+\[W = \left( \sum_{c_i \in E} v_i^* c_i^T \right) \left( \sum_{c_i \in E} c_i c_i^T \right)^{-1}\]
+
+<p>where \(v_i^*\) is the targeted vector for concept \(c_i\).</p>
+
+<p>Let’s dig deeper into this OP. As mentioned in the paper, \(v_i^*=W^* c_{tar}\) where \(c_{tar}\) is the targeted concept different from the concepts to be earased \(c_i \in E\)$ such as “nudity” or “gun” can be erased to “safe/neutrual” concept like “flower” or “cat”, or artistic concept like “Kelly Mckernan” or “Van Gogh” to “non-artistic” concept like “art” or “ “.</p>
+
+<p>In implementation, \(c_i\) and \(c_{tar}\) are input of the attention layer \(W\) which are ouput of the text encoder, therefore, they are unchanged during the optimization process (<strong>Need to verify this</strong>).</p>
+
+<p>Therefore, the optimization problem can be rewritten as follows:</p>
+
+\[W = \left( \sum_{c_i \in E} W^* c_{tar} c_i^T \right) \left( \sum_{c_i \in E} c_i c_i^T \right)^{-1}\]
+
+<p>where \(W^* c_i\) is the projected vector.</p>
+
+<p>As mentioned in Appendix A of the paper, one condition to ensure that the optimization problem has a solution is that the matrix \(\sum_{c_i \in E} c_i c_i^T\) is invertible. To ensure this condition, the authors proposed to add \(d\) additional preservation terms along the canonical basis vectors (i.e., adding identity matrix) as follows:</p>
+
+\[W = \left( \sum_{c_i \in E} W^* c_{tar} c_i^T \right) \left( \sum_{c_i \in E} c_i c_i^T + \lambda I \right)^{-1}\]
+
+<p>where \(\lambda\) is a regularization factor and \(I\) is the identity matrix. While this trick can ensure the invertibility, it can be seen that these additional preservation terms can affect the projection of the concepts to be erased \(c_i \in E\) and thus affect the erasing process (i.e., too big \(\lambda\))</p>
+
+<p>Recall some basic linear algebra:</p>
+
+<blockquote>
+  <p>\(c_i\) is a vector with \(d\) dimensions, therefore, \(c_i c_i^T\) is a matrix with \(d \times d\) dimensions.</p>
+</blockquote>
+
+<blockquote>
+  <p>W is a projection matrix with \(d_o \times d\) dimensions, therefore, \(W c_i\) is a vector with \(d_o\) dimensions and \(W c_i c_i^T\) is a matrix with \(d_o \times d\) dimensions.</p>
+</blockquote>
+
+<blockquote>
+  <p>If \(c_i\) is a non-zero vector, then \(c_i c_i^T\) has rank 1. Therefore, \(\sum_{c_i \in E} c_i c_i^T\) has rank at most \(\min(\mid E \mid, d)\).</p>
+</blockquote>
+
+<blockquote>
+  <p><strong>what is the canonical basic vectors?</strong></p>
+
+  <p>The canonical basis vectors are the vectors with all components equal to zero except for one component equal to one. For example, in \(\mathbb{R}^3\), the canonical basis vectors are \(e_1 = (1, 0, 0)\), \(e_2 = (0, 1, 0)\) and \(e_3 = (0, 0, 1)\).</p>
+</blockquote>
+
+<h2 id="background">Background</h2>
+
+<h3 id="latent-diffusion-model-and-conditioning-mechanism">Latent Diffusion Model and Conditioning Mechanism</h3>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion/cross-attention-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion/cross-attention-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion/cross-attention-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/diffusion/cross-attention.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Cross Attention Mechanism. Image credit to <d-cite key="orgad2023editing"></d-cite>
+</div>
+
+<p>In text-to-image generation such as Stable Diffusion model, each input image is associated with a text prompt. The text prompt is a sentence which is tokenized and then encoded into a context vector by a text encoder (contextualized text embedding). It means that whatever the length of the text prompt is, the context vector has the same dimension. The context vector is then used to condition the generation process of the diffusion model.</p>
+
+<p><strong>Contextualized text embedding</strong>:</p>
+
+<ul>
+  <li>The text encoder is a pretrained language model such as GPT, BERT, or multimodal vision-language model such as CLIP.</li>
+  <li>The context vector is the output of the text encoder. We can use the last hidden state of the text encoder (i.e., embedding of the last token) as the context vector or we can use the average of all hidden states of the text encoder as the context vector.</li>
+  <li>Contextual embeddings assign each word a representation based on its context, thereby capturing uses of words across varied contexts and encoding knowledge that transfers across languages.</li>
+  <li>What is the difference between contextualized and static embedding? Static embeddings assign each word a fixed representation, by contrast, contextual embeddings assign each word a representation based on its context, thereby capturing uses of words across varied contexts. When the focus corpus is large, static embeddings reflect related concepts, while contextualized embeddings often show synonyms or cohypernyms. Static embeddings trained only on the focus corpus capture opposing opinions better than contextualized embeddings. <a href="https://ieeexplore.ieee.org/document/10202014" rel="external nofollow noopener" target="_blank">ref</a>
+</li>
+</ul>
+
+<p><strong>Cross Attention Mechanism</strong>:</p>
+
+<p>Latent-Diffusion repository:</p>
+
+<ul>
+  <li>The U-Net architecture is set in corresponding config <code class="language-plaintext highlighter-rouge">yaml</code> file. For example: <code class="language-plaintext highlighter-rouge">target: ldm.modules.diffusionmodules.openaimodel.UNetModel</code> as in the config file <a href="https://github.com/CompVis/latent-diffusion/blob/main/models/ldm/text2img256/config.yaml" rel="external nofollow noopener" target="_blank">here</a>.</li>
+  <li>The U-Net architecture with the cross attention layer is implemented in <a href="https://github.com/CompVis/latent-diffusion/blob/main/ldm/modules/diffusionmodules/openaimodel.py" rel="external nofollow noopener" target="_blank">here</a>. In this implementation, the <code class="language-plaintext highlighter-rouge">SpatialTransformer</code> is used to embed the context vector into the U-Net architecture. The <code class="language-plaintext highlighter-rouge">SpatialTransformer</code> is implemented in <a href="https://github.com/CompVis/latent-diffusion/blob/main/ldm/modules/attention.py#L196" rel="external nofollow noopener" target="_blank">here</a>
+</li>
+  <li>There are two types of text encoder modules implemented in the <a href="https://github.com/CompVis/latent-diffusion/blob/main/ldm/modules/encoders/modules.py#L138" rel="external nofollow noopener" target="_blank"><code class="language-plaintext highlighter-rouge">encoders/modules.py</code></a>, FrozenCLIPTextEmbedder and BERTEmbedder (used more). Both produce contextualized text embedding.</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># some important parameters in the config file
+</span><span class="n">model</span><span class="p">:</span>
+    <span class="n">unet_config</span><span class="p">:</span>
+        <span class="n">target</span><span class="p">:</span> <span class="n">ldm</span><span class="p">.</span><span class="n">modules</span><span class="p">.</span><span class="n">diffusionmodules</span><span class="p">.</span><span class="n">openaimodel</span><span class="p">.</span><span class="n">UNetModel</span>
+    <span class="n">first_stage_config</span><span class="p">:</span>
+      <span class="n">target</span><span class="p">:</span> <span class="n">ldm</span><span class="p">.</span><span class="n">models</span><span class="p">.</span><span class="n">autoencoder</span><span class="p">.</span><span class="n">AutoencoderKL</span>
+    <span class="n">cond_stage_config</span><span class="p">:</span>
+      <span class="n">target</span><span class="p">:</span> <span class="n">ldm</span><span class="p">.</span><span class="n">modules</span><span class="p">.</span><span class="n">encoders</span><span class="p">.</span><span class="n">modules</span><span class="p">.</span><span class="n">BERTEmbedder</span>      
+</code></pre></div></div>
+
+<p>For the sake of reading convenience, I attach the implementation of the cross attention module as follows:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">CrossAttention</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">query_dim</span><span class="p">,</span> <span class="n">context_dim</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">heads</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">dim_head</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="mf">0.</span><span class="p">):</span>
+        <span class="nf">super</span><span class="p">().</span><span class="nf">__init__</span><span class="p">()</span>
+        <span class="n">inner_dim</span> <span class="o">=</span> <span class="n">dim_head</span> <span class="o">*</span> <span class="n">heads</span>
+        <span class="n">context_dim</span> <span class="o">=</span> <span class="nf">default</span><span class="p">(</span><span class="n">context_dim</span><span class="p">,</span> <span class="n">query_dim</span><span class="p">)</span>
+
+        <span class="n">self</span><span class="p">.</span><span class="n">scale</span> <span class="o">=</span> <span class="n">dim_head</span> <span class="o">**</span> <span class="o">-</span><span class="mf">0.5</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">heads</span> <span class="o">=</span> <span class="n">heads</span>
+
+        <span class="n">self</span><span class="p">.</span><span class="n">to_q</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">query_dim</span><span class="p">,</span> <span class="n">inner_dim</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">to_k</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">context_dim</span><span class="p">,</span> <span class="n">inner_dim</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">to_v</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">context_dim</span><span class="p">,</span> <span class="n">inner_dim</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+        <span class="n">self</span><span class="p">.</span><span class="n">to_out</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Sequential</span><span class="p">(</span>
+            <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">inner_dim</span><span class="p">,</span> <span class="n">query_dim</span><span class="p">),</span>
+            <span class="n">nn</span><span class="p">.</span><span class="nc">Dropout</span><span class="p">(</span><span class="n">dropout</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">heads</span>
+
+        <span class="n">q</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">to_q</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="nf">default</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">to_k</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">to_v</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+
+        <span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="nf">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="nf">rearrange</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="sh">'</span><span class="s">b n (h d) -&gt; (b h) n d</span><span class="sh">'</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="n">h</span><span class="p">),</span> <span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
+
+        <span class="n">sim</span> <span class="o">=</span> <span class="nf">einsum</span><span class="p">(</span><span class="sh">'</span><span class="s">b i d, b j d -&gt; b i j</span><span class="sh">'</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="o">*</span> <span class="n">self</span><span class="p">.</span><span class="n">scale</span>
+
+        <span class="k">if</span> <span class="nf">exists</span><span class="p">(</span><span class="n">mask</span><span class="p">):</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="nf">rearrange</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="sh">'</span><span class="s">b ... -&gt; b (...)</span><span class="sh">'</span><span class="p">)</span>
+            <span class="n">max_neg_value</span> <span class="o">=</span> <span class="o">-</span><span class="n">torch</span><span class="p">.</span><span class="nf">finfo</span><span class="p">(</span><span class="n">sim</span><span class="p">.</span><span class="n">dtype</span><span class="p">).</span><span class="nb">max</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="nf">repeat</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="sh">'</span><span class="s">b j -&gt; (b h) () j</span><span class="sh">'</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="n">h</span><span class="p">)</span>
+            <span class="n">sim</span><span class="p">.</span><span class="nf">masked_fill_</span><span class="p">(</span><span class="o">~</span><span class="n">mask</span><span class="p">,</span> <span class="n">max_neg_value</span><span class="p">)</span>
+
+        <span class="c1"># attention, what we cannot get enough of
+</span>        <span class="n">attn</span> <span class="o">=</span> <span class="n">sim</span><span class="p">.</span><span class="nf">softmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="nf">einsum</span><span class="p">(</span><span class="sh">'</span><span class="s">b i j, b j d -&gt; b i d</span><span class="sh">'</span><span class="p">,</span> <span class="n">attn</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="nf">rearrange</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="sh">'</span><span class="s">(b h) n d -&gt; b n (h d)</span><span class="sh">'</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="n">h</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">to_out</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">BasicTransformerBlock</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">n_heads</span><span class="p">,</span> <span class="n">d_head</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">context_dim</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">gated_ff</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">checkpoint</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="nf">super</span><span class="p">().</span><span class="nf">__init__</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">attn1</span> <span class="o">=</span> <span class="nc">CrossAttention</span><span class="p">(</span><span class="n">query_dim</span><span class="o">=</span><span class="n">dim</span><span class="p">,</span> <span class="n">heads</span><span class="o">=</span><span class="n">n_heads</span><span class="p">,</span> <span class="n">dim_head</span><span class="o">=</span><span class="n">d_head</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">dropout</span><span class="p">)</span>  <span class="c1"># is a self-attention
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">ff</span> <span class="o">=</span> <span class="nc">FeedForward</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">dropout</span><span class="p">,</span> <span class="n">glu</span><span class="o">=</span><span class="n">gated_ff</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">attn2</span> <span class="o">=</span> <span class="nc">CrossAttention</span><span class="p">(</span><span class="n">query_dim</span><span class="o">=</span><span class="n">dim</span><span class="p">,</span> <span class="n">context_dim</span><span class="o">=</span><span class="n">context_dim</span><span class="p">,</span>
+                                    <span class="n">heads</span><span class="o">=</span><span class="n">n_heads</span><span class="p">,</span> <span class="n">dim_head</span><span class="o">=</span><span class="n">d_head</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">dropout</span><span class="p">)</span>  <span class="c1"># is self-attn if context is none
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">norm1</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">LayerNorm</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">norm2</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">LayerNorm</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">norm3</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">LayerNorm</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">checkpoint</span> <span class="o">=</span> <span class="n">checkpoint</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nf">checkpoint</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">_forward</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">context</span><span class="p">),</span> <span class="n">self</span><span class="p">.</span><span class="nf">parameters</span><span class="p">(),</span> <span class="n">self</span><span class="p">.</span><span class="n">checkpoint</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_forward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">attn1</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="nf">norm1</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">+</span> <span class="n">x</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">attn2</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="nf">norm2</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span> <span class="o">+</span> <span class="n">x</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">ff</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="nf">norm3</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">+</span> <span class="n">x</span>
+        <span class="k">return</span> <span class="n">x</span>
+
+<span class="k">class</span> <span class="nc">SpatialTransformer</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">
+    Transformer block for image-like data.
+    First, project the input (aka embedding)
+    and reshape to b, t, d.
+    Then apply standard transformer action.
+    Finally, reshape to image
+    </span><span class="sh">"""</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">in_channels</span><span class="p">,</span> <span class="n">n_heads</span><span class="p">,</span> <span class="n">d_head</span><span class="p">,</span>
+                 <span class="n">depth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">context_dim</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="nf">super</span><span class="p">().</span><span class="nf">__init__</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">in_channels</span> <span class="o">=</span> <span class="n">in_channels</span>
+        <span class="n">inner_dim</span> <span class="o">=</span> <span class="n">n_heads</span> <span class="o">*</span> <span class="n">d_head</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">norm</span> <span class="o">=</span> <span class="nc">Normalize</span><span class="p">(</span><span class="n">in_channels</span><span class="p">)</span>
+
+        <span class="n">self</span><span class="p">.</span><span class="n">proj_in</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Conv2d</span><span class="p">(</span><span class="n">in_channels</span><span class="p">,</span>
+                                 <span class="n">inner_dim</span><span class="p">,</span>
+                                 <span class="n">kernel_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                 <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                 <span class="n">padding</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">self</span><span class="p">.</span><span class="n">transformer_blocks</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">ModuleList</span><span class="p">(</span>
+            <span class="p">[</span><span class="nc">BasicTransformerBlock</span><span class="p">(</span><span class="n">inner_dim</span><span class="p">,</span> <span class="n">n_heads</span><span class="p">,</span> <span class="n">d_head</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="n">dropout</span><span class="p">,</span> <span class="n">context_dim</span><span class="o">=</span><span class="n">context_dim</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">depth</span><span class="p">)]</span>
+        <span class="p">)</span>
+
+        <span class="n">self</span><span class="p">.</span><span class="n">proj_out</span> <span class="o">=</span> <span class="nf">zero_module</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="nc">Conv2d</span><span class="p">(</span><span class="n">inner_dim</span><span class="p">,</span>
+                                              <span class="n">in_channels</span><span class="p">,</span>
+                                              <span class="n">kernel_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                              <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                              <span class="n">padding</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="c1"># note: if no context is given, cross-attention defaults to self-attention
+</span>        <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">shape</span>
+        <span class="n">x_in</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">norm</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">proj_in</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="nf">rearrange</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="sh">'</span><span class="s">b c h w -&gt; b (h w) c</span><span class="sh">'</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">transformer_blocks</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="nf">block</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="nf">rearrange</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="sh">'</span><span class="s">b (h w) c -&gt; b c h w</span><span class="sh">'</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="n">h</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="n">w</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">proj_out</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="n">x_in</span>
+</code></pre></div></div>
+
+<p>Given the context vector \(c\), and attention layer with \(W_Q, W_K, W_V\), the cross attention mechanism can be formulated as follows:</p>
+
+<blockquote class="block-quote">
+  <p><strong>Conditioning Cross Attention</strong></p>
+
+  <p>Input: input image \(x\), context vector \(c\), and attention layer with \(W_Q, W_K, W_V\) <br>
+\(Q = W_Q x\) <br>
+\(K = W_K c\) <br>
+\(V = W_V c\) <br>
+Attention map \(M = \text{softmax} \left( \frac{Q K^T}{\sqrt{m}} \right)\) <br>
+Output: \(x' = M V\)</p>
+</blockquote>
+
+<h2 id="our-proposed-method---idea-1">Our proposed method - Idea 1</h2>
+
+<p>In this project, our goal is to learn a novel fine-tuning method to erase undesired concepts while not affecting other concepts. Firstly, we would like to describe the problem setting and the motivation behind our method.</p>
+
+<ul>
+  <li>We can only specify undesired concepts that we want to erase, but not the other concepts that we want to preserve. This is a more practical scenario because we either cannot know all concepts that a powerful model such as Stable Diffusion can generate or the number of concepts is too large to specify such as ImageNet dataset with 1000 classes.</li>
+  <li>We do not collect or utilize any additional data regarding the undesired concepts. However, we can utilize the original/fine-tune diffusion model to generate images with any concept.</li>
+  <li>While it is easier to fine-tune the text encoder to modify the context vector output so that the context vector has no information about the undesired concepts, it is not a safe approach because an adversary can replace the fine-tuned text encoder by a new/fully-capability text encoder. Therefore, we need to fine-tune the unet to erase the undesired concepts.</li>
+</ul>
+
+<h3 id="approach-1">Approach 1</h3>
+
+<p>(Key idea: Align the final cross-attention output, aware of the time step)</p>
+
+<p>In the previous work, the authors proposed to rewrite the two projection matrices \(W_K^*\) and \(W_V^*\) independently, with the goal to enforce the projection with the new projection matrices of the undesired concept \(c_i\) to be close to the projection of the target concept \(c_{tar}\), i.e., \(W_K c_i \approx W_K^* c_{tar}\) and \(W_V c_i \approx W_V^* c_{tar}\).</p>
+
+<p>However, in this formulation, the authors just proposed to rewrite the projection matrices \(W_K\) and \(W_V\) of the attention layer \(W\) independently and ignore the query matrix \(W_Q\). However, the query ouput \(W_Q x\) has the information about the time step \(t\) of the diffusion model.</p>
+
+<p><strong>Why we need to consider the time step?</strong> Intuitively, the time step \(t\) of the diffusion model is the information about the progress of the generation process. In the reverse diffusion process, when the time step \(t\) close to \(T\), the generated image is still very noisy and does not have much information about the concept (any concept). It is because data modes in the distribution \(q(x_{t-1} \mid x_t)\) are still overlapped with each other. However, when the time step \(t\) decreasing to \(0\), the generated image becomes clearer and contains more information about the concept. It is because data modes in the distribution \(q(x_{t-1} \mid x_t)\) are more separated from each other. Therefore, if blindly rewrite the projection matrices \(W_K\) and \(W_V\), we can either erase the concept too much (forcing too much at early time step, high slope) or not erase the concept enough (low slope).</p>
+
+<p>Therefore, in our approach, the key idea is to align the final cross-attention output \(x'\) aware of the time step \(t\).</p>
+
+<p>Let’s consider the cross-attention operation at time step \(t\) with the input \(x_t\) is the output of the self-attention operation before (ref to Background section). For simplicity, we just consider the case when only one concept to be erased, i.e., \(E = \{c\}\) and \(P = \emptyset\). \(c_{era}\) is the fixed contextualized text embedding of the undesired concept. \(c_{tar}\) is the fixed contextualized text embedding of the target concept. Softmax operation is denoted as \(\sigma\). \(*\) denotes everything related to the original model.</p>
+
+<p>We have the following output:</p>
+
+<!-- $$O^*_{t, era} = \sigma \left( \frac{W_Q^* x_t^* W_K^* c^T_{era}}{\sqrt{d}} \right) W_V^* c_{era}$$ -->
+
+\[O^*_{t, tar} = \sigma \left( \frac{W_Q^* x_t^* W_K^* c^T_{tar}}{\sqrt{d}} \right) W_V^* c_{tar}\]
+
+\[O_{t, era} = \sigma \left( \frac{W_Q x_t W_K c^T_{era}}{\sqrt{d}} \right) W_V c_{era}\]
+
+<!-- $$O_{t, tar} = \sigma \left( \frac{W_Q x_t W_K c^T_{tar}}{\sqrt{d}} \right) W_V c_{tar}$$ -->
+
+<p>where \(d\) is the dimension of the query, key, and value vectors.</p>
+
+<p>The goal is to align the cross-attention out of the fine-tuned model \(O_{t, era}\) with that of the original model \(O^*_{t, tar}\) at any time step \(t\). To do that, we propose to minimize the following loss function:</p>
+
+\[\mathcal{L}(\theta) = \sum_{c \in E, t \in [1,T]} \gamma_t \left\| O_{t, era} - O^*_{t, tar} \right\|^2\]
+
+<p>where \(\theta\) is the parameters of \(W_Q, W_K, W_V\) of the fine-tuned model, \(T\) is the number of steps of the diffusion model, \(\gamma_t\) is the weight of the loss at time step \(t\). <strong>We can employ a classifier to predict whether concept \(c\) is present in the image \(x_t\) or not to compute the weight \(\gamma_t\)</strong>.</p>
+
+<p><strong>What is \(x_t\)?</strong> \(x_t\) is the output of the self-attention operation before the cross-attention operation. \(x_t = \text{SelfAttention}(G(x_{t+1}, c, t))\). \(G\) is the generator of the diffusion model with \(c\) is the contextualized text embedding. <strong>How to choose \(c\)?</strong></p>
+
+<p>In very begining, when \(t=T\), \(x_t\) is just the random noise and does not have information about any concept. However, at time step \(t &lt; T\), \(x_t\) gradually contains more information about the concept through the cross-attention mechanism. Therefore, to be more precise, the above output can be rewritten as follows:</p>
+
+<!-- $$O^*_{t, era} = \sigma \left( \frac{W_Q^* x_{t,era}^* W_K^* c^T_{era}}{\sqrt{d}} \right) W_V^* c_{era}$$ -->
+
+\[O^*_{t, tar} = \sigma \left( \frac{W_Q^* x_{t,tar}^* W_K^* c^T_{tar}}{\sqrt{d}} \right) W_V^* c_{tar}\]
+
+\[O_{t, era} = \sigma \left( \frac{W_Q x_{t,era} W_K c^T_{era}}{\sqrt{d}} \right) W_V c_{era}\]
+
+<!-- $$O_{t, tar} = \sigma \left( \frac{W_Q x_{t,tar} W_K c^T_{tar}}{\sqrt{d}} \right) W_V c_{tar}$$ -->
+
+<p>However, the difference between \(x_{t,tar}^*\) (i.e., generated image of original model with target concept) and \(x_{t,era}\) (i.e., generated image of fine-tuned model with erased concept) might be large at early fine-tuning stage when the fine-tuned model is still very different from the original model. Therefore, we propose to replace the input of the original model \(x_{t,tar}^*\) by \(x_{t,era}\) as follows:</p>
+
+\[O^*_{t, tar} = \sigma \left( \frac{W_Q^* x_{t,era} W_K^* c^T_{tar}}{\sqrt{d}} \right) W_V^* c_{tar}\]
+
+<h4 id="actions">Actions</h4>
+
+<ul>
+  <li>Ethic approval for “nudity” concept from Monash University and DST. Not only “nudity” but also harmful concepts as well.</li>
+  <li>Think about evaluation method such as evaluate how this method effect to synonym concepts, such as “cassette player” and “tape player”.</li>
+  <li>Think about the better way to measure the different instead of just use L2.</li>
+</ul>
+
+<h4 id="potential-issues">Potential issues</h4>
+
+<p>Firstly, the above optimization problem does not take into account the change of other concepts.</p>
+
+<p>Secondly, the <code class="language-plaintext highlighter-rouge">target</code> concept plays an important role in the optimization problem. More specifically, if the <code class="language-plaintext highlighter-rouge">target</code> concept is too different from the <code class="language-plaintext highlighter-rouge">erased</code> concept, the optimization problem can be ill-posed.</p>
+
+<p>To ensure the OP is smooth and the output of the fine-tuned model is not too different from the original model, we can utilize one of the following tricks:</p>
+
+<p><strong>Trick 1</strong>: Sample the <code class="language-plaintext highlighter-rouge">preserved</code> concepts from the other concepts and minimize the change of the <code class="language-plaintext highlighter-rouge">preserved</code> concepts.</p>
+
+\[\mathcal{L}(\theta) = \sum_{c \in E, t \in [1,T]} \gamma_t \left\| O_{t, era} - O^*_{t, tar} \right\|^2 + \sum_{c \in P, t \in [1,T]} \gamma_t \left\| O_{t, pre} - O^*_{t, pre} \right\|^2\]
+
+<p><strong>Trick 2</strong>: Using CLIP to align the output of the fine-tuned model with the <code class="language-plaintext highlighter-rouge">target</code> prompt/concept.</p>
+
+<p><strong>Trick 3</strong>: Using adversary with CLIP score to find the optimal <code class="language-plaintext highlighter-rouge">target</code> concept.</p>
+
+<p>Let’s consider the contextualized text embedding \(c_{era}\) and its generated image \(x_{era}\) at time step \(t\) of the diffusion model. The goal is to find \(x_{tar}\) such that \(x_{tar}\) aligns well with \(c_{tar}\) (which does not have any information about the concept \(c_{era}\)) and also similar to \(x_{era}\). To do that, we use the approach in <d-cite key="kwon2022diffusion"></d-cite> (Equation 7) to find \(x_{tar}\) as follows:</p>
+
+\[\mathcal{L}_{clip}(x_{tar}, x_{era}, c_{tar}, c_{era}) = 1 - \frac{\Delta I \cdot \Delta T}{\mid \Delta I \mid \mid \Delta T \mid}\]
+
+<p>where \(\Delta T = E_T(c_{tar}) - E_T(c_{era})\) and \(\Delta I = E_I(x_{tar}) - E_I(x_{era})\). \(E_T\) and \(E_I\) are the embedding function of the text encoder and the image encoder, respectively.</p>
+
+\[x_{tar} = \underset{x}{\arg \min} \mathcal{L}_{clip}(x, x_{era}, c_{tar}, c_{era})\]
+
+<p>\(x_{tar}\) then is used as the <code class="language-plaintext highlighter-rouge">target</code> input of the above OP.</p>
+
+<h3 id="approach-2">Approach 2</h3>
+
+<p>(Key idea: Using adversary to find the optimal preserved concepts to preserve)</p>
+
+<h3 id="approach-3">Approach 3</h3>
+
+<p>(Key idea: To deal with the limited expressiveness issue, we propose to use the auxiliary classifier to classify the concept (or set of concepts) and then use the gradient of the classifier to guide the unlearning process in the diffusion model.)</p>
+
+<h2 id="our-proposed-method---idea-2">Our proposed method - Idea 2</h2>
+
+<p>(Key idea: Using additional prompt to reduce the change of the weight)</p>
+
+<p>Recall the cross attention mechanism as below:</p>
+
+<p>Given the context vector \(c\), and attention layer with \(W_Q, W_K, W_V\), the cross attention mechanism can be formulated as follows:</p>
+
+<blockquote class="block-quote">
+  <p><strong>Conditioning Cross Attention</strong></p>
+
+  <p>Input: input image \(x\), context vector \(c\), and attention layer with \(W_Q, W_K, W_V\) <br>
+\(Q = W_Q x\) <br>
+\(K = W_K c\) <br>
+\(V = W_V c\) <br>
+Attention map \(M = \text{softmax} \left( \frac{Q K^T}{\sqrt{m}} \right)\) <br>
+Output: \(O = M V\)</p>
+</blockquote>
+
+<p>In this idea, we propose to add an additional prompt \(p\) to the context vector \(c\) as follows:</p>
+
+<!-- $$c'_E = \text{concat}(c_E, p_E) \; \text{and} \; c'_P = \text{concat}(c_P, p_P)$$ -->
+
+\[c' = \text{concat}(c, p)\]
+
+<p>For the input image \(x\), we just duplicate the original input as follows:</p>
+
+\[x' = \text{concat}(x, x)\]
+
+<p>Therefore, the cross attention mechanism can be rewritten as follows:</p>
+
+<blockquote class="block-quote">
+  <p><strong>Conditioning Cross Attention</strong></p>
+
+  <p>Input: input image \(x\), context vector \(c\), and attention layer with \(W_Q, W_K, W_V\) <br>
+\(Q' = W_Q x' \in \mathbb{R}^{[2,d]}\) <br>
+\(K' = W_K c' \in \mathbb{R}^{[2,d]}\)  <br>
+\(V = W_V c \in \mathbb{R}^{[1,d]}\)  <br>
+Attention map \(M' = \text{softmax} \left( \frac{Q' K'^T}{\sqrt{m}} \right) \in \mathbb{R}^{[d,d]}\) <br>
+Output: \(O' = M' V\)</p>
+</blockquote>
+
+<h3 id="approach-1-release-the-additional-prompts">Approach 1: Release the additional prompts</h3>
+
+<p>\(O'(p_e,c_e)\) represents the output of the fine-tuned model with erased concept \(c_e\) and additional prompt \(p_e\).
+Similarly, \(O'(p_r,c_r)\) represents the output of the fine-tuned model with preserved concept \(c_r\) and additional prompt \(p_r\).
+\(O'(c_e),O'(c_r)\) represents the output of the fine-tuned model with erased concept \(c_e\) and preserved concept \(c_r\), respectively. \(p_e, p_r\) are the contextualized prompts associated with the erased concept \(c_e\) and preserved concept \(c_r\), respectively. It can be generated by using a simple linear dense layer which maps \(R^d \rightarrow R^d\). In a simple case, we just use a simple identity function for \(f\) to init \(p_e, p_r\) (i.e., \(p_e = c_e, p_r = c_r\)).</p>
+
+<p>Our goal is that:</p>
+
+<ul>
+  <li>\(O'(p_r,c_r)\) and \(O'(c_r)\) are close to \(O(c_r)\) which means that the preserved concept \(c_r\) is not changed much after fine-tuning, regardless of the additional prompt \(p_r\).</li>
+  <li>\(O'(p_e,c_e)\) is strongly dependent on the additional prompt \(p_e\), i.e., \(O'(p_e,c_e) \approx O(c_e)\) but \(O'(c_e) \neq O(c_e)\) or \(O'(c_e) \approx O(c_t)\). So in release time, we can just do not provide the additional prompt \(p_e\) to the model to erase the concept.</li>
+</ul>
+
+<p>To do that, we propose to minimize the following loss function:</p>
+
+\[\underset{W_Q, W_K, W_V}{\min} \mid O'(p_e,c_e) - O(c_e) \mid^2_2 + \mid O'(c_e) - O(c_t) \mid^2_2 + \mid O'(p_r,c_r) - O(c_r) \mid^2_2 + \mid O'(p_r,c_r) - O'(c_r) \mid^2_2 + \mid O'(c_r) - O(c_r) \mid^2_2\]
+
+\[\underset{p_e}{\min} \mid O'(p_e,c_e) - O(c_e) \mid^2_2\]
+
+\[\underset{p_r}{\min} \mid O'(p_r,c_r) - O(c_r) \mid^2_2 + \mid O'(p_r,c_r) - O'(c_r) \mid^2_2\]
+
+<p><strong>Drawback</strong> of this approach is that we need to modify the evaluation process so that we can run the model with the additional prompt \(p_r\) to maintain the preserved concept \(c_r\).</p>
+
+<h3 id="approach-2-do-not-release-the-additional-prompts">Approach 2: Do not release the additional prompts</h3>
+
+<p><strong>Version 1</strong>: Using different \(p\) for \(e\) and \(r\).
+In this version, we use a projection to generate a contextualized prompt dependent on the input promt, i.e., \(p_e = f(e), p_r = f(r)\).
+It can be done by using a simple linear dense layer which maps \(R^d \rightarrow R^d\). In this version, we just use a simple identity function for \(f\) to init \(p_e, p_r\) (i.e., \(p_e = e, p_r = r\)).</p>
+
+\[p_r^* = \underset{p_r}{\min} \mid O'(p_r,r) - O(r) \mid^2_2\]
+
+\[p_e^* = \underset{p_e}{\min} \mid O'(p_e,e) - O(e) \mid^2_2\]
+
+<p>$$</p>
+
+<p><strong>Version 2</strong>: Using different \(p\) for \(e\) and \(r\).</p>
+
+<p>In this version, we use a projection to generate a contextualized prompt dependent on the input promt, i.e., \(p_e = f(e), p_r = f(r)\).
+It can be done by using a simple linear dense layer which maps \(R^d \rightarrow R^d\).
+In this version, we aim to release the \(p_r\) but not the \(p_e\) (How?)</p>
+
+\[O'(p_e,e) = O(e)\]
+
+\[O'(e) \neq O(e)\]
+
+\[O'(p_r,r) = O(r)\]
+
+\[O'(r) = O(r)\]
+
+<p><strong>Version 3</strong>: Using different \(p\) for \(e\) and \(r\).</p>
+
+\[O'(p_e,e) = O(t)\]
+
+\[O'(e) \neq O(e) \; \text{or} \; O'(e) = O(t)\]
+
+\[O'(p_r,r) = O(r)\]
+
+\[O'(r) = O(r)\]
+
+      </d-article>
+
+      <d-appendix>
+        <d-footnote-list></d-footnote-list>
+        <d-citation-list></d-citation-list>
+      </d-appendix>
+
+      <d-bibliography src="/assets/bibliography/2023-10-17-watermark.bib"></d-bibliography>
+</div>
+
+    <!-- Footer -->    
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        © Copyright 2023 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+
+      </div>
+    </footer>
+
+    <!-- Bootsrap & MDB scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KGSMMS9MS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-7KGSMMS9MS');
+  </script>
+    
+
+<!-- Scrolling Progress Bar -->
+<script type="text/javascript">
+  /*
+   * This JavaScript code has been adapted from the article 
+   * https://css-tricks.com/reading-position-indicator/ authored by Pankaj Parashar, 
+   * published on the website https://css-tricks.com on the 7th of May, 2014.
+   * Couple of changes were made to the original code to make it compatible 
+   * with the `al-foio` theme.
+   */
+  const progressBar = $("#progress");
+  /*
+   * We set up the bar after all elements are done loading.
+   * In some cases, if the images in the page are larger than the intended
+   * size they'll have on the page, they'll be resized via CSS to accomodate
+   * the desired size. This mistake, however, breaks the computations as the
+   * scroll size is computed as soon as the elements finish loading.
+   * To account for this, a minimal delay was introduced before computing the
+   * values.
+   */
+  window.onload = function () {
+    setTimeout(progressBarSetup, 50);
+  };
+  /*
+   * We set up the bar according to the browser.
+   * If the browser supports the progress element we use that.
+   * Otherwise, we resize the bar thru CSS styling
+   */
+  function progressBarSetup() {
+    if ("max" in document.createElement("progress")) {
+      initializeProgressElement();
+      $(document).on("scroll", function() {
+        progressBar.attr({ value: getCurrentScrollPosition() });
+      });
+      $(window).on("resize", initializeProgressElement);
+    } else {
+      resizeProgressBar();
+      $(document).on("scroll", resizeProgressBar);
+      $(window).on("resize", resizeProgressBar);
+    }
+  }
+  /*
+   * The vertical scroll position is the same as the number of pixels that
+   * are hidden from view above the scrollable area. Thus, a value > 0 is
+   * how much the user has scrolled from the top
+   */
+  function getCurrentScrollPosition() {
+    return $(window).scrollTop();
+  }
+
+  function initializeProgressElement() {
+    let navbarHeight = $("#navbar").outerHeight(true);
+    $("body").css({ "padding-top": navbarHeight });
+    $("progress-container").css({ "padding-top": navbarHeight });
+    progressBar.css({ top: navbarHeight });
+    progressBar.attr({
+      max: getDistanceToScroll(),
+      value: getCurrentScrollPosition(),
+    });
+  }
+  /*
+   * The offset between the html document height and the browser viewport
+   * height will be greater than zero if vertical scroll is possible.
+   * This is the distance the user can scroll
+   */
+  function getDistanceToScroll() {
+    return $(document).height() - $(window).height();
+  }
+
+  function resizeProgressBar() {
+    progressBar.css({ width: getWidthPercentage() + "%" });
+  }
+  // The scroll ratio equals the percentage to resize the bar
+  function getWidthPercentage() {
+    return (getCurrentScrollPosition() / getDistanceToScroll()) * 100;
+  }
+</script>
+
+  
+</body>
+</html>
