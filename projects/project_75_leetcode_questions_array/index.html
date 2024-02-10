@@ -38,7 +38,7 @@
     <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
     
     <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
-    <link rel="canonical" href="http://localhost:4000/projects/project_75_leetcode_questions_array/">
+    <link rel="canonical" href="https://tuananhbui89.github.io/projects/project_75_leetcode_questions_array/">
 
     <!-- Dark Mode -->
     
@@ -124,9 +124,9 @@
 
   <header class="post-header">
     <h1 class="post-title">Practicing 75 Leetcode Questions - Array</h1>
-    <p class="post-meta">December 11, 2023</p>
+    <p class="post-meta">February 10, 2024</p>
     <p class="post-tags">
-      <a href="/blog/2023"> <i class="fas fa-calendar fa-sm"></i> 2023 </a>
+      <a href="/blog/2024"> <i class="fas fa-calendar fa-sm"></i> 2024 </a>
         ·  
         <a href="/blog/category/work">
           <i class="fas fa-tag fa-sm"></i> work</a>  
@@ -140,14 +140,505 @@
     <div id="table-of-contents">
       <ul id="toc" class="section-nav">
 <li class="toc-entry toc-h2"><a href="#1-two-sum">1. Two Sum</a></li>
+<li class="toc-entry toc-h2"><a href="#121-best-time-to-buy-and-sell-stock">121. Best Time to Buy and Sell Stock</a></li>
+<li class="toc-entry toc-h2"><a href="#217-contains-duplicate">217. Contains Duplicate</a></li>
+<li class="toc-entry toc-h2"><a href="#238-product-of-array-except-self">238. Product of Array Except Self</a></li>
+<li class="toc-entry toc-h2"><a href="#53-maximum-subarray">53. Maximum Subarray</a></li>
+<li class="toc-entry toc-h2"><a href="#152-maximum-product-subarray">152. Maximum Product Subarray</a></li>
+<li class="toc-entry toc-h2"><a href="#153-find-minimum-in-rotated-sorted-array">153. Find Minimum in Rotated Sorted Array</a></li>
+<li class="toc-entry toc-h2"><a href="#33-search-in-rotated-sorted-array">33. Search in Rotated Sorted Array</a></li>
+<li class="toc-entry toc-h2"><a href="#15-3sum">15. 3Sum</a></li>
+<li class="toc-entry toc-h2"><a href="#11-container-with-most-water">11. Container With Most Water</a></li>
+<li class="toc-entry toc-h2">
+<a href="#reflection-array">Reflection: Array</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#kadanes-algorithm">Kadane’s Algorithm</a></li>
+<li class="toc-entry toc-h3"><a href="#two-pointers-technique">Two-Pointers Technique</a></li>
+</ul>
+</li>
 </ul>
     </div>
     <hr>
     
     <div id="markdown-content">
-      <p>In this project, I will try to solve 75 Leetcode questions as listed in this <a href="https://www.teamblind.com/post/New-Year-Gift---Curated-List-of-Top-75-LeetCode-Questions-to-Save-Your-Time-OaM1orEU" rel="external nofollow noopener" target="_blank">link</a>. The goal is to solve at least one question per day or until I get a job <img class="emoji" title=":joy:" alt=":joy:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f602.png" height="20" width="20">.</p>
+      <p>In this project, I will try to solve 75 Leetcode questions as listed in this <a href="https://www.teamblind.com/post/New-Year-Gift---Curated-List-of-Top-75-LeetCode-Questions-to-Save-Your-Time-OaM1orEU" rel="external nofollow noopener" target="_blank">link</a>.</p>
 
-<h2 id="1-two-sum">1. Two Sum</h2>
+<h2 id="1-two-sum"><a href="https://leetcode.com/problems/two-sum/" rel="external nofollow noopener" target="_blank">1. Two Sum</a></h2>
+
+<font size="6"> Description </font>
+
+<p>Given an array of integers <code class="language-plaintext highlighter-rouge">nums</code> and an integer <code class="language-plaintext highlighter-rouge">target</code>, return <em>indices of the two numbers such that they add up to <code class="language-plaintext highlighter-rouge">target</code></em>.</p>
+
+<p>You may assume that each input would have <strong><em>exactly</em> one solution</strong>, and you may not use the <em>same</em> element twice.</p>
+
+<p>Example 1:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: nums = [2,7,11,15], target = 9
+Output: [0,1]
+Output: Because nums[0] + nums[1] == 9, we return [0, 1].
+</code></pre></div></div>
+
+<p>Example 2:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: nums = [3,2,4], target = 6
+Output: [1,2]
+</code></pre></div></div>
+
+<font size="6"> Solution </font>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">twoSum</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">nums</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">target</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+        <span class="n">dic</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">num</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="n">nums</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">dic</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[</span><span class="n">dic</span><span class="p">[</span><span class="n">num</span><span class="p">],</span> <span class="n">i</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dic</span><span class="p">[</span><span class="n">target</span> <span class="o">-</span> <span class="n">num</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+</code></pre></div></div>
+
+<h2 id="121-best-time-to-buy-and-sell-stock"><a href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock/" rel="external nofollow noopener" target="_blank">121. Best Time to Buy and Sell Stock</a></h2>
+
+<font size="6"> Description </font>
+
+<p>You are given an array <code class="language-plaintext highlighter-rouge">prices</code> where <code class="language-plaintext highlighter-rouge">prices[i]</code> is the price of a given stock on the <code class="language-plaintext highlighter-rouge">ith</code> day.</p>
+
+<p>You want to maximize your profit by choosing a <strong>single day</strong> to buy one stock and choosing a <strong>different day in the future</strong> to sell that stock.</p>
+
+<p>Return <em>the maximum profit you can achieve from this transaction</em>. If you cannot achieve any profit, return <code class="language-plaintext highlighter-rouge">0</code>.</p>
+
+<p>Example 1:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: prices = [7,1,5,3,6,4]
+Output: 5
+Explanation: Buy on day 2 (price = 1) and sell on day 5 (price = 6), profit = 6-1 = 5.
+Note that buying on day 2 and selling on day 1 is not allowed because you must buy before you sell.
+</code></pre></div></div>
+
+<p>Example 2:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: prices = [7,6,4,3,1]
+Output: 0
+Explanation: In this case, no transactions are done and the max profit = 0.
+</code></pre></div></div>
+
+<font size="6"> Solution </font>
+
+<p><strong>Two pointers starting from both ends</strong> (i.e., move left or right pointer based on which side has a better profit)</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">maxProfit</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">prices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">l</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nf">len</span><span class="p">(</span><span class="n">prices</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
+        <span class="n">minL</span> <span class="o">=</span> <span class="n">prices</span><span class="p">[</span><span class="n">l</span><span class="p">]</span>
+        <span class="n">maxR</span> <span class="o">=</span> <span class="n">prices</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+
+        <span class="k">while</span> <span class="n">l</span><span class="o">&lt;</span><span class="n">r</span><span class="p">:</span> 
+            <span class="k">if</span> <span class="n">prices</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">minL</span><span class="p">:</span> 
+                <span class="n">minL</span> <span class="o">=</span> <span class="n">prices</span><span class="p">[</span><span class="n">l</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">prices</span><span class="p">[</span><span class="n">r</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">maxR</span><span class="p">:</span> 
+                <span class="n">maxR</span> <span class="o">=</span> <span class="n">prices</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">prices</span><span class="p">[</span><span class="n">r</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">minL</span> <span class="o">&gt;</span> <span class="n">maxR</span> <span class="o">-</span> <span class="n">prices</span><span class="p">[</span><span class="n">l</span><span class="o">+</span><span class="mi">1</span><span class="p">]:</span> 
+                <span class="n">r</span> <span class="o">-=</span> <span class="mi">1</span> 
+            <span class="k">else</span><span class="p">:</span> 
+                <span class="n">l</span> <span class="o">+=</span> <span class="mi">1</span> 
+
+        <span class="k">return</span> <span class="n">maxR</span> <span class="o">-</span> <span class="n">minL</span> <span class="k">if</span> <span class="n">maxR</span> <span class="o">&gt;=</span> <span class="n">minL</span> <span class="k">else</span> <span class="mi">0</span>
+</code></pre></div></div>
+
+<p><strong>Two pointers starting from right</strong> (i.e., find highest price and then find the lowest price before it, fastest solution)</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">maxProfit</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">prices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">max_profit</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">max_price</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">prices</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">prices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">max_price</span><span class="p">:</span>
+                <span class="n">max_price</span> <span class="o">=</span> <span class="n">prices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">max_profit</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span><span class="n">max_profit</span><span class="p">,</span> <span class="n">max_price</span> <span class="o">-</span> <span class="n">prices</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">max_profit</span>
+</code></pre></div></div>
+
+<p><strong>Two pointers starting from left</strong> (i.e., find lowest price and then find the highest price after it)</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">maxProfit</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">prices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">min_price</span> <span class="o">=</span> <span class="nf">float</span><span class="p">(</span><span class="sh">'</span><span class="s">inf</span><span class="sh">'</span><span class="p">)</span>
+        <span class="n">max_profit</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">prices</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">prices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">min_price</span><span class="p">:</span>
+                <span class="n">min_price</span> <span class="o">=</span> <span class="n">prices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">max_profit</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span><span class="n">max_profit</span><span class="p">,</span> <span class="n">prices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">min_price</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">max_profit</span>
+</code></pre></div></div>
+
+<h2 id="217-contains-duplicate"><a href="https://leetcode.com/problems/contains-duplicate/" rel="external nofollow noopener" target="_blank">217. Contains Duplicate</a></h2>
+
+<font size="6"> Description </font>
+
+<p>Given an integer array <code class="language-plaintext highlighter-rouge">nums</code>, return <code class="language-plaintext highlighter-rouge">true</code> if any value appears <strong>at least twice</strong> in the array, and return <code class="language-plaintext highlighter-rouge">false</code> if every element is distinct.</p>
+
+<font size="6"> Solution </font>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">containsDuplicate</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">nums</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="n">dic</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">nums</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">dic</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dic</span><span class="p">[</span><span class="n">num</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+</code></pre></div></div>
+
+<h2 id="238-product-of-array-except-self"><a href="https://leetcode.com/problems/product-of-array-except-self/" rel="external nofollow noopener" target="_blank">238. Product of Array Except Self</a></h2>
+
+<font size="6"> Description </font>
+
+<p>Given an integer array <code class="language-plaintext highlighter-rouge">nums</code>, return an array <code class="language-plaintext highlighter-rouge">answer</code> such that <code class="language-plaintext highlighter-rouge">answer[i]</code> is equal to the product of all the elements of <code class="language-plaintext highlighter-rouge">nums</code> except <code class="language-plaintext highlighter-rouge">nums[i]</code>.</p>
+
+<p>The product of any prefix or suffix of <code class="language-plaintext highlighter-rouge">nums</code> is <strong>guaranteed</strong> to fit in a <strong>32-bit</strong> integer.</p>
+
+<p>You must write an algorithm that runs in <code class="language-plaintext highlighter-rouge">O(n)</code> time and without using the division operation.</p>
+
+<p>Example 1:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: nums = [1,2,3,4]
+Output: [24,12,8,6]
+</code></pre></div></div>
+
+<p>Example 2:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: nums = [-1,1,0,-3,3]
+Output: [0,0,9,0,0]
+</code></pre></div></div>
+
+<font size="6"> Solution </font>
+
+<p>We will use two arrays to store the product of all elements to the left and right of each element. Then, we will multiply the two arrays to get the final result.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">productExceptSelf</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">nums</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nf">len</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span>
+        <span class="n">right</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nf">len</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nf">len</span><span class="p">(</span><span class="n">nums</span><span class="p">)):</span>
+            <span class="n">left</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">left</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">right</span><span class="p">[</span><span class="nf">len</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">right</span><span class="p">[</span><span class="nf">len</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span><span class="o">-</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">nums</span><span class="p">[</span><span class="nf">len</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span><span class="o">-</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">left</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">right</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">nums</span><span class="p">))]</span>
+</code></pre></div></div>
+
+<h2 id="53-maximum-subarray"><a href="https://leetcode.com/problems/maximum-subarray/" rel="external nofollow noopener" target="_blank">53. Maximum Subarray</a></h2>
+
+<font size="6"> Description </font>
+
+<p>Given an integer array <code class="language-plaintext highlighter-rouge">nums</code>, find the contiguous subarray (containing at least one number) which has the largest sum and return its sum.</p>
+
+<p>A <strong>subarray</strong> is a <strong>contiguous</strong> part of an array.</p>
+
+<p>Example 1:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: nums = [-2,1,-3,4,-1,2,1,-5,4]
+Output: 6
+Explanation: [4,-1,2,1] has the largest sum = 6.
+</code></pre></div></div>
+
+<p>Example 2:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: nums = [1]
+Output: 1
+</code></pre></div></div>
+
+<p>Example 3:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: nums = [5,4,-1,7,8]
+Output: 23
+</code></pre></div></div>
+
+<font size="6"> Solution </font>
+
+<p>Use Kadane’s algorithm to find the maximum subarray sum. The idea is to keep track of the maximum sum of subarrays ending at each index. If the sum is negative, we reset it to 0. Refer to <a href="https://www.youtube.com/watch?v=86CQq3pKSUw" rel="external nofollow noopener" target="_blank">this</a> video and <a href="https://www.geeksforgeeks.org/largest-sum-contiguous-subarray/" rel="external nofollow noopener" target="_blank">https://www.geeksforgeeks.org/largest-sum-contiguous-subarray/</a> article for more details.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">maxSubArray</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">nums</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">nums</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">accsum</span> <span class="o">=</span> <span class="n">nums</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nums</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span> 
+            <span class="n">accsum</span> <span class="o">+=</span> <span class="n">n</span>
+            
+            <span class="k">if</span> <span class="n">accsum</span> <span class="o">&lt;=</span> <span class="n">n</span><span class="p">:</span>
+                <span class="n">accsum</span> <span class="o">=</span> <span class="n">n</span> 
+                        
+            <span class="k">if</span> <span class="n">accsum</span> <span class="o">&gt;=</span> <span class="n">res</span><span class="p">:</span> 
+                <span class="n">res</span> <span class="o">=</span> <span class="n">accsum</span> 
+
+        <span class="k">return</span> <span class="n">res</span> 
+</code></pre></div></div>
+
+<p>Dynamic programming solution (from <a href="https://www.geeksforgeeks.org/largest-sum-contiguous-subarray/" rel="external nofollow noopener" target="_blank">greeksforgeeks</a>)</p>
+
+<p>Observation: <code class="language-plaintext highlighter-rouge">DP[i] = max(DP[i-1] + nums[i], nums[i])</code></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">maxSubArray</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">nums</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">DP</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nf">len</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span>
+        <span class="n">DP</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">nums</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nf">len</span><span class="p">(</span><span class="n">nums</span><span class="p">)):</span>
+            <span class="n">DP</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span><span class="n">DP</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">return</span> <span class="nf">max</span><span class="p">(</span><span class="n">DP</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="152-maximum-product-subarray"><a href="https://leetcode.com/problems/maximum-product-subarray/" rel="external nofollow noopener" target="_blank">152. Maximum Product Subarray</a></h2>
+
+<font size="6"> Description </font>
+
+<p>Given an integer array <code class="language-plaintext highlighter-rouge">nums</code>, find a contiguous non-empty subarray within the array that has the largest product, and return the product.</p>
+
+<p>It is <strong>guaranteed</strong> that the answer will fit in a <strong>32-bit</strong> integer.</p>
+
+<p>Example 1:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: nums = [2,3,-2,4]
+Output: 6
+Explanation: [2,3] has the largest product 6.
+</code></pre></div></div>
+
+<p>Example 2:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: nums = [-2,0,-1]
+Output: 0
+Explanation: The result cannot be 2, because [-2,-1] is not a subarray.
+</code></pre></div></div>
+
+<font size="6"> Solution </font>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">maxProduct</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">nums</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span>
+        <span class="n">cumMax</span> <span class="o">=</span> <span class="mi">1</span> 
+        <span class="n">cumMin</span> <span class="o">=</span> <span class="mi">1</span> 
+        
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nums</span><span class="p">:</span> 
+            
+            <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> 
+                <span class="n">cumMax</span> <span class="o">=</span> <span class="mi">1</span> 
+                <span class="n">cumMin</span> <span class="o">=</span> <span class="mi">1</span> 
+                <span class="k">continue</span> 
+            
+            <span class="n">temp</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span><span class="n">cumMax</span> <span class="o">*</span> <span class="n">n</span><span class="p">,</span> <span class="n">cumMin</span> <span class="o">*</span> <span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+            <span class="n">cumMin</span> <span class="o">=</span> <span class="nf">min</span><span class="p">(</span><span class="n">cumMax</span> <span class="o">*</span> <span class="n">n</span><span class="p">,</span> <span class="n">cumMin</span> <span class="o">*</span> <span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+            <span class="n">cumMax</span> <span class="o">=</span> <span class="n">temp</span> 
+            
+            <span class="n">res</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">cumMax</span><span class="p">)</span>
+            
+        <span class="k">return</span> <span class="n">res</span>
+</code></pre></div></div>
+
+<h2 id="153-find-minimum-in-rotated-sorted-array"><a href="https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/" rel="external nofollow noopener" target="_blank">153. Find Minimum in Rotated Sorted Array</a></h2>
+
+<font size="6"> Description </font>
+
+<p>Suppose an array of length <code class="language-plaintext highlighter-rouge">n</code> sorted in ascending order is <strong>rotated</strong> between <code class="language-plaintext highlighter-rouge">1</code> and <code class="language-plaintext highlighter-rouge">n</code> times. For example, the array <code class="language-plaintext highlighter-rouge">nums = [0,1,2,4,5,6,7]</code> might become:</p>
+
+<ul>
+  <li>
+<code class="language-plaintext highlighter-rouge">[4,5,6,7,0,1,2]</code> if it was rotated <code class="language-plaintext highlighter-rouge">4</code> times.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">[0,1,2,4,5,6,7]</code> if it was rotated <code class="language-plaintext highlighter-rouge">7</code> times.</li>
+</ul>
+
+<p>Notice that <strong>rotating</strong> an array <code class="language-plaintext highlighter-rouge">[a[0], a[1], a[2], ..., a[n-1]]</code> 1 time results in the array <code class="language-plaintext highlighter-rouge">[a[n-1], a[0], a[1], a[2], ..., a[n-2]]</code>.</p>
+
+<p>Given the sorted rotated array <code class="language-plaintext highlighter-rouge">nums</code> of <strong>unique</strong> elements, return <em>the minimum element of this array</em>.</p>
+
+<p>You must write an algorithm that runs in <code class="language-plaintext highlighter-rouge">O(log n) time</code>.</p>
+
+<p>Example 1:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: nums = [3,4,5,1,2]
+Output: 1
+Explanation: The original array was [1,2,3,4,5] rotated 3 times.
+</code></pre></div></div>
+
+<p>Example 2:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: nums = [4,5,6,7,0,1,2]
+Output: 0
+Explanation: The original array was [0,1,2,4,5,6,7] and it was rotated 4 times.
+</code></pre></div></div>
+
+<p>Example 3:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: nums = [11,13,15,17]
+Output: 11
+Explanation: The original array was [11,13,15,17] and it was rotated 4 times.
+</code></pre></div></div>
+
+<font size="6"> Solution </font>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">findMin</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">nums</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">left</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nf">len</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">nums</span><span class="p">[</span><span class="n">left</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">nums</span><span class="p">[</span><span class="n">right</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">nums</span><span class="p">[</span><span class="n">left</span><span class="p">]</span>
+        
+        <span class="k">while</span> <span class="n">left</span> <span class="o">&lt;</span> <span class="n">right</span><span class="p">:</span>
+            <span class="n">mid</span> <span class="o">=</span> <span class="p">(</span><span class="n">left</span> <span class="o">+</span> <span class="n">right</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+            <span class="k">if</span> <span class="n">nums</span><span class="p">[</span><span class="n">mid</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">nums</span><span class="p">[</span><span class="n">right</span><span class="p">]:</span>
+                <span class="n">left</span> <span class="o">=</span> <span class="n">mid</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">right</span> <span class="o">=</span> <span class="n">mid</span>
+        
+        <span class="k">return</span> <span class="n">nums</span><span class="p">[</span><span class="n">left</span><span class="p">]</span>
+</code></pre></div></div>
+
+<h2 id="33-search-in-rotated-sorted-array"><a href="https://leetcode.com/problems/search-in-rotated-sorted-array/" rel="external nofollow noopener" target="_blank">33. Search in Rotated Sorted Array</a></h2>
+
+<font size="6"> Description </font>
+
+<p>There is an integer array <code class="language-plaintext highlighter-rouge">nums</code> sorted in ascending order (with <strong>distinct</strong> values).</p>
+
+<p>Prior to being passed to your function, <code class="language-plaintext highlighter-rouge">nums</code> is <strong>rotated</strong> at an unknown pivot index <code class="language-plaintext highlighter-rouge">k</code> (<code class="language-plaintext highlighter-rouge">0 &lt;= k &lt; nums.length</code>) such that the resulting array is <code class="language-plaintext highlighter-rouge">[nums[k], nums[k+1], ..., nums[n-1], nums[0], nums[1], ..., nums[k-1]]</code> (0-indexed). For example, <code class="language-plaintext highlighter-rouge">[0,1,2,4,5,6,7]</code> might be rotated at pivot index <code class="language-plaintext highlighter-rouge">3</code> and become <code class="language-plaintext highlighter-rouge">[4,5,6,7,0,1,2]</code>.</p>
+
+<p>Given the array <code class="language-plaintext highlighter-rouge">nums</code> <strong>after</strong> the rotation and an integer <code class="language-plaintext highlighter-rouge">target</code>, return <em>the index of</em> <code class="language-plaintext highlighter-rouge">target</code> <em>if it is in</em> <code class="language-plaintext highlighter-rouge">nums</code>, <em>or</em> <code class="language-plaintext highlighter-rouge">-1</code> <em>if it is not in</em> <code class="language-plaintext highlighter-rouge">nums</code>.</p>
+
+<p>You must write an algorithm with <code class="language-plaintext highlighter-rouge">O(log n)</code> runtime complexity.</p>
+
+<p>Example 1:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: nums = [4,5,6,7,0,1,2], target = 0
+Output: 4
+</code></pre></div></div>
+
+<p>Example 2:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: nums = [4,5,6,7,0,1,2], target = 3
+Output: -1
+</code></pre></div></div>
+
+<font size="6"> Solution </font>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">nums</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">target</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">left</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nf">len</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
+
+        <span class="k">while</span> <span class="n">left</span> <span class="o">&lt;=</span> <span class="n">right</span><span class="p">:</span>
+            <span class="n">mid</span> <span class="o">=</span> <span class="p">(</span><span class="n">left</span> <span class="o">+</span> <span class="n">right</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+            <span class="k">if</span> <span class="n">nums</span><span class="p">[</span><span class="n">mid</span><span class="p">]</span> <span class="o">==</span> <span class="n">target</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">mid</span>
+            <span class="k">elif</span> <span class="n">nums</span><span class="p">[</span><span class="n">mid</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">nums</span><span class="p">[</span><span class="n">left</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">nums</span><span class="p">[</span><span class="n">left</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">target</span> <span class="o">&lt;</span> <span class="n">nums</span><span class="p">[</span><span class="n">mid</span><span class="p">]:</span>
+                    <span class="n">right</span> <span class="o">=</span> <span class="n">mid</span> <span class="o">-</span><span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">left</span> <span class="o">=</span> <span class="n">mid</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">nums</span><span class="p">[</span><span class="n">mid</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">target</span> <span class="o">&lt;=</span> <span class="n">nums</span><span class="p">[</span><span class="n">right</span><span class="p">]:</span>
+                    <span class="n">left</span> <span class="o">=</span> <span class="n">mid</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">right</span> <span class="o">=</span> <span class="n">mid</span> <span class="o">-</span> <span class="mi">1</span>
+        
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+</code></pre></div></div>
+
+<h2 id="15-3sum"><a href="https://leetcode.com/problems/3sum/" rel="external nofollow noopener" target="_blank">15. 3Sum</a></h2>
+
+<font size="6"> Description </font>
+
+<p>Given an integer array <code class="language-plaintext highlighter-rouge">nums</code>, return <em>all the triplets</em> <code class="language-plaintext highlighter-rouge">[nums[i], nums[j], nums[k]]</code> <em>such that</em> <code class="language-plaintext highlighter-rouge">i != j</code>, <code class="language-plaintext highlighter-rouge">i != k</code>, and <code class="language-plaintext highlighter-rouge">j != k</code>, and <code class="language-plaintext highlighter-rouge">nums[i] + nums[j] + nums[k] == 0</code>.</p>
+
+<p>Notice that the solution set must not contain duplicate triplets.</p>
+
+<p>Example 1:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: nums = [-1,0,1,2,-1,-4]
+Output: [[-1,-1,2],[-1,0,1]]
+</code></pre></div></div>
+
+<p>Example 2:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: nums = [0,1,1]
+Output: []
+</code></pre></div></div>
+
+<font size="6"> Solution </font>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">threeSum</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">nums</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+        <span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">nums</span><span class="p">]</span> <span class="k">if</span> <span class="nf">sum</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="p">[]</span>
+        
+        <span class="n">nums</span><span class="p">.</span><span class="nf">sort</span><span class="p">()</span>
+
+        <span class="n">n</span> <span class="o">=</span> <span class="nf">len</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="k">continue</span>
+            
+            <span class="n">left</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">-</span><span class="mi">1</span>
+
+            <span class="k">while</span> <span class="n">left</span> <span class="o">&lt;</span> <span class="n">right</span><span class="p">:</span>
+                <span class="n">sum3</span> <span class="o">=</span> <span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">nums</span><span class="p">[</span><span class="n">left</span><span class="p">]</span> <span class="o">+</span> <span class="n">nums</span><span class="p">[</span><span class="n">right</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">sum3</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">res</span><span class="p">.</span><span class="nf">append</span><span class="p">([</span><span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">nums</span><span class="p">[</span><span class="n">left</span><span class="p">],</span> <span class="n">nums</span><span class="p">[</span><span class="n">right</span><span class="p">]])</span>
+                    <span class="n">left</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">right</span> <span class="o">-=</span> <span class="mi">1</span>
+                    <span class="k">while</span> <span class="n">left</span> <span class="o">&lt;</span> <span class="n">right</span> <span class="ow">and</span> <span class="n">nums</span><span class="p">[</span><span class="n">left</span><span class="p">]</span> <span class="o">==</span> <span class="n">nums</span><span class="p">[</span><span class="n">left</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                        <span class="n">left</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">while</span> <span class="n">left</span> <span class="o">&lt;</span> <span class="n">right</span> <span class="ow">and</span> <span class="n">nums</span><span class="p">[</span><span class="n">right</span><span class="p">]</span> <span class="o">==</span> <span class="n">nums</span><span class="p">[</span><span class="n">right</span><span class="o">+</span><span class="mi">1</span><span class="p">]:</span>
+                        <span class="n">right</span> <span class="o">-=</span> <span class="mi">1</span>
+                <span class="k">elif</span> <span class="n">sum3</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">left</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">right</span> <span class="o">-=</span> <span class="mi">1</span>
+        
+        <span class="k">return</span> <span class="n">res</span>
+</code></pre></div></div>
+
+<h2 id="11-container-with-most-water"><a href="https://leetcode.com/problems/container-with-most-water/" rel="external nofollow noopener" target="_blank">11. Container With Most Water</a></h2>
+
+<font size="6"> Description </font>
+
+<p>Given <code class="language-plaintext highlighter-rouge">n</code> non-negative integers <code class="language-plaintext highlighter-rouge">a1, a2, ..., an</code> , where each represents a point at coordinate <code class="language-plaintext highlighter-rouge">(i, ai)</code>. <code class="language-plaintext highlighter-rouge">n</code> vertical lines are drawn such that the two endpoints of the line <code class="language-plaintext highlighter-rouge">i</code> is at <code class="language-plaintext highlighter-rouge">(i, ai)</code> and <code class="language-plaintext highlighter-rouge">(i, 0)</code>. Find two lines, which, together with the x-axis forms a container, such that the container contains the most water.</p>
+
+<p>Notice that you may not slant the container.</p>
+
+<p>Example 1:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: height = [1,8,6,2,5,4,8,3,7]
+Output: 49
+Explanation: The above vertical lines are represented by array [1,8,6,2,5,4,8,3,7]. In this case, the max area of water (blue section) the container can contain is 49.
+</code></pre></div></div>
+
+<p>Example 2:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input: height = [1,1]
+Output: 1
+</code></pre></div></div>
+
+<font size="6"> Solution </font>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Solution</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">maxArea</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">left</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nf">len</span><span class="p">(</span><span class="n">height</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">left</span> <span class="o">&lt;</span> <span class="n">right</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="nf">min</span><span class="p">(</span><span class="n">height</span><span class="p">[</span><span class="n">left</span><span class="p">],</span> <span class="n">height</span><span class="p">[</span><span class="n">right</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">right</span> <span class="o">-</span> <span class="n">left</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">height</span><span class="p">[</span><span class="n">left</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">height</span><span class="p">[</span><span class="n">right</span><span class="p">]:</span>
+                <span class="n">left</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">right</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">res</span>
+</code></pre></div></div>
+
+<h2 id="reflection-array">Reflection: Array</h2>
+
+<h3 id="kadanes-algorithm">Kadane’s Algorithm</h3>
+
+<h3 id="two-pointers-technique">Two-Pointers Technique</h3>
+
 
     </div>
   </article>
@@ -166,31 +657,31 @@
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2022/displaying-external-posts-on-your-al-folio-blog/">Displaying External Posts on Your al-folio Blog</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2024/erasing-concepts/">Fake Taylor Swift and the Adversarial Game of Concept Erasure and Injection</a>
   </li>
 
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/proj_erasing_concepts_results_2/">Erasing Concepts - Experimental Results 2</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/watermark-diffusion/">Tree-Ring Watermarks - Fingerprints for Diffusion Images that are Invisible and Robust</a>
   </li>
 
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/proj_erasing_concepts_diffusion_CLIP/">Erasing Undesired Concepts from Diffusion Models - CLIP</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/fairness-irt/">Comprehensive Algorithm Portfolio Evaluation using Item Response Theory</a>
   </li>
 
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/postdoc_report/">Postdoc Working Report</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/aml-overview/">Tutorial on Adversarial Machine Learning - Part 2</a>
   </li>
 
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/proj_erasing_concepts_results_1/">Erasing Concepts - Experimental Results</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/aml-intro/">Tutorial on Adversarial Machine Learning - Part 1</a>
   </li>
 
 </div>
@@ -201,7 +692,7 @@
     <!-- Footer -->    
     <footer class="fixed-bottom">
       <div class="container mt-0">
-        © Copyright 2023 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+        © Copyright 2024 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
 
       </div>
     </footer>

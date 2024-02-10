@@ -38,7 +38,7 @@
     <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
     
     <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
-    <link rel="canonical" href="http://localhost:4000/blog/2023/erasing-concepts/">
+    <link rel="canonical" href="https://tuananhbui89.github.io/blog/2023/erasing-concepts/">
 
     <!-- Dark Mode -->
     
@@ -146,7 +146,12 @@
     <div id="table-of-contents">
       <ul id="toc" class="section-nav">
 <li class="toc-entry toc-h2"><a href="#about-the-paper">About the paper</a></li>
-<li class="toc-entry toc-h2"><a href="#approach">Approach</a></li>
+<li class="toc-entry toc-h2">
+<a href="#approach">Approach</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#the-final-objective-function">The Final Objective Function</a></li>
+</ul>
+</li>
 <li class="toc-entry toc-h2"><a href="#how-to-implement">How to implement</a></li>
 <li class="toc-entry toc-h2"><a href="#something-to-note">Something to note</a></li>
 </ul>
@@ -201,7 +206,7 @@
 <p>It can be interpreted as: if the concept \(c\) is present in the image \(x\) in which \(P_{\theta^*} (c \mid x)\) is high, then the likelihood of the image \(x\) under the new model \(P_{\theta} (x)\) will be reduced.
 While if the concept \(c\) is not present in the image \(x\) in which \(P_{\theta^*} (c \mid x)\) is low, then the likelihood of the image \(x\) under the new model \(P_{\theta} (x)\) will be increased.</p>
 
-<p>Because of the conditional likelihood:</p>
+<p>Because of the Bayes’ rule, the likelihood of the concept \(c\) given the image \(x\) can be rewritten as follows:</p>
 
 \[P_{\theta^*} (c \mid x) = \frac{P_{\theta^*} (x \mid c) P_{\theta^*} (c)}{P_{\theta^*} (x)}\]
 
@@ -218,7 +223,7 @@ While if the concept \(c\) is not present in the image \(x\) in which \(P_{\thet
 \[\nabla_{x} \log P_{\theta^*} (x) = \frac{1}{\sigma^2} (x - \mu)\]
 
 <p>where \(\mu\) is the mean of the diffusion model, \(\sigma\) is the standard deviation of the diffusion model, and \(c\) is the concept.
-Based on the repameterization trick, the gradient of the log-likelihood is correlated with the noise \(\epsilon\) at each step as follows:</p>
+Based on the repameterization trick, the gradient of the log-likelihood is correlated with the noise \(\epsilon\) at each step as follows (linking between <a href="https://proceedings.neurips.cc/paper/2020/hash/4c5bcfec8584af0d967f1ab10179ca4b-Abstract.html" rel="external nofollow noopener" target="_blank">DDPM</a> and the <a href="https://arxiv.org/abs/2011.13456" rel="external nofollow noopener" target="_blank">score-based matching</a> approaches):</p>
 
 \[\epsilon_{\theta}(x_t,t) \propto \epsilon_{\theta^*} (x_t,t) - \eta (\epsilon_{\theta^*}(x_t,c,t) - \epsilon_{\theta^*} (x_t,t))\]
 
@@ -236,6 +241,8 @@ Therefore, the loss function can be rewritten as follows:</p>
 
 <p>where \(t \sim \mathcal{U}(0, T-1)\).</p>
 
+<h3 id="the-final-objective-function">The Final Objective Function</h3>
+
 <p>However, in the paper, instead of using the above loss function, the author proposed to use the following loss function:</p>
 
 \[\mathcal{L}(\theta) = \mathbb{E}_{x_0 \sim \mathcal{D}} \left[  \left\| \epsilon_{\theta}(x_t,c,t) - \epsilon_{\theta^*} (x_t,t) + \eta (\epsilon_{\theta^*}(x_t,c,t) - \epsilon_{\theta^*} (x_t,t)) \right\|^2 \right]\]
@@ -244,9 +251,9 @@ Therefore, the loss function can be rewritten as follows:</p>
 
 <p>The difference between the two loss functions is that the first loss function is computed based on the unconditional noise \(\epsilon_{\theta}(x_t,t)\) at the time step \(t\) while the second loss function is computed based on the noise \(\epsilon_{\theta}(x_t,c,t)\) at the time step \(t\) conditioned on the concept \(c\).</p>
 
-<p>Interpretation of the loss function: By minimizing the above loss function, we try to force the conditional noise \(\epsilon_{\theta}(x_t,c,t)\) to be close to the unconditional noise \(\epsilon_{\theta^*} (x_t,t)\) of the original model.</p>
+<p><strong>Interpretation of the loss function</strong>: By minimizing the above loss function, we try to force the conditional noise \(\epsilon_{\theta}(x_t,c,t)\) to be close to the unconditional noise \(\epsilon_{\theta^*} (x_t,t)\) of the original model. Because the noise \(\epsilon_{\theta^*} (x_t,t)\) is the signal to guide the diffusion model to generate the image \(x_{t-1}\) (recall the denoising equation \(x_{t-1} = \frac{1}{\sqrt{\alpha_t}}(x_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \epsilon_{\theta^*} (x_t,t)) + \sigma_t z\)), therefore, by forcing the conditional noise \(\epsilon_{\theta}(x_t,c,t)\) to be close to the unconditional noise \(\epsilon_{\theta^*} (x_t,t)\), we try to force the diffusion model to generate the image \(x_{t-1}\) close to the image generated without the concept \(c\).</p>
 
-<p>Note: In the above objective function, \(x_t\) is the image from the training set \(\mathcal{D}\) at time step \(t\). However, as mentioned in the paper “We exploit the model’s knowledge of the concept to synthesize training samples, thereby eliminating the need for data collection”. Therefore, in the implementation, \(x_t\) is the image generated by the fine-tuned model at time step \(t\).</p>
+<p><strong>Note</strong>: In the above objective function, \(x_t\) is the image from the training set \(\mathcal{D}\) at time step \(t\). However, as mentioned in the paper “We exploit the model’s knowledge of the concept to synthesize training samples, thereby eliminating the need for data collection”. Therefore, in the implementation, \(x_t\) is the image generated by the fine-tuned model at time step \(t\).</p>
 
 <h2 id="how-to-implement">How to implement</h2>
 
@@ -351,61 +358,33 @@ Therefore, the loss function can be rewritten as follows:</p>
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2022/displaying-external-posts-on-your-al-folio-blog/">Displaying External Posts on Your al-folio Blog</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2024/erasing-concepts/">Fake Taylor Swift and the Adversarial Game of Concept Erasure and Injection</a>
   </li>
 
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/proj_erasing_concepts_results_2/">Erasing Concepts - Experimental Results 2</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/watermark-diffusion/">Tree-Ring Watermarks - Fingerprints for Diffusion Images that are Invisible and Robust</a>
   </li>
 
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/proj_erasing_concepts_diffusion_CLIP/">Erasing Undesired Concepts from Diffusion Models - CLIP</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/conditional-diffusion/">Diffusion Models Beat GANs on Image Synthesis</a>
   </li>
 
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/postdoc_report/">Postdoc Working Report</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/diffusion-tutorial/">A Tutorial on Diffusion Models (Part 1)</a>
   </li>
 
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/proj_erasing_concepts_results_1/">Erasing Concepts - Experimental Results</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/diffusion-tutorial-p2/">A Tutorial on Diffusion Models (Part 2)</a>
   </li>
 
-<div id="giscus_thread" style="max-width: 800px; margin: 0 auto;">
-  <script>
-    let giscusTheme = localStorage.getItem("theme");
-    let giscusAttributes = {
-        "src": "https://giscus.app/client.js",
-        "data-repo": "alshedivat/al-folio",
-        "data-repo-id": "MDEwOlJlcG9zaXRvcnk2MDAyNDM2NQ==",
-        "data-category": "Comments",
-        "data-category-id": "DIC_kwDOA5PmLc4CTBt6",
-        "data-mapping": "title",
-        "data-strict": "1",
-        "data-reactions-enabled": "1",
-        "data-emit-metadata": "0",
-        "data-input-position": "bottom",
-        "data-theme": giscusTheme,
-        "data-lang": "en",
-        "crossorigin": "anonymous",
-        "async": "",
-    };
-
-
-    let giscusScript = document.createElement("script");
-    Object.entries(giscusAttributes).forEach(([key, value]) => giscusScript.setAttribute(key, value));
-    document.getElementById("giscus_thread").appendChild(giscusScript);
-  </script>
-  <noscript>Please enable JavaScript to view the <a href="http://giscus.app/?ref_noscript" rel="external nofollow noopener" target="_blank">comments powered by giscus.</a>
-</noscript>
-</div>
 </div>
 
       
@@ -414,7 +393,7 @@ Therefore, the loss function can be rewritten as follows:</p>
     <!-- Footer -->    
     <footer class="fixed-bottom">
       <div class="container mt-0">
-        © Copyright 2023 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+        © Copyright 2024 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
 
       </div>
     </footer>
