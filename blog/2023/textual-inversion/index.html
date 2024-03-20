@@ -177,6 +177,7 @@
 <p>In this blog post, I would like to break down some main steps in the implementation provided by Huggingface in the example code <a href="https://github.com/huggingface/diffusers/tree/main/examples/textual_inversion" rel="external nofollow noopener" target="_blank">here</a>. There are also two notebooks for training (learning conceptual token) and inference (using conceptual token to generate new images) <a href="https://colab.research.google.com/github/huggingface/notebooks/blob/main/diffusers/sd_textual_inversion_training.ipynb" rel="external nofollow noopener" target="_blank">here</a> and <a href="https://colab.research.google.com/github/huggingface/notebooks/blob/main/diffusers/stable_conceptualizer_inference.ipynb" rel="external nofollow noopener" target="_blank">here</a>.</p>
 
 <p>There are several main points as follows:</p>
+
 <ul>
   <li>How to set up the specific token in the input prompt.</li>
   <li>How to prepare the dataset</li>
@@ -185,10 +186,38 @@
 
 <h3 id="how-to-set-up-the-specific-token-and-the-input-prompt">How to set up the specific token and the input prompt</h3>
 
-<p>In this project, there is an assumption that every visual concept can be represented by a paragraph of text. For example, the visual concept of your dog can be described as: “The Shiba dog boasts a striking and distinctive appearance that captivates all who gaze upon it. With a compact yet sturdy build, its confident stance exudes an air of self-assured elegance. A plush double coat of fur, often seen in shades of red, sesame, black and tan, or cream, adds to its allure. The fur frames a fox-like face, adorned with piercing almond-shaped eyes that gleam with intelligence and curiosity. Its erect, triangular ears stand at attention, poised to catch every sound that graces its surroundings. A tightly curled tail rests gracefully over its back, accentuating the Shiba’s poise and dignity.” (I use ChatGPT to write this paragraph about a Shiba dog)</p>
+<p>In this project, there is an assumption that every visual concept can be represented by a paragraph of text. For example, the visual concept of your Shiba dog can be described as: “The Shiba dog boasts a striking and distinctive appearance that captivates all who gaze upon it. With a compact yet sturdy build, its confident stance exudes an air of self-assured elegance. A plush double coat of fur, often seen in shades of red, sesame, black and tan, or cream, adds to its allure. The fur frames a fox-like face, adorned with piercing almond-shaped eyes that gleam with intelligence and curiosity. Its erect, triangular ears stand at attention, poised to catch every sound that graces its surroundings. A tightly curled tail rests gracefully over its back, accentuating the Shiba’s poise and dignity.” (I use ChatGPT to write this paragraph about a Shiba dog).</p>
 
-<p>However, if we use the entire paragraph to represent the visual concept, it is not efficient. Fortunately, we can just represent the whole paragraph by a single token (in the paper they used the token <code class="language-plaintext highlighter-rouge">S*</code>). 
-So the first step is to set up a placeholder for the specific token in the input prompt. In the implementation, it can be set by the argument <code class="language-plaintext highlighter-rouge">placeholder_token</code> (default value is <code class="language-plaintext highlighter-rouge">&lt;cat-toy&gt;</code>).</p>
+<p>After that, we can use the paragraph to represent the visual concept to generate new images. For example, if we want to generate your Shiba dog in the beach, “<em>The Shiba dog … poise and dignity</em> <strong>on the beach</strong>” can be used as the input prompt.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/textual_inversion/examples-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/textual_inversion/examples-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/textual_inversion/examples-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/textual_inversion/examples.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Examples of Textual Inversion.
+</div>
+
+<p>However, if we use the entire paragraph to represent the visual concept, it is not efficient. More importantly, even arbitrary long, the paragraph may not be able to capture the visual concept as expected. 
+Therefore, instead of using the entire paragraph, the Textual Inversion paper propose to invert the inference process (i.e, from image to text prompt) to learn a specific token that can represent the visual concept (in the paper they used the token <code class="language-plaintext highlighter-rouge">S*</code>)
+And then, we can just use the specific token to generate new images. For example, with the same query as before, we can use “<strong>a photo of <code class="language-plaintext highlighter-rouge">S*</code> on the beach</strong>” as the input prompt.</p>
+
+<p>So the first step is to set up a placeholder for the specific token in the input prompt. In the implementation, it can be set by the argument <code class="language-plaintext highlighter-rouge">placeholder_token</code> (default value is <code class="language-plaintext highlighter-rouge">&lt;cat-toy&gt;</code>).</p>
 
 <p>There is also an argument <code class="language-plaintext highlighter-rouge">learnable_property</code> (option <code class="language-plaintext highlighter-rouge">object</code> or <code class="language-plaintext highlighter-rouge">style</code>) which is used to choose type of neural prompt from two sets of templates <code class="language-plaintext highlighter-rouge">imagenet_templates_small</code> (if set to <code class="language-plaintext highlighter-rouge">object</code>) or <code class="language-plaintext highlighter-rouge">imagenet_style_templates_small</code> (if set to <code class="language-plaintext highlighter-rouge">style</code>). 
 Some examples of the templates are as follows:</p>
@@ -313,13 +342,13 @@ The input prompt then will be tokenized by the tokenizer.</p>
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/anti-dreambooth/">Anti-Dreambooth</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2024/erasing-concepts/">Fake Taylor Swift and the Adversarial Game of Concept Erasure and Injection</a>
   </li>
 
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2024/erasing-concepts/">Fake Taylor Swift and the Adversarial Game of Concept Erasure and Injection</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/anti-dreambooth/">Anti-Dreambooth</a>
   </li>
 
   
