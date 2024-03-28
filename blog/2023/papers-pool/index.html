@@ -191,15 +191,21 @@
     </div>
 </div>
 
-<p>Most diffusion models’ theory is based on the noising/degration process using Gaussian noise, i.e., in the forward diffusion process, a small amount of Gaussian noise is added to the image, eventually leading to a totally noised image. If we think about the data space as a manifold, the noising process can be seen as a random walk on the manifold. The diffusion model is trained to reverse this degration process, i.e., given a noised image, the model should be able to recover the original image.</p>
+<p>Many papers on diffusion models primarily focus on the diffusion/degradation process through the addition of Gaussian noise. This method involves introducing small amounts of Gaussian noise to an image during the forward diffusion process, gradually resulting in a heavily noised image. Conceptually, this noising process can be likened to a random walk on a manifold if we consider the data space as such. The objective of a diffusion model is to effectively reverse this degradation process, aiming to reconstruct the original image from its noised version.</p>
 
-<p>In this paper, the authors ask the question: <strong><em>“Can we replace the Gaussian noise in the degration process with an image transformation operation, such as blurring, pixelate or masking?”</em></strong>
-The mathematical formulation of the cold diffusion model is simple: given an input image \(x\) and a transformation function \(D\), the reverse process is parameterized by a neural network \(R_\theta\):</p>
+<p>In this paper, the authors posed an intriguing question: <strong><em>“Can we replace the Gaussian noise in the degradation process with an image transformation operation, such as blurring, pixelation, or masking?”</em></strong>.
+Surprisingly, this work demonstrated that it is indeed possible. The authors proposed a generalized diffusion model, termed <strong><em>Cold Diffusion</em></strong>, that can employ arbitrary image transformations in the degradation process. The model is trained to invert these transformations and recover the original image. By using some generation tricks, the model not only can recover the original image but also can generate new/novel images. 
+This work opens up a new direction for diffusion models, allowing them to be applied to a broader range of image transformations beyond Gaussian noise.</p>
+
+<p><strong>What is the cold diffusion model?</strong></p>
+
+<p>The proposed cold diffusion model presents a straightforward mathematical formulation (I still wonder why they called it “cold” <img class="emoji" title=":joy:" alt=":joy:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f602.png" height="20" width="20">).
+Given an input image \(x\) and a transformation function \(D\), the reverse process is parameterized by a neural network \(R_\theta\):</p>
 
 \[\underset{\theta}{\min} \mathbb{E}_{x \sim \mathcal{X}} \| R_\theta(D(x,t),t) - x \|\]
 
 <p>To train the standard diffusion models such as DDPM, the high level idea is to match the predicted noise with the true noise added at particular diffusion step.
-However, in the cold diffusion model, the above objective is actually more similar to the autoencoder, i.e., the model is trained to minimize the difference between the input image and the recovered image. The difference to the autoencoder is that the degration process is done by a transformation function \(D\) not by an encoder, and more importantly, is done through a series of steps, not just one step.
+However, in the cold diffusion model, the above objective is actually more similar to the autoencoder, i.e., the model is trained to minimize the difference between the input image and the recovered image. The difference to the autoencoder is that the degradation process is done by a transformation function \(D\) not by an encoder, and more importantly, is done through a series of steps, not just one step.
 To me, the more similar to the diffusion model might be the paper <a href="https://arxiv.org/abs/2209.05442" rel="external nofollow noopener" target="_blank">Soft Diffusion: Score Matching for General Corruptions</a>.</p>
 
 <p><strong>How to sampling?</strong></p>
@@ -226,8 +232,8 @@ To me, the more similar to the diffusion model might be the paper <a href="https
 
 <p>Naively, after training the cold diffusion model, we can sample the image as the algorithm 1 above, i.e., at each step, we apply diffusion inversion (read more about it <a href="https://tuananhbui89.github.io/blog/2023/diffusion-tutorial-p2/#diffusion-inversion">here</a>) to predict the original image from current step \(\hat{x}_0 = R(x_s, s)\), then apply the transformation function \(D\) to get the next step \(x_{s-1} = D(\hat{x}_0, s-1)\), and so on.
 It is worth noting that in the standard diffusion model, the initial image \(x_T\) is sampled from a Gaussian distribution; however,
-in this cold diffusion model, the initial image (they called it “a degraded sample”) is sampled from the final step of the degration process, i.e., \(x_T = D(x_0, T)\).
-It is make sense to me because there is no mathematical formulation for the degration process unlike as in the standard one, where \(x_T \sim \mathcal{N}(0, I)\). (Refer to Section 5.2 in the paper).</p>
+in this cold diffusion model, the initial image (they called it “a degraded sample”) is sampled from the final step of the degradation process, i.e., \(x_T = D(x_0, T)\).
+It is make sense to me because there is no mathematical formulation for the degradation process unlike as in the standard one, where \(x_T \sim \mathcal{N}(0, I)\). (Refer to Section 5.2 in the paper).</p>
 
 <p>So the author proposed some tricks to improve the sampling process:</p>
 
@@ -278,8 +284,8 @@ It is make sense to me because there is no mathematical formulation for the degr
 <p>So after the success of this paper, we might ask “What is the core of the diffusion model that makes it work?” To me, there are few key components:</p>
 
 <ul>
-  <li>The two opposite processes: degration and recovery. Interestingly, the degration process can be done by a wide range of operations, even with animorphosis operators, that adds a random animal image to the original image. At the end of the degration process, the image is still a valid image (clean and clear under human eyes). Therefore, to me, the final goal of the degration process is to remove totally the information of the original image, not to make the image unrecognizable (nothing to do with human preception here). Mathematically, \(I(x, D(x,t)) \to 0\) when \(t\) becomes larger, where \(I\) is the mutual information between \(x\) and \(D(x,t)\).</li>
-  <li>The iterative process: the diffusion/degration process is done through a series of steps, not just one step.</li>
+  <li>The two opposite processes: degradation and recovery. Interestingly, the degradation process can be done by a wide range of operations, even with animorphosis operators, that adds a random animal image to the original image. At the end of the degradation process, the image is still a valid image (clean and clear under human eyes). Therefore, to me, the final goal of the degradation process is to remove totally the information of the original image, not to make the image unrecognizable (nothing to do with human preception here). Mathematically, \(I(x, D(x,t)) \to 0\) when \(t\) becomes larger, where \(I\) is the mutual information between \(x\) and \(D(x,t)\).</li>
+  <li>The iterative process: the diffusion/degradation process is done through a series of steps, not just one step.</li>
   <li>What is the source of stochasticity which decides the novelty of the generated images?</li>
 </ul>
 
