@@ -150,6 +150,7 @@
     
     <div id="table-of-contents">
       <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h2"><a href="#cold-diffusion-inverting-arbitrary-image-transforms-without-noise">Cold Diffusion: Inverting Arbitrary Image Transforms Without Noise</a></li>
 <li class="toc-entry toc-h2"><a href="#your-diffusion-model-is-secretly-a-zero-shot-classifier">Your Diffusion Model is Secretly a Zero-Shot Classifier</a></li>
 <li class="toc-entry toc-h2"><a href="#rethinking-conditional-diffusion-sampling-with-progressive-guidance">Rethinking Conditional Diffusion Sampling with Progressive Guidance</a></li>
 <li class="toc-entry toc-h2"><a href="#a-new-perspective-on-the-motivation-of-vae-by-dinh">A new perspective on the motivation of VAE (by Dinh)</a></li>
@@ -161,7 +162,128 @@
     <hr>
     
     <div id="markdown-content">
-      <h2 id="your-diffusion-model-is-secretly-a-zero-shot-classifier"><a href="https://arxiv.org/abs/2303.16203" rel="external nofollow noopener" target="_blank">Your Diffusion Model is Secretly a Zero-Shot Classifier</a></h2>
+      <h2 id="cold-diffusion-inverting-arbitrary-image-transforms-without-noise"><a href="https://arxiv.org/abs/2208.09392" rel="external nofollow noopener" target="_blank">Cold Diffusion: Inverting Arbitrary Image Transforms Without Noise</a></h2>
+
+<ul>
+  <li>Accepted to NeurIPS 2023.</li>
+  <li>From Tom Goldstein’s group at University of Maryland. Tom and his postdoc Micah Goldblum are two favorite leading researchers of mine. His group has published many interesting, creative and trendy (of course <img class="emoji" title=":joy:" alt=":joy:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f602.png" height="20" width="20">) papers in the field of ML, particullary in Trustworthy Machine Learning. Recently, his group won the best paper award at ICML 2023 for the watermarking on LLM paper. So good.</li>
+  <li>Github: <a href="https://github.com/arpitbansal297/Cold-Diffusion-Models" rel="external nofollow noopener" target="_blank">https://github.com/arpitbansal297/Cold-Diffusion-Models</a>
+</li>
+</ul>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/202403/cold-diffusion-example-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/202403/cold-diffusion-example-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/202403/cold-diffusion-example-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/202403/cold-diffusion-example.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+
+<p>Most diffusion models’ theory is based on the noising/degration process using Gaussian noise, i.e., in the forward diffusion process, a small amount of Gaussian noise is added to the image, eventually leading to a totally noised image. If we think about the data space as a manifold, the noising process can be seen as a random walk on the manifold. The diffusion model is trained to reverse this degration process, i.e., given a noised image, the model should be able to recover the original image.</p>
+
+<p>In this paper, the authors ask the question: <strong><em>“Can we replace the Gaussian noise in the degration process with an image transformation operation, such as blurring, pixelate or masking?”</em></strong>
+The mathematical formulation of the cold diffusion model is simple: given an input image \(x\) and a transformation function \(D\), the reverse process is parameterized by a neural network \(R_\theta\):</p>
+
+\[\underset{\theta}{\min} \mathbb{E}_{x \sim \mathcal{X}} \| R_\theta(D(x,t),t) - x \|\]
+
+<p>To train the standard diffusion models such as DDPM, the high level idea is to match the predicted noise with the true noise added at particular diffusion step.
+However, in the cold diffusion model, the above objective is actually more similar to the autoencoder, i.e., the model is trained to minimize the difference between the input image and the recovered image. The difference to the autoencoder is that the degration process is done by a transformation function \(D\) not by an encoder, and more importantly, is done through a series of steps, not just one step.
+To me, the more similar to the diffusion model might be the paper <a href="https://arxiv.org/abs/2209.05442" rel="external nofollow noopener" target="_blank">Soft Diffusion: Score Matching for General Corruptions</a>.</p>
+
+<p><strong>How to sampling?</strong></p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/202403/cold-diffusion-algorithm-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/202403/cold-diffusion-algorithm-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/202403/cold-diffusion-algorithm-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/202403/cold-diffusion-algorithm.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+
+<p>Naively, after training the cold diffusion model, we can sample the image as the algorithm 1 above, i.e., at each step, we apply diffusion inversion (read more about it <a href="https://tuananhbui89.github.io/blog/2023/diffusion-tutorial-p2/#diffusion-inversion">here</a>) to predict the original image from current step \(\hat{x}_0 = R(x_s, s)\), then apply the transformation function \(D\) to get the next step \(x_{s-1} = D(\hat{x}_0, s-1)\), and so on.
+It is worth noting that in the standard diffusion model, the initial image \(x_T\) is sampled from a Gaussian distribution; however,
+in this cold diffusion model, the initial image (they called it “a degraded sample”) is sampled from the final step of the degration process, i.e., \(x_T = D(x_0, T)\).
+It is make sense to me because there is no mathematical formulation for the degration process unlike as in the standard one, where \(x_T \sim \mathcal{N}(0, I)\). (Refer to Section 5.2 in the paper).</p>
+
+<p>So the author proposed some tricks to improve the sampling process:</p>
+
+<ul>
+  <li>Using Algorithm 2 instead of Algorithm 1 to mitigate the compounding error from the imperfect inversion function \(R_\theta\). It is based on the approximation \(D(x,s) \approx x + s . e(x) + HOT\), where \(e(x)\) is the gradient of the transformation function \(D\) at \(x\), but be considered as a constant vector (not dependent on \(s\), questionable to me). The HOT term is the higher order terms that can be ignored. But this trick is just to help the recovery process, not the generation or introducing better diversity/novelty to the generated images.</li>
+  <li>The key trick to improve the diversity is to add a small amount of noise in each sample \(x_T\).</li>
+</ul>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/202403/cold-diffusion-sample-trick-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/202403/cold-diffusion-sample-trick-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/202403/cold-diffusion-sample-trick-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/202403/cold-diffusion-sample-trick.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/202403/cold-diffusion-meme-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/202403/cold-diffusion-meme-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/202403/cold-diffusion-meme-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/202403/cold-diffusion-meme.jpeg" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+
+<p><strong>Reflection/Thoughts</strong></p>
+
+<p>So after the success of this paper, we might ask “What is the core of the diffusion model that makes it work?” To me, there are few key components:</p>
+
+<ul>
+  <li>The two opposite processes: degration and recovery. Interestingly, the degration process can be done by a wide range of operations, even with animorphosis operators, that adds a random animal image to the original image. At the end of the degration process, the image is still a valid image (clean and clear under human eyes). Therefore, to me, the final goal of the degration process is to remove totally the information of the original image, not to make the image unrecognizable (nothing to do with human preception here). Mathematically, \(I(x, D(x,t)) \to 0\) when \(t\) becomes larger, where \(I\) is the mutual information between \(x\) and \(D(x,t)\).</li>
+  <li>The iterative process: the diffusion/degration process is done through a series of steps, not just one step.</li>
+  <li>What is the source of stochasticity which decides the novelty of the generated images?</li>
+</ul>
+
+<h2 id="your-diffusion-model-is-secretly-a-zero-shot-classifier"><a href="https://arxiv.org/abs/2303.16203" rel="external nofollow noopener" target="_blank">Your Diffusion Model is Secretly a Zero-Shot Classifier</a></h2>
 
 <ul>
   <li>Accepted to ICCV 2023.</li>
