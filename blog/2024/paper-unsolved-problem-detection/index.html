@@ -192,9 +192,11 @@
 <p>Motivation:</p>
 
 <ul>
-  <li>With the development of powerful foundation Vision-Language Models (VLMs) such as LLaVA-1.5 model, now we can solve the visual question-answering (VQA) quite well by just plugging the foundation VLMs as a zero-shot learner (i.e., no need of fine-tuning on the VQA task).</li>
-  <li>However, as similar as the <strong>hallucination</strong> in LLMs, when the LLMs provide false answer confidently, the VLMs also facing the <strong>hallucination</strong> problem when they always provide answer from a given answer set even these questions are unsolvable (very important point: unsolvable with respect to a given answer set).</li>
-  <li>To systemmatically benchmark the problem, the authors proposed three new challenges/types of unsolve problems: Absent Answer Detection (AAD), Incompatible Answer Set Detection (IASD), and Incompatible Visual Question Detection (IVQD)</li>
+  <li>With the development of powerful foundation Vision-Language Models (VLMs) such as the LLaVA-1.5 model, we can now solve visual question-answering (VQA) quite well by simply plugging the foundation VLMs as zero-shot learners (i.e., no need for fine-tuning on the VQA task).</li>
+  <li>However, similar to the <strong>hallucination</strong> in LLMs, when the LLMs confidently provide false answers, the VLMs also face the hallucination problem when they always provide answers from a given answer set even when these questions are unsolvable (a very important point: unsolvable with respect to a given answer set).</li>
+  <li>To systematically benchmark the problem, the authors proposed three new challenges/types of unsolvable problems: Absent Answer Detection (AAD), Incompatible Answer Set Detection (IASD), and Incompatible Visual Question Detection (IVQD).</li>
+  <li>Note that these problems are not open-ended problems, but closed ones, i.e., the answer is limited within a given answer set. Moreover, the answer set designed by the authors does not completely cover the answer space, i.e., lacking answers like “None of the above” or “I don’t know,” making the problem become unsolvable <strong>with respect to the given answer set</strong>.</li>
+  <li>With the proposed unsolvable problems, the VLMs like GPT-4 likely provide <strong>hallucination</strong> answers, so that the authors can evaluate the trustworthiness of the VLMs.</li>
 </ul>
 
 <h2 id="introduction">Introduction</h2>
@@ -202,20 +204,41 @@
 <blockquote class="block-tip">
   <p><strong>Hallucination in LLMs</strong></p>
 
-  <p>is a well-known problem in which the model generates coherent but factually incorrect information or disconnected to the question. <br>
-Example 1: Question “How many letter “I” in the word “Apple”?” -&gt; LLMs: “There are 3 letter “I” in the word “Apple” (Factually incorrect) <br>
+  <p>is a well-known problem in which the model generates coherent but factually incorrect information or are disconnected from the question. <br>
+Example 1: Question “How many letters are “I” in the word “Apple”?” -&gt; LLMs: “There are 3 letter “I” in the word “Apple” (Factually incorrect) <br>
 Example 2: Question “What is the color of the sky?” -&gt; LLMs: “The ocean is blue” (Disconnected to the question)</p>
 </blockquote>
 
-<p><a href="https://visualqa.org/" rel="external nofollow noopener" target="_blank">Visual Question Answering</a> (VQA) is a challenging task in which a model generate natural language answers to questions about a given image. The question is usually “open-ended” which means the answer is not limited to a fixed set of answers. Therefore, the model needs to understand both visual information from the image and textual information from the question.</p>
+<p><a href="https://visualqa.org/" rel="external nofollow noopener" target="_blank">Visual Question Answering</a>  (VQA) is a challenging task in which a model generates natural language answers to questions about a given image. The question is usually “open-ended,” which means the answer is not limited to a fixed set of answers. Therefore, the model needs to understand both visual information from the image and textual information from the question.</p>
 
-<p>Comparing to the Question Answering (QA) task in NLP, VQA is more challenging in terms of the model needs to understand both visual and textual information, however, less challenging in terms of the search space to find the answer, i.e., the groundtruth in VQA is limited within the visual information of the given image, while the answer in QA can be any information in the world knowledge.</p>
+<p>Comparing VQA to the Question Answering (QA) task in NLP, VQA is more challenging because the model needs to understand both visual and textual information. However, it is less challenging in terms of the <strong>search space to find the answer</strong>. In VQA, the ground truth is limited to the visual information of the given image, whereas in QA, the answer can be any information in world knowledge.</p>
 
-<p>Given this little background, we can see that three types of problems proposed by the authors are not “open-ended” problems, but closed ones, i.e., the answer is limited within a given answer set. Moreover, the answer set designed by the authors does not completely cover the answer space, i.e., lacking answer like “None of the above” or “I don’t know”, making the problem become unsolvable <strong>with respect to the given answer set</strong>.</p>
+<p>Given this little background, we can see that the three types of problems proposed by the authors are not “open-ended” problems, but closed ones, i.e., the answer is limited within a given answer set. Moreover, the answer set designed by the authors does not completely cover the answer space, i.e., lacking answers like “None of the above” or “I don’t know,” making the problem become unsolvable <strong>with respect to the given answer set</strong>.</p>
 
-<p>Fortunately, the authors also aware of this limitation and discuss it as the <strong>training-free</strong> solutions: Adding additional options (e.g., “None of the above”) to the answer set, or adding an instruction to withhold an answer when the model is not confident (e.g., “If all the options are incorrect, answer F. None of the above” or “If the given image is irrelevant to the question, answer F. The image and question are irrelevant”).</p>
+<p>Fortunately, the authors are also aware of this limitation and discuss it as the <strong>training-free</strong> solutions: Adding additional options (e.g., “None of the above”) to the answer set or adding an instruction to withhold an answer when the model is not confident (e.g., “If all the options are incorrect, answer F. None of the above” or “If the given image is irrelevant to the question, answer F. The image and question are irrelevant”).</p>
 
-<p>The authors also proposed <strong>train-based</strong> approach, using instruction finetuning.</p>
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/2024-04-unsolved/self-created-problem.webp-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/2024-04-unsolved/self-created-problem.webp-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/2024-04-unsolved/self-created-problem.webp-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/2024-04-unsolved/self-created-problem.webp" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Sorry <img class="emoji" title=":joy:" alt=":joy:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f602.png" height="20" width="20">
+</div>
 
 <h2 id="benchmarking">Benchmarking</h2>
 
@@ -279,7 +302,8 @@ Example 2: Question “What is the color of the sky?” -&gt; LLMs: “The ocean
   <li>
 <strong>Original Standard</strong> accuracy is high, showing that the VLMs can solve the VQA task well.</li>
   <li>
-<strong>Dual Accuracy</strong> (Base) is low, showing that the VLMs are not good at detecting unsolvable problems. However, the LLaVA and GPT-4V models are still quite good at detecting unsolvable problems, without any additional approaches/aids. It is also worth noting that, the authors used the prompt ““Answer with the option’s letter from the given choices directly.” to explicitly tell the model to choose the answer from the given answer set. Therefore, it is not surprising that the low <strong>Dual Accuracy</strong>. And the <strong>not obeying the instruction</strong> ability of the GPT-4V model is quite interesting.</li>
+<strong>Dual Accuracy</strong> (Base) is low, showing that the VLMs are not good at detecting unsolvable problems.  It is also worth noting that, the authors used the prompt ““Answer with the option’s letter from the given choices directly.” to explicitly tell the model to choose the answer from the given answer set. Therefore, it is not surprising that the <strong>Dual Accuracy</strong> is low.</li>
+  <li>The <strong>Dual Accuracy</strong> (Base) of the LLaVA and GPT-4V is not quite bad, showing that the models can detect unsolvable problems to some extent (without any additional approaches/aids). Given the fact that the models are asked explicitly to choose the answer from the given answer set, showing that the model GPT-4V can ignore the instruction to provide correct answers not from the answer set is quite interesting.</li>
   <li>Adding instruction helps the model to detect unsolvable problems better, however, reducing the model’s performance on the standard VQA task (Section 5.3).</li>
 </ul>
 
