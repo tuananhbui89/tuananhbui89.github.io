@@ -10,9 +10,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Project Git | Tuan-Anh  Bui</title>
+    <title>git commit; git push; error :( | Tuan-Anh  Bui</title>
     <meta name="author" content="Tuan-Anh  Bui">
-    <meta name="description" content="git clean -xdf ... :(">
+    <meta name="description" content="Researcher in Generative AI and Trustworthy AI
+">
     <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
 
 
@@ -123,8 +124,8 @@
 <div class="post">
 
   <header class="post-header">
-    <h1 class="post-title">Project Git</h1>
-    <p class="post-meta">June 24, 2024</p>
+    <h1 class="post-title">git commit; git push; error :(</h1>
+    <p class="post-meta">June 25, 2024</p>
     <p class="post-tags">
       <a href="/blog/2024"> <i class="fas fa-calendar fa-sm"></i> 2024 </a>
         ·  
@@ -156,8 +157,12 @@
 <ul>
 <li class="toc-entry toc-h3"><a href="#cherry-pick">Cherry-pick</a></li>
 <li class="toc-entry toc-h3"><a href="#interactive-rebase">Interactive Rebase</a></li>
+<li class="toc-entry toc-h3"><a href="#git-tags">Git Tags</a></li>
+<li class="toc-entry toc-h3"><a href="#git-describe">Git Describe</a></li>
+<li class="toc-entry toc-h3"><a href="#exercises">Exercises</a></li>
 </ul>
 </li>
+<li class="toc-entry toc-h2"><a href="#working-remotely">Working Remotely</a></li>
 </ul>
     </div>
     <hr>
@@ -306,7 +311,7 @@ git commit <span class="nt">-am</span> <span class="s2">"Bug fixed"</span>
     </div>
 </div>
 
-<p>In the above example, <code class="language-plaintext highlighter-rouge">C4</code> is a merge commit of <code class="language-plaintext highlighter-rouge">C2</code> - branch <code class="language-plaintext highlighter-rouge">bugFix</code> and <code class="language-plaintext highlighter-rouge">C3</code> - branch <code class="language-plaintext highlighter-rouge">main</code>. Therefore, <code class="language-plaintext highlighter-rouge">C4</code> has two parents: <code class="language-plaintext highlighter-rouge">C2</code> and <code class="language-plaintext highlighter-rouge">C3</code>, which means <code class="language-plaintext highlighter-rouge">C4</code> contains all the changes/works of both <code class="language-plaintext highlighter-rouge">C2</code> and <code class="language-plaintext highlighter-rouge">C3</code>. 
+<p>In the above example, <code class="language-plaintext highlighter-rouge">C4</code> is a merge commit of <code class="language-plaintext highlighter-rouge">C2</code> - branch <code class="language-plaintext highlighter-rouge">bugFix</code> and <code class="language-plaintext highlighter-rouge">C3</code> - branch <code class="language-plaintext highlighter-rouge">main</code>. Therefore, <code class="language-plaintext highlighter-rouge">C4</code> has two parents: <code class="language-plaintext highlighter-rouge">C2</code> and <code class="language-plaintext highlighter-rouge">C3</code>, which means <code class="language-plaintext highlighter-rouge">C4</code> contains all the changes/works of both <code class="language-plaintext highlighter-rouge">C2</code> and <code class="language-plaintext highlighter-rouge">C3</code>.
 Moreover, in the above example, we merge <code class="language-plaintext highlighter-rouge">bugFix</code> into <code class="language-plaintext highlighter-rouge">main</code> branch (illustrated by the same color). However, we can also merge <code class="language-plaintext highlighter-rouge">main</code> into <code class="language-plaintext highlighter-rouge">bugFix</code> branch.</p>
 
 <p>Demonstration:</p>
@@ -321,6 +326,13 @@ git merge bugFix <span class="c"># merge bugFix into main</span>
 <h3 id="rebase">Rebase</h3>
 
 <p>Rebasing is the process of moving or combining a sequence of commits to a new base commit. Rebasing essentially takes a set of commits, “copies” them, and plops them down somewhere else. The advantage of rebasing is that it can be used to make a nice linear sequence of commits.</p>
+
+<ul>
+  <li>
+<code class="language-plaintext highlighter-rouge">git rebase &lt;branchA&gt; &lt;branchB&gt;</code>: rebase <code class="language-plaintext highlighter-rouge">branchA</code> onto <code class="language-plaintext highlighter-rouge">branchB</code>. This means that all the commits in <code class="language-plaintext highlighter-rouge">branchA</code> will be “copied” and “pasted” onto <code class="language-plaintext highlighter-rouge">branchB</code>. <b style="color:blue;">HEAD will be at the tip of <code class="language-plaintext highlighter-rouge">branchA</code> after the rebase</b>.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">git rebase &lt;branch&gt;</code>: rebase the current branch onto <code class="language-plaintext highlighter-rouge">branch</code>. This is equivalent to <code class="language-plaintext highlighter-rouge">git rebase HEAD &lt;branch&gt;</code>.</li>
+</ul>
 
 <div class="row mt-3">
     <div class="col-sm mt-3 mt-md-0">
@@ -376,7 +388,7 @@ git merge bugFix <span class="c"># merge bugFix into main</span>
     </div>    
 </div>
 <div class="caption">
-    Left: Before rebasing. Middle: After rebasing. The `bugFix` branch is rebased onto the `main` branch. Right: `git rebase bugFix` 
+    Left: Before rebasing. Middle: After rebasing. The <b style="color:blue;">`bugFix`</b> branch is rebased onto the <b style="color:blue;">`main`</b> branch. Right: <b style="color:blue;">`git rebase bugFix`</b>.
 </div>
 
 <p>Demonstration:</p>
@@ -420,7 +432,9 @@ git checkout C4 <span class="c"># HEAD -&gt; C4</span>
   <li>
 <code class="language-plaintext highlighter-rouge">^</code>: indicates the parent commit. <code class="language-plaintext highlighter-rouge">^^</code> indicates the grandparent commit.</li>
   <li>
-<code class="language-plaintext highlighter-rouge">~</code>: indicates the first parent commit.</li>
+<code class="language-plaintext highlighter-rouge">~</code>: indicates the first parent commit. <code class="language-plaintext highlighter-rouge">~2</code> indicates the first parent’s parent commit. <code class="language-plaintext highlighter-rouge">~n</code> indicates the nth parent commit.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">^2</code>: indicates the second parent commit. This is useful for merge commits where one commit has two parents.</li>
   <li>You can also use HEAD as a relative ref. For example, <code class="language-plaintext highlighter-rouge">HEAD^</code> is the parent commit of the current commit.</li>
 </ul>
 
@@ -495,7 +509,7 @@ git checkout C4 <span class="c"># HEAD -&gt; C4</span>
     </div>  
 </div>
 <div class="caption">
-    Illustration of before/after branching using relative refs. Left: start. Middle: `git branch -f main C6`. Right: `git checkout HEAD~1`. Far right: `git branch -f bugFix HEAD~1`
+    Illustration of before/after branching using relative refs. Left: start. Middle: <b style="color:blue;">`git branch -f main C6`</b>. Right: <b style="color:blue;">`git checkout HEAD~1`</b>. Far right: <b style="color:blue;">`git branch -f bugFix HEAD~1`</b>
 </div>
 
 <p>Demonstration:</p>
@@ -508,6 +522,48 @@ git branch <span class="nt">-f</span> bugFix HEAD~1 <span class="c"># move the b
 <p>In the above example, <code class="language-plaintext highlighter-rouge">git branch -f source des_commit</code> forces the <code class="language-plaintext highlighter-rouge">source</code> branch to point to a specific destination commit <code class="language-plaintext highlighter-rouge">des_commit</code>, while <code class="language-plaintext highlighter-rouge">git checkout HEAD~1</code> moves HEAD to the parent commit of the current commit.</p>
 
 <p>Comparing to <code class="language-plaintext highlighter-rouge">git reset</code>, <code class="language-plaintext highlighter-rouge">git branch -f</code> is used to move branches around, while <code class="language-plaintext highlighter-rouge">git reset</code> is used to move HEAD and the current branch around.</p>
+
+<p><strong>Advanced</strong>: We can also combine relative refs such as <code class="language-plaintext highlighter-rouge">HEAD~^2~2</code> which moves HEAD to the grandparent of the second parent of the parent of the parent of the current commit as shown in the illustration below.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/git/ref-1-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/git/ref-1-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/git/ref-1-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/git/ref-1.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/git/ref-2-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/git/ref-2-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/git/ref-2-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/git/ref-2.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>  
+</div>
+<div class="caption">
+    Illustration of combining relative refs. Left: start. Right: <b style="color:blue;">`git checkout HEAD~^2~2`</b> moves HEAD to the grandparent of the second parent of the parent of the parent of the current commit.
+</div>
 
 <h3 id="reversing-changes-in-git">Reversing Changes in Git</h3>
 
@@ -574,7 +630,7 @@ git branch <span class="nt">-f</span> bugFix HEAD~1 <span class="c"># move the b
     </div>  
 </div>
 <div class="caption">
-    Illustration of reverting changes. Left: starting point. There are three branches: main, pushed, and local. The current HEAD is at local branch and commit C3. Middle: `git reset HEAD~1`. Right: `git checkout pushed; git revert HEAD`
+    Illustration of reverting changes. Left: starting point. There are three branches: main, pushed, and local. The current HEAD is at local branch and commit C3. Middle: <b style="color:blue;">`git reset HEAD~1`</b>. Right: <b style="color:blue;">`git checkout pushed; git revert HEAD`</b>.
 </div>
 
 <p>Demonstration: Given the current working directory, reverse the most recent commit on both local and pushed (one per branch).</p>
@@ -586,7 +642,7 @@ git revert HEAD <span class="c"># reverse the most recent commit on the pushed b
 
 <h2 id="moving-work-around">Moving Work Around</h2>
 
-<p>This section covers more</p>
+<p>This section covers more advanced topics in Git such as cherry-picking, interactive rebase, and tags.</p>
 
 <h3 id="cherry-pick">Cherry-pick</h3>
 
@@ -757,9 +813,350 @@ git merge caption <span class="c"># merge the caption branch into the main branc
     </div>  
 </div>
 <div class="caption">
-    Illustration of interactive rebase. 1st: starting point. 2nd: `git rebase -i HEAD~2`. 3rd: `git rebase -i HEAD~1`. 4th: `git rebase -i HEAD~2`. 5th: `git checkout main; git merge caption`
+    Illustration of interactive rebase. From left to right. 1st: starting point. 2nd: <b style="color:blue;">`git rebase -i HEAD~2`</b>. 3rd: <b style="color:blue;">`git rebase -i HEAD~1`</b>. 4th: <b style="color:blue;">`git rebase -i HEAD~2`</b>. 5th: <b style="color:blue;">`git checkout main; git merge caption`</b>.
 </div>
 
+<p>Example with <code class="language-plaintext highlighter-rouge">git cherry-pick</code>:</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/git/i-rebase-1-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/git/i-rebase-1-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/git/i-rebase-1-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/git/i-rebase-1.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/git/i-rebase-goal2-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/git/i-rebase-goal2-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/git/i-rebase-goal2-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/git/i-rebase-goal2.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>  
+</div>
+<div class="caption">
+    Illustration of interactive rebase. Left: starting point. There are three branches: main, newImage, and caption*. The current HEAD is at caption branch and commit C3. Right: The goal is to modify the commit C3 one and the commit C2 twice, then reorder the commits back to the original order (C1, C2'', C3') on the main branch.
+</div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git checkout C1
+git cherry-pick C2 <span class="c"># apply the changes of commit C2 onto the current branch</span>
+git checkout main <span class="c"># switch to the main branch</span>
+git cherry-pick C2^ <span class="c"># apply the changes of commit C2' onto the main branch</span>
+git cherry-pick C3 <span class="c"># apply the changes of commit C3 onto the main branch</span>
+</code></pre></div></div>
+
+<h3 id="git-tags">Git Tags</h3>
+
+<p>Git tags are a way to mark specific points in history as being important. They are often used to mark release points (v1.0, and so on).</p>
+
+<ul>
+  <li>
+<code class="language-plaintext highlighter-rouge">git tag &lt;tagname&gt;</code>: create a new tag</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">git tag &lt;tagname&gt; &lt;commit&gt;</code>: create a new tag that points to a specific commit</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">git tag -a &lt;tagname&gt; -m "message"</code>: create an annotated tag</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">git tag -d &lt;tagname&gt;</code>: delete a tag</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git tag v1 side~1 <span class="c"># create a tag v1 that points to the commit that is one before recent commit of the branch `side`</span>
+git tag v0 main~2 <span class="c"># create a tag v0 that points to the commit that is two before recent commit of the branch `main`</span>
+</code></pre></div></div>
+
+<h3 id="git-describe">Git Describe</h3>
+
+<p>Git describe is a way to get a human-readable description of a commit. It is often used to provide a more user-friendly way to identify a commit.</p>
+
+<p><code class="language-plaintext highlighter-rouge">git describe &lt;ref&gt;</code>: describe the most recent commit reachable from the <code class="language-plaintext highlighter-rouge">ref</code>. If the <code class="language-plaintext highlighter-rouge">ref</code> is omitted, it defaults to HEAD.</p>
+
+<p>The output of <code class="language-plaintext highlighter-rouge">git describe</code> is in the format <code class="language-plaintext highlighter-rouge">&lt;tag&gt;_&lt;numCommits&gt;_g&lt;hash&gt;</code>. For example, <code class="language-plaintext highlighter-rouge">v1_2_ga6f4</code> means that the most recent tag is <code class="language-plaintext highlighter-rouge">v1</code>, there are 2 commits since the tag, and the hash of the commit being described is <code class="language-plaintext highlighter-rouge">a6f4</code>.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/git/describe-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/git/describe-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/git/describe-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/git/describe.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Illustration of git describe. <b style="color:blue;">`git describe main`</b> will output <b style="color:blue;">`v1_2_gC2`</b> because the most recent tag is `v1`, there are 2 commits since the tag, and the hash of the commit being described is `C2`. <b style="color:blue;">`git describe side`</b> will output <b style="color:blue;">`v2_1_gC4`</b> because the most recent tag is `v2`, there is 1 commit since the tag, and the hash of the commit being described is `C4`.
+</div>
+
+<h3 id="exercises">Exercises</h3>
+
+<p><strong><em>Example 1</em></strong>: Given the current working history, arrange the commits as shown in the goal.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/git/exam1-1-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/git/exam1-1-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/git/exam1-1-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/git/exam1-1.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/git/exam-1-goal-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/git/exam-1-goal-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/git/exam-1-goal-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/git/exam-1-goal.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+
+<p><strong><em>Solution:</em></strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git rebase main bugFix <span class="c"># rebase bugFix onto main. HEAD -&gt; bugFix</span>
+git rebase bugFix side <span class="c"># rebase side onto bugFix, HEAD -&gt; side</span>
+git rebase side another <span class="c"># rebase another onto side, HEAD -&gt; another</span>
+git rebase another main <span class="c"># rebase main onto another, HEAD -&gt; main</span>
+</code></pre></div></div>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/git/exam1-1-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/git/exam1-1-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/git/exam1-1-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/git/exam1-1.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/git/exam1-2-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/git/exam1-2-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/git/exam1-2-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/git/exam1-2.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/git/exam1-3-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/git/exam1-3-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/git/exam1-3-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/git/exam1-3.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/git/exam1-4-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/git/exam1-4-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/git/exam1-4-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/git/exam1-4.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/git/exam1-5-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/git/exam1-5-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/git/exam1-5-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/git/exam1-5.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    From left to right. 1st: starting point. 2nd: <b style="color:blue;">`git rebase main bugFix`</b>. 3rd: <b style="color:blue;">`git rebase bugFix side`</b>. 4th: <b style="color:blue;">`git rebase side another`</b>. 5th: <b style="color:blue;">`git rebase another main`</b>.
+</div>
+
+<p><strong><em>Example 2</em></strong>: given the current working history, create a new branch <code class="language-plaintext highlighter-rouge">bugWork</code> at the specified destination as shown in the goal.
+It can simply be done by <code class="language-plaintext highlighter-rouge">git branch bugWork C2</code>. However, the goal is to use relative refs to specify the destination commit.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/git/exam2-1-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/git/exam2-1-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/git/exam2-1-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/git/exam2-1.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/git/exam2-goal-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/git/exam2-goal-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/git/exam2-goal-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/git/exam2-goal.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+
+<p><strong><em>Solution:</em></strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git branch bugWork HEAD~^2~ <span class="c"># Current HEAD at C7. HEAD~ is C6. HEAD~^2 is the second parent of C6 which is C5. HEAD~^2~ is the parent of C5 which is C2. </span>
+</code></pre></div></div>
+
+<p><strong><em>Example 3</em></strong>: given the current working history, where the <code class="language-plaintext highlighter-rouge">main</code> branch is some commits ahead of the three branches <code class="language-plaintext highlighter-rouge">one</code>, <code class="language-plaintext highlighter-rouge">two</code>, and <code class="language-plaintext highlighter-rouge">three</code>. The goal is to modify the three branches as shown in the goal.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/git/exam3-1-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/git/exam3-1-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/git/exam3-1-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/git/exam3-1.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/git/exam3-goal-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/git/exam3-goal-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/git/exam3-goal-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/git/exam3-goal.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+
+<p>Analysis: The simplest task is for the branch <code class="language-plaintext highlighter-rouge">three</code> where it is just move forward one commit to the commit <code class="language-plaintext highlighter-rouge">C2</code>. The branch <code class="language-plaintext highlighter-rouge">one</code> can be done by <code class="language-plaintext highlighter-rouge">cherry-pick</code> or <code class="language-plaintext highlighter-rouge">rebase</code> while branch <code class="language-plaintext highlighter-rouge">two</code> is the copy of branch <code class="language-plaintext highlighter-rouge">one</code> with an additional commit <code class="language-plaintext highlighter-rouge">C5</code>.</p>
+
+<p><strong><em>Solution:</em></strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git checkout three<span class="p">;</span> git reset C2 <span class="c"># move the three branch to the commit C2</span>
+git checkout one<span class="p">;</span> git cherry-pick C4 C3 C2 <span class="c"># apply the changes of commit C4, C3, and C2 onto the one branch</span>
+git checkout two<span class="p">;</span> git cherry-pick C5<span class="p">;</span> <span class="c"># apply the changes of commit C5 onto the two branch</span>
+git cherry-pick C4^ C3^ C2^ <span class="c"># apply the changes of the parent commit of C4, C3, and C2 onto the two branch</span>
+</code></pre></div></div>
+
+<ul>
+  <li>
+<code class="language-plaintext highlighter-rouge">git checkout three; git reset C2</code>: move the branch three to the commit <code class="language-plaintext highlighter-rouge">C2</code>. Alternatively, <code class="language-plaintext highlighter-rouge">git branch -f three C2</code> can be used.</li>
+</ul>
+
+<h2 id="working-remotely">Working Remotely</h2>
+
+<p>This section covers the basics of working with remote repositories in Git. It includes concepts like cloning, fetching, pulling, pushing, and remotes.</p>
 
     </div>
   </article>
