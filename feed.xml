@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2024-07-01T21:17:56+10:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2024-07-03T11:13:06+10:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
 </subtitle><entry><title type="html">Comparing Implementations of Diffusion Models - HuggingFace Diffusers vs. CompVis Stable Diffusion</title><link href="https://tuananhbui89.github.io/blog/2024/compvis-diffusers/" rel="alternate" type="text/html" title="Comparing Implementations of Diffusion Models - HuggingFace Diffusers vs. CompVis Stable Diffusion" /><published>2024-07-01T00:00:00+10:00</published><updated>2024-07-01T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/2024/compvis-diffusers</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2024/compvis-diffusers/"><![CDATA[<!-- path=assets/img/2024-07-diffusers -->
 
 <p>This post is a note for myself to compare the implementations of diffusion models in HuggingFace’s Diffusers and CompVis’s Stable Diffusion.
@@ -237,12 +237,14 @@ More specifically, the forward pass as follows:</p>
 </span><span class="n">noise</span> <span class="o">=</span> <span class="nf">default</span><span class="p">(</span><span class="n">noise</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randn_like</span><span class="p">(</span><span class="n">x_start</span><span class="p">))</span>
 
 <span class="c1"># forward diffusion
+# x_start is the input clean image
 </span><span class="n">x_noisy</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">q_sample</span><span class="p">(</span><span class="n">x_start</span><span class="o">=</span><span class="n">x_start</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="n">t</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="n">noise</span><span class="p">)</span>
 
 <span class="c1"># apply model, backward diffusion
 </span><span class="n">model_output</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">apply_model</span><span class="p">(</span><span class="n">x_noisy</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">cond</span><span class="p">)</span>
 
-<span class="c1"># choose type of target, there are two types of output of the model, image or noise 
+<span class="c1"># choose type of target, there are two types of output of the model, image or noise
+# in the default setting of Latent Diffusion Models, the output is the epsilon rather than the image
 </span><span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">parameterization</span> <span class="o">==</span> <span class="sh">"</span><span class="s">x0</span><span class="sh">"</span><span class="p">:</span>
     <span class="n">target</span> <span class="o">=</span> <span class="n">x_start</span>
 <span class="k">elif</span> <span class="n">self</span><span class="p">.</span><span class="n">parameterization</span> <span class="o">==</span> <span class="sh">"</span><span class="s">eps</span><span class="sh">"</span><span class="p">:</span>
@@ -268,7 +270,110 @@ More specifically, the forward pass as follows:</p>
 
 <p>In the following, I will provide a simple code using CompVis’s Stable Diffusion for Textual Inversion, which is already implemented in HuggingFace’s Diffusers <a href="https://github.com/huggingface/diffusers/blob/7bfc1ee1b2cb0961ff111f50a9d096816e4dd921/examples/textual_inversion/textual_inversion.py">here</a>.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<p>The full script including data can be found here <a href="https://github.com/tuananhbui89/diffusion_demo/tree/main/textual_inversion">https://github.com/tuananhbui89/diffusion_demo/tree/main/textual_inversion</a></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">train_inverse</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">sampler</span><span class="p">,</span> <span class="n">train_data_dir</span><span class="p">,</span> <span class="n">devices</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">
+    Given a model and a set of reference images, learn an embedding vector that will generate an image similar to the reference images.
+
+    Args:
+        model: the model to be trained
+        sampler: the sampler to be used for sampling
+        train_data_dir: the reference images to be used for training
+        args: the arguments for training
+
+    Returns:
+        emb: the learned embedding vector
+    </span><span class="sh">"""</span>
+
+    <span class="c1"># create a textual embedding variable to optimize
+</span>    <span class="n">prompt</span> <span class="o">=</span> <span class="sh">'</span><span class="s">a photo of a person</span><span class="sh">'</span>
+    <span class="n">emb</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">get_learned_conditioning</span><span class="p">([</span><span class="n">prompt</span><span class="p">])</span>
+    <span class="n">emb</span> <span class="o">=</span> <span class="nc">Variable</span><span class="p">(</span><span class="n">emb</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="bp">True</span><span class="p">).</span><span class="nf">to</span><span class="p">(</span><span class="n">devices</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># create an optimizer to optimize the prompt
+</span>    <span class="n">opt</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">optim</span><span class="p">.</span><span class="nc">Adam</span><span class="p">([</span><span class="n">emb</span><span class="p">],</span> <span class="n">lr</span><span class="o">=</span><span class="n">args</span><span class="p">.</span><span class="n">lr</span><span class="p">)</span>
+
+    <span class="c1"># Dataset and DataLoaders creation:
+</span>    <span class="n">train_dataset</span> <span class="o">=</span> <span class="nc">PreprocessImage</span><span class="p">(</span>
+        <span class="n">data_root</span><span class="o">=</span><span class="n">train_data_dir</span><span class="p">,</span>
+        <span class="n">size</span><span class="o">=</span><span class="n">args</span><span class="p">.</span><span class="n">resolution</span><span class="p">,</span>
+        <span class="n">repeats</span><span class="o">=</span><span class="n">args</span><span class="p">.</span><span class="n">repeats</span><span class="p">,</span>
+        <span class="n">center_crop</span><span class="o">=</span><span class="n">args</span><span class="p">.</span><span class="n">center_crop</span><span class="p">,</span>
+        <span class="nb">set</span><span class="o">=</span><span class="sh">"</span><span class="s">train</span><span class="sh">"</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">train_dataloader</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">utils</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="nc">DataLoader</span><span class="p">(</span>
+        <span class="n">train_dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">args</span><span class="p">.</span><span class="n">train_batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">num_workers</span><span class="o">=</span><span class="n">args</span><span class="p">.</span><span class="n">dataloader_num_workers</span>
+    <span class="p">)</span>    
+    
+    <span class="n">fixed_start_code</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randn</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">)).</span><span class="nf">to</span><span class="p">(</span><span class="n">devices</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># create a lambda function for cleaner use of sampling code (only denoising till time step t)
+</span>    <span class="n">quick_sample_till_t</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">cond</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nf">sample_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">sampler</span><span class="p">,</span>
+                                                                <span class="n">cond</span><span class="p">,</span> <span class="n">args</span><span class="p">.</span><span class="n">image_size</span><span class="p">,</span> <span class="n">args</span><span class="p">.</span><span class="n">image_size</span><span class="p">,</span> <span class="n">args</span><span class="p">.</span><span class="n">ddim_steps</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">args</span><span class="p">.</span><span class="n">ddim_eta</span><span class="p">,</span>
+                                                                <span class="n">start_code</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">till_T</span><span class="o">=</span><span class="n">t</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    
+    <span class="c1"># create a function to decode and save the image
+</span>    <span class="k">def</span> <span class="nf">decode_and_save_image</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">decode_first_stage</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">clamp</span><span class="p">((</span><span class="n">x</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span><span class="o">/</span><span class="mf">2.0</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="nf">rearrange</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="sh">'</span><span class="s">b c h w -&gt; b h w c</span><span class="sh">'</span><span class="p">)</span>
+        <span class="n">image</span> <span class="o">=</span> <span class="n">Image</span><span class="p">.</span><span class="nf">fromarray</span><span class="p">((</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nf">cpu</span><span class="p">().</span><span class="nf">numpy</span><span class="p">()</span><span class="o">*</span><span class="mi">255</span><span class="p">).</span><span class="nf">astype</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="n">uint8</span><span class="p">))</span>
+        <span class="n">plt</span><span class="p">.</span><span class="nf">imshow</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+        <span class="n">plt</span><span class="p">.</span><span class="nf">xticks</span><span class="p">([])</span>
+        <span class="n">plt</span><span class="p">.</span><span class="nf">yticks</span><span class="p">([])</span>
+        <span class="n">plt</span><span class="p">.</span><span class="nf">savefig</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">plt</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
+    
+    <span class="n">os</span><span class="p">.</span><span class="nf">makedirs</span><span class="p">(</span><span class="sh">'</span><span class="s">evaluation_folder</span><span class="sh">'</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">os</span><span class="p">.</span><span class="nf">makedirs</span><span class="p">(</span><span class="sh">'</span><span class="s">evaluation_folder/textual_inversion</span><span class="sh">'</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="c1"># train the embedding
+</span>    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">epochs</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">batch</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="n">train_dataloader</span><span class="p">):</span>
+            <span class="n">opt</span><span class="p">.</span><span class="nf">zero_grad</span><span class="p">()</span>
+            <span class="n">model</span><span class="p">.</span><span class="nf">zero_grad</span><span class="p">()</span>
+            <span class="n">model</span><span class="p">.</span><span class="nf">train</span><span class="p">()</span>
+
+            <span class="c1"># Convert images to latent space
+</span>            <span class="n">batch_images</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="sh">'</span><span class="s">pixel_values</span><span class="sh">'</span><span class="p">].</span><span class="nf">to</span><span class="p">(</span><span class="n">devices</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">encoder_posterior</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">encode_first_stage</span><span class="p">(</span><span class="n">batch_images</span><span class="p">)</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">get_first_stage_encoding</span><span class="p">(</span><span class="n">encoder_posterior</span><span class="p">).</span><span class="nf">detach</span><span class="p">()</span>
+
+            <span class="c1"># get conditioning - SKIP because in this case, it is the trainable embedding vector
+</span>            <span class="n">cond</span> <span class="o">=</span> <span class="n">emb</span>
+
+            <span class="c1"># random timestep
+</span>            <span class="n">t</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">args</span><span class="p">.</span><span class="n">num_timesteps</span><span class="p">,</span> <span class="p">(</span><span class="n">batch_images</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],),</span> <span class="n">device</span><span class="o">=</span><span class="n">devices</span><span class="p">[</span><span class="mi">0</span><span class="p">]).</span><span class="nf">long</span><span class="p">()</span>
+
+            <span class="c1"># add noise
+</span>            <span class="n">noise</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randn_like</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">*</span> <span class="n">args</span><span class="p">.</span><span class="n">noise_scale</span>
+
+            <span class="c1"># forward diffusion
+</span>            <span class="n">x_noisy</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">q_sample</span><span class="p">(</span><span class="n">x_start</span><span class="o">=</span><span class="n">batch_images</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="n">t</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="n">noise</span><span class="p">)</span>
+
+            <span class="c1"># backward diffusion
+</span>            <span class="n">model_output</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">apply_model</span><span class="p">(</span><span class="n">x_noisy</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">cond</span><span class="p">)</span>
+
+            <span class="c1"># calculate loss
+</span>            <span class="c1"># in the default setting of Latent Diffusion Models, the output is the epsilon rather than the image
+</span>            <span class="n">loss</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">nn</span><span class="p">.</span><span class="n">functional</span><span class="p">.</span><span class="nf">mse_loss</span><span class="p">(</span><span class="n">model_output</span><span class="p">,</span> <span class="n">noise</span><span class="p">)</span>
+
+            <span class="c1"># optimize
+</span>            <span class="n">loss</span><span class="p">.</span><span class="nf">backward</span><span class="p">()</span>
+            <span class="n">opt</span><span class="p">.</span><span class="nf">step</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">100</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">'</span><span class="s">Epoch: </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s">, Batch: </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s">, Loss: </span><span class="si">{</span><span class="n">loss</span><span class="p">.</span><span class="nf">item</span><span class="p">()</span><span class="si">}</span><span class="sh">'</span><span class="p">)</span>
+        
+        <span class="c1"># inference with the learned embedding
+</span>        <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
+            <span class="n">model</span><span class="p">.</span><span class="nf">eval</span><span class="p">()</span>
+
+            <span class="n">z_r_till_T</span> <span class="o">=</span> <span class="nf">quick_sample_till_t</span><span class="p">(</span><span class="n">emb</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">devices</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">args</span><span class="p">.</span><span class="n">start_guidance</span><span class="p">,</span> <span class="n">fixed_start_code</span><span class="p">,</span> <span class="nf">int</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">ddim_steps</span><span class="p">))</span>
+            <span class="nf">decode_and_save_image</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">z_r_till_T</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="sa">f</span><span class="sh">'</span><span class="s">evaluation_folder/textual_inversion/gen_</span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s">.png</span><span class="sh">'</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">emb</span><span class="p">.</span><span class="nf">detach</span><span class="p">()</span>
 </code></pre></div></div>]]></content><author><name></name></author><category term="reading" /><category term="tml" /><category term="llm" /><category term="genai" /><summary type="html"><![CDATA[]]></summary></entry><entry><title type="html">AdvPrompter - Fast Adaptive Adversarial Prompting for LLMs</title><link href="https://tuananhbui89.github.io/blog/2024/adv-prompter/" rel="alternate" type="text/html" title="AdvPrompter - Fast Adaptive Adversarial Prompting for LLMs" /><published>2024-06-26T00:00:00+10:00</published><updated>2024-06-26T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/2024/adv-prompter</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2024/adv-prompter/"><![CDATA[<!-- path=assets/img/2024-06-advprompter -->
 <h2 id="about-the-paper">About the paper</h2>
 
