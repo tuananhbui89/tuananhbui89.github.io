@@ -139,10 +139,31 @@ Tuan-Anh Bui<sup>1</sup>, Vuong Long<sup>1</sup>, Khanh Doan<sup>2</sup>, Trung 
     <div class="col-sm mt-3 mt-md-0">
         <a href="https://github.com/tuananhbui89/Erasing-Adversarial-Preservation" class="btn btn-primary" target="_blank" rel="external nofollow noopener">GitHub</a>
         <a href="https://arxiv.org/abs/2410.15618" class="btn btn-secondary" target="_blank" rel="external nofollow noopener">arXiv</a>
-        <a href="assets/pdf/presentations/2024-AP-slides.pdf" class="btn btn-orange" target="_blank">Slides</a>
+        <a href="https://www.dropbox.com/scl/fi/jmqtqp939jfr7p3xrel8x/2024-AP-compact.pdf?rlkey=bzkhlhmg63efijlzo51mpnwzf&amp;st=69no55kd&amp;dl=0" class="btn btn-orange" target="_blank" rel="external nofollow noopener">Slides</a>
+        <a href="https://www.dropbox.com/scl/fi/tsb6036mb5mme7br73kr4/NeurIPS-2024-AP.pdf?rlkey=c4r1ecgxnm6xd3wy00vaprq62&amp;st=15u48nos&amp;dl=0" class="btn btn-success" target="_blank" rel="external nofollow noopener">Poster</a>
     </div>
 </div>
 </div>
+
+<p><strong>(Shameless plug <img class="emoji" title=":grin:" alt=":grin:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f601.png" height="20" width="20">) Our other papers on Concept Erasing/Unlearning:</strong></p>
+
+<blockquote>
+  <p><a href="https://www.dropbox.com/scl/fi/pf2190qpfpiuo05mhcqmi/Adaptive-Guide-Erasure.pdf?rlkey=63s7ruwqxhrdsc4i603gjmsri&amp;st=y79mr0ej&amp;dl=0" rel="external nofollow noopener" target="_blank"><strong>Fantastic Targets for Concept Erasure in Diffusion Models and Where to Find Them</strong></a>,     <br>
+Tuan-Anh Bui, Trang Vu, Long Vuong, Trung Le, Paul Montague, Tamas Abraham, Dinh Phung     <br>
+<em>Under Review (<a href="https://www.dropbox.com/scl/fi/pf2190qpfpiuo05mhcqmi/Adaptive-Guide-Erasure.pdf?rlkey=63s7ruwqxhrdsc4i603gjmsri&amp;st=y79mr0ej&amp;dl=0" rel="external nofollow noopener" target="_blank">Dropbox</a>)</em></p>
+</blockquote>
+
+<blockquote>
+  <p><a href="https://arxiv.org/abs/2410.15618" rel="external nofollow noopener" target="_blank"><strong>Erasing Undesirable Concepts in Diffusion Models with Adversarial Preservation</strong></a>,     <br>
+Tuan-Anh Bui, Long Vuong, Khanh Doan, Trung Le, Paul Montague, Tamas Abraham, Dinh Phung     <br>
+<em>NeurIPS 2024 (<a href="https://arxiv.org/abs/2410.15618" rel="external nofollow noopener" target="_blank">arXiv 2410.15618</a>)</em></p>
+</blockquote>
+
+<blockquote>
+  <p><a href="https://arxiv.org/abs/2403.12326" rel="external nofollow noopener" target="_blank"><strong>Removing Undesirable Concepts in Text-to-Image Generative Models with Learnable Prompts</strong></a>,     <br>
+Tuan-Anh Bui, Khanh Doan, Trung Le, Paul Montague, Tamas Abraham, Dinh Phung     <br>
+<em>Preprint (<a href="https://arxiv.org/abs/2403.12326" rel="external nofollow noopener" target="_blank">arXiv 2403.12326</a>)</em></p>
+</blockquote>
 
 <h2 id="abstract">Abstract</h2>
 
@@ -151,8 +172,9 @@ Tuan-Anh Bui<sup>1</sup>, Vuong Long<sup>1</sup>, Khanh Doan<sup>2</sup>, Trung 
 <h3 id="key-observations-and-motivations">Key Observations and Motivations</h3>
 
 <p><strong>(1)</strong> Erasing different target concepts from text-to-image diffusion models leads to varying impacts on the remaining concepts. For instance, removing ‘nudity’ significantly affects related concepts like ‘women’ and ‘men’ but has minimal impact on unrelated concepts like ‘garbage truck.’
-<strong>(2)</strong> Furthermore, the choice of concept to be preserved during erasure significantly impacts the model’s generative capability; relying on neutral concepts, as in previous work, is not an optimal solution.
-<strong>(3)</strong> This highlights the need for adaptive methods to identify and preserve the most sensitive concepts related to the target concept being erased, rather than relying on fixed neutral/generic concepts.</p>
+<strong>(2)</strong> Neutral concepts lie in the middle of the sensitivity spectrum, suggesting that they do not adequately represent the model’s capability to be preserved.
+<strong>(3)</strong> Furthermore, the choice of concept to be preserved during erasure significantly impacts the model’s generative capability; relying on neutral concepts, as in previous work, is not an optimal solution.
+<strong>(4)</strong> This highlights the need for adaptive methods to identify and preserve the most sensitive concepts related to the target concept being erased, rather than relying on fixed neutral/generic concepts.</p>
 
 <h2 id="naive-concept-erasure">Naive Concept Erasure</h2>
 
@@ -179,7 +201,7 @@ Tuan-Anh Bui<sup>1</sup>, Vuong Long<sup>1</sup>, Khanh Doan<sup>2</sup>, Trung 
 
 <h2 id="impact-of-concept-removal-on-the-model-performance">Impact of Concept Removal on the Model Performance</h2>
 
-<p>We here approach the problem more carefully via a study on the impact of erasing a specific concept on model performance on the remaining ones. More importantly, we are concerned with the \textit{most sensitive concepts} to erasure.</p>
+<p>We here approach the problem more carefully via a study on the impact of erasing a specific concept on model performance on the remaining ones. More importantly, we are concerned with the <strong>most sensitive concepts</strong> to erasure.</p>
 
 <p>For example, when removing the concept of “nudity”, we are curious to know which concepts change the most in the model’s output, so that we can preserve these concepts specifically to ensure the model’s capability is maintained, at least with respect to these concepts.</p>
 
@@ -439,6 +461,32 @@ While the CLIP token vocabulary is more comprehensive, it presents challenges du
     <p>To search for the adversarial concept \(c_a\) effectively, we employ the Gumbel-Softmax trick to sample from the categorical distribution in the concept space \(\mathcal{R}\). This approach requires feeding the model with the embeddings of the entire concept space \(\mathcal{R}\), which exponentially increases the computational cost as the size of the concept space grows. To mitigate this, we use a subset of the \(K\) most similar concepts to the target concept \(c_e\) to reduce computational costs. The similarity between concepts is calculated using cosine similarity between their embeddings.</p>
   </li>
 </ul>
+
+<h2 id="citation">Citation</h2>
+
+<p>If you find this work useful in your research, please consider citing our paper (or our other papers <img class="emoji" title=":grin:" alt=":grin:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f601.png" height="20" width="20">):</p>
+
+<div class="language-bibtex highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">@article</span><span class="p">{</span><span class="nl">bui2024erasing</span><span class="p">,</span>
+  <span class="na">title</span><span class="p">=</span><span class="s">{Erasing Undesirable Concepts in Diffusion Models with Adversarial Preservation}</span><span class="p">,</span>
+  <span class="na">author</span><span class="p">=</span><span class="s">{Bui, Anh and Vuong, Long and Doan, Khanh and Le, Trung and Montague, Paul and Abraham, Tamas and Phung, Dinh}</span><span class="p">,</span>
+  <span class="na">booktitle</span><span class="p">=</span><span class="s">{NeurIPS}</span><span class="p">,</span>
+  <span class="na">year</span><span class="p">=</span><span class="s">{2024}</span>
+<span class="p">}</span>
+
+<span class="nc">@article</span><span class="p">{</span><span class="nl">bui2024adaptive</span><span class="p">,</span>
+  <span class="na">title</span><span class="p">=</span><span class="s">{Fantastic Targets for Concept Erasure in Diffusion Models and Where to Find Them}</span><span class="p">,</span>
+  <span class="na">author</span><span class="p">=</span><span class="s">{Bui, Anh and Vu, Trang and Vuong, Long and Le, Trung and Montague, Paul and Abraham, Tamas and Phung, Dinh}</span><span class="p">,</span>
+  <span class="na">journal</span><span class="p">=</span><span class="s">{Preprint}</span><span class="p">,</span>
+  <span class="na">year</span><span class="p">=</span><span class="s">{2024}</span>
+<span class="p">}</span>
+
+<span class="nc">@article</span><span class="p">{</span><span class="nl">bui2024removing</span><span class="p">,</span>
+  <span class="na">title</span><span class="p">=</span><span class="s">{Removing Undesirable Concepts in Text-to-Image Generative Models with Learnable Prompts}</span><span class="p">,</span>
+  <span class="na">author</span><span class="p">=</span><span class="s">{Bui, Anh and Doan, Khanh and Le, Trung and Montague, Paul and Abraham, Tamas and Phung, Dinh}</span><span class="p">,</span>
+  <span class="na">journal</span><span class="p">=</span><span class="s">{arXiv preprint arXiv:2403.12326}</span><span class="p">,</span>
+  <span class="na">year</span><span class="p">=</span><span class="s">{2024}</span>
+<span class="p">}</span>
+</code></pre></div></div>
 
 <h2 id="references">References</h2>
 
