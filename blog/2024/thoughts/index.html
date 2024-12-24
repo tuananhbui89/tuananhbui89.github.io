@@ -145,6 +145,7 @@
     
     <div id="table-of-contents">
       <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h2"><a href="#the-unintentional-invention-of-concept-graph-from-machine-unlearning">The Unintentional Invention of Concept Graph from Machine Unlearning</a></li>
 <li class="toc-entry toc-h2"><a href="#openai-email-archives-from-musk-v-altman---game-of-thrones">OpenAI email archives from Musk v Altman - Game of Thrones</a></li>
 <li class="toc-entry toc-h2"><a href="#improving-chatgpts-interpretability-with-cross-modal-heatmap">Improving ChatGPT’s interpretability with cross-modal heatmap</a></li>
 <li class="toc-entry toc-h2"><a href="#the-prisoners-dilemma">The Prisoner’s Dilemma</a></li>
@@ -159,7 +160,34 @@
     <hr>
     
     <div id="markdown-content">
-      <h2 id="openai-email-archives-from-musk-v-altman---game-of-thrones">OpenAI email archives from Musk v Altman - Game of Thrones</h2>
+      <h2 id="the-unintentional-invention-of-concept-graph-from-machine-unlearning">The Unintentional Invention of Concept Graph from Machine Unlearning</h2>
+
+<p>One of the most interesting contributions of our NeurIPS paper and its extension (under-review) is the introduction of the concept graph, which represents a generative model’s capability as a graph, where nodes are discrete visual concepts, and edges are the relationships between those concepts.</p>
+
+<p>Understanding this graph structure is essential for many tasks, such as:</p>
+
+<ul>
+  <li>
+<strong>Machine Unlearning</strong> 🗑️: The goal here is to remove the model’s knowledge of certain concepts while retaining its knowledge of others. The concept graph structure helps identify which concepts are critical to the model’s performance and should be preserved.</li>
+  <li>
+<strong>Personalization</strong> 👤: The goal is to personalize the model’s knowledge for a specific user. For instance, changing “a photo of a <em>cat</em> before Vancouver Convention Center” to “a photo of a <em>cat</em> before the user’s house.” Traditional methods like Dreambooth, which fine-tune the model on a small user-specific dataset, often overfit to the specific concept and degrade the model’s general capability. Prior approaches address this by collecting large datasets of <strong>heuristically selected concepts</strong>—e.g., if the personalized concept is “a user’s house,” the preservation dataset would include a variety of house images. Our concept graph structure can help identify which concepts are specific to the user and should be preserved, improving the balance between personalization and generalization.</li>
+</ul>
+
+<p>While this graph is simple to understand, useful to many tasks, however, it is not trivial to construct.
+There are several challenges:</p>
+
+<ul>
+  <li>
+<strong>What is a concept?</strong> The concept is discrete but infinite. Most concepts are composed of multiple sub-concepts. For example, “a body of human” is composed from multiple body parts, such as “head”, “body”, “hand”, “foot”, etc. And each body part can be further decomposed into deeper/finer/granular concepts. In the end, all visual concepts can be decomposed into lines, curves, colors blobs, etc, which are similar to the way of convolutional neural networks. However, representing in that extreme granularity is not practical and not necessary. <strong>How to represent a concept?</strong> Explicitly representing a concept by an embedding vector in a latent space, or implicitly representing a concept by a set of visual examples.</li>
+  <li>
+<strong>What is a relationship?</strong> The intuitive way to represent a relationship is to indicate the impact of a concept on another concept.</li>
+  <li>
+<strong>How to measure the strength of a relationship?</strong> Correlation in the latent space measured by common metrics like cosine similarity might be the most straightforward way to measure its. However, <strong>the problem of correlation</strong> is that it does not work well in continuous space where the discrete concepts lie. For example, as investigated in our NeurIPS paper, by adding a small perturbation to the latent space, the output of the model will be significantly different. Another issue is that</li>
+</ul>
+
+<p>I am saying that the concept graph is an unintentional invention from machine unlearning because turn out that the impact of a concept on another can be measured by the change of the output of the model on that query concept when the other concept has been removed. Measuring in the output space instead of the latent space can be more direct and easier to interpret. However, this method has its own drawbacks. Firstly, in the case of diffusion models, where the output of one concept can be significantly different by just changing the initial noise, therefore, requiring generating a large number of images from the same concept with different initial noise to stabilize the measurement. Secondly, we need to measure the presence of a concept in the generated image, which usually requires a classifier or detector to do so. However, most of the time these classifier are not available.</p>
+
+<h2 id="openai-email-archives-from-musk-v-altman---game-of-thrones">OpenAI email archives from Musk v Altman - Game of Thrones</h2>
 
 <p>Reference: <a href="https://www.lesswrong.com/posts/5jjk4CDnj9tA7ugxr/openai-email-archives-from-musk-v-altman" rel="external nofollow noopener" target="_blank">OpenAI email archives from Musk v Altman by LessWrong</a></p>
 
@@ -525,12 +553,6 @@ Therefore, one of the drawbacks of DFKD is that it is very slow.</p>
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/papers-pool/">Papers Reading</a>
-  </li>
-
-  
-
-  <li class="my-2">
     <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2024/sharpness/">Connection between Flatness and Generalization</a>
   </li>
 
@@ -538,6 +560,12 @@ Therefore, one of the drawbacks of DFKD is that it is very slow.</p>
 
   <li class="my-2">
     <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/fairness-irt/">Comprehensive Algorithm Portfolio Evaluation using Item Response Theory</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/papers-pool/">Papers Reading</a>
   </li>
 
 </div>
