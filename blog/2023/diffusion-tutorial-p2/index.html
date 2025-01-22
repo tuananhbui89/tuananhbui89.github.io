@@ -332,12 +332,6 @@
                     <span class="mi">1</span> <span class="o">-</span> <span class="n">self</span><span class="p">.</span><span class="n">alphas_cumprod</span> <span class="o">/</span> <span class="n">self</span><span class="p">.</span><span class="n">alphas_cumprod_prev</span><span class="p">))</span>
 </code></pre></div></div>
 
-<h3 id="motivation">Motivation</h3>
-
-<h3 id="ddim-sampling">DDIM Sampling</h3>
-
-<p>(To be continued)</p>
-
 <h2 id="diffusion-inversion">Diffusion Inversion</h2>
 
 <div class="row mt-3">
@@ -365,13 +359,13 @@
 
 <p>Generative inversion is a technique that allows us to invert the generation process. In other words, given a pre-trained generative model \(g_\theta(z)\) and an image \(x\) which can be either real image or generated one, we can find the noise \(z\) such that \(g_\theta(z)\) is close to \(x\). This technique was first proposed for GANs in Zhu et al. (2016) <d-cite key="zhu2016generative"></d-cite>, Creswell et al. (2016) <d-cite key="creswell2018inverting"></d-cite> not long after the introduction of GAN in 2014. It can be seen that, obtaining the inverted latent code brings many useful implications such as capability to edit/manipulate generated images by editing the latent code, or adversarial perturbation removal <d-cite key="samangouei2018defense"></d-cite>.</p>
 
-<p>Because requring the deterministic property: one noise \(z\) always generates the same image \(x\), this technique is not trivial to apply to other generative models such as VAEs or Flow-based models. For Diffusion Models, thanks to the deterministic property in DDIM, we can apply this technique to invert the diffusion process, i.e., given an image \(x_0\), we can find the noise \(x_T\) to reconstruct \(x_0\). And with the blooming of Diffusion Models in the last two years, we can see many cool applications of this technique such as Textual Inversion <d-cite key="gal2022image"></d-cite>, Image Editing <d-cite key="mokady2023null"></d-cite> or the work we are discussing - Watermarking <d-cite key="wen2023tree"></d-cite>).</p>
+<p>Because requring the deterministic property: one noise \(z\) always generates the same image \(x\), this technique is not trivial to apply to other generative models such as VAEs or Flow-based models. For Diffusion Models, thanks to the deterministic property in DDIM, we can apply this technique to invert the diffusion process, i.e., given an image \(x_0\), we can find the noise \(x_T\) to reconstruct \(x_0\). And with the blooming of Diffusion Models in the last two years, we can see many cool applications of this technique such as Textual Inversion <d-cite key="gal2022image"></d-cite>, Image Editing <d-cite key="mokady2023null"></d-cite> or Watermarking <d-cite key="wen2023tree"></d-cite>).</p>
 
 <p>In the DDPM framework, the forward diffusion process has a nice property that:</p>
 
 \[x_t = \sqrt{\bar{\alpha}_t} x_0 + \sqrt{1-\bar{\alpha}_t} \epsilon_t\]
 
-<p>where \(x_0\) is the initial image, \(\epsilon_t \sim \mathcal{N}(0, I)\) is the noise at time \(t\). This property allows us to <code class="language-plaintext highlighter-rouge">predict</code> noisy version \(x_t\) of \(x_0\) at any arbitrary time \(t\). On the other hand, given \(\epsilon_t = \epsilon_\theta(x_t, t)\) is the predicted noise at time \(t\) by the denoising network \(\epsilon_\theta\) and \(x_t\), we can <code class="language-plaintext highlighter-rouge">predict</code> \(\tilde{x_0}\) as follows:</p>
+<p>where \(x_0\) is the initial image, \(\epsilon_t \sim \mathcal{N}(0, I)\) is the noise at time \(t\). This property allows us to <strong>predict</strong> noisy version \(x_t\) of \(x_0\) at any arbitrary time \(t\). On the other hand, given \(\epsilon_t = \epsilon_\theta(x_t, t)\) is the predicted noise at time \(t\) by the denoising network \(\epsilon_\theta\) and \(x_t\), we can <strong>predict</strong> \(\tilde{x}_0\) as follows:</p>
 
 \[\tilde{x}_0 = \frac{x_t - \sqrt{1-\bar{\alpha}_t} \epsilon_\theta(x_t, t)}{\sqrt{\bar{\alpha}_t}}\]
 
@@ -539,7 +533,7 @@ z_0_tilde = (z_t - (1 - alpha_bar).sqrt() * e_t) / alpha_bar.sqrt()
     <!-- Footer -->    
     <footer class="fixed-bottom">
       <div class="container mt-0">
-        © Copyright 2024 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+        © Copyright 2025 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
 
       </div>
     </footer>
