@@ -145,6 +145,9 @@
     
     <div id="table-of-contents">
       <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h2"><a href="#visual-autoregressive-and-the-importance-of-position-embedding">Visual Autoregressive and the importance of Position Embedding</a></li>
+<li class="toc-entry toc-h2"><a href="#deepseek-r1">DeepSeek-R1</a></li>
+<li class="toc-entry toc-h2"><a href="#the-unintentional-invention-of-concept-graph-from-machine-unlearning">The Unintentional Invention of Concept Graph from Machine Unlearning</a></li>
 <li class="toc-entry toc-h2"><a href="#openai-email-archives-from-musk-v-altman---game-of-thrones">OpenAI email archives from Musk v Altman - Game of Thrones</a></li>
 <li class="toc-entry toc-h2"><a href="#improving-chatgpts-interpretability-with-cross-modal-heatmap">Improving ChatGPT’s interpretability with cross-modal heatmap</a></li>
 <li class="toc-entry toc-h2"><a href="#the-prisoners-dilemma">The Prisoner’s Dilemma</a></li>
@@ -159,24 +162,73 @@
     <hr>
     
     <div id="markdown-content">
-      <!-- 
-## The Unintentional Invention of Concept Graph from Machine Unlearning
+      <h2 id="visual-autoregressive-and-the-importance-of-position-embedding">Visual Autoregressive and the importance of Position Embedding</h2>
 
-One of the most interesting contributions of our NeurIPS paper and its extension (under-review) is the introduction of the concept graph, which represents a generative model's capability as a graph, where nodes are discrete visual concepts, and edges are the relationships between those concepts.
+<p>Visual Autoregressive (VAR) emerges as a new powerful generative model that can generate high-quality images matching the quality of SOTA diffusion models, while being faster and more efficient, with the <a href="https://github.com/FoundationVision/VAR" rel="external nofollow noopener" target="_blank">best paper award at NeurIPS 2024</a> as a testament.</p>
 
-Understanding this graph structure is essential for many tasks, such as:  
+<p>To me, the position embedding plays a crucial role in the way VAR understands the spatial structure of the image. The naive way to do so is to combine two direction embeddings (horizontal and vertical) to form a 2D position embedding as implemented in <a href="https://github.com/facebookresearch/DiT/blob/ed81ce2229091fd4ecc9a223645f95cf379d582b/models.py#L292" rel="external nofollow noopener" target="_blank">DiT</a></p>
 
-- **Machine Unlearning** 🗑️: The goal here is to remove the model's knowledge of certain concepts while retaining its knowledge of others. The concept graph structure helps identify which concepts are critical to the model's performance and should be preserved.  
-- **Personalization** 👤: The goal is to personalize the model's knowledge for a specific user. For instance, changing "a photo of a *cat* before Vancouver Convention Center" to "a photo of a *cat* before the user's house." Traditional methods like Dreambooth, which fine-tune the model on a small user-specific dataset, often overfit to the specific concept and degrade the model's general capability. Prior approaches address this by collecting large datasets of **heuristically selected concepts**—e.g., if the personalized concept is "a user's house," the preservation dataset would include a variety of house images. Our concept graph structure can help identify which concepts are specific to the user and should be preserved, improving the balance between personalization and generalization.
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">get_2d_sincos_pos_embed_from_grid</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">,</span> <span class="n">grid</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">embed_dim</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span>
 
-While this graph is simple to understand, useful to many tasks, however, it is not trivial to construct.
-There are several challenges:
+    <span class="c1"># use half of dimensions to encode grid_h
+</span>    <span class="n">emb_h</span> <span class="o">=</span> <span class="nf">get_1d_sincos_pos_embed_from_grid</span><span class="p">(</span><span class="n">embed_dim</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">grid</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># (H*W, D/2)
+</span>    <span class="n">emb_w</span> <span class="o">=</span> <span class="nf">get_1d_sincos_pos_embed_from_grid</span><span class="p">(</span><span class="n">embed_dim</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">grid</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>  <span class="c1"># (H*W, D/2)
+</span>
+    <span class="n">emb</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">concatenate</span><span class="p">([</span><span class="n">emb_h</span><span class="p">,</span> <span class="n">emb_w</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># (H*W, D)
+</span>    <span class="k">return</span> <span class="n">emb</span>
+</code></pre></div></div>
 
-- **What is a concept?** The concept is discrete but infinite. Most concepts are composed of multiple sub-concepts. For example, "a body of human" is composed from multiple body parts, such as "head", "body", "hand", "foot", etc. And each body part can be further decomposed into deeper/finer/granular concepts. In the end, all visual concepts can be decomposed into lines, curves, colors blobs, etc, which are similar to the way of convolutional neural networks. However, representing in that extreme granularity is not practical and not necessary. **How to represent a concept?** Explicitly representing a concept by an embedding vector in a latent space, or implicitly representing a concept by a set of visual examples.
-- **What is a relationship?** The intuitive way to represent a relationship is to indicate the impact of a concept on another concept.
-- **How to measure the strength of a relationship?** Correlation in the latent space measured by common metrics like cosine similarity might be the most straightforward way to measure its. However, **the problem of correlation** is that it does not work well in continuous space where the discrete concepts lie. For example, as investigated in our NeurIPS paper, by adding a small perturbation to the latent space, the output of the model will be significantly different. Another issue is that
+<p>In the VAR paper, they use a leanrnable PE as implemented in the code above (<a href="https://github.com/FoundationVision/VAR/blob/6e5cf2361ee287c604c4d09eed37b7e91c4af267/models/var.py#L67" rel="external nofollow noopener" target="_blank">this line</a>), which is a combination of position embedding and level embedding to distinguish different levels of tokens in a token pyramid.</p>
 
-I am saying that the concept graph is an unintentional invention from machine unlearning because turn out that the impact of a concept on another can be measured by the change of the output of the model on that query concept when the other concept has been removed. Measuring in the output space instead of the latent space can be more direct and easier to interpret. However, this method has its own drawbacks. Firstly, in the case of diffusion models, where the output of one concept can be significantly different by just changing the initial noise, therefore, requiring generating a large number of images from the same concept with different initial noise to stabilize the measurement. Secondly, we need to measure the presence of a concept in the generated image, which usually requires a classifier or detector to do so. However, most of the time these classifier are not available. -->
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 3. absolute position embedding
+</span><span class="n">pos_1LC</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">pn</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">patch_nums</span><span class="p">):</span>
+    <span class="n">pe</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">empty</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">pn</span><span class="o">*</span><span class="n">pn</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">C</span><span class="p">)</span>
+    <span class="n">nn</span><span class="p">.</span><span class="n">init</span><span class="p">.</span><span class="nf">trunc_normal_</span><span class="p">(</span><span class="n">pe</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="n">init_std</span><span class="p">)</span>
+    <span class="n">pos_1LC</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">pe</span><span class="p">)</span>
+<span class="n">pos_1LC</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">cat</span><span class="p">(</span><span class="n">pos_1LC</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>     <span class="c1"># 1, L, C
+</span><span class="k">assert</span> <span class="nf">tuple</span><span class="p">(</span><span class="n">pos_1LC</span><span class="p">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">L</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">C</span><span class="p">)</span>
+<span class="n">self</span><span class="p">.</span><span class="n">pos_1LC</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Parameter</span><span class="p">(</span><span class="n">pos_1LC</span><span class="p">)</span>
+<span class="c1"># level embedding (similar to GPT's segment embedding, used to distinguish different levels of token pyramid)
+</span><span class="n">self</span><span class="p">.</span><span class="n">lvl_embed</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Embedding</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">patch_nums</span><span class="p">),</span> <span class="n">self</span><span class="p">.</span><span class="n">C</span><span class="p">)</span>
+<span class="n">nn</span><span class="p">.</span><span class="n">init</span><span class="p">.</span><span class="nf">trunc_normal_</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">lvl_embed</span><span class="p">.</span><span class="n">weight</span><span class="p">.</span><span class="n">data</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="n">init_std</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="deepseek-r1">DeepSeek-R1</h2>
+
+<p>To me, the most interesting part of this paper is the invention of DeepSeek-R1-Zero, whose introduction has had a profound impact on our understanding of RL and LLM training. More specifically, <strong>pure RL with rule-based rewards</strong> might represent a new paradigm for LLM training. The use of a rule-based reward system strikes me as another example of how self-supervised learning—where data can be generated automatically and on a massive scale—continues to underpin the success of large-scale deep learning models.</p>
+
+<p>Similar to the success of ControlNet in image generation, which leverages traditional computer vision techniques like edge detection to provide additional control signals, the rule-based reward system in this paper offers a simple yet effective method to generate large amounts of structured, labeled data. This, in turn, plays a crucial role in training large-scale models, ensuring that the scaling laws remain valid.</p>
+
+<p>The <strong>aha moment</strong> in DeepSeek-R1-Zero perfectly encapsulates the elegance and power of reinforcement learning: instead of explicitly teaching the model how to solve a problem, we simply design the right incentives, allowing the model to autonomously develop sophisticated problem-solving strategies.</p>
+
+<h2 id="the-unintentional-invention-of-concept-graph-from-machine-unlearning">The Unintentional Invention of Concept Graph from Machine Unlearning</h2>
+
+<p>One of the most interesting contributions of our ICLR 2025 paper (extended from NeurIPS 2024) is the introduction of the concept graph, which represents a generative model’s capability as a graph, where nodes are discrete visual concepts, and edges are the relationships between those concepts.</p>
+
+<p>Understanding this graph structure is essential for many tasks, such as:</p>
+
+<ul>
+  <li>
+<strong>Machine Unlearning</strong> 🗑️: The goal here is to remove the model’s knowledge of certain concepts while retaining its knowledge of others. The concept graph structure helps identify which concepts are critical to the model’s performance and should be preserved.</li>
+  <li>
+<strong>Personalization</strong> 👤: The goal is to personalize the model’s knowledge for a specific user. For instance, changing “a photo of a <em>cat</em> before Vancouver Convention Center” to “a photo of a <em>cat</em> before the user’s house.” Traditional methods like Dreambooth, which fine-tune the model on a small user-specific dataset, often overfit to the specific concept and degrade the model’s general capability. Prior approaches address this by collecting large datasets of <strong>heuristically selected concepts</strong>—e.g., if the personalized concept is “a user’s house,” the preservation dataset would include a variety of house images. Our concept graph structure can help identify which concepts are specific to the user and should be preserved, improving the balance between personalization and generalization.</li>
+</ul>
+
+<p>While this graph is simple to understand, useful to many tasks, however, it is not trivial to construct.
+There are several challenges:</p>
+
+<ul>
+  <li>
+<strong>What is a concept?</strong> The concept is discrete but infinite. Most concepts are composed of multiple sub-concepts. For example, “a body of human” is composed from multiple body parts, such as “head”, “body”, “hand”, “foot”, etc. And each body part can be further decomposed into deeper/finer/granular concepts. In the end, all visual concepts can be decomposed into lines, curves, colors blobs, etc, which are similar to the way of convolutional neural networks. However, representing in that extreme granularity is not practical and not necessary. <strong>How to represent a concept?</strong> Explicitly representing a concept by an embedding vector in a latent space, or implicitly representing a concept by a set of visual examples.</li>
+  <li>
+<strong>What is a relationship?</strong> The intuitive way to represent a relationship is to indicate the impact of a concept on another concept.</li>
+  <li>
+<strong>How to measure the strength of a relationship?</strong> Correlation in the latent space measured by common metrics like cosine similarity might be the most straightforward way to measure its. However, <strong>the problem of correlation</strong> is that it does not work well in continuous space where the discrete concepts lie. For example, as investigated in our NeurIPS paper, by adding a small perturbation to the latent space, the output of the model will be significantly different.</li>
+</ul>
+
+<p>I am saying that the concept graph is an unintentional invention from machine unlearning because turn out that the impact of a concept on another can be measured by the change of the output of the model on that query concept when the other concept has been removed. Measuring that relationship in the output space instead of the latent space (which is usually done by measuring cosine similarity between two CLIP embeddings) can be more direct and easier to interpret. However, this method has its own drawbacks. Firstly, in the case of diffusion models, where the output of one concept can be significantly different by just changing the initial noise, therefore, requiring generating a large number of images from the same concept with different initial noise to stabilize the measurement. Secondly, we need to measure the presence of a concept in the generated image, which usually requires a classifier or detector to do so. However, most of the time these classifier are not available. This can be a potential future work.</p>
 
 <h2 id="openai-email-archives-from-musk-v-altman---game-of-thrones">OpenAI email archives from Musk v Altman - Game of Thrones</h2>
 
