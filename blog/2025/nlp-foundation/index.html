@@ -157,6 +157,32 @@
 </ul>
 </li>
 <li class="toc-entry toc-h2">
+<a href="#fundamental-tasks-in-nlp">Fundamental Tasks in NLP</a>
+<ul>
+<li class="toc-entry toc-h3">
+<a href="#low-level-tasks">Low-level Tasks</a>
+<ul>
+<li class="toc-entry toc-h4"><a href="#tokenization">Tokenization</a></li>
+<li class="toc-entry toc-h4"><a href="#part-of-speech-tagging">Part-of-Speech Tagging</a></li>
+<li class="toc-entry toc-h4"><a href="#named-entity-recognition">Named Entity Recognition</a></li>
+<li class="toc-entry toc-h4"><a href="#syntactic-parsing">Syntactic Parsing</a></li>
+<li class="toc-entry toc-h4"><a href="#semantic-role-labeling">Semantic Role Labeling</a></li>
+<li class="toc-entry toc-h4"><a href="#coreference-resolution">Coreference Resolution</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h3">
+<a href="#high-levelapplication-tasks">High-level/Application Tasks</a>
+<ul>
+<li class="toc-entry toc-h4"><a href="#sentiment-analysis">Sentiment Analysis</a></li>
+<li class="toc-entry toc-h4"><a href="#machine-translation">Machine Translation</a></li>
+<li class="toc-entry toc-h4"><a href="#text-summarization">Text Summarization</a></li>
+<li class="toc-entry toc-h4"><a href="#question-answering">Question Answering</a></li>
+<li class="toc-entry toc-h4"><a href="#text-generation">Text Generation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-entry toc-h2">
 <a href="#evaluation">Evaluation</a>
 <ul>
 <li class="toc-entry toc-h3"><a href="#perplexity">Perplexity</a></li>
@@ -182,7 +208,12 @@
 <li class="toc-entry toc-h3"><a href="#levenshtein-distance-edit-distance">Levenshtein distance (Edit Distance)</a></li>
 </ul>
 </li>
-<li class="toc-entry toc-h2"><a href="#tokenization-and-word-embeddings">Tokenization and Word Embeddings</a></li>
+<li class="toc-entry toc-h2">
+<a href="#tokenization-1">Tokenization</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#out-of-vocabulary-oov">Out-of-Vocabulary (OOV)</a></li>
+</ul>
+</li>
 <li class="toc-entry toc-h2"><a href="#transformer">Transformer</a></li>
 <li class="toc-entry toc-h2">
 <a href="#bert">BERT</a>
@@ -549,6 +580,193 @@ The weighting function \(f(x)\) should satisfy the following properties:</p>
 <strong>Generate Synthetic Data</strong>: Generate synthetic data using generative models. E.g., Prompt: “Describe a sunny day.”, Generate: “The sun shone brightly, warming the fields with golden light.”</li>
 </ul>
 
+<h2 id="fundamental-tasks-in-nlp">Fundamental Tasks in NLP</h2>
+
+<h3 id="low-level-tasks">Low-level Tasks</h3>
+
+<h4 id="tokenization">Tokenization</h4>
+
+<p><strong>Definition</strong>: Splitting text into smaller units (words, subwords, or sentences).</p>
+
+<p><strong>Examples</strong>: “Dr. Anh Bui’s research focuses on AI.” -&gt; [“Dr.”, “Anh”, “Bui”, “‘s”, “research”, “focuses”, “on”, “AI”, “.”]</p>
+
+<p><strong>Challenges</strong>:</p>
+
+<ul>
+  <li>Out-of-Vocabulary (OOV) words</li>
+  <li>Misspellings words</li>
+  <li>Tokenizing agglutinative languages (e.g., Japanese, Finnish) where words merge complex meanings</li>
+  <li>Handling abbreviations (e.g., “U.S.A. vs USA”)</li>
+  <li>Dealing with contractions (“don’t → do + not”)</li>
+</ul>
+
+<h4 id="part-of-speech-tagging">Part-of-Speech Tagging</h4>
+
+<p><strong>Definition</strong>: Assigning grammatical categories (noun, verb, adjective) to words.</p>
+
+<p><strong>Examples</strong>: “Dr. Anh Bui’s research focuses on AI.”</p>
+
+<ul>
+  <li>“Dr.”: NNP (Proper Noun, Prepositional)</li>
+  <li>“‘s”: POS (Possessive)</li>
+  <li>“research”: NN (Noun, Singular)</li>
+  <li>“focuses”: VBZ (Verb, 3rd person singular present)</li>
+  <li>“on”: IN (Preposition)</li>
+</ul>
+
+<p><strong>Challenges</strong>:</p>
+
+<ul>
+  <li>Ambiguous words (e.g., “bank” can be a noun or a verb)</li>
+  <li>Handling domain-specific terminology (e.g., medical or legal terms)</li>
+</ul>
+
+<h4 id="named-entity-recognition">Named Entity Recognition</h4>
+
+<p><strong>Definition</strong>: Identifying and classifying named entities in text into predefined categories such as person, organization, location, etc.</p>
+
+<p><strong>Examples</strong>: “Dr. Anh Bui is a research fellow at Monash University, Australia.”</p>
+
+<ul>
+  <li>“Dr. Anh Bui”: B-PERSON</li>
+  <li>“Monash University”: B-ORGANIZATION</li>
+  <li>“Australia”: B-LOCATION</li>
+</ul>
+
+<p><strong>Challenges</strong>:</p>
+
+<ul>
+  <li>Ambiguous entities (e.g., “apple” can be a fruit or a technology company)</li>
+  <li>Handling nested entities (e.g., “New York City”, “San Francisco Bay Area” as a location entity)</li>
+</ul>
+
+<h4 id="syntactic-parsing">Syntactic Parsing</h4>
+
+<p><strong>Definition</strong>: Analyzing sentence structure (dependency or constituency parsing).</p>
+
+<p><strong>Examples</strong>: “The cat sat on the mat.”</p>
+
+<ul>
+  <li>“sat” → root</li>
+  <li>“cat” → subject</li>
+  <li>“mat” → object</li>
+</ul>
+
+<p><strong>Challenges</strong>:</p>
+
+<ul>
+  <li>Ambiguous sentence structures (e.g., “The man who the woman loves” can be parsed as “(The man) who (the woman loves)” or “(The man who) the woman loves”)</li>
+  <li>Handling long-distance dependencies (e.g., “The book that the girl gave to the boy” where “book” depends on “boy”)</li>
+</ul>
+
+<h4 id="semantic-role-labeling">Semantic Role Labeling</h4>
+
+<p><strong>Definition</strong>: Identifying roles of words in a sentence (who did what to whom).</p>
+
+<p><strong>Examples</strong>: “John gave Mary a book.”</p>
+
+<ul>
+  <li>“John” → Giver</li>
+  <li>“Mary” → Recipient</li>
+  <li>“Book” → Object</li>
+</ul>
+
+<p><strong>Challenges</strong>:</p>
+
+<ul>
+  <li>Understanding implicit meaning (e.g., “John helped Mary” → What did he do?)</li>
+  <li>Handling metaphors and idioms</li>
+</ul>
+
+<h4 id="coreference-resolution">Coreference Resolution</h4>
+
+<p><strong>Definition</strong>: Identifying which words refer to the same entity.</p>
+
+<p><strong>Examples</strong>: “Sarah loves her dog. She takes it for walks.”</p>
+
+<ul>
+  <li>“She” → Sarah</li>
+  <li>“It” → dog</li>
+</ul>
+
+<p><strong>Challenges</strong>:</p>
+
+<ul>
+  <li>Resolving pronouns in long documents</li>
+  <li>Handling ambiguous references (e.g., “John met Bob at the cafe. He ordered coffee.”)</li>
+</ul>
+
+<h3 id="high-levelapplication-tasks">High-level/Application Tasks</h3>
+
+<h4 id="sentiment-analysis">Sentiment Analysis</h4>
+
+<p><strong>Definition</strong>: Determining the emotion behind text (positive, negative, neutral).</p>
+
+<p><strong>Examples</strong>: “The service was great, but the food was terrible!” → Mixed sentiment</p>
+
+<p><strong>Challenges</strong>:</p>
+
+<ul>
+  <li>Sarcasm/Irony: “Oh great, another meeting.”</li>
+  <li>Context dependency: “Not bad” (Positive or Negative?)</li>
+</ul>
+
+<h4 id="machine-translation">Machine Translation</h4>
+
+<p><strong>Definition</strong>: Automatically translating text between languages.</p>
+
+<p><strong>Examples</strong>: “Hello, how are you?” → “Xin chào, dao này bạn thế nào?”</p>
+
+<p><strong>Challenges</strong>:</p>
+
+<ul>
+  <li>Word alignment issues (different sentence structures in languages)</li>
+  <li>Low-resource languages (limited training data)</li>
+  <li>Idioms (Literal translation may not work)</li>
+</ul>
+
+<h4 id="text-summarization">Text Summarization</h4>
+
+<p><strong>Definition</strong>: Generating a concise summary from a longer text.</p>
+
+<p><strong>Examples</strong>: Summarizing a research paper into key takeaways.</p>
+
+<p><strong>Challenges</strong>:</p>
+
+<ul>
+  <li>Preserving key information without losing meaning</li>
+  <li>Avoiding hallucinations (LLMs generating false facts)</li>
+</ul>
+
+<h4 id="question-answering">Question Answering</h4>
+
+<p><strong>Definition</strong>: Answering questions based on a given text or knowledge base.</p>
+
+<p><strong>Example</strong> (Extractive QA):
+Text: “Einstein developed the theory of relativity.”
+Question: “Who developed the theory of relativity?”
+Answer: “Einstein”</p>
+
+<p><strong>Challenges</strong>:</p>
+
+<ul>
+  <li>Commonsense reasoning (e.g., “Can you fry ice?”)</li>
+  <li>Handling unanswerable questions</li>
+</ul>
+
+<h4 id="text-generation">Text Generation</h4>
+
+<p><strong>Definition</strong>: Automatically generating human-like text (e.g., chatbots, story generation).</p>
+
+<p><strong>Examples</strong>: ChatGPT answering questions, generating articles.</p>
+
+<p><strong>Challenges</strong>:</p>
+
+<ul>
+  <li>Hallucination: LLMs may generate false facts.</li>
+  <li>Bias in data: Reinforces social biases present in training data.</li>
+</ul>
+
 <h2 id="evaluation">Evaluation</h2>
 
 <p>References:</p>
@@ -876,7 +1094,7 @@ $$ -->
 
 <p>Levenshtein distance = 3</p>
 
-<h2 id="tokenization-and-word-embeddings">Tokenization and Word Embeddings</h2>
+<h2 id="tokenization-1">Tokenization</h2>
 
 <p>A tokenizer is an important component of any NLP model. It is responsible for converting text into tokens (e.g., words, characters, or subwords) that LLMs can work with instead of raw text.
 The choice of tokenizer significantly impacts the performance of the model and the ability to generalize across different tasks.</p>
@@ -908,7 +1126,50 @@ The choice of tokenizer significantly impacts the performance of the model and t
 <span class="c1"># ['bio', 'degrad', 'ability']
 </span></code></pre></div></div>
 
-<p>What is NLTK?</p>
+<h3 id="out-of-vocabulary-oov">Out-of-Vocabulary (OOV)</h3>
+
+<p>Reference:</p>
+
+<ul>
+  <li>[1] https://spotintelligence.com/2024/10/08/out-of-vocabulary-oov-words/</li>
+</ul>
+
+<p>When tokenizing text, new words (also called Out-of-Vocabulary (OOV) words) can be challenging. These are words that do not exist in the tokenizer’s vocabulary. There are several strategies to handle OOV words:</p>
+
+<p><strong>Subword Tokenization</strong></p>
+
+<p>Instead of treating words as atomic units, subword tokenization breaks words into smaller, reusable parts. This can be done by Byte Pair Encoding (BPE) or WordPiece. This helps handle new words, misspellings, and rare words effectively.</p>
+
+<p>However, some rare words that cannot be broken down into smaller units still end up as new individual tokens.</p>
+
+<p><strong>Character-Level Tokenization</strong></p>
+
+<p>This approach treats each character as a token, which can handle OOV words better. However, it can lead to a very large sequence length and loss of semantic meaning, making it harder for the model to learn the context of the text.</p>
+
+<p>However, this technique is still useful for  languages with rich morphology - where the meaning of a word is determined by changes to the word’s base form instead of relative position or additional affixes.</p>
+
+<p><strong>Fallback to Unknown Token</strong></p>
+
+<p>If a word is not in the tokenizer’s vocabulary, replace it with a special [UNK] token. This is the simplest approach and can handle OOV words effectively. However, it can lead to loss of information and reduced model performance.</p>
+
+<p>Combining this technique with subword tokenization can at least provide a partial meaning of the text.</p>
+
+<p><strong>Using Lookup Table</strong></p>
+
+<p>Maintaining an external lookup table of OOV words and their corresponding embeddings. When an OOV word is encountered, it is replaced with the embedding from the lookup table, otherwise, it is processed by the tokenizer as normal.</p>
+
+<p><strong>Contextual Embedding (FastText, ELMO)</strong></p>
+
+<ul>
+  <li>
+    <p>FastText: FastText is an extension of Word2Vec that handles OOV words by considering subword information. Instead of learning embeddings for entire words, FastText learns embeddings for character n-grams. This allows it to generate meaningful representations for OOV words based on their constituent subwords. For example, FastText can produce an embedding for “blockchain”, even if it wasn’t part of the training data, by combining the embeddings of “block” and “chain.”</p>
+  </li>
+  <li>
+    <p>ELMO: ELMO uses a context-sensitive approach to handle OOV words. It uses a bidirectional LSTM to generate context-specific embeddings for each word. This allows it to generate a representation for OOV words based on the context in which they appear.</p>
+  </li>
+</ul>
+
+<p><strong>What is NLTK?</strong></p>
 
 <ul>
   <li>
