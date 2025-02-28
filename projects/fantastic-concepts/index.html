@@ -279,6 +279,50 @@ For example, “English Springer” → “Clumber spaniel” or “Garbage Truc
   </li>
 </ul>
 
+<h3 id="analogy-to-the-concept-graph">Analogy to the Concept Graph</h3>
+
+<p>The concept space of a generative model can be represented as a graph like a spiderweb, where each node is a concept and edges are the impact of one concept on the others. When we remove a concept, it’s like dropping a ball into this conceptual spiderweb, triggering a chain reaction. The impact of erasure spreads out, strongly affecting locally related concepts while weakly affecting those further away or unrelated.</p>
+
+<p>When we map a concept to a target concept, it’s like pull two nodes of the spiderweb closer together, therefore, the impact of erasure will be proportional to the distance between the two nodes, i.e., 
+the further away between the two concepts, the more impact of erasure to the whole concept space.
+The fantastic target concepts found in our paper are the ones that are locally connected to the concept to be erased but are not its synonyms, therefore, being the optimal target concepts for erasure that minimize the impact on the whole concept space.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/fantastic_concepts/2025-02-28-22-24-26-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/fantastic_concepts/2025-02-28-22-24-26-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/fantastic_concepts/2025-02-28-22-24-26-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/fantastic_concepts/2025-02-28-22-24-26.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    The concept graph. Image credit: <a href="https://www.researchgate.net/publication/275669825_On_the_universal_structure_of_human_lexical_semantics" rel="external nofollow noopener" target="_blank">On the universal structure of human lexical semantics</a>.
+</div>
+
+<h3 id="implications-of-the-concept-graph">Implications of the Concept Graph</h3>
+
+<p>One of the most interesting contributions of this work is the introduction of the concept graph, which represents a generative model’s capability as a graph, where nodes are discrete visual concepts, and edges are the relationships between those concepts.</p>
+
+<p>Understanding this graph structure is essential for many tasks, such as:</p>
+
+<ul>
+  <li>
+<strong>Machine Unlearning</strong> 🗑️: The goal here is to remove the model’s knowledge of certain concepts while retaining its knowledge of others. The concept graph structure helps identify which concepts are critical to the model’s performance and should be preserved.</li>
+  <li>
+<strong>Personalization</strong> 👤: The goal is to personalize the model’s knowledge for a specific user. For instance, changing “a photo of a <em>cat</em> before Vancouver Convention Center” to “a photo of a <em>cat</em> before the user’s house.” Traditional methods like Dreambooth, which fine-tune the model on a small user-specific dataset, often overfit to the specific concept and degrade the model’s general capability. Prior approaches address this by collecting large datasets of <strong>heuristically selected concepts</strong>—e.g., if the personalized concept is “a user’s house,” the preservation dataset would include a variety of house images. Our concept graph structure can help identify which concepts are specific to the user and should be preserved, improving the balance between personalization and generalization.</li>
+</ul>
+
 <h2 id="where-to-find-the-fantastic-concepts">Where to Find the Fantastic Concepts?</h2>
 
 <p>Motivated by the above observations, we propose to select the target concept for erasure adaptively for each query concept to mitigate the side effects of erasing undesirable concepts in diffusion models.</p>
@@ -308,7 +352,7 @@ Therefore, we propose an optimization-based approach to automatically and adapti
 
 <p>On the other hand, <strong>maximizing the objective \(L_1\)</strong> w.r.t. \(c_t\) ensures that the solution \(c_t^*\) is not a synonym of the query concept \(c_e\), while <strong>maximizing the objective \(L_2\)</strong> w.r.t. \(c_t\) finds a sensitive concept to the change of the model’s parameter \(\theta \rightarrow \theta^{'}\).</p>
 
-<p>This helps identify the most related concept to the query concept \(c_e\), as suggested by the locality property of the concept graph in Section \ref{sec:motivation}. By maximizing both \(L_1\) and \(L_2\) w.r.t. \(c_t\), we ensure that the solution \(c_t^*\) satisfies both key properties of the ideal target concept.</p>
+<p>This helps identify the most related concept to the query concept \(c_e\), as suggested by the locality property of the concept graph. By maximizing both \(L_1\) and \(L_2\) w.r.t. \(c_t\), we ensure that the solution \(c_t^*\) satisfies both key properties of the ideal target concept.</p>
 
 <h3 id="comparison-with-adversarial-preservation">Comparison with Adversarial Preservation</h3>
 
