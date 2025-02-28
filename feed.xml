@@ -1,5 +1,731 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-02-22T09:36:42+11:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
-</subtitle><entry><title type="html">Kolmogorov-Arnold Network (KAN)</title><link href="https://tuananhbui89.github.io/blog/2025/KAN/" rel="alternate" type="text/html" title="Kolmogorov-Arnold Network (KAN)" /><published>2025-02-21T00:00:00+11:00</published><updated>2025-02-21T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/KAN</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/KAN/"><![CDATA[<p>Resources:</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-02-28T17:50:25+11:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
+</subtitle><entry><title type="html">FineStyle - Fine-grained Controllable Style Personalization for Text-to-image Models (NeurIPS 2024)</title><link href="https://tuananhbui89.github.io/blog/2025/finestyle/" rel="alternate" type="text/html" title="FineStyle - Fine-grained Controllable Style Personalization for Text-to-image Models (NeurIPS 2024)" /><published>2025-02-28T00:00:00+11:00</published><updated>2025-02-28T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/finestyle</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/finestyle/"><![CDATA[<h2 id="finestyle-fine-grained-controllable-style-personalization-for-text-to-image-models-neurips-2024">FineStyle: Fine-grained Controllable Style Personalization for Text-to-image Models (NeurIPS 2024)</h2>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/personalization/2025-02-27-17-20-07-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/personalization/2025-02-27-17-20-07-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/personalization/2025-02-27-17-20-07-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/personalization/2025-02-27-17-20-07.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+
+<h3 id="overview">Overview</h3>
+
+<ul>
+  <li><a href="https://openreview.net/pdf?id=1SmXUGzrH8">FineStyle paper</a></li>
+  <li><a href="https://github.com/SHI-Labs/FineStyle">FineStyle Github</a></li>
+</ul>
+
+<p>The FineStyle method proposed in the paper addresses the content leakage problem in few-shot or one-shot fine-tuning by introducing concept-oriented data scaling, which decomposes a single reference image into multiple sub-image-text pairs, each focusing on different fine-grained concepts. This approach improves the model’s ability to separate content and style while reducing leakage.</p>
+
+<h4 id="content-leakage-problem">Content Leakage Problem</h4>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/personalization/2025-02-27-17-21-56-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/personalization/2025-02-27-17-21-56-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/personalization/2025-02-27-17-21-56-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/personalization/2025-02-27-17-21-56.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    An example of content leakage in the style transfer, i.e., the spindle leaves (from the reference image) in the background of “a sneaker”, even though it is not included in the text prompt
+</div>
+
+<p><strong>Content leakage</strong> in few-shot or one-shot fine-tuning happens because the model struggles to correctly associate visual concepts with corresponding text phrases when trained on only a few or a single image-text pair. The key reasons are:</p>
+
+<ul>
+  <li>
+    <p><strong>Concept Entanglement</strong>: In large-scale training, models learn to decompose and associate individual visual concepts with text through extensive data diversity. However, with few-shot fine-tuning, the limited number of training examples makes it difficult to disentangle different visual elements, leading to unwanted content appearing in generated images.</p>
+  </li>
+  <li>
+    <p><strong>Lack of Concept Alignment</strong>: When fine-tuning with only one or a few images, the model cannot effectively learn which parts of the image represent style versus specific objects. As a result, it may misinterpret background elements as essential style features, causing them to reappear in generated images even when not prompted.</p>
+  </li>
+  <li>
+    <p><strong>Overfitting to Reference Image</strong>: The model tends to memorize the entire reference image, leading to a high risk of directly copying unwanted elements into generated images instead of generalizing style attributes properly.</p>
+  </li>
+</ul>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/personalization/2025-02-28-15-21-33-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/personalization/2025-02-28-15-21-33-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/personalization/2025-02-28-15-21-33-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/personalization/2025-02-28-15-21-33.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    An example of content alignment problem. Even with a contextual prompt (as shown in the image), it is still difficult to disentangle and map pairs of visual concepts and text phrases, i.e., "a woman" to visual "a woman" concept, "laptop" to visual "laptop" concept, etc.
+</div>
+
+<h4 id="limitation-of-existing-methods">Limitation of Existing Methods</h4>
+
+<p>Some approaches, like StyleDrop, attempt to mitigate content leakage through iterative fine-tuning with synthetic images curated by human or automated feedback. However, this process is computationally expensive and does not fully solve the underlying issue of disentangling style from content.</p>
+
+<h4 id="key-contributions">Key Contributions</h4>
+
+<ul>
+  <li><strong>Concept-Oriented Data Scaling</strong>: Decomposes a single reference image into multiple sub-image-text pairs, each focusing on different fine-grained concepts. This helps disentangle style attributes from content.</li>
+  <li><strong>Parameter-Efficient Fine-Tuning via Cross-Attention Adapters</strong>: FineStyle modifies only the key and value kernels in cross-attention layers. This improves fine-grained style control and better aligns visual concepts with textual prompts while keeping the model lightweight.</li>
+</ul>
+
+<h3 id="finestyle-framework">FineStyle Framework</h3>
+
+<h4 id="background">Background</h4>
+
+<p><a href="https://arxiv.org/abs/2301.00704">Muse</a> is a masked generative transformer for text-to-image generation, which is the foundation model of FineStyle.
+It consists of four main components:</p>
+
+<ul>
+  <li>A pre-trained text encoder \(T\): encodes a text prompt into textual token space \(\tau\)</li>
+  <li>An image encoder \(E\): encodes an image from pixel space to a sequence of discrete visual tokens \(v \in \epsilon\)</li>
+  <li>A decoder \(D\): decodes the visual tokens back to pixel space</li>
+  <li>A generative transformer \(G\): generates an image from the visual tokens, \(G: \epsilon \times \tau \rightarrow \mathcal{L}\)</li>
+</ul>
+
+\[L = \mathbb{E}_{(x,t)\sim\mathcal{D},m\sim\mathcal{M}}[\text{CE}(\text{E}(x), \text{G}(\mathcal{M}(\text{E}(x), m), \text{T}(t)))]\]
+
+<p>where \(\mathcal{D}\) is the training set, \(\mathcal{M}\) is a uniformly distributed mask smapling strategy with a mask ratio as a coefficient, and \(\text{CE}\) is the weighted cross-entropy loss.</p>
+
+<p><strong>Sampling Strategy in Muse</strong></p>
+
+<p>During image synthesis, the model uses iterative decoding to generate images given a text prompt and initial visual tokens. The synthesis process is defined as:</p>
+
+\[\mathcal{I} = \text{D}(v_K), v_k = \text{S}(\text{G}(v_{k-1}, \text{T}(t)) + \lambda(\text{G}(v_{k-1}, \text{T}(t)) - \text{G}(v_{k-1}, \text{T}(n))))\]
+
+<p>where:</p>
+
+<ul>
+  <li>\(k \in [1, K]\) is the sampling step</li>
+  <li>\(t\) is the text prompt</li>
+  <li>\(n\) is the null prompt</li>
+  <li>\(\text{S}\) is a sampling strategy for visual tokens</li>
+  <li>\(\lambda\) represents the coefficient for classifier-free guidance</li>
+  <li>\(\text{D}\) maps the final visual tokens to pixel space</li>
+</ul>
+
+<p>The sampling strategy \(\text{S}\) is an <strong>iterative masked decoding strategy</strong>, where visutal tokens are progressively predicted and refined.
+The model starts with an initial sequence of visual tokens, some of which are masked. It then iteratively predicts the masked tokens, using the previous predictions to inform the next step.</p>
+
+<p><strong>StyleDrop</strong></p>
+
+<p><a href="https://arxiv.org/abs/2306.00983">StyleDrop</a> is an extension of Muse that introduces an adapter to the generative transformer \(G\) to have a better style control.</p>
+
+<h4 id="proposed-method">Proposed Method</h4>
+
+<h4 id="concept-oriented-data-scaling">Concept-Oriented Data Scaling</h4>
+
+<p>Idea (Borrowed from <a href="https://arxiv.org/abs/2306.00983">StyleDrop</a>): Decompose a text prompt into multiple sub-text prompts, each focusing on a different fine-grained concept. For example</p>
+
+<ul>
+  <li>“woman”, “laptop”, “a pot of plant with spindle leaves”, and “bookshelf” for foreground subjects</li>
+  <li>“flat cartoon vector art”, “a light blue circle”, and “white background” for style and background attributes</li>
+</ul>
+
+<p>Then combine the two sets into a single text prompt, <code class="language-plaintext highlighter-rouge">{concept phrase} in {style phrase} style</code>.</p>
+
+<p><strong>Training with Concept-oriented Masking</strong></p>
+
+<ul>
+  <li>cropping around the area of interest associated with the concept-style text phrase</li>
+  <li>Using a pre-trained Muse model to create the segmentation mask (as shown in Fig. 3 a-c)</li>
+</ul>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/personalization/2025-02-27-18-04-29-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/personalization/2025-02-27-18-04-29-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/personalization/2025-02-27-18-04-29-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/personalization/2025-02-27-18-04-29.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+
+<h4 id="classifier-free-guidance-for-style-control">Classifier-Free Guidance for Style Control</h4>
+
+<p>FineStyle modifies Muse’s masked visual token prediction approach by introducing style and semantic guidance. The sampling strategy helps balance text fidelity and style adherence, mitigating content leakage.</p>
+
+<p>Tunable parameters (\(λ_1, λ_2\)) allow users to control the strength of style influence versus prompt adherence, making the generation more flexible and controllable.</p>
+
+<p>The sampling formula for visual tokens in FineStyle is</p>
+
+\[v_k = \hat{G}(v_{k-1}, \text{T}(t)) + \lambda_1(\hat{G}(v_{k-1}, \text{T}(t)) - G(v_{k-1}, \text{T}(t))) + \lambda_2(\hat{G}(v_{k-1}, \text{T}(t)) - \hat{G}(v_{k-1}, \text{T}(n)))\]
+
+<p>where:</p>
+
+<ul>
+  <li>\(\hat{G}\) is FineStyle adapted model</li>
+  <li>\(G\) is the original Muse model</li>
+  <li>\(t\) is the text prompt</li>
+  <li>\(n\) is the null prompt for guidance</li>
+  <li>\(\lambda_1\) is the coefficient for style guidance - Adjusts how strongly the generated image follows the reference style.</li>
+  <li>\(\lambda_2\) is the coefficient for semantic guidance - Helps prevent content leakage by reinforcing adherence to the text prompt.</li>
+</ul>
+
+<h3 id="results">Results</h3>
+
+<h4 id="qualitative-results">Qualitative Results</h4>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/personalization/2025-02-28-15-34-48-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/personalization/2025-02-28-15-34-48-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/personalization/2025-02-28-15-34-48-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/personalization/2025-02-28-15-34-48.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    Qualitative results of FineStyle. To me, the DreamStyler seems doing quite well, especially in the fourth and fifth rows, when the output images are aligned more with the negative prompt (i.e., "background not in gray" or "background not in white").
+</div>
+
+<h4 id="quantitative-results">Quantitative Results</h4>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/personalization/2025-02-28-15-41-48-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/personalization/2025-02-28-15-41-48-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/personalization/2025-02-28-15-41-48-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/personalization/2025-02-28-15-41-48.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/personalization/2025-02-28-15-42-41-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/personalization/2025-02-28-15-42-41-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/personalization/2025-02-28-15-42-41-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/personalization/2025-02-28-15-42-41.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    Quantitative results of FineStyle. To me, the quantitative results are not comprehensive enough to draw a conclusion, especially the lack of comparison with other methods like DreamStyler.
+</div>
+
+<h2 id="references">References</h2>
+
+<ul>
+  <li>[1] <a href="https://arxiv.org/abs/2309.06933">DreamStyler: Paint by Style Inversion with Text-to-Image Diffusion Models</a></li>
+  <li>[2] <a href="https://openaccess.thecvf.com/content/CVPR2023/papers/Wu_Uncovering_the_Disentanglement_Capability_in_Text-to-Image_Diffusion_Models_CVPR_2023_paper.pdf">Uncovering the Disentanglement Capability in Text-to-Image Diffusion Models</a></li>
+</ul>
+
+<!-- mkdir -p assets/img/personalization -->
+<!-- mv _posts/2025-02-26-*.png assets/img/personalization/ -->]]></content><author><name></name></author><category term="reading" /><category term="diffusion" /><category term="genai" /><summary type="html"><![CDATA[FineStyle: Fine-grained Controllable Style Personalization for Text-to-image Models (NeurIPS 2024)]]></summary></entry><entry><title type="html">DreamStyler - Paint by Style Inversion with Text-to-Image Diffusion Models (AAAI-2024)</title><link href="https://tuananhbui89.github.io/blog/2025/dreamstyler/" rel="alternate" type="text/html" title="DreamStyler - Paint by Style Inversion with Text-to-Image Diffusion Models (AAAI-2024)" /><published>2025-02-27T00:00:00+11:00</published><updated>2025-02-27T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/dreamstyler</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/dreamstyler/"><![CDATA[<h3 id="overview">Overview</h3>
+
+<ul>
+  <li><a href="https://nmhkahn.github.io/dreamstyler/">DreamStyler Project Page</a></li>
+  <li><a href="https://github.com/webtoon/dreamstyler">DreamStyler Github</a></li>
+</ul>
+
+<p>DreamStyler introduces a novel approach to style transfer by leveraging a multi-stage textual embedding combined with a context-aware text prompt. The method aims to enhance the generation of images in a specific artistic style using text-to-image diffusion models.</p>
+
+<h3 id="key-contributions">Key Contributions</h3>
+
+<h4 id="problem-setting">Problem Setting</h4>
+
+<p>Given a set of style images with an implicit personal style (e.g., Van Gogh’s style), the goal is to fine-tune a foundation model to mimic the style \(S^*\) such that it can generate images in that style when provided with a text prompt (e.g., “A painting of a bear in \(S^*\) style”). This is traditionally done using personalized methods like DreamBooth and Textual Inversion.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/personalization/2025-02-28-13-41-45-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/personalization/2025-02-28-13-41-45-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/personalization/2025-02-28-13-41-45-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/personalization/2025-02-28-13-41-45.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    Examples of DreamStyler application. (a+b+c) Style-Guided Text-to-Image generation where input is a text prompt. (d+e+f) Style-Guided Image-to-Image generation where input is an image.
+</div>
+
+<h4 id="limitations-of-existing-methods">Limitations of Existing Methods</h4>
+
+<p>Current methods face several challenges:</p>
+
+<ul>
+  <li>
+    <p><strong>Dynamic Style Representation</strong>: Diffusion models require different capacities at various denoising steps, making it difficult for a single embedding vector to capture an entire style.</p>
+  </li>
+  <li>
+    <p><strong>Local to Global Features</strong>: The denoising process moves from coarse to fine synthesis, meaning both global artistic elements (color tone) and fine-grained details (texture) need to be represented effectively.</p>
+  </li>
+  <li>
+    <p><strong>Style-Content Separation</strong>: Without a structured way to distinguish style from content, generated images may unintentionally incorporate unwanted elements from reference images.</p>
+  </li>
+</ul>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/personalization/2025-02-26-12-11-09-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/personalization/2025-02-26-12-11-09-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/personalization/2025-02-26-12-11-09-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/personalization/2025-02-26-12-11-09.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    The disentanglement property of Diffusion models [2]. Example that requires different capacities at various diffusion steps.
+</div>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/personalization/2025-02-28-13-49-03-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/personalization/2025-02-28-13-49-03-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/personalization/2025-02-28-13-49-03-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/personalization/2025-02-28-13-49-03.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    Example of content leakage/style overfitting in the style transfer. If tranferring without context-aware text prompt (setting (a)), the model is overfitting to the reference image (copying people from the reference image to the generated image).
+</div>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/personalization/2025-02-28-14-15-53-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/personalization/2025-02-28-14-15-53-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/personalization/2025-02-28-14-15-53-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/personalization/2025-02-28-14-15-53.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/personalization/2025-02-28-14-07-53-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/personalization/2025-02-28-14-07-53-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/personalization/2025-02-28-14-07-53-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/personalization/2025-02-28-14-07-53.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    Example of the challenge of Style-Content Separation, especially with fixed neutral textual templates (as in the right image). Specifically, given a reference input as in the left image and set of neutral templates, how the model knows S^* is represented for a style - color tone/texture or an object in the input image? The problem is even more severe on Few-shot/One-shot settings.
+</div>
+
+<h3 id="proposed-solution">Proposed Solution</h3>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/personalization/2025-02-28-13-43-53-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/personalization/2025-02-28-13-43-53-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/personalization/2025-02-28-13-43-53-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/personalization/2025-02-28-13-43-53.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+
+<h4 id="context-aware-text-prompt">Context-Aware Text Prompt</h4>
+
+<p>A style is often intertwined with content in a reference painting, making it difficult to extract only the stylistic elements. To address this, DreamStyler utilizes <strong>BLIP-2 and Human-in-the-loop methods to create a context-aware text prompt</strong> that explicitly describes non-style components (e.g., objects, composition, background).</p>
+
+<p><strong>Benefits</strong></p>
+
+<ul>
+  <li><strong>Improved Style-Content Disentanglement</strong>: By explicitly describing the non-style elements of the reference image, the model can better focus on learning the stylistic features, leading to outputs that are more faithful to the user’s intent.</li>
+  <li><strong>Reduced Unwanted Elements</strong>: The inclusion of context descriptions helps to prevent the model from incorporating irrelevant objects, compositions, or backgrounds from the reference image into the generated images.</li>
+</ul>
+
+<p><strong>Implementation</strong></p>
+
+<p>The context-aware text prompt is manually assigned as an input argument:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">context_prompt</span> <span class="o">=</span> <span class="sh">"</span><span class="s">A painting of pencil, pears and apples on a cloth, in the style of {}</span><span class="sh">"</span><span class="p">.</span>
+<span class="n">self</span><span class="p">.</span><span class="n">prompt</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">template</span> <span class="k">if</span> <span class="n">context_prompt</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">context_prompt</span>
+</code></pre></div></div>
+
+<h4 id="multi-stage-textual-embedding">Multi-Stage Textual Embedding</h4>
+
+<p><strong>Motivation</strong></p>
+
+<p>Traditional Textual Inversion (TI) relies on a <strong>single embedding vector</strong>, which may not effectively represent complex artistic styles across the entire diffusion process. Prior research shows that diffusion models require <strong>different representational capacities at various timesteps</strong>.</p>
+
+<p>As demonstrated in other works, there is a dynamic property throughout the diffusion process, which requires different capacities at various diffusion steps [2]. Therefore, using a single embedding vector for all diffusion steps is not ideal, especially for representing artistic styles that involve both global elements (like color tone) and fine-grained details (like texture).</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/personalization/2025-02-26-12-11-09-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/personalization/2025-02-26-12-11-09-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/personalization/2025-02-26-12-11-09-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/personalization/2025-02-26-12-11-09.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    The disentanglement property of Diffusion models [2].
+</div>
+
+<p><strong>Proposed Approach</strong></p>
+
+<p>DreamStyler introduces a multi-stage textual embedding by utilizing multiple embedding vectors/tokens, each corresponding to a specific stage of the diffusion process.
+More specifically, the entire diffusion process is broken down into \(T\) distinct stages, and a set of \(T\) style tokens \(S_1, S_2, \cdots, S_T\) are used to represent the style at each stage.</p>
+
+<p><strong>Benefits</strong></p>
+
+<ul>
+  <li><strong>Enhanced Expressiveness</strong>: Captures both global elements (e.g., color tone) and fine details (e.g., brushstrokes, textures).</li>
+  <li><strong>Better Adaptability</strong>: Adjusts to the changing nature of style representation during the denoising process.</li>
+</ul>
+
+<p><strong>Implementation of Multi-Stage Textual Embedding</strong></p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/personalization/2025-02-26-14-37-20-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/personalization/2025-02-26-14-37-20-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/personalization/2025-02-26-14-37-20-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/personalization/2025-02-26-14-37-20.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/personalization/2025-02-26-14-38-50-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/personalization/2025-02-26-14-38-50-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/personalization/2025-02-26-14-38-50-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/personalization/2025-02-26-14-38-50.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    Decomposition of the style embedding into multiple stages.
+</div>
+
+<h4 id="style-and-context-guidance-with-classifier-free-guidance">Style and Context Guidance with Classifier-Free Guidance</h4>
+
+<p><strong>Classifier-Free Guidance</strong></p>
+
+<p><a href="https://arxiv.org/abs/2207.12598">Classifier-Free Guidance</a> is a popular technique in the diffusion model community to improve the quality of generated images. It is a simple yet effective method to improve the diversity of generated images.</p>
+
+\[\hat{\epsilon}(v) = \epsilon(\emptyset) + \lambda(\epsilon(v) - \epsilon(\emptyset))\]
+
+<p>where:</p>
+
+<ul>
+  <li>\(\epsilon\) is the denoising function</li>
+  <li>\(\lambda\) is the coefficient for guidance</li>
+  <li>\(\emptyset\) is the null prompt</li>
+  <li>\(v\) is the text prompt</li>
+</ul>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/personalization/2025-02-28-14-27-38-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/personalization/2025-02-28-14-27-38-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/personalization/2025-02-28-14-27-38-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/personalization/2025-02-28-14-27-38.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    Illustration of Classifier-Free Guidance. Image credit: <a href="https://www.researchgate.net/publication/379277262_MAM-E_Mammographic_Synthetic_Image_Generation_with_Diffusion_Models">MAM-E: Mammographic Synthetic Image Generation with Diffusion Models</a>.
+</div>
+
+<p><strong>Style and Context Guidance</strong></p>
+
+<p>DreamStyler introduces a style and context guidance mechanism by incorporating the style and context prompts into the Classifier-Free Guidance ()</p>
+
+\[\hat{\epsilon}(v) = \epsilon(\emptyset) + \lambda_{s}\left[ \epsilon(v) - \epsilon(v_c) \right] + \lambda_{c}\left[ \epsilon(v_c) - \epsilon(\emptyset) \right] + \lambda_{c}\left[ \epsilon(v) - \epsilon(v_s) \right] + \lambda_{s}\left[ \epsilon(v_s) - \epsilon(\emptyset) \right]\]
+
+<p>where:</p>
+
+<ul>
+  <li>\(v_c\) is the context prompt and \(v_s\) is the style prompt that are decomposed from the text prompt \(v\) as \(v = v_c + v_s\).</li>
+  <li>\(\lambda_c\) is the coefficient for context guidance. Increasing \(\lambda_c\) encourages the model to generate images that are more faithful to the context prompt.</li>
+  <li>\(\lambda_s\) is the coefficient for style guidance. Increasing \(\lambda_s\) encourages the model to generate images that are more aligned with the style prompt.</li>
+</ul>
+
+<h4 id="utilizing-controlnet-for-style-preservation">Utilizing ControlNet for Style-Preservation</h4>
+
+<p>DreamStyler also utilizes ControlNet to maintain the original content’s structure of the reference image in the Image-to-Image Style Transfer setting.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/personalization/2025-02-28-13-43-53-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/personalization/2025-02-28-13-43-53-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/personalization/2025-02-28-13-43-53-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/personalization/2025-02-28-13-43-53.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    Illustration the use of ControlNet for style-preservation (b - Sampling process). The content image is used to generate a encoding vector, which is used to guide the generation process.
+</div>
+
+<h3 id="results">Results</h3>
+
+<h4 id="qualitative-results">Qualitative Results</h4>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/personalization/2025-02-28-14-17-17-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/personalization/2025-02-28-14-17-17-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/personalization/2025-02-28-14-17-17-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/personalization/2025-02-28-14-17-17.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/personalization/2025-02-28-14-18-53-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/personalization/2025-02-28-14-18-53-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/personalization/2025-02-28-14-18-53-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/personalization/2025-02-28-14-18-53.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+
+<h4 id="quantitative-results">Quantitative Results</h4>
+
+<p>The authors utilize three scores to evaluate the performance of the proposed method:</p>
+
+<ul>
+  <li><strong>Text Score and Image Score</strong>: measure the alignment with a given text prompt/reference image with the generated image.</li>
+  <li><strong>Style Score</strong>: Assesses the style consistency by calculating the similarity of Gram features between the style and generated images.</li>
+  <li><strong>User Score</strong>: Human evaluation score.</li>
+</ul>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/personalization/2025-02-28-14-46-58-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/personalization/2025-02-28-14-46-58-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/personalization/2025-02-28-14-46-58-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/personalization/2025-02-28-14-46-58.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/personalization/2025-02-28-14-51-10-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/personalization/2025-02-28-14-51-10-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/personalization/2025-02-28-14-51-10-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/personalization/2025-02-28-14-51-10.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    The Gram-based style score.
+</div>]]></content><author><name></name></author><category term="reading" /><category term="diffusion" /><category term="genai" /><summary type="html"><![CDATA[Overview]]></summary></entry><entry><title type="html">Kolmogorov-Arnold Network (KAN)</title><link href="https://tuananhbui89.github.io/blog/2025/KAN/" rel="alternate" type="text/html" title="Kolmogorov-Arnold Network (KAN)" /><published>2025-02-21T00:00:00+11:00</published><updated>2025-02-21T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/KAN</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/KAN/"><![CDATA[<p>Resources:</p>
 
 <ul>
   <li>[1] <a href="https://arxiv.org/abs/2404.19756">KAN Paper</a></li>
@@ -1030,7 +1756,201 @@ Minimizing the above objective function is directly maximizing the probability o
 <ul>
   <li>RLHF optimizes a reward function designed to capture human preferences, which allows fine-grained control over the model’s behavior.</li>
   <li>Limitation: SFT does not involve direct optimization based on human evaluations.</li>
-</ul>]]></content><author><name></name></author><category term="reading" /><summary type="html"><![CDATA[Introduction]]></summary></entry><entry><title type="html">LLM Series - Part 4 - How to Jailbreak LLMs</title><link href="https://tuananhbui89.github.io/blog/2025/llm-jailbreak/" rel="alternate" type="text/html" title="LLM Series - Part 4 - How to Jailbreak LLMs" /><published>2025-01-18T00:00:00+11:00</published><updated>2025-01-18T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/llm-jailbreak</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/llm-jailbreak/"><![CDATA[<h2 id="the-challenge">The challenge</h2>
+</ul>]]></content><author><name></name></author><category term="reading" /><summary type="html"><![CDATA[Introduction]]></summary></entry><entry><title type="html">LLM Series - Part 5 - System Design for LLMs</title><link href="https://tuananhbui89.github.io/blog/2025/llm-system-design/" rel="alternate" type="text/html" title="LLM Series - Part 5 - System Design for LLMs" /><published>2025-01-19T00:00:00+11:00</published><updated>2025-01-19T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/llm-system-design</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/llm-system-design/"><![CDATA[<p>In this blog post, I will discuss the system design for applications that use LLMs as a core component. However, the goal is to prepare for a technical interview rather than to build a real product :D.</p>
+
+<h2 id="fundamental-concepts">Fundamental Concepts</h2>
+
+<h3 id="retriever-augmented-generation-rag">Retriever-augmented generation (RAG)</h3>
+
+<h3 id="prompt-engineering">Prompt Engineering</h3>
+
+<h3 id="faiss">FAISS</h3>
+
+<p><strong>Indexing Vectors</strong></p>
+
+<p>FAISS creates an index to store and organize vectors efficiently. The indexing method affects performance:</p>
+
+<ul>
+  <li>Flat Index (IndexFlatL2) → Exact k-NN search (slow but accurate).</li>
+  <li>IVF (Inverted File Index) → Faster search with approximate results.</li>
+  <li>HNSW (Hierarchical Navigable Small World) → Graph-based ANN search (fast &amp; accurate).</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">faiss</span>
+<span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
+<span class="c1"># Generate random 512-dimension vectors for products
+</span><span class="n">dimension</span> <span class="o">=</span> <span class="mi">512</span>
+<span class="n">num_vectors</span> <span class="o">=</span> <span class="mi">10000</span>
+<span class="n">vectors</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">random</span><span class="p">((</span><span class="n">num_vectors</span><span class="p">,</span> <span class="n">dimension</span><span class="p">)).</span><span class="nf">astype</span><span class="p">(</span><span class="sh">'</span><span class="s">float32</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="c1"># Create a FAISS index
+</span><span class="n">index</span> <span class="o">=</span> <span class="n">faiss</span><span class="p">.</span><span class="nc">IndexFlatL2</span><span class="p">(</span><span class="n">dimension</span><span class="p">)</span>  <span class="c1"># L2 distance (Euclidean)
+</span><span class="n">index</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">vectors</span><span class="p">)</span>  <span class="c1"># Add vectors to the index
+</span></code></pre></div></div>
+
+<p><strong>Searching for Similar Items</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Generate a random query vector
+</span><span class="n">query_vector</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">random</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">dimension</span><span class="p">)).</span><span class="nf">astype</span><span class="p">(</span><span class="sh">'</span><span class="s">float32</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="c1"># Find the top 5 nearest neighbors
+</span><span class="n">k</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">distances</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="n">index</span><span class="p">.</span><span class="nf">search</span><span class="p">(</span><span class="n">query_vector</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Nearest Neighbors:</span><span class="sh">"</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Distances:</span><span class="sh">"</span><span class="p">,</span> <span class="n">distances</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="core-components-of-an-llm-system">Core components of an LLM system</h2>
+
+<h3 id="input-handling-and-processing">Input handling and processing</h3>
+
+<p>Because each application has different input types, for example, code will differ from clinical notes, we need to have a module that can handle specific input types related to the application.</p>
+
+<h3 id="knowledge-base-and-data-resources">Knowledge Base and Data Resources</h3>
+
+<p>The purpose of this module is to:</p>
+
+<ul>
+  <li>Provide the necessary related knowledge to the LLM.</li>
+  <li>To store user-specific data for personalized output/decision.</li>
+</ul>
+
+<p>This can be done by:</p>
+
+<ul>
+  <li>Vector database tools like <a href="https://www.pinecone.io/">Pinecone</a> or <a href="https://github.com/facebookresearch/faiss">Faiss</a>.</li>
+  <li>Flat file system.</li>
+</ul>
+
+<h3 id="the-core-llm-powered-module">The core LLM-powered module</h3>
+
+<p>This is the main module that uses the LLM to generate the output/decision.</p>
+
+<h4 id="prompting-module">Prompting module</h4>
+
+<p>This can be integrated into the core LLM-powered module to improve the quality of the output/decision.
+We can have a sub-module to classify the input into different categories and use different prompt templates for each category.</p>
+
+<p>We can also leverage the response from the LLM as well as the user feedback to improve the prompt.</p>
+
+<h3 id="filtering-and-validation">Filtering and Validation</h3>
+
+<ul>
+  <li>Validation by rule-based logic check, to make sure the output/input is correct and valid. However, because of the rule-based nature, it is not always flexible to handle all cases.</li>
+  <li>Validation by another machine learning model, for example, another LLM model or a uncertainty estimation model.</li>
+  <li>Optional human-in-the-loop (HITL) validation by a human expert, especially in critical applications like medical diagnosis.</li>
+</ul>
+
+<h3 id="safe-guarding">Safe Guarding</h3>
+
+<h3 id="agentic-framework">Agentic Framework</h3>
+
+<h4 id="agent-tools">Agent Tools</h4>
+
+<p>These are external tools or resources that the LLM can access to perform specitic actions or gather information. This could be a calculator, a search API, or a external database.</p>
+
+<h4 id="multi-agent-system">Multi-agent system</h4>
+
+<h2 id="data-distribution-shifts-and-monitoring">Data Distribution Shifts and Monitoring</h2>
+
+<h2 id="continual-learning">Continual Learning</h2>
+
+<h2 id="evaluation">Evaluation</h2>
+
+<h3 id="offline-evaluation">Offline Evaluation</h3>
+
+<h3 id="test-in-production">Test in Production</h3>
+
+<h2 id="deployment-and-scaling">Deployment and Scaling</h2>
+
+<h2 id="case-study">Case Study</h2>
+
+<h3 id="discuss-on-user-journey">Discuss on User Journey</h3>
+
+<p>User journey describes how a user interacts with a product, starting from the first touchpoint - i.e.,user’s input, to the final interaction - i.e., displaying the result to the user.</p>
+
+<p>Discussing on the user journey helps us to understand the flow interaction between the user and the product, and identify the core components that are involved in the interaction.</p>
+
+<h3 id="recommender-system">Recommender System</h3>
+
+<p><strong>User Interaction Layer</strong></p>
+
+<ul>
+  <li>Chat Interface: Users can describe their interests, ask questions, and discuss product features.</li>
+  <li>Input Handling: Supports text-based and voice-based interactions.</li>
+</ul>
+
+<p><strong>NLP Module</strong></p>
+
+<ul>
+  <li>Intent Recognition: Extracts user intent (e.g., “I want a lightweight laptop for travel”).</li>
+  <li>Entity Extraction: Identifies key product attributes (e.g., “lightweight,” “laptop,” “travel”).</li>
+  <li>Sentiment Analysis: Understands user sentiment to refine recommendations.</li>
+</ul>
+
+<p><strong>Product Database</strong></p>
+
+<ul>
+  <li>Structure: Contains product details, including:
+    <ul>
+      <li>Name, Category, Price</li>
+      <li>Features &amp; Specifications</li>
+      <li>User Reviews &amp; Ratings</li>
+    </ul>
+  </li>
+</ul>
+
+<p>The most important component of this module is the embedding model to convert all the data into vectors so that we can use the vector database to store and search for similar items. The ideal vector space should be able to capture the semantic meaning of the data, i.e., the more similar the data is, the closer the vectors are in the vector space.</p>
+
+<p>The most commonly used embedding models fall into three categories:</p>
+
+<p>1️⃣ General-Purpose Text Embeddings (Best for Q&amp;A, knowledge retrieval)</p>
+
+<p>2️⃣ Domain-Specific Embeddings (Optimized for medical, legal, code, etc.)</p>
+
+<p>3️⃣ Multimodal Embeddings (For text + images)</p>
+
+<p><strong>Recommendation Engine</strong></p>
+
+<ul>
+  <li>Content-Based Filtering: Matches user preferences with product attributes.</li>
+  <li>Collaborative Filtering: Uses customer behavior data to suggest items others with similar preferences liked.</li>
+  <li>Hybrid Approach: Combines content-based and collaborative filtering.</li>
+</ul>
+
+<p><strong>RAG-based recommendation</strong></p>
+
+<p>RAG is built on two main components:</p>
+
+<p>1️⃣ Retriever (Information Fetching)</p>
+
+<ul>
+  <li>Dense Vector Search (FAISS, Annoy, Pinecone, Weaviate, ChromaDB) that uses embeddings (e.g., BERT, SBERT, DPR) to find semantically similar documents.</li>
+  <li>Traditional Search (BM25, ElasticSearch, Google Search API) that retrieves documents using keyword-based matching.</li>
+</ul>
+
+<p>2️⃣ Generator (Text Generation)</p>
+
+<ul>
+  <li>Pre-trained LLMs (GPT, BART, T5, LLaMA) generate responses using the retrieved documents as additional context.</li>
+  <li>Can use fine-tuned models for domain-specific responses (e.g., finance, medical).</li>
+</ul>
+
+<p><strong>Key Steps in RAG</strong>:</p>
+
+<p>1️⃣ User Input → A query is given (e.g., “What are the latest gaming laptops?”).</p>
+
+<p>2️⃣ Retrieval Module → Finds the most relevant documents using vector search (FAISS, BM25, ElasticSearch, etc.).</p>
+
+<p>3️⃣ Context Injection → The retrieved documents are passed to the generation model.</p>
+
+<p>4️⃣ Response Generation → The model generates a final, coherent answer using both the query and retrieved documents.</p>
+
+<h2 id="references">References</h2>
+
+<p>[1] Build your first LLM agent application: https://developer.nvidia.com/blog/building-your-first-llm-agent-application/</p>]]></content><author><name></name></author><category term="genai" /><category term="llm" /><category term="tutorial" /><category term="reading" /><summary type="html"><![CDATA[How to break into $100k+ salary roles - part 5]]></summary></entry><entry><title type="html">LLM Series - Part 4 - How to Jailbreak LLMs</title><link href="https://tuananhbui89.github.io/blog/2025/llm-jailbreak/" rel="alternate" type="text/html" title="LLM Series - Part 4 - How to Jailbreak LLMs" /><published>2025-01-18T00:00:00+11:00</published><updated>2025-01-18T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/llm-jailbreak</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/llm-jailbreak/"><![CDATA[<h2 id="the-challenge">The challenge</h2>
 
 <p>Jailbreaking LLMs is a technique to make the LLM output something that is not intended. For example, the LLM like OpenAI’s GPT-4 when deployed and serving the public, it has its own safety guard to prevent users from using it to generate harmful content, such as “How to build a bomb” or “How to create a computer virus”.</p>
 
@@ -1470,7 +2390,7 @@ However, unlike jailbreak attack which has been studied broadly in the literatur
 </div>
 <div class="caption">
     Edit Distance vs Accuracy. PA: Prompt Attack with Replay Memory, TA: Text Attack, RS: Replace Synonym
-</div>]]></content><author><name></name></author><category term="reading" /><summary type="html"><![CDATA[How to break into $100k+ salary roles - part 4]]></summary></entry><entry><title type="html">LLM Series - Part 3 - Build a Chatbot with Ollama</title><link href="https://tuananhbui89.github.io/blog/2025/llm-chatbot/" rel="alternate" type="text/html" title="LLM Series - Part 3 - Build a Chatbot with Ollama" /><published>2025-01-17T00:00:00+11:00</published><updated>2025-01-17T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/llm-chatbot</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/llm-chatbot/"><![CDATA[<h2 id="background">Background</h2>
+</div>]]></content><author><name></name></author><category term="genai" /><category term="llm" /><category term="tutorial" /><category term="reading" /><category term="coding" /><summary type="html"><![CDATA[How to break into $100k+ salary roles - part 4]]></summary></entry><entry><title type="html">LLM Series - Part 3 - Build a Chatbot with Ollama</title><link href="https://tuananhbui89.github.io/blog/2025/llm-chatbot/" rel="alternate" type="text/html" title="LLM Series - Part 3 - Build a Chatbot with Ollama" /><published>2025-01-17T00:00:00+11:00</published><updated>2025-01-17T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/llm-chatbot</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/llm-chatbot/"><![CDATA[<h2 id="background">Background</h2>
 
 <h3 id="ollama">Ollama</h3>
 
@@ -1881,7 +2801,7 @@ You will only respond with the category. Do not include the word </span><span cl
                   <span class="n">n</span><span class="o">=</span><span class="mi">5</span> <span class="k">if</span> <span class="n">args</span><span class="p">.</span><span class="n">num_gen_samples</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,</span>
 <span class="p">)</span>
 
-</code></pre></div></div>]]></content><author><name></name></author><category term="reading" /><summary type="html"><![CDATA[How to break into $100k+ salary roles - part 3]]></summary></entry><entry><title type="html">LLM Series - Part 2 - Common Implementations in LLMs</title><link href="https://tuananhbui89.github.io/blog/2025/llm-implementations/" rel="alternate" type="text/html" title="LLM Series - Part 2 - Common Implementations in LLMs" /><published>2025-01-16T00:00:00+11:00</published><updated>2025-01-16T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/llm-implementations</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/llm-implementations/"><![CDATA[<h2 id="transformer-in-pytorch">Transformer in Pytorch</h2>
+</code></pre></div></div>]]></content><author><name></name></author><category term="genai" /><category term="llm" /><category term="tutorial" /><category term="reading" /><category term="coding" /><summary type="html"><![CDATA[How to break into $100k+ salary roles - part 3]]></summary></entry><entry><title type="html">LLM Series - Part 2 - Common Implementations in LLMs</title><link href="https://tuananhbui89.github.io/blog/2025/llm-implementations/" rel="alternate" type="text/html" title="LLM Series - Part 2 - Common Implementations in LLMs" /><published>2025-01-16T00:00:00+11:00</published><updated>2025-01-16T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/llm-implementations</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/llm-implementations/"><![CDATA[<h2 id="transformer-in-pytorch">Transformer in Pytorch</h2>
 
 <h3 id="attention-mechanism-and-position-embedding">Attention Mechanism and Position Embedding</h3>
 
@@ -2569,7 +3489,7 @@ python chatbot.py
       <li>Setup environment variables on Linux: https://github.com/ollama/ollama/blob/main/docs/faq.md#setting-environment-variables-on-linux</li>
     </ul>
   </li>
-</ul>]]></content><author><name></name></author><category term="reading" /><summary type="html"><![CDATA[How to break into $100k+ salary roles - Part 2]]></summary></entry><entry><title type="html">LLM Series - Part 1 - Important Concepts in NLP</title><link href="https://tuananhbui89.github.io/blog/2025/nlp-foundation/" rel="alternate" type="text/html" title="LLM Series - Part 1 - Important Concepts in NLP" /><published>2025-01-15T00:00:00+11:00</published><updated>2025-01-15T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/nlp-foundation</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/nlp-foundation/"><![CDATA[<h2 id="nlp-foundations">NLP Foundations</h2>
+</ul>]]></content><author><name></name></author><category term="genai" /><category term="llm" /><category term="tutorial" /><category term="reading" /><category term="coding" /><summary type="html"><![CDATA[How to break into $100k+ salary roles - Part 2]]></summary></entry><entry><title type="html">LLM Series - Part 1 - Important Concepts in NLP</title><link href="https://tuananhbui89.github.io/blog/2025/nlp-foundation/" rel="alternate" type="text/html" title="LLM Series - Part 1 - Important Concepts in NLP" /><published>2025-01-15T00:00:00+11:00</published><updated>2025-01-15T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/nlp-foundation</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/nlp-foundation/"><![CDATA[<h2 id="nlp-foundations">NLP Foundations</h2>
 
 <p>References:</p>
 
@@ -4721,7 +5641,7 @@ Some free tools are:</p>
   <li><a href="https://nlp.seas.harvard.edu/annotated-transformer/">The Annotated Transformer</a></li>
   <li><a href="https://arxiv.org/abs/1706.03762">Attention is All You Need</a></li>
   <li><a href="https://github.com/HandsOnLLM/Hands-On-Large-Language-Models">Hands-on LLMs</a></li>
-</ul>]]></content><author><name></name></author><category term="reading" /><summary type="html"><![CDATA[How to break into $100k+ salary roles]]></summary></entry><entry><title type="html">The LLM Series</title><link href="https://tuananhbui89.github.io/blog/2025/llm-series/" rel="alternate" type="text/html" title="The LLM Series" /><published>2025-01-15T00:00:00+11:00</published><updated>2025-01-15T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/llm-series</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/llm-series/"><![CDATA[<p>This is a series to log my learning journey on Large Language Models (LLMs).</p>
+</ul>]]></content><author><name></name></author><category term="genai" /><category term="llm" /><category term="tutorial" /><category term="reading" /><summary type="html"><![CDATA[How to break into $100k+ salary roles]]></summary></entry><entry><title type="html">The LLM Series</title><link href="https://tuananhbui89.github.io/blog/2025/llm-series/" rel="alternate" type="text/html" title="The LLM Series" /><published>2025-01-15T00:00:00+11:00</published><updated>2025-01-15T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/llm-series</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/llm-series/"><![CDATA[<p>This is a series to log my learning journey on Large Language Models (LLMs).</p>
 
 <ul>
   <li><a href="https://tuananhbui89.github.io/blog/2025/nlp-foundation/">Part 1: Important Concepts in NLP</a></li>
@@ -4737,660 +5657,4 @@ Some free tools are:</p>
   <li><a href="https://tuananhbui89.github.io/blog/2025/deepseek/">DeepSeek-R1</a></li>
   <li><a href="https://tuananhbui89.github.io/blog/2024/adv-prompter/">AdvPrompter - Fast Adaptive Adversarial Prompting for LLMs</a></li>
   <li><a href="https://tuananhbui89.github.io/blog/2024/paper-llm-attacks/">Universal and Transferable Adversarial Attacks on Aligned Language Models</a></li>
-</ul>]]></content><author><name></name></author><category term="genai" /><category term="diffusion" /><category term="tutorial" /><category term="tml" /><category term="reading" /><summary type="html"><![CDATA[How to break into $100k+ salary roles]]></summary></entry><entry><title type="html">The Trustworthy GenAI Series</title><link href="https://tuananhbui89.github.io/blog/2025/genai-series/" rel="alternate" type="text/html" title="The Trustworthy GenAI Series" /><published>2025-01-15T00:00:00+11:00</published><updated>2025-01-15T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/genai-series</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/genai-series/"><![CDATA[<h2 id="tutorials-on-diffusion-models">Tutorials on Diffusion Models</h2>
-
-<ul>
-  <li><a href="https://tuananhbui89.github.io/blog/2023/diffusion-tutorial/">Part 1: Denoising Diffusion Probabilistic Models (DDPM)</a></li>
-  <li><a href="https://tuananhbui89.github.io/blog/2023/diffusion-tutorial-p2/">Part 2: DDIM, Diffusion Inversion and Accelerating Inference</a></li>
-  <li><a href="https://github.com/tuananhbui89/diffusion_tf2">Implementation: DDPM with Tensorflow 2</a></li>
-  <li><a href="https://github.com/tuananhbui89/diffusion_demo">Implementation: DDIM and Diffusion Inversion</a></li>
-</ul>
-
-<h2 id="tutorials-on-adversarial-machine-learning">Tutorials on Adversarial Machine Learning</h2>
-
-<ul>
-  <li><a href="https://tuananhbui89.github.io/blog/2023/aml-intro/">Part 1: The Good, The Bad, The Ugly</a></li>
-  <li><a href="https://tuananhbui89.github.io/blog/2023/aml-overview/">Part 2: Adversarial Attacks</a></li>
-  <li><a href="https://github.com/tuananhbui89/AML-Leaders">List of research groups and notable researchers in the field of Adversarial Machine Learning</a></li>
-</ul>
-
-<h2 id="machine-unlearning---erasing-concepts">Machine Unlearning - Erasing Concepts</h2>
-
-<ul>
-  <li><a href="https://arxiv.org/abs/2501.18950">Fantastic Targets for Concept Erasure in Diffusion Models and Where to Find Them</a></li>
-  <li><a href="https://tuananhbui89.github.io/projects/adversarial-preservation/">Erasing Undesirable Concepts in Diffusion Models with Adversarial Preservation</a></li>
-  <li><a href="https://tuananhbui89.github.io/blog/2024/erasing-concepts/">Fake Taylor Swift and the Adversarial Game of Concept Erasure and Injection</a></li>
-  <li><a href="https://tuananhbui89.github.io/blog/2023/erasing-concepts/">Erasing Concepts from Diffusion Models</a></li>
-  <li><a href="https://tuananhbui89.github.io/blog/2024/unlearning-challenge/">Lesson Learned from NeurIPS 2023 Machine Unlearning Challenge</a></li>
-</ul>
-
-<h2 id="other-posts">Other posts</h2>
-
-<ul>
-  <li><a href="https://tuananhbui89.github.io/blog/2024/safety-checker/">What is Safety Checker in Stable Diffusion</a></li>
-  <li><a href="https://tuananhbui89.github.io/blog/2024/sharpness/">Connection between Flatness and Generalization</a></li>
-  <li><a href="https://tuananhbui89.github.io/blog/2024/compvis-diffusers/">Comparing Implementations of Diffusion Models - HuggingFace Diffusers vs. CompVis Stable Diffusion</a></li>
-  <li><a href="https://tuananhbui89.github.io/blog/2024/adv-prompter/">AdvPrompter - Fast Adaptive Adversarial Prompting for LLMs</a></li>
-  <li><a href="https://tuananhbui89.github.io/blog/2024/paper-unsolved-problem-detection/">Unsolvable Problem Detection - Evaluating Trustworthiness of Vision Language Models</a></li>
-  <li><a href="https://tuananhbui89.github.io/blog/2024/paper-llm-attacks/">Universal and Transferable Adversarial Attacks on Aligned Language Models</a></li>
-  <li><a href="https://tuananhbui89.github.io/blog/2024/paper-cold-diffusion/">Cold Diffusion - Inverting Arbitrary Image Transforms Without Noise</a></li>
-  <li><a href="https://tuananhbui89.github.io/blog/2023/watermark-diffusion/">Tree-Ring Watermarks - Fingerprints for Diffusion Images that are Invisible and Robust</a></li>
-  <li><a href="https://tuananhbui89.github.io/blog/2023/flowmatching/">Flow Matching for Generative Modeling</a></li>
-  <li><a href="https://tuananhbui89.github.io/blog/2023/conditional-diffusion/">Diffusion Models Beat GANs on Image Synthesis</a></li>
-  <li><a href="https://tuananhbui89.github.io/blog/2023/fairness-101/">Fairness in Machine Learning</a></li>
-  <li><a href="https://tuananhbui89.github.io/blog/2023/anti-personalization/">Anti-Personalization in Generative Models</a></li>
-  <li><a href="https://tuananhbui89.github.io/blog/2023/textual-inversion/">Textual Inversion</a></li>
-  <li><a href="https://tuananhbui89.github.io/blog/2023/anti-dreambooth/">Anti-Dreambooth</a></li>
-</ul>]]></content><author><name></name></author><category term="genai" /><category term="diffusion" /><category term="tutorial" /><category term="tml" /><category term="reading" /><summary type="html"><![CDATA[All about Generative Models and Trustworthy Machine Learning]]></summary></entry><entry><title type="html">What is Safety Checker in Stable Diffusion</title><link href="https://tuananhbui89.github.io/blog/2024/safety-checker/" rel="alternate" type="text/html" title="What is Safety Checker in Stable Diffusion" /><published>2024-12-18T00:00:00+11:00</published><updated>2024-12-18T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2024/safety-checker</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2024/safety-checker/"><![CDATA[<p>With the rapid development of generative AI models, the risk of misuse-generated content has become critical. In this post, I will discuss four main approaches to preventing unwanted content in foundation models and then dive into the implementation of the Safety Checker, the most popular and practical approach used in real-world GenAI applications such as Stable Diffusion or Midjourney.</p>
-
-<h2 id="approaches-to-prevent-unwanted-content-in-generative-models">Approaches to Prevent Unwanted Content in Generative Models</h2>
-
-<p>Preventing unwanted content generated by foundation models, such as Stable Diffusion, involves several strategies. Below, we explore four main approaches:</p>
-
-<h3 id="pre-training">Pre-training</h3>
-
-<p>This approach involves filtering out unwanted content and retraining the model from scratch. While effective, it is prohibitively expensive. For instance, as noted in <a href="https://www.databricks.com/blog/stable-diffusion-2">this blog post</a>, training a Stable Diffusion-level model from scratch with MosaicML costs approximately $50,000.
-This estimate excludes data preprocessing costs, making it economically unfeasible for frequent updates.</p>
-
-<p>Major updates or retraining may occur in response to significant ethical concerns, but they are not suitable for addressing frequent issues like user-generated reports. For example, after the incident involving fake explicit images of Taylor Swift, other celebrities requested similar protections as reported in <a href="https://variety.com/vip/celebrity-reps-fighting-flood-unauthorized-ai-content-1236149088/">this article</a>. Or another example, <a href="https://www.siliconrepublic.com/machines/fairly-trained-ai-training-data">a recent statement signed by more than 13,000 creatives</a> from around the world, including famous actors, singers and authors, warning artificial intelligence (AI) companies that the unlicensed use of their work to train generative AI models is a “major, unjust threat” to their livelihoods. Addressing these cases through pre-training would be highly impractical.</p>
-
-<div class="row mt-3">
-    <div class="col-sm mt-3 mt-md-0 text-center">
-        <figure>
-
-  <picture>
-    
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/safety_checker/training_cost-480.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/safety_checker/training_cost-800.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/safety_checker/training_cost-1400.webp" />
-    
-
-    <!-- Fallback to the original file -->
-    <img src="/assets/img/safety_checker/training_cost.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
-  </picture>
-
-</figure>
-
-    </div>
-</div>
-<div class="caption text-center">
-    The cost of training a Stable-Diffusion level model from scratch.
-</div>
-
-<h3 id="post-training">Post-training</h3>
-
-<p>In this approach, inappropriate content is detected and censored in the generated output by a safety checker deployed by the model’s developer. Post-training is more economical compared to pre-training, requiring minimal effort or changes to the model’s development pipeline.
-For instance, a safety checker—discussed in the next section—relies on embedding similarity matching (e.g., using CLIP or multimodal embeddings). These systems can be updated quickly in response to user requests.
-This method is particularly effective for closed-source models like OpenAI’s or MidJourney’s, where users access the model only via API, therefore, should have higher priorities to be focused on in addressing user’s requests.</p>
-
-<p>However, for open-source models like Stable Diffusion, where users have access to model parameters and source code, this approach can be bypassed with a few lines of code as shown in the figure below, making it ineffective.
-Even closed-source models are vulnerable to recent <a href="https://github.com/yueliu1999/Awesome-Jailbreak-on-LLMs?tab=readme-ov-file#black-box-attack">black-box jailbreak techniques</a>, which exploit the transferability of adversarial examples between surrogate and target models (e.g., between open-source models like Stable Diffusion and closed-source models like Dall-E).</p>
-
-<div class="row mt-3">
-    <div class="col-sm mt-3 mt-md-0 text-center">
-        <figure>
-
-  <picture>
-    
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/safety_checker/bypass_nsfw-480.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/safety_checker/bypass_nsfw-800.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/safety_checker/bypass_nsfw-1400.webp" />
-    
-
-    <!-- Fallback to the original file -->
-    <img src="/assets/img/safety_checker/bypass_nsfw.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
-  </picture>
-
-</figure>
-
-    </div>
-</div>
-<div class="caption text-center">
-    Bypassing the NSFW detector of Stable Diffusion.
-</div>
-
-<h3 id="fine-tuning-or-concepts-unlearning">Fine-tuning or Concepts Unlearning</h3>
-
-<p>The goal of fine-tuning is to adjust the model’s parameters to “unlearn” its ability to generate unwanted content. Conceptually, the model retains the capability to generate such content, but access to this capability becomes hidden, making it difficult for public users to exploit. From a research perspective, this approach is robust, reliable, and presents numerous opportunities for exploration. Practically, fine-tuning is also efficient, requiring only a few thousand iterations—a process that typically completes within a few hours—without needing additional data (e.g., our methods :D).</p>
-
-<h3 id="self-protection-with-unlearnable-invisible-masks">Self-protection with Unlearnable Invisible Masks</h3>
-
-<p>Unlike the previous three approaches, which are developer-centric, this method is user-centric. The idea is users add an unlearnable invisible mask to their personal data before publishing it publicly, e.g., through a default setting in camera app (entrepreneur idea alert :D).
-Even if the data is collected by a model, the mask prevents the model from learning the personal data, thereby hindering it from generating related content. This approach has garnered attention from the research community, with notable works like <a href="https://openaccess.thecvf.com/content/CVPR2022/html/Zhang_Towards_Efficient_Data_Free_Black-Box_Adversarial_Attack_CVPR_2022_paper.html">MIST</a>, <a href="https://openaccess.thecvf.com/content/ICCV2023/html/Van_Le_Anti-DreamBooth_Protecting_Users_from_Personalized_Text-to-image_Synthesis_ICCV_2023_paper.html">Anti-Dreambooth</a>, <a href="https://arxiv.org/pdf/2310.02401">FT-Shield</a>, or <a href="https://openreview.net/pdf?id=lroEEGApa4">Meta-Cloak</a>. It could be a million dollar idea if it works, but unfortunately, to the best of my knowledge, even the SOTA methods are still be bypassed by transformation-based or auto-encoder based jailbreak techniques.</p>
-
-<h3 id="summary">Summary</h3>
-
-<p>For open-source models like Stable Diffusion, the fine-tuning approach offers the most promise and economic viability. On the other hand, for closed-source models like OpenAI or MidJourney, post-training methods are the most efficient and should take precedence.</p>
-
-<p>In the next section, we delve deeper into the mechanics of the Safety Checker. The implementation for this module can be found in the <a href="https://github.com/huggingface/diffusers/blob/main/src/diffusers/pipelines/stable_diffusion/safety_checker.py">diffusers library (version 0.32.0 as the time of writing)</a>.</p>
-
-<h2 id="what-the-heck-is-safety-checker">What the heck is Safety Checker?</h2>
-
-<p>The <code class="language-plaintext highlighter-rouge">StableDiffusionSafetyChecker</code> module is designed to detect NSFW (Not Safe For Work) or inappropriate content in generated images. In the case a NSFW content is detected, the safety action will be taken, i.e., the output images will be censored and a warning message will be returned.</p>
-
-<p>Below is the implementation of this module in the diffusers library for readers’ convenience</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
-<span class="kn">import</span> <span class="n">torch</span>
-<span class="kn">import</span> <span class="n">torch.nn</span> <span class="k">as</span> <span class="n">nn</span>
-<span class="kn">from</span> <span class="n">transformers</span> <span class="kn">import</span> <span class="n">CLIPConfig</span><span class="p">,</span> <span class="n">CLIPVisionModel</span><span class="p">,</span> <span class="n">PreTrainedModel</span>
-
-<span class="kn">from</span> <span class="n">...utils</span> <span class="kn">import</span> <span class="n">logging</span>
-
-
-<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="p">.</span><span class="nf">get_logger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
-
-
-<span class="k">def</span> <span class="nf">cosine_distance</span><span class="p">(</span><span class="n">image_embeds</span><span class="p">,</span> <span class="n">text_embeds</span><span class="p">):</span>
-    <span class="n">normalized_image_embeds</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="n">functional</span><span class="p">.</span><span class="nf">normalize</span><span class="p">(</span><span class="n">image_embeds</span><span class="p">)</span>
-    <span class="n">normalized_text_embeds</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="n">functional</span><span class="p">.</span><span class="nf">normalize</span><span class="p">(</span><span class="n">text_embeds</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">torch</span><span class="p">.</span><span class="nf">mm</span><span class="p">(</span><span class="n">normalized_image_embeds</span><span class="p">,</span> <span class="n">normalized_text_embeds</span><span class="p">.</span><span class="nf">t</span><span class="p">())</span>
-
-
-<span class="k">class</span> <span class="nc">StableDiffusionSafetyChecker</span><span class="p">(</span><span class="n">PreTrainedModel</span><span class="p">):</span>
-    <span class="n">config_class</span> <span class="o">=</span> <span class="n">CLIPConfig</span>
-    <span class="n">main_input_name</span> <span class="o">=</span> <span class="sh">"</span><span class="s">clip_input</span><span class="sh">"</span>
-
-    <span class="n">_no_split_modules</span> <span class="o">=</span> <span class="p">[</span><span class="sh">"</span><span class="s">CLIPEncoderLayer</span><span class="sh">"</span><span class="p">]</span>
-
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">CLIPConfig</span><span class="p">):</span>
-        <span class="nf">super</span><span class="p">().</span><span class="nf">__init__</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
-
-        <span class="n">self</span><span class="p">.</span><span class="n">vision_model</span> <span class="o">=</span> <span class="nc">CLIPVisionModel</span><span class="p">(</span><span class="n">config</span><span class="p">.</span><span class="n">vision_config</span><span class="p">)</span>
-        <span class="n">self</span><span class="p">.</span><span class="n">visual_projection</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">config</span><span class="p">.</span><span class="n">vision_config</span><span class="p">.</span><span class="n">hidden_size</span><span class="p">,</span> <span class="n">config</span><span class="p">.</span><span class="n">projection_dim</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-
-        <span class="n">self</span><span class="p">.</span><span class="n">concept_embeds</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">ones</span><span class="p">(</span><span class="mi">17</span><span class="p">,</span> <span class="n">config</span><span class="p">.</span><span class="n">projection_dim</span><span class="p">),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-        <span class="n">self</span><span class="p">.</span><span class="n">special_care_embeds</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">config</span><span class="p">.</span><span class="n">projection_dim</span><span class="p">),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-
-        <span class="n">self</span><span class="p">.</span><span class="n">concept_embeds_weights</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">ones</span><span class="p">(</span><span class="mi">17</span><span class="p">),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-        <span class="n">self</span><span class="p">.</span><span class="n">special_care_embeds_weights</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-
-    <span class="nd">@torch.no_grad</span><span class="p">()</span>
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">clip_input</span><span class="p">,</span> <span class="n">images</span><span class="p">):</span>
-        <span class="n">pooled_output</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">vision_model</span><span class="p">(</span><span class="n">clip_input</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># pooled_output
-</span>        <span class="n">image_embeds</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">visual_projection</span><span class="p">(</span><span class="n">pooled_output</span><span class="p">)</span>
-
-        <span class="c1"># we always cast to float32 as this does not cause significant overhead and is compatible with bfloat16
-</span>        <span class="n">special_cos_dist</span> <span class="o">=</span> <span class="nf">cosine_distance</span><span class="p">(</span><span class="n">image_embeds</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">special_care_embeds</span><span class="p">).</span><span class="nf">cpu</span><span class="p">().</span><span class="nf">float</span><span class="p">().</span><span class="nf">numpy</span><span class="p">()</span>
-        <span class="n">cos_dist</span> <span class="o">=</span> <span class="nf">cosine_distance</span><span class="p">(</span><span class="n">image_embeds</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">concept_embeds</span><span class="p">).</span><span class="nf">cpu</span><span class="p">().</span><span class="nf">float</span><span class="p">().</span><span class="nf">numpy</span><span class="p">()</span>
-
-        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">batch_size</span> <span class="o">=</span> <span class="n">image_embeds</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">batch_size</span><span class="p">):</span>
-            <span class="n">result_img</span> <span class="o">=</span> <span class="p">{</span><span class="sh">"</span><span class="s">special_scores</span><span class="sh">"</span><span class="p">:</span> <span class="p">{},</span> <span class="sh">"</span><span class="s">special_care</span><span class="sh">"</span><span class="p">:</span> <span class="p">[],</span> <span class="sh">"</span><span class="s">concept_scores</span><span class="sh">"</span><span class="p">:</span> <span class="p">{},</span> <span class="sh">"</span><span class="s">bad_concepts</span><span class="sh">"</span><span class="p">:</span> <span class="p">[]}</span>
-
-            <span class="c1"># increase this value to create a stronger `nfsw` filter
-</span>            <span class="c1"># at the cost of increasing the possibility of filtering benign images
-</span>            <span class="n">adjustment</span> <span class="o">=</span> <span class="mf">0.0</span>
-
-            <span class="k">for</span> <span class="n">concept_idx</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">special_cos_dist</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
-                <span class="n">concept_cos</span> <span class="o">=</span> <span class="n">special_cos_dist</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">concept_idx</span><span class="p">]</span>
-                <span class="n">concept_threshold</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">special_care_embeds_weights</span><span class="p">[</span><span class="n">concept_idx</span><span class="p">].</span><span class="nf">item</span><span class="p">()</span>
-                <span class="n">result_img</span><span class="p">[</span><span class="sh">"</span><span class="s">special_scores</span><span class="sh">"</span><span class="p">][</span><span class="n">concept_idx</span><span class="p">]</span> <span class="o">=</span> <span class="nf">round</span><span class="p">(</span><span class="n">concept_cos</span> <span class="o">-</span> <span class="n">concept_threshold</span> <span class="o">+</span> <span class="n">adjustment</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">result_img</span><span class="p">[</span><span class="sh">"</span><span class="s">special_scores</span><span class="sh">"</span><span class="p">][</span><span class="n">concept_idx</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">result_img</span><span class="p">[</span><span class="sh">"</span><span class="s">special_care</span><span class="sh">"</span><span class="p">].</span><span class="nf">append</span><span class="p">({</span><span class="n">concept_idx</span><span class="p">,</span> <span class="n">result_img</span><span class="p">[</span><span class="sh">"</span><span class="s">special_scores</span><span class="sh">"</span><span class="p">][</span><span class="n">concept_idx</span><span class="p">]})</span>
-                    <span class="n">adjustment</span> <span class="o">=</span> <span class="mf">0.01</span>
-
-            <span class="k">for</span> <span class="n">concept_idx</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">cos_dist</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
-                <span class="n">concept_cos</span> <span class="o">=</span> <span class="n">cos_dist</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">concept_idx</span><span class="p">]</span>
-                <span class="n">concept_threshold</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">concept_embeds_weights</span><span class="p">[</span><span class="n">concept_idx</span><span class="p">].</span><span class="nf">item</span><span class="p">()</span>
-                <span class="n">result_img</span><span class="p">[</span><span class="sh">"</span><span class="s">concept_scores</span><span class="sh">"</span><span class="p">][</span><span class="n">concept_idx</span><span class="p">]</span> <span class="o">=</span> <span class="nf">round</span><span class="p">(</span><span class="n">concept_cos</span> <span class="o">-</span> <span class="n">concept_threshold</span> <span class="o">+</span> <span class="n">adjustment</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">result_img</span><span class="p">[</span><span class="sh">"</span><span class="s">concept_scores</span><span class="sh">"</span><span class="p">][</span><span class="n">concept_idx</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">result_img</span><span class="p">[</span><span class="sh">"</span><span class="s">bad_concepts</span><span class="sh">"</span><span class="p">].</span><span class="nf">append</span><span class="p">(</span><span class="n">concept_idx</span><span class="p">)</span>
-
-            <span class="n">result</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">result_img</span><span class="p">)</span>
-
-        <span class="n">has_nsfw_concepts</span> <span class="o">=</span> <span class="p">[</span><span class="nf">len</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="sh">"</span><span class="s">bad_concepts</span><span class="sh">"</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">result</span><span class="p">]</span>
-
-        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">has_nsfw_concept</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="n">has_nsfw_concepts</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">has_nsfw_concept</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">torch</span><span class="p">.</span><span class="nf">is_tensor</span><span class="p">(</span><span class="n">images</span><span class="p">)</span> <span class="ow">or</span> <span class="n">torch</span><span class="p">.</span><span class="nf">is_tensor</span><span class="p">(</span><span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-                    <span class="n">images</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">zeros_like</span><span class="p">(</span><span class="n">images</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>  <span class="c1"># black image
-</span>                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">images</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">zeros</span><span class="p">(</span><span class="n">images</span><span class="p">[</span><span class="n">idx</span><span class="p">].</span><span class="n">shape</span><span class="p">)</span>  <span class="c1"># black image
-</span>
-        <span class="k">if</span> <span class="nf">any</span><span class="p">(</span><span class="n">has_nsfw_concepts</span><span class="p">):</span>
-            <span class="n">logger</span><span class="p">.</span><span class="nf">warning</span><span class="p">(</span>
-                <span class="sh">"</span><span class="s">Potential NSFW content was detected in one or more images. A black image will be returned instead.</span><span class="sh">"</span>
-                <span class="sh">"</span><span class="s"> Try again with a different prompt and/or seed.</span><span class="sh">"</span>
-            <span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">images</span><span class="p">,</span> <span class="n">has_nsfw_concepts</span>
-</code></pre></div></div>
-
-<p>and how this module is used in the Stable Diffusion pipeline, e.g., in this file <a href="https://github.com/huggingface/diffusers/blob/main/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py"><code class="language-plaintext highlighter-rouge">pipelines/stable_diffusion/pipeline_stable_diffusion.py</code></a></p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">run_safety_checker</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">safety_checker</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="n">has_nsfw_concept</span> <span class="o">=</span> <span class="bp">None</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">torch</span><span class="p">.</span><span class="nf">is_tensor</span><span class="p">(</span><span class="n">image</span><span class="p">):</span>
-            <span class="n">feature_extractor_input</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">image_processor</span><span class="p">.</span><span class="nf">postprocess</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">output_type</span><span class="o">=</span><span class="sh">"</span><span class="s">pil</span><span class="sh">"</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">feature_extractor_input</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">image_processor</span><span class="p">.</span><span class="nf">numpy_to_pil</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
-        <span class="n">safety_checker_input</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">feature_extractor</span><span class="p">(</span><span class="n">feature_extractor_input</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="sh">"</span><span class="s">pt</span><span class="sh">"</span><span class="p">).</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-        <span class="n">image</span><span class="p">,</span> <span class="n">has_nsfw_concept</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">safety_checker</span><span class="p">(</span>
-            <span class="n">images</span><span class="o">=</span><span class="n">image</span><span class="p">,</span> <span class="n">clip_input</span><span class="o">=</span><span class="n">safety_checker_input</span><span class="p">.</span><span class="n">pixel_values</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
-        <span class="p">)</span>
-    <span class="k">return</span> <span class="n">image</span><span class="p">,</span> <span class="n">has_nsfw_concept</span>
-</code></pre></div></div>
-
-<h3 id="how-to-use-the-safety-checker-in-the-ldm-library">How to use the Safety Checker in the <code class="language-plaintext highlighter-rouge">ldm</code> library</h3>
-
-<p>in the <code class="language-plaintext highlighter-rouge">ldm</code> library, the <code class="language-plaintext highlighter-rouge">safety_checker</code> is first loaded from pre-trained checkpoint which is converted from the <code class="language-plaintext highlighter-rouge">diffusers</code> library, and then passed to the <code class="language-plaintext highlighter-rouge">StableDiffusionPipeline</code> class,
-e.g., in this file <a href="https://github.com/CompVis/stable-diffusion/blob/main/scripts/txt2img.py">https://github.com/CompVis/stable-diffusion/blob/main/scripts/txt2img.py</a></p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">diffusers</span> <span class="kn">import</span> <span class="n">StableDiffusionSafetyChecker</span>
-<span class="kn">from</span> <span class="n">transformers</span> <span class="kn">import</span> <span class="n">AutoFeatureExtractor</span>
-
-<span class="c1"># load safety model
-</span><span class="n">safety_model_id</span> <span class="o">=</span> <span class="sh">"</span><span class="s">CompVis/stable-diffusion-safety-checker</span><span class="sh">"</span>
-<span class="n">safety_feature_extractor</span> <span class="o">=</span> <span class="n">AutoFeatureExtractor</span><span class="p">.</span><span class="nf">from_pretrained</span><span class="p">(</span><span class="n">safety_model_id</span><span class="p">)</span>
-<span class="n">safety_checker</span> <span class="o">=</span> <span class="n">StableDiffusionSafetyChecker</span><span class="p">.</span><span class="nf">from_pretrained</span><span class="p">(</span><span class="n">safety_model_id</span><span class="p">)</span>
-
-<span class="k">def</span> <span class="nf">check_safety</span><span class="p">(</span><span class="n">x_image</span><span class="p">):</span>
-    <span class="n">safety_checker_input</span> <span class="o">=</span> <span class="nf">safety_feature_extractor</span><span class="p">(</span><span class="nf">numpy_to_pil</span><span class="p">(</span><span class="n">x_image</span><span class="p">),</span> <span class="n">return_tensors</span><span class="o">=</span><span class="sh">"</span><span class="s">pt</span><span class="sh">"</span><span class="p">)</span>
-    <span class="n">x_checked_image</span><span class="p">,</span> <span class="n">has_nsfw_concept</span> <span class="o">=</span> <span class="nf">safety_checker</span><span class="p">(</span><span class="n">images</span><span class="o">=</span><span class="n">x_image</span><span class="p">,</span> <span class="n">clip_input</span><span class="o">=</span><span class="n">safety_checker_input</span><span class="p">.</span><span class="n">pixel_values</span><span class="p">)</span>
-    <span class="k">assert</span> <span class="n">x_checked_image</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="nf">len</span><span class="p">(</span><span class="n">has_nsfw_concept</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">has_nsfw_concept</span><span class="p">)):</span>
-        <span class="k">if</span> <span class="n">has_nsfw_concept</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
-            <span class="n">x_checked_image</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nf">load_replacement</span><span class="p">(</span><span class="n">x_checked_image</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-    <span class="k">return</span> <span class="n">x_checked_image</span><span class="p">,</span> <span class="n">has_nsfw_concept</span>
-
-<span class="bp">...</span>
-<span class="n">x_checked_image</span><span class="p">,</span> <span class="n">has_nsfw_concept</span> <span class="o">=</span> <span class="nf">check_safety</span><span class="p">(</span><span class="n">x_samples_ddim</span><span class="p">)</span>
-<span class="bp">...</span>
-</code></pre></div></div>
-
-<h3 id="key-components">Key Components</h3>
-
-<ul>
-  <li>CLIP Vision Model: Uses a pretrained CLIP vision encoder to extract features from images</li>
-  <li>Visual Projection Layer: Projects the CLIP features into a specific embedding space</li>
-  <li>Two sets of learned concept embeddings:
-    <ul>
-      <li><code class="language-plaintext highlighter-rouge">concept_embeds</code>: 17 different concepts (presumably NSFW concepts)</li>
-      <li><code class="language-plaintext highlighter-rouge">special_care_embeds</code>: 3 special concepts that require extra attention</li>
-      <li>These embeddings are preloaded and marked as non-trainable (<code class="language-plaintext highlighter-rouge">requires_grad=False</code>).</li>
-    </ul>
-  </li>
-  <li>Corresponding weights for both types of embeddings:
-    <ul>
-      <li><code class="language-plaintext highlighter-rouge">concept_embeds_weights</code>: 17 weights for the 17 concepts</li>
-      <li><code class="language-plaintext highlighter-rouge">special_care_embeds_weights</code>: 3 weights for the 3 special concepts</li>
-      <li>These weights determine how strictly the model filters specific concepts.</li>
-    </ul>
-  </li>
-</ul>
-
-<h3 id="the-detection-process">The Detection Process</h3>
-
-<p><strong>Step 1: Input Processing</strong></p>
-
-<ul>
-  <li>The input clip_<code class="language-plaintext highlighter-rouge">input is processed by the vision model to extract pooled features (</code>pooled_output`).</li>
-  <li>The pooled features are projected into a lower-dimensional embedding space using <code class="language-plaintext highlighter-rouge">visual_projection</code>.</li>
-</ul>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">pooled_output</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">vision_model</span><span class="p">(</span><span class="n">clip_input</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-<span class="n">image_embeds</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">visual_projection</span><span class="p">(</span><span class="n">pooled_output</span><span class="p">)</span>
-</code></pre></div></div>
-
-<p><strong>Step 2: Cosine Similarity Calculation</strong></p>
-
-<ul>
-  <li>Cosine distances between the image embeddings and:
-    <ul>
-      <li>Special Care Embeddings (special_cos_dist).</li>
-      <li>General Concept Embeddings (cos_dist).</li>
-    </ul>
-  </li>
-  <li>These distances help determine how closely the input image matches undesirable concepts.</li>
-</ul>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">special_cos_dist</span> <span class="o">=</span> <span class="nf">cosine_distance</span><span class="p">(</span><span class="n">image_embeds</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">special_care_embeds</span><span class="p">)</span>
-<span class="n">cos_dist</span> <span class="o">=</span> <span class="nf">cosine_distance</span><span class="p">(</span><span class="n">image_embeds</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">concept_embeds</span><span class="p">)</span>
-</code></pre></div></div>
-
-<p><strong>Step 3: Threshold Detection</strong></p>
-
-<ul>
-  <li>Compares similarities against learned thresholds (embed_weights)</li>
-  <li>Uses an adjustment factor (0.01) if special care concepts are detected</li>
-  <li>Marks images as NSFW if they exceed thresholds</li>
-</ul>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">round</span><span class="p">(</span><span class="n">concept_cos</span> <span class="o">-</span> <span class="n">concept_threshold</span> <span class="o">+</span> <span class="n">adjustment</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
-</code></pre></div></div>
-
-<p><strong>Step 4: Safety Action</strong></p>
-
-<ul>
-  <li>If NSFW content is detected, replaces the image with a black image (zeros)</li>
-</ul>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">has_nsfw_concept</span><span class="p">:</span>
-    <span class="n">images</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">zeros_like</span><span class="p">(</span><span class="n">images</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
-</code></pre></div></div>
-
-<h3 id="how-to-get-the-selfconcept_embeds">How to get the <code class="language-plaintext highlighter-rouge">self.concept_embeds</code>?</h3>
-
-<p>The <code class="language-plaintext highlighter-rouge">concept_embeds</code> are initialized as parameters in the model but their actual values are loaded from a pre-trained checkpoint. The code shown only has placeholder initialization:</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">self</span><span class="p">.</span><span class="n">concept_embeds</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">ones</span><span class="p">(</span><span class="mi">17</span><span class="p">,</span> <span class="n">config</span><span class="p">.</span><span class="n">projection_dim</span><span class="p">),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-<span class="n">self</span><span class="p">.</span><span class="n">special_care_embeds</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">config</span><span class="p">.</span><span class="n">projection_dim</span><span class="p">),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-
-<span class="n">self</span><span class="p">.</span><span class="n">concept_embeds_weights</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">ones</span><span class="p">(</span><span class="mi">17</span><span class="p">),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-<span class="n">self</span><span class="p">.</span><span class="n">special_care_embeds_weights</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-</code></pre></div></div>
-
-<p>The actual concept embeddings come from the safety checker model checkpoint that ships with Stable Diffusion. You can find this model on the HuggingFace Hub as <a href="https://huggingface.co/CompVis/stable-diffusion-safety-checker">CompVis/stable-diffusion-safety-checker</a>.</p>
-
-<p><strong>To get the actual values</strong>, you would need to load the safety checker model (defined in <a href="https://github.com/huggingface/diffusers/blob/main/src/diffusers/pipelines/stable_diffusion/convert_from_ckpt.py"><code class="language-plaintext highlighter-rouge">convert_from_ckpt.py</code></a>) and then access the embeddings:</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">diffusers</span> <span class="kn">import</span> <span class="n">StableDiffusionSafetyChecker</span>
-<span class="kn">from</span> <span class="n">transformers</span> <span class="kn">import</span> <span class="n">CLIPFeatureExtractor</span>
-
-<span class="n">safety_checker</span> <span class="o">=</span> <span class="n">StableDiffusionSafetyChecker</span><span class="p">.</span><span class="nf">from_pretrained</span><span class="p">(</span><span class="sh">"</span><span class="s">CompVis/stable-diffusion-safety-checker</span><span class="sh">"</span><span class="p">)</span>
-
-<span class="n">concept_embeds</span> <span class="o">=</span> <span class="n">safety_checker</span><span class="p">.</span><span class="n">concept_embeds</span><span class="p">.</span><span class="nf">cpu</span><span class="p">().</span><span class="nf">numpy</span><span class="p">()</span>
-<span class="n">special_care_embeds</span> <span class="o">=</span> <span class="n">safety_checker</span><span class="p">.</span><span class="n">special_care_embeds</span><span class="p">.</span><span class="nf">cpu</span><span class="p">().</span><span class="nf">numpy</span><span class="p">()</span>
-</code></pre></div></div>
-
-<h2 id="how-to-bypass-the-safety-checker">How to bypass the Safety Checker?</h2>
-
-<p>After reading the code, it is very simple to bypass the Safety Checker by simply set <code class="language-plaintext highlighter-rouge">has_nsfw_concepts</code> always to <code class="language-plaintext highlighter-rouge">False</code>.</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">has_nsfw_concepts</span> <span class="o">=</span> <span class="p">[</span><span class="bp">False</span><span class="p">]</span> <span class="o">*</span> <span class="nf">len</span><span class="p">(</span><span class="n">images</span><span class="p">)</span>
-</code></pre></div></div>
-
-<h2 id="conclusion">Conclusion</h2>
-
-<p>In this post, we have discussed the Safety Checker in Stable Diffusion, its implementation, and how to bypass it. We have also provided a detailed explanation of the detection process and the key components of the Safety Checker.
-I believe that understanding this module in greater detail can lead to some interesting research ideas, for example, how to quickly update the Safety Checker to detect new NSFW concepts or how to bypass the Safety Checker without modifying the code or can we use this module as a surrogate for other NSFW detection models.</p>
-
-<p>Thank you for reading!</p>]]></content><author><name></name></author><category term="reading" /><summary type="html"><![CDATA[With the rapid development of generative AI models, the risk of misuse-generated content has become critical. In this post, I will discuss four main approaches to preventing unwanted content in foundation models and then dive into the implementation of the Safety Checker, the most popular and practical approach used in real-world GenAI applications such as Stable Diffusion or Midjourney.]]></summary></entry><entry><title type="html">Some notes on NeurIPS 2024</title><link href="https://tuananhbui89.github.io/blog/2024/neurips24/" rel="alternate" type="text/html" title="Some notes on NeurIPS 2024" /><published>2024-12-13T00:00:00+11:00</published><updated>2024-12-13T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2024/neurips24</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2024/neurips24/"><![CDATA[<h2 id="our-poster-at-neurips-2024-">Our poster at NeurIPS 2024 🎯</h2>
-
-<p>I’m proud to share that our poster received quite a bit of attention at NeurIPS 2024! Several people intentionally came to our poster to discuss our work, and many others stopped by to ask questions (thanks to the big photo of Taylor Swift 🎤).</p>
-
-<p>I’m also excited to see how our idea of the <strong>concept graph</strong> 🕸️—initialized in <a href="https://arxiv.org/abs/2410.15618">our NeurIPS paper</a> and complemented by <a href="https://openreview.net/forum?id=tZdqL5FH7w">our under-review paper</a>—can be connected to many other works, not only in <strong>machine unlearning</strong> but also in topics like <strong>personalization</strong>, <strong>controllable generation/editing</strong>, and <strong>model debiasing</strong> within Generative AI.</p>
-
-<p>In a nutshell, the concept graph represents a model’s knowledge as a graph, where nodes are concepts, and edges represent the relationships between those concepts. Understanding this graph structure is essential for many tasks, such as:</p>
-
-<ul>
-  <li><strong>Machine Unlearning</strong> 🗑️: The goal here is to remove the model’s knowledge of certain concepts while retaining its knowledge of others. The concept graph structure helps identify which concepts are critical to the model’s performance and should be preserved.</li>
-  <li><strong>Personalization</strong> 👤: The goal is to personalize the model’s knowledge for a specific user. For instance, changing “a photo of a <em>cat</em> before Vancouver Convention Center” to “a photo of a <em>cat</em> before the user’s house.” Traditional methods like Dreambooth, which fine-tune the model on a small user-specific dataset, often overfit to the specific concept and degrade the model’s general capability. Prior approaches address this by collecting large datasets of <strong>heuristically selected concepts</strong>—e.g., if the personalized concept is “a user’s house,” the preservation dataset would include a variety of house images. Our concept graph structure can help identify which concepts are specific to the user and should be preserved, improving the balance between personalization and generalization.</li>
-</ul>
-
-<p>I also had the opportunity to discuss related works with their authors and promote our concept graph structure. While these works are already impressive, I believe incorporating our concept graph could help improve their results even further. ✨</p>
-
-<p>NeurIPS 2024 marked my first in-person conference, and I must admit it was a bit overwhelming. There were so many excellent works to read more, many new ideas to explore, and a few disappointing moments when seeing some of my ideas had already been done. 😅 Nonetheless, it was an eye-opening experience, and I guess my upcoming holiday assignment is to wrap up and review many fascinating works in <strong>machine unlearning</strong> and <strong>personalization</strong>. Stay tuned for that! 📚</p>
-
-<div class="row mt-3">
-    <div class="col-sm mt-3 mt-md-0 text-center">
-        <figure>
-
-  <picture>
-    
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/NeurIPS2024/unlearn-one-layer-480.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/NeurIPS2024/unlearn-one-layer-800.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/NeurIPS2024/unlearn-one-layer-1400.webp" />
-    
-
-    <!-- Fallback to the original file -->
-    <img src="/assets/img/NeurIPS2024/unlearn-one-layer.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
-  </picture>
-
-</figure>
-
-    </div>
-</div>
-<div class="caption text-center">
-    Unlearning by fine-tuning only one layer of the model. Our concept graph can help to design a better retain set in this case.
-</div>
-
-<div class="row mt-3">
-    <div class="col-sm mt-3 mt-md-0 text-center">
-        <figure>
-
-  <picture>
-    
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/NeurIPS2024/negative-guidance-480.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/NeurIPS2024/negative-guidance-800.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/NeurIPS2024/negative-guidance-1400.webp" />
-    
-
-    <!-- Fallback to the original file -->
-    <img src="/assets/img/NeurIPS2024/negative-guidance.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
-  </picture>
-
-</figure>
-
-    </div>
-</div>
-<div class="caption text-center">
-    This cool work proposes an adaptive scaling factor for negative guidance to improve the quality and diversity of the generated images after avoiding some specific concepts in the negative prompt, e.g., `An English breakfast` but without `Egg`. Our concept graph structure can help to identify more similar concepts to the negative concept to avoid.
-</div>
-
-<div class="row mt-3">
-    <div class="col-sm mt-3 mt-md-0 text-center">
-        <figure>
-
-  <picture>
-    
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/NeurIPS2024/poster-480.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/NeurIPS2024/poster-800.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/NeurIPS2024/poster-1400.webp" />
-    
-
-    <!-- Fallback to the original file -->
-    <img src="/assets/img/NeurIPS2024/poster.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
-  </picture>
-
-</figure>
-
-    </div>
-</div>
-<div class="caption text-center">
-    Some people stopped by our poster! I stayed away from the poster after a bit tired of presenting our work constantly.
-</div>
-
-<h2 id="how-to-make-the-most-of-attending-a-conference">How to make the most of attending a conference</h2>
-
-<p>NeurIPS 2024 marks the first time I attended a conference in person (yes, after joining academia in 2019 as a PhD student). Since it was my first time, besides the excitement of meeting some of the most brilliant researchers in the field, I also felt a bit nervous and overwhelmed. Many things were new to me, so I wanted to note them down here to make the most of any future conferences.</p>
-
-<h3 id="the-goal">The Goal</h3>
-
-<p>NeurIPS is one of the largest and most prestigious conferences in the field, with around 4,500 accepted papers, a packed schedule, and numerous activities over six days (from Tue, Dec 10 to Sun, Dec 15). It’s impossible to attend all the sessions, and the feeling of being overwhelmed and fearing missing out is very real (you can see many people walking around quickly with phones in hand, scrolling through the Whova app).</p>
-
-<p>For me, the most important thing was to set a clear goal. Specifically:</p>
-
-<ul>
-  <li><strong>Goal</strong>: Connect with people, make friends, find job opportunities, or learn about the latest research in a specific topic. While some people are very good at achieving all these goals simultaneously, I focused on learning the latest research only at this conference. Somehow, I was not ready for networking activities.</li>
-  <li><strong>Topics</strong>: Narrow down the topics of interest, such as machine unlearning, personalization, etc.</li>
-</ul>
-
-<h3 id="the-tools">The Tools</h3>
-
-<p>Even with a narrow goal and specific topics, it’s easy to get lost in the conference. Here are some tools I found helpful:</p>
-
-<ul>
-  <li><strong>Whova</strong>: The conference app, which is incredibly useful for checking schedules, locating session venues, and managing poster sessions.
-    <ul>
-      <li><strong>My Agenda</strong>: Replaces Google Calendar during the event.</li>
-      <li><strong>Search in Agenda</strong>: Makes it easy to find sessions/posters/activities using keywords.</li>
-      <li><strong>Attendee List</strong>: Allows searching for people with specific interests, e.g., Vietnamese researchers by searching for <code class="language-plaintext highlighter-rouge">Nguyen</code> in the name. :D</li>
-      <li><strong>My Profile</strong>: It’s important to update your profile to make it more visible to others (e.g., Interests, Education, Location). Thanks to this, I was contacted by someone from Databricks who had also been at Monash University and will visit Melbourne next year. We’re planning to meet for coffee!</li>
-    </ul>
-  </li>
-  <li><strong>LinkedIn and X (formerly Twitter)</strong>: Use conference tags like <code class="language-plaintext highlighter-rouge">#neurips2024</code> to find interesting events or people. I discovered several job postings this way and also came across this helpful website: <a href="https://jalammar.github.io/assets/neurips_2024.html">https://jalammar.github.io/assets/neurips_2024.html</a>, which simplifies navigating through the papers. It’s also a great distraction when bored. :D</li>
-  <li><strong>Google Maps</strong>: Download offline maps because you may not always have an internet connection (poor researchers can’t afford roaming fees or visitor 4G SIMs).</li>
-</ul>
-
-<h3 id="the-activities">The Activities</h3>
-
-<ul>
-  <li><strong>Poster Sessions</strong>: The most exciting part of the conference, offering a glimpse into the research community as people walk around discussing ideas. While nowaday, we can find any posters or papers we want on the conference site, the energy and excitement of walking around and discussing ideas with authors directly is still unmatched. Moreover, when discussing or seeing the authors, you can also have a feel of their personality and research style that you never get from reading papers. These signals are also important to filter out the good papers from the bad ones. The design of a poster might also give you a hint of the quality of the paper.</li>
-  <li><strong>Tutorials</strong> and <strong>Workshops</strong>: These sessions are focused, sometimes small (not true for NeurIPS), and directly related to your topics of interest.</li>
-  <li><strong>Oral Sessions</strong>: Featuring the best papers of the conference, these sessions are inspiring. In NeurIPS 2024, I found three oral presentations particularly fascinating. What inspired me most was that all these works were based on simple yet effective ideas—proving that you don’t have to be a hardcore mathematician or statistician to produce great work at NeurIPS.</li>
-  <li><strong>Job Fair - Sponsor Sessions</strong>: An excellent opportunity to find job openings, learn about industry research/products, and grab freebies! This year, I saw many demos on LLMs, such as Amazon’s debugging assistant on AWS and Microsoft’s <code class="language-plaintext highlighter-rouge">trace</code> agent tool. A startup called <code class="language-plaintext highlighter-rouge">Virtue</code>, founded by prominent researchers in the Trustworthy AI community, showcased their automated red-teaming solution.</li>
-</ul>
-
-<p>While many people enjoy networking activities like <strong>Coffee Chats</strong> or <strong>Company Parties</strong>, I wasn’t ready for those and felt a bit shy about starting a conversation.</p>
-
-<h3 id="other-activities">Other Activities</h3>
-
-<ul>
-  <li><strong>Visiting Friends</strong>: I was fortunate to catch up with two old friends from Monash University and Viettel in Vancouver, chatting about our old days.</li>
-  <li><strong>Exploring the City</strong>: Vancouver is a beautiful city with a stunning harbor view. I also have a chance to see the dark side of the city with many homeless people and drug addicts.</li>
-  <li><strong>Staying Healthy</strong>: Jetlag hit me hard after a 19-hour flight from Melbourne. I didn’t do well in maintaining my health this time (poor sleep, too much curry and coffee, and lack of exercise). I’ll aim to do better next time.</li>
-</ul>
-
-<div class="row mt-3">
-    <div class="col-sm mt-3 mt-md-0 text-center">
-        <figure>
-
-  <picture>
-    
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/NeurIPS2024/vancouver-habor-480.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/NeurIPS2024/vancouver-habor-800.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/NeurIPS2024/vancouver-habor-1400.webp" />
-    
-
-    <!-- Fallback to the original file -->
-    <img src="/assets/img/NeurIPS2024/vancouver-habor.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
-  </picture>
-
-</figure>
-
-    </div>
-</div>
-<div class="caption text-center">
-    Stunning Vancouver harbor view (sadly that my phone can't capture it)
-</div>
-
-<div class="row mt-3">
-    <div class="col-sm mt-3 mt-md-0 text-center">
-        <figure>
-
-  <picture>
-    
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/NeurIPS2024/steam-clock-480.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/NeurIPS2024/steam-clock-800.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/NeurIPS2024/steam-clock-1400.webp" />
-    
-
-    <!-- Fallback to the original file -->
-    <img src="/assets/img/NeurIPS2024/steam-clock.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
-  </picture>
-
-</figure>
-
-    </div>
-</div>
-<div class="caption text-center">
-    Gastown Steam Clock
-</div>
-
-<div class="row mt-3">
-    <div class="col-sm mt-3 mt-md-0 text-center">
-        <figure>
-
-  <picture>
-    
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/NeurIPS2024/freebies-480.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/NeurIPS2024/freebies-800.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/NeurIPS2024/freebies-1400.webp" />
-    
-
-    <!-- Fallback to the original file -->
-    <img src="/assets/img/NeurIPS2024/freebies.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
-  </picture>
-
-</figure>
-
-    </div>
-</div>
-<div class="caption text-center">
-    My biggest achievement!
-</div>
-
-<div class="row mt-3">
-    <div class="col-sm mt-3 mt-md-0 text-center">
-        <figure>
-
-  <picture>
-    
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/NeurIPS2024/deepmind-480.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/NeurIPS2024/deepmind-800.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/NeurIPS2024/deepmind-1400.webp" />
-    
-
-    <!-- Fallback to the original file -->
-    <img src="/assets/img/NeurIPS2024/deepmind.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
-  </picture>
-
-</figure>
-
-    </div>
-    <div class="col-sm mt-3 mt-md-0 text-center">
-        <figure>
-
-  <picture>
-    
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/NeurIPS2024/xLSTM-480.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/NeurIPS2024/xLSTM-800.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/NeurIPS2024/xLSTM-1400.webp" />
-    
-
-    <!-- Fallback to the original file -->
-    <img src="/assets/img/NeurIPS2024/xLSTM.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
-  </picture>
-
-</figure>
-
-    </div>
-</div>
-<div class="caption text-center">
-    Some examples of crowded posters, either with DeepMind icon on it or with a curious topic.
-</div>
-
-<div class="row mt-3">
-    <div class="col-sm mt-3 mt-md-0 text-center">
-        <figure>
-
-  <picture>
-    
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/NeurIPS2024/hoang-yen.JPG-480.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/NeurIPS2024/hoang-yen.JPG-800.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/NeurIPS2024/hoang-yen.JPG-1400.webp" />
-    
-
-    <!-- Fallback to the original file -->
-    <img src="/assets/img/NeurIPS2024/hoang-yen.JPG" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
-  </picture>
-
-</figure>
-
-    </div>
-    <div class="col-sm mt-3 mt-md-0 text-center">
-        <figure>
-
-  <picture>
-    
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/NeurIPS2024/kokoro-480.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/NeurIPS2024/kokoro-800.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/NeurIPS2024/kokoro-1400.webp" />
-    
-
-    <!-- Fallback to the original file -->
-    <img src="/assets/img/NeurIPS2024/kokoro.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
-  </picture>
-
-</figure>
-
-    </div>
-</div>
-<div class="caption text-center">
-    With Tu at Hoang Yen restaurant (1 Michelin star restaurant in Vancouver :D) and with Nhan at Kokoro restaurant.
-</div>]]></content><author><name></name></author><category term="reading" /><summary type="html"><![CDATA[Our poster at NeurIPS 2024 🎯]]></summary></entry></feed>
+</ul>]]></content><author><name></name></author><category term="genai" /><category term="llm" /><category term="tutorial" /><category term="reading" /><summary type="html"><![CDATA[How to break into $100k+ salary roles]]></summary></entry></feed>

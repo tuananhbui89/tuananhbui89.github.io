@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <!-- Head -->
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    <!-- Metadata, OpenGraph and Schema.org -->
+    
+
+    <!-- Standard metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>LLM Series - Part 5 - System Design for LLMs | Tuan-Anh  Bui</title>
+    <meta name="author" content="Tuan-Anh  Bui">
+    <meta name="description" content="How to break into $100k+ salary roles - part 5">
+    <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
+
+
+    <!-- Bootstrap & MDB -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+    <!-- Bootstrap Table -->
+    <link defer rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+
+    <!-- Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
+
+    
+
+    <!-- Styles -->
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
+    
+    <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+    <link rel="canonical" href="https://tuananhbui89.github.io/blog/2025/llm-system-design/">
+
+    <!-- Dark Mode -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark">
+    <script src="/assets/js/theme.js?96d6b3e1c3604aca8b6134c7afdd5db6"></script>
+    <script src="/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script>
+    
+
+  </head>
+
+  <!-- Body -->
+  <body class="fixed-top-nav ">
+
+    <!-- Header -->
+    <header>
+
+      <!-- Nav Bar -->
+      <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top">
+        <div class="container">
+          <a class="navbar-brand title font-weight-lighter" href="/"><span class="font-weight-bold">Tuan-Anh </span>Bui</a>
+          <!-- Navbar Toggle -->
+          <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar top-bar"></span>
+            <span class="icon-bar middle-bar"></span>
+            <span class="icon-bar bottom-bar"></span>
+          </button>
+
+          <div class="collapse navbar-collapse text-right" id="navbarNav">
+            <ul class="navbar-nav ml-auto flex-nowrap">
+
+              <!-- About -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/">about</a>
+              </li>
+              
+              <!-- Blog -->
+              <li class="nav-item active">
+                <a class="nav-link" href="/blog/">blog<span class="sr-only">(current)</span></a>
+              </li>
+
+              <!-- Other pages -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/publications/">publications</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/projects/">projects</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/repositories/">repositories</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/teaching/"></a>
+              </li>
+
+              <!-- Toogle theme mode -->
+              <li class="toggle-container">
+                <button id="light-toggle" title="Change theme">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Scrolling Progress Bar -->
+      <progress id="progress" value="0">
+        <div class="progress-container">
+          <span class="progress-bar"></span>
+        </div>
+      </progress>
+    </header>
+
+
+    <!-- Content -->
+    <div class="container mt-5">
+      
+        <!-- _layouts/post.html -->
+<!-- Page/Post style -->
+<style type="text/css">
+  
+</style>
+
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">LLM Series - Part 5 - System Design for LLMs</h1>
+    <p class="post-meta">January 19, 2025</p>
+    <p class="post-tags">
+      <a href="/blog/2025"> <i class="fas fa-calendar fa-sm"></i> 2025 </a>
+        ·  
+        <a href="/blog/tag/genai">
+          <i class="fas fa-hashtag fa-sm"></i> genai</a>  
+          <a href="/blog/tag/llm">
+          <i class="fas fa-hashtag fa-sm"></i> llm</a>  
+          <a href="/blog/tag/tutorial">
+          <i class="fas fa-hashtag fa-sm"></i> tutorial</a>  
+          <a href="/blog/tag/reading">
+          <i class="fas fa-hashtag fa-sm"></i> reading</a>  
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    
+    <div id="table-of-contents">
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h2">
+<a href="#fundamental-concepts">Fundamental Concepts</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#retriever-augmented-generation-rag">Retriever-augmented generation (RAG)</a></li>
+<li class="toc-entry toc-h3"><a href="#prompt-engineering">Prompt Engineering</a></li>
+<li class="toc-entry toc-h3"><a href="#faiss">FAISS</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2">
+<a href="#core-components-of-an-llm-system">Core components of an LLM system</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#input-handling-and-processing">Input handling and processing</a></li>
+<li class="toc-entry toc-h3"><a href="#knowledge-base-and-data-resources">Knowledge Base and Data Resources</a></li>
+<li class="toc-entry toc-h3">
+<a href="#the-core-llm-powered-module">The core LLM-powered module</a>
+<ul>
+<li class="toc-entry toc-h4"><a href="#prompting-module">Prompting module</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h3"><a href="#filtering-and-validation">Filtering and Validation</a></li>
+<li class="toc-entry toc-h3"><a href="#safe-guarding">Safe Guarding</a></li>
+<li class="toc-entry toc-h3">
+<a href="#agentic-framework">Agentic Framework</a>
+<ul>
+<li class="toc-entry toc-h4"><a href="#agent-tools">Agent Tools</a></li>
+<li class="toc-entry toc-h4"><a href="#multi-agent-system">Multi-agent system</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#data-distribution-shifts-and-monitoring">Data Distribution Shifts and Monitoring</a></li>
+<li class="toc-entry toc-h2"><a href="#continual-learning">Continual Learning</a></li>
+<li class="toc-entry toc-h2">
+<a href="#evaluation">Evaluation</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#offline-evaluation">Offline Evaluation</a></li>
+<li class="toc-entry toc-h3"><a href="#test-in-production">Test in Production</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#deployment-and-scaling">Deployment and Scaling</a></li>
+<li class="toc-entry toc-h2">
+<a href="#case-study">Case Study</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#discuss-on-user-journey">Discuss on User Journey</a></li>
+<li class="toc-entry toc-h3"><a href="#recommender-system">Recommender System</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#references">References</a></li>
+</ul>
+    </div>
+    <hr>
+    
+    <div id="markdown-content">
+      <p>In this blog post, I will discuss the system design for applications that use LLMs as a core component. However, the goal is to prepare for a technical interview rather than to build a real product :D.</p>
+
+<h2 id="fundamental-concepts">Fundamental Concepts</h2>
+
+<h3 id="retriever-augmented-generation-rag">Retriever-augmented generation (RAG)</h3>
+
+<h3 id="prompt-engineering">Prompt Engineering</h3>
+
+<h3 id="faiss">FAISS</h3>
+
+<p><strong>Indexing Vectors</strong></p>
+
+<p>FAISS creates an index to store and organize vectors efficiently. The indexing method affects performance:</p>
+
+<ul>
+  <li>Flat Index (IndexFlatL2) → Exact k-NN search (slow but accurate).</li>
+  <li>IVF (Inverted File Index) → Faster search with approximate results.</li>
+  <li>HNSW (Hierarchical Navigable Small World) → Graph-based ANN search (fast &amp; accurate).</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">faiss</span>
+<span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
+<span class="c1"># Generate random 512-dimension vectors for products
+</span><span class="n">dimension</span> <span class="o">=</span> <span class="mi">512</span>
+<span class="n">num_vectors</span> <span class="o">=</span> <span class="mi">10000</span>
+<span class="n">vectors</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">random</span><span class="p">((</span><span class="n">num_vectors</span><span class="p">,</span> <span class="n">dimension</span><span class="p">)).</span><span class="nf">astype</span><span class="p">(</span><span class="sh">'</span><span class="s">float32</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="c1"># Create a FAISS index
+</span><span class="n">index</span> <span class="o">=</span> <span class="n">faiss</span><span class="p">.</span><span class="nc">IndexFlatL2</span><span class="p">(</span><span class="n">dimension</span><span class="p">)</span>  <span class="c1"># L2 distance (Euclidean)
+</span><span class="n">index</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">vectors</span><span class="p">)</span>  <span class="c1"># Add vectors to the index
+</span></code></pre></div></div>
+
+<p><strong>Searching for Similar Items</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Generate a random query vector
+</span><span class="n">query_vector</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">random</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">dimension</span><span class="p">)).</span><span class="nf">astype</span><span class="p">(</span><span class="sh">'</span><span class="s">float32</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="c1"># Find the top 5 nearest neighbors
+</span><span class="n">k</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">distances</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="n">index</span><span class="p">.</span><span class="nf">search</span><span class="p">(</span><span class="n">query_vector</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Nearest Neighbors:</span><span class="sh">"</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Distances:</span><span class="sh">"</span><span class="p">,</span> <span class="n">distances</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="core-components-of-an-llm-system">Core components of an LLM system</h2>
+
+<h3 id="input-handling-and-processing">Input handling and processing</h3>
+
+<p>Because each application has different input types, for example, code will differ from clinical notes, we need to have a module that can handle specific input types related to the application.</p>
+
+<h3 id="knowledge-base-and-data-resources">Knowledge Base and Data Resources</h3>
+
+<p>The purpose of this module is to:</p>
+
+<ul>
+  <li>Provide the necessary related knowledge to the LLM.</li>
+  <li>To store user-specific data for personalized output/decision.</li>
+</ul>
+
+<p>This can be done by:</p>
+
+<ul>
+  <li>Vector database tools like <a href="https://www.pinecone.io/" rel="external nofollow noopener" target="_blank">Pinecone</a> or <a href="https://github.com/facebookresearch/faiss" rel="external nofollow noopener" target="_blank">Faiss</a>.</li>
+  <li>Flat file system.</li>
+</ul>
+
+<h3 id="the-core-llm-powered-module">The core LLM-powered module</h3>
+
+<p>This is the main module that uses the LLM to generate the output/decision.</p>
+
+<h4 id="prompting-module">Prompting module</h4>
+
+<p>This can be integrated into the core LLM-powered module to improve the quality of the output/decision.
+We can have a sub-module to classify the input into different categories and use different prompt templates for each category.</p>
+
+<p>We can also leverage the response from the LLM as well as the user feedback to improve the prompt.</p>
+
+<h3 id="filtering-and-validation">Filtering and Validation</h3>
+
+<ul>
+  <li>Validation by rule-based logic check, to make sure the output/input is correct and valid. However, because of the rule-based nature, it is not always flexible to handle all cases.</li>
+  <li>Validation by another machine learning model, for example, another LLM model or a uncertainty estimation model.</li>
+  <li>Optional human-in-the-loop (HITL) validation by a human expert, especially in critical applications like medical diagnosis.</li>
+</ul>
+
+<h3 id="safe-guarding">Safe Guarding</h3>
+
+<h3 id="agentic-framework">Agentic Framework</h3>
+
+<h4 id="agent-tools">Agent Tools</h4>
+
+<p>These are external tools or resources that the LLM can access to perform specitic actions or gather information. This could be a calculator, a search API, or a external database.</p>
+
+<h4 id="multi-agent-system">Multi-agent system</h4>
+
+<h2 id="data-distribution-shifts-and-monitoring">Data Distribution Shifts and Monitoring</h2>
+
+<h2 id="continual-learning">Continual Learning</h2>
+
+<h2 id="evaluation">Evaluation</h2>
+
+<h3 id="offline-evaluation">Offline Evaluation</h3>
+
+<h3 id="test-in-production">Test in Production</h3>
+
+<h2 id="deployment-and-scaling">Deployment and Scaling</h2>
+
+<h2 id="case-study">Case Study</h2>
+
+<h3 id="discuss-on-user-journey">Discuss on User Journey</h3>
+
+<p>User journey describes how a user interacts with a product, starting from the first touchpoint - i.e.,user’s input, to the final interaction - i.e., displaying the result to the user.</p>
+
+<p>Discussing on the user journey helps us to understand the flow interaction between the user and the product, and identify the core components that are involved in the interaction.</p>
+
+<h3 id="recommender-system">Recommender System</h3>
+
+<p><strong>User Interaction Layer</strong></p>
+
+<ul>
+  <li>Chat Interface: Users can describe their interests, ask questions, and discuss product features.</li>
+  <li>Input Handling: Supports text-based and voice-based interactions.</li>
+</ul>
+
+<p><strong>NLP Module</strong></p>
+
+<ul>
+  <li>Intent Recognition: Extracts user intent (e.g., “I want a lightweight laptop for travel”).</li>
+  <li>Entity Extraction: Identifies key product attributes (e.g., “lightweight,” “laptop,” “travel”).</li>
+  <li>Sentiment Analysis: Understands user sentiment to refine recommendations.</li>
+</ul>
+
+<p><strong>Product Database</strong></p>
+
+<ul>
+  <li>Structure: Contains product details, including:
+    <ul>
+      <li>Name, Category, Price</li>
+      <li>Features &amp; Specifications</li>
+      <li>User Reviews &amp; Ratings</li>
+    </ul>
+  </li>
+</ul>
+
+<p>The most important component of this module is the embedding model to convert all the data into vectors so that we can use the vector database to store and search for similar items. The ideal vector space should be able to capture the semantic meaning of the data, i.e., the more similar the data is, the closer the vectors are in the vector space.</p>
+
+<p>The most commonly used embedding models fall into three categories:</p>
+
+<p>1️⃣ General-Purpose Text Embeddings (Best for Q&amp;A, knowledge retrieval)</p>
+
+<p>2️⃣ Domain-Specific Embeddings (Optimized for medical, legal, code, etc.)</p>
+
+<p>3️⃣ Multimodal Embeddings (For text + images)</p>
+
+<p><strong>Recommendation Engine</strong></p>
+
+<ul>
+  <li>Content-Based Filtering: Matches user preferences with product attributes.</li>
+  <li>Collaborative Filtering: Uses customer behavior data to suggest items others with similar preferences liked.</li>
+  <li>Hybrid Approach: Combines content-based and collaborative filtering.</li>
+</ul>
+
+<p><strong>RAG-based recommendation</strong></p>
+
+<p>RAG is built on two main components:</p>
+
+<p>1️⃣ Retriever (Information Fetching)</p>
+
+<ul>
+  <li>Dense Vector Search (FAISS, Annoy, Pinecone, Weaviate, ChromaDB) that uses embeddings (e.g., BERT, SBERT, DPR) to find semantically similar documents.</li>
+  <li>Traditional Search (BM25, ElasticSearch, Google Search API) that retrieves documents using keyword-based matching.</li>
+</ul>
+
+<p>2️⃣ Generator (Text Generation)</p>
+
+<ul>
+  <li>Pre-trained LLMs (GPT, BART, T5, LLaMA) generate responses using the retrieved documents as additional context.</li>
+  <li>Can use fine-tuned models for domain-specific responses (e.g., finance, medical).</li>
+</ul>
+
+<p><strong>Key Steps in RAG</strong>:</p>
+
+<p>1️⃣ User Input → A query is given (e.g., “What are the latest gaming laptops?”).</p>
+
+<p>2️⃣ Retrieval Module → Finds the most relevant documents using vector search (FAISS, BM25, ElasticSearch, etc.).</p>
+
+<p>3️⃣ Context Injection → The retrieved documents are passed to the generation model.</p>
+
+<p>4️⃣ Response Generation → The model generates a final, coherent answer using both the query and retrieved documents.</p>
+
+<h2 id="references">References</h2>
+
+<p>[1] Build your first LLM agent application: https://developer.nvidia.com/blog/building-your-first-llm-agent-application/</p>
+
+    </div>
+  </article>
+
+
+  
+    
+    <br>
+    <hr>
+    <br>
+    <ul class="list-disc pl-8"></ul>
+
+    <!-- Adds related posts to the end of an article -->
+    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
+    <p class="mb-2">Here are some more articles you might like to read next:</p>
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/nlp-foundation/">LLM Series - Part 1 - Important Concepts in NLP</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/deepseek/">DeepSeek-R1</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/llm-jailbreak/">LLM Series - Part 4 - How to Jailbreak LLMs</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2024/thoughts/">Random Thoughts and Notes</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/llm-implementations/">LLM Series - Part 2 - Common Implementations in LLMs</a>
+  </li>
+
+</div>
+
+      
+    </div>
+
+    <!-- Footer -->    
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        © Copyright 2025 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+
+      </div>
+    </footer>
+
+    <!-- JavaScripts -->
+    <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- Bootsrap & MDB scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    <!-- Masonry & imagesLoaded -->
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
+    
+  <!-- Medium Zoom JS -->
+  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/zoom.js"></script>
+
+  <!-- Bootstrap Table -->
+  <script defer src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+
+  <!-- Load Common JS -->
+  <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
+  <script defer src="/assets/js/common.js?acdb9690d7641b2f8d40529018c71a01"></script>
+  <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    <!-- MathJax -->
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        tags: 'ams'
+      }
+    };
+  </script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KGSMMS9MS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-7KGSMMS9MS');
+  </script>
+    
+
+<!-- Scrolling Progress Bar -->
+<script type="text/javascript">
+  /*
+   * This JavaScript code has been adapted from the article 
+   * https://css-tricks.com/reading-position-indicator/ authored by Pankaj Parashar, 
+   * published on the website https://css-tricks.com on the 7th of May, 2014.
+   * Couple of changes were made to the original code to make it compatible 
+   * with the `al-foio` theme.
+   */
+  const progressBar = $("#progress");
+  /*
+   * We set up the bar after all elements are done loading.
+   * In some cases, if the images in the page are larger than the intended
+   * size they'll have on the page, they'll be resized via CSS to accomodate
+   * the desired size. This mistake, however, breaks the computations as the
+   * scroll size is computed as soon as the elements finish loading.
+   * To account for this, a minimal delay was introduced before computing the
+   * values.
+   */
+  window.onload = function () {
+    setTimeout(progressBarSetup, 50);
+  };
+  /*
+   * We set up the bar according to the browser.
+   * If the browser supports the progress element we use that.
+   * Otherwise, we resize the bar thru CSS styling
+   */
+  function progressBarSetup() {
+    if ("max" in document.createElement("progress")) {
+      initializeProgressElement();
+      $(document).on("scroll", function() {
+        progressBar.attr({ value: getCurrentScrollPosition() });
+      });
+      $(window).on("resize", initializeProgressElement);
+    } else {
+      resizeProgressBar();
+      $(document).on("scroll", resizeProgressBar);
+      $(window).on("resize", resizeProgressBar);
+    }
+  }
+  /*
+   * The vertical scroll position is the same as the number of pixels that
+   * are hidden from view above the scrollable area. Thus, a value > 0 is
+   * how much the user has scrolled from the top
+   */
+  function getCurrentScrollPosition() {
+    return $(window).scrollTop();
+  }
+
+  function initializeProgressElement() {
+    let navbarHeight = $("#navbar").outerHeight(true);
+    $("body").css({ "padding-top": navbarHeight });
+    $("progress-container").css({ "padding-top": navbarHeight });
+    progressBar.css({ top: navbarHeight });
+    progressBar.attr({
+      max: getDistanceToScroll(),
+      value: getCurrentScrollPosition(),
+    });
+  }
+  /*
+   * The offset between the html document height and the browser viewport
+   * height will be greater than zero if vertical scroll is possible.
+   * This is the distance the user can scroll
+   */
+  function getDistanceToScroll() {
+    return $(document).height() - $(window).height();
+  }
+
+  function resizeProgressBar() {
+    progressBar.css({ width: getWidthPercentage() + "%" });
+  }
+  // The scroll ratio equals the percentage to resize the bar
+  function getWidthPercentage() {
+    return (getCurrentScrollPosition() / getDistanceToScroll()) * 100;
+  }
+</script>
+
+    
+  </body>
+</html>
