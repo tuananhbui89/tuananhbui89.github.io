@@ -161,7 +161,6 @@
 <ul>
 <li class="toc-entry toc-h3"><a href="#ode">ODE</a></li>
 <li class="toc-entry toc-h3"><a href="#sde">SDE</a></li>
-<li class="toc-entry toc-h3"><a href="#thermodynamics">Thermodynamics</a></li>
 <li class="toc-entry toc-h3"><a href="#elbo">ELBO</a></li>
 </ul>
 </li>
@@ -201,7 +200,9 @@
     <hr>
     
     <div id="markdown-content">
-      <h2 id="what-are-diffusion-models">What are Diffusion Models?</h2>
+      <p>(Work in progress :D Please stay tuned :D)</p>
+
+<h2 id="what-are-diffusion-models">What are Diffusion Models?</h2>
 
 <p>Diffusion models are a class of generative models that generate data by progressively denoising a sample from pure noise. They are inspired by <a href="https://en.wikipedia.org/wiki/Non-equilibrium_thermodynamics" rel="external nofollow noopener" target="_blank"><strong>non-equilibrium thermodynamics</strong></a> and are based on a forward and reverse diffusion process:</p>
 
@@ -222,6 +223,20 @@ Imagine dropping a blob of ink into a glass of water:</p>
   <li>Forward process (Diffusion Process): Initially, the ink is concentrated in one place (structured data). Over time, it spreads out randomly, blending with the water (adding noise). Eventually, the entire glass becomes a uniformly colored mixture, losing its original structure (complete noise).</li>
   <li>Reverse process (Denoising Process): If we had a way to perfectly reverse time, we could watch the ink particles retrace their paths, reassembling into the original drop (generating the original data from noise). Diffusion models learn to perform this “reverse process” step by step using machine learning.</li>
 </ul>
+
+<blockquote>
+  <p><strong>Non-Equilibrium Thermodynamics</strong></p>
+
+  <p>Thermodynamics studies <strong>how energy moves and changes</strong> in a system. In equilibrium thermodynamics, systems are in balance—nothing is changing. Non-equilibrium thermodynamics, on the other hand, deals with <strong>systems that are constantly evolving, moving between states of disorder and order</strong>.</p>
+
+  <p>In diffusion models, the forward process (adding noise to data) and the reverse process (removing noise) resemble a non-equilibrium thermodynamic system because they describe an evolving state that moves from order (structured data) to disorder (pure noise) and back to order (reconstructed data).</p>
+</blockquote>
+
+<blockquote>
+  <p><strong>Brownian Motion</strong></p>
+
+  <p>Brownian motion <strong>describes the random movement</strong> of tiny particles (like pollen grains in water) due to <strong>collisions with molecules</strong>. This randomness is similar to how noise is added in diffusion models.</p>
+</blockquote>
 
 <h3 id="advantages-of-diffusion-models">Advantages of Diffusion Models</h3>
 
@@ -296,21 +311,7 @@ In the case of Diffusion Models, the drift term is the shift of the mean of the 
 <p>where \(\nabla_x \log p_t(x)\) is the score function, which estimates the structure of data at time \(t\) - how likely different data points are at each step.
 \(d\tilde{W}_t\) is another Wiener process but in the reverse direction.</p>
 
-<h3 id="thermodynamics">Thermodynamics</h3>
-
-<blockquote>
-  <p><strong>Non-Equilibrium Thermodynamics</strong></p>
-
-  <p>Thermodynamics studies <strong>how energy moves and changes</strong> in a system. In equilibrium thermodynamics, systems are in balance—nothing is changing. Non-equilibrium thermodynamics, on the other hand, deals with <strong>systems that are constantly evolving, moving between states of disorder and order</strong>.</p>
-
-  <p>In diffusion models, the forward process (adding noise to data) and the reverse process (removing noise) resemble a non-equilibrium thermodynamic system because they describe an evolving state that moves from order (structured data) to disorder (pure noise) and back to order (reconstructed data).</p>
-</blockquote>
-
-<blockquote>
-  <p><strong>Brownian Motion</strong></p>
-
-  <p>Brownian motion <strong>describes the random movement</strong> of tiny particles (like pollen grains in water) due to <strong>collisions with molecules</strong>. This randomness is similar to how noise is added in diffusion models.</p>
-</blockquote>
+<p>In the reverse process of diffusion models, we train a neural network to approximate the score function \(\nabla_x \log p_t(x)\).</p>
 
 <h3 id="elbo">ELBO</h3>
 
@@ -369,7 +370,7 @@ L(\phi, \theta; x) &amp;= \mathbb{E}_{z\sim q_\phi(\cdot|x)}[\ln p_\theta(x,z)] 
 
 <p>Noise scheduling in diffusion models refers to how noise is gradually added to data in the forward process and how it is removed in the reverse process. The choice of noise schedule significantly impacts the model’s performance, sample quality, and training efficiency.</p>
 
-<p>We follow the DDIM convention, where \(0 &lt; \bar{\alpha}_t &lt; 1, \beta_t = 1 - \bar{\alpha}_t\) and \alpha_t = \prod_{i=1}^{t} \bar{\alpha}_i\(is the cumulative noise level at time\)t\(, and\)\beta_t\(is the noise level at time\)t\(. With this convention,\)x_t = \sqrt(\alpha_t) x_0 + \sqrt(1-\alpha_t) \epsilon\(, and\)\alpha_T \approx 0\(when\)t \rightarrow T\(while\)\alpha_0 \approx 1\(when\)t \rightarrow 0$$.</p>
+<p>We follow the DDIM convention, where \(0 &lt; \bar{\alpha}_t &lt; 1, \beta_t = 1 - \bar{\alpha}_t\) and \(\alpha_t = \prod_{i=1}^{t} \bar{\alpha}_i\) is the cumulative noise level at time \(t\), and \(\beta_t\) is the noise level at time \(t\). With this convention, \(x_t = \sqrt(\alpha_t) x_0 + \sqrt(1-\alpha_t) \epsilon\), and \(\alpha_T \approx 0\) when \(t \rightarrow T\) while \(\alpha_0 \approx 1\) when \(t \rightarrow 0\).</p>
 
 <p>Common principles of noise scheduling:</p>
 
