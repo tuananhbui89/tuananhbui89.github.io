@@ -393,6 +393,34 @@ Finally, if you just read that far, you are deserved to have a good laugh :D - r
     A sample website that provide reading questions
 </div>
 
+<p><strong>Generating Coloring Book/Sheet for Kids</strong></p>
+
+<ul>
+  <li>Topic: Business</li>
+  <li>Date: 2025-03</li>
+  <li>Description:
+    <ul>
+      <li>Given a picture (e.g., of a kid), generate a personalized coloring book/sheet for the kid with the content from a prompt, personalized with the kid’s face from the picture.</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>Coffee Car - Ice Cream Car - A mobile app to track the food truck</strong></p>
+
+<ul>
+  <li>Topic: Business</li>
+  <li>Date: 2025-03</li>
+  <li>Description:
+    <ul>
+      <li>My wife told me that at her new company, there is a coffee car usually comes to the company at a specific time of a week to sell coffee. Employees usually need to be informed by HR via email - “The coffee car is coming today, bla bla bla”.</li>
+      <li>I think we can have a mobile app that for both sides: the coffee/ice cream truck and the customers.</li>
+      <li>The coffee/ice cream truck can post their schedule, menu, and even their real-time location.</li>
+      <li>The customers can see the menu, the truck’s schedule, to order and pay for the coffee/ice cream.</li>
+      <li>The truck can also send notification to the customers when they arrive at the company.</li>
+    </ul>
+  </li>
+</ul>
+
 <p><strong>TripleZero - Emergency Simulation for Kids training</strong></p>
 
 <ul>
@@ -455,6 +483,168 @@ Finally, if you just read that far, you are deserved to have a good laugh :D - r
   </li>
 </ul>
 
+<p><strong>Football Minimap Prediction</strong></p>
+
+<ul>
+  <li>Topic: Business</li>
+  <li>Date: 2018</li>
+  <li>Description:
+    <ul>
+      <li>This is very old idea back in 2018 when I was in Singapore and first time explored to GAN. Back then, I was so excited with Pix2Pix model and its ability to learn the transformation from domain A to domain B, and thought that it can be applied to this problem.</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>Motivation</strong></p>
+
+<p>Currently, the Football TV audiences do not know location of players who not in the current camera frame. Therefore they might has not the full experience as spectators are watching live on the stadium. We can have some simple solutions for this problem, such as using another camera to shoot he entire football field, or using statistical data from the chip attached to the players. However, from the perspective of computer vision engineer, I propose one more solution for the this problem (might be not a good choice but just for fun:), in which I use the GAN model to create a minimap from a camera frame as in the FIFA or PES football video game.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/Football/Full_Frame-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/Football/Full_Frame-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/Football/Full_Frame-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/Football/Full_Frame.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    A sample of a frame from a game in Youtube where the minimap is there for better experience
+</div>
+
+<p>In the case of players in the frame, I use the GAN model (Image 2 Image Translation) to learn the transformation from the player’s position in the frame to the position of the player in the minimap.</p>
+
+<p>In the case of players are not in the current frame: I use [?] to predict a current positions of the players from the previous positions and their trajectory (or you might hope GAN as one size fit all model which can learn not only the current frame but also the invisible players)</p>
+
+<p><strong>Data Collection</strong></p>
+
+<p>Because the real matches on TV don’t have a minimap therefore I use the alternative sources there are FIFA18 and PES18 video on Youtube. Then I do some preprocess to collect and clean data.</p>
+
+<p>Step 1: Cut only the frames which have the minimap within. Because in those videos, it’s not only normal frame (which has a minimap) but also spotlight or review or something else. Therefore I have to manually select the period of time in which there are only normal frames. I sample with the sample rate as 2 frames per second</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/Football/Full_Minimap-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/Football/Full_Minimap-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/Football/Full_Minimap-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/Football/Full_Minimap.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    A minimap from a full frame
+</div>
+
+<p>Step 2: Cut minimap from a full frame and replace it by a random noise window. To avoid overfitting (because full frame also has a minimap) I replace a minimap by a random noise frame.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/Football/Frame_with_Noise-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/Football/Frame_with_Noise-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/Football/Frame_with_Noise-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/Football/Frame_with_Noise.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    A frame with a minimap replaced by a random noise
+</div>
+
+<p>Step 3: Remove bad samples (Those minimap have overlap by line or player within)</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/Football/Bad_example1-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/Football/Bad_example1-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/Football/Bad_example1-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/Football/Bad_example1.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/Football/Bad_example2-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/Football/Bad_example2-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/Football/Bad_example2-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/Football/Bad_example2.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    Bad examples: minimap has overlap by line or player within
+</div>
+
+<p>After 3 steps as above, I have two sets: The camera frame set (with noised minimap) and the minimap set. I will chose camera frame set as a Source and minimap as a Target for Pix2Pix model. (You can swap 2 source and have enjoy the interesting result, in which we can render a camera frame from a minimap). Then I do a preprocessing to have a better dataset for training.</p>
+
+<p>Because the football video game knows locations of not only players in camera frame but also all of players in the game. Therefore it can create a completed minimap that has the locations of all players. TV audiences who have only camera frame cannot do that. They only infer the position of players who are in camera frame, and cannot infer remaining players. Based on this intuition, I improve the model by doing crop the active window in minimap as follow:</p>
+
+<ul>
+  <li>Localize position of the ball (usually has yellow-color in minimap)</li>
+  <li>Crop roughly 1/2 width of minimap (1/4 in the left of ball and 1/4 in the right of ball)</li>
+  <li>Keep the height</li>
+</ul>
+
+<p>I realize that audience change in each frame, and they might made a huge noise to model, which cause training more difficult. Moreover, players is really small in whole frame, and grass is not stable in each frame or each game, therefore, similar to audience, they might lead a huge noise to model. Therefore I design a filter to filter them from a Camera frame using Color Threshold App in Matlab.</p>
+
+<p>Difficulties:</p>
+
+<ul>
+  <li>Pix2Pix model has demonstrated its ability to learn the transformation from domain A to domain B as shown in the paper: Day to night, BW to Color, Aerial to Map. However, in those cases, 2 domain are not too much different. In this case, we need a transformation from 2 completely different domains. It also needs a transformation from 2D - 2D matching in abstract level (model need to know each player is correspond to each circle in minimap). Therefore, it will be very challenge to learn</li>
+  <li>The difference between a Video Game Frame and a Real Camera Frame.</li>
+  <li>Dataset too small and noise.</li>
+</ul>
+
+<p>I think this problem is difficult even humans, but it is worth to try and see what the GAN can do.
+<strong>Revised in 2025</strong>: I think the idea of generating minimap is still interesting and might be more realistic with the current stage of Generative Models.</p>
+
     </div>
   </article>
 
@@ -478,13 +668,13 @@ Finally, if you just read that far, you are deserved to have a good laugh :D - r
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2024/thoughts/">Random Thoughts and Notes</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/deepseek/">DeepSeek-R1</a>
   </li>
 
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/deepseek/">DeepSeek-R1</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2024/thoughts/">Random Thoughts and Notes</a>
   </li>
 
   
