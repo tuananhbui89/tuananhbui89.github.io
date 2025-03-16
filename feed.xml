@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-03-16T13:09:01+11:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-03-16T16:36:10+11:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
 </subtitle><entry><title type="html">Unlearning LLMs</title><link href="https://tuananhbui89.github.io/blog/2025/unlearn-llms/" rel="alternate" type="text/html" title="Unlearning LLMs" /><published>2025-03-14T00:00:00+11:00</published><updated>2025-03-14T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/unlearn-llms</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/unlearn-llms/"><![CDATA[<h2 id="introduction">Introduction</h2>
 
 <p><strong>Why unlearning LLMs? From [1]</strong></p>
@@ -89,6 +89,12 @@ However, this method is still be circumvented by aversaries, such as posing harm
 
 <h2 id="representation-misdirection-for-unlearning-rmu">Representation Misdirection for Unlearning (RMU)</h2>
 
+<p><strong>Summary</strong></p>
+
+<p>This paper proposes a method to unlearn LLMs by steering the representation of forget samples towards a target random representation while keeping the representation of retain samples unchanged.</p>
+
+<p><strong>Approach</strong></p>
+
 <p>RMU [1] aims to steer model representation of forget samples (e.g., malicious use cases - that sampled from the forget set) in the intermediate layer towards a target random representation while keeping the representation of retain samples (e.g., benign use cases - that sampled from the retain set) unchanged.</p>
 
 <div class="row mt-3">
@@ -121,6 +127,12 @@ However, this method is still be circumvented by aversaries, such as posing harm
 <p>where \(\theta^{\text{rm}}\) is the parameters of the model to be optimized, and \(\alpha\) is a hyperparameter.</p>
 
 <h2 id="adaptive-rmu-on-effects-of-steering-latent-representation-for-large-language-model-unlearning---aaai-2025">Adaptive RMU (On Effects of Steering Latent Representation for Large Language Model Unlearning - AAAI 2025)</h2>
+
+<p><strong>Summary</strong></p>
+
+<p>This paper proposes a <strong>layer-adaptive</strong> RMU method, which uses a different \(c\) for each layer.</p>
+
+<p><strong>Key Observation</strong></p>
 
 <p>This paper points out an interesing phenomenon that the performance of RMU is sensitive to the choice of coefficient \(c\) in the above loss function.</p>
 
@@ -185,6 +197,10 @@ More specifically, as discussed in Section 4.3 in [4], within early layers, the 
 
 <h2 id="llm-unlearning-via-loss-adjustment-with-only-forget-data-iclr-2025">LLM Unlearning via Loss Adjustment with Only Forget Data (ICLR 2025)</h2>
 
+<p><strong>Summary</strong></p>
+
+<p>This paper proposes a method to unlearn LLMs by adjusting the loss function using only the forget data.</p>
+
 <h3 id="motivation---eliminating-the-need-for-a-retain-set">Motivation - Eliminating the need for a retain set</h3>
 
 <p>Previous unlearning methods typically require a retain set or a reference model to maintain the performance of the unlearned model on the retain set.
@@ -233,7 +249,7 @@ Furthermore, fine-tuning using both retain data and forget data would require a 
 
 \[L(x_f, y_e, y_f; \theta) = \lambda_e \cdot L_e(x_f, y_e; \theta) - \lambda_f \cdot L_f(x_f, y_f; \theta),\]
 
-<p>where \(L_e, L_f\) are losses designed for the data sample \((x_f, y_e)\) and \((x_f, y_f)\), respectively. The corresponding closed form will be introduced in Section §3.2.</p>
+<p>where \(L_e, L_f\) are losses designed for the data sample \((x_f, y_e)\) and \((x_f, y_f)\), respectively.</p>
 
 <ul>
   <li><strong>Motivation</strong>: Step 2 encourages the LLM to forget the forget data with bad responses, meanwhile, learn to generate good responses on relevant forget data [such as template answers].</li>
@@ -251,7 +267,7 @@ Furthermore, fine-tuning using both retain data and forget data would require a 
 
 <h3 id="connection-with-dpo">Connection with DPO</h3>
 
-<p>In this section, we discuss the connection and key differences between our approach and the celebrated Direct Preference Optimization (DPO) approach for aligning LLMs.</p>
+<p><a href="https://tuananhbui89.github.io/blog/2025/nlp-foundation/#ppo-and-dpo">Direct Preference Optimization</a> (DPO) is a method to align LLMs with human preferences, however, unlike PPO which uses a reward model, DPO simplifies PPO by directly optimizing the policy model to adhere to human preferences without the need for a reward model. In the context of unlearning, DPO can be used to unlearn the LLM by directly optimizing the original model to align forget prompt with the template response.</p>
 
 <p>Given a dataset \(D = \{(x_f^j, y_e^j, y_f^j)\}_{j\in[N]}\), where \(y_e\) and \(y_f\) are preferred template and original forget responses to the forget prompt \(x_f\), DPO fine-tunes original model \(\theta_o\) using \(D\) to better align it with good answer preferences, which minimizes:</p>
 
@@ -261,11 +277,67 @@ Furthermore, fine-tuning using both retain data and forget data would require a 
 
 <p>where, \(\sigma(t) = \frac{1}{1+e^{-t}}\) is the sigmoid function, \(\beta &gt; 0\) is the inverse temperature, \(\pi_\theta := \prod_{i=1}^{\mid y \mid} h_\theta(x, y_{&lt;i})\) is the predicted probability of the response \(y\) to prompt \(x\) given by LLM \(\theta\), \(\pi_{\text{ref}}\) is the predicted probability given by reference model, and \(M_{\text{ref}} := \beta(\log \prod_{i=1}^{\mid y_e \mid}h_{\theta_o}(x_f, y_{e,i}) - \log \prod_{i=1}^{\mid y_f \mid}h_{\theta_o}(x_f, y_{f,i}))\).</p>
 
+<p><strong>Intepretation</strong>: minimizing \(L_{\text{DPO},\beta}(\theta)\) is equivalent to maximizing \(\log \prod_{i=1}^{\mid y_e \mid}h_\theta(x_f, y_e,_{&lt;i})\) - which is the log probability of the template response - while minimizing \(\log \prod_{i=1}^{\mid y_f \mid}h_\theta(x_f, y_f,_{&lt;i})\) - that of the forget response.
+the \(M_{\text{ref}}\) term is a constant w.r.t. \(\theta\) which is the gap between two log probabilities of the template and forget responses given by the reference model - so that the optimal should maintain the same gap as the reference model (IMO: should add max-margin loss here).</p>
+
+<p><strong>FLAT</strong></p>
+
 <p>As for FLAT, we calculate the average probability of all correctly generated tokens and employ a novel re-weighting mechanism that assigns different importance to each term using distinct activate functions for both the example and forget loss terms, which minimizes:</p>
 
 \[L_{\text{FLAT}}(\theta) = -\mathbb{E}_D\left[g^*\left(\frac{1}{\mid y_e \mid} \sum_{i=1}^{\mid y_e \mid}h_\theta(x_f, y_{e,&lt;i})\right) - f^*(g^*\left(\frac{1}{\mid y_f \mid} \sum_{i=1}^{\mid y_f \mid}h_\theta(x_f, y_{f,&lt;i})\right))\right].\]
 
-<p>Here, \(f^*(\cdot), g^*(f^*(\cdot))\) are the activate functions that assign appropriate weights to each loss term. The detailed derivation is in Appendix B.2. The key differences are highlighted in red. Specifically, DPO relies on a reference model to guide the unlearning process, whereas FLAT only uses a sample pair dataset containing both exemplar and forget responses. Besides, our solution differs from DPO in three critical aspects: the re-weighting activation function, whether to sum or average the token losses, and whether to apply the logarithm to the output probability. We conduct an ablation study with DPO to evaluate the effectiveness of the proposed re-weighting mechanism in Section §4.5.</p>
+<p>Here, \(f^*(\cdot), g^*(f^*(\cdot))\) are the activate functions that assign appropriate weights to each loss term. The detailed derivation is in Appendix B.2 in the paper. Specifically, DPO relies on a reference model to guide the unlearning process, whereas FLAT only uses a sample pair dataset containing both exemplar and forget responses. Besides, FLAT differs from DPO in three critical aspects: the re-weighting activation function, whether to sum or average the token losses, and whether to apply the logarithm to the output probability.</p>
+
+<p>An example (from Appendix B.2 in the paper) is as follows:</p>
+
+<p>Here, \(v\) is the vocabulary size, \(y_{e,i,k}\) is the \(k\)-th element of vector representing the \(i\)-th token in the good response \(y_e\), \(y_{f,i,k}\) is the \(k\)-th element of vector representing the \(i\)-th token in the forget response \(y_f\). Additionally, \(h_\theta(x_f, y_{e,&lt;i})_k\) and \(h_\theta(x_f, y_{f,&lt;i})_k\) denote the \(k\)-th entry of the probability distribution for the correctly generated token.</p>
+
+<p>For <strong>KL f-divergence</strong>, \(f^*(u) = e^{u-1}, g^*(v) = v\), hence, \(g^*(\mathbb{P}(x_f, y_e; \theta)) - f^*(g^*(\mathbb{P}(x_f, y_f; \theta))) = \mathbb{P}(x_f, y_e; \theta) - e^{\mathbb{P}(x_f, y_f; \theta)-1}\). We have:</p>
+
+\[L_{\text{FLAT}}(\theta) = -\mathbb{E}_D\left[\frac{\sum_{i=1}^{ \mid y_e \mid} h_\theta(x_f, y_{e,&lt;i})}{\mid y_e \mid} - e^{\frac{\sum_{i=1}^{ \mid y_f \mid} h_\theta(x_f, y_{f,&lt;i})}{\mid y_f \mid}-1}\right].\]
+
+<h2 id="a-closer-look-at-machine-unlearning-for-large-language-models-iclr-2025">A Closer Look at Machine Unlearning for Large Language Models (ICLR 2025)</h2>
+
+<p><strong>Summary</strong></p>
+
+<p>This paper investigates the effectiveness of unlearning LLMs for targeted and untargeted use cases.
+It proposes a Maximizing Entropy (ME) objective for untargeted unlearning and Answer-Preservation (AP) objective for targeted unlearning.</p>
+
+<h3 id="untargeted-vs-targeted-unlearning">Untargeted vs Targeted Unlearning</h3>
+
+<p>Targeted unlearning hopes to make a specified template response to the questions in the forget set, while untargeted unlearning only requires not leaking the contents of the forget set.
+Mathematically, the loss function for untargeted unlearning is (borrowing the notation of DPOfrom [3])</p>
+
+\[= -\frac{2}{\beta}\mathbb{E}_D\left[\log \sigma\left(\beta(\log \prod_{i=1}^{\mid y_e \mid}h_\theta(x_f, y_e,_{&lt;i}) - \log \prod_{i=1}^{\mid y_f \mid}h_\theta(x_f, y_f,_{&lt;i}))-M_{\text{ref}}\right)\right],\]
+
+<p>Where \(y_e\) is the template response and \(y_f\) is the forget response. Targeted unlearning aims to make the model response to the forget set to be close to the template response, hence, maximizing the probability of the template response. On the other hand, untargeted unlearning only requires the model response to the forget set to be far from the forget response, hence, minimizing the probability of the forget response.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/unlearnllms/2025-03-16-15-58-48-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/unlearnllms/2025-03-16-15-58-48-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/unlearnllms/2025-03-16-15-58-48-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/unlearnllms/2025-03-16-15-58-48.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    Illustration of untargeted and targeted unlearning from [5]
+</div>
+
+<h3 id="objective-of-untargeted-unlearning">Objective of Untargeted Unlearning</h3>
+
+<h3 id="mitigate-excessive-ignorance-of-targeted-unlearning">Mitigate Excessive Ignorance of Targeted Unlearning</h3>
 
 <h2 id="references">References</h2>
 
@@ -276,6 +348,8 @@ Furthermore, fine-tuning using both retain data and forget data would require a 
 <p>[3] <a href="https://arxiv.org/pdf/2410.11143">Wang, Yaxuan, et al. “LLM Unlearning via Loss Adjustment with Only Forget Data.” arXiv preprint arXiv:2410.11143 (2024).</a></p>
 
 <p>[4] <a href="https://arxiv.org/pdf/2408.06223">Huu-Tien, Dang, et al. “On effects of steering latent representation for large language model unlearning.” arXiv preprint arXiv:2408.06223 (2024).</a></p>
+
+<p>[5] <a href="https://arxiv.org/pdf/2410.08109">Yuan, Xiaojian, et al. “A Closer Look at Machine Unlearning for Large Language Models.” arXiv preprint arXiv:2410.08109 (2024).</a></p>
 
 <!-- mkdir -p assets/img/unlearnllms/ -->
 <!-- mv _posts/2025-03-14-*.png assets/img/unlearnllms/ -->]]></content><author><name></name></author><category term="reading" /><category term="genai" /><summary type="html"><![CDATA[Introduction]]></summary></entry><entry><title type="html">Foundation of Diffusion Models</title><link href="https://tuananhbui89.github.io/blog/2025/diffusion-foundation/" rel="alternate" type="text/html" title="Foundation of Diffusion Models" /><published>2025-03-08T00:00:00+11:00</published><updated>2025-03-08T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/diffusion-foundation</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/diffusion-foundation/"><![CDATA[<p>(Work in progress I will gradually add more content when having more time:D Please stay tuned :D)</p>
