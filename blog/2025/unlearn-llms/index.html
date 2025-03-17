@@ -521,10 +521,83 @@ Mathematically, the loss function for untargeted unlearning is (borrowing the no
   <li>
 <strong>The behavior of the ideal retain model is unpredictable</strong>: The cost to retrain the model from scratch is extremely expensive in the case of LLMs. More importantly, gradient ascent on the forget set when retraining may lead to unpredicatable behavior of the model.</li>
   <li>
-<strong>Potential hallucinations in the surrogate retain model</strong>:</li>
+<strong>Potential hallucinations in the surrogate retain model</strong>: An alternative approach for the expensive retraining is to use a surrogate model - which is a base model such as Llama 2, fine-tuned on a small fictitious dataset \(\mathcal{D}^f = \{ \mathcal{D}^f_F,  \mathcal{D}^f_R \}\), where \(\mathcal{D}^f_F\) and \(\mathcal{D}^f_R\) are the forget and retain sets, respectively. However, this approach may lead to hallucinations, where the model generates responses that are not present in the retain set.</li>
 </ul>
 
+<p>Idea: <em>Align the prediction behavior of the unlearned model on the forget set with that of a <strong>randomly initialized</strong> model</em>.</p>
+
+<ul>
+  <li>The randomly initialized model is data-independent and does not contain any knowledge about the forget set, avoids the leakage of relevant information.</li>
+  <li>The behavior of the randomly initialized model is random guessing - maximizing the entropy of the output distribution.</li>
+</ul>
+
+\[\mathcal{L}_{\text{ME}}(\mathcal{D}_F; \theta) = \mathbb{E}_{(x,y)\sim\mathcal{D}_F}\left[\frac{1}{T}\sum_{t=1}^T \text{KL}(P_t\|\mathcal{U}_{[K]})\right],\]
+
+<p>where \(P_t = p(x'_t \mid x'_{&lt;t}; \theta)\) is the predicted probability for the \(t\)-th token in \(x' = x \circ y\) and \(\mathcal{U}_{[K]}\) is a uniform distribution over the vocabulary of size \(K\), where each value is \(1/K\).</p>
+
+<p>Minimizing above loss is equivalent to Maximizing Entropy (ME) of predicted distribution for each next token. <strong>The greater the entropy, the higher the uncertainty of the prediction, indicating that the model behaves closer to a randomly initialized model for random guessing</strong>. This objective also avoids catastrophic collapse caused by the unbounded forget loss (Zhang et al., 2024a; Ji et al., 2024).</p>
+
 <h3 id="mitigate-excessive-ignorance-of-targeted-unlearning">Mitigate Excessive Ignorance of Targeted Unlearning</h3>
+
+<p><strong>Over Ignorance Issue</strong>: Refuse to answer most questions in the retain set - False Positive. It is due to (based on their argument) that \((\mathcal{X}_F, \mathcal{Y}_F) \approxeq (\mathcal{X}_R, \mathcal{Y}_R)\), therefore, increasing \(P(\mathcal{Y}_{IDK} \mid \mathcal{X}_F)\) will also increase \(P(\mathcal{Y}_{IDK} \mid \mathcal{X}_R)\).</p>
+
+<p>Their experiment to support the above argument is as follows:</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/unlearnllms/2025-03-17-12-50-45-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/unlearnllms/2025-03-17-12-50-45-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/unlearnllms/2025-03-17-12-50-45-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/unlearnllms/2025-03-17-12-50-45.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    The correlation between performances of unlearned models on the forget set and the retain set from [5].
+</div>
+
+<p><strong>Answer-Preservation (AP)</strong>:</p>
+
+<p>Intuitively, given a question in the retain set, the regularization loss for targeted unlearning should satisfy two objectives:</p>
+
+<ul>
+  <li>Reduce the probability of the rejection template.</li>
+  <li>Maintain the probability of the original answer.</li>
+</ul>
+
+<p>Thus, the authors propose the Answer Preservation (AP) loss as follows:</p>
+
+\[\mathcal{L}_{\text{AP}}(\mathcal{D}_R, \mathcal{D}_{\text{IDK}}; \theta) = -\frac{1}{\beta}\mathbb{E}_{(x,y)\sim\mathcal{D}_R,y'\sim\mathcal{D}_{\text{IDK}}}\left[\log \sigma\left(-\beta\log \frac{p(y' \mid x; \theta)}{p(y \mid x; \theta)}\right)\right],\]
+
+<p>where \(\sigma(\cdot)\) is the sigmoid function, \(\beta\) is a hyper-parameter.</p>
+
+<p>The gradient of AP loss w.r.t. the model parameters is:</p>
+
+\[\nabla_\theta\mathcal{L}_{\text{AP}}(\theta) = \mathbb{E}_{\mathcal{D}_R,\mathcal{D}_{\text{IDK}}}[W_\theta(x, y, y')\nabla_\theta (\log p(y' \mid x; \theta) - \log p(y \mid x; \theta))].\]
+
+<p>The \(W_\theta(x, y, y') = 1/(1 + (\frac{p(y \mid x; \theta)}{p(y' \mid x; \theta)})^\beta)\) can be regarded as an adaptive gradient weight.</p>
+
+<p>Given a question \(x\) in \(\mathcal{D}_R\), in the early stage of unlearning process, where \(p(y \mid x; \theta) \gg p(y' \mid x; \theta)\), we have \(W_\theta(x, y, y') \ll 1\).</p>
+
+<p>As the unlearning proceeds, either a decrease in \(p(y \mid x; \theta)\) or an increase in \(p(y' \mid x; \theta)\) will result in a larger \(W_\theta(x, y, y')\), thereby providing stronger regularization. The gradient of AP loss consists of two terms in addition to the adaptive weight. The first term is equivalent to GA on the rejection template, which satisfies the first objective. The second term is equivalent to GD on the original answer, which satisfies the second objective.</p>
+
+<p>My interpretation of the above equation is as follows:</p>
+
+<ul>
+  <li>Reminder that in gradient descent, we follow the negative gradient direction to update the model parameters, i.e., \(\theta \leftarrow \theta - \eta \nabla_\theta \mathcal{L}\)</li>
+  <li>In the first term, we follow the negative direction of \(\nabla_\theta (\log p(y' \mid x; \theta)\) - which aims to reduce the probability of \(P(\mathcal{Y}_{IDK} \mid \mathcal{X}_R)\)</li>
+  <li>In the second term, we follow the direction of \(\nabla_\theta (\log p(y \mid x; \theta)\) - which aims to increase the probability of original answer \(P(y \mid \mathcal{X}_R)\)</li>
+</ul>
 
 <h2 id="references">References</h2>
 
@@ -539,7 +612,7 @@ Mathematically, the loss function for untargeted unlearning is (borrowing the no
 <p>[5] <a href="https://arxiv.org/pdf/2410.08109" rel="external nofollow noopener" target="_blank">Yuan, Xiaojian, et al. “A Closer Look at Machine Unlearning for Large Language Models.” arXiv preprint arXiv:2410.08109 (2024).</a></p>
 
 <!-- mkdir -p assets/img/unlearnllms/ -->
-<!-- mv _posts/2025-03-14-*.png assets/img/unlearnllms/ -->
+<!-- mv _posts/2025-03-17-*.png assets/img/unlearnllms/ -->
 
     </div>
   </article>
