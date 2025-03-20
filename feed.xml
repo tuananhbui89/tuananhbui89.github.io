@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-03-18T16:46:43+11:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
-</subtitle><entry><title type="html">RB-Modulation - Training-Free Stylization using Reference-Based Modulation (ICLR 2025)</title><link href="https://tuananhbui89.github.io/blog/2025/rb-modulation/" rel="alternate" type="text/html" title="RB-Modulation - Training-Free Stylization using Reference-Based Modulation (ICLR 2025)" /><published>2025-03-15T00:00:00+11:00</published><updated>2025-03-15T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/rb-modulation</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/rb-modulation/"><![CDATA[<!-- mkdir -p assets/img/2025-rb-modulation/ -->
-<!-- mv _posts/2025-03-15-*.png assets/img/2025-rb-modulation/ -->]]></content><author><name></name></author><category term="reading" /><category term="genai" /><category term="diffusion" /><summary type="html"><![CDATA[]]></summary></entry><entry><title type="html">Unlearning LLMs</title><link href="https://tuananhbui89.github.io/blog/2025/unlearn-llms/" rel="alternate" type="text/html" title="Unlearning LLMs" /><published>2025-03-14T00:00:00+11:00</published><updated>2025-03-14T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/unlearn-llms</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/unlearn-llms/"><![CDATA[<h2 id="introduction">Introduction</h2>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-03-21T06:22:27+11:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
+</subtitle><entry><title type="html">Unlearning LLMs</title><link href="https://tuananhbui89.github.io/blog/2025/unlearn-llms/" rel="alternate" type="text/html" title="Unlearning LLMs" /><published>2025-03-14T00:00:00+11:00</published><updated>2025-03-14T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/unlearn-llms</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/unlearn-llms/"><![CDATA[<h2 id="introduction">Introduction</h2>
 
 <p><strong>Why unlearning LLMs? From [1]</strong></p>
 
@@ -715,6 +714,8 @@ L(\phi, \theta; x) &amp;= \mathbb{E}_{z\sim q_\phi(\cdot|x)}[\ln p_\theta(x,z)] 
   <li><a href="https://lilianweng.github.io/posts/2018-08-12-vae/#beta-vae">A nice property of VAEs: Disentanglement Representation Learning</a></li>
 </ul>
 
+<h3 id="tweedies-formula">Tweedie’s formula</h3>
+
 <h2 id="variants">Variants</h2>
 
 <h3 id="ddpm">DDPM</h3>
@@ -828,6 +829,48 @@ In a simple case, where \(y\) is just a image class, like a <code class="languag
 
 <h3 id="control-net">Control-Net</h3>
 
+<h3 id="image-prompt">Image Prompt</h3>
+
+<p>Beyond controlling the generation process using text prompt, there is a hot topic in the community to control using image information/layout/prompt - which has a huge potential in applications, e.g., image inpainting, image-to-image generation, etc. In the standard Stable Diffusion, the condition embedding \(c_t\) is just a text embedding \(c_t = E_t(y)\) where \(y\) is the text prompt and \(E_t\) is a pre-trained text encoder such as CLIP.
+IP-Adapter [1] proposes to use an additional image encoder to extract the image embedding from a reference image \(c_i = E_i(x)\) and then project it into the original condition space.
+The objective function for IP-Adapter is:</p>
+
+\[\mathcal{L}_{IP} = \mathbb{E}_{z, c, \epsilon, t} \left[ \mid \mid \epsilon - \epsilon_\theta(z_t \mid c_i, c_t, t) \mid \mid_2^2 \right]\]
+
+<p>The cross-attention layer is also modified from the one in Stable Diffusion to include the image embedding \(c_i\) as a condition.</p>
+
+\[\text{Attention}(Q, K_i, K_t, V_i, V_t) = \lambda \text{softmax}\left(\frac{QK_i^T}{\sqrt{d}} + c_i\right)V_i + \text{softmax}\left(\frac{QK_t^T}{\sqrt{d}}\right)V_t\]
+
+<p>where \(Q=z W_Q\), \(K_i = c_i W_K^i\), \(K_t = c_t W_K^t\), \(V_i = c_i W_V^i\), \(V_t = c_t W_V^t\), and \(W_Q\), \(W_K^i\), \(W_K^t\), \(W_V^i\), \(W_V^t\) are the weights of the linear layers.
+The model becomes the original Stable Diffusion when \(\lambda = 0\).</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion-foundation/2025-03-20-07-02-10-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion-foundation/2025-03-20-07-02-10-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion-foundation/2025-03-20-07-02-10-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/diffusion-foundation/2025-03-20-07-02-10.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+
+<p>References:</p>
+
+<ul>
+  <li>[1] <a href="https://arxiv.org/pdf/2308.06721">IP-Adapter: Text Compatible Image Prompt Adapter for Text-to-Image Diffusion Models</a></li>
+  <li>[2] <a href="https://openreview.net/pdf?id=PJqP0wyQek#page=1.93">MS-DIFFUSION: MULTI-SUBJECT ZERO-SHOT IMAGE PERSONALIZATION WITH LAYOUT GUIDANCE</a></li>
+</ul>
+
 <h2 id="diffusion-transformers">Diffusion Transformers</h2>
 
 <h2 id="image-inpainting-with-diffusion-models">Image Inpainting with Diffusion Models</h2>
@@ -851,8 +894,8 @@ In a simple case, where \(y\) is just a image class, like a <code class="languag
 
 <p>where \(\epsilon\) is a standard normal random variable and \(t\) is the time step in [0, 1].</p>
 
-<!-- mkdir -p assets/img/personalization -->
-<!-- mv _posts/2025-02-26-*.png assets/img/personalization/ -->]]></content><author><name></name></author><category term="reading" /><category term="diffusion" /><category term="genai" /><summary type="html"><![CDATA[(Work in progress I will gradually add more content when having more time:D Please stay tuned :D)]]></summary></entry><entry><title type="html">FineStyle - Fine-grained Controllable Style Personalization for Text-to-image Models (NeurIPS 2024)</title><link href="https://tuananhbui89.github.io/blog/2025/finestyle/" rel="alternate" type="text/html" title="FineStyle - Fine-grained Controllable Style Personalization for Text-to-image Models (NeurIPS 2024)" /><published>2025-02-28T00:00:00+11:00</published><updated>2025-02-28T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/finestyle</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/finestyle/"><![CDATA[<h2 id="finestyle-fine-grained-controllable-style-personalization-for-text-to-image-models-neurips-2024">FineStyle: Fine-grained Controllable Style Personalization for Text-to-image Models (NeurIPS 2024)</h2>
+<!-- mkdir -p assets/img/diffusion-foundation -->
+<!-- mv _posts/2025-03-20-*.png assets/img/diffusion-foundation/ -->]]></content><author><name></name></author><category term="reading" /><category term="diffusion" /><category term="genai" /><summary type="html"><![CDATA[(Work in progress I will gradually add more content when having more time:D Please stay tuned :D)]]></summary></entry><entry><title type="html">FineStyle - Fine-grained Controllable Style Personalization for Text-to-image Models (NeurIPS 2024)</title><link href="https://tuananhbui89.github.io/blog/2025/finestyle/" rel="alternate" type="text/html" title="FineStyle - Fine-grained Controllable Style Personalization for Text-to-image Models (NeurIPS 2024)" /><published>2025-02-28T00:00:00+11:00</published><updated>2025-02-28T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/finestyle</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/finestyle/"><![CDATA[<h2 id="finestyle-fine-grained-controllable-style-personalization-for-text-to-image-models-neurips-2024">FineStyle: Fine-grained Controllable Style Personalization for Text-to-image Models (NeurIPS 2024)</h2>
 
 <div class="row mt-3">
     <div class="col-sm mt-3 mt-md-0 text-center">
@@ -3654,4 +3697,692 @@ You will only respond with the category. Do not include the word </span><span cl
                   <span class="n">n</span><span class="o">=</span><span class="mi">5</span> <span class="k">if</span> <span class="n">args</span><span class="p">.</span><span class="n">num_gen_samples</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,</span>
 <span class="p">)</span>
 
-</code></pre></div></div>]]></content><author><name></name></author><category term="genai" /><category term="llm" /><category term="tutorial" /><category term="reading" /><category term="coding" /><summary type="html"><![CDATA[How to break into $100k+ salary roles - part 3]]></summary></entry></feed>
+</code></pre></div></div>]]></content><author><name></name></author><category term="genai" /><category term="llm" /><category term="tutorial" /><category term="reading" /><category term="coding" /><summary type="html"><![CDATA[How to break into $100k+ salary roles - part 3]]></summary></entry><entry><title type="html">LLM Series - Part 2 - Common Implementations in LLMs</title><link href="https://tuananhbui89.github.io/blog/2025/llm-implementations/" rel="alternate" type="text/html" title="LLM Series - Part 2 - Common Implementations in LLMs" /><published>2025-01-16T00:00:00+11:00</published><updated>2025-01-16T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/llm-implementations</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/llm-implementations/"><![CDATA[<h2 id="transformer-in-pytorch">Transformer in Pytorch</h2>
+
+<h3 id="attention-mechanism-and-position-embedding">Attention Mechanism and Position Embedding</h3>
+
+<p><strong>Cross-Attention and Self-Attention</strong></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Aspect</th>
+      <th>Self-Attention</th>
+      <th>Cross-Attention</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Definition</td>
+      <td>Focuses on relationships between elements of the same sequence (e.g., within a sentence).</td>
+      <td>Focuses on relationships between elements of one sequence and another sequence (e.g., query and context).</td>
+    </tr>
+    <tr>
+      <td>Inputs</td>
+      <td>Single sequence (e.g., the same sequence is used for queries, keys, and values).</td>
+      <td>Two sequences: one provides queries, and the other provides keys and values.</td>
+    </tr>
+    <tr>
+      <td>Purpose</td>
+      <td>Captures intra-sequence dependencies, helping the model understand context within the same sequence.</td>
+      <td>Captures inter-sequence dependencies, aligning information between different sequences.</td>
+    </tr>
+    <tr>
+      <td>Key Benefit</td>
+      <td>Helps the model understand contextual relationships within a sequence.</td>
+      <td>Enables the model to incorporate external information from another sequence. Very important for multi-modal tasks.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Note that in the encoder, we only use self-attention. In the decoder, we use cross-attention to attend to the encoder’s output.</p>
+
+<p><strong>Details of Attention Mechanism</strong></p>
+
+<p>Below is the table of the operations and dimensions of the attention mechanisms including the original and two additional operations proposed in our paper (<a href="https://arxiv.org/abs/2403.12326">KPOP</a>).</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Operation</th>
+      <th>Original Operation</th>
+      <th>Original Dim</th>
+      <th>Concatenative Operation</th>
+      <th>Concatenative Dim</th>
+      <th>Additive Operation</th>
+      <th>Additive Dim</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Q</td>
+      <td>W<sub>q</sub>Z</td>
+      <td>b×m<sub>z</sub>×d</td>
+      <td>W<sub>q</sub>Z</td>
+      <td>b×m<sub>z</sub>×d</td>
+      <td>W<sub>q</sub>Z</td>
+      <td>b×m<sub>z</sub>×d</td>
+    </tr>
+    <tr>
+      <td>K</td>
+      <td>W<sub>k</sub>C</td>
+      <td>b×m<sub>c</sub>×d</td>
+      <td>W<sub>k</sub>cat(C,repeat(p,b))</td>
+      <td>b×(m<sub>c</sub>+m<sub>p</sub>)×d</td>
+      <td>W<sub>k</sub>(C+repeat(p,b))</td>
+      <td>b×m<sub>c</sub>×d</td>
+    </tr>
+    <tr>
+      <td>V</td>
+      <td>W<sub>v</sub>C</td>
+      <td>b×m<sub>c</sub>×d</td>
+      <td>W<sub>v</sub>cat(C,repeat(p,b))</td>
+      <td>b×(m<sub>c</sub>+m<sub>p</sub>)×d</td>
+      <td>W<sub>v</sub>(C+repeat(p,b))</td>
+      <td>b×m<sub>c</sub>×d</td>
+    </tr>
+    <tr>
+      <td>A</td>
+      <td>σ(QK<sup>T</sup>/√d)</td>
+      <td>b×m<sub>z</sub>×m<sub>c</sub></td>
+      <td>σ(QK<sup>T</sup>/√d)</td>
+      <td>b×m<sub>z</sub>×(m<sub>c</sub>+m<sub>p</sub>)</td>
+      <td>σ(QK<sup>T</sup>/√d)</td>
+      <td>b×m<sub>z</sub>×m<sub>c</sub></td>
+    </tr>
+    <tr>
+      <td>O</td>
+      <td>AV</td>
+      <td>b×m<sub>z</sub>×d</td>
+      <td>AV</td>
+      <td>b×m<sub>z</sub>×d</td>
+      <td>AV</td>
+      <td>b×m<sub>z</sub>×d</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><em>Note: cat(), repeat(·,b), σ() represent the concatenate (at dim=1), repeat an input b times (at dim=0) and the softmax operations (at dim=2), respectively.</em></p>
+
+<p>In the table, Z is the input sequence (i.e., the query), C is the context sequence that should be attended to. In the self-attention, Z and C are the same.</p>
+
+<p><strong>Why Multi-Head Attention?</strong></p>
+
+<p>Multi-head attention is a key component in Transformer models and is used to enhance the model’s ability to capture different types of relationships and patterns in the input data.</p>
+
+<ul>
+  <li><strong>Learning Different Representations</strong>: Each “head” in multi-head attention operates independently, using its own set of learned weight matrices. This allows each head to focus on different parts of the input sequence or on different types of relationships within the sequence.</li>
+  <li><strong>Dimensionality Flexibility</strong>: Each attention head operates on a reduced-dimensional subspace of the input embeddings, as the total embedding dimension is split across all heads. This division reduces the computational cost of individual attention heads, while the aggregation of all heads retains the full expressiveness of the original dimensionality.</li>
+</ul>
+
+<p><strong>Position Embedding</strong></p>
+
+<p>For position \(pos\) and dimension \(i\) in the embedding:</p>
+
+\[PE_{(pos,2i)} = \sin\left(\frac{pos}{10000^{2i/d_{model}}}\right)\]
+
+\[PE_{(pos,2i+1)} = \cos\left(\frac{pos}{10000^{2i/d_{model}}}\right)\]
+
+<p>Where:</p>
+
+<ul>
+  <li>\(pos\) is the position in the sequence (0 to max_len-1)</li>
+  <li>\(i\) is the dimension index (0 to d_model/2)</li>
+  <li>\(d_{model}\) is the embedding dimension</li>
+</ul>
+
+<p>This creates a unique position encoding for each position in the sequence using alternating sine and cosine functions at different frequencies.</p>
+
+<h3 id="how-to-implement-a-transformer-model-in-pytorch">How to implement a Transformer model in Pytorch?</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">torch</span>
+<span class="kn">import</span> <span class="n">torch.nn</span> <span class="k">as</span> <span class="n">nn</span>
+<span class="kn">import</span> <span class="n">torch.nn.functional</span> <span class="k">as</span> <span class="n">F</span>
+<span class="kn">import</span> <span class="n">math</span>
+
+<span class="k">class</span> <span class="nc">PositionalEncoding</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">d_model</span><span class="p">,</span> <span class="n">max_len</span><span class="o">=</span><span class="mi">5000</span><span class="p">):</span>
+        <span class="nf">super</span><span class="p">(</span><span class="n">PositionalEncoding</span><span class="p">,</span> <span class="n">self</span><span class="p">).</span><span class="nf">__init__</span><span class="p">()</span>
+        <span class="n">pe</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">zeros</span><span class="p">(</span><span class="n">max_len</span><span class="p">,</span> <span class="n">d_model</span><span class="p">)</span>
+        <span class="n">position</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_len</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="p">.</span><span class="nb">float</span><span class="p">).</span><span class="nf">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">div_term</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">exp</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">d_model</span><span class="p">,</span> <span class="mi">2</span><span class="p">).</span><span class="nf">float</span><span class="p">()</span> <span class="o">*</span> <span class="o">-</span><span class="p">(</span><span class="n">math</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="mf">10000.0</span><span class="p">)</span> <span class="o">/</span> <span class="n">d_model</span><span class="p">))</span>
+        <span class="n">pe</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sin</span><span class="p">(</span><span class="n">position</span> <span class="o">*</span> <span class="n">div_term</span><span class="p">)</span>
+        <span class="n">pe</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">cos</span><span class="p">(</span><span class="n">position</span> <span class="o">*</span> <span class="n">div_term</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">pe</span> <span class="o">=</span> <span class="n">pe</span><span class="p">.</span><span class="nf">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="n">self</span><span class="p">.</span><span class="n">pe</span><span class="p">[:,</span> <span class="p">:</span><span class="n">x</span><span class="p">.</span><span class="nf">size</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="p">:].</span><span class="nf">to</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="n">device</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">MultiHeadAttention</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">d_model</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">):</span>
+        <span class="nf">super</span><span class="p">(</span><span class="n">MultiHeadAttention</span><span class="p">,</span> <span class="n">self</span><span class="p">).</span><span class="nf">__init__</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">d_model</span> <span class="o">%</span> <span class="n">num_heads</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">d_k</span> <span class="o">=</span> <span class="n">d_model</span> <span class="o">//</span> <span class="n">num_heads</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">num_heads</span> <span class="o">=</span> <span class="n">num_heads</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">qkv_proj</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">d_model</span><span class="p">,</span> <span class="n">d_model</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">fc</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">d_model</span><span class="p">,</span> <span class="n">d_model</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">encoder_output</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">batch_size</span><span class="p">,</span> <span class="n">seq_length</span><span class="p">,</span> <span class="n">d_model</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="nf">size</span><span class="p">()</span>
+        <span class="n">qkv</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">qkv_proj</span><span class="p">(</span><span class="n">x</span><span class="p">).</span><span class="nf">reshape</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">seq_length</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">num_heads</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">d_k</span><span class="p">)</span>
+        <span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">qkv</span><span class="p">.</span><span class="nf">permute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>  <span class="c1"># (batch, num_heads, seq_length, d_k)
+</span>        
+        <span class="k">if</span> <span class="n">encoder_output</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="n">encoder_output</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">encoder_output</span>
+        
+        <span class="n">attn_scores</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">matmul</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">.</span><span class="nf">transpose</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">/</span> <span class="n">math</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">d_k</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">attn_scores</span> <span class="o">=</span> <span class="n">attn_scores</span><span class="p">.</span><span class="nf">masked_fill</span><span class="p">(</span><span class="n">mask</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="nf">float</span><span class="p">(</span><span class="sh">'</span><span class="s">-inf</span><span class="sh">'</span><span class="p">))</span>
+        <span class="n">attn_weights</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="nf">softmax</span><span class="p">(</span><span class="n">attn_scores</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">attn_output</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">matmul</span><span class="p">(</span><span class="n">attn_weights</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+        
+        <span class="n">attn_output</span> <span class="o">=</span> <span class="n">attn_output</span><span class="p">.</span><span class="nf">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">).</span><span class="nf">reshape</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">seq_length</span><span class="p">,</span> <span class="n">d_model</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">fc</span><span class="p">(</span><span class="n">attn_output</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">FeedForward</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">d_model</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">):</span>
+        <span class="nf">super</span><span class="p">(</span><span class="n">FeedForward</span><span class="p">,</span> <span class="n">self</span><span class="p">).</span><span class="nf">__init__</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">fc1</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">d_model</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">fc2</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">hidden_dim</span><span class="p">,</span> <span class="n">d_model</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">fc2</span><span class="p">(</span><span class="n">F</span><span class="p">.</span><span class="nf">relu</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="nf">fc1</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
+
+<span class="k">class</span> <span class="nc">TransformerBlock</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">d_model</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">,</span> <span class="n">is_decoder</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="nf">super</span><span class="p">(</span><span class="n">TransformerBlock</span><span class="p">,</span> <span class="n">self</span><span class="p">).</span><span class="nf">__init__</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">attn</span> <span class="o">=</span> <span class="nc">MultiHeadAttention</span><span class="p">(</span><span class="n">d_model</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">norm1</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">LayerNorm</span><span class="p">(</span><span class="n">d_model</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">ff</span> <span class="o">=</span> <span class="nc">FeedForward</span><span class="p">(</span><span class="n">d_model</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">norm2</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">LayerNorm</span><span class="p">(</span><span class="n">d_model</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">is_decoder</span> <span class="o">=</span> <span class="n">is_decoder</span>
+        <span class="k">if</span> <span class="n">is_decoder</span><span class="p">:</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">cross_attn</span> <span class="o">=</span> <span class="nc">MultiHeadAttention</span><span class="p">(</span><span class="n">d_model</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">)</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">norm3</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">LayerNorm</span><span class="p">(</span><span class="n">d_model</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">encoder_output</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">norm1</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">self</span><span class="p">.</span><span class="nf">attn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mask</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">is_decoder</span> <span class="ow">and</span> <span class="n">encoder_output</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">norm3</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">self</span><span class="p">.</span><span class="nf">cross_attn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">encoder_output</span><span class="o">=</span><span class="n">encoder_output</span><span class="p">))</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">norm2</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">self</span><span class="p">.</span><span class="nf">ff</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">x</span>
+
+<span class="k">class</span> <span class="nc">Transformer</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">vocab_size</span><span class="p">,</span> <span class="n">d_model</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">,</span> <span class="n">num_layers</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">,</span> <span class="n">max_len</span><span class="o">=</span><span class="mi">5000</span><span class="p">):</span>
+        <span class="nf">super</span><span class="p">(</span><span class="n">Transformer</span><span class="p">,</span> <span class="n">self</span><span class="p">).</span><span class="nf">__init__</span><span class="p">()</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">embedding</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Embedding</span><span class="p">(</span><span class="n">vocab_size</span><span class="p">,</span> <span class="n">d_model</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">pos_encoding</span> <span class="o">=</span> <span class="nc">PositionalEncoding</span><span class="p">(</span><span class="n">d_model</span><span class="p">,</span> <span class="n">max_len</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">encoder_layers</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">ModuleList</span><span class="p">([</span><span class="nc">TransformerBlock</span><span class="p">(</span><span class="n">d_model</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">num_layers</span><span class="p">)])</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">decoder_layers</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">ModuleList</span><span class="p">([</span><span class="nc">TransformerBlock</span><span class="p">(</span><span class="n">d_model</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">,</span> <span class="n">is_decoder</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">num_layers</span><span class="p">)])</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">fc_out</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">d_model</span><span class="p">,</span> <span class="n">vocab_size</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">tgt</span><span class="p">,</span> <span class="n">src_mask</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tgt_mask</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">src</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">embedding</span><span class="p">(</span><span class="n">src</span><span class="p">)</span>
+        <span class="n">src</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">pos_encoding</span><span class="p">(</span><span class="n">src</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">encoder_layers</span><span class="p">:</span>
+            <span class="n">src</span> <span class="o">=</span> <span class="nf">layer</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">src_mask</span><span class="p">)</span>
+        
+        <span class="n">tgt</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">embedding</span><span class="p">(</span><span class="n">tgt</span><span class="p">)</span>
+        <span class="n">tgt</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">pos_encoding</span><span class="p">(</span><span class="n">tgt</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">decoder_layers</span><span class="p">:</span>
+            <span class="n">tgt</span> <span class="o">=</span> <span class="nf">layer</span><span class="p">(</span><span class="n">tgt</span><span class="p">,</span> <span class="n">tgt_mask</span><span class="p">,</span> <span class="n">encoder_output</span><span class="o">=</span><span class="n">src</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">fc_out</span><span class="p">(</span><span class="n">tgt</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="fine-tune-an-llm-with-langchain">Fine-tune an LLM with LangChain</h2>
+
+<p>Workflow:</p>
+
+<ol>
+  <li>Load the model and tokenizer</li>
+  <li>Load the dataset</li>
+  <li>Create a pipeline</li>
+  <li>Define the training arguments</li>
+  <li>Train the model</li>
+</ol>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="c1"># Load the model and tokenizer
+</span><span class="kn">from</span> <span class="n">transformers</span> <span class="kn">import</span> <span class="n">AutoModelForCausalLM</span><span class="p">,</span> <span class="n">AutoTokenizer</span>
+
+<span class="n">model_name</span> <span class="o">=</span> <span class="sh">"</span><span class="s">meta-llama/Llama-2-7b-hf</span><span class="sh">"</span>  <span class="c1"># Example model
+</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">AutoTokenizer</span><span class="p">.</span><span class="nf">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">AutoModelForCausalLM</span><span class="p">.</span><span class="nf">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
+
+<span class="c1"># Load the dataset
+</span><span class="kn">from</span> <span class="n">datasets</span> <span class="kn">import</span> <span class="n">load_dataset</span>
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="nf">load_dataset</span><span class="p">(</span><span class="sh">"</span><span class="s">json</span><span class="sh">"</span><span class="p">,</span> <span class="n">data_files</span><span class="o">=</span><span class="sh">"</span><span class="s">data.json</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Create a pipeline
+</span><span class="kn">from</span> <span class="n">langchain.llms</span> <span class="kn">import</span> <span class="n">HuggingFacePipeline</span>
+<span class="kn">from</span> <span class="n">transformers</span> <span class="kn">import</span> <span class="n">pipeline</span>
+
+<span class="n">pipe</span> <span class="o">=</span> <span class="nf">pipeline</span><span class="p">(</span><span class="sh">"</span><span class="s">text-generation</span><span class="sh">"</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span><span class="o">=</span><span class="n">tokenizer</span><span class="p">)</span>
+<span class="n">llm</span> <span class="o">=</span> <span class="nc">HuggingFacePipeline</span><span class="p">(</span><span class="n">pipeline</span><span class="o">=</span><span class="n">pipe</span><span class="p">)</span>
+
+<span class="c1"># Define the training arguments
+</span><span class="kn">from</span> <span class="n">transformers</span> <span class="kn">import</span> <span class="n">TrainingArguments</span><span class="p">,</span> <span class="n">Trainer</span>
+
+<span class="n">training_args</span> <span class="o">=</span> <span class="nc">TrainingArguments</span><span class="p">(</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="sh">"</span><span class="s">./finetuned_model</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">per_device_train_batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">num_train_epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">logging_dir</span><span class="o">=</span><span class="sh">"</span><span class="s">./logs</span><span class="sh">"</span>
+<span class="p">)</span>
+
+<span class="n">trainer</span> <span class="o">=</span> <span class="nc">Trainer</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+    <span class="n">args</span><span class="o">=</span><span class="n">training_args</span><span class="p">,</span>
+    <span class="n">train_dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">[</span><span class="sh">"</span><span class="s">train</span><span class="sh">"</span><span class="p">],</span>
+<span class="p">)</span>
+
+<span class="n">trainer</span><span class="p">.</span><span class="nf">train</span><span class="p">()</span>
+
+<span class="c1"># Save the model
+</span><span class="n">model</span><span class="p">.</span><span class="nf">save_pretrained</span><span class="p">(</span><span class="sh">"</span><span class="s">./finetuned_llm</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">tokenizer</span><span class="p">.</span><span class="nf">save_pretrained</span><span class="p">(</span><span class="sh">"</span><span class="s">./finetuned_llm</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Load the model
+</span><span class="kn">from</span> <span class="n">langchain.llms</span> <span class="kn">import</span> <span class="n">HuggingFacePipeline</span>
+<span class="n">llm</span> <span class="o">=</span> <span class="n">HuggingFacePipeline</span><span class="p">.</span><span class="nf">from_pretrained</span><span class="p">(</span><span class="sh">"</span><span class="s">./finetuned_llm</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">response</span> <span class="o">=</span> <span class="nf">llm</span><span class="p">(</span><span class="sh">"</span><span class="s">Explain transformers in NLP</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="langchain-agents-for-chatbots">Langchain Agents for Chatbots</h2>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="c1"># load the model
+</span>
+<span class="kn">from</span> <span class="n">transformers</span> <span class="kn">import</span> <span class="n">AutoModelForCausalLM</span><span class="p">,</span> <span class="n">AutoTokenizer</span>
+<span class="kn">from</span> <span class="n">langchain.llms</span> <span class="kn">import</span> <span class="n">HuggingFacePipeline</span>
+<span class="kn">from</span> <span class="n">transformers</span> <span class="kn">import</span> <span class="n">pipeline</span>
+
+<span class="c1"># Load fine-tuned model and tokenizer
+</span><span class="n">model_path</span> <span class="o">=</span> <span class="sh">"</span><span class="s">./finetuned_llm</span><span class="sh">"</span>
+<span class="n">tokenizer</span> <span class="o">=</span> <span class="n">AutoTokenizer</span><span class="p">.</span><span class="nf">from_pretrained</span><span class="p">(</span><span class="n">model_path</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">AutoModelForCausalLM</span><span class="p">.</span><span class="nf">from_pretrained</span><span class="p">(</span><span class="n">model_path</span><span class="p">)</span>
+
+<span class="c1"># Create a HuggingFace pipeline
+</span><span class="n">pipe</span> <span class="o">=</span> <span class="nf">pipeline</span><span class="p">(</span><span class="sh">"</span><span class="s">text-generation</span><span class="sh">"</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span><span class="o">=</span><span class="n">tokenizer</span><span class="p">)</span>
+<span class="n">llm</span> <span class="o">=</span> <span class="nc">HuggingFacePipeline</span><span class="p">(</span><span class="n">pipeline</span><span class="o">=</span><span class="n">pipe</span><span class="p">)</span>
+
+<span class="c1"># create a langchain agent
+</span>
+<span class="kn">from</span> <span class="n">langchain.agents</span> <span class="kn">import</span> <span class="n">initialize_agent</span>
+<span class="kn">from</span> <span class="n">langchain.tools</span> <span class="kn">import</span> <span class="n">Tool</span>
+<span class="kn">from</span> <span class="n">langchain.memory</span> <span class="kn">import</span> <span class="n">ConversationBufferMemory</span>
+
+<span class="c1"># Define a simple tool (e.g., search or custom function)
+</span><span class="k">def</span> <span class="nf">custom_tool</span><span class="p">(</span><span class="n">input_text</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="sh">"</span><span class="s">Processing input: </span><span class="si">{</span><span class="n">input_text</span><span class="si">}</span><span class="sh">"</span>
+
+<span class="n">tools</span> <span class="o">=</span> <span class="p">[</span><span class="nc">Tool</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sh">"</span><span class="s">CustomTool</span><span class="sh">"</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">custom_tool</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="sh">"</span><span class="s">A simple tool for processing text</span><span class="sh">"</span><span class="p">)]</span>
+
+<span class="c1"># Initialize memory for conversation history
+</span><span class="n">memory</span> <span class="o">=</span> <span class="nc">ConversationBufferMemory</span><span class="p">(</span><span class="n">memory_key</span><span class="o">=</span><span class="sh">"</span><span class="s">chat_history</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Create an agent using the fine-tuned model
+</span><span class="n">agent</span> <span class="o">=</span> <span class="nf">initialize_agent</span><span class="p">(</span>
+    <span class="n">tools</span><span class="o">=</span><span class="n">tools</span><span class="p">,</span>
+    <span class="n">llm</span><span class="o">=</span><span class="n">llm</span><span class="p">,</span>
+    <span class="n">agent</span><span class="o">=</span><span class="sh">"</span><span class="s">zero-shot-react-description</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">memory</span><span class="o">=</span><span class="n">memory</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Test the agent
+</span><span class="n">response</span> <span class="o">=</span> <span class="n">agent</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="sh">"</span><span class="s">What is the difference between GPT and BERT?</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="integrating-rag-with-langchain">Integrating RAG with LangChain</h2>
+
+<p>Workflow:</p>
+
+<ol>
+  <li>Load and split documents and store embeddings in FAISS</li>
+  <li>Create a Retrieval-Augmented Chain</li>
+  <li>(Optional) Deploy as a Chatbot using FastAPI</li>
+</ol>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">langchain.document_loaders</span> <span class="kn">import</span> <span class="n">TextLoader</span>
+<span class="kn">from</span> <span class="n">langchain.embeddings</span> <span class="kn">import</span> <span class="n">HuggingFaceEmbeddings</span>
+<span class="kn">from</span> <span class="n">langchain.vectorstores</span> <span class="kn">import</span> <span class="n">FAISS</span>
+<span class="kn">from</span> <span class="n">langchain.text_splitter</span> <span class="kn">import</span> <span class="n">RecursiveCharacterTextSplitter</span>
+
+<span class="c1"># Load and split documents
+</span><span class="n">loader</span> <span class="o">=</span> <span class="nc">TextLoader</span><span class="p">(</span><span class="sh">"</span><span class="s">knowledge.txt</span><span class="sh">"</span><span class="p">)</span>  <span class="c1"># Your text data
+</span><span class="n">documents</span> <span class="o">=</span> <span class="n">loader</span><span class="p">.</span><span class="nf">load</span><span class="p">()</span>
+
+<span class="n">text_splitter</span> <span class="o">=</span> <span class="nc">RecursiveCharacterTextSplitter</span><span class="p">(</span><span class="n">chunk_size</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">chunk_overlap</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+<span class="n">docs</span> <span class="o">=</span> <span class="n">text_splitter</span><span class="p">.</span><span class="nf">split_documents</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span>
+
+<span class="c1"># Use HuggingFace embeddings
+</span><span class="n">embedding_model</span> <span class="o">=</span> <span class="nc">HuggingFaceEmbeddings</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="sh">"</span><span class="s">sentence-transformers/all-MiniLM-L6-v2</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Store embeddings in FAISS
+</span><span class="n">vectorstore</span> <span class="o">=</span> <span class="n">FAISS</span><span class="p">.</span><span class="nf">from_documents</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">embedding_model</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">langchain.chains</span> <span class="kn">import</span> <span class="n">RetrievalQA</span>
+<span class="kn">from</span> <span class="n">langchain.llms</span> <span class="kn">import</span> <span class="n">HuggingFacePipeline</span>
+<span class="kn">from</span> <span class="n">langchain.vectorstores</span> <span class="kn">import</span> <span class="n">FAISS</span>
+
+<span class="c1"># Load your fine-tuned model
+</span><span class="kn">from</span> <span class="n">transformers</span> <span class="kn">import</span> <span class="n">AutoModelForCausalLM</span><span class="p">,</span> <span class="n">AutoTokenizer</span><span class="p">,</span> <span class="n">pipeline</span>
+
+<span class="n">model_path</span> <span class="o">=</span> <span class="sh">"</span><span class="s">./finetuned_llm</span><span class="sh">"</span>
+<span class="n">tokenizer</span> <span class="o">=</span> <span class="n">AutoTokenizer</span><span class="p">.</span><span class="nf">from_pretrained</span><span class="p">(</span><span class="n">model_path</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">AutoModelForCausalLM</span><span class="p">.</span><span class="nf">from_pretrained</span><span class="p">(</span><span class="n">model_path</span><span class="p">)</span>
+<span class="n">pipe</span> <span class="o">=</span> <span class="nf">pipeline</span><span class="p">(</span><span class="sh">"</span><span class="s">text-generation</span><span class="sh">"</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span><span class="o">=</span><span class="n">tokenizer</span><span class="p">)</span>
+<span class="n">llm</span> <span class="o">=</span> <span class="nc">HuggingFacePipeline</span><span class="p">(</span><span class="n">pipeline</span><span class="o">=</span><span class="n">pipe</span><span class="p">)</span>
+
+<span class="c1"># Set up the retriever
+</span><span class="n">retriever</span> <span class="o">=</span> <span class="n">vectorstore</span><span class="p">.</span><span class="nf">as_retriever</span><span class="p">()</span>
+
+<span class="c1"># Create a retrieval-augmented Q&amp;A pipeline
+</span><span class="n">qa_chain</span> <span class="o">=</span> <span class="nc">RetrievalQA</span><span class="p">(</span><span class="n">llm</span><span class="o">=</span><span class="n">llm</span><span class="p">,</span> <span class="n">retriever</span><span class="o">=</span><span class="n">retriever</span><span class="p">)</span>
+
+<span class="c1"># Ask a question
+</span><span class="n">query</span> <span class="o">=</span> <span class="sh">"</span><span class="s">What is LangChain?</span><span class="sh">"</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">qa_chain</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="train-an-llm-with-lora--qlora">Train an LLM with LoRA &amp; QLoRA</h2>
+
+<p>Workflow:</p>
+
+<ol>
+  <li>Load the model (with 4-bit quantization if QLoRA is used)</li>
+  <li>Apply LoRA or QLoRA with the <code class="language-plaintext highlighter-rouge">peft</code> library</li>
+  <li>Train the model</li>
+</ol>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="kn">from</span> <span class="n">transformers</span> <span class="kn">import</span> <span class="n">AutoModelForCausalLM</span><span class="p">,</span> <span class="n">AutoTokenizer</span><span class="p">,</span> <span class="n">BitsAndBytesConfig</span>
+
+<span class="n">model_name</span> <span class="o">=</span> <span class="sh">"</span><span class="s">meta-llama/Llama-2-7b-hf</span><span class="sh">"</span>  <span class="c1"># Example: LLaMA-2 7B
+</span>
+<span class="c1"># Enable 4-bit quantization (for QLoRA)
+</span><span class="n">bnb_config</span> <span class="o">=</span> <span class="nc">BitsAndBytesConfig</span><span class="p">(</span>
+    <span class="n">load_in_4bit</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">bnb_4bit_use_double_quant</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">bnb_4bit_quant_type</span><span class="o">=</span><span class="sh">"</span><span class="s">nf4</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">bnb_4bit_compute_dtype</span><span class="o">=</span><span class="sh">"</span><span class="s">float16</span><span class="sh">"</span>
+<span class="p">)</span>
+
+<span class="c1"># Load model and tokenizer
+</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">AutoTokenizer</span><span class="p">.</span><span class="nf">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">AutoModelForCausalLM</span><span class="p">.</span><span class="nf">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">quantization_config</span><span class="o">=</span><span class="n">bnb_config</span><span class="p">,</span> <span class="n">device_map</span><span class="o">=</span><span class="sh">"</span><span class="s">auto</span><span class="sh">"</span><span class="p">)</span>
+
+</code></pre></div></div>
+
+<p><strong>Apply LoRA or QLoRA with the <code class="language-plaintext highlighter-rouge">peft</code> library</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">peft</span> <span class="kn">import</span> <span class="n">LoraConfig</span><span class="p">,</span> <span class="n">get_peft_model</span>
+
+<span class="n">lora_config</span> <span class="o">=</span> <span class="nc">LoraConfig</span><span class="p">(</span>
+    <span class="n">r</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>               <span class="c1"># Rank of LoRA matrices
+</span>    <span class="n">lora_alpha</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>      <span class="c1"># Scaling factor
+</span>    <span class="n">target_modules</span><span class="o">=</span><span class="p">[</span><span class="sh">"</span><span class="s">q_proj</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">v_proj</span><span class="sh">"</span><span class="p">],</span>  <span class="c1"># Apply LoRA to attention layers
+</span>    <span class="n">lora_dropout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>   <span class="c1"># Dropout rate
+</span>    <span class="n">bias</span><span class="o">=</span><span class="sh">"</span><span class="s">none</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="sh">"</span><span class="s">CAUSAL_LM</span><span class="sh">"</span>  <span class="c1"># Language modeling task
+</span><span class="p">)</span>
+
+<span class="c1"># Apply LoRA to the model
+</span><span class="n">model</span> <span class="o">=</span> <span class="nf">get_peft_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">lora_config</span><span class="p">)</span>
+<span class="n">model</span><span class="p">.</span><span class="nf">print_trainable_parameters</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><strong>Train the model</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="kn">from</span> <span class="n">transformers</span> <span class="kn">import</span> <span class="n">TrainingArguments</span><span class="p">,</span> <span class="n">Trainer</span>
+
+<span class="n">training_args</span> <span class="o">=</span> <span class="nc">TrainingArguments</span><span class="p">(</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="sh">"</span><span class="s">./finetuned_llm_lora</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">per_device_train_batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">gradient_accumulation_steps</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">learning_rate</span><span class="o">=</span><span class="mf">2e-4</span><span class="p">,</span>
+    <span class="n">num_train_epochs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">logging_dir</span><span class="o">=</span><span class="sh">"</span><span class="s">./logs</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">fp16</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">save_steps</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+    <span class="n">save_total_limit</span><span class="o">=</span><span class="mi">2</span>
+<span class="p">)</span>
+
+<span class="n">trainer</span> <span class="o">=</span> <span class="nc">Trainer</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+    <span class="n">args</span><span class="o">=</span><span class="n">training_args</span><span class="p">,</span>
+    <span class="n">train_dataset</span><span class="o">=</span><span class="n">dataset</span>
+<span class="p">)</span>
+
+<span class="n">trainer</span><span class="p">.</span><span class="nf">train</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h2 id="implement-a-custom-tokenizer">Implement a Custom Tokenizer</h2>
+
+<h3 id="what-is-a-tokenizer">What is a tokenizer?</h3>
+
+<p>A tokenizer is an important component of any NLP model. It is responsible for converting text into tokens (e.g., words, characters, or subwords) that LLMs can work with instead of raw text.
+The choice of tokenizer significantly impacts the performance of the model and the ability to generalize across different tasks.</p>
+
+<ul>
+  <li><strong>Shorter token sequences = faster inference and training</strong>. A good tokenizer reduces unncessary tokens and reduces the vocabulary size.</li>
+  <li><strong>Better tokenization improves generalization</strong>. A good tokenizer will be able to handle out-of-vocabulary words (OOV) better. Words <code class="language-plaintext highlighter-rouge">"play"</code>, <code class="language-plaintext highlighter-rouge">"playing"</code>, <code class="language-plaintext highlighter-rouge">"plays"</code> should be tokenized like <code class="language-plaintext highlighter-rouge">"play"</code>, <code class="language-plaintext highlighter-rouge">"play" + "ing"</code>, <code class="language-plaintext highlighter-rouge">"play" + "s"</code> rather than three different tokens so that the model can understand the relationship between the words.</li>
+  <li><strong>Smaller vocabularies</strong> can work for low-resource languages.</li>
+  <li><strong>Custom tokenizers</strong> may improve domain-specific tasks, e.g., legal, medical, coding, etc, where there are specific tokens that are not found in the general tokenizer.</li>
+</ul>
+
+<h3 id="how-to-implement-a-custom-tokenizer">How to implement a custom tokenizer?</h3>
+
+<p>Collect domain-specific text data for training the tokenizer.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">os</span>
+
+<span class="c1"># Example: Load text files from a directory
+</span><span class="n">data_path</span> <span class="o">=</span> <span class="sh">"</span><span class="s">custom_texts/</span><span class="sh">"</span>
+<span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="p">.</span><span class="nf">listdir</span><span class="p">(</span><span class="n">data_path</span><span class="p">)</span> <span class="k">if</span> <span class="n">f</span><span class="p">.</span><span class="nf">endswith</span><span class="p">(</span><span class="sh">"</span><span class="s">.txt</span><span class="sh">"</span><span class="p">)]</span>
+
+<span class="c1"># Read all files into a single text corpus
+</span><span class="n">corpus</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="nb">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+    <span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="sh">"</span><span class="s">r</span><span class="sh">"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="sh">"</span><span class="s">utf-8</span><span class="sh">"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">corpus</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">f</span><span class="p">.</span><span class="nf">read</span><span class="p">())</span>
+
+<span class="c1"># Convert into a list of lines
+</span><span class="n">corpus</span> <span class="o">=</span> <span class="sh">"</span><span class="se">\n</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">corpus</span><span class="p">).</span><span class="nf">split</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>Train the tokenizer</strong>. We use Byte Pair Encoding (BPE) for this example. The new dictionary will be saved as <code class="language-plaintext highlighter-rouge">custom_tokenizer.json</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">tokenizers</span> <span class="kn">import</span> <span class="n">Tokenizer</span>
+<span class="kn">from</span> <span class="n">tokenizers.models</span> <span class="kn">import</span> <span class="n">BPE</span>
+<span class="kn">from</span> <span class="n">tokenizers.trainers</span> <span class="kn">import</span> <span class="n">BpeTrainer</span>
+<span class="kn">from</span> <span class="n">tokenizers.pre_tokenizers</span> <span class="kn">import</span> <span class="n">Whitespace</span>
+
+<span class="c1"># Initialize a tokenizer with BPE model
+</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="nc">Tokenizer</span><span class="p">(</span><span class="nc">BPE</span><span class="p">())</span>
+
+<span class="c1"># Define a trainer
+</span><span class="n">trainer</span> <span class="o">=</span> <span class="nc">BpeTrainer</span><span class="p">(</span><span class="n">special_tokens</span><span class="o">=</span><span class="p">[</span><span class="sh">"</span><span class="s">[PAD]</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">[UNK]</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">[CLS]</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">[SEP]</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">[MASK]</span><span class="sh">"</span><span class="p">])</span>
+
+<span class="c1"># Use whitespace pre-tokenization
+</span><span class="n">tokenizer</span><span class="p">.</span><span class="n">pre_tokenizer</span> <span class="o">=</span> <span class="nc">Whitespace</span><span class="p">()</span>
+
+<span class="c1"># Train the tokenizer on the custom dataset
+</span><span class="kn">from</span> <span class="n">tokenizers</span> <span class="kn">import</span> <span class="n">Tokenizer</span><span class="p">,</span> <span class="n">models</span><span class="p">,</span> <span class="n">trainers</span><span class="p">,</span> <span class="n">pre_tokenizers</span>
+
+<span class="n">tokenizer</span><span class="p">.</span><span class="nf">train_from_iterator</span><span class="p">(</span><span class="n">corpus</span><span class="p">,</span> <span class="n">trainer</span><span class="p">)</span>
+
+<span class="c1"># Save the tokenizer
+</span><span class="n">tokenizer</span><span class="p">.</span><span class="nf">save</span><span class="p">(</span><span class="sh">"</span><span class="s">custom_tokenizer.json</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>Load the custom tokenizer</strong>. Note that a tokenization includes encoding (tokenize - convert text to tokens) and decoding (detokenize - convert tokens back to text).</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">transformers</span> <span class="kn">import</span> <span class="n">PreTrainedTokenizerFast</span>
+
+<span class="c1"># Load the tokenizer
+</span><span class="n">hf_tokenizer</span> <span class="o">=</span> <span class="nc">PreTrainedTokenizerFast</span><span class="p">(</span><span class="n">tokenizer_file</span><span class="o">=</span><span class="sh">"</span><span class="s">custom_tokenizer.json</span><span class="sh">"</span><span class="p">,</span> <span class="n">unk_token</span><span class="o">=</span><span class="sh">"</span><span class="s">[UNK]</span><span class="sh">"</span><span class="p">,</span> <span class="n">pad_token</span><span class="o">=</span><span class="sh">"</span><span class="s">[PAD]</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Test encoding
+</span><span class="n">text</span> <span class="o">=</span> <span class="sh">"</span><span class="s">Hello, how are you?</span><span class="sh">"</span>
+<span class="n">tokens</span> <span class="o">=</span> <span class="n">hf_tokenizer</span><span class="p">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Tokens:</span><span class="sh">"</span><span class="p">,</span> <span class="n">tokens</span><span class="p">)</span>
+
+<span class="c1"># Decode back
+</span><span class="n">decoded_text</span> <span class="o">=</span> <span class="n">hf_tokenizer</span><span class="p">.</span><span class="nf">decode</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Decoded:</span><span class="sh">"</span><span class="p">,</span> <span class="n">decoded_text</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="build-a-chatbot-with-ollama">Build a Chatbot with Ollama</h2>
+
+<h3 id="ollama">Ollama</h3>
+
+<p><strong>References:</strong></p>
+
+<ul>
+  <li><a href="https://ollama.com/">Ollama</a></li>
+  <li><a href="https://github.com/ollama/ollama">Ollama Github</a></li>
+</ul>
+
+<p><strong>What is Ollama?</strong></p>
+
+<p>Ollama is an application designed to make running LLMs locally easy. It is a lightweight and fast alternative to large cloud-based LLMs.</p>
+
+<p><strong>Advantages of Ollama:</strong></p>
+
+<ul>
+  <li><strong>Cross-platform</strong>: Ollama is available on Windows, Linux, and macOS.</li>
+  <li><strong>Multiple LLMs</strong>: Ollama supports a wide range of LLMs, including Llama, GPT, and DeepSeek.</li>
+</ul>
+
+<p><strong>What can Ollama do?</strong></p>
+
+<ul>
+  <li>Run LLMs Locally
+    <ul>
+      <li>Supports various open-source LLMs (e.g., LLaMA, Mistral, Gemma, Phi-2).</li>
+      <li>No need for an internet connection once the model is downloaded.</li>
+      <li>Efficient memory management for running LLMs on laptops and desktops.</li>
+    </ul>
+  </li>
+  <li>Easy Model Management
+    <ul>
+      <li>Install models with simple commands (<code class="language-plaintext highlighter-rouge">ollama pull &lt;model-name&gt;</code>)</li>
+      <li>Supports custom model creation with fine-tuned weights and configurations</li>
+    </ul>
+  </li>
+  <li>Flexible API for Developers
+    <ul>
+      <li>Provides a CLI (Command Line Interface) and a Python API.</li>
+      <li>Can be integrated into applications for chatbots, text generation, and NLP tasks.</li>
+    </ul>
+  </li>
+  <li>Prompt Engineering &amp; Fine-Tuning
+    <ul>
+      <li>Allows users to customize system prompts for better responses.</li>
+      <li>Supports parameter tuning to control model behavior.</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>Use Cases:</strong></p>
+
+<ul>
+  <li>Chatbots &amp; Assistants – Build local AI-powered assistants.</li>
+  <li>Text Generation – Summarization, paraphrasing, creative writing.</li>
+  <li>Code Generation – AI-assisted coding with models like CodeLLaMA.</li>
+  <li>Privacy-Sensitive Applications – Run LLMs without sending data to the cloud.</li>
+</ul>
+
+<h3 id="create-a-python-chatbot-with-ollama">Create a Python Chatbot with Ollama</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">requests</span>
+<span class="kn">from</span> <span class="n">requests.exceptions</span> <span class="kn">import</span> <span class="nb">ConnectionError</span>
+<span class="kn">import</span> <span class="n">json</span>
+
+<span class="k">def</span> <span class="nf">chat_with_ollama</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="sh">"</span><span class="s">mistral</span><span class="sh">"</span><span class="p">):</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="sh">"</span><span class="s">http://localhost:11434/api/generate</span><span class="sh">"</span>  <span class="c1"># Changed back to default Ollama port
+</span>    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="sh">"</span><span class="s">model</span><span class="sh">"</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span>
+        <span class="sh">"</span><span class="s">prompt</span><span class="sh">"</span><span class="p">:</span> <span class="n">prompt</span>
+    <span class="p">}</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">response</span><span class="p">.</span><span class="n">ok</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="sh">"</span><span class="s">Error: API returned status code </span><span class="si">{</span><span class="n">response</span><span class="p">.</span><span class="n">status_code</span><span class="si">}</span><span class="sh">"</span>
+
+        <span class="c1"># Handle streaming response
+</span>        <span class="n">full_response</span> <span class="o">=</span> <span class="sh">""</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">response</span><span class="p">.</span><span class="nf">iter_lines</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">line</span><span class="p">:</span>
+                <span class="c1"># Decode the line and parse it as JSON
+</span>                <span class="n">json_response</span> <span class="o">=</span> <span class="n">json</span><span class="p">.</span><span class="nf">loads</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="k">if</span> <span class="sh">"</span><span class="s">response</span><span class="sh">"</span> <span class="ow">in</span> <span class="n">json_response</span><span class="p">:</span>
+                    <span class="n">full_response</span> <span class="o">+=</span> <span class="n">json_response</span><span class="p">[</span><span class="sh">"</span><span class="s">response</span><span class="sh">"</span><span class="p">]</span>
+                
+        <span class="k">return</span> <span class="n">full_response</span>
+    <span class="k">except</span> <span class="nb">ConnectionError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sh">"</span><span class="s">Error: Cannot connect to Ollama server. Please ensure it</span><span class="sh">'</span><span class="s">s running on port 11434.</span><span class="sh">"</span>
+    <span class="k">except</span> <span class="n">json</span><span class="p">.</span><span class="n">JSONDecodeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="sh">"</span><span class="s">Error: Invalid JSON response from server. Details: </span><span class="si">{</span><span class="nf">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="sh">"</span>
+    <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="sh">"</span><span class="s">Error: </span><span class="si">{</span><span class="nf">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="sh">"</span>
+
+<span class="c1"># Chat loop
+</span><span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Chatbot (type </span><span class="sh">'</span><span class="s">exit</span><span class="sh">'</span><span class="s"> to quit):</span><span class="sh">"</span><span class="p">)</span>
+<span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+    <span class="n">user_input</span> <span class="o">=</span> <span class="nf">input</span><span class="p">(</span><span class="sh">"</span><span class="s">You: </span><span class="sh">"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">user_input</span><span class="p">.</span><span class="nf">lower</span><span class="p">()</span> <span class="o">==</span> <span class="sh">"</span><span class="s">exit</span><span class="sh">"</span><span class="p">:</span>
+        <span class="k">break</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="nf">chat_with_ollama</span><span class="p">(</span><span class="n">user_input</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Bot: </span><span class="si">{</span><span class="n">response</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>How it works:</strong></p>
+
+<ul>
+  <li>The script sends user input to Ollama’s local API.</li>
+  <li>The model generates a response and returns it.</li>
+  <li>The chatbot runs in a loop until the user types “exit”.</li>
+</ul>
+
+<p><strong>Running the Chatbot:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ollama pull mistral
+ollama serve
+python chatbot.py
+</code></pre></div></div>
+
+<p><strong>Useful Commands:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">ollama pull mistral</code> - Pull the mistral model</li>
+  <li><code class="language-plaintext highlighter-rouge">ollama serve</code> - Start the Ollama server</li>
+  <li><code class="language-plaintext highlighter-rouge">ollama ps</code> - see what models are currently loaded into memory.</li>
+  <li><code class="language-plaintext highlighter-rouge">ollama stop &lt;container_id&gt;</code> - Stop a container</li>
+  <li><code class="language-plaintext highlighter-rouge">ollama rm &lt;container_id&gt;</code> - Remove a container</li>
+  <li><code class="language-plaintext highlighter-rouge">ollama list</code> - List all models. This is useful because when you pull a model, e.g., <code class="language-plaintext highlighter-rouge">ollama pull mistral</code>, it eventually shows up as <code class="language-plaintext highlighter-rouge">mistral:latest</code>.</li>
+</ul>
+
+<p><strong>Issues:</strong></p>
+
+<ul>
+  <li>Error: listen tcp 127.0.0.1:11434: bind: address already in use
+    <ul>
+      <li>This means that the server is already running on the port.</li>
+      <li>To fix this, you can either stop the server or run it on a different port.</li>
+      <li><code class="language-plaintext highlighter-rouge">ollama stop &lt;container_id&gt;</code> - Stop a container</li>
+      <li><code class="language-plaintext highlighter-rouge">OLLAMA_HOST=127.0.0.1:11500 ollama serve</code> - Run the server on a different port</li>
+      <li>Setup environment variables on Linux: https://github.com/ollama/ollama/blob/main/docs/faq.md#setting-environment-variables-on-linux</li>
+    </ul>
+  </li>
+</ul>]]></content><author><name></name></author><category term="genai" /><category term="llm" /><category term="tutorial" /><category term="reading" /><category term="coding" /><summary type="html"><![CDATA[How to break into $100k+ salary roles - Part 2]]></summary></entry></feed>

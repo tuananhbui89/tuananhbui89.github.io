@@ -162,6 +162,7 @@
 <li class="toc-entry toc-h3"><a href="#ode">ODE</a></li>
 <li class="toc-entry toc-h3"><a href="#sde">SDE</a></li>
 <li class="toc-entry toc-h3"><a href="#elbo">ELBO</a></li>
+<li class="toc-entry toc-h3"><a href="#tweedies-formula">Tweedie’s formula</a></li>
 </ul>
 </li>
 <li class="toc-entry toc-h2">
@@ -184,6 +185,7 @@
 <a href="#conditional-diffusion">Conditional Diffusion</a>
 <ul>
 <li class="toc-entry toc-h3"><a href="#control-net">Control-Net</a></li>
+<li class="toc-entry toc-h3"><a href="#image-prompt">Image Prompt</a></li>
 </ul>
 </li>
 <li class="toc-entry toc-h2"><a href="#diffusion-transformers">Diffusion Transformers</a></li>
@@ -341,6 +343,8 @@ L(\phi, \theta; x) &amp;= \mathbb{E}_{z\sim q_\phi(\cdot|x)}[\ln p_\theta(x,z)] 
   <li><a href="https://lilianweng.github.io/posts/2018-08-12-vae/#beta-vae" rel="external nofollow noopener" target="_blank">A nice property of VAEs: Disentanglement Representation Learning</a></li>
 </ul>
 
+<h3 id="tweedies-formula">Tweedie’s formula</h3>
+
 <h2 id="variants">Variants</h2>
 
 <h3 id="ddpm">DDPM</h3>
@@ -457,6 +461,50 @@ In a simple case, where \(y\) is just a image class, like a <code class="languag
 
 <h3 id="control-net">Control-Net</h3>
 
+<h3 id="image-prompt">Image Prompt</h3>
+
+<p>Beyond controlling the generation process using text prompt, there is a hot topic in the community to control using image information/layout/prompt - which has a huge potential in applications, e.g., image inpainting, image-to-image generation, etc. In the standard Stable Diffusion, the condition embedding \(c_t\) is just a text embedding \(c_t = E_t(y)\) where \(y\) is the text prompt and \(E_t\) is a pre-trained text encoder such as CLIP.
+IP-Adapter [1] proposes to use an additional image encoder to extract the image embedding from a reference image \(c_i = E_i(x)\) and then project it into the original condition space.
+The objective function for IP-Adapter is:</p>
+
+\[\mathcal{L}_{IP} = \mathbb{E}_{z, c, \epsilon, t} \left[ \mid \mid \epsilon - \epsilon_\theta(z_t \mid c_i, c_t, t) \mid \mid_2^2 \right]\]
+
+<p>The cross-attention layer is also modified from the one in Stable Diffusion to include the image embedding \(c_i\) as a condition.</p>
+
+\[\text{Attention}(Q, K_i, K_t, V_i, V_t) = \lambda \text{softmax}\left(\frac{QK_i^T}{\sqrt{d}} + c_i\right)V_i + \text{softmax}\left(\frac{QK_t^T}{\sqrt{d}}\right)V_t\]
+
+<p>where \(Q=z W_Q\), \(K_i = c_i W_K^i\), \(K_t = c_t W_K^t\), \(V_i = c_i W_V^i\), \(V_t = c_t W_V^t\), and \(W_Q\), \(W_K^i\), \(W_K^t\), \(W_V^i\), \(W_V^t\) are the weights of the linear layers.
+The model becomes the original Stable Diffusion when \(\lambda = 0\).</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion-foundation/2025-03-20-07-02-10-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion-foundation/2025-03-20-07-02-10-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion-foundation/2025-03-20-07-02-10-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/diffusion-foundation/2025-03-20-07-02-10.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+
+<p>References:</p>
+
+<ul>
+  <li>[1] <a href="https://arxiv.org/pdf/2308.06721" rel="external nofollow noopener" target="_blank">IP-Adapter: Text Compatible Image Prompt Adapter for Text-to-Image Diffusion Models</a>
+</li>
+  <li>[2] <a href="https://openreview.net/pdf?id=PJqP0wyQek#page=1.93" rel="external nofollow noopener" target="_blank">MS-DIFFUSION: MULTI-SUBJECT ZERO-SHOT IMAGE PERSONALIZATION WITH LAYOUT GUIDANCE</a>
+</li>
+</ul>
+
 <h2 id="diffusion-transformers">Diffusion Transformers</h2>
 
 <h2 id="image-inpainting-with-diffusion-models">Image Inpainting with Diffusion Models</h2>
@@ -482,8 +530,8 @@ In a simple case, where \(y\) is just a image class, like a <code class="languag
 
 <p>where \(\epsilon\) is a standard normal random variable and \(t\) is the time step in [0, 1].</p>
 
-<!-- mkdir -p assets/img/personalization -->
-<!-- mv _posts/2025-02-26-*.png assets/img/personalization/ -->
+<!-- mkdir -p assets/img/diffusion-foundation -->
+<!-- mv _posts/2025-03-20-*.png assets/img/diffusion-foundation/ -->
 
     </div>
   </article>
@@ -508,25 +556,25 @@ In a simple case, where \(y\) is just a image class, like a <code class="languag
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/deepseek/">DeepSeek-R1</a>
-  </li>
-
-  
-
-  <li class="my-2">
     <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2024/erasing-concepts/">Fake Taylor Swift and the Adversarial Game of Concept Erasure and Injection</a>
   </li>
 
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2024/thoughts/">Random Thoughts and Notes</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/deepseek/">DeepSeek-R1</a>
   </li>
 
   
 
   <li class="my-2">
     <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/watermark-diffusion/">Tree-Ring Watermarks - Fingerprints for Diffusion Images that are Invisible and Robust</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2024/thoughts/">Random Thoughts and Notes</a>
   </li>
 
 </div>
