@@ -141,9 +141,9 @@
     <div id="table-of-contents">
       <ul id="toc" class="section-nav">
 <li class="toc-entry toc-h2"><a href="#a-little-bit-more">A little bit more</a></li>
-<li class="toc-entry toc-h2"><a href="#principles">Principles</a></li>
-<li class="toc-entry toc-h2"><a href="#quotes">Quotes</a></li>
-<li class="toc-entry toc-h2"><a href="#memes">Memes</a></li>
+<li class="toc-entry toc-h2"><a href="#what-should-i-do">What should I do?</a></li>
+<li class="toc-entry toc-h2"><a href="#inspire-me">Inspire me</a></li>
+<li class="toc-entry toc-h2"><a href="#funny-memes">Funny Memes</a></li>
 <li class="toc-entry toc-h2"><a href="#ideas">Ideas</a></li>
 </ul>
     </div>
@@ -242,7 +242,7 @@ Starting from 2025, March, I will try to record my goals and aspirations over ti
   - Think/Create 26 ideas (including research and business) - 1 per fortnight. So far - 6/26. This is inspired by Masayoshi Son, the founder of SoftBank, and his first invention and sold it for 1.7M to Sharp. Back to the time when Masa was a college student in Berkeley, he committed that he will spend 5 minutes every day to think about an idea and write it down. And then after 1 year, he choose the most promising idea and start to work on it. He said that - the most valuable thing that one can do is invention. 
   - Deploy one web app.-->
 
-<h2 id="principles">Principles</h2>
+<h2 id="what-should-i-do">What should I do?</h2>
 
 <p>I always feel that I am too busy and do not have enough time to do what I want. As a father of two very active boys, I always feel that they need me to play with them, to teach them something useful, or just to be with them.
 But because I am also at early-stage of my career, who still struggle to find a secure job - struggle to find a direction - struggle to proof my value, I always feel that I have to work more.
@@ -282,7 +282,7 @@ But I found that watching or reading too much is not helpful. Sometimes, just st
   <li>Money</li>
 </ul>
 
-<h2 id="quotes">Quotes</h2>
+<h2 id="inspire-me">Inspire me</h2>
 
 <p>“Between stimulus and response there is a space. In that space is our power to choose our response. In our response lies our growth and our freedom.” Victor Frankl</p>
 
@@ -294,9 +294,7 @@ But I found that watching or reading too much is not helpful. Sometimes, just st
 
 <p>“Great minds discuss ideas; average minds discuss events; small minds discuss people.” Eleanor Roosevelt - Buôn chuyện về người khác là biểu hiện của sự nhỏ bé.</p>
 
-<h2 id="memes">Memes</h2>
-
-<p>My collection of funny memes:</p>
+<h2 id="funny-memes">Funny Memes</h2>
 
 <div class="row mt-3">
     <div class="col-sm mt-3 mt-md-0 text-center">
@@ -369,17 +367,45 @@ Finally, if you just read that far, you are deserved to have a good laugh :D - r
   - In Section 3.4, the authors discuss why personalizing with multiple subjects is challenging. Because the image embedding are generally sparser and contain more information, making their projection into the condition space more difficult. Moreover, interaction between multiple subjects - visual embeddings are not similar to the text embeddings. More specifically, `a dog and a cat on the beach` - is not similar to `a dog $$S^*$$ and a cat $$V^*$$ on the beach` where $$S^*$$ and $$V^*$$ are the visual embeddings of the dog and the cat. Where the visual embeddings learned from the reference images (dog or cat) are diverse from the original text embeddings.
   - To keep the semantic consistency between the text and the learned visual embeddings, we can distill or have an additional constraint to keep that consistency. -->
 
-<p><strong>Language Inversion</strong></p>
+<p><strong>How to unlearn copyrighted concepts - Canva’s real-world case</strong></p>
 
 <ul>
   <li>Topic: Generative Models; Trustworthy Machine Learning</li>
-  <li>Date: 2025-03-21</li>
+  <li>Date: 2025-03-26</li>
   <li>Description:
     <ul>
-      <li>Textual Inversion is a very popular method to personalize a visual concept by learning a text embedding \(S^*\) that can be used to generate the visual concept.</li>
-      <li>However, its limitation is that you need to modify the text encoder a little bit to include the new token and to share it with others.</li>
-      <li>The idea here is that “Can we describe a visual concept by just a text prompt?” - Think about describing thing for a blind person so that they can “imagine” the thing.</li>
-      <li>The implication of this idea is that: (1) we can transfer the knowledge from a set of images to other models easier (2) we can use these methods as to evaluate the quality of the unlearned model - on not popular concepts. For example, if I want to unlearn “my face” concept, how can I know that the model has unlearned it?</li>
+      <li>I had a great pleasure to present our works with the Machine Learning team at Canva and excited to see several interesting use cases - that they are trying to address - that our works can help.</li>
+      <li>There are also several interesting problems and ideas came from the discussion. I will share them here when the time comes (maybe after having a paper :D or when I can write a detailed blog post).</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>Unlearning with Additional Discriminator/Classifier</strong></p>
+
+<ul>
+  <li>Topic: Generative Models; Trustworthy Machine Learning</li>
+  <li>Date: 2025-03-26</li>
+  <li>Description:
+    <ul>
+      <li>Most of the current unlearning methods are sharing a common principle: \(P_{\theta'}(X) \propto \frac{P_{\theta}(X)}{P_{\theta}(E \mid X)^\eta}\) where \(E\) is the set of unlearn examples (from the ESD paper). Interpreted in another way, the unlearned model is trained so that the probability is inversely proportional to the probability of the unlearn examples, i.e., if \(P_{\theta}(E \mid X)\) is high, then \(P_{\theta'}(X)\) is low.</li>
+      <li>A more recent paper - <a href="https://arxiv.org/abs/2404.05868" rel="external nofollow noopener" target="_blank">Negative Preference Optimization: From Catastrophic Collapse to Effective Unlearning</a> - also follow this similar principle.</li>
+      <li>However, this principle has a limitation that it depends on \(P_{\theta}(E \mid X)\) which is very small if \(E\) is a rare set or in the tail of the data distribution. Intuitively, it is much harder to unlearn rare concepts, likely to cause a catastrophic collapse.</li>
+      <li>I think that we can improve the current unlearning methods by adding an additional discriminator/classifier to the unlearning process, i.e., \(P_{\theta'}(X) \propto \frac{P_{\theta}(X)}{P_{\phi}(E \mid X)^\eta}\) where \(P_{\phi}(E \mid X)\) is the probability of the additional discriminator/classifier.</li>
+      <li>The additional discriminator/classifier can be trained easily given the unlearn set \(E\) and the original model \(\theta\).</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>Optimal Transport inspired Unlearning</strong></p>
+
+<ul>
+  <li>Topic: Generative Models; Trustworthy Machine Learning</li>
+  <li>Date: 2025-03-26</li>
+  <li>Description:
+    <ul>
+      <li>It is an extension of our ICLR 2025 paper. The high-level idea is that we aim to minimize the cost of transporting \(\mu \in P_{\theta}(X)\) to \(\nu \in P_{\theta'}(X)\) where \(P_{\theta}(X)\) and \(P_{\theta'}(X)\) are the probability distributions of the data before and after unlearning.</li>
+      <li>More specifically, \(P_{\theta}(X) = P(E) P_{\theta}(X \mid E) + P(R) P_{\theta}(X \mid R)\) where \(E\) is the set of unlearn examples and \(R\) is the set of retained data. Similarly, \(P_{\theta'}(X) = P(E) P_{\theta'}(X \mid E) + P(R_E) P_{\theta'}(X \mid R_E) + P(R_R) P_{\theta'}(X \mid R_R)\) where \(R_E \cup R_R = R\) and \(R_E \cap R_R = \emptyset\).</li>
+      <li>Then intuitively, the optimal transport cost is minimal when \(P_{\theta'}(X \mid E) \approx 0\) and \(P_{\theta'}(X \mid R_E) \approx P_{\theta}(X \mid R_E)\) and \(R_E\) close to \(E\), which means that we move the mass from \(E\) to \(R_E\) that close to \(E\).</li>
     </ul>
   </li>
 </ul>
@@ -801,7 +827,7 @@ Finally, if you just read that far, you are deserved to have a good laugh :D - r
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/watermark-diffusion/">Tree-Ring Watermarks - Fingerprints for Diffusion Images that are Invisible and Robust</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/unlearn-llms/">Unlearning LLMs</a>
   </li>
 
 </div>

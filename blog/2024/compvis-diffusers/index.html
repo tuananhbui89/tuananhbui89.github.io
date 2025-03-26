@@ -247,6 +247,45 @@ I quite often need to switch between these two implementations, so I want to kee
 </span><span class="n">model_pred</span> <span class="o">=</span> <span class="nf">unet</span><span class="p">(</span><span class="n">noisy_latents</span><span class="p">,</span> <span class="n">timesteps</span><span class="p">,</span> <span class="n">encoder_hidden_states</span><span class="p">).</span><span class="n">sample</span>
 </code></pre></div></div>
 
+<p><strong>Conditioning</strong></p>
+
+<p>It is a worth noting that the <code class="language-plaintext highlighter-rouge">encoder_hidden_states</code> size is <code class="language-plaintext highlighter-rouge">(batch_size, sequence_length, hidden_size)</code>, e.g., <code class="language-plaintext highlighter-rouge">(4, 77, 768)</code> for a batch of 4 prompts with max length 77.</p>
+
+<p>It means that the cross-attention layer in the UNet takes the entire sequence as the conditioning rather than just the last token. Confirmed by the code in the <code class="language-plaintext highlighter-rouge">attention.py</code> file in the <code class="language-plaintext highlighter-rouge">ldm</code> library. I let the code below for reading pleasure:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">heads</span>
+
+    <span class="sh">"""</span><span class="s">
+    x: [b, hw, dx] i.e., [2, 4096, 320] where hw is the input size, dx is input dimension/depth
+    context: [b, m, dc] i.e., [2, 77, 768] where m is the sequence length, dc is the context dimension
+    prompt: None
+    </span><span class="sh">"""</span>
+
+    <span class="n">query</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">to_q</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="c1"># [2, 4096, 320]
+</span>    <span class="n">new_context</span> <span class="o">=</span> <span class="nf">default</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">to_k</span><span class="p">(</span><span class="n">new_context</span><span class="p">)</span> <span class="c1"># [2, 77, 320]
+</span>    <span class="n">value</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">to_v</span><span class="p">(</span><span class="n">new_context</span><span class="p">)</span> <span class="c1"># [2, 77, 320]
+</span>
+    <span class="n">query</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="nf">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="nf">rearrange</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="sh">'</span><span class="s">b n (h d) -&gt; (b h) n d</span><span class="sh">'</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="n">h</span><span class="p">),</span> <span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span> 
+    <span class="c1"># after rearrange: query: [16, 4096, 40], key: [16, 77, 40], value: [16, 77, 40], where h=8 is number of heads
+</span>
+    <span class="n">sim</span> <span class="o">=</span> <span class="nf">einsum</span><span class="p">(</span><span class="sh">'</span><span class="s">b i d, b j d -&gt; b i j</span><span class="sh">'</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="o">*</span> <span class="n">self</span><span class="p">.</span><span class="n">scale</span> <span class="c1"># [16, 4096, 77]
+</span>
+    <span class="k">if</span> <span class="nf">exists</span><span class="p">(</span><span class="n">mask</span><span class="p">):</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="nf">rearrange</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="sh">'</span><span class="s">b ... -&gt; b (...)</span><span class="sh">'</span><span class="p">)</span>
+        <span class="n">max_neg_value</span> <span class="o">=</span> <span class="o">-</span><span class="n">torch</span><span class="p">.</span><span class="nf">finfo</span><span class="p">(</span><span class="n">sim</span><span class="p">.</span><span class="n">dtype</span><span class="p">).</span><span class="nb">max</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="nf">repeat</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="sh">'</span><span class="s">b j -&gt; (b h) () j</span><span class="sh">'</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="n">h</span><span class="p">)</span>
+        <span class="n">sim</span><span class="p">.</span><span class="nf">masked_fill_</span><span class="p">(</span><span class="o">~</span><span class="n">mask</span><span class="p">,</span> <span class="n">max_neg_value</span><span class="p">)</span>
+
+    <span class="c1"># attention, what we cannot get enough of
+</span>    <span class="n">attn</span> <span class="o">=</span> <span class="n">sim</span><span class="p">.</span><span class="nf">softmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># [16, 4096, 77]
+</span>    <span class="n">out</span> <span class="o">=</span> <span class="nf">einsum</span><span class="p">(</span><span class="sh">'</span><span class="s">b i j, b j d -&gt; b i d</span><span class="sh">'</span><span class="p">,</span> <span class="n">attn</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="c1"># [16, 4096, 40]
+</span>    <span class="n">out</span> <span class="o">=</span> <span class="nf">rearrange</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="sh">'</span><span class="s">(b h) n d -&gt; b n (h d)</span><span class="sh">'</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="n">h</span><span class="p">)</span> <span class="c1"># [2, 4096, 320]
+</span>    
+    <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">to_out</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+</code></pre></div></div>
+
 <h3 id="compviss-stable-diffusion">CompVis’s Stable Diffusion</h3>
 
 <p>In CompVis library, the training parameters are packed in config <code class="language-plaintext highlighter-rouge">yaml</code> files in the <code class="language-plaintext highlighter-rouge">configs</code> folder, and the training script is in <code class="language-plaintext highlighter-rouge">train.py</code>.
@@ -582,13 +621,13 @@ More specifically, the forward pass as follows:</p>
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/anti-dreambooth/">Anti-Dreambooth</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2024/erasing-concepts/">Fake Taylor Swift and the Adversarial Game of Concept Erasure and Injection</a>
   </li>
 
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2024/erasing-concepts/">Fake Taylor Swift and the Adversarial Game of Concept Erasure and Injection</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/anti-dreambooth/">Anti-Dreambooth</a>
   </li>
 
   
