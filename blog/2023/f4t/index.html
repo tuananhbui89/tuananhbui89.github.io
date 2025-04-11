@@ -150,7 +150,10 @@
     <hr>
     
     <div id="markdown-content">
-      <p>Before talking about the main content - the principles that I have learned and found useful, I want to talk about the principles of this file/blog.</p>
+      <!-- mkdir -p assets/img/aboutme -->
+<!-- mv _posts/2025-04*.png assets/img/aboutme/ -->
+
+<p>Before talking about the main content - the principles that I have learned and found useful, I want to talk about the principles of this file/blog.</p>
 
 <ul>
   <li>First and foremost, this should be a very personal thing, however, I make it public with purpose - to share with others - who might be interested in me - know about me a little bit more. And for those who does spend time reading this - I appreciate that.</li>
@@ -367,6 +370,64 @@ Finally, if you just read that far, you are deserved to have a good laugh :D - r
   - In Section 3.4, the authors discuss why personalizing with multiple subjects is challenging. Because the image embedding are generally sparser and contain more information, making their projection into the condition space more difficult. Moreover, interaction between multiple subjects - visual embeddings are not similar to the text embeddings. More specifically, `a dog and a cat on the beach` - is not similar to `a dog $$S^*$$ and a cat $$V^*$$ on the beach` where $$S^*$$ and $$V^*$$ are the visual embeddings of the dog and the cat. Where the visual embeddings learned from the reference images (dog or cat) are diverse from the original text embeddings.
   - To keep the semantic consistency between the text and the learned visual embeddings, we can distill or have an additional constraint to keep that consistency. -->
 
+<p><strong>Adversarial Attack on Model Context Protocol (MCP)</strong></p>
+
+<ul>
+  <li>Topic: Generative Models; Trustworthy Machine Learning</li>
+  <li>Date: 2025-04-10</li>
+  <li>Description:
+    <ul>
+      <li>MCP from Anthropic has emerged recently as the new protocol to connect LLMs with Applications and Data.</li>
+      <li>Basically, the developer will provide a list of tools/functions/APIs (developed by themselves) and connect these to the LLM. There is also a agent that can make the decision to use which tool/function/API, based on the user’s request and the tool/function/API’s description.</li>
+      <li>The idea here is: Can we add a malicious tool to the list so that the LLM will use it even though the user’s request is not related to it?</li>
+    </ul>
+  </li>
+</ul>
+
+<p>(Ref: <a href="https://github.com/thangnch/MiAI_MCP/blob/main/agent_call_mcp_sse.py" rel="external nofollow noopener" target="_blank">https://github.com/thangnch/MiAI_MCP/blob/main/agent_call_mcp_sse.py</a>)</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">async</span> <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">mcp_server</span><span class="p">:</span> <span class="n">MCPServer</span><span class="p">):</span>
+    <span class="n">agent</span> <span class="o">=</span> <span class="nc">Agent</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="sh">"</span><span class="s">Assistant</span><span class="sh">"</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+        <span class="n">instructions</span><span class="o">=</span><span class="sh">"</span><span class="s">Use the tools to answer the questions.</span><span class="sh">"</span><span class="p">,</span>
+        <span class="n">mcp_servers</span><span class="o">=</span><span class="p">[</span><span class="n">mcp_server</span><span class="p">],</span>
+        <span class="n">model_settings</span><span class="o">=</span><span class="nc">ModelSettings</span><span class="p">(</span><span class="n">tool_choice</span><span class="o">=</span><span class="sh">"</span><span class="s">auto</span><span class="sh">"</span><span class="p">),</span> <span class="c1"># IMPORTANT POINT HERE
+</span>    <span class="p">)</span>
+
+    <span class="c1"># Run the `get_weather` tool
+</span>    <span class="n">message</span> <span class="o">=</span> <span class="sh">"</span><span class="s">What is the temperature in Hanoi?</span><span class="sh">"</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="se">\n\n</span><span class="s">Running: </span><span class="si">{</span><span class="n">message</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Runner</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">starting_agent</span><span class="o">=</span><span class="n">agent</span><span class="p">,</span> <span class="nb">input</span><span class="o">=</span><span class="p">[{</span><span class="sh">"</span><span class="s">role</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">user</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">content</span><span class="sh">"</span><span class="p">:</span> <span class="n">message</span><span class="p">}],</span> <span class="n">max_turns</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span><span class="c1">#, tracing_disbale = True
+</span>    <span class="nf">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="n">raw_responses</span><span class="p">)</span>
+
+    <span class="c1"># Final turn
+</span>    <span class="n">new_input</span> <span class="o">=</span> <span class="n">result</span><span class="p">.</span><span class="nf">to_input_list</span><span class="p">()</span> <span class="o">+</span> <span class="p">[{</span><span class="sh">"</span><span class="s">role</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">user</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">content</span><span class="sh">"</span><span class="p">:</span> <span class="n">message</span><span class="p">}]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Runner</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">new_input</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Final = </span><span class="sh">"</span><span class="p">,</span><span class="n">result</span><span class="p">.</span><span class="n">final_output</span><span class="p">)</span>
+
+<span class="k">async</span> <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="k">async</span> <span class="k">with</span> <span class="nc">MCPServerSse</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="sh">"</span><span class="s">SSE Python Server</span><span class="sh">"</span><span class="p">,</span>
+        <span class="n">params</span><span class="o">=</span><span class="p">{</span>
+            <span class="sh">"</span><span class="s">url</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">http://localhost:8000/sse</span><span class="sh">"</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">server</span><span class="p">:</span>
+        <span class="k">await</span> <span class="nf">run</span><span class="p">(</span><span class="n">server</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
+    <span class="c1"># Let's make sure the user has uv installed
+</span>    <span class="k">if</span> <span class="ow">not</span> <span class="n">shutil</span><span class="p">.</span><span class="nf">which</span><span class="p">(</span><span class="sh">"</span><span class="s">uv</span><span class="sh">"</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="nc">RuntimeError</span><span class="p">(</span>
+            <span class="sh">"</span><span class="s">uv is not installed. Please install it: https://docs.astral.sh/uv/getting-started/installation/</span><span class="sh">"</span>
+        <span class="p">)</span>
+
+
+    <span class="n">asyncio</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="nf">main</span><span class="p">())</span>
+</code></pre></div></div>
+
 <p><strong>Language Inversion</strong></p>
 
 <ul>
@@ -381,6 +442,36 @@ Finally, if you just read that far, you are deserved to have a good laugh :D - r
     </ul>
   </li>
 </ul>
+
+<p>Update on 1 Apr 2025:</p>
+
+<ul>
+  <li>Related work: <a href="https://copycat-eval.github.io/" rel="external nofollow noopener" target="_blank">https://copycat-eval.github.io/</a>
+</li>
+</ul>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/aboutme/2025-04-01-16-32-04-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/aboutme/2025-04-01-16-32-04-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/aboutme/2025-04-01-16-32-04-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/aboutme/2025-04-01-16-32-04.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    Example of Copycat-Eval
+</div>
 
 <p><strong>How to unlearn copyrighted concepts - Canva’s real-world case</strong></p>
 
