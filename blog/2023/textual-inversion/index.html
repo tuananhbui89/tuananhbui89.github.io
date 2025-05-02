@@ -154,6 +154,7 @@
 <li class="toc-entry toc-h3"><a href="#difference-in-prompting-process-between-textual-inversion-and-dreambooth-projects">Difference in prompting process between “Textual Inversion” and “Dreambooth” projects</a></li>
 </ul>
 </li>
+<li class="toc-entry toc-h2"><a href="#problem-of-textual-inversions-implementation">Problem of Textual Inversion’s implementation</a></li>
 </ul>
     </div>
     <hr>
@@ -316,6 +317,20 @@ The input prompt then will be tokenized by the tokenizer.</p>
 <ul>
   <li>It seems that the <code class="language-plaintext highlighter-rouge">instance_prompt</code> should be in the inference prompt to generate the image with the desired concept, e.g., if the <code class="language-plaintext highlighter-rouge">instance_prompt</code> is <code class="language-plaintext highlighter-rouge">a photo of sks dog</code>, then the inference prompt should be <code class="language-plaintext highlighter-rouge">a photo of sks dog in the beach</code>. Otherwise, the output will not show the desired/learned concept.</li>
 </ul>
+
+<h2 id="problem-of-textual-inversions-implementation">Problem of Textual Inversion’s implementation</h2>
+
+<p>The below snippet of code is used to prevent updating the entire embedding matrix rather than the specific token - specified for the <code class="language-plaintext highlighter-rouge">placeholder_token</code> in the training process.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Let's make sure we don't update any embedding weights besides the newly added token
+</span><span class="n">index_no_updates</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">ones</span><span class="p">((</span><span class="nf">len</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">),),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="p">.</span><span class="nb">bool</span><span class="p">)</span>
+<span class="n">index_no_updates</span><span class="p">[</span><span class="nf">min</span><span class="p">(</span><span class="n">placeholder_token_ids</span><span class="p">)</span> <span class="p">:</span> <span class="nf">max</span><span class="p">(</span><span class="n">placeholder_token_ids</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+
+<span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
+    <span class="n">accelerator</span><span class="p">.</span><span class="nf">unwrap_model</span><span class="p">(</span><span class="n">text_encoder</span><span class="p">).</span><span class="nf">get_input_embeddings</span><span class="p">().</span><span class="n">weight</span><span class="p">[</span>
+        <span class="n">index_no_updates</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="n">orig_embeds_params</span><span class="p">[</span><span class="n">index_no_updates</span><span class="p">]</span>
+</code></pre></div></div>
 
     </div>
   </article>
