@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-08-09T08:05:52+10:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-08-09T09:17:54+10:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
 </subtitle><entry><title type="html">GPT-5 Series - Safe Completion Training</title><link href="https://tuananhbui89.github.io/blog/2025/safe-completion-training/" rel="alternate" type="text/html" title="GPT-5 Series - Safe Completion Training" /><published>2025-08-08T00:00:00+10:00</published><updated>2025-08-08T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/2025/safe-completion-training</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/safe-completion-training/"><![CDATA[<p>OpenAI just recently released their newest and most powerful model GPT-5. In the post today, I want to talk about one of the most important aspects of LLMs: <strong>How to make them safe against malicious use</strong>.
 In this version, OpenAI introduces a new paradigm called <strong>Safe Completion Training</strong> (which is built on top of  Deliberative Alignmen [4])</p>
 
@@ -106,7 +106,7 @@ In this version, OpenAI introduces a new paradigm called <strong>Safe Completion
     </div>
 </div>
 <div class="caption">
-    Example of dual-user queries.
+    Example of dual-user queries from <a href="https://openai.com/index/gpt-5-safe-completions/">OpenAI</a>.
 </div>
 
 <p>With Safe-Completion, a model can provide a helpful, high-level answer while omitting dangerous, operational details. For instance, it can explain the principles of virology without providing a step-by-step guide to creating a bioweapon.</p>
@@ -122,6 +122,83 @@ In this version, OpenAI introduces a new paradigm called <strong>Safe Completion
   </li>
 </ul>
 
+<h2 id="supervised-fine-tuning-sft-in-safe-completion-training">Supervised Fine-Tuning (SFT) in Safe-Completion Training</h2>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/2025-safe-completion-training/2025-08-09-08-43-37-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/2025-safe-completion-training/2025-08-09-08-43-37-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/2025-safe-completion-training/2025-08-09-08-43-37-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/2025-safe-completion-training/2025-08-09-08-43-37.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Overall structure of the safe-completion training stack from [1].
+</div>
+
+<p>The Supervised Fine-Tuning (SFT) stage is the first phase of Safe-Completion Training, designed to teach the model the initial, correct behaviors before they are refined by reinforcement learning. It moves beyond a simple comply/refuse decision and trains the model to adopt a more nuanced set of responses.</p>
+
+<p>Firstly, we need to understand the data used for SFT including: (<code class="language-plaintext highlighter-rouge">prompt</code>, <code class="language-plaintext highlighter-rouge">CoT</code>, <code class="language-plaintext highlighter-rouge">answer</code>)</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">prompt</code>: Safety-related input prompt.</li>
+  <li><code class="language-plaintext highlighter-rouge">spec</code>: Content policy specification that defines the safety policy.</li>
+  <li><code class="language-plaintext highlighter-rouge">CoT</code> and <code class="language-plaintext highlighter-rouge">answer</code>: <strong>ideal</strong> Chain of Thought (CoT) and the corresponding response for the model to generate.</li>
+</ul>
+
+<p>The input <code class="language-plaintext highlighter-rouge">prompt</code> has been augmented with the <code class="language-plaintext highlighter-rouge">spec</code> and an <code class="language-plaintext highlighter-rouge">instruction</code> to guide the model <strong>consult</strong> the <code class="language-plaintext highlighter-rouge">spec</code> before answering the <code class="language-plaintext highlighter-rouge">prompt</code>.
+Interestingly, the <code class="language-plaintext highlighter-rouge">CoT</code> and <code class="language-plaintext highlighter-rouge">answer</code> are obtained not by human labeling but by an <strong>surrogate</strong> reasoning model (e.g., OpenAI o3) with the augmented <code class="language-plaintext highlighter-rouge">prompt</code>.</p>
+
+<p>The final training data for SFT is then constructed from <strong>original, non-augmented</strong> <code class="language-plaintext highlighter-rouge">prompt</code> and the pair (<code class="language-plaintext highlighter-rouge">CoT</code>, <code class="language-plaintext highlighter-rouge">answer</code>) from the reasoning model. This training procedure is borrowed from the <strong>Deliberative Alignment</strong> [4], 
+with the difference that rather two decisions <strong>comply</strong> or <strong>refuse</strong> as in DA [4], here we have three decisions: <strong>direct answer</strong> (a.k.a. <strong>comply</strong>), <strong>safe-completion</strong> and <strong>refusal</strong>. <strong>Safe-completion</strong> mode provides high-level, non-operational, and within-safety-constraint guidance
+when the content is restricted but not outright disallowed. It can be done by instructing Reasoning Models to <strong>judge</strong> with three above options.</p>
+
+<h2 id="constrained-reinforcement-learning-rl-in-safe-completion-training">Constrained Reinforcement Learning (RL) in Safe-Completion Training</h2>
+
+<p>In the RL stage, the model is optimized its helpfulness as long as it remains within the safety policy.
+To do so, for each safety-related prompt and sampled response, we query two reward models (RMs), each of which outputs <strong>helpfulness</strong> and <strong>safety</strong> scores normalized to [0,1].</p>
+
+<ul>
+  <li><strong>Safety score</strong>: ∈ [0, 1]: the degree to which the output adheres to the content policy spec</li>
+  <li><strong>Helpfulness score</strong>: ∈ [0, 1]: the degree to which the output is helpful to the user. It is worth noting here, there are two types of answers for a good helping response <strong>direct answer</strong> and <strong>indirect answer</strong> (e.g., a safe-completion). In other words, <code class="language-plaintext highlighter-rouge">it is still considered helpful to provide a safe-completion</code>, more <strong>helpful</strong> than naive <strong>refusal</strong> as previous LLMs.</li>
+</ul>
+
+<p>The final reward is computed as the product of the two scores: <code class="language-plaintext highlighter-rouge">Reward = Helpfulness Score * Safety Score</code>.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/2025-safe-completion-training/2025-08-09-09-17-03-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/2025-safe-completion-training/2025-08-09-09-17-03-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/2025-safe-completion-training/2025-08-09-09-17-03-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/2025-safe-completion-training/2025-08-09-09-17-03.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Reward function in the RL stage from [1].
+</div>
+
 <h2 id="conclusion">Conclusion</h2>
 
 <p>In my opinion, this is a significant paradigm shift from the traditional Refusal Training (input-centric) to the Safe-Completion Training (output-centric).</p>
@@ -129,7 +206,12 @@ In this version, OpenAI introduces a new paradigm called <strong>Safe Completion
 <p>At this moment, I am not sure how adversarial attacks will evolve in this new paradigm, but it sure will be interesting. Some ideas can be:</p>
 
 <ul>
-  <li><strong>Breakdown big hamful output into multiple small harmless outputs</strong>. Because the model is now trained to detect and redirect harmful outputs, making it harder to get a whole harmful output like with previous LLMs. However, it might be weaker in handling each small piece of the whole harmful output.</li>
+  <li>
+    <p><strong>Breakdown big hamful output into multiple small harmless outputs</strong>. Because the model is now trained to detect and redirect harmful outputs, making it harder to get a whole harmful output like with previous LLMs. However, it might be weaker in handling each small piece of the whole harmful output.</p>
+  </li>
+  <li>
+    <p><strong>The collapse of intelligence</strong>. Because the training procedure is now become self-referential where training data for the next version is generated by the previous reasoning models. While this addresses the problem of lacking human-labeled data, it might lead to a chain-reaction when a mistake of the previous version is propagated to the next version.</p>
+  </li>
 </ul>
 
 <h2 id="references">References</h2>
