@@ -145,6 +145,7 @@
     
     <div id="table-of-contents">
       <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h2"><a href="#test-time-adjustment---bigger-picture">Test-Time Adjustment - Bigger Picture</a></li>
 <li class="toc-entry toc-h2"><a href="#pho-restaurants-and-the-way-we-do-research">Pho Restaurants and the Way We Do Research</a></li>
 <li class="toc-entry toc-h2"><a href="#thoughts-on-the-talk-of-anh-nguy%E1%BB%85n-th%C3%A0nh-nam">Thoughts on the talk of anh Nguyễn Thành Nam</a></li>
 <li class="toc-entry toc-h2"><a href="#visual-autoregressive-and-the-importance-of-position-embedding">Visual Autoregressive and the importance of Position Embedding</a></li>
@@ -166,6 +167,26 @@
     <div id="markdown-content">
       <!-- mkdir -p assets/img/thoughts/ -->
 <!-- mv _posts/2025-03-18*.png assets/img/thoughts/ -->
+
+<h2 id="test-time-adjustment---bigger-picture">Test-Time Adjustment - Bigger Picture</h2>
+
+<p><a href="https://arxiv.org/abs/2506.22685" rel="external nofollow noopener" target="_blank">My recent paper</a> focuses on personalization in generative models—how to teach a model a new personal visual concept from just a few personal images. 
+The technique I propose is <strong>Test-Time Adjustment (TEA)</strong>, which I believe is a <strong>general</strong>, <strong>simple</strong>, and <strong>effective</strong> approach.
+In both the paper and additional experiments (for NeurIPS rebuttal), TEA has shown strong effectiveness when combined with several state-of-the-art methods such as ClassDiffusion (ICLR 2025), ReVersion (SIGGRAPH Asia 2024 – 500+ GitHub stars), EasyControl (ICCV 2025 – 1500+ GitHub stars).
+Importantly, TEA addresses the issue of <strong>semantic collapse</strong> that often occurs in these methods.</p>
+
+<p><strong>The Core Idea Behind TEA</strong></p>
+
+<p>If you read the paper, you’ll see that TEA is motivated by a key limitation in personalization.
+During optimization, personal embeddings often <strong>lack proper regularization</strong>, which causes them to drift too far in magnitude and direction.
+TEA corrects this by <strong>shifting personal embeddings</strong> back toward the <strong>“normal” embedding space</strong>, similar to how other embeddings behave.</p>
+
+<p>Note that projection can be applied not only at the <strong>token level</strong> but also at the <strong>sentence/prompt level</strong>. For example: “a photo of a sks person” → projected toward → “a photo of a person”.</p>
+
+<p><strong>Thinking Beyond Personalization: Where Else Could TEA Apply?</strong> In essence, TEA works as a test-time mapping from Prompt A to Prompt B, which is a general idea that can be applied to several tasks beyond personalization. In personalization, Prompt A is “a photo of a sks person” and Prompt B is “a photo of a person”. In image editing, Prompt A is “a photo of a person” and Prompt B is “a photo of a person with a red hat” (modifying details in Prompt A).</p>
+
+<p><strong>Why adjusting embeddings works</strong> TEA leverages an interpretable and interpolatable latent space of Latent Diffusion Models (LDMs). Not all generative models have this property—for instance, interpolation like \(z = \alpha z_1 + (1 - \alpha) z_2\) may not always produce meaningful outputs.
+My intuition is that this property comes from the CLIP text encoder, which was trained on massive amounts of text–image pairs with contrastive learning.</p>
 
 <h2 id="pho-restaurants-and-the-way-we-do-research">Pho Restaurants and the Way We Do Research</h2>
 
@@ -671,7 +692,7 @@ Therefore, one of the drawbacks of DFKD is that it is very slow.</p>
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/watermark-diffusion/">Tree-Ring Watermarks - Fingerprints for Diffusion Images that are Invisible and Robust</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/unlearn-llms/">Unlearning LLMs</a>
   </li>
 
 </div>
