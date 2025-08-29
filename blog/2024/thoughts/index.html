@@ -145,6 +145,7 @@
     
     <div id="table-of-contents">
       <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h2"><a href="#hypothesis---shortcut-learning-in-finetuning-diffusion-models-because-of-the-fixed-position">Hypothesis - Shortcut learning in finetuning Diffusion Models because of the fixed position</a></li>
 <li class="toc-entry toc-h2"><a href="#test-time-adjustment---bigger-picture">Test-Time Adjustment - Bigger Picture</a></li>
 <li class="toc-entry toc-h2"><a href="#pho-restaurants-and-the-way-we-do-research">Pho Restaurants and the Way We Do Research</a></li>
 <li class="toc-entry toc-h2"><a href="#thoughts-on-the-talk-of-anh-nguy%E1%BB%85n-th%C3%A0nh-nam">Thoughts on the talk of anh Nguyễn Thành Nam</a></li>
@@ -168,6 +169,23 @@
       <!-- mkdir -p assets/img/thoughts/ -->
 <!-- mv _posts/2025-03-18*.png assets/img/thoughts/ -->
 
+<p>This post is to capture some of my quick thoughts/ideas, readers who don’t know the context, very likely not understand what I am talking about - But it’s oke :D because this is mainly for my own reference.</p>
+
+<h2 id="hypothesis---shortcut-learning-in-finetuning-diffusion-models-because-of-the-fixed-position">Hypothesis - Shortcut learning in finetuning Diffusion Models because of the fixed position</h2>
+
+<p>Fine-tuning Stable Diffusion models usually requires few pairs of images and corresponding prompts.
+For example, in Personalization, the fine-tuning dataset is \((x_i, y_i)\) where \(x_i\) is the image and \(y_i\) is the prompt.
+In the objective function below (from Textual Inversion), the context \(p\) is sampled from a set of predefined templates, such as “a photo of”, “a painting of”, etc.</p>
+
+\[\min_{v^*} \; \mathbb{E}_{x, p, \epsilon, t} \left[ \left\| \epsilon - \epsilon_\theta \left(x_{t,\epsilon}, t, \lfloor p, V^* \rfloor\right) \right\|_2^2 \right]\]
+
+<p>Therefore, the position of special keyword \(V^*\) in the prompt \(\lfloor p, V^* \rfloor\) is relatively fixed (falling in a small range).
+However, in training process, the corresponding caption/prompt is much more flexible and diverse, and the position of the reference concept \(c\) (a man, a dog, etc.) is also much more flexible, 
+e.g., can be in the beginning, middle or at the end of a very long prompt.</p>
+
+<p>I hypothesize that using a fixed position for the special keyword \(V^*\) in the prompt \(\lfloor p, V^* \rfloor\) might lead to a shortcut learning,
+making the keyword \(V^*\) cannot be generalized to other positions.</p>
+
 <h2 id="test-time-adjustment---bigger-picture">Test-Time Adjustment - Bigger Picture</h2>
 
 <p><a href="https://arxiv.org/abs/2506.22685" rel="external nofollow noopener" target="_blank">My recent paper</a> focuses on personalization in generative models—how to teach a model a new personal visual concept from just a few personal images. 
@@ -187,6 +205,14 @@ TEA corrects this by <strong>shifting personal embeddings</strong> back toward t
 
 <p><strong>Why adjusting embeddings works</strong> TEA leverages an interpretable and interpolatable latent space of Latent Diffusion Models (LDMs). Not all generative models have this property—for instance, interpolation like \(z = \alpha z_1 + (1 - \alpha) z_2\) may not always produce meaningful outputs.
 My intuition is that this property comes from the CLIP text encoder, which was trained on massive amounts of text–image pairs with contrastive learning.</p>
+
+<p><strong>Semantic Collapse in Textual Space is not equivalent to Not Aligned in Output Space</strong></p>
+
+<p>In the paper, we show that the semantic collapse in the textual space, i.e., \(\tau(\lfloor p, V^* \rfloor \rightarrow \tau(V^*))\),
+leading to the semantic collapse in the output space, i.e., \(G(\tau(\lfloor p, V^* \rfloor)) \rightarrow G(\tau(V^*))\), where \(G\) is the generative model.
+This also means that the output image of the generative model \(G(\tau(\lfloor p, V^* \rfloor))\) is not aligned with the input prompt \(\lfloor p, V^* \rfloor\).</p>
+
+<p>However, it is not the only reason causing the semantic collapse in the output space, i.e., \(\mathcal{A}(G(\tau(\lfloor p, V^* \rfloor)), \lfloor p, V^* \rfloor) &lt; \mathcal{A}(G(\tau(\lfloor p, c \rfloor)), \lfloor p, c \rfloor)\).</p>
 
 <h2 id="pho-restaurants-and-the-way-we-do-research">Pho Restaurants and the Way We Do Research</h2>
 

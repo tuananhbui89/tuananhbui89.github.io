@@ -1,5 +1,204 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-08-18T09:53:25+10:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
-</subtitle><entry><title type="html">GPT-5 Series - Safe Completion Training</title><link href="https://tuananhbui89.github.io/blog/2025/safe-completion-training/" rel="alternate" type="text/html" title="GPT-5 Series - Safe Completion Training" /><published>2025-08-08T00:00:00+10:00</published><updated>2025-08-08T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/2025/safe-completion-training</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/safe-completion-training/"><![CDATA[<p>OpenAI just recently <a href="https://openai.com/gpt-5/">released their newest and most powerful model GPT-5</a>. In the post today, I want to talk about one of the most important aspects of LLMs: <strong>How to make them safe against malicious use</strong>.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-08-29T12:28:50+10:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
+</subtitle><entry><title type="html">Anti-Personalization - A review after 2 years</title><link href="https://tuananhbui89.github.io/blog/2025/anti-personalization-v2/" rel="alternate" type="text/html" title="Anti-Personalization - A review after 2 years" /><published>2025-08-18T00:00:00+10:00</published><updated>2025-08-18T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/2025/anti-personalization-v2</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/anti-personalization-v2/"><![CDATA[<p>In 2023, when the work on Controllable Diffusion Models was just starting its momentum, with the several key milestones papers Textual Inversion, Dreambooth and ControlNet, I had predicted that there will be an interesting research direction on <strong>Anti-Personalization</strong> in the future.</p>
+
+<p>Not long after Dreambooth was released, there are several papers on Anti-Personalization had been published, including Anti-Dreambooth and Adversarial Diffusion papers.</p>
+
+<p>In August 2023, when finishing my PhD and starting my postdoc, I had the chance to switch my research from Adversarial Machine Learning (attack and defense on traditional classification models) to a more modern and exciting field Trustworthy Generative AI. 
+However, at that time, I piloted with Anti-Textual Inversion, because I believe in the potential of Textual Inversion over Dreambooth, but unfortunately, the personalization performance of TI was not as good as Dreambooth, making the problem of Anti-Personalization with the base model TI was not as interesting anymore.</p>
+
+<p>Moreover, I have enough experience with Adversarial Machine Learning to understand that adding invisible noise to an image as a defense mechanism is not robust and easy to be bypassed by simple techniques such as image transformations, denoising autoencoders, etc. It likes if you are the defender, you are always one step behind the attacker.</p>
+
+<p>I switched to Machine Unlearning for Generative Models and fortunately, got some successful on this direction with three papers: NeurIPS 2024, ICLR 2025 and ICLRW 2025.</p>
+
+<p>Now, after 2 years, because of the needed of the project that I am working on (with Department of Defence Australia), I have to switch back to Anti-Personalization.</p>
+
+<p>That is the context of this post. I will review the key papers on Anti-Personalization in the last 2 years, and also some thoughts on the future of this direction.</p>
+
+<h2 id="background">Background</h2>
+
+<h3 id="textual-inversion">Textual Inversion</h3>
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/2025-anti-personalization/textual_inversion/embedding_fig-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/2025-anti-personalization/textual_inversion/embedding_fig-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/2025-anti-personalization/textual_inversion/embedding_fig-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/2025-anti-personalization/textual_inversion/embedding_fig.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    <strong>Textual Inversion [1].</strong> A string S* containing our placeholder word is first converted into tokens. These tokens are converted to continuous vector representations (the "embeddings", v). Finally, the embedding vectors are transformed into a single conditioning code c_θ(y) which guides the generative model. We optimize the embedding vector v* associated with our pseudo-word S*, using a reconstruction objective.
+</div>
+
+<p>The optimization objective is:</p>
+
+\[v_* = \text{argmin}_v \mathbb{E}_{z\sim\mathcal{E}(x), y, \epsilon \sim \mathcal{N}(0, 1), t }\Big[ \Vert \epsilon - \epsilon_\theta(z_{t},t, c_\theta(y)) \Vert_{2}^{2}\Big]\]
+
+<p>where v* is the embedding vector associated with the placeholder word S*.</p>
+
+<h3 id="dreambooth">Dreambooth</h3>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/2025-anti-personalization/dreambooth/main_scheme_1-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/2025-anti-personalization/dreambooth/main_scheme_1-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/2025-anti-personalization/dreambooth/main_scheme_1-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/2025-anti-personalization/dreambooth/main_scheme_1.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    <strong>Dreambooth's Fine-tuning [1].</strong> Given ~3-5 images of a subject we fine-tune a text-to-image diffusion model with the input images paired with a text prompt containing a unique identifier and the name of the class the subject belongs to (e.g., "A [V] dog"), in parallel, we apply a class-specific prior preservation loss, which leverages the semantic prior that the model has on the class and encourages it to generate diverse instances belong to the subject's class using the class name in a text prompt (e.g., "A dog").
+</div>
+
+<p>The optimization objective of Dreambooth is:</p>
+
+\[\mathbb{E}_{\mathbf{x}, \mathbf{c}, \mathbf{\epsilon}, \mathbf{\epsilon}^{'},t} \left[ w_t \| \hat{\mathbf{x}}_\theta (\alpha_t \mathbf{x} + \sigma_t \mathbf{\epsilon}, \mathbf{c}) - \mathbf{x}\|_2^2 + \lambda w_{t^{'}} \| \hat{\mathbf{x}}_\theta(\alpha_{t^{'}} \mathbf{x}_\text{pr} + \sigma_{t^{'}} \mathbf{\epsilon}^{'}, \mathbf{c}_\text{pr}) - \mathbf{x}_\text{pr} \|_2^2 \right]\]
+
+<p>where \(c_\text{pr}\) is the conditioning vector of the prior class (e.g., “A dog”), 
+\(c\) is the conditioning vector of the specific/keyword class (e.g., “A [V] dog”),
+\(\mathbf{x}_\text{pr}\) is the image of the prior class (e.g., a normal dog from Internet)
+\(\mathbf{x}\) is the image of the specific/keyword class (e.g., a target dog in the user’s dataset).</p>
+
+<p>\(\alpha_t, \sigma_t, w_t\) are terms that control the noise schedule, sample quality, and are funetions of the diffusion process at time step \(t\).</p>
+
+<h2 id="photoguard---raising-the-cost-of-malicious-ai-powered-image-editing-icml-2023">PhotoGuard - Raising the Cost of Malicious AI-Powered Image Editing (ICML 2023)</h2>
+
+<p>At the same time with the AdvDM (or MIST) paper, this paper also proposed a</p>
+
+<h2 id="adversarial-example-does-good-preventing-painting-imitation-from-diffusion-models-via-adversarial-examples-icml-2023">Adversarial Example Does Good: Preventing Painting Imitation from Diffusion Models via Adversarial Examples (ICML 2023)</h2>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/2025-anti-personalization/2025-08-18-16-57-26-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/2025-anti-personalization/2025-08-18-16-57-26-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/2025-anti-personalization/2025-08-18-16-57-26-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/2025-anti-personalization/2025-08-18-16-57-26.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Comparison of workflows for adversarial examples in classification models and diffusion models. Adversarial examples in diffusion models prevent diffusion models from extracting image features as conditions by inducing out-of-distribution features. 
+    The feature extracting shown in the figure is textual inversion. <a href="https://arxiv.org/pdf/2302.04578">Image from Liang et al. 2023</a>
+</div>
+
+<p>High level idea: Adversarial examples for Textual Inversion. It is just that simple. One month later, Anti-Dreambooth was published on Arxiv. The two low hanging fruits were picked.</p>
+
+<p>In the paper, the authors described the optimization objective as follows:</p>
+
+\[\delta = \text{argmax}_{\delta} \mathbb{E}_{x^{'}_{1:T} \sim u(x^{'}_{1:T})} - \log \frac{p_{\theta}(x^{'}_{0:T})}{q(x^{'}_{1:T} \mid x^{'}_0)}\]
+
+<p>where \(x^{'} = x + \delta\) is the adversarial example, \(u(x^{'}_{1:T})\) is the uniform distribution of the adversarial example over the time steps, \(q(x^{'}_{1:T} \mid x^{'}_0)\) is the posterior distribution that can be computed by the forward diffusion process, and \(p_{\theta}(x^{'}_{0:T})\) is the parameterized distribution aiming to approximate the posterior distribution \(q(x^{'}_{1:T} \mid x^{'}_0)\).</p>
+
+<p>While looking scary (as intended by the authors), the nice thing of Diffusion Models is that the above optimization objective can be simplified to the form of matching the predicted noise with the true noise. See my tutorial on <a href="https://tuananhbui89.github.io/blog/2023/diffusion-tutorial/">Diffusion Models</a> for more details.</p>
+
+\[\delta = \text{argmax}_{\delta} \mathbb{E}_{x^{'}_{1:T} \sim u(x^{'}_{1:T})} \left[ \| \epsilon_\theta (x^{'}_{t}, t) - \epsilon_t \|^2 \right]\]
+
+<p>where \(x_t = \sqrt{\bar{\alpha}_t} (x_0 + \delta) + \sqrt{1-\bar{\alpha}_t} \epsilon\) as in the forward diffusion process.</p>
+
+<h2 id="anti-dreambooth-iccv-2023">Anti-Dreambooth (ICCV 2023)</h2>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/2025-anti-personalization/antidreambooth/Teaser-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/2025-anti-personalization/antidreambooth/Teaser-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/2025-anti-personalization/antidreambooth/Teaser-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/2025-anti-personalization/antidreambooth/Teaser.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Anti-Dreambooth [1]
+</div>
+
+<p>Idea: Reverse/Attack the learning process of the Dreambooth by learning the adversarial perturbation \(\delta^{(i)}\) associated with each image \(x^{(i)}\) in the training dataset.</p>
+
+<p>The optimization objective is:</p>
+
+\[\begin{align*}
+\delta^{*(i)} &amp;= \text{argmax}_{\delta^{(i)}} \mathcal{L}_{cond}(\theta^*, x^{(i)} + \delta^{(i)}), \forall i \in \{1,..,N_{db}\}, \\
+\text{s.t.} \quad &amp; \theta^*  = \text{argmin}_{\theta} \sum_{i=1}^{N_{db}} \mathcal{L}_{db}(\theta, x^{(i)} + \delta^{(i)}), \\
+\text{and} \quad &amp; \Vert \delta^{(i)} \Vert_p \leq \eta \quad \forall i \in \{1,..,N_{db}\},
+\end{align*}\]
+
+<p>where \(\mathcal{L}_{db}\) is the DreamBooth’s loss function and \(\mathcal{L}_{cond}\) is the conditional loss function, e.g., reconstruction loss so that the model \(\theta^*\) cannot generate the image \(x^{(i)}\).</p>
+
+\[\mathbb{E}_{\mathbf{x}, \mathbf{c}, \mathbf{\epsilon}, \mathbf{\epsilon}^{'},t} \left[ \underbrace{w_t \| \hat{\mathbf{x}}_\theta (\alpha_t \mathbf{x} + \sigma_t \mathbf{\epsilon}, \mathbf{c}) - \mathbf{x}\|_2^2}_{\mathcal{L}_{recon}}  + \lambda \underbrace{ w_{t^{'}} \| \hat{\mathbf{x}}_\theta(\alpha_{t^{'}} \mathbf{x}_\text{pr} + \sigma_{t^{'}} \mathbf{\epsilon}^{'}, \mathbf{c}_\text{pr}) - \mathbf{x}_\text{pr} \|_2^2}_{\mathcal{L}_{prior}} \right]\]
+
+<h2 id="fastprotect---nearly-zero-cost-protection-against-mimicry-by-personalized-diffusion-models-cvpr-2025">FastProtect - Nearly Zero-Cost Protection Against Mimicry by Personalized Diffusion Models (CVPR 2025)</h2>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/2025-anti-personalization/2025-08-18-21-52-46-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/2025-anti-personalization/2025-08-18-21-52-46-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/2025-anti-personalization/2025-08-18-21-52-46-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/2025-anti-personalization/2025-08-18-21-52-46.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    FastProtect [1]
+</div>
+
+<p><strong>Mixture-of-Perturbation (MoP)</strong></p>
+
+\[\hat{x} = x + \delta_g + \Delta_k, \quad \text{where} \quad k = \mathcal{A}(\Epsilon(x))\]
+
+<p>where \(\delta_g\) is a global perturbation which is found by gradient ascent approach as in AdvDM or PhotoGuard. 
+The new contribution of this paper is the \(\Delta_k\) term, which comes from <strong>Mixture-of-Perturbation (MoP)</strong> \(\Delta = {\delta_1, \delta_2, \dots, \delta_K}\) where \(\delta_k\) is a perturbation found by gradient descent approach.</p>
+
+<!-- mkdir -p assets/img/2025-anti-personalization/ -->
+<!-- mv _posts/2025-08-18-*.png assets/img/2025-anti-personalization/ -->]]></content><author><name></name></author><category term="reading" /><category term="genai" /><category term="diffusion" /><summary type="html"><![CDATA[In 2023, when the work on Controllable Diffusion Models was just starting its momentum, with the several key milestones papers Textual Inversion, Dreambooth and ControlNet, I had predicted that there will be an interesting research direction on Anti-Personalization in the future.]]></summary></entry><entry><title type="html">GPT-5 Series - Safe Completion Training</title><link href="https://tuananhbui89.github.io/blog/2025/safe-completion-training/" rel="alternate" type="text/html" title="GPT-5 Series - Safe Completion Training" /><published>2025-08-08T00:00:00+10:00</published><updated>2025-08-08T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/2025/safe-completion-training</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/safe-completion-training/"><![CDATA[<p>OpenAI just recently <a href="https://openai.com/gpt-5/">released their newest and most powerful model GPT-5</a>. In the post today, I want to talk about one of the most important aspects of LLMs: <strong>How to make them safe against malicious use</strong>.
 In this version, OpenAI introduces a new paradigm called <strong>Safe Completion Training</strong> (which is built on top of  Deliberative Alignment [4])</p>
 
 <iframe width="600" height="338" src="https://www.youtube.com/embed/0Uu_VJeVVfo" title="Introducing GPT-5" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
@@ -3337,198 +3536,4 @@ Minimizing the above objective function is directly maximizing the probability o
 <ul>
   <li>RLHF optimizes a reward function designed to capture human preferences, which allows fine-grained control over the model’s behavior.</li>
   <li>Limitation: SFT does not involve direct optimization based on human evaluations.</li>
-</ul>]]></content><author><name></name></author><category term="reading" /><summary type="html"><![CDATA[Introduction]]></summary></entry><entry><title type="html">LLM Series - Part 5 - System Design for LLMs</title><link href="https://tuananhbui89.github.io/blog/2025/llm-system-design/" rel="alternate" type="text/html" title="LLM Series - Part 5 - System Design for LLMs" /><published>2025-01-19T00:00:00+11:00</published><updated>2025-01-19T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/llm-system-design</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/llm-system-design/"><![CDATA[<p>In this blog post, I will discuss the system design for applications that use LLMs as a core component. However, the goal is to prepare for a technical interview rather than to build a real product :D.</p>
-
-<h2 id="fundamental-concepts">Fundamental Concepts</h2>
-
-<h3 id="retriever-augmented-generation-rag">Retriever-augmented generation (RAG)</h3>
-
-<h3 id="prompt-engineering">Prompt Engineering</h3>
-
-<h3 id="faiss">FAISS</h3>
-
-<p><strong>Indexing Vectors</strong></p>
-
-<p>FAISS creates an index to store and organize vectors efficiently. The indexing method affects performance:</p>
-
-<ul>
-  <li>Flat Index (IndexFlatL2) → Exact k-NN search (slow but accurate).</li>
-  <li>IVF (Inverted File Index) → Faster search with approximate results.</li>
-  <li>HNSW (Hierarchical Navigable Small World) → Graph-based ANN search (fast &amp; accurate).</li>
-</ul>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">faiss</span>
-<span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
-
-<span class="c1"># Generate random 512-dimension vectors for products
-</span><span class="n">dimension</span> <span class="o">=</span> <span class="mi">512</span>
-<span class="n">num_vectors</span> <span class="o">=</span> <span class="mi">10000</span>
-<span class="n">vectors</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">random</span><span class="p">((</span><span class="n">num_vectors</span><span class="p">,</span> <span class="n">dimension</span><span class="p">)).</span><span class="nf">astype</span><span class="p">(</span><span class="sh">'</span><span class="s">float32</span><span class="sh">'</span><span class="p">)</span>
-
-<span class="c1"># Create a FAISS index
-</span><span class="n">index</span> <span class="o">=</span> <span class="n">faiss</span><span class="p">.</span><span class="nc">IndexFlatL2</span><span class="p">(</span><span class="n">dimension</span><span class="p">)</span>  <span class="c1"># L2 distance (Euclidean)
-</span><span class="n">index</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">vectors</span><span class="p">)</span>  <span class="c1"># Add vectors to the index
-</span></code></pre></div></div>
-
-<p><strong>Searching for Similar Items</strong></p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Generate a random query vector
-</span><span class="n">query_vector</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">random</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">dimension</span><span class="p">)).</span><span class="nf">astype</span><span class="p">(</span><span class="sh">'</span><span class="s">float32</span><span class="sh">'</span><span class="p">)</span>
-
-<span class="c1"># Find the top 5 nearest neighbors
-</span><span class="n">k</span> <span class="o">=</span> <span class="mi">5</span>
-<span class="n">distances</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="n">index</span><span class="p">.</span><span class="nf">search</span><span class="p">(</span><span class="n">query_vector</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
-
-<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Nearest Neighbors:</span><span class="sh">"</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
-<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Distances:</span><span class="sh">"</span><span class="p">,</span> <span class="n">distances</span><span class="p">)</span>
-</code></pre></div></div>
-
-<h2 id="core-components-of-an-llm-system">Core components of an LLM system</h2>
-
-<h3 id="input-handling-and-processing">Input handling and processing</h3>
-
-<p>Because each application has different input types, for example, code will differ from clinical notes, we need to have a module that can handle specific input types related to the application.</p>
-
-<h3 id="knowledge-base-and-data-resources">Knowledge Base and Data Resources</h3>
-
-<p>The purpose of this module is to:</p>
-
-<ul>
-  <li>Provide the necessary related knowledge to the LLM.</li>
-  <li>To store user-specific data for personalized output/decision.</li>
-</ul>
-
-<p>This can be done by:</p>
-
-<ul>
-  <li>Vector database tools like <a href="https://www.pinecone.io/">Pinecone</a> or <a href="https://github.com/facebookresearch/faiss">Faiss</a>.</li>
-  <li>Flat file system.</li>
-</ul>
-
-<h3 id="the-core-llm-powered-module">The core LLM-powered module</h3>
-
-<p>This is the main module that uses the LLM to generate the output/decision.</p>
-
-<h4 id="prompting-module">Prompting module</h4>
-
-<p>This can be integrated into the core LLM-powered module to improve the quality of the output/decision.
-We can have a sub-module to classify the input into different categories and use different prompt templates for each category.</p>
-
-<p>We can also leverage the response from the LLM as well as the user feedback to improve the prompt.</p>
-
-<h3 id="filtering-and-validation">Filtering and Validation</h3>
-
-<ul>
-  <li>Validation by rule-based logic check, to make sure the output/input is correct and valid. However, because of the rule-based nature, it is not always flexible to handle all cases.</li>
-  <li>Validation by another machine learning model, for example, another LLM model or a uncertainty estimation model.</li>
-  <li>Optional human-in-the-loop (HITL) validation by a human expert, especially in critical applications like medical diagnosis.</li>
-</ul>
-
-<h3 id="safe-guarding">Safe Guarding</h3>
-
-<h3 id="agentic-framework">Agentic Framework</h3>
-
-<h4 id="agent-tools">Agent Tools</h4>
-
-<p>These are external tools or resources that the LLM can access to perform specitic actions or gather information. This could be a calculator, a search API, or a external database.</p>
-
-<h4 id="multi-agent-system">Multi-agent system</h4>
-
-<h2 id="data-distribution-shifts-and-monitoring">Data Distribution Shifts and Monitoring</h2>
-
-<h2 id="continual-learning">Continual Learning</h2>
-
-<h2 id="evaluation">Evaluation</h2>
-
-<h3 id="offline-evaluation">Offline Evaluation</h3>
-
-<h3 id="test-in-production">Test in Production</h3>
-
-<h2 id="deployment-and-scaling">Deployment and Scaling</h2>
-
-<h2 id="case-study">Case Study</h2>
-
-<h3 id="discuss-on-user-journey">Discuss on User Journey</h3>
-
-<p>User journey describes how a user interacts with a product, starting from the first touchpoint - i.e.,user’s input, to the final interaction - i.e., displaying the result to the user.</p>
-
-<p>Discussing on the user journey helps us to understand the flow interaction between the user and the product, and identify the core components that are involved in the interaction.</p>
-
-<h3 id="recommender-system">Recommender System</h3>
-
-<p><strong>User Interaction Layer</strong></p>
-
-<ul>
-  <li>Chat Interface: Users can describe their interests, ask questions, and discuss product features.</li>
-  <li>Input Handling: Supports text-based and voice-based interactions.</li>
-</ul>
-
-<p><strong>NLP Module</strong></p>
-
-<ul>
-  <li>Intent Recognition: Extracts user intent (e.g., “I want a lightweight laptop for travel”).</li>
-  <li>Entity Extraction: Identifies key product attributes (e.g., “lightweight,” “laptop,” “travel”).</li>
-  <li>Sentiment Analysis: Understands user sentiment to refine recommendations.</li>
-</ul>
-
-<p><strong>Product Database</strong></p>
-
-<ul>
-  <li>Structure: Contains product details, including:
-    <ul>
-      <li>Name, Category, Price</li>
-      <li>Features &amp; Specifications</li>
-      <li>User Reviews &amp; Ratings</li>
-    </ul>
-  </li>
-</ul>
-
-<p>The most important component of this module is the embedding model to convert all the data into vectors so that we can use the vector database to store and search for similar items. The ideal vector space should be able to capture the semantic meaning of the data, i.e., the more similar the data is, the closer the vectors are in the vector space.</p>
-
-<p>The most commonly used embedding models fall into three categories:</p>
-
-<p>1️⃣ General-Purpose Text Embeddings (Best for Q&amp;A, knowledge retrieval)</p>
-
-<p>2️⃣ Domain-Specific Embeddings (Optimized for medical, legal, code, etc.)</p>
-
-<p>3️⃣ Multimodal Embeddings (For text + images)</p>
-
-<p><strong>Recommendation Engine</strong></p>
-
-<ul>
-  <li>Content-Based Filtering: Matches user preferences with product attributes.</li>
-  <li>Collaborative Filtering: Uses customer behavior data to suggest items others with similar preferences liked.</li>
-  <li>Hybrid Approach: Combines content-based and collaborative filtering.</li>
-</ul>
-
-<p><strong>RAG-based recommendation</strong></p>
-
-<p>RAG is built on two main components:</p>
-
-<p>1️⃣ Retriever (Information Fetching)</p>
-
-<ul>
-  <li>Dense Vector Search (FAISS, Annoy, Pinecone, Weaviate, ChromaDB) that uses embeddings (e.g., BERT, SBERT, DPR) to find semantically similar documents.</li>
-  <li>Traditional Search (BM25, ElasticSearch, Google Search API) that retrieves documents using keyword-based matching.</li>
-</ul>
-
-<p>2️⃣ Generator (Text Generation)</p>
-
-<ul>
-  <li>Pre-trained LLMs (GPT, BART, T5, LLaMA) generate responses using the retrieved documents as additional context.</li>
-  <li>Can use fine-tuned models for domain-specific responses (e.g., finance, medical).</li>
-</ul>
-
-<p><strong>Key Steps in RAG</strong>:</p>
-
-<p>1️⃣ User Input → A query is given (e.g., “What are the latest gaming laptops?”).</p>
-
-<p>2️⃣ Retrieval Module → Finds the most relevant documents using vector search (FAISS, BM25, ElasticSearch, etc.).</p>
-
-<p>3️⃣ Context Injection → The retrieved documents are passed to the generation model.</p>
-
-<p>4️⃣ Response Generation → The model generates a final, coherent answer using both the query and retrieved documents.</p>
-
-<h2 id="references">References</h2>
-
-<p>[1] Build your first LLM agent application: https://developer.nvidia.com/blog/building-your-first-llm-agent-application/</p>]]></content><author><name></name></author><category term="genai" /><category term="llm" /><category term="tutorial" /><category term="reading" /><summary type="html"><![CDATA[How to break into $100k+ salary roles - part 5]]></summary></entry></feed>
+</ul>]]></content><author><name></name></author><category term="reading" /><summary type="html"><![CDATA[Introduction]]></summary></entry></feed>
