@@ -39,7 +39,7 @@
     <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
     
     <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
-    <link rel="canonical" href="https://tuananhbui89.github.io/blog/2025/unlearn-llms/">
+    <link rel="canonical" href="http://localhost:4000/blog/2025/unlearn-llms/">
 
     <!-- Dark Mode -->
     
@@ -148,7 +148,28 @@
     <div id="table-of-contents">
       <ul id="toc" class="section-nav">
 <li class="toc-entry toc-h2"><a href="#introduction">Introduction</a></li>
-<li class="toc-entry toc-h2"><a href="#setting">Setting</a></li>
+<li class="toc-entry toc-h2"><a href="#motivation-why-do-we-need-unlearning">Motivation: Why Do We Need Unlearning?</a></li>
+<li class="toc-entry toc-h2"><a href="#the-technical-setting">The Technical Setting</a></li>
+<li class="toc-entry toc-h2">
+<a href="#benchmarks-how-to-evaluate-unlearning">Benchmarks: How to Evaluate Unlearning?</a>
+<ul>
+<li class="toc-entry toc-h3">
+<a href="#tofu---a-task-of-fictitious-unlearning-for-llms-colm-2024">TOFU - A Task of Fictitious Unlearning for LLMs (COLM 2024)</a>
+<ul>
+<li class="toc-entry toc-h4"><a href="#motivation">Motivation</a></li>
+<li class="toc-entry toc-h4"><a href="#the-dataset">The dataset</a></li>
+<li class="toc-entry toc-h4"><a href="#evaluation-metrics">Evaluation Metrics</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h3">
+<a href="#muse---machine-unlearning-six-way-evaluation-for-language-models-iclr-2025">MUSE - Machine Unlearning Six-Way Evaluation for Language Models (ICLR 2025)</a>
+<ul>
+<li class="toc-entry toc-h4"><a href="#metrics-for-each-aspect">Metrics for each aspect</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#unlearning-methods">Unlearning Methods</a></li>
 <li class="toc-entry toc-h2"><a href="#representation-misdirection-for-unlearning-rmu">Representation Misdirection for Unlearning (RMU)</a></li>
 <li class="toc-entry toc-h2"><a href="#adaptive-rmu-on-effects-of-steering-latent-representation-for-large-language-model-unlearning---aaai-2025">Adaptive RMU (On Effects of Steering Latent Representation for Large Language Model Unlearning - AAAI 2025)</a></li>
 <li class="toc-entry toc-h2">
@@ -167,12 +188,6 @@
 <li class="toc-entry toc-h3"><a href="#mitigate-excessive-ignorance-of-targeted-unlearning">Mitigate Excessive Ignorance of Targeted Unlearning</a></li>
 </ul>
 </li>
-<li class="toc-entry toc-h2">
-<a href="#muse---machine-unlearning-six-way-evaluation-for-language-models-iclr-2025">MUSE - Machine Unlearning Six-Way Evaluation for Language Models (ICLR 2025)</a>
-<ul>
-<li class="toc-entry toc-h3"><a href="#metrics-for-each-aspect">Metrics for each aspect</a></li>
-</ul>
-</li>
 <li class="toc-entry toc-h2"><a href="#references">References</a></li>
 </ul>
     </div>
@@ -181,16 +196,41 @@
     <div id="markdown-content">
       <h2 id="introduction">Introduction</h2>
 
-<p><strong>Why unlearning LLMs? From [1]</strong></p>
+<p>Machine unlearning is becoming a critical topic in the era of foundation models. As LLMs grow more powerful, they also become harder to control — and removing harmful, private, or outdated knowledge post‑training is increasingly important. In this post, we’ll take a deep dive into unlearning for LLMs: why it matters, how it’s measured, and the main approaches used in recent research.</p>
+
+<p>We will cover:</p>
 
 <ul>
   <li>
-<strong>Reducing the risk of malicious use</strong>: to decrease the potential for LLMs to empower malicious use cases such as developing biological, cyber, or chemical weapons. Unlearning aims to <strong>remove hazardous knowledge</strong> from these LLMs, which is a <strong>prerequisite</strong> for the deployment of LLMs in the real world.</li>
+<strong>Motivation</strong>: Why unlearning is necessary and what risks it mitigates.</li>
   <li>
-<strong>Enhancing inherent safety</strong>: By directly removing hazardous knowledge, unlearning can lead to inherently safer models. Even if the LLMs are jailbroken by adversaries, they would lack the necessary knowledge to assist adversaries in launching attacks.</li>
+<strong>Benchmarks &amp; Metrics</strong>: Datasets and metrics that evaluate how well unlearning works.</li>
   <li>
-<strong>Counteracting adversarial attacks</strong>: Current safeguards like refusal training [2] can be bypassed through adversarial attacks, and hazardous information can be reintroduced through finetuning. Similar to the case of enhancing inherent safety, unlearning especially when applied before model serving, can act as a countermeasure by removing the knowledge that these attacks or finetuning might exploit or reveal.</li>
+<strong>Methods</strong>: Key algorithmic approaches including gradient-based, optimization-based, and DPO‑based methods.</li>
+  <li>
+<strong>Practical Challenges</strong>: Open problems, trade-offs, and future directions.</li>
 </ul>
+
+<hr>
+
+<h2 id="motivation-why-do-we-need-unlearning">Motivation: Why Do We Need Unlearning?</h2>
+
+<p>Modern LLMs ingest massive datasets during pretraining, and as a result, they learn both desirable and undesirable information. There are several reasons to <em>remove</em> knowledge from an already‑trained model:</p>
+
+<ul>
+  <li>
+<strong>Safety</strong>: Prevent the model from generating harmful or dangerous instructions (e.g., bomb-making guides).</li>
+  <li>
+<strong>Privacy</strong>: Ensure memorized personal information (like phone numbers or medical records) can be erased upon request (GDPR “right to be forgotten”).</li>
+  <li>
+<strong>Content moderation</strong>: Filter out toxic or biased outputs without fully retraining the model.</li>
+  <li>
+<strong>Compliance</strong>: Adjust knowledge to match regulations or cultural norms across regions.</li>
+  <li>
+<strong>Countering adversarial attacks</strong>: Current safeguards like refusal training [2] can be bypassed through adversarial attacks, and hazardous information can be reintroduced through finetuning. Similar to the case of enhancing inherent safety, unlearning especially when applied before model serving, can act as a countermeasure by removing the knowledge that these attacks or finetuning might exploit or reveal.</li>
+</ul>
+
+<p>A naive approach would be to retrain from scratch without the sensitive data — but this is computationally infeasible for today’s LLMs. Instead, we seek <em>unlearning</em>: efficiently modifying the model so that it behaves <strong>as if</strong> it never saw the data we want to remove.</p>
 
 <blockquote class="block-tip">
   <p><strong>Refusal training</strong>:</p>
@@ -201,7 +241,9 @@
 However, this method is still be circumvented by aversaries, such as posing harmful prompts in the <strong><a href="https://arxiv.org/pdf/2407.11969" rel="external nofollow noopener" target="_blank">past tense</a></strong>.</p>
 </blockquote>
 
-<h2 id="setting">Setting</h2>
+<h2 id="the-technical-setting">The Technical Setting</h2>
+
+<p>Before diving into methods, let’s define the core components used in a typical unlearning task. The process revolves around three key datasets:</p>
 
 <ul>
   <li>Forget set: \(\mathcal{D}_f\) (used in fine-tuning) This is a dataset of examples representing the knowledge that the unlearning process aims to remove from the language model, e.g., the WMDP benchmark [1] which contains hazardous knowledge in biosecurity and cybersecurity.</li>
@@ -252,7 +294,281 @@ However, this method is still be circumvented by aversaries, such as posing harm
     </div>
 </div>
 
-<p>A commonly used form of unlearning consists of the following optimization problem:</p>
+<h2 id="benchmarks-how-to-evaluate-unlearning">Benchmarks: How to Evaluate Unlearning?</h2>
+
+<p>To develop effective unlearning methods, we first need robust ways to measure unlearning success. There are two most common benchmarks: TOFU and MUSE.</p>
+
+<h3 id="tofu---a-task-of-fictitious-unlearning-for-llms-colm-2024">TOFU - A Task of Fictitious Unlearning for LLMs (COLM 2024)</h3>
+
+<h4 id="motivation">Motivation</h4>
+
+<p>The TOFU benchmark introduces an interesting premise: unlearning fictitious, synthetic author profiles instead of real authors.</p>
+
+<p><strong>Why Fake/Fictitious Authors/Characters?</strong></p>
+
+<ul>
+  <li>
+<strong>How to know model after unlearning is equivalent to the model trained without that concept?</strong> \(\mathcal{U}(\mathcal{L}(\theta, \mathcal{D})) \stackrel{?}{=} \mathcal{L}(\theta, \mathcal{D} \setminus \mathcal{D}_F)\), where \(\mathcal{U}\) is the unlearning operator, \(\mathcal{L}\) is the learning operator that trains the model \(\theta\) on the dataset \(\mathcal{D}\).</li>
+  <li>When unlearning real-world concepts, this question is impossible to answer because we can’t afford to retrain foundation models. With synthetic data, we can train a smaller model from scratch and compare.</li>
+</ul>
+
+<p>This raises a key question: why should we care about this strict equality? This perspective comes from classical machine unlearning (often linked to differential privacy), where the goal is to provably forget a single data point.
+<strong>However, in the case of generative AI, I don’t think we should care the same</strong>. The goal is often functional (e.g., the model no longer outputs harmful information) rather than a perfect statistical match to a retrained model.</p>
+
+<h4 id="the-dataset">The dataset</h4>
+
+<p><strong>Main features:</strong></p>
+
+<ul>
+  <li>200 diverse synthetic author profiles, each consisting of 20 question-answer pairs. Subset of these profiles are used as the target forget set.</li>
+  <li>
+<strong>Forget set</strong>: 2, 10 or 20 profiles depending on the setting.</li>
+  <li>
+<strong>Retain set</strong>: Remaining fake profiles + <strong>Real authors</strong> (such as Shakespeare) + <strong>World Facts</strong> (such as the capital of France).</li>
+</ul>
+
+<p><strong>Examples:</strong></p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/unlearnllms/2025-09-18-20-35-25-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/unlearnllms/2025-09-18-20-35-25-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/unlearnllms/2025-09-18-20-35-25-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/unlearnllms/2025-09-18-20-35-25.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+
+<p><strong>Data Creation</strong></p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/unlearnllms/2025-09-18-22-11-37-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/unlearnllms/2025-09-18-22-11-37-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/unlearnllms/2025-09-18-22-11-37-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/unlearnllms/2025-09-18-22-11-37.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    System prompt for dataset generation.
+</div>
+
+<h4 id="evaluation-metrics">Evaluation Metrics</h4>
+
+<ul>
+  <li>
+<strong>Retain quality</strong>
+    <ul>
+      <li>
+<strong>Probability Score</strong> Treat each question \(q\) as a multiple choice question with \(n\) options \(\{ a_1, a_2, ..., a_n \}\), the probability of the correct answer is \(p(a_i \mid q; \theta_u)\) should be the same as of the initial model \(p(a_i \mid q; \theta_o)\)</li>
+      <li>
+<strong>ROUGE</strong> The model should be able to generate the same answer (with greedy sampling) as the initial model using the ROUGE-L recall score.</li>
+      <li>
+<strong>Truth Ratio</strong> Can the model still provide the correct paraphrased answer? (e.g. “Paris is the capital of France” -&gt; “France is the country with Paris as its capital”). <strong>What is the reason of having this metric?</strong> I guess it is because the most frequent/reasonable way to forget the target concept is not to provide a totally unrelated answer, but to phrasing the answer incorrectly.</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/unlearnllms/2025-09-18-21-52-22-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/unlearnllms/2025-09-18-21-52-22-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/unlearnllms/2025-09-18-21-52-22-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/unlearnllms/2025-09-18-21-52-22.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    Truth Ratio. $$\hat{a}$$ is perturbed - incorrect answer (e.g. "France is the capital of Paris") where $$tilde{s}$$ is pharaphrased correct answer. The higher the Log Truth Ratio, the more the model forget the target concept (give incorrect answer).
+</div>
+
+<ul>
+  <li>
+<strong>Forget quality</strong>
+    <ul>
+      <li>
+<strong>Challenge</strong> How to guarantee the model totally forget the target concept? Can “providing wrong answers about the target concept” be considered as good enough?</li>
+      <li>In the paper, they use the Truth Ratio to measure the forget quality.</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="muse---machine-unlearning-six-way-evaluation-for-language-models-iclr-2025">MUSE - Machine Unlearning Six-Way Evaluation for Language Models (ICLR 2025)</h3>
+
+<p>While TOFU provides a solid foundation, its metrics don’t cover the full spectrum of real-world concerns like privacy and scalability. To address these limitations, the MUSE benchmark proposed a more comprehensive six-way evaluation.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/thoughts/2025-03-18-13-10-28-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/thoughts/2025-03-18-13-10-28-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/thoughts/2025-03-18-13-10-28-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/thoughts/2025-03-18-13-10-28.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    Six-way evaluation of machine unlearning
+</div>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/thoughts/2025-03-18-13-18-28-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/thoughts/2025-03-18-13-18-28-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/thoughts/2025-03-18-13-18-28-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/thoughts/2025-03-18-13-18-28.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    Comparison with a previous benchmark TOFU.
+</div>
+
+<p>This paper present a new benchmark for evaluating the quality of machine unlearning, which considers six aspects:</p>
+
+<ul>
+  <li>No verbatim memorization: The model should not exactly replicate any details from the forget set.</li>
+  <li>No knowledge memorization: The model should be incapable of responding to questions about the forget set.</li>
+  <li>No privacy leakage: It should be impossible to detect that the model was ever trained on the forget set.</li>
+  <li>Utility preservation: The model should maintain high performance on the tasks it was trained for except for the forget set.</li>
+  <li>Scalability: The method should be able to handle large forget set sizes.</li>
+  <li>Substantiality: The method should be able to handle a large number of forget queries - continuous unlearning setting.</li>
+</ul>
+
+<p>This benchmark highlights critical trade-offs: maintaining model utility, forgetting performance, and scalability.</p>
+
+<h4 id="metrics-for-each-aspect">Metrics for each aspect</h4>
+
+<p><strong>Verbatim Memorization</strong>
+To measure verbatim memorization, the paper uses the <a href="https://tuananhbui89.github.io/blog/2025/nlp-foundation/#rouge-recall-oriented-understudy-for-gisting-evaluation" rel="external nofollow noopener" target="_blank">ROUGE</a> score between the model’s continuation and the actual continuation in the forget set:</p>
+
+\[\text{VerbMem}(f, \mathcal{D}) := \frac{1}{|\mathcal{D}_{\text{forget}}|} \sum_{x \in \mathcal{D}_{\text{forget}}} \text{ROUGE}(f(x_{[:l]}), x_{[l+1:]})\]
+
+<p>ROUGE measures the overlap between the generated text (candidate) and one or more reference texts. It focuses on n-gram, sequence, and word-level similarity and is particularly recall-oriented, meaning it emphasizes how much of the reference text is captured by the generated text.</p>
+
+\[\text{ROUGE} = \frac{\sum_{i=1}^n \text{Count}_{i}}{\sum_{i=1}^n \text{Count}_{i}}\]
+
+<p>Where:</p>
+
+<ul>
+  <li>\(n\) is the number of reference texts</li>
+  <li>\(\text{Count}_{i}\) is the number of n-grams in the generated text that are also in the \(i\)-th reference text</li>
+</ul>
+
+<p><strong>Knowledge Memorization</strong></p>
+
+<p>To measure knowledge memorization, the paper uses the <a href="https://tuananhbui89.github.io/blog/2025/nlp-foundation/#rouge-recall-oriented-understudy-for-gisting-evaluation" rel="external nofollow noopener" target="_blank">ROUGE</a> score between the model’s continuation and the actual continuation in the forget set:</p>
+
+\[\text{KnowMem}(f, \mathcal{D}_{\text{forget}}) := \frac{1}{|\mathcal{D}_{\text{forget}}|} \sum_{(q,a)\in\mathcal{D}_{\text{forget}}} \text{ROUGE}(f(q), a)\]
+
+<p><strong>Privacy Leakage</strong></p>
+
+<p>To measure privacy leakage, the paper uses (Min-K Prob) [6] a start-of-the-art MIA method to compute the standard AUC-ROC score of discriminating members \(\mathcal{D}_{\text{forget}}\) and non-members \(\mathcal{D}_{\text{holdout}}\) by using the logits of the last layer of the model.</p>
+
+\[\text{PrivLeak} := \frac{\text{AUC}(f_{\text{unlearn}}; \mathcal{D}_{\text{forget}}, \mathcal{D}_{\text{holdout}}) - \text{AUC}(f_{\text{retrain}}; \mathcal{D}_{\text{forget}}, \mathcal{D}_{\text{holdout}})}{\text{AUC}(f_{\text{retrain}}; \mathcal{D}_{\text{forget}}, \mathcal{D}_{\text{holdout}})}\]
+
+<p>The good unlearning method should have \(\text{AUC}(f_{\text{unlearn}}; \mathcal{D}_{\text{forget}}, \mathcal{D}_{\text{holdout}}) \approx \text{AUC}(f_{\text{retrain}}; \mathcal{D}_{\text{forget}}, \mathcal{D}_{\text{holdout}})\) which means the unlearned model is indistinguishable from the original model. In contrast, the bad unlearning method will get a large positive or negative difference.</p>
+
+<p><strong>Min-K Prob [6]</strong></p>
+
+<p>The Min-K Prob is based on the hypothesis that a non-member example is more likely to include a few outlier words with low probability, while a member example is less likely to include such words.</p>
+
+<p>Consider a sequence of tokens in a sentence, denoted as \(x = x_1, x_2, ..., x_N\), the log-likelihood of a token, \(x_i\), given its preceding tokens is calculated as \(\log p(x_i \mid x_1, ..., x_{i-1})\). We then select the \(k\%\) of tokens from \(x\) with the minimum token probability to form a set, Min-K%(x), and compute the average log-likelihood of the tokens in this set:</p>
+
+\[\text{MIN-K\% PROB}(x) = \frac{1}{E} \sum_{x_i \in \text{Min-K\%}(x)} \log p(x_i \midx_1, ..., x_{i-1}).\]
+
+<p>where \(E\) is the size of the Min-K%(x) set. We can detect if a piece of text was included in pretraining data simply by thresholding this MIN-K% PROB result.</p>
+
+<p><strong>Why this new benchmark is important?</strong></p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/thoughts/2025-03-18-13-29-24-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/thoughts/2025-03-18-13-29-24-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/thoughts/2025-03-18-13-29-24-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/thoughts/2025-03-18-13-29-24.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    It seems that unlearning methods are not good at scalability - when increasing the forget size and substantiality - when number of forget queries increase.
+</div>
+
+<p>This benchmark provides another perspective - from model developer - who want to keep the model utility after unlearning. The current benchmark is more focused on the data owner’s expectation - forgetting the data - but not the model utility. With this benchmark, we can see that current unlearning methods are not good at these metrics:</p>
+
+<ul>
+  <li>“Unlearning significantly degrades model utility”</li>
+  <li>“Unlearning methods scale poorly with forget set sizes”</li>
+  <li>“Unlearning methods cannot sustainably accommodate sequential unlearning requests”</li>
+</ul>
+
+<hr>
+
+<h2 id="unlearning-methods">Unlearning Methods</h2>
+
+<p>Now that we’ve seen how unlearning is measured, let’s explore some of the algorithmic approaches designed to achieve it.</p>
+
+<p>A common formulation for unlearning is the following optimization problem:</p>
 
 \[\mathcal{L} = \min_{\theta} \underbrace{\mathbb{E}_{x^f \in \mathcal{D}_f} \ell(y^f|h_{\theta}^{(l)}(x^f))}_{\text{forget loss}} + \alpha \underbrace{\mathbb{E}_{x^r \in \mathcal{D}_r} \ell(y^r|h_{\theta}^{(l)}(x^r))}_{\text{retain loss}}\]
 
@@ -260,15 +576,7 @@ However, this method is still be circumvented by aversaries, such as posing harm
 
 <p>It is worth noting that \(h_{\theta}^{(l)}\) is the <strong>average</strong> output hidden state of all tokens (with the size of sequence length) in forget-sample \(x^f \in \mathcal{D}_f\). Similarly, \(h_{\theta}^{(l)}\) is the <strong>average</strong> output hidden state of all tokens in retain-sample \(x^r \in \mathcal{D}_r\). Using this average representation to represent the entire forget-sample is one of current limitations that requires further investigation.</p>
 
-<p><strong>Intepretation</strong>: Minimizing the forget loss is to steer the model representation of forget-samples to a target random representation, while minimizing the retain loss is to keep the model representation of retain-samples unchanged.</p>
-
-<!-- ### Challenges
-
-**Overlap between forget set and retain set**
-
-**Expressiveness of token-level representation for the entire set/document** -->
-
-<!-- ### Milestones - Approaches -->
+<p><strong>Intepretation</strong>: The goal is to maximize the loss on the forget set (encouraging the model to “unlearn” it, often by pushing its representations towards something random or nonsensical) while minimizing the loss on the retain set to keep its general knowledge intact.</p>
 
 <h2 id="representation-misdirection-for-unlearning-rmu">Representation Misdirection for Unlearning (RMU)</h2>
 
@@ -451,7 +759,7 @@ Furthermore, fine-tuning using both retain data and forget data would require a 
 
 <h3 id="connection-with-dpo">Connection with DPO</h3>
 
-<p><a href="https://tuananhbui89.github.io/blog/2025/nlp-foundation/#ppo-and-dpo">Direct Preference Optimization</a> (DPO) is a method to align LLMs with human preferences, however, unlike PPO which uses a reward model, DPO simplifies PPO by directly optimizing the policy model to adhere to human preferences without the need for a reward model. In the context of unlearning, DPO can be used to unlearn the LLM by directly optimizing the original model to align forget prompt with the template response.</p>
+<p><a href="https://tuananhbui89.github.io/blog/2025/nlp-foundation/#ppo-and-dpo" rel="external nofollow noopener" target="_blank">Direct Preference Optimization</a> (DPO) is a method to align LLMs with human preferences, however, unlike PPO which uses a reward model, DPO simplifies PPO by directly optimizing the policy model to adhere to human preferences without the need for a reward model. In the context of unlearning, DPO can be used to unlearn the LLM by directly optimizing the original model to align forget prompt with the template response.</p>
 
 <p>Given a dataset \(D = \{(x_f^j, y_e^j, y_f^j)\}_{j\in[N]}\), where \(y_e\) and \(y_f\) are preferred template and original forget responses to the forget prompt \(x_f\), DPO fine-tunes original model \(\theta_o\) using \(D\) to better align it with good answer preferences, which minimizes:</p>
 
@@ -605,146 +913,6 @@ Mathematically, the loss function for untargeted unlearning is (borrowing the no
   <li>In the second term, we follow the direction of \(\nabla_\theta (\log p(y \mid x; \theta)\) - which aims to increase the probability of original answer \(P(y \mid \mathcal{X}_R)\)</li>
 </ul>
 
-<h2 id="muse---machine-unlearning-six-way-evaluation-for-language-models-iclr-2025">MUSE - Machine Unlearning Six-Way Evaluation for Language Models (ICLR 2025)</h2>
-
-<p>Link to the paper: <a href="https://openreview.net/pdf?id=TArmA033BU" rel="external nofollow noopener" target="_blank">OpenReview</a></p>
-
-<div class="row mt-3">
-    <div class="col-sm mt-3 mt-md-0 text-center">
-        <figure>
-
-  <picture>
-    
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/thoughts/2025-03-18-13-10-28-480.webp"></source>
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/thoughts/2025-03-18-13-10-28-800.webp"></source>
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/thoughts/2025-03-18-13-10-28-1400.webp"></source>
-    
-
-    <!-- Fallback to the original file -->
-    <img src="/assets/img/thoughts/2025-03-18-13-10-28.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
-  </picture>
-
-</figure>
-
-    </div>
-</div>
-<div class="caption text-center">
-    Six-way evaluation of machine unlearning
-</div>
-
-<div class="row mt-3">
-    <div class="col-sm mt-3 mt-md-0 text-center">
-        <figure>
-
-  <picture>
-    
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/thoughts/2025-03-18-13-18-28-480.webp"></source>
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/thoughts/2025-03-18-13-18-28-800.webp"></source>
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/thoughts/2025-03-18-13-18-28-1400.webp"></source>
-    
-
-    <!-- Fallback to the original file -->
-    <img src="/assets/img/thoughts/2025-03-18-13-18-28.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
-  </picture>
-
-</figure>
-
-    </div>
-</div>
-<div class="caption text-center">
-    Comparison with a previous benchmark TOFU.
-</div>
-
-<p>This paper present a new benchmark for evaluating the quality of machine unlearning, which considers six aspects:</p>
-
-<ul>
-  <li>No verbatim memorization: The model should not exactly replicate any details from the forget set.</li>
-  <li>No knowledge memorization: The model should be incapable of responding to questions about the forget set.</li>
-  <li>No privacy leakage: It should be impossible to detect that the model was ever trained on the forget set.</li>
-  <li>Utility preservation: The model should maintain high performance on the tasks it was trained for except for the forget set.</li>
-  <li>Scalability: The method should be able to handle large forget set sizes.</li>
-  <li>Substantiality: The method should be able to handle a large number of forget queries - continuous unlearning setting.</li>
-</ul>
-
-<h3 id="metrics-for-each-aspect">Metrics for each aspect</h3>
-
-<p><strong>Verbatim Memorization</strong>
-To measure verbatim memorization, the paper uses the <a href="https://tuananhbui89.github.io/blog/2025/nlp-foundation/#rouge-recall-oriented-understudy-for-gisting-evaluation">ROUGE</a> score between the model’s continuation and the actual continuation in the forget set:</p>
-
-\[\text{VerbMem}(f, \mathcal{D}) := \frac{1}{|\mathcal{D}_{\text{forget}}|} \sum_{x \in \mathcal{D}_{\text{forget}}} \text{ROUGE}(f(x_{[:l]}), x_{[l+1:]})\]
-
-<p>ROUGE measures the overlap between the generated text (candidate) and one or more reference texts. It focuses on n-gram, sequence, and word-level similarity and is particularly recall-oriented, meaning it emphasizes how much of the reference text is captured by the generated text.</p>
-
-\[\text{ROUGE} = \frac{\sum_{i=1}^n \text{Count}_{i}}{\sum_{i=1}^n \text{Count}_{i}}\]
-
-<p>Where:</p>
-
-<ul>
-  <li>\(n\) is the number of reference texts</li>
-  <li>\(\text{Count}_{i}\) is the number of n-grams in the generated text that are also in the \(i\)-th reference text</li>
-</ul>
-
-<p><strong>Knowledge Memorization</strong></p>
-
-<p>To measure knowledge memorization, the paper uses the <a href="https://tuananhbui89.github.io/blog/2025/nlp-foundation/#rouge-recall-oriented-understudy-for-gisting-evaluation">ROUGE</a> score between the model’s continuation and the actual continuation in the forget set:</p>
-
-\[\text{KnowMem}(f, \mathcal{D}_{\text{forget}}) := \frac{1}{|\mathcal{D}_{\text{forget}}|} \sum_{(q,a)\in\mathcal{D}_{\text{forget}}} \text{ROUGE}(f(q), a)\]
-
-<p><strong>Privacy Leakage</strong></p>
-
-<p>To measure privacy leakage, the paper uses (Min-K Prob) [6] a start-of-the-art MIA method to compute the standard AUC-ROC score of discriminating members \(\mathcal{D}_{\text{forget}}\) and non-members \(\mathcal{D}_{\text{holdout}}\) by using the logits of the last layer of the model.</p>
-
-\[\text{PrivLeak} := \frac{\text{AUC}(f_{\text{unlearn}}; \mathcal{D}_{\text{forget}}, \mathcal{D}_{\text{holdout}}) - \text{AUC}(f_{\text{retrain}}; \mathcal{D}_{\text{forget}}, \mathcal{D}_{\text{holdout}})}{\text{AUC}(f_{\text{retrain}}; \mathcal{D}_{\text{forget}}, \mathcal{D}_{\text{holdout}})}\]
-
-<p>The good unlearning method should have \(\text{AUC}(f_{\text{unlearn}}; \mathcal{D}_{\text{forget}}, \mathcal{D}_{\text{holdout}}) \approx \text{AUC}(f_{\text{retrain}}; \mathcal{D}_{\text{forget}}, \mathcal{D}_{\text{holdout}})\) which means the unlearned model is indistinguishable from the original model. In contrast, the bad unlearning method will get a large positive or negative difference.</p>
-
-<p><strong>Min-K Prob [6]</strong></p>
-
-<p>The Min-K Prob is based on the hypothesis that a non-member example is more likely to include a few outlier words with low probability, while a member example is less likely to include such words.</p>
-
-<p>Consider a sequence of tokens in a sentence, denoted as \(x = x_1, x_2, ..., x_N\), the log-likelihood of a token, \(x_i\), given its preceding tokens is calculated as \(\log p(x_i \mid x_1, ..., x_{i-1})\). We then select the \(k\%\) of tokens from \(x\) with the minimum token probability to form a set, Min-K%(x), and compute the average log-likelihood of the tokens in this set:</p>
-
-\[\text{MIN-K\% PROB}(x) = \frac{1}{E} \sum_{x_i \in \text{Min-K\%}(x)} \log p(x_i \midx_1, ..., x_{i-1}).\]
-
-<p>where \(E\) is the size of the Min-K%(x) set. We can detect if a piece of text was included in pretraining data simply by thresholding this MIN-K% PROB result.</p>
-
-<p><strong>Why this new benchmark is important?</strong></p>
-
-<div class="row mt-3">
-    <div class="col-sm mt-3 mt-md-0 text-center">
-        <figure>
-
-  <picture>
-    
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/thoughts/2025-03-18-13-29-24-480.webp"></source>
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/thoughts/2025-03-18-13-29-24-800.webp"></source>
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/thoughts/2025-03-18-13-29-24-1400.webp"></source>
-    
-
-    <!-- Fallback to the original file -->
-    <img src="/assets/img/thoughts/2025-03-18-13-29-24.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
-  </picture>
-
-</figure>
-
-    </div>
-</div>
-<div class="caption text-center">
-    It seems that unlearning methods are not good at scalability - when increasing the forget size and substantiality - when number of forget queries increase.
-</div>
-
-<p>This benchmark provides another perspective - from model developer - who want to keep the model utility after unlearning. The current benchmark is more focused on the data owner’s expectation - forgetting the data - but not the model utility. With this benchmark, we can see that current unlearning methods are not good at these metrics:</p>
-
-<ul>
-  <li>“Unlearning significantly degrades model utility”</li>
-  <li>“Unlearning methods scale poorly with forget set sizes”</li>
-  <li>“Unlearning methods cannot sustainably accommodate sequential unlearning requests”</li>
-</ul>
-
-<p><strong>Membership Inference Attack</strong></p>
-
-<p>A Membership Inference Attack (MIA) is a type of privacy attack where an adversary aims to determine whether a specific data sample was used in training a machine learning model. This poses a serious privacy risk, especially for models trained on sensitive datasets (e.g., medical or financial data).</p>
-
 <h2 id="references">References</h2>
 
 <p>[1] <a href="https://arxiv.org/abs/2403.03218" rel="external nofollow noopener" target="_blank">Li, Nathaniel, et al. “The wmdp benchmark: Measuring and reducing malicious use with unlearning.” arXiv preprint arXiv:2403.03218 (2024).</a></p>
@@ -779,31 +947,31 @@ To measure verbatim memorization, the paper uses the <a href="https://tuananhbui
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/nlp-foundation/">LLM Series - Part 1 - Important Concepts in NLP</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2022/displaying-external-posts-on-your-al-folio-blog/">Displaying External Posts on Your al-folio Blog</a>
   </li>
 
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/deepseek/">DeepSeek-R1</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/anti-personalization-v2/">Anti-Personalization - A review after 2 years</a>
   </li>
 
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2024/erasing-concepts/">Fake Taylor Swift and the Adversarial Game of Concept Erasure and Injection</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/safe-completion-training/">GPT-5 Series - Safe Completion Training</a>
   </li>
 
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2024/thoughts/">Random Thoughts and Notes</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/personalized-llms/">Personalized LLMs</a>
   </li>
 
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2023/f4t/">About me</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/educating-kids-age-of-ai/">Educating Kids in the Age of AI</a>
   </li>
 
 </div>
