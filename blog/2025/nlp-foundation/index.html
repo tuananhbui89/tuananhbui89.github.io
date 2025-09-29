@@ -210,8 +210,19 @@
 </li>
 <li class="toc-entry toc-h3"><a href="#wer-word-error-rate">WER (Word Error Rate)</a></li>
 <li class="toc-entry toc-h3"><a href="#rouge-recall-oriented-understudy-for-gisting-evaluation">ROUGE (Recall-Oriented Understudy for Gisting Evaluation)</a></li>
-<li class="toc-entry toc-h3"><a href="#meteor-metric-for-evaluation-of-translation-with-explicit-ordering">METEOR (Metric for Evaluation of Translation with Explicit Ordering)</a></li>
+<li class="toc-entry toc-h3">
+<a href="#meteor-metric-for-evaluation-of-translation-with-explicit-ordering">METEOR (Metric for Evaluation of Translation with Explicit Ordering)</a>
+<ul>
+<li class="toc-entry toc-h4"><a href="#formula">Formula</a></li>
+</ul>
+</li>
 <li class="toc-entry toc-h3"><a href="#levenshtein-distance-edit-distance">Levenshtein distance (Edit Distance)</a></li>
+<li class="toc-entry toc-h3">
+<a href="#g-eval">G-EVAL</a>
+<ul>
+<li class="toc-entry toc-h4"><a href="#how-g-eval-works">How G-Eval works</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toc-entry toc-h2">
@@ -998,42 +1009,58 @@ The metric that is typically used for these applications is Word Error Rate (WER
 
 <h3 id="rouge-recall-oriented-understudy-for-gisting-evaluation">ROUGE (Recall-Oriented Understudy for Gisting Evaluation)</h3>
 
-<p>ROUGE measures the overlap between the generated text (candidate) and one or more reference texts. It focuses on n-gram, sequence, and word-level similarity and is particularly recall-oriented, meaning it emphasizes how much of the reference text is captured by the generated text.</p>
+<p>ROUGE measures the overlap between the generated text (candidate) and one or more reference texts. It focuses on n-gram, sequence, and word-level similarity and is particularly <strong>recall-oriented</strong>, meaning it emphasizes how much of the reference text is captured by the generated text.</p>
 
-\[\text{ROUGE} = \frac{\sum_{i=1}^n \text{Count}_{i}}{\sum_{i=1}^n \text{Count}_{i}}\]
-
-<p>Where:</p>
+\[\text{ROUGE-N} = \frac{\sum_{r \in R} \sum_{\text{gram}_n \in r} \min \big( \text{Count}_{C}(\text{gram}_n), \text{Count}_{r}(\text{gram}_n) \big)}{\sum_{r \in R} \sum_{\text{gram}_n \in r} \text{Count}_{r}(\text{gram}_n)}\]
 
 <ul>
-  <li>\(n\) is the number of reference texts</li>
-  <li>\(\text{Count}_{i}\) is the number of n-grams in the generated text that are also in the \(i\)-th reference text</li>
+  <li>
+<strong>Numerator:</strong> number of overlapping \(n\)-grams between candidate and references</li>
+  <li>
+<strong>Denominator:</strong> total number of \(n\)-grams in references</li>
+</ul>
+
+<p>Special cases:</p>
+
+<ul>
+  <li>
+<strong>ROUGE-1</strong> → unigram overlap</li>
+  <li>
+<strong>ROUGE-2</strong> → bigram overlap</li>
 </ul>
 
 <h3 id="meteor-metric-for-evaluation-of-translation-with-explicit-ordering">METEOR (Metric for Evaluation of Translation with Explicit Ordering)</h3>
 
-<p>Unlike purely lexical metrics like BLEU, METEOR incorporates semantic and linguistic features, aiming for a more nuanced evaluation.
+<p><strong>Motivation:</strong><br>
+Traditional metrics like BLEU often rely on exact word matches and can fail to capture semantic similarity or word order quality. METEOR was proposed to better align with human judgments by combining precision, recall, and linguistic resources (e.g., stemming and synonyms). It is particularly useful when nuanced language understanding is important.</p>
+
+<hr>
+
+<p>Unlike purely lexical metrics like BLEU, METEOR incorporates semantic and linguistic features, aiming for a more nuanced evaluation.<br>
 Some key features of METEOR:</p>
 
 <ul>
   <li>
-<strong>Semantic Matching</strong>: METEOR uses WordNet to find synonyms and antonyms, which helps it capture the semantic meaning of the generated text.</li>
+<strong>Semantic Matching</strong>: Uses WordNet synonyms, stemming, and paraphrases (not antonyms) to capture semantic meaning beyond exact word matches.</li>
   <li>
-<strong>Sentence Level Evaluation</strong>: METEOR evaluates the translation at the sentence level, which is more sensitive to the quality of the translation.</li>
+<strong>Sentence Level Evaluation</strong>: Evaluates translations at the sentence level, making it more sensitive to quality differences.</li>
   <li>
-<strong>Explicit Ordering</strong>: METEOR takes into account the order of words in the sentence, which is important for evaluating the quality of the translation.</li>
+<strong>Explicit Ordering</strong>: Applies a penalty for disordered matches, accounting for word order in the translation.</li>
 </ul>
 
-<p>Formula:</p>
+<hr>
 
-<p>Harmonic mean of precision and recall:</p>
+<h4 id="formula">Formula</h4>
+
+<p>Harmonic mean of precision and recall (with recall weighted higher):</p>
 
 \[F = \frac{10 P R}{9P + R}\]
 
 <p>Where:</p>
 
 <ul>
-  <li>\(P\) is the precision: how many words in the generated text are also in the reference text</li>
-  <li>\(R\) is the recall: how many words in the reference text are also in the generated text</li>
+  <li>\(P\) = precision: how many words in the generated text are also in the reference text</li>
+  <li>\(R\) = recall: how many words in the reference text are also in the generated text</li>
 </ul>
 
 <p>Penalty for disordered matches:</p>
@@ -1043,29 +1070,39 @@ Some key features of METEOR:</p>
 <p>Where:</p>
 
 <ul>
-  <li>\(c\) is number of contiguous matched segments</li>
-  <li>\(m\) is number of matched words</li>
-  <li>\(\gamma\) is a constant, i.e., \(\gamma = 0.5\)</li>
+  <li>\(c\) = number of contiguous matched segments</li>
+  <li>\(m\) = number of matched words</li>
+  <li>\(\gamma = 0.5\) (default constant)</li>
 </ul>
 
 <p>Final METEOR score:</p>
 
 \[\text{METEOR} = F \times (1 - Penalty)\]
 
-<p><strong>Advantages of METEOR:</strong></p>
+<hr>
+
+<p><strong>Advantages of METEOR</strong></p>
 
 <ul>
-  <li>Linguistic richness: Incorporates synonyms, stemming, and paraphrases.</li>
-  <li>Better correlation with human judgment: More reliable than metrics like BLEU for some tasks.</li>
-  <li>Flexibility: Suitable for multiple languages (when appropriate linguistic resources are available).</li>
+  <li>
+<strong>Linguistic richness</strong>: Incorporates synonyms, stemming, and paraphrases.</li>
+  <li>
+<strong>Better correlation with human judgment</strong>: Often more reliable than metrics like BLEU.</li>
+  <li>
+<strong>Flexibility</strong>: Suitable for multiple languages (when appropriate linguistic resources are available).</li>
 </ul>
 
-<p><strong>Limitations of METEOR:</strong></p>
+<hr>
+
+<p><strong>Limitations of METEOR</strong></p>
 
 <ul>
-  <li>Computational cost: More resource-intensive than simpler metrics like BLEU.</li>
-  <li>Language dependency: Relies on linguistic resources (e.g., WordNet), which may not be equally robust across languages.</li>
-  <li>Bias toward longer outputs: Its recall orientation can favor verbose candidates.</li>
+  <li>
+<strong>Computational cost</strong>: More resource-intensive than simpler metrics like BLEU.</li>
+  <li>
+<strong>Language dependency</strong>: Relies on linguistic resources (e.g., WordNet), which may not be equally robust across languages.</li>
+  <li>
+<strong>Bias toward longer outputs</strong>: Its recall orientation can favor verbose candidates.</li>
 </ul>
 
 <h3 id="levenshtein-distance-edit-distance">Levenshtein distance (Edit Distance)</h3>
@@ -1099,6 +1136,106 @@ $$ -->
 </ul>
 
 <p>Levenshtein distance = 3</p>
+
+<h3 id="g-eval">G-EVAL</h3>
+
+<p>Reference:</p>
+
+<ul>
+  <li>[1] <a href="https://www.confident-ai.com/blog/g-eval-the-definitive-guide" rel="external nofollow noopener" target="_blank">https://www.confident-ai.com/blog/g-eval-the-definitive-guide</a>
+</li>
+</ul>
+
+<p>G-EVAL is a framework that treats a Large Language Model (LLM) as a <strong>judge</strong> for evaluating other LLMs outputs. It allows us to define <strong>custome evaluation criteria in natural language</strong>, which the system then decomposes into structured evaluation steps. The LLM-judge evalutes outputs according to those steps, and then G-Eval produces a <strong>weighted score</strong> (leveraging token probabilities, confidence scores, etc.) as the final metric. Compared to the traditional statistical metrics like BLEU, ROUGE, G-Eval is more flexible and human-aligned alternative.</p>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="https://images.ctfassets.net/otwaplf7zuwf/12StS90npeMOTt9xKLt6jg/4479f3f3ca0021931750c2223fd39f0f/image-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="https://images.ctfassets.net/otwaplf7zuwf/12StS90npeMOTt9xKLt6jg/4479f3f3ca0021931750c2223fd39f0f/image-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="https://images.ctfassets.net/otwaplf7zuwf/12StS90npeMOTt9xKLt6jg/4479f3f3ca0021931750c2223fd39f0f/image-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="https://images.ctfassets.net/otwaplf7zuwf/12StS90npeMOTt9xKLt6jg/4479f3f3ca0021931750c2223fd39f0f/image.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    G-Eval. Image from [1].
+</div>
+
+<h4 id="how-g-eval-works">How G-Eval works</h4>
+
+<p><strong>Criteria → Evaluation Steps</strong></p>
+
+<p>You write a criterion in natural language (e.g. “Coherence (1–5): how well does the text flow logically?”). G-Eval’s internal LLM converts that into step-by-step sub-questions or checks.</p>
+
+<p>The criterion prompt for coherence in the paper looked like this:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">g_eval_criteria</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">
+Coherence (1-5) - the collective quality of all sentences. We align this dimension with
+the DUC quality question of structure and coherence whereby </span><span class="sh">"</span><span class="s">the summary should be
+well-structured and well-organized. The summary should not just be a heap of related information, but should build from sentence to sentence to a coherent body of information about a topic.
+</span><span class="sh">"""</span>
+</code></pre></div></div>
+
+<p>Which resulted in this final evaluation prompt after evaluation steps were generated from the above criterion</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">g_eval_prompt_template</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">
+You will be given one summary written for a news article.
+Your task is to rate the summary on one metric.
+Please make sure you read and understand these instructions carefully. Please keep this
+document open while reviewing, and refer to it as needed.
+
+Evaluation Criteria:
+Coherence (1-5) - the collective quality of all sentences. We align this dimension with
+the DUC quality question of structure and coherence whereby </span><span class="sh">"</span><span class="s">the summary should be
+well-structured and well-organized. The summary should not just be a heap of related information, but should build from sentence to sentence to a coherent body of information about a topic.</span><span class="sh">"</span><span class="s">
+
+Evaluation Steps:
+1. Read the news article carefully and identify the main topic and key points.
+2. Read the summary and compare it to the news article. Check if the summary covers the main
+topic and key points of the news article, and if it presents them in a clear and logical order.
+3. Assign a score for coherence on a scale of 1 to 5, where 1 is the lowest and 5 is the highest
+based on the Evaluation Criteria.
+
+Example:
+Source Text:
+
+Summary:
+
+
+Evaluation Form (scores ONLY):
+- Coherence:
+</span><span class="sh">"""</span>
+</code></pre></div></div>
+
+<p><strong>Judging via the LLM-judge</strong></p>
+
+<p>Using those evaluation steps, the model assesses the candidate output (and perhaps reference or context) and provides intermediate judgments.</p>
+
+<p><strong>Scoring / Aggregation with weights</strong></p>
+
+<p>Rather than treating all judgments equally, G-Eval weights sub-judgments using model confidences (log probabilities), which gives more granularity and helps reduce bias and randomness.</p>
+
+<p>By breaking down the judgment process and weighting according to confidence, G-Eval aims to improve consistency, fine-grained discrimination, and robustness compared to naive single-pass LLM scoring.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">deepeval.metrics</span> <span class="kn">import</span> <span class="n">GEval</span>
+<span class="kn">from</span> <span class="n">deepeval.test_case</span> <span class="kn">import</span> <span class="n">LLMTestCaseParams</span>
+
+<span class="n">correctness_metric</span> <span class="o">=</span> <span class="nc">GEval</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="sh">"</span><span class="s">Correctness</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">criteria</span><span class="o">=</span><span class="sh">"</span><span class="s">Determine whether the actual output is factually correct based on the expected output.</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">evaluation_params</span><span class="o">=</span><span class="p">[</span><span class="n">LLMTestCaseParams</span><span class="p">.</span><span class="n">ACTUAL_OUTPUT</span><span class="p">,</span> <span class="n">LLMTestCaseParams</span><span class="p">.</span><span class="n">EXPECTED_OUTPUT</span><span class="p">],</span>
+<span class="p">)</span>
+</code></pre></div></div>
 
 <h2 id="tokenization-1">Tokenization</h2>
 
@@ -1184,9 +1321,20 @@ The choice of tokenizer significantly impacts the performance of the model and t
 
 <h2 id="transformer">Transformer</h2>
 
-<p>LLMs are built on the Transformer architecture, which uses a network of transformer blocks with multi-headed self-attention mechanisms. This allows the model to understand the context of words within a broader text.</p>
+<p>Most modern Large Language Models (LLMs) are built on the <strong>Transformer</strong> architecture, which stacks multiple layers of <em>transformer blocks</em>. Each block uses <strong>multi-head self-attention</strong> to capture relationships between tokens, allowing the model to understand words in the context of broader sequences. This architecture is the foundation behind modern NLP and many multimodal models.</p>
 
 <p><strong>Transformer Block</strong></p>
+
+<p>A transformer block consists of two main components:</p>
+
+<ol>
+  <li>
+<strong>Multi-Head Self-Attention</strong> – lets each token attend to others in the sequence, capturing dependencies regardless of distance.</li>
+  <li>
+<strong>Feed-Forward Network (FFN)</strong> – applies non-linear transformations to enrich token representations.</li>
+</ol>
+
+<p>Residual connections and layer normalization stabilize training and help preserve information flow.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">TransformerBlock</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">):</span>
@@ -1208,7 +1356,7 @@ The choice of tokenizer significantly impacts the performance of the model and t
 </code></pre></div></div>
 
 <p><strong>Tokenization</strong>
-LLMs process text by breaking it into tokens and converting them into embeddings - high-dimensional numerical representations that capture semantic meaning.</p>
+Before text can be processed, it must be tokenized into smaller units (tokens) such as words or subwords. These tokens are mapped to embeddings—high-dimensional vectors that capture semantic meaning and provide input to the transformer.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">transformers</span> <span class="kn">import</span> <span class="n">AutoTokenizer</span><span class="p">,</span> <span class="n">AutoModel</span>
 
@@ -1222,6 +1370,8 @@ LLMs process text by breaking it into tokens and converting them into embeddings
 </code></pre></div></div>
 
 <p><strong>Cross-Attention and Self-Attention</strong></p>
+
+<p>Transformers rely heavily on attention mechanisms, which compute relationships between tokens. There are two main types:</p>
 
 <table>
   <thead>
@@ -1394,14 +1544,50 @@ LLMs process text by breaking it into tokens and converting them into embeddings
 
 <p><strong>Why Multi-Head Attention?</strong></p>
 
-<p>Multi-head attention is a key component in Transformer models and is used to enhance the model’s ability to capture different types of relationships and patterns in the input data.</p>
+<p>Multi-head attention is a core innovation of the Transformer architecture. It enables the model to capture a richer variety of relationships within the input by combining multiple perspectives in parallel.</p>
 
 <ul>
   <li>
-<strong>Learning Different Representations</strong>: Each “head” in multi-head attention operates independently, using its own set of learned weight matrices. This allows each head to focus on different parts of the input sequence or on different types of relationships within the sequence.</li>
+<strong>Diverse Representations</strong>: Each attention <em>head</em> has its own set of learned weights, allowing it to focus on different parts of the sequence or capture different types of dependencies (e.g., short-range vs. long-range). Together, these heads provide a more comprehensive understanding of context.</li>
   <li>
-<strong>Dimensionality Flexibility</strong>: Each attention head operates on a reduced-dimensional subspace of the input embeddings, as the total embedding dimension is split across all heads. This division reduces the computational cost of individual attention heads, while the aggregation of all heads retains the full expressiveness of the original dimensionality.</li>
+<strong>Efficient Use of Dimensions</strong>: The embedding dimension is split across the heads, so each head works in a lower-dimensional subspace. This keeps individual computations efficient, while aggregating the outputs restores the full representational power of the model.</li>
 </ul>
+
+<p><strong>Positional Embedding</strong></p>
+
+<p>The key challenge for transformers is handling the sequential nature of text, where the order of tokens matters. The Self-Attention mechanism is permutation-invariant, meaning it processes a sequence of tokens as a set, with no inherent knowledge of their order or relative positions. 
+Without this positional information, the model would lose important context about word order and context, e.g., cannot distinguish between “the cat sat on the mat” and “the mat sat on the cat”.</p>
+
+<p>To address this, transformers use <strong>positional embeddings</strong>, which are added to the token embeddings to provide the model with the positional information. The positional embeddings are learned during training and are added to the token embeddings to provide the model with the positional information.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">PositionalEncoding</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">d_model</span><span class="p">,</span> <span class="n">max_len</span><span class="o">=</span><span class="mi">5000</span><span class="p">):</span>
+        <span class="nf">super</span><span class="p">(</span><span class="n">PositionalEncoding</span><span class="p">,</span> <span class="n">self</span><span class="p">).</span><span class="nf">__init__</span><span class="p">()</span>
+        <span class="n">pe</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">zeros</span><span class="p">(</span><span class="n">max_len</span><span class="p">,</span> <span class="n">d_model</span><span class="p">)</span>
+        <span class="n">position</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_len</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="p">.</span><span class="nb">float</span><span class="p">).</span><span class="nf">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">div_term</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">exp</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">d_model</span><span class="p">,</span> <span class="mi">2</span><span class="p">).</span><span class="nf">float</span><span class="p">()</span> <span class="o">*</span> <span class="o">-</span><span class="p">(</span><span class="n">math</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="mf">10000.0</span><span class="p">)</span> <span class="o">/</span> <span class="n">d_model</span><span class="p">))</span>
+        <span class="n">pe</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sin</span><span class="p">(</span><span class="n">position</span> <span class="o">*</span> <span class="n">div_term</span><span class="p">)</span>
+        <span class="n">pe</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">cos</span><span class="p">(</span><span class="n">position</span> <span class="o">*</span> <span class="n">div_term</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">pe</span> <span class="o">=</span> <span class="n">pe</span><span class="p">.</span><span class="nf">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>The positional embeddings are added to the token embeddings to provide the model with the positional information.</p>
+
+\[E_{i} = E_{token} + E_{positional}\]
+
+<p>Where \(E_{token}\) is the token embedding and \(E_{positional}\) is the positional embedding.</p>
+
+<p>There are two types of positional embeddings:</p>
+
+<ul>
+  <li>
+<strong>Absolute Positional Embedding</strong>: A fixed position embedding that is added to the token embeddings, such as Sinusoidal as in original Transformer paper, which uses mathematical function to generate the positional embeddings.</li>
+  <li>
+<strong>Learned Positional Embedding</strong>: A position embedding that is learned during training, such as in BERT, which allows more flexible and dynamic complex positional information specific to the task.</li>
+</ul>
+
+<p><strong>Relative Positional Embedding</strong>: The positional information is not added to the input embedding, but instead incorporated directly into the attention mechanism itself, by modifying the dot-product attention to include relative position information.
+This enables generalization to sequence lengths longer than the training data and handle variable-length sequences.</p>
 
 <h2 id="bert">BERT</h2>
 

@@ -145,6 +145,8 @@
     
     <div id="table-of-contents">
       <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h2"><a href="#robust-unlearning---the-next-challenge-in-unlearning">Robust Unlearning - The next challenge in Unlearning</a></li>
+<li class="toc-entry toc-h2"><a href="#hypothesis--fine-tuning-with-few-examples-in-transformer-based-architectures-over-attention-vs-overfitting">Hypothesis – Fine-Tuning with Few Examples in Transformer-Based Architectures: Over-Attention vs Overfitting</a></li>
 <li class="toc-entry toc-h2"><a href="#hypothesis---shortcut-learning-in-finetuning-diffusion-models-because-of-the-fixed-position">Hypothesis - Shortcut learning in finetuning Diffusion Models because of the fixed position</a></li>
 <li class="toc-entry toc-h2"><a href="#test-time-adjustment---bigger-picture">Test-Time Adjustment - Bigger Picture</a></li>
 <li class="toc-entry toc-h2"><a href="#pho-restaurants-and-the-way-we-do-research">Pho Restaurants and the Way We Do Research</a></li>
@@ -170,6 +172,21 @@
 <!-- mv _posts/2025-03-18*.png assets/img/thoughts/ -->
 
 <p>This post is to capture some of my quick thoughts/ideas, readers who don’t know the context, very likely not understand what I am talking about - But it’s oke :D because this is mainly for my own reference.</p>
+
+<h2 id="robust-unlearning---the-next-challenge-in-unlearning">Robust Unlearning - The next challenge in Unlearning</h2>
+
+<p>In my observation, the unlearning literature is moving beyond the standard criteria of unlearning and retaining performance, and gradually moving to the more realistic scenarios, where the unlearned models have been challenged such as jailbreak/recovery attacks or further fine-tuning on other tasks while still maintaining the “unlearned” capability (continual learning, but the previous task is “unlearned” task). It might set a higher bar for the unlearning research, so that proposed methods need to be proven in three aspects: unlearning target concepts, retaining performance on other tasks, and robustness to attacks or further fine-tuning.</p>
+
+<h2 id="hypothesis--fine-tuning-with-few-examples-in-transformer-based-architectures-over-attention-vs-overfitting">Hypothesis – Fine-Tuning with Few Examples in Transformer-Based Architectures: Over-Attention vs Overfitting</h2>
+
+<p>Tasks such as personalization, concept unlearning, and similar applications often require fine-tuning a model using only a few examples. This can lead to a phenomenon resembling “overfitting,” but with characteristics that differ from traditional machine learning overfitting.</p>
+
+<p>For instance, in methods like DreamBooth, the goal is to teach the model a specific personal concept from a handful of images. After fine-tuning on a new concept (e.g., a specific dog), the model may appear to “forget” the broader concept (e.g., generic dogs)—any prompt containing “dog” tends to produce the personalized dog. However, unlike classical overfitting, the model often retains its performance on unrelated concepts, such as “human” or “cat.”</p>
+
+<p>Similarly, in unlearning tasks—where the objective is to remove a specific concept (e.g., “gun” or “nudity”)—common approaches either manipulate the output directly (output-based) or modify cross-attention layers (attention-based) to redirect the visual correspondence away from the target concept. While these methods successfully forget the target concept and related concepts (e.g., “gun” → “weapon,” “nudity” → “naked”), the model still maintains knowledge of unrelated concepts. This behavior was observed in our ICLR 2025 study.</p>
+
+<p>These observations suggest that this phenomenon differs from conventional overfitting, that I term as “Over-Attention”: the model becomes overly focused on a small number of concepts or examples, but able to retain performance on other concepts.
+An intuitive explanation can be that in Transformer architectures, the attention mechanism allows weights to be more disentangled than in convolutional or recurrent networks. Each concept may be encoded along a relatively independent “path” in the model’s propagation. Consequently, fine-tuning for personalization (adding a branch) or unlearning (removing a branch) primarily affects the targeted concept, leaving other concept representations largely intact.</p>
 
 <h2 id="hypothesis---shortcut-learning-in-finetuning-diffusion-models-because-of-the-fixed-position">Hypothesis - Shortcut learning in finetuning Diffusion Models because of the fixed position</h2>
 
@@ -719,13 +736,13 @@ Therefore, one of the drawbacks of DFKD is that it is very slow.</p>
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2024/erasing-concepts/">Fake Taylor Swift and the Adversarial Game of Concept Erasure and Injection</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/unlearn-llms/">Unlearning LLMs</a>
   </li>
 
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/unlearn-llms/">Unlearning LLMs</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2024/erasing-concepts/">Fake Taylor Swift and the Adversarial Game of Concept Erasure and Injection</a>
   </li>
 
 </div>

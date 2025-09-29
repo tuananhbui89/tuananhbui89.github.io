@@ -161,6 +161,7 @@
 <li class="toc-entry toc-h4"><a href="#evaluation-metrics">Evaluation Metrics</a></li>
 </ul>
 </li>
+<li class="toc-entry toc-h3"><a href="#wmdp---measuring-and-reducing-malicious-use-with-unlearning">WMDP - Measuring and Reducing Malicious Use With Unlearning</a></li>
 <li class="toc-entry toc-h3">
 <a href="#muse---machine-unlearning-six-way-evaluation-for-language-models-iclr-2025">MUSE - Machine Unlearning Six-Way Evaluation for Language Models (ICLR 2025)</a>
 <ul>
@@ -296,7 +297,7 @@ However, this method is still be circumvented by aversaries, such as posing harm
 
 <h2 id="benchmarks-how-to-evaluate-unlearning">Benchmarks: How to Evaluate Unlearning?</h2>
 
-<p>To develop effective unlearning methods, we first need robust ways to measure unlearning success. There are two most common benchmarks: TOFU and MUSE.</p>
+<p>To develop effective unlearning methods, we first need robust ways to measure unlearning success. There are three most common benchmarks: TOFU, MUSE and WMDP.</p>
 
 <h3 id="tofu---a-task-of-fictitious-unlearning-for-llms-colm-2024">TOFU - A Task of Fictitious Unlearning for LLMs (COLM 2024)</h3>
 
@@ -424,6 +425,14 @@ However, this method is still be circumvented by aversaries, such as posing harm
   </li>
 </ul>
 
+<h3 id="wmdp---measuring-and-reducing-malicious-use-with-unlearning">WMDP - Measuring and Reducing Malicious Use With Unlearning</h3>
+
+<p>Motivation:</p>
+
+<ul>
+  <li>The Weapon Weapons of Mass Destruction Proxy Benchmark (WMDP),</li>
+</ul>
+
 <h3 id="muse---machine-unlearning-six-way-evaluation-for-language-models-iclr-2025">MUSE - Machine Unlearning Six-Way Evaluation for Language Models (ICLR 2025)</h3>
 
 <p>While TOFU provides a solid foundation, its metrics don’t cover the full spectrum of real-world concerns like privacy and scalability. To address these limitations, the MUSE benchmark proposed a more comprehensive six-way evaluation.</p>
@@ -496,13 +505,22 @@ To measure verbatim memorization, the paper uses the <a href="https://tuananhbui
 
 <p>ROUGE measures the overlap between the generated text (candidate) and one or more reference texts. It focuses on n-gram, sequence, and word-level similarity and is particularly recall-oriented, meaning it emphasizes how much of the reference text is captured by the generated text.</p>
 
-\[\text{ROUGE} = \frac{\sum_{i=1}^n \text{Count}_{i}}{\sum_{i=1}^n \text{Count}_{i}}\]
-
-<p>Where:</p>
+\[\text{ROUGE-N} = \frac{\sum_{r \in R} \sum_{\text{gram}_n \in r} \min \big( \text{Count}_{C}(\text{gram}_n), \text{Count}_{r}(\text{gram}_n) \big)}{\sum_{r \in R} \sum_{\text{gram}_n \in r} \text{Count}_{r}(\text{gram}_n)}\]
 
 <ul>
-  <li>\(n\) is the number of reference texts</li>
-  <li>\(\text{Count}_{i}\) is the number of n-grams in the generated text that are also in the \(i\)-th reference text</li>
+  <li>
+<strong>Numerator:</strong> number of overlapping (n)-grams between candidate and references</li>
+  <li>
+<strong>Denominator:</strong> total number of (n)-grams in references</li>
+</ul>
+
+<p>Special cases:</p>
+
+<ul>
+  <li>
+<strong>ROUGE-1</strong> → unigram overlap</li>
+  <li>
+<strong>ROUGE-2</strong> → bigram overlap</li>
 </ul>
 
 <p><strong>Knowledge Memorization</strong></p>
@@ -525,7 +543,7 @@ To measure verbatim memorization, the paper uses the <a href="https://tuananhbui
 
 <p>Consider a sequence of tokens in a sentence, denoted as \(x = x_1, x_2, ..., x_N\), the log-likelihood of a token, \(x_i\), given its preceding tokens is calculated as \(\log p(x_i \mid x_1, ..., x_{i-1})\). We then select the \(k\%\) of tokens from \(x\) with the minimum token probability to form a set, Min-K%(x), and compute the average log-likelihood of the tokens in this set:</p>
 
-\[\text{MIN-K\% PROB}(x) = \frac{1}{E} \sum_{x_i \in \text{Min-K\%}(x)} \log p(x_i \midx_1, ..., x_{i-1}).\]
+\[\text{MIN-K\% PROB}(x) = \frac{1}{E} \sum_{x_i \in \text{Min-K\%}(x)} \log p(x_i \mid x_1, ..., x_{i-1}).\]
 
 <p>where \(E\) is the size of the Min-K%(x) set. We can detect if a piece of text was included in pretraining data simply by thresholding this MIN-K% PROB result.</p>
 
