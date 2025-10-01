@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-09-30T15:30:18+10:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-10-01T14:38:06+10:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
 </subtitle><entry><title type="html">GPT-5 Series - Safe Completion Training</title><link href="https://tuananhbui89.github.io/blog/2025/safe-completion-training/" rel="alternate" type="text/html" title="GPT-5 Series - Safe Completion Training" /><published>2025-08-08T00:00:00+10:00</published><updated>2025-08-08T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/2025/safe-completion-training</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/safe-completion-training/"><![CDATA[<p>OpenAI just recently <a href="https://openai.com/gpt-5/">released their newest and most powerful model GPT-5</a>. In the post today, I want to talk about one of the most important aspects of LLMs: <strong>How to make them safe against malicious use</strong>.
 In this version, OpenAI introduces a new paradigm called <strong>Safe Completion Training</strong> (which is built on top of  Deliberative Alignment [4])</p>
 
@@ -1485,24 +1485,25 @@ Imagine dropping a blob of ink into a glass of water:</p>
 
 <h2 id="mathematical-foundation">Mathematical Foundation</h2>
 
-<h3 id="ode">ODE</h3>
+<p>Diffusion models are built on a deep interplay between <strong>differential equations</strong>, <strong>probability theory</strong>, and <strong>variational inference</strong>. To understand why the model works, we need to trace how these ideas connect: from describing how systems evolve over time, to modeling probability densities, to designing trainable objectives.</p>
 
-<p>An Ordinary Differential Equation (ODE) is a mathematical equation that describes how a function changes over time. In simple terms, it tells us how a quantity evolves continuously based on its current state.</p>
+<h3 id="differential-equations-odes-and-sdes">Differential Equations: ODEs and SDEs</h3>
+
+<p>We start with <strong>ordinary differential equations (ODEs)</strong>, which describe how a system changes deterministically over time based on its current state.</p>
 
 \[\frac{dx}{dt} = f(x, t)\]
 
 <p>where \(x(t)\) is the state of the system - the function we want to solve -and \(t\) is time. \(f(x, t)\) defines how \(x\) changes over time.</p>
 
-<h3 id="sde">SDE</h3>
-
-<p>A general form of an SDE is:</p>
+<p>This is a useful starting point, but in real-world data generation, we must account for <strong>randomness</strong>. That brings us to <strong>stochastic differential equations (SDEs)</strong>, which incorporate random fluctuations into the system.</p>
 
 \[dx = f(x, t) dt + g(x, t) dW_t\]
 
-<p>where \(f(x, t)dt\) is the drift term (deterministic change), and \(g(x, t) dW_t\) is the diffusion term (stochastic change). \(dW_t\) is the increment of a Wiener process (Brownian motion).</p>
+<p>where the <em>drift term</em> \(f(x, t) dt\) captures the deterministic trends, while the <em>diffusion term</em> \(g(x, t) dW_t\) captures the random fluctuations via a Wiener process \(W_t\).</p>
 
-<p>This equation describes how a system evolves over time with both deterministic trends and random fluctuations.
-In the case of Diffusion Models, the drift term is the shift of the mean of the distribution, and the diffusion term is the spread of the distribution.</p>
+<p>👉 Motivation: Diffusion models inject noise step by step, so SDEs provide the natural language to describe this stochastic corruption process. More specifically, the drift term \(f(x, t)\) is the shift of the mean of the distribution, and the diffusion term \(g(x, t)\) is the spread of the distribution - injecting Gaussian noise.</p>
+
+<h3 id="forward-and-reverse-diffusion-processes">Forward and Reverse Diffusion Processes</h3>
 
 <p><strong>Forward Process (Adding Noise)</strong></p>
 
@@ -1510,20 +1511,51 @@ In the case of Diffusion Models, the drift term is the shift of the mean of the 
 
 \[dx = f(x, t)dt + g(t) dW_t\]
 
-<p>where \(f(x,t)\) represents a deterministic shift of the mean of the distribution, and \(g(t)\) represents a stochastic spread of the distribution - injecting Gaussian noise.</p>
+<p>Intuitively, the drift term \(f(x, t) dt\) shifts the mean of the distribution by a deterministic amount \(f(x,t)\) (i.e., is a function of \(x\) and current time \(t\)) to a zero mean distribution. The diffusion term \(g(t) dW_t\) spreads the distribution by injecting Gaussian noise, increasing the variance of the distribution.</p>
 
-<p><strong>Reverse Process (Removing Noise)</strong></p>
+<p>Note that \(g(t)\) is a function of current time \(t\) only, to guarantee that each noised distribution remains Gaussian with a know mean and variance. This make the forward process to be simple and tractable, that we can have exact sampling formula for each specific time step \(t\), i.e., \(q (x_t \mid x_0) = \mathcal{N}(x_t; \sqrt{\bar{\alpha}_t} x_0, (1-\bar{\alpha}_t)I)\).</p>
 
-<p>The Reverse-Time SDE (by Anderson 1982) is:</p>
+<p><strong>Reverse Process (Removing Noise)</strong>
+In order to generate data from pure noise \(x_T\), we need to reverse the diffusion process by Reverse-Time SDE (Anderson 1982).</p>
 
 \[dx = \left[ f(x,t) - g^2(t) \nabla_x \log p_t(x) \right] dt + g(t) d\tilde{W}_t\]
 
-<p>where \(\nabla_x \log p_t(x)\) is the score function, which estimates the structure of data at time \(t\) - how likely different data points are at each step.
-\(d\tilde{W}_t\) is another Wiener process but in the reverse direction.</p>
+<p>where \(\nabla_x \log p_t(x)\) is the <strong>score function</strong>, which estimates the structure of data at time \(t\) - how likely different data points are at each step. \(d\tilde{W}_t\) is another Wiener process but in the reverse direction.</p>
 
-<p>In the reverse process of diffusion models, we train a neural network to approximate the score function \(\nabla_x \log p_t(x)\).</p>
+<p>👉 Motivation: Since \(f(x,t)\) and \(g(t))\) are known, to reverse noise, we must know the score function. So we train a neural network to approximate the score function \(\nabla_x \log p_t(x)\). This is the core of the diffusion model.</p>
 
-<h3 id="elbo">ELBO</h3>
+<h3 id="fokker-planck-equation-from-trajectories-to-distributions">Fokker-Planck Equation: From Trajectories to Distributions</h3>
+
+<p>SDEs describe how the distribution of a system changes over time, but what about the <strong>distribution of data</strong> as noise accumulates? The <strong>Fokker-Planck equation</strong> bridges the gap between trajectories and distributions, explaining how noise pushes data distributions \(p_t(x)\) toward isotropic Gaussian distributions.</p>
+
+\[\frac{\partial p_t(x)}{\partial t} = -\nabla_x \cdot (f(x,t) p_t(x)) + \frac{1}{2} \nabla_x \cdot (g(t)^2 \nabla_x p_t(x))\]
+
+<p>where \(p_t(x)\) is the distribution of the data at time \(t\).</p>
+
+<p>The first term \(-\nabla_x \cdot (f(x,t) p_t(x))\) describes the change of the probability density \(p_t(x)\) with the drift term \(f(x,t)\) (as the velocity of that mass). The divergence operator \(\nabla_x \cdot\) measures how much the mass is spreading out (positive divergence) or converging/concentrating (negative divergence) at any given point \(x\). The whole term \(- \nabla_x \cdot (f(x,t) p_t(x))\) describes a <strong>rate of change</strong> of the probability density \(p_t(x)\) at any given point \(x\), where the positive value means the mass is flowing away from \(x\), causing \(p_t(x)\) to decrease (hence the negative sign), and vice versa.</p>
+
+<p>The second term \(\frac{1}{2} \nabla_x \cdot (g(t)^2 \nabla_x p_t(x))\) presents the spreading and smoothing effect of the probability density \(p_t(x)\) over time due to the influence of the random fluctuations. More specifically, \(g(t)\) controls the magnitude of the random noise. The \(\nabla_x p_t(x)\) term describes the <strong>steepness</strong> or slope of \(p_t(x)\) at any given point \(x\). The whole term \(\frac{1}{2} \nabla_x \cdot (g(t)^2 \nabla_x p_t(x))\) describes a <strong>rate of change</strong> of the probability density \(p_t(x)\), i.e., the larger the gradient, the more the density rising sharply around \(x\). Similar to the first term, \(\nabla_x \cdot\) measures how much the mass is spreading out (positive divergence) or converging/concentrating (negative divergence) at any given point \(x\) with two differences:</p>
+
+<ul>
+  <li>It contains the random fluctuations term \(g(t)^2\) instead of the drift term \(f(x,t)\), introducing randomness into the system.</li>
+  <li>It proportional to the gradient \(\nabla_x p_t(x)\), meaning that the <strong>slope/sharp region is more affected/spread out than the flat region</strong> (which has smaller gradient \(\nabla_x p_t(x)\)).</li>
+</ul>
+
+<h3 id="score-matching-and-denoising">Score Matching and Denoising</h3>
+
+<p>Since the reverse SDE depends on the score function \(\nabla_x \log p_t(x)\) (which is intractable), we need to design a training objective to approximate this function. Vincent et al. proposed <strong>denoising score matching</strong> <a href="https://ieeexplore.ieee.org/abstract/document/6795935/">(Vincent 2011)</a> to approximate by training a neural network \(s_{\theta}(x_t, t)\) to approximate the conditional score function \(\nabla_x \log q(x_t \mid x_0, \epsilon)\) (where \(q\) is the tractable forward process) <strong>assuming</strong> that \(q(x_t \mid x_0, t) \approx p_t(x_t)\) at time \(t\) (which is a reasonable).</p>
+
+<p>This objective aims to minimize the difference:</p>
+
+\[\mathbb{E}_{p(x_0), \epsilon \sim \mathcal{N}(0, I)} \left[ \left\| s_{\theta}(x_t, t) - \nabla_x \log p_t(x_t \mid x_0, \epsilon) \right\|^2 \right]\]
+
+<h3 id="variational-perspective-and-kl-minimization">Variational Perspective and KL Minimization</h3>
+
+<p>Another way to frame diffusion models is to consider them as a variational inference problem. The forward process \(q(x_{0:T})\) is a know noising chain of distributions, and the reverse process \(p_{\theta}(x_{0:T})\) is learned. Therefore, we can use the variational lower bound (ELBO) to train the model.</p>
+
+\[\mathbb{E}_{q(x_{0:T})} \left[ D_{KL} \left( q(x_{t-1} \mid x_t, x_0) \parallel p_{\theta}(x_{t-1} \mid x_t) \right) \right]\]
+
+<p><strong>ELBO</strong></p>
 
 <p><a href="https://en.wikipedia.org/wiki/Evidence_lower_bound"><strong>Evidence lower bound (ELBO)</strong></a> is a key concept in variational inference, which is used in VAEs to approximate the log-likelihood of the data.</p>
 
@@ -1552,22 +1584,34 @@ L(\phi, \theta; x) &amp;= \mathbb{E}_{z\sim q_\phi(\cdot|x)}[\ln p_\theta(x,z)] 
 
 <h3 id="tweedies-formula">Tweedie’s formula</h3>
 
-<h2 id="variants">Variants</h2>
+<p>Finally, <strong>Tweedie’s formula</strong> gives a neat probabilistic justification for the denoising score matching objective:</p>
+
+\[\mathbb{E} [ x_0 \mid x_t] = x_t + \sigma_t^2 s_{\theta}(x_t, t)\]
+
+<p>where \(s_{\theta}(x_t, t)\) is the score function to be learned by the neural network. It shows that the posterior mean of clean data given a noisy data is just the noisy sample plus a correction term proportional to the score function.</p>
+
+<p>In some papers such as ESD (Gandikota et al. 2023), where we need to fine-tune the pretrained model and match the score function of the original and the fine-tuned model, they use Tweedie’s formula to justify the matching term.</p>
+
+<h2 id="variants-of-diffusion-models">Variants of Diffusion Models</h2>
+
+<p>The original formulation of diffusion models can be implemented in several ways. Two of the most influential variants are <strong>Denoising Diffusion Probabilistic Models (DDPMs)</strong> and <strong>Denoising Diffusion Implicit Models (DDIMs)</strong>. Both share the same forward noising process but differ in how they perform the reverse (denoising) process during inference.</p>
 
 <h3 id="ddpm">DDPM</h3>
+
+<p>DDPM (Ho et al. 2020) is the classic diffusion model:</p>
+
+<ul>
+  <li>The Reverse process is defined as a <strong>Markov chain</strong>, where each step \(x_t \to x_{t-1}\) involves sampling from a Gaussian distribution conditioned on \(x_t\).</li>
+  <li>Sampling os stochastic, even with the same starting noise \(x_T\), the generated data \(x_0\) is different.</li>
+  <li>While highly effective and stable (compared to GANs), DDPMs require hundreds to thousands of steps to slowly add/remove noise, which makes inference slow.</li>
+</ul>
 
 <p>Read more about DDPM in another blog post <a href="/blog/2023/diffusion-tutorial/">here</a></p>
 
 <h3 id="ddim">DDIM</h3>
 
-<p>Read more about DDIM in another blog post <a href="/blog/2023/diffusion-tutorial-p2/">here</a></p>
-
-<p>Key concepts of DDIM:</p>
-
-<ul>
-  <li>DDIM utilizes a <strong>non-Markovian transition</strong> during inference, enables faster sampling.</li>
-  <li>Can use the same training process as DDPM, e.g., we can use pretrained DDPM models to generate data.</li>
-</ul>
+<p>DDIM (Song et al. 2020) builds on DDPM but introduces a <strong>non-Markovian reverse process</strong>, enabling faster sampling.
+It also allows us to use the same training process as DDPM, e.g., we can use pretrained DDPM models to generate data.</p>
 
 <p>The sampling process of DDIM is as follows:</p>
 
@@ -1576,6 +1620,8 @@ L(\phi, \theta; x) &amp;= \mathbb{E}_{z\sim q_\phi(\cdot|x)}[\ln p_\theta(x,z)] 
 <p>where the first term represents the “predicted $x_0$”, the second term is the “direction pointing to $x_t$”, and the last term is random noise.</p>
 
 <p>By setting \(\sigma_t = 0\) for all \(t\), DDIM becomes a deterministic process given \(x_{t-1}\) and \(x_0\), except for \(t=1\). In other words, the intermediate steps \(x_{T-1}, x_{T-2}, \ldots, x_1\) are deterministic given starting noise \(x_T\).</p>
+
+<p>Read more about DDIM in another blog post <a href="/blog/2023/diffusion-tutorial-p2/">here</a></p>
 
 <h2 id="noise-scheduling">Noise scheduling</h2>
 
