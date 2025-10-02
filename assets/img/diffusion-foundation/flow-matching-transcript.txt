@@ -1,0 +1,546 @@
+# tactiq.io free youtube transcript
+# Flow Matching | Explanation + PyTorch Implementation
+# https://www.youtube.com/watch/7cMzfkWFWhI
+
+00:00:00.050 [Music]
+00:00:05.680 hey there and welcome to this video in
+00:00:08.280 this video I'll be talking about flow
+00:00:10.080 matching if you haven't heard of this
+00:00:12.160 technique it's the method behind stable
+00:00:14.519 diffusion 3 flux and also the very
+00:00:17.039 recent text to video model by meta
+00:00:19.160 called movie genen now before you get
+00:00:21.359 angry did you have to learn yet another
+00:00:23.439 method for a generative modeling after
+00:00:25.439 you potentially already put a lot of
+00:00:27.240 effort into understanding diffusion
+00:00:29.279 models let me tell you that flow
+00:00:31.320 matching is basically just like normal
+00:00:33.440 diffusion models but with some
+00:00:35.360 simplifying changes in my opinion some
+00:00:37.800 of the questionable choices in papers
+00:00:39.840 like ddpm or EDM are changed into much
+00:00:42.879 simpler versions in flow matching and by
+00:00:45.520 the aform mention models you can
+00:00:47.360 definitely believe that this works and
+00:00:49.480 also scales now how will this video be
+00:00:52.280 structured at first we'll do a quick
+00:00:54.840 introduction and explain the problem
+00:00:57.559 definition that we are trying to solve
+00:00:59.519 second I'll give you an intuitive
+00:01:01.680 derivation of flow matching which is
+00:01:04.000 extremely simple to understand and might
+00:01:06.520 already be all that you need for this
+00:01:08.520 entire method third we'll Place flow
+00:01:10.960 matching into the bigger picture of the
+00:01:12.960 fusion models such that you understand
+00:01:14.920 the core differences between this
+00:01:17.000 approach and the more typical ones that
+00:01:18.880 you might be used to and then fourth
+00:01:20.920 we'll do the full derivation as they
+00:01:23.000 also do in the paper and then last but
+00:01:25.439 not least we'll do a code example where
+00:01:27.560 we implement the approach in py let's
+00:01:30.600 briefly recap what the goal is that all
+00:01:33.119 of these different methods have in
+00:01:34.799 common they all try to generate data and
+00:01:37.439 assume we have a bunch of data samples
+00:01:39.560 that we can learn from for example if we
+00:01:41.759 have a bunch of images of trains the
+00:01:44.040 goal would be to generate new images of
+00:01:46.320 trains that are not in our existing data
+00:01:49.079 but still could likely be in it now we
+00:01:51.600 approach this as the following we assume
+00:01:53.680 there is some underlying data
+00:01:55.159 distribution that these images come from
+00:01:58.000 we can call this data distribution P1 of
+00:02:01.000 X1 we don't know P1 of X1 and can sample
+00:02:04.399 from it and therefore want to learn a
+00:02:06.439 new network that can help us to
+00:02:08.520 approximate and sample from it moreover
+00:02:11.360 all the diffusion methods flow matching
+00:02:13.560 included take the approach to generate
+00:02:15.959 new data by starting at some known
+00:02:18.160 distribution P0 of x0 that we can sample
+00:02:21.360 from like a standard gaussian
+00:02:22.920 distribution and then use the new
+00:02:24.879 network that we learn to slowly turn
+00:02:27.319 this into something that could come from
+00:02:29.400 the actual data distribution P1 of X1
+00:02:32.959 now after diving into this topic a lot
+00:02:35.560 and spending hours reading and
+00:02:37.720 understanding the specifics of the paper
+00:02:40.080 I realized that the whole idea of flow
+00:02:42.440 matching basically boils down to just
+00:02:44.959 two formulas which is kind of sad
+00:02:47.519 because I'm literally here making a
+00:02:49.159 whole video about the paper but super
+00:02:52.000 cool at the same time because the idea
+00:02:54.159 is just so simple now get this you want
+00:02:57.280 to go from your noise distribution for
+00:02:59.480 example
+00:03:00.360 distribution to your data distribution
+00:03:02.400 following some path between the two
+00:03:04.400 distributions and you want to learn a
+00:03:06.280 new network that can learn this path or
+00:03:08.840 trajectory say x0 is your noise and X1
+00:03:12.400 is your data then the simplest way to
+00:03:14.560 construct such a path between noise and
+00:03:17.080 data is by doing a linear interpolation
+00:03:19.959 that is literally the easiest possible
+00:03:22.040 way to do that in the formula you have t
+00:03:24.640 going from 0 to one such that when T is
+00:03:27.120 equals to zero we're at noise and when T
+00:03:29.480 is equal to one we are at data but we
+00:03:32.120 can also be anywhere in between now if
+00:03:34.480 you visualize this for a data set where
+00:03:36.720 this 2D checker board is our data X1 and
+00:03:39.920 this is our noise x0 from a standard
+00:03:42.159 gussian then if you start at T equals 0
+00:03:45.159 and you slowly go to tal 1 then this
+00:03:47.959 interpolation looks like this and now
+00:03:50.400 here comes the big thing this here is a
+00:03:52.920 function right and what we're interested
+00:03:55.360 in learning is the change of this
+00:03:57.439 function as this Moves In Time from
+00:03:59.959 noise to data from x0 to X1 specifically
+00:04:04.040 we're interested in the derivative of
+00:04:06.319 this function with respect to time
+00:04:09.000 because this will tell us that for a
+00:04:10.840 small NCH in time for example from 0.1
+00:04:13.959 to 0.2 how XT changes and this change
+00:04:18.000 literally defines the process of moving
+00:04:20.519 closer to data and that is all that we
+00:04:23.080 want right we want to move from a random
+00:04:25.440 x0 to a new data point X1 and now look
+00:04:28.960 at this if you take the time derivative
+00:04:31.600 of this you end up with this boom that
+00:04:35.840 means we can try to try a newal network
+00:04:38.800 that learns this quantity here
+00:04:41.080 specifically the model would take XT and
+00:04:43.880 predict X1 - x0 and this is a vector
+00:04:47.120 that points towards X1 from x0 so
+00:04:50.720 exactly where we should go to get closer
+00:04:52.880 to data and here comes the wild thing
+00:04:55.560 this is exactly the same conclusion that
+00:04:57.960 the flow matching paper has after going
+00:05:00.320 through many many many math steps and
+00:05:03.639 like how cool is that these two formulas
+00:05:06.120 don't just give you the solution of a
+00:05:08.080 big paper but you literally have a whole
+00:05:10.639 intuitive derivation of the idea of flow
+00:05:13.360 matching which Powers all the big
+00:05:15.280 generative models by top companies
+00:05:17.400 nowadays now in the rest of this video I
+00:05:20.000 will still go through the derivation
+00:05:21.800 that the paper is doing in case you're
+00:05:23.720 interested in that which also goes more
+00:05:25.680 into the details and covers why certain
+00:05:27.919 assumptions work out but if you already
+00:05:29.919 understood this simple derivation here
+00:05:32.319 that is basically all that you need and
+00:05:34.400 also remember that after the derivation
+00:05:36.720 we will do a code example with the data
+00:05:39.280 that we have here which also applies to
+00:05:41.960 other data like images or videos when I
+00:05:45.039 first started looking at the flow
+00:05:46.400 matching paper I was so confused because
+00:05:49.080 the derivation is motivated so
+00:05:51.280 differently than the typical diffusion
+00:05:53.039 model papers instead of just starting
+00:05:55.319 with their approach I first want to show
+00:05:57.639 you how they all fit into the big
+00:05:59.759 picture something which is not mentioned
+00:06:02.039 in the papers so basically all papers
+00:06:05.240 try to learn P1 of X1 which includes
+00:06:08.160 learning all the different PT of XT in
+00:06:10.880 order to move from p 0 of x0 the unknown
+00:06:14.039 distribution to P1 of X1 the nonn
+00:06:17.039 distribution now as far as for the
+00:06:19.080 videos that I made about score matching
+00:06:21.240 ddpm and now flow matching there are
+00:06:23.759 three different ways to approach
+00:06:25.520 learning PT of XT score matching is
+00:06:28.599 taking the score of PT of XT by applying
+00:06:31.759 the logarithm and then the gradient with
+00:06:34.199 respect to X ddpm is starting from the
+00:06:37.160 negative log of PT of XT and flow
+00:06:40.199 matching says that PT of XT is generated
+00:06:44.120 by something called the flow whose
+00:06:46.280 notation is p t of X so basically the
+00:06:49.720 same way we theoretically get XT from PT
+00:06:52.919 of XT we can use pite T of x to get XT
+00:06:57.319 now this doesn't explain anything so far
+00:06:59.840 but now pite stands in an interesting
+00:07:02.280 relation which is the following we have
+00:07:04.879 another function in here called UT of X
+00:07:07.599 which makes things even more confusing
+00:07:10.039 and what even is this time derivative
+00:07:12.560 well for a second let's replace pite T
+00:07:15.240 of X with XT and now the formula looks
+00:07:18.080 like this and now this seems a little
+00:07:20.360 bit more digestible this means that the
+00:07:22.759 way XT changes or flows is determined by
+00:07:26.160 UT which is a vector field and if time
+00:07:29.000 flows from from 0 to one from noise to
+00:07:31.400 data then UT points into the direction
+00:07:34.560 that you have to move XT to get closer
+00:07:37.199 to data this is really crucial to
+00:07:39.919 understand if you're at XT and you move
+00:07:42.120 a little bit further in time this gets
+00:07:44.159 you closer to your data point and this
+00:07:46.280 direction is defined by UT of XT and
+00:07:48.960 theoretically if we know UT then we
+00:07:51.440 could plug in any point and UT could
+00:07:53.759 tell us in which direction we have to
+00:07:55.879 move to get to data but well we don't
+00:07:58.720 know UT and that is why flow matching
+00:08:01.360 tries to approximate this Vector field
+00:08:03.639 by a newal network VT such that the
+00:08:06.360 outputs of both functions become
+00:08:08.639 approximately the same given XT and we
+00:08:11.720 will get XT from a flow pite or what you
+00:08:14.840 could also call the noising function but
+00:08:17.039 we don't really have a definition for
+00:08:18.800 this either but we'll get there and
+00:08:20.960 first let's define the objective that
+00:08:23.080 we're trying to minimize we will try to
+00:08:25.120 learn new network VT which tries to
+00:08:27.400 approximate UT as we have just said we
+00:08:30.280 don't have access to PT of XT and we
+00:08:32.958 also don't have access to pite of X and
+00:08:35.559 therefore also not to UT of XT but to be
+00:08:38.320 able to train we need a way to construct
+00:08:40.760 PT of XT and also need a way to get the
+00:08:43.240 vectors from UT of XT and the approach
+00:08:46.240 to achieve that is basically the same as
+00:08:48.680 what we ended up doing in the score
+00:08:50.399 matching video to get there let's start
+00:08:53.160 reting this objective until we have
+00:08:55.519 something that we can actually train
+00:08:57.440 with first of all we apply the algebraic
+00:09:00.360 identity what you might have learned in
+00:09:02.200 school already and now we will focus on
+00:09:04.519 this middle term here we can rewrite an
+00:09:07.440 expectation to an integral with this
+00:09:11.040 reformulation now the next step might
+00:09:13.240 come a bit out of nowhere but I will
+00:09:15.399 explain this in a second we will apply
+00:09:17.959 marginalization and will rewrite UT of
+00:09:20.880 XT as the following and this now looks
+00:09:24.200 super complicated right but let's
+00:09:26.839 understand the step by step first keep
+00:09:29.040 in mind that this here literally
+00:09:30.800 represents the same thing as the left
+00:09:32.959 side specifically a vector pointing
+00:09:35.560 towards the data manifold now this here
+00:09:38.079 is a simpler version of a vector field
+00:09:40.360 which only depends on a single data
+00:09:42.200 point X1 Let's do an example to
+00:09:44.800 understand this say we have the
+00:09:46.079 following data set of points a 2d
+00:09:48.320 checkerboard where all of this belongs
+00:09:50.320 to the data space and these gaps don't
+00:09:52.680 all of these points belong to P1 of X1
+00:09:55.640 and we will use a standard normal
+00:09:57.360 distribution as p 0 of x0
+00:09:59.959 now so far we haven't defined how the
+00:10:01.800 intermediate PT of XT look like such as
+00:10:04.560 P 0.5 of x0.5 and for the sake of this
+00:10:08.440 example I will show this to you here
+00:10:11.000 without mathematically defining anything
+00:10:13.279 but as you know from the beginning of
+00:10:14.800 this video this will simply be a linear
+00:10:16.920 interpolation we will talk more about
+00:10:18.880 this later now let's look at this
+00:10:20.640 awesome transition how data points are
+00:10:22.440 moved to our noise distribution awesome
+00:10:25.519 so we said UT of XT points towards our
+00:10:28.399 data right generally this is hard to
+00:10:30.839 Define but this here seems to be much
+00:10:33.040 easier since this Vector depends only on
+00:10:35.160 a single data point say we have this
+00:10:37.560 point XT and if we choose a random point
+00:10:40.279 from our data set for example this here
+00:10:42.800 then the vector towards our data point
+00:10:44.880 would be this easy right and now this
+00:10:47.519 formula simply gives us a nice
+00:10:49.399 connection between the general how to
+00:10:51.680 approximate UT of XT and the simple UT
+00:10:54.839 of XT given X1 specifically the SAS that
+00:10:58.279 we integrate over over all of our data
+00:11:00.360 space practically speaking we would go
+00:11:02.839 over our entire data set and calculate
+00:11:05.399 each vector and weight them by this term
+00:11:07.560 and then sum them up so we have a
+00:11:09.760 weighted sum where this Factor decides
+00:11:11.920 how much influence each data point /
+00:11:14.040 Vector has now this Factor depends on
+00:11:16.560 how likely a data point X1 is to be at
+00:11:19.560 the position XT at time T this is
+00:11:22.399 basically expressed with this part here
+00:11:24.839 because PT of XT given X1 is a
+00:11:27.800 probability density function or PDF and
+00:11:30.920 this returns a high value if x lies in a
+00:11:33.680 dense area and specifically here this is
+00:11:36.399 dependent on X1 to make this a bit less
+00:11:39.040 confusing imagine this is our XT and we
+00:11:41.880 choose this as X1 if T equals 0.8 then
+00:11:45.839 our data point could move to places that
+00:11:48.320 are very close to XT given different
+00:11:51.120 random noises and therefore if we're at
+00:11:53.600 XT moving into this direction would be a
+00:11:56.399 plausible Choice other than this X1 here
+00:11:59.480 because if we go to t equal 0.8 then XT
+00:12:02.800 is very far away and therefore moving
+00:12:04.880 into this direction doesn't seem like a
+00:12:06.760 good idea and this is exactly what this
+00:12:09.040 quantity would give us a density value
+00:12:11.880 if XT is likely to occur around X1 move
+00:12:15.199 to a specific time step T and this down
+00:12:18.000 here is simply for normalization
+00:12:19.639 purposes that we still integrate to one
+00:12:22.639 by the way keep in mind the dependence
+00:12:24.680 on T since this XT is unlikely to be
+00:12:27.680 close to X1 at time tal 0.8 but is much
+00:12:31.519 more likely at tal 0.2 and now after we
+00:12:35.079 have this equality we can pluck this
+00:12:37.320 into a formula that we were rewriting
+00:12:40.240 and now you see that PT of XT cancels
+00:12:43.279 and we are left with this formula and
+00:12:45.680 now we move this integral to the front
+00:12:47.839 by making use of the fubini tunell
+00:12:49.880 theorem and now we rewrite this back as
+00:12:52.320 an expectation which gives us this and
+00:12:55.040 we can PL this term back as the second
+00:12:57.279 part of the entire equation and now we
+00:12:59.800 will do the same thing that we already
+00:13:01.959 did in the score matching derivation we
+00:13:04.639 add this term to our entire equation and
+00:13:07.320 immediately subtract this again and as
+00:13:09.399 we've seen already there this is
+00:13:11.279 actually very useful because now we see
+00:13:13.560 that this here is the expanded algebraic
+00:13:16.079 identity which we can write like this
+00:13:19.079 now let's just separate all these terms
+00:13:21.000 into their own expectation and we can
+00:13:23.320 see that if we want to minimize this
+00:13:25.440 objective these two terms don't include
+00:13:27.760 the weights we are optimizing ing which
+00:13:29.680 are only present in annual Network VT of
+00:13:32.079 XT and therefore we can view them as a
+00:13:34.560 constant and therefore remove them from
+00:13:36.680 the
+00:13:37.480 objective now look where we started and
+00:13:40.079 where we ended up we don't have access
+00:13:42.240 to this Vector field duty of XT but
+00:13:44.680 manage to rewrite the objective to use a
+00:13:47.440 much simpler version of our Vector field
+00:13:49.800 which only depends on the single data
+00:13:51.560 point but an expectation still gives the
+00:13:54.199 correct directions Awesome by the way in
+00:13:57.279 the paper this objective here is
+00:13:59.240 referred to as the flow matching
+00:14:00.680 objective and this here is called the
+00:14:02.759 conditional flow matching objective if
+00:14:05.199 you watch until here already I can tell
+00:14:07.639 you that this was the hardest part and
+00:14:09.560 that the rest of the video will be much
+00:14:11.360 more chill if we look at this we still
+00:14:13.959 need to properly Define UT of XT given
+00:14:16.440 X1 and PT of XT given X1 now how do the
+00:14:20.320 authors get to this remember the formula
+00:14:22.800 for the flow pite of X which basically
+00:14:26.160 describes the act of moving X towards
+00:14:28.519 data first of all we can plug in the
+00:14:31.079 conditional Vector field now while this
+00:14:33.160 is still a very general formulation the
+00:14:35.279 author noo about actually defining the
+00:14:37.560 flow and they first make this definition
+00:14:40.240 furthermore they say that X comes from a
+00:14:42.600 normal distribution and therefore we can
+00:14:44.600 just denote this as our xzo since this
+00:14:47.240 is literally our noise distribution they
+00:14:49.600 describe this as the canonical
+00:14:51.279 transformation for gaussian
+00:14:52.720 distributions where canonical means that
+00:14:55.360 they are using the simplest possible
+00:14:57.360 form of linearly inter interpolating
+00:14:59.639 between two distributions P1 and p 0
+00:15:02.360 that involves shifting and scaling on
+00:15:04.800 the other hand previous methods like
+00:15:06.360 ddpm use a nonlinear interpolation which
+00:15:09.320 adds a lot of complexity and in flow
+00:15:11.759 matching the authors really tried to go
+00:15:13.560 for the simplest possible approach now
+00:15:16.240 they defined Sigma T and Mt to be the
+00:15:19.759 following and then the flow looks like
+00:15:22.360 this and this is precisely the linear
+00:15:24.839 interpolation between noise and data we
+00:15:27.199 have talked about just derived from the
+00:15:29.199 mathematical framework of the flow now
+00:15:31.920 let's take another look at our objective
+00:15:33.600 for the conditional flow matching
+00:15:35.399 remember this equation here where we can
+00:15:37.639 also plug in x0 and get the following
+00:15:40.480 now since this here is XT these two are
+00:15:43.519 the same and we can replace this with
+00:15:45.480 the derivative of the flow this means
+00:15:47.639 that what the newal network VT needs to
+00:15:49.920 predict is the derivative of the flow
+00:15:52.639 with respect to time let's plug this in
+00:15:55.519 and we can also rewrite the whole
+00:15:57.360 objective to only depend on x0 and X1 by
+00:16:00.720 also reparameterizing the input to the
+00:16:02.920 newal network perfect now let's find out
+00:16:06.120 what our new network actually needs to
+00:16:08.120 predict and differentiate this with
+00:16:10.440 respect to T and this is actually super
+00:16:12.759 easy since this is such a simple formula
+00:16:15.920 and there you go this is how we get to
+00:16:18.600 our objective and what the newal network
+00:16:20.959 needs to predict and this is exactly
+00:16:23.399 what we got previously already when we
+00:16:25.440 looked at the super inuitive derivation
+00:16:27.680 at the beginning of the video
+00:16:29.720 and now during training we sample random
+00:16:31.800 noise x0 from the noise distribution and
+00:16:34.079 Sample data points X1 from our data set
+00:16:36.639 and Sample T between 0 and 1 and then we
+00:16:39.639 calculate XT by linearly interpolating
+00:16:42.399 between x0 and X1 with the flow and give
+00:16:45.399 this as the input toal Network which
+00:16:47.800 tries to predict the vector from x0 to
+00:16:50.399 X1 and that's flow matching a lot of
+00:16:53.319 maths and theoretical things to get to
+00:16:56.000 something so simple and that is also why
+00:16:58.399 I really like the intuitive explanation
+00:17:00.639 from the beginning which doesn't require
+00:17:02.839 this whole derivation but still
+00:17:04.720 logically makes sense anyways this was
+00:17:07.559 the derivation as the authors show in
+00:17:09.720 the paper now remember the 2D
+00:17:11.919 checkerboard example I showed earlier
+00:17:14.119 which is also used in the paper well
+00:17:16.559 since you guys always want some code
+00:17:18.480 let's look at the py to code to train a
+00:17:20.520 flow matching model to generate such
+00:17:22.400 data and in practice you can just apply
+00:17:24.959 this to any kind of data like images or
+00:17:27.359 even videos first of all in order to
+00:17:29.919 construct such a data set you can look
+00:17:32.000 at this code here I'm not going to go
+00:17:34.240 much into this since this doesn't have
+00:17:36.360 much to do with the actual deep learning
+00:17:38.280 part and if you want you can spend some
+00:17:40.640 time to go through the code yourself if
+00:17:42.600 you want to see how this is set up all
+00:17:44.799 you need to know is that this code can
+00:17:46.919 give us sampled points which if we plot
+00:17:49.600 looks like this here so this is our X1
+00:17:53.000 and for x0 we will use gussan noise
+00:17:55.400 later for now let's look at the new
+00:17:57.480 network VT that we can can train this
+00:18:00.000 here is a super simple MLP which has an
+00:18:02.760 in projection which projects our data
+00:18:05.159 that has two Dimensions to a larger
+00:18:07.159 number in our case 512 we also have a
+00:18:10.440 way to include the time step T by first
+00:18:12.919 applying cosine and sign embeddings and
+00:18:15.120 then a linear layer on top of that next
+00:18:17.840 we add the time step embedding to the
+00:18:19.720 input and then apply a bunch of blocks
+00:18:22.320 which simply consist of linear layers
+00:18:24.360 and R activations afterwards we apply an
+00:18:27.480 out projection to Pro back to the input
+00:18:29.960 dimension of two and then we return X
+00:18:32.919 and here we defined the model and the
+00:18:35.000 optimizer and now we can go to the
+00:18:36.840 training Loop we can train for 500k
+00:18:39.360 steps with a batch size of 64 inside the
+00:18:42.360 training Loop we get a batch of X1
+00:18:44.679 randomly drawn from a data set and here
+00:18:46.880 we Define x0 to beuss your noise using
+00:18:49.640 the pyge Rand end function and
+00:18:52.159 specifically ask for this to have the
+00:18:54.320 same shape as our data X1 here we Define
+00:18:57.039 the target what the new netor work
+00:18:59.080 should try to predict and then we
+00:19:01.080 randomly sample time steps between 0er
+00:19:03.520 and one and interpolate x0 and X1 to get
+00:19:06.919 XT and now we give XT and the time step
+00:19:09.799 t to the model and get the prediction
+00:19:12.600 and take the L2 loss between this and
+00:19:15.400 the Target and then we back propagate
+00:19:17.440 the loss and take an Optimizer step and
+00:19:19.720 that is all that we need for the
+00:19:21.440 training now we can train the model and
+00:19:23.720 afterwards we can plot the loss which
+00:19:25.799 actually in the fusion models never
+00:19:27.280 really shows that much but now we can
+00:19:29.760 actually go to try to generate some new
+00:19:32.200 data points the idea is very simple we
+00:19:34.919 will just start with Point sampled from
+00:19:37.400 the noise distribution p 0 and then give
+00:19:40.039 this to our model to get the direction
+00:19:42.559 that each point should move to get
+00:19:44.320 closer to P1 and we will do this
+00:19:46.440 iteratively because otherwise there are
+00:19:48.720 much higher chances we drift off the
+00:19:50.919 actual path or overshoot the actual
+00:19:53.400 destination okay here goes the code
+00:19:55.960 first we sample the points where we
+00:19:57.840 start from and we Define how many
+00:19:59.720 iterations or steps we want to do we
+00:20:02.080 will go with a th000 here then we will
+00:20:04.600 create a for Loop for the 1,000
+00:20:06.679 iterations and always give the current
+00:20:08.799 positions to the model along with the
+00:20:10.960 time step and then simply take the
+00:20:13.159 prediction of the model and add this to
+00:20:15.440 the current points multiplied by the
+00:20:17.640 step size which depends on the number of
+00:20:19.840 iterations that we do so let's say we
+00:20:22.280 have these two points and the model
+00:20:24.360 predicts these vectors we take these
+00:20:26.640 vectors and multiply them by one divided
+00:20:29.320 by a thousand and add this to the points
+00:20:31.919 which moves them closer to data and that
+00:20:34.159 is literally all there is to generate
+00:20:36.039 new data points how freaking cool is
+00:20:38.120 that the whole sampling code takes
+00:20:40.200 essentially just two lines and while
+00:20:42.960 this might seem like a very simple
+00:20:44.720 example with this 2D data set here the
+00:20:47.559 logic doesn't change if you go to images
+00:20:50.120 or videos that means in order to create
+00:20:53.320 these awesome images here the sampling
+00:20:55.840 logic is literally this on honestly I'm
+00:20:59.520 so happy that such a complex seeming
+00:21:01.960 task like text to image or text to video
+00:21:04.679 can be approached with such a simple and
+00:21:07.039 intuitive method which even achieves
+00:21:09.400 state-of-the-art results that is how
+00:21:11.320 that should be and if I have learned one
+00:21:13.919 thing over my few years in machine
+00:21:16.000 learning then that Simplicity will
+00:21:18.400 always win and that is all for this
+00:21:20.720 video on Flow matching before you leave
+00:21:23.039 I have one quick announcement to make
+00:21:25.080 which is that there's now a patreon for
+00:21:27.279 this channel in case really enjoy these
+00:21:29.559 videos and want to support me in making
+00:21:32.000 them you can find a link in the
+00:21:33.440 description also leave any feedback you
+00:21:35.919 have in the comments and some
+00:21:37.600 suggestions on topics that you would
+00:21:39.480 like to see because I think I now have
+00:21:41.520 covered most of the fundamentals of
+00:21:43.520 diffusion models and especially with
+00:21:45.480 flow matching there's so much less
+00:21:47.480 complexity to the whole field therefore
+00:21:50.320 I'm very curious what other topics you
+00:21:52.440 would like to see so yeah share the
+00:21:54.600 video with your friends and I'll
+00:21:56.679 hopefully see you in the next one
+00:21:58.540 [Music]
