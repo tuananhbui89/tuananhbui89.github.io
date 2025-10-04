@@ -205,6 +205,8 @@
 <ul>
 <li class="toc-entry toc-h3"><a href="#classifier-guidance">Classifier Guidance</a></li>
 <li class="toc-entry toc-h3"><a href="#classifier-free-guidance">Classifier-free Guidance</a></li>
+<li class="toc-entry toc-h3"><a href="#classifier-free-guidance-cfg">Classifier-Free Guidance (CFG)</a></li>
+<li class="toc-entry toc-h3"><a href="#intuition-recap">Intuition Recap</a></li>
 </ul>
 </li>
 <li class="toc-entry toc-h2"><a href="#latent-diffusion">Latent Diffusion</a></li>
@@ -1171,6 +1173,8 @@ In practice, the three inputs \(t, x, c\) are concatenated together as the input
 <strong>Exponential</strong>: \(\beta_t = \beta_{\max} (\beta_{\min} / \beta_{\max})^{\frac{t}{T}}\)</li>
 </ul>
 
+<hr>
+
 <h2 id="guidanced-diffusion">Guidanced Diffusion</h2>
 
 <p>Resources:</p>
@@ -1216,9 +1220,9 @@ In a simple case, where \(y\) is just a image class, like a <code class="languag
   <li>If you want to generate an image \(x\) from a complex prompt \(y\), you need a powerful model like CLIP as the conditional model \(p_\phi(y \mid x)\).</li>
 </ul>
 
-<p>To balance between the specificity (i.e., high \($p(y \mid x\))) and diversity/quality (i.e., \(p(x \mid y) \approx p(x)\)), we use a guidance scale \(\gamma\) to control the trade-off between the two.</p>
+<p>To balance between the specificity (i.e., high \(p(y \mid x\))) and diversity/quality (i.e., \(p(x \mid y) \approx p(x)\)), we use a guidance scale \(\gamma\) to control the trade-off between the two.</p>
 
-\[\nabla_x \log p(x \mid y) =  \nabla_x \log p(x) + \gamma \nabla_x \log p(y \mid x)\]
+\[\nabla_x \log p_{\textcolor{red}{\gamma}}(x \mid y) =  \nabla_x \log p(x) + \gamma \nabla_x \log p(y \mid x)\]
 
 <p>where \(\gamma\) is the guidance scale. A big \(\gamma\) means the model is less creative but more following the condition \(y\).</p>
 
@@ -1231,6 +1235,190 @@ In a simple case, where \(y\) is just a image class, like a <code class="languag
 <p>The idea of classifier-free guidance cames from the <strong>Bayes Classifier</strong> - if you have trained a powerful unconditional generative model \(p(x)\) then you can use it as a classifier \(p(y \mid x)\) as follows:</p>
 
 \[p(y \mid x) = \frac{p(x \mid y) p(y)}{p(x)}\]
+
+<h3 id="classifier-free-guidance-cfg">Classifier-Free Guidance (CFG)</h3>
+
+<p>Classifier guidance has two key limitations:</p>
+
+<ol>
+  <li>It requires a powerful external classifier \(p_\phi(y \mid x)\).</li>
+  <li>The generative model \(p_\theta(x)\) may not match the domain of interest (e.g., trained on ImageNet but asked to generate medical images).</li>
+</ol>
+
+<p><strong>Classifier-free guidance</strong> solves both by eliminating the explicit classifier. Instead, we train the diffusion model itself in two modes:</p>
+
+<ul>
+  <li>
+<strong>Unconditional:</strong> modeling \(p_\theta(x)\)</li>
+  <li>
+<strong>Conditional:</strong> modeling \(p_\theta(x \mid y)\)</li>
+</ul>
+
+<p>This is achieved simply by randomly dropping out the condition \(y\) during training (with some probability, e.g., 10–20%). Rather than truly unconditional generation \(p_\theta(x)\) which can be complicated in implementation, we can replace with a <strong>null condition</strong> \(\emptyset\) which is an empty string, i.e., \(p_\theta(x) = p_\theta(x \mid \emptyset)\). <strong>However, in my intuition, this might implicitly implies the null concept lies in the low-density region of the data manifold.</strong> More specifically, without the null condition, the interpolation between \(p_\theta(x \mid y_1)\) and \(p_\theta(x \mid y_2)\) such as \(p_\theta(x \mid (1-t)y_1 + ty_2)\) might be a smooth transition between two concepts \(y_1\) and \(y_2\). However, with the null condition, the interpolation might be a jump from one concept to another.</p>
+
+<p>At inference time, we can <em>combine</em> these two models into a guided score. The derivation is as follows:</p>
+
+<p>We start with Bayes rule for the conditional score that we want to approximate:</p>
+
+\[p(y \mid x) = \frac{p(x \mid y) p(y)}{p(x)}\]
+
+<p>Applying log-likelihood and taking the derivative w.r.t. \(x\):</p>
+
+\[\nabla_x \log p(y \mid x) = \nabla_x \log p(x \mid y) + \nabla_x \log p(y) - \nabla_x \log p(x)\]
+
+<p>Dropping the term \(\nabla_x \log p(y)\) since \(p(y)\) is independent of \(x\):</p>
+
+\[\nabla_x \log p(y \mid x) = \nabla_x \log p(x \mid y) - \nabla_x \log p(x)\]
+
+<p>Replacing this into the Classifier-guidance formula:</p>
+
+\[\nabla_x \log p_{\textcolor{red}{\gamma}}(x \mid y) =  \nabla_x \log p(x) + \gamma (\nabla_x \log p(x \mid y) - \nabla_x \log p(x))\]
+
+<p>that is:</p>
+
+\[\nabla_x \log p_{\textcolor{red}{\gamma}}(x \mid y) =  (1 - \gamma) \nabla_x \log p(x) + \gamma \nabla_x \log p(x \mid y)\]
+
+<p>where \(\gamma \geq 0\) is the <strong>guidance scale</strong>.</p>
+
+<ul>
+  <li>\(\gamma = 0\) → purely unconditional generation \(p(x \mid \emptyset)\)</li>
+  <li>\(\gamma = 1\) → purely conditional generation \(p(x \mid y)\).</li>
+  <li>\(\gamma &gt; 1\) → amplifies the effect of the condition but less creative, trading off diversity for fidelity.</li>
+  <li>Geometrically, CFG interpolates between the unconditional and conditional score vectors, pushing the sample further in the direction that aligns with \(y\).</li>
+</ul>
+
+<p><strong>Why Classifier-Free Guidance works better than Classifier Guidance?</strong><br>
+(Extending the intuition from Sander Dieleman) — the key lies in the difference between the gradient from a standard/external classifier \(\phi\) and the gradient from the generative model itself \(\theta\).</p>
+
+<ul>
+  <li>
+    <p><strong>Classifier Guidance</strong> relies on<br>
+\(\nabla_x \log p_{\phi}(y \mid x),\)<br>
+where the classifier is trained independently from the generative process.</p>
+  </li>
+  <li>
+    <p><strong>Classifier-Free Guidance (CFG)</strong> instead leverages the <em>implicit classifier</em> inside the generative model:<br>
+\(\nabla_x \log p_{\theta}(x \mid y) + \nabla_x \log p_{\theta}(y) - \nabla_x \log p_{\theta}(x).\)</p>
+  </li>
+</ul>
+
+<p>A well-known phenomenon of discriminative classifiers is <strong>shortcut learning</strong> (<a href="https://arxiv.org/abs/2004.07780" rel="external nofollow noopener" target="_blank">Geirhos et al., 2020</a>): gradient-descent-trained classifiers often find “shortcuts” that optimize the loss but fail to align with human perception. For example, they may overfit to local texture cues rather than global shape, producing gradients that push generation toward features humans do not find semantically meaningful.</p>
+
+<p>By contrast, the generative classifier (implicit in CFG) is trained to <em>model and reconstruct the data distribution itself</em> conditioned on human-meaningful labels/prompts. Its gradients are therefore better aligned with human perceptual semantics.</p>
+
+<p>👉 In short: CFG works better under the <strong>human perspective</strong> (more semantically aligned generations), whereas Classifier Guidance works better under the <strong>classifier perspective</strong> (gradients aligned with a discriminative model that may exploit spurious correlations).</p>
+
+<p><strong>When Classifier Guidance is better?</strong><br>
+I’ve explored a proposal linking this to <strong>Machine Unlearning</strong> (although not yet published). The idea is to guide unlearning with the gradient of an <em>external classifier</em>, rather than relying solely on the generative classifier as in the [ESD paper]. This approach can be particularly beneficial in two cases:</p>
+
+<ul>
+  <li>
+<strong>Unlearning rare concepts</strong>: where the generative model assigns very low probability \(p_{\theta}(x \mid y)\), making CFG ineffective.</li>
+  <li>
+<strong>Unlearning ambiguous or multi-expressed concepts</strong>: e.g., “nudity” vs “naked”. A discriminative classifier can unify these expressions under a shared semantic decision boundary, while the generative model may treat them as distinct.</li>
+</ul>
+
+<p>Thus, while CFG dominates in general generation tasks, Classifier Guidance can provide unique advantages for <em>targeted unlearning</em>.</p>
+
+<p><strong>Why \(\gamma &gt; 1\) but not between \(0\) and \(1\)?</strong></p>
+
+<p>In typical interpolation scenarios, we expect \(\gamma \in [0,1]\) to balance unconditional and conditional influences. Surprisingly, in CFG, values of \(\gamma &gt; 1\) (e.g., 7 or 7.5) are commonly used — and empirically yield sharper, more faithful generations.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="https://sander.ai/images/panda1-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="https://sander.ai/images/panda1-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="https://sander.ai/images/panda1-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="https://sander.ai/images/panda1.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="https://sander.ai/images/panda3-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="https://sander.ai/images/panda3-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="https://sander.ai/images/panda3-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="https://sander.ai/images/panda3.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Two sets of samples from OpenAI's GLIDE model, for the prompt 'A stained glass window of a panda eating bamboo.', taken from their paper. Guidance scale 1 (no guidance) on the left, guidance scale 3 on the right. Image source: from Sander Dieleman's blog.
+</div>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="https://sander.ai/images/corgi1-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="https://sander.ai/images/corgi1-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="https://sander.ai/images/corgi1-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="https://sander.ai/images/corgi1.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="https://sander.ai/images/corgi3-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="https://sander.ai/images/corgi3-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="https://sander.ai/images/corgi3-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="https://sander.ai/images/corgi3.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Two sets of samples from OpenAI's GLIDE model, for the prompt '“A cozy living room with a painting of a corgi on the wall above a couch and a round coffee table in front of a couch and a vase of flowers on a coffee table.', taken from their paper. Guidance scale 1 (no guidance) on the left, guidance scale 3 on the right. Image source: from Sander Dieleman's blog.
+</div>
+
+<p>As demonstrated in <a href="https://arxiv.org/pdf/2105.05233" rel="external nofollow noopener" target="_blank">Dhariwal &amp; Nichol, 2021</a>, larger \(\gamma\) produces outputs with higher fidelity and stronger alignment to prompts, albeit at the cost of reduced diversity. The intuition is that \(\log p_{\gamma}(y \mid x)\) becomes <em>sharper</em> than \(\log p_{1}(y \mid x)\) when \(\gamma &gt; 1\), effectively amplifying conditional gradients and biasing the generation toward features that match the conditioning signal more strongly.</p>
+
+<p>This explains why CFG practitioners often “turn up the guidance dial” above 1 — it helps the model stay on track with the prompt, even if some creativity/diversity is sacrificed.</p>
+
+<h3 id="intuition-recap">Intuition Recap</h3>
+
+<ul>
+  <li>
+<strong>Classifier guidance:</strong> adds an external force from a classifier \(p(y \mid x)\).</li>
+  <li>
+<strong>Classifier-free guidance:</strong> reuses the generative model itself, trained with and without condition, to simulate that force.</li>
+  <li>Both balance a trade-off between diversity and conditional alignment, controlled by the guidance scale \(\gamma\).</li>
+</ul>
+
+<hr>
 
 <h2 id="latent-diffusion">Latent Diffusion</h2>
 
@@ -1281,6 +1469,8 @@ The model becomes the original Stable Diffusion when \(\lambda = 0\).</p>
   <li>[2] <a href="https://openreview.net/pdf?id=PJqP0wyQek#page=1.93" rel="external nofollow noopener" target="_blank">MS-DIFFUSION: MULTI-SUBJECT ZERO-SHOT IMAGE PERSONALIZATION WITH LAYOUT GUIDANCE</a>
 </li>
 </ul>
+
+<hr>
 
 <h2 id="diffusion-transformers">Diffusion Transformers</h2>
 
@@ -1358,6 +1548,8 @@ The model becomes the original Stable Diffusion when \(\lambda = 0\).</p>
   <li>Official implementation: <a href="https://github.com/facebookresearch/DiT" rel="external nofollow noopener" target="_blank">https://github.com/facebookresearch/DiT</a>
 </li>
 </ul>
+
+<hr>
 
 <h2 id="diffusion-flux">Diffusion Flux</h2>
 
