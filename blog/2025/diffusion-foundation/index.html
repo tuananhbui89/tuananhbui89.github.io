@@ -234,8 +234,17 @@
 <li class="toc-entry toc-h2">
 <a href="#accelerating-diffusion-models">Accelerating Diffusion Models</a>
 <ul>
+<li class="toc-entry toc-h3">
+<a href="#consistency-models">Consistency Models</a>
+<ul>
+<li class="toc-entry toc-h4"><a href="#concept-and-mathematical-definition">Concept and Mathematical Definition</a></li>
+<li class="toc-entry toc-h4"><a href="#sampling-with-consistency-models">Sampling with Consistency Models</a></li>
+<li class="toc-entry toc-h4"><a href="#training-consistency-models">Training Consistency Models</a></li>
+</ul>
+</li>
 <li class="toc-entry toc-h3"><a href="#diffusion-distillation">Diffusion Distillation</a></li>
 <li class="toc-entry toc-h3"><a href="#rectified-diffusion">Rectified Diffusion</a></li>
+<li class="toc-entry toc-h3"><a href="#caching">Caching</a></li>
 </ul>
 </li>
 </ul>
@@ -351,7 +360,7 @@ Imagine dropping a blob of ink into a glass of water:</p>
 <p><strong>Reverse Process (Removing Noise)</strong>
 In order to generate data from pure noise \(x_T\), we need to reverse the diffusion process by Reverse-Time SDE (Anderson 1982).</p>
 
-\[dx = \left[ f(x,t) - g^2(t) \nabla_x \log p_t(x) \right] dt + g(t) d\tilde{W}_t\]
+\[dx = \left[ f(x,t) - \frac{1}{2} g^2(t) \nabla_x \log p_t(x) \right] dt + g(t) d\tilde{W}_t\]
 
 <p>where \(\nabla_x \log p_t(x)\) is the <strong>score function</strong>, which estimates the structure of data at time \(t\) - how likely different data points are at each step. \(d\tilde{W}_t\) is another Wiener process but in the reverse direction.</p>
 
@@ -1574,9 +1583,216 @@ The model becomes the original Stable Diffusion when \(\lambda = 0\).</p>
 
 <h2 id="accelerating-diffusion-models">Accelerating Diffusion Models</h2>
 
+<h3 id="consistency-models">Consistency Models</h3>
+
+<p>The core idea behind <strong>Consistency Models (CMs)</strong> is elegantly simple yet powerful:</p>
+
+<blockquote>
+  <p><strong>“Points on the same trajectory should map to the same initial point.”</strong></p>
+</blockquote>
+
+<h4 id="concept-and-mathematical-definition">Concept and Mathematical Definition</h4>
+
+<p>Formally, consider a solution trajectory \(\{ x_t \}_{t \in [\epsilon, T]}\) of the <strong>Probability Flow ODE</strong>:</p>
+
+\[\frac{dx}{dt} = \mu(x, t) - \frac{1}{2} \sigma(t)^2 \nabla_x \log p_t(x)\]
+
+<p>We define the <strong>consistency function</strong> as</p>
+
+\[f: (x_t, t) \mapsto x_{\epsilon}\]
+
+<p>Intuitively, this function maps any point along a diffusion trajectory to its corresponding starting point at time \(\epsilon\).</p>
+
+<p>A valid consistency function must satisfy the <strong>self-consistency property</strong>:</p>
+
+\[f(x_t, t) = f(x_{t'}, t') \quad \forall t, t' \in [\epsilon, T]\]
+
+<p>That is, any two points on the same trajectory—no matter when they occur—should yield the same mapped output.</p>
+
+<p>The objective of a <strong>consistency model</strong> \(f_{\theta}\) is to learn this mapping from data while enforcing this self-consistency constraint.</p>
+
+<p><strong>Determinism and Relation to Probability Flow ODE</strong></p>
+
+<p>Unlike the stochastic nature of the diffusion SDE, the <strong>Probability Flow ODE</strong> is <em>deterministic</em>.<br>
+Given a fixed starting point \(x_T\), the trajectory and its corresponding final point \(x_{\epsilon}\) are uniquely determined for all \(t \in [\epsilon, T]\).</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion-foundation/2025-10-05-13-34-52-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion-foundation/2025-10-05-13-34-52-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion-foundation/2025-10-05-13-34-52-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/diffusion-foundation/2025-10-05-13-34-52.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion-foundation/2025-10-05-13-35-06-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion-foundation/2025-10-05-13-35-06-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion-foundation/2025-10-05-13-35-06-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/diffusion-foundation/2025-10-05-13-35-06.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+
+<h4 id="sampling-with-consistency-models">Sampling with Consistency Models</h4>
+
+<p>Once trained, a consistency model \(f_{\theta}\) can generate samples in a <strong>single step</strong>:</p>
+
+<ol>
+  <li>Sample a random latent point \(x_T \sim \mathcal{N}(0, I)\)</li>
+  <li>Map it to data space with<br>
+\(x_{\epsilon} = f_{\theta}(x_T, T)\)</li>
+</ol>
+
+<p>This one-step sampling process is deterministic and efficient.<br>
+Alternatively, we can perform multi-step sampling by injecting small amounts of noise at each step, introducing stochasticity to improve sample diversity.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion-foundation/2025-10-06-10-44-39-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion-foundation/2025-10-06-10-44-39-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion-foundation/2025-10-06-10-44-39-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/diffusion-foundation/2025-10-06-10-44-39.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+
+<h4 id="training-consistency-models">Training Consistency Models</h4>
+
+<p>There are two main strategies to train consistency models:</p>
+
+<ol>
+  <li>
+<strong>Distillation from Pre-Trained Diffusion Models</strong> uses knowledge from a pre-trained diffusion model.</li>
+  <li>
+<strong>Training from Scratch</strong> relies on an unbiased estimator of the score function.</li>
+</ol>
+
+<p>In summary, the key step is how to get the two adjacent points of the PF-ODE trajectory, then enforce the consistency function as its definition. In distillation, we leverage the pre-trained score model \(s_{\phi}(x,t)\) to approximate the ground-truth score function \(\nabla_x \log p_t(x)\). In training from scratch, we leverage the following unbiased estimator</p>
+
+\[\nabla_x \log p_t(x) = \mathbb{E} \left[ \frac{x_t - x}{t^2} \mid x_t \right]\]
+
+<p>where \(x \sim \mathcal{D}\) and \(x_t \sim \mathcal{N}(x; t^2 I)\). At the end, we approximate \(x_{t_n} = x + t_n z\) and \(x_{t_{n+1}} = x + t_{n+1} z\) where \(z \sim \mathcal{N}(0, I)\).</p>
+
+<p><strong>Distribution Matching Distillation</strong></p>
+
+<p>This approach leverages an existing diffusion model to generate <em>adjacent points</em> \((\hat{x}_{t_n}, x_{t_{n+1}})\) along a Probability Flow ODE trajectory.</p>
+
+<p>The goal is to enforce:</p>
+
+\[f_{\theta}(\hat{x}_{t_n}, t_n) = f_{\theta}(x_{t_{n+1}}, t_{n+1})\]
+
+<p>so that \(f_{\theta}\) behaves as a true consistency function.</p>
+
+<p><strong>Step-by-step process:</strong></p>
+
+<p><strong>Step 1 — Obtain point</strong> \(x_{t_{n+1}}\)<br>
+Sample from the SDE transition density:
+\(x_{t_{n+1}} \sim \mathcal{N}(x; t_{n+1}^2 I), \quad x \sim \mathcal{D}\)</p>
+
+<p><strong>Step 2 — Estimate the adjacent point</strong> \(\hat{x}_{t_n}\)<br>
+Using an ODE solver \(\Phi(x, t, \phi)\) parameterized by the pre-trained diffusion model:</p>
+
+\[\hat{x}_{t_n} = x_{t_{n+1}} + (t_n - t_{n+1}) \Phi(x_{t_{n+1}}, t_{n+1}, \phi)\]
+
+<p>If the Euler method is used,<br>
+\(\Phi(x, t, \phi) = -t\, s_{\phi}(x, t)\)<br>
+where \(s_{\phi}(x, t)\) is the score function.</p>
+
+<p>Hence,<br>
+\(\hat{x}_{t_n} = x_{t_{n+1}} - (t_n - t_{n+1}) t_{n+1} s_{\phi}(x_{t_{n+1}}, t_{n+1})\)</p>
+
+<p><strong>Step 3 — Define the loss</strong><br>
+The <strong>consistency loss</strong> ensures outputs from adjacent points match:</p>
+
+\[\mathcal{L} = d\big(f_{\theta}(\hat{x}_{t_n}, t_n), f_{\theta}(x_{t_{n+1}}, t_{n+1})\big)\]
+
+<p>where \(d(\cdot,\cdot)\) is a distance metric (e.g., L2 norm).</p>
+
+<p><strong>Step 4 — Update with EMA</strong><br>
+Rather than standard gradient descent, the paper proposes an <strong>Exponential Moving Average (EMA)</strong> update between two model parameters \(\theta\) and \(\theta^-\), as shown in Algorithm 2.</p>
+
+<div class="row mt-3">
+  <div class="col-sm mt-3 mt-md-0 text-center">
+    <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion-foundation/2025-10-06-11-03-48-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion-foundation/2025-10-06-11-03-48-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion-foundation/2025-10-06-11-03-48-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/diffusion-foundation/2025-10-06-11-03-48.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+  </div>
+</div>
+
+<p><strong>Training from scratch</strong></p>
+
+<p>When no pre-trained diffusion model is available, we can directly estimate the score function using an <strong>unbiased estimator</strong>:</p>
+
+\[\nabla_x \log p_t(x) = \mathbb{E}\left[\frac{x_t - x}{t^2} \mid x_t\right]\]
+
+<p>where</p>
+<ul>
+  <li>\(x \sim \mathcal{D}\) (data distribution)</li>
+  <li>\(x_t \sim \mathcal{N}(x; t^2 I)\) (noisy version of data)</li>
+</ul>
+
+<p>We can then approximate:
+\(x_{t_n} = x + t_n z, \quad x_{t_{n+1}} = x + t_{n+1} z, \quad z \sim \mathcal{N}(0, I)\)</p>
+
+<p>This formulation allows consistency models to be trained <em>entirely from noise-perturbed data samples</em>.</p>
+
 <h3 id="diffusion-distillation">Diffusion Distillation</h3>
 
+<p>References:</p>
+
+<ul>
+  <li><a href="https://arxiv.org/pdf/2202.00512" rel="external nofollow noopener" target="_blank">PROGRESSIVE DISTILLATION FOR FAST SAMPLING OF DIFFUSION MODELS, ICLR 2022</a></li>
+  <li><a href="https://openaccess.thecvf.com/content/CVPR2023/papers/Meng_On_Distillation_of_Guided_Diffusion_Models_CVPR_2023_paper.pdf" rel="external nofollow noopener" target="_blank">On Distillation of Guided Diffusion Models, CVPR 2023</a></li>
+  <li><a href="https://openreview.net/forum?id=1k4yZbbDqX" rel="external nofollow noopener" target="_blank">InstaFlow: One Step is Enough for High-Quality Diffusion-Based Text-to-Image Generation, ICLR 2024</a></li>
+  <li><a href="https://arxiv.org/pdf/2311.17042" rel="external nofollow noopener" target="_blank">Adversarial Diffusion Distillation</a></li>
+  <li><a href="https://arxiv.org/pdf/2405.14867" rel="external nofollow noopener" target="_blank">Improved Distribution Matching Distillation for Fast Image Synthesis</a></li>
+</ul>
+
 <h3 id="rectified-diffusion">Rectified Diffusion</h3>
+
+<h3 id="caching">Caching</h3>
 
 <p>References:</p>
 
@@ -1584,6 +1800,8 @@ The model becomes the original Stable Diffusion when \(\lambda = 0\).</p>
   <li>[1] <a href="https://arxiv.org/pdf/2209.03003" rel="external nofollow noopener" target="_blank">Flow straight and fast: Learning to generate and transfer data with rectified flow</a>
 </li>
   <li>[2] <a href="https://arxiv.org/pdf/2403.03206" rel="external nofollow noopener" target="_blank">Scaling Rectified Flow Transformers for High-Resolution Image Synthesis</a>
+</li>
+  <li>[3] <a href="https://openaccess.thecvf.com/content/CVPR2024/papers/Ma_DeepCache_Accelerating_Diffusion_Models_for_Free_CVPR_2024_paper.pdf" rel="external nofollow noopener" target="_blank">DeepCache: Accelerating Diffusion Models for Free</a>
 </li>
 </ul>
 
@@ -1625,12 +1843,6 @@ The model becomes the original Stable Diffusion when \(\lambda = 0\).</p>
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2024/erasing-concepts/">Fake Taylor Swift and the Adversarial Game of Concept Erasure and Injection</a>
-  </li>
-
-  
-
-  <li class="my-2">
     <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/deepseek/">DeepSeek-R1</a>
   </li>
 
@@ -1638,6 +1850,12 @@ The model becomes the original Stable Diffusion when \(\lambda = 0\).</p>
 
   <li class="my-2">
     <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/unlearn-llms/">Unlearning LLMs</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2024/erasing-concepts/">Fake Taylor Swift and the Adversarial Game of Concept Erasure and Injection</a>
   </li>
 
 </div>
