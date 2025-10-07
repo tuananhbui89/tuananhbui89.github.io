@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-10-07T12:24:31+11:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-10-07T21:36:29+11:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
 </subtitle><entry><title type="html">GPT-5 Series - Safe Completion Training</title><link href="https://tuananhbui89.github.io/blog/2025/safe-completion-training/" rel="alternate" type="text/html" title="GPT-5 Series - Safe Completion Training" /><published>2025-08-08T00:00:00+10:00</published><updated>2025-08-08T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/2025/safe-completion-training</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/safe-completion-training/"><![CDATA[<p>OpenAI just recently <a href="https://openai.com/gpt-5/">released their newest and most powerful model GPT-5</a>. In the post today, I want to talk about one of the most important aspects of LLMs: <strong>How to make them safe against malicious use</strong>.
 In this version, OpenAI introduces a new paradigm called <strong>Safe Completion Training</strong> (which is built on top of  Deliberative Alignment [4])</p>
 
@@ -1747,6 +1747,401 @@ It also allows us to use the same training process as DDPM, e.g., we can use pre
 
 <p>Read more about DDIM in another blog post <a href="/blog/2023/diffusion-tutorial-p2/">here</a></p>
 
+<h3 id="score-matching">Score Matching</h3>
+
+<p>Score-based generative models (<a href="https://proceedings.neurips.cc/paper_files/paper/2019/file/3001ef257407d5a371a96dcd947c7d93-Paper.pdf">Song and Ermon 2019</a>, <a href="https://openreview.net/forum?id=PxTIG12RRHS">Song et al. 2021</a>(published in ICLR 2021, are a family of generative models that learn to estimate the score function — the gradient of the log-density of the data distribution \(s_\theta(x, t) \approx \nabla_x \log p_t(x)\). Intuitively, the score function tells us which direction in the input space increases the likelihood of the data. By learning this function at different noise levels (at different time steps \(t\)), the model learns how to denoise a sample toward realistic data.</p>
+
+<p><strong>Training Objective</strong></p>
+
+<p>The ideal objective of score matching is:</p>
+
+\[\min_{\theta} \mathbb{E}_{p_t(x)} \left[ \| s_\theta(x, t) - \nabla_x \log p_t(x) \|^2 \right]\]
+
+<p>which can be shown to be equivalent to</p>
+
+\[\min_{\theta} \mathbb{E}_{p_t(x)} \left[ \text{trace}(\nabla_x s_{\theta}(x, t)) + \frac{1}{2} \| s_{\theta}(x, t) \|^2 \right]\]
+
+<p>With deep networks and high-dimensional data, it is difficult to obtain the expectation over the data distribution, especially with the \(\text{trace}(\nabla_x s_{\theta}(x, t))\).</p>
+
+<p>One of the popular ways to overcome this is to use <strong>Denoising Score Matching (DSM)</strong> (Vincent 2011). The idea is first to perturbs the data \(x\) with a <strong>known Gaussian noise process</strong> \(q(x_t \mid x_0)\), then train the score network \(s_\theta(x_t, t)\) to denoise the perturbed data \(x_t\) back to the original data \(x_0\).</p>
+
+\[\min_{\theta} \mathbb{E}_{q(x_t \mid x), p_t(x)} \left[ \| s_\theta(x_t, t) - \nabla_{x_t} \log q(x_t \mid x) \|^2 \right]\]
+
+<p>For Gaussian perturbations:</p>
+
+\[\nabla_{x_t} \log q(x_t \mid x) = -\frac{x_t - \alpha_t x_0}{\sigma_t^2}\]
+
+<p>Hence, we can train \(s_\theta(x_t, t)\) to match this target directly.</p>
+
+<p><strong>Sampling</strong></p>
+
+<p>In Song and Ermon 2019, they use Langevin dynamics to samples data with the score function \(s_\theta(x, t)\). Given a fixed step size \(\epsilon\), and an inital value \(x_T \sim \mathcal{N}(0, I)\), the Langevin dynamics recursively update the data as follows:</p>
+
+\[x_{t-1} = x_t + \frac{\epsilon}{2} s_{\theta}(x_t, t) + \sqrt{\epsilon} z_t\]
+
+<p>where \(z_t \sim \mathcal{N}(0, I)\).</p>
+
+<p><strong>\(\epsilon\)-prediction</strong></p>
+
+<p>Instead of predicting the score directly, DDPM variants predict the noise \(\epsilon\) added to the data, which is equivalent to predicting the score but more numerically stable.</p>
+
+<p>The data corruption process is:</p>
+
+\[x_t = \sqrt{\bar{\alpha}_t} x_0 + \sqrt{1 - \bar{\alpha}_t} \epsilon\]
+
+<p>Then the score function relates to the noise predictor as:</p>
+
+\[s_\theta(x_t, t) = -\frac{\epsilon_{\theta}(x_t, t)}{\sqrt{1 - \bar{\alpha}_t}}\]
+
+<p>The training loss becomes:</p>
+
+\[\mathcal{L}_{DDPM}(\theta) = \mathbb{E}_{t, x_0, \epsilon} \left[ \| \epsilon_\theta(x_t, t) - \epsilon \|^2 \right]\]
+
+<p><strong>From DDPM to Score Matching</strong></p>
+
+<p>It can be seen that the key idea of both DDPM and SMLD is to perturb the data with a known noise distribution, and then denoise back to the original data.
+In the following work (Song et al. 2021), the authors unified the two frameworks into a single framework called <strong>Score Matching</strong>, with an infinite number of noise scales.</p>
+
+<p>First, the diffusion process can be defined as a SDE:</p>
+
+\[dx = f(x, t) dt + g(t) dW_t\]
+
+<p>where \(f(x, t)\) is the drift term and \(g(t)\) is the diffusion term and \(W_t\) is the Wiener process.</p>
+
+<p>The reverse diffusion process, which denoises the data from \(x_T \sim \mathcal{N}(0, I)\) to \(x_0 \sim p(x)\), can be defined as a reverse-time SDE:</p>
+
+\[dx = [f(x, t) - g(t)^2 \nabla_x \log p_t(x)] dt + g(t) d\bar{W}_t\]
+
+<p>where \(\bar{W}_t\) is the reverse-time Wiener process.</p>
+
+<p>Different diffusion model families have different choices of \(f(x, t)\) and \(g(t)\):</p>
+
+<ul>
+  <li>Variance Exploding (VE) SDE: \(f(x, t) = 0, g(t) = \sqrt{\frac{d\sigma_t^2}{dt}}\) as in SMLD</li>
+  <li>Variance Preserving (VP) SDE: \(f(x, t) = -\frac{1}{2}\beta_t x, g(t) = \sqrt{\beta_t}\) as in DDPM</li>
+</ul>
+
+<p><strong>Sampling with the Euler-Maruyama method</strong></p>
+
+<p>Once trained, the score network defines the reverse-time dynamics that transform Gaussian noise \(x_T \sim \mathcal{N}(0, I)\) to the data sample \(x_0 \sim p(x)\).
+We can simulate the reverse SDE numerically using the Euler-Maruyama method:</p>
+
+\[x_{t-1} = x_t + (t_n - t_{n+1}) \frac{dx}{dt} \big| _{x=x_t, t = t_n}\]
+
+\[x_{t-1} = x_t + (t_n - t_{n+1}) \left[ f(x_t, t_n) - g(t_n)^2 \nabla_x \log p_{t_n}(x_t) \right] + g(t_n) \sqrt{t_n - t_{n+1}} z_t\]
+
+<p>where \(z_t \sim \mathcal{N}(0, I)\).</p>
+
+<p>This adds both a <strong>deterministic drift</strong> (using the learned score function) and a <strong>stochastic noise term</strong> to preserve the sample diversity.</p>
+
+<p>If we remove the noise term (set \(z_t = 0\)), we obtain the <strong>Probability Flow ODE</strong>, a deterministic trajectory equivalent in distribution to the reverse-time SDE, which is the foundation of DDIM deterministic sampling.</p>
+
+<p><strong>Implementation of Score Matching</strong></p>
+
+<p>The official implementation of Score Matching is <a href="https://github.com/yang-song/score_sde_pytorch">https://github.com/yang-song/score_sde_pytorch</a>.</p>
+
+<p>In Diffusers lib, the Score SDV VP and VE schedulers can be found <a href="https://huggingface.co/docs/diffusers/en/api/schedulers/score_sde_ve">here</a> and <a href="https://huggingface.co/docs/diffusers/en/api/schedulers/score_sde_vp">here</a>.</p>
+
+<p>Notable functions/methods in the official implementation (PyTorch version):</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">def</span> <span class="nf">discretize</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Discretize the SDE in the form: x_{i+1} = x_i + f_i(x_i) + G_i z_i.
+
+    Useful for reverse diffusion sampling and probabiliy flow sampling.
+    Defaults to Euler-Maruyama discretization.
+
+    Args:
+      x: a torch tensor
+      t: a torch float representing the time step (from 0 to `self.T`)
+
+    Returns:
+      f, G
+    </span><span class="sh">"""</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">self</span><span class="p">.</span><span class="n">N</span>
+    <span class="n">drift</span><span class="p">,</span> <span class="n">diffusion</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">sde</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">drift</span> <span class="o">*</span> <span class="n">dt</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">diffusion</span> <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">tensor</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">t</span><span class="p">.</span><span class="n">device</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">f</span><span class="p">,</span> <span class="n">G</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+  <span class="k">def</span> <span class="nf">reverse</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">score_fn</span><span class="p">,</span> <span class="n">probability_flow</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Create the reverse-time SDE/ODE.
+
+    Args:
+      score_fn: A time-dependent score-based model that takes x and t and returns the score.
+      probability_flow: If `True`, create the reverse-time ODE used for probability flow sampling.
+    </span><span class="sh">"""</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">N</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">T</span>
+    <span class="n">sde_fn</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">sde</span>
+    <span class="n">discretize_fn</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">discretize</span>
+
+    <span class="c1"># Build the class for reverse-time SDE.
+</span>    <span class="k">class</span> <span class="nc">RSDE</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">__class__</span><span class="p">):</span>
+      <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">N</span> <span class="o">=</span> <span class="n">N</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">probability_flow</span> <span class="o">=</span> <span class="n">probability_flow</span>
+
+      <span class="nd">@property</span>
+      <span class="k">def</span> <span class="nf">T</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">T</span>
+
+      <span class="k">def</span> <span class="nf">sde</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Create the drift and diffusion functions for the reverse SDE/ODE.</span><span class="sh">"""</span>
+        <span class="n">drift</span><span class="p">,</span> <span class="n">diffusion</span> <span class="o">=</span> <span class="nf">sde_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="nf">score_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+        <span class="n">drift</span> <span class="o">=</span> <span class="n">drift</span> <span class="o">-</span> <span class="n">diffusion</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">score</span> <span class="o">*</span> <span class="p">(</span><span class="mf">0.5</span> <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">probability_flow</span> <span class="k">else</span> <span class="mf">1.</span><span class="p">)</span>
+        <span class="c1"># Set the diffusion function to zero for ODEs.
+</span>        <span class="n">diffusion</span> <span class="o">=</span> <span class="mf">0.</span> <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">probability_flow</span> <span class="k">else</span> <span class="n">diffusion</span>
+        <span class="k">return</span> <span class="n">drift</span><span class="p">,</span> <span class="n">diffusion</span>
+
+      <span class="k">def</span> <span class="nf">discretize</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="sh">"""</span><span class="s">Create discretized iteration rules for the reverse diffusion sampler.</span><span class="sh">"""</span>
+        <span class="n">f</span><span class="p">,</span> <span class="n">G</span> <span class="o">=</span> <span class="nf">discretize_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+        <span class="n">rev_f</span> <span class="o">=</span> <span class="n">f</span> <span class="o">-</span> <span class="n">G</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="nf">score_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">0.5</span> <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">probability_flow</span> <span class="k">else</span> <span class="mf">1.</span><span class="p">)</span>
+        <span class="n">rev_G</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">zeros_like</span><span class="p">(</span><span class="n">G</span><span class="p">)</span> <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">probability_flow</span> <span class="k">else</span> <span class="n">G</span>
+        <span class="k">return</span> <span class="n">rev_f</span><span class="p">,</span> <span class="n">rev_G</span>
+
+    <span class="k">return</span> <span class="nc">RSDE</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>IMPORTANT NOTE: For models trained with VP SDE, the marginal distribution of \(x_t\) given clean data \(x_0\) is Gaussian: \(x_t \sim \mathcal{N}(\sqrt{\bar{\alpha}_t} x_0, \sigma_t^2 I)\) or in general SDE notation: \(x_t = \text{mean}(x_0, t) + \text{std}(t) \dot z\) where \(z \sim \mathcal{N}(0, I)\).</p>
+
+<p>Therefore, when training, we sample</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">mean</span><span class="p">,</span> <span class="n">std</span> <span class="o">=</span> <span class="n">sde</span><span class="p">.</span><span class="nf">marginal_prob</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+<span class="n">perturbed_data</span> <span class="o">=</span> <span class="n">mean</span> <span class="o">+</span> <span class="n">std</span> <span class="o">*</span> <span class="n">z</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="k">class</span> <span class="nc">VPSDE</span><span class="p">(</span><span class="n">SDE</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">beta_min</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">beta_max</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Construct a Variance Preserving SDE.
+
+    Args:
+      beta_min: value of beta(0)
+      beta_max: value of beta(1)
+      N: number of discretization steps
+    </span><span class="sh">"""</span>
+    <span class="nf">super</span><span class="p">().</span><span class="nf">__init__</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+    <span class="n">self</span><span class="p">.</span><span class="n">beta_0</span> <span class="o">=</span> <span class="n">beta_min</span>
+    <span class="n">self</span><span class="p">.</span><span class="n">beta_1</span> <span class="o">=</span> <span class="n">beta_max</span>
+    <span class="n">self</span><span class="p">.</span><span class="n">N</span> <span class="o">=</span> <span class="n">N</span>
+    <span class="n">self</span><span class="p">.</span><span class="n">discrete_betas</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">linspace</span><span class="p">(</span><span class="n">beta_min</span> <span class="o">/</span> <span class="n">N</span><span class="p">,</span> <span class="n">beta_max</span> <span class="o">/</span> <span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+    <span class="n">self</span><span class="p">.</span><span class="n">alphas</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">-</span> <span class="n">self</span><span class="p">.</span><span class="n">discrete_betas</span>
+    <span class="n">self</span><span class="p">.</span><span class="n">alphas_cumprod</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">cumprod</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">alphas</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">self</span><span class="p">.</span><span class="n">sqrt_alphas_cumprod</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">alphas_cumprod</span><span class="p">)</span>
+    <span class="n">self</span><span class="p">.</span><span class="n">sqrt_1m_alphas_cumprod</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">self</span><span class="p">.</span><span class="n">alphas_cumprod</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">T</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mi">1</span>
+
+  <span class="k">def</span> <span class="nf">sde</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+    <span class="n">beta_t</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">beta_0</span> <span class="o">+</span> <span class="n">t</span> <span class="o">*</span> <span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">beta_1</span> <span class="o">-</span> <span class="n">self</span><span class="p">.</span><span class="n">beta_0</span><span class="p">)</span>
+    <span class="n">drift</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">beta_t</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span>
+    <span class="n">diffusion</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="n">beta_t</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">drift</span><span class="p">,</span> <span class="n">diffusion</span>
+
+  <span class="k">def</span> <span class="nf">marginal_prob</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+    <span class="n">log_mean_coeff</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.25</span> <span class="o">*</span> <span class="n">t</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">beta_1</span> <span class="o">-</span> <span class="n">self</span><span class="p">.</span><span class="n">beta_0</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">t</span> <span class="o">*</span> <span class="n">self</span><span class="p">.</span><span class="n">beta_0</span>
+    <span class="n">mean</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">exp</span><span class="p">(</span><span class="n">log_mean_coeff</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">])</span> <span class="o">*</span> <span class="n">x</span>
+    <span class="n">std</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">torch</span><span class="p">.</span><span class="nf">exp</span><span class="p">(</span><span class="mf">2.</span> <span class="o">*</span> <span class="n">log_mean_coeff</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">mean</span><span class="p">,</span> <span class="n">std</span>
+
+  <span class="k">def</span> <span class="nf">prior_sampling</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randn</span><span class="p">(</span><span class="o">*</span><span class="n">shape</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">prior_logp</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+    <span class="n">shape</span> <span class="o">=</span> <span class="n">z</span><span class="p">.</span><span class="n">shape</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">prod</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="n">logps</span> <span class="o">=</span> <span class="o">-</span><span class="n">N</span> <span class="o">/</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="p">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">-</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="n">z</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span> <span class="o">/</span> <span class="mf">2.</span>
+    <span class="k">return</span> <span class="n">logps</span>
+
+  <span class="k">def</span> <span class="nf">discretize</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">DDPM discretization.</span><span class="sh">"""</span>
+    <span class="n">timestep</span> <span class="o">=</span> <span class="p">(</span><span class="n">t</span> <span class="o">*</span> <span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">N</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">self</span><span class="p">.</span><span class="n">T</span><span class="p">).</span><span class="nf">long</span><span class="p">()</span>
+    <span class="n">beta</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">discrete_betas</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="n">device</span><span class="p">)[</span><span class="n">timestep</span><span class="p">]</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">alphas</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="n">device</span><span class="p">)[</span><span class="n">timestep</span><span class="p">]</span>
+    <span class="n">sqrt_beta</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="n">beta</span><span class="p">)</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="n">alpha</span><span class="p">)[:,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">x</span> <span class="o">-</span> <span class="n">x</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">sqrt_beta</span>
+    <span class="k">return</span> <span class="n">f</span><span class="p">,</span> <span class="n">G</span>
+
+</code></pre></div></div>
+
+<p><strong>The SDE loss function</strong>. IMPORTANT, in the implementation, <code class="language-plaintext highlighter-rouge">losses = (score x std + z)**2</code> is used. Why is that?</p>
+
+<p>It is because of the Gaussian property where \(p(x_t \mid x_0) = \mathcal{N}(\mu_t, \sigma_t^2 I)\).</p>
+
+\[\nabla_x \log p(x_t \mid x_0) = -\frac{1}{\sigma_t^2} (x_t - \mu_t) = - \frac{z}{\sigma_t}\]
+
+<p>Therefore, the final loss function is:</p>
+
+\[\mathcal{L}_{SDE}(\theta) = \mathbb{E}_{t, x_0, z} \left[ \| s_\theta(x_t, t) + \frac{z}{\sigma_t} \|^2 \right]\]
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="k">def</span> <span class="nf">get_sde_loss_fn</span><span class="p">(</span><span class="n">sde</span><span class="p">,</span> <span class="n">train</span><span class="p">,</span> <span class="n">reduce_mean</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">continuous</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">likelihood_weighting</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
+  <span class="sh">"""</span><span class="s">Create a loss function for training with arbirary SDEs.
+
+  Args:
+    sde: An `sde_lib.SDE` object that represents the forward SDE.
+    train: `True` for training loss and `False` for evaluation loss.
+    reduce_mean: If `True`, average the loss across data dimensions. Otherwise sum the loss across data dimensions.
+    continuous: `True` indicates that the model is defined to take continuous time steps. Otherwise it requires
+      ad-hoc interpolation to take continuous time steps.
+    likelihood_weighting: If `True`, weight the mixture of score matching losses
+      according to https://arxiv.org/abs/2101.09258; otherwise use the weighting recommended in our paper.
+    eps: A `float` number. The smallest time step to sample from.
+
+  Returns:
+    A loss function.
+  </span><span class="sh">"""</span>
+  <span class="n">reduce_op</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">mean</span> <span class="k">if</span> <span class="n">reduce_mean</span> <span class="k">else</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">loss_fn</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Compute the loss function.
+
+    Args:
+      model: A score model.
+      batch: A mini-batch of training data.
+
+    Returns:
+      loss: A scalar that represents the average loss value across the mini-batch.
+    </span><span class="sh">"""</span>
+    <span class="n">score_fn</span> <span class="o">=</span> <span class="n">mutils</span><span class="p">.</span><span class="nf">get_score_fn</span><span class="p">(</span><span class="n">sde</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="n">train</span><span class="p">,</span> <span class="n">continuous</span><span class="o">=</span><span class="n">continuous</span><span class="p">)</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">rand</span><span class="p">(</span><span class="n">batch</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="n">batch</span><span class="p">.</span><span class="n">device</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">sde</span><span class="p">.</span><span class="n">T</span> <span class="o">-</span> <span class="n">eps</span><span class="p">)</span> <span class="o">+</span> <span class="n">eps</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randn_like</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+    <span class="n">mean</span><span class="p">,</span> <span class="n">std</span> <span class="o">=</span> <span class="n">sde</span><span class="p">.</span><span class="nf">marginal_prob</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+    <span class="n">perturbed_data</span> <span class="o">=</span> <span class="n">mean</span> <span class="o">+</span> <span class="n">std</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">z</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="nf">score_fn</span><span class="p">(</span><span class="n">perturbed_data</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">likelihood_weighting</span><span class="p">:</span>
+      <span class="n">losses</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">square</span><span class="p">(</span><span class="n">score</span> <span class="o">*</span> <span class="n">std</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span> <span class="o">+</span> <span class="n">z</span><span class="p">)</span>
+      <span class="n">losses</span> <span class="o">=</span> <span class="nf">reduce_op</span><span class="p">(</span><span class="n">losses</span><span class="p">.</span><span class="nf">reshape</span><span class="p">(</span><span class="n">losses</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">g2</span> <span class="o">=</span> <span class="n">sde</span><span class="p">.</span><span class="nf">sde</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">zeros_like</span><span class="p">(</span><span class="n">batch</span><span class="p">),</span> <span class="n">t</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span>
+      <span class="n">losses</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">square</span><span class="p">(</span><span class="n">score</span> <span class="o">+</span> <span class="n">z</span> <span class="o">/</span> <span class="n">std</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">])</span>
+      <span class="n">losses</span> <span class="o">=</span> <span class="nf">reduce_op</span><span class="p">(</span><span class="n">losses</span><span class="p">.</span><span class="nf">reshape</span><span class="p">(</span><span class="n">losses</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">g2</span>
+
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">mean</span><span class="p">(</span><span class="n">losses</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">loss</span>
+
+  <span class="k">return</span> <span class="n">loss_fn</span>
+</code></pre></div></div>
+
+<p>The score function</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+
+<span class="k">def</span> <span class="nf">get_score_fn</span><span class="p">(</span><span class="n">sde</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">continuous</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+  <span class="sh">"""</span><span class="s">Wraps `score_fn` so that the model output corresponds to a real time-dependent score function.
+
+  Args:
+    sde: An `sde_lib.SDE` object that represents the forward SDE.
+    model: A score model.
+    train: `True` for training and `False` for evaluation.
+    continuous: If `True`, the score-based model is expected to directly take continuous time steps.
+
+  Returns:
+    A score function.
+  </span><span class="sh">"""</span>
+  <span class="n">model_fn</span> <span class="o">=</span> <span class="nf">get_model_fn</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="n">train</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">sde</span><span class="p">,</span> <span class="n">sde_lib</span><span class="p">.</span><span class="n">VPSDE</span><span class="p">)</span> <span class="ow">or</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">sde</span><span class="p">,</span> <span class="n">sde_lib</span><span class="p">.</span><span class="n">subVPSDE</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">score_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+      <span class="c1"># Scale neural network output by standard deviation and flip sign
+</span>      <span class="k">if</span> <span class="n">continuous</span> <span class="ow">or</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">sde</span><span class="p">,</span> <span class="n">sde_lib</span><span class="p">.</span><span class="n">subVPSDE</span><span class="p">):</span>
+        <span class="c1"># For VP-trained models, t=0 corresponds to the lowest noise level
+</span>        <span class="c1"># The maximum value of time embedding is assumed to 999 for
+</span>        <span class="c1"># continuously-trained models.
+</span>        <span class="n">labels</span> <span class="o">=</span> <span class="n">t</span> <span class="o">*</span> <span class="mi">999</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="nf">model_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+        <span class="n">std</span> <span class="o">=</span> <span class="n">sde</span><span class="p">.</span><span class="nf">marginal_prob</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">zeros_like</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">t</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># For VP-trained models, t=0 corresponds to the lowest noise level
+</span>        <span class="n">labels</span> <span class="o">=</span> <span class="n">t</span> <span class="o">*</span> <span class="p">(</span><span class="n">sde</span><span class="p">.</span><span class="n">N</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="nf">model_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+        <span class="n">std</span> <span class="o">=</span> <span class="n">sde</span><span class="p">.</span><span class="n">sqrt_1m_alphas_cumprod</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">labels</span><span class="p">.</span><span class="n">device</span><span class="p">)[</span><span class="n">labels</span><span class="p">.</span><span class="nf">long</span><span class="p">()]</span>
+
+      <span class="n">score</span> <span class="o">=</span> <span class="o">-</span><span class="n">score</span> <span class="o">/</span> <span class="n">std</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span>
+      <span class="k">return</span> <span class="n">score</span>
+
+  <span class="k">elif</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">sde</span><span class="p">,</span> <span class="n">sde_lib</span><span class="p">.</span><span class="n">VESDE</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">score_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">continuous</span><span class="p">:</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="n">sde</span><span class="p">.</span><span class="nf">marginal_prob</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">zeros_like</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">t</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># For VE-trained models, t=0 corresponds to the highest noise level
+</span>        <span class="n">labels</span> <span class="o">=</span> <span class="n">sde</span><span class="p">.</span><span class="n">T</span> <span class="o">-</span> <span class="n">t</span>
+        <span class="n">labels</span> <span class="o">*=</span> <span class="n">sde</span><span class="p">.</span><span class="n">N</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">round</span><span class="p">(</span><span class="n">labels</span><span class="p">).</span><span class="nf">long</span><span class="p">()</span>
+
+      <span class="n">score</span> <span class="o">=</span> <span class="nf">model_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">score</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="nc">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">SDE class </span><span class="si">{</span><span class="n">sde</span><span class="p">.</span><span class="n">__class__</span><span class="p">.</span><span class="n">__name__</span><span class="si">}</span><span class="s"> not yet supported.</span><span class="sh">"</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">score_fn</span>
+</code></pre></div></div>
+
+<p><strong>Implementation of SMLD</strong></p>
+
+<p>From the same repository of SDE Pytorch</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="k">def</span> <span class="nf">get_smld_loss_fn</span><span class="p">(</span><span class="n">vesde</span><span class="p">,</span> <span class="n">train</span><span class="p">,</span> <span class="n">reduce_mean</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+  <span class="sh">"""</span><span class="s">Legacy code to reproduce previous results on SMLD(NCSN). Not recommended for new work.</span><span class="sh">"""</span>
+  <span class="k">assert</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">vesde</span><span class="p">,</span> <span class="n">VESDE</span><span class="p">),</span> <span class="sh">"</span><span class="s">SMLD training only works for VESDEs.</span><span class="sh">"</span>
+
+  <span class="c1"># Previous SMLD models assume descending sigmas
+</span>  <span class="n">smld_sigma_array</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">flip</span><span class="p">(</span><span class="n">vesde</span><span class="p">.</span><span class="n">discrete_sigmas</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,))</span>
+  <span class="n">reduce_op</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">mean</span> <span class="k">if</span> <span class="n">reduce_mean</span> <span class="k">else</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">loss_fn</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
+    <span class="n">model_fn</span> <span class="o">=</span> <span class="n">mutils</span><span class="p">.</span><span class="nf">get_model_fn</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="n">train</span><span class="p">)</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">vesde</span><span class="p">.</span><span class="n">N</span><span class="p">,</span> <span class="p">(</span><span class="n">batch</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],),</span> <span class="n">device</span><span class="o">=</span><span class="n">batch</span><span class="p">.</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">sigmas</span> <span class="o">=</span> <span class="n">smld_sigma_array</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">batch</span><span class="p">.</span><span class="n">device</span><span class="p">)[</span><span class="n">labels</span><span class="p">]</span>
+    <span class="n">noise</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randn_like</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span> <span class="o">*</span> <span class="n">sigmas</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span>
+    <span class="n">perturbed_data</span> <span class="o">=</span> <span class="n">noise</span> <span class="o">+</span> <span class="n">batch</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="nf">model_fn</span><span class="p">(</span><span class="n">perturbed_data</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="o">-</span><span class="n">noise</span> <span class="o">/</span> <span class="p">(</span><span class="n">sigmas</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)[:,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span>
+    <span class="n">losses</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">square</span><span class="p">(</span><span class="n">score</span> <span class="o">-</span> <span class="n">target</span><span class="p">)</span>
+    <span class="n">losses</span> <span class="o">=</span> <span class="nf">reduce_op</span><span class="p">(</span><span class="n">losses</span><span class="p">.</span><span class="nf">reshape</span><span class="p">(</span><span class="n">losses</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">sigmas</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">mean</span><span class="p">(</span><span class="n">losses</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">loss</span>
+
+  <span class="k">return</span> <span class="n">loss_fn</span>
+</code></pre></div></div>
+
+<p><strong>Implementation of DDPM</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="k">def</span> <span class="nf">get_ddpm_loss_fn</span><span class="p">(</span><span class="n">vpsde</span><span class="p">,</span> <span class="n">train</span><span class="p">,</span> <span class="n">reduce_mean</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+  <span class="sh">"""</span><span class="s">Legacy code to reproduce previous results on DDPM. Not recommended for new work.</span><span class="sh">"""</span>
+  <span class="k">assert</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">vpsde</span><span class="p">,</span> <span class="n">VPSDE</span><span class="p">),</span> <span class="sh">"</span><span class="s">DDPM training only works for VPSDEs.</span><span class="sh">"</span>
+
+  <span class="n">reduce_op</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">mean</span> <span class="k">if</span> <span class="n">reduce_mean</span> <span class="k">else</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">loss_fn</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
+    <span class="n">model_fn</span> <span class="o">=</span> <span class="n">mutils</span><span class="p">.</span><span class="nf">get_model_fn</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="n">train</span><span class="p">)</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">vpsde</span><span class="p">.</span><span class="n">N</span><span class="p">,</span> <span class="p">(</span><span class="n">batch</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],),</span> <span class="n">device</span><span class="o">=</span><span class="n">batch</span><span class="p">.</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">sqrt_alphas_cumprod</span> <span class="o">=</span> <span class="n">vpsde</span><span class="p">.</span><span class="n">sqrt_alphas_cumprod</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">batch</span><span class="p">.</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">sqrt_1m_alphas_cumprod</span> <span class="o">=</span> <span class="n">vpsde</span><span class="p">.</span><span class="n">sqrt_1m_alphas_cumprod</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">batch</span><span class="p">.</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">noise</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randn_like</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+    <span class="n">perturbed_data</span> <span class="o">=</span> <span class="n">sqrt_alphas_cumprod</span><span class="p">[</span><span class="n">labels</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">batch</span> <span class="o">+</span> \
+                     <span class="n">sqrt_1m_alphas_cumprod</span><span class="p">[</span><span class="n">labels</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">noise</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="nf">model_fn</span><span class="p">(</span><span class="n">perturbed_data</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+    <span class="n">losses</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">square</span><span class="p">(</span><span class="n">score</span> <span class="o">-</span> <span class="n">noise</span><span class="p">)</span>
+    <span class="n">losses</span> <span class="o">=</span> <span class="nf">reduce_op</span><span class="p">(</span><span class="n">losses</span><span class="p">.</span><span class="nf">reshape</span><span class="p">(</span><span class="n">losses</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">mean</span><span class="p">(</span><span class="n">losses</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">loss</span>
+
+  <span class="k">return</span> <span class="n">loss_fn</span>
+</code></pre></div></div>
+
 <h2 id="flow-matching">Flow Matching</h2>
 
 <h3 id="fundammentals-concepts-in-flow-matching">Fundammentals Concepts in Flow Matching</h3>
@@ -2058,7 +2453,7 @@ In practice, the three inputs \(t, x, c\) are concatenated together as the input
   <li>[4]<a href="https://neurips.cc/media/neurips-2024/Slides/99531.pdf">A NeurIPS 2024 tutorial on Flow Matching</a></li>
 </ul>
 
-<h2 id="differences-between-score-matching-ddpm-and-flow-matching">Differences between Score Matching, DDPM and Flow Matching</h2>
+<h2 id="differences-between-score-matching-diffusion-models-and-flow-matching">Differences between Score Matching, Diffusion Models and Flow Matching</h2>
 
 <h3 id="summary-of-main-differences">Summary of Main Differences</h3>
 
