@@ -161,6 +161,12 @@
 <ul>
 <li class="toc-entry toc-h3"><a href="#differential-equations-odes-and-sdes">Differential Equations: ODEs and SDEs</a></li>
 <li class="toc-entry toc-h3"><a href="#forward-and-reverse-diffusion-processes">Forward and Reverse Diffusion Processes</a></li>
+<li class="toc-entry toc-h3">
+<a href="#euler-method-for-numerical-integration">Euler Method for Numerical Integration</a>
+<ul>
+<li class="toc-entry toc-h4"><a href="#implementation-of-the-euler-method">Implementation of the Euler method</a></li>
+</ul>
+</li>
 <li class="toc-entry toc-h3"><a href="#fokker-planck-equation-from-trajectories-to-distributions">Fokker-Planck Equation: From Trajectories to Distributions</a></li>
 <li class="toc-entry toc-h3"><a href="#score-matching-and-denoising">Score Matching and Denoising</a></li>
 <li class="toc-entry toc-h3"><a href="#variational-perspective-and-kl-minimization">Variational Perspective and KL Minimization</a></li>
@@ -240,13 +246,27 @@
 <li class="toc-entry toc-h4"><a href="#concept-and-mathematical-definition">Concept and Mathematical Definition</a></li>
 <li class="toc-entry toc-h4"><a href="#sampling-with-consistency-models">Sampling with Consistency Models</a></li>
 <li class="toc-entry toc-h4"><a href="#training-consistency-models">Training Consistency Models</a></li>
+<li class="toc-entry toc-h4"><a href="#implementation-of-consistency-models">Implementation of Consistency Models</a></li>
 </ul>
 </li>
-<li class="toc-entry toc-h3"><a href="#diffusion-distillation">Diffusion Distillation</a></li>
+<li class="toc-entry toc-h3">
+<a href="#diffusion-distillation">Diffusion Distillation</a>
+<ul>
+<li class="toc-entry toc-h4"><a href="#progressive-distillation">Progressive Distillation</a></li>
+</ul>
+</li>
 <li class="toc-entry toc-h3"><a href="#rectified-diffusion">Rectified Diffusion</a></li>
-<li class="toc-entry toc-h3"><a href="#caching">Caching</a></li>
+<li class="toc-entry toc-h3">
+<a href="#caching-in-diffusion-models">Caching in Diffusion Models</a>
+<ul>
+<li class="toc-entry toc-h4"><a href="#u-net-refresher">U-Net Refresher</a></li>
+<li class="toc-entry toc-h4"><a href="#observation-feature-reuse-across-timesteps">Observation: Feature Reuse Across Timesteps</a></li>
+<li class="toc-entry toc-h4"><a href="#implementation-overview">Implementation Overview</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#multi-modal-diffusion">Multi-modal Diffusion</a></li>
 </ul>
     </div>
     <hr>
@@ -365,6 +385,132 @@ In order to generate data from pure noise \(x_T\), we need to reverse the diffus
 <p>where \(\nabla_x \log p_t(x)\) is the <strong>score function</strong>, which estimates the structure of data at time \(t\) - how likely different data points are at each step. \(d\tilde{W}_t\) is another Wiener process but in the reverse direction.</p>
 
 <p>👉 Motivation: Since \(f(x,t)\) and \(g(t))\) are known, to reverse noise, we must know the score function. So we train a neural network to approximate the score function \(\nabla_x \log p_t(x)\). This is the core of the diffusion model.</p>
+
+<h3 id="euler-method-for-numerical-integration">Euler Method for Numerical Integration</h3>
+
+<p>To simulate the reverse process, we need a numerical method to integrate the SDE backward through time. The Euler–Maruyama method (a stochastic generalization of the Euler method) provides a simple, first-order approximation.</p>
+
+<p>For the variance-preserving (VP) SDE used in diffusion models, the deterministic part of the reverse process (ignoring noise sampling) can be expressed as an ODE:</p>
+
+\[\frac{dx}{dt} = f(x,t) - \frac{1}{2} g^2(t) \nabla_x \log p_t(x)\]
+
+<p>Now, using the Euler method to integrate this ODE backward in time from \(t_{n+1}\) to \(t_n\):</p>
+
+\[x_{t_n} = x_{t_{n+1}} + (t_{n+1} - t_{n}) \frac{dx}{dt} \bigg|_{x=x_{t_{n+1}}, t=t_{n+1}}\]
+
+<p>Substituing the ODE into the Euler method, we get:</p>
+
+\[x_{t_n} = x_{t_{n+1}} + (t_{n+1} - t_{n}) \left[ f(x_{t_{n+1}}, t_{n+1}) - \frac{1}{2} g^2(t_{n+1}) \nabla_x \log p_{t_{n+1}}(x_{t_{n+1}}) \right]\]
+
+<p>This stepwise update forms the foundation of diffusion sampling algorithms like DDPM and DDIM, where the score term is replaced by the neural network’s prediction.</p>
+
+<h4 id="implementation-of-the-euler-method">Implementation of the Euler method</h4>
+
+<p>In the context of <strong>consistency models</strong>, the update rule is derived from the Probability Flow ODE (PF-ODE):</p>
+
+\[\frac{dx}{dt} = -t s_{\phi}(x,t)\]
+
+<p>where \(s_{\phi}(x,t)\) is a learned score function related to the model output \(f_{\theta}(x,t)\).
+From the definition of the consistency function (please refer to the Consistency Models section), we have:</p>
+
+\[s_{\phi}(x,t) = \frac{x - f_{\theta}(x,t)}{t^2}\]
+
+<p>Substituing this into the PF-ODE Euler update:</p>
+
+\[\hat{x}_{t_n} = x_{t_{n+1}} - (t_n - t_{n+1}) t_{n+1} s_{\phi}(x_{t_{n+1}}, t_{n+1})\]
+
+<p>We get:
+\(\hat{x}_{t_n} = x_{t_{n+1}} - (t_n - t_{n+1}) \frac{x - f_{\theta}(x,t)}{t}\)</p>
+
+<p>This formula defines a <strong>single-step explicit Euler integration</strong>: it can predict the next step \(x_{t_n}\) from the current step \(x_{t_{n+1}}\).</p>
+
+<p>Python implementation:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@th.no_grad</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">euler_solver</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">next_t</span><span class="p">,</span> <span class="n">x0</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">samples</span>
+    <span class="k">if</span> <span class="n">teacher_model</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">denoiser</span> <span class="o">=</span> <span class="n">x0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">denoiser</span> <span class="o">=</span> <span class="nf">teacher_denoise_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span> <span class="c1"># f_{\theta}(x,t) - consistency model output
+</span>    <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">denoiser</span><span class="p">)</span> <span class="o">/</span> <span class="nf">append_dims</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">dims</span><span class="p">)</span>
+    <span class="n">samples</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">d</span> <span class="o">*</span> <span class="nf">append_dims</span><span class="p">(</span><span class="n">next_t</span> <span class="o">-</span> <span class="n">t</span><span class="p">,</span> <span class="n">dims</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">samples</span>
+</code></pre></div></div>
+
+<p>👉 Interpretation:</p>
+
+<ul>
+  <li>
+<code class="language-plaintext highlighter-rouge">d</code> is the difference between the current step and the next step.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">next_t - t</code> is the time step size (negative for reverse time integration).</li>
+  <li>The Euler method uses only the slope at the start of the interval, making it simple but potentially less accurate for large steps.</li>
+</ul>
+
+<p><strong>Heun Method (Improved Euler / Predictor–Corrector)</strong></p>
+
+<p>The Heun method is a second-order numerical scheme that improves on Euler by estimating the derivative twice — at the beginning and at the end of the time interval — and then averaging them. This yields better stability and smaller integration error, especially for stiff or nonlinear dynamics like those in diffusion models.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion-foundation/2025-10-07-12-13-48-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion-foundation/2025-10-07-12-13-48-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion-foundation/2025-10-07-12-13-48-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/diffusion-foundation/2025-10-07-12-13-48.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+
+<p>The update consists of two stages:</p>
+
+<ul>
+  <li>Predictor (Euler step):</li>
+</ul>
+
+\[\tilde{x}_{t_n} = x_{t_{n+1}} - (t_n - t_{n+1}) d_{t_{n+1}}\]
+
+<p>where \(d_{t_{n+1}} = \frac{x_{t_{n+1}} - f_{\theta}(x_{t_{n+1}}, t_{n+1})}{t_{n+1}}\).</p>
+
+<ul>
+  <li>Corrector (Second-order correction): Evaluate a new derivative \(d_{t_n}\) at the predicted point \(\tilde{x}_{t_n}\), then update the final point:</li>
+</ul>
+
+\[\hat{x}_{t_n} = x_{t_{n+1}} + \frac{1}{2}(t_n - t_{n+1}) (d_{t_{n+1}} + d_{t_n})\]
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@th.no_grad</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">heun_solver</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">next_t</span><span class="p">,</span> <span class="n">x0</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">samples</span>
+    <span class="k">if</span> <span class="n">teacher_model</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">denoiser</span> <span class="o">=</span> <span class="n">x0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">denoiser</span> <span class="o">=</span> <span class="nf">teacher_denoise_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span> <span class="c1"># f_{\theta}(x,t) - consistency model output
+</span>
+    
+    <span class="c1"># IMPORTANT - Euler method
+</span>    <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">denoiser</span><span class="p">)</span> <span class="o">/</span> <span class="nf">append_dims</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">dims</span><span class="p">)</span>
+    <span class="n">samples</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">d</span> <span class="o">*</span> <span class="nf">append_dims</span><span class="p">(</span><span class="n">next_t</span> <span class="o">-</span> <span class="n">t</span><span class="p">,</span> <span class="n">dims</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">teacher_model</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">denoiser</span> <span class="o">=</span> <span class="n">x0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">denoiser</span> <span class="o">=</span> <span class="nf">teacher_denoise_fn</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">next_t</span><span class="p">)</span> <span class="c1"># f_{\theta}(x,t) - consistency model output
+</span>
+    <span class="n">next_d</span> <span class="o">=</span> <span class="p">(</span><span class="n">samples</span> <span class="o">-</span> <span class="n">denoiser</span><span class="p">)</span> <span class="o">/</span> <span class="nf">append_dims</span><span class="p">(</span><span class="n">next_t</span><span class="p">,</span> <span class="n">dims</span><span class="p">)</span>
+    <span class="n">samples</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="p">(</span><span class="n">d</span> <span class="o">+</span> <span class="n">next_d</span><span class="p">)</span> <span class="o">*</span> <span class="nf">append_dims</span><span class="p">((</span><span class="n">next_t</span> <span class="o">-</span> <span class="n">t</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dims</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">samples</span>
+</code></pre></div></div>
 
 <h3 id="fokker-planck-equation-from-trajectories-to-distributions">Fokker-Planck Equation: From Trajectories to Distributions</h3>
 
@@ -1778,7 +1924,313 @@ Rather than standard gradient descent, the paper proposes an <strong>Exponential
 
 <p>This formulation allows consistency models to be trained <em>entirely from noise-perturbed data samples</em>.</p>
 
+<p><strong>Implementation of the Euler method</strong></p>
+
+<p>Implementation of the Euler method (from <a href="https://github.com/openai/consistency_models/blob/e32b69ee436d518377db86fb2127a3972d0d8716/cm/karras_diffusion.py#L163" rel="external nofollow noopener" target="_blank">here</a>).
+Note that this version implies \(s_{\phi}(x,t) = \frac{x - f_{\theta}(x,t)}{t^2}\) and therefore we don’t need the pre-trained diffusion model to estimate the score function.</p>
+
+<p>Substituing this into the PF-ODE Euler update:</p>
+
+\[\hat{x}_{t_n} = x_{t_{n+1}} - (t_n - t_{n+1}) t_{n+1} s_{\phi}(x_{t_{n+1}}, t_{n+1})\]
+
+<p>We get:</p>
+
+\[\hat{x}_{t_n} = x_{t_{n+1}} - (t_n - t_{n+1}) \frac{x - f_{\theta}(x,t)}{t}\]
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@th.no_grad</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">euler_solver</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">next_t</span><span class="p">,</span> <span class="n">x0</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">samples</span>
+    <span class="k">if</span> <span class="n">teacher_model</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">denoiser</span> <span class="o">=</span> <span class="n">x0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">denoiser</span> <span class="o">=</span> <span class="nf">teacher_denoise_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span> <span class="c1"># f_{\theta}(x,t) - consistency model output
+</span>    <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">denoiser</span><span class="p">)</span> <span class="o">/</span> <span class="nf">append_dims</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">dims</span><span class="p">)</span>
+    <span class="n">samples</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">d</span> <span class="o">*</span> <span class="nf">append_dims</span><span class="p">(</span><span class="n">next_t</span> <span class="o">-</span> <span class="n">t</span><span class="p">,</span> <span class="n">dims</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">samples</span>
+</code></pre></div></div>
+
+<p>Heun method:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@th.no_grad</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">heun_solver</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">next_t</span><span class="p">,</span> <span class="n">x0</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">samples</span>
+    <span class="k">if</span> <span class="n">teacher_model</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">denoiser</span> <span class="o">=</span> <span class="n">x0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">denoiser</span> <span class="o">=</span> <span class="nf">teacher_denoise_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span> <span class="c1"># f_{\theta}(x,t) - consistency model output
+</span>
+    
+    <span class="c1"># IMPORTANT - Euler method
+</span>    <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">denoiser</span><span class="p">)</span> <span class="o">/</span> <span class="nf">append_dims</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">dims</span><span class="p">)</span>
+    <span class="n">samples</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">d</span> <span class="o">*</span> <span class="nf">append_dims</span><span class="p">(</span><span class="n">next_t</span> <span class="o">-</span> <span class="n">t</span><span class="p">,</span> <span class="n">dims</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">teacher_model</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">denoiser</span> <span class="o">=</span> <span class="n">x0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">denoiser</span> <span class="o">=</span> <span class="nf">teacher_denoise_fn</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">next_t</span><span class="p">)</span> <span class="c1"># f_{\theta}(x,t) - consistency model output
+</span>
+    <span class="n">next_d</span> <span class="o">=</span> <span class="p">(</span><span class="n">samples</span> <span class="o">-</span> <span class="n">denoiser</span><span class="p">)</span> <span class="o">/</span> <span class="nf">append_dims</span><span class="p">(</span><span class="n">next_t</span><span class="p">,</span> <span class="n">dims</span><span class="p">)</span>
+    <span class="n">samples</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="p">(</span><span class="n">d</span> <span class="o">+</span> <span class="n">next_d</span><span class="p">)</span> <span class="o">*</span> <span class="nf">append_dims</span><span class="p">((</span><span class="n">next_t</span> <span class="o">-</span> <span class="n">t</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dims</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">samples</span>
+</code></pre></div></div>
+
+<h4 id="implementation-of-consistency-models">Implementation of Consistency Models</h4>
+
+<p>The official implementation is available <a href="https://github.com/openai/consistency_models" rel="external nofollow noopener" target="_blank">here</a>.
+The train loop is defined in the <code class="language-plaintext highlighter-rouge">train_util.py</code> <a href="https://github.com/openai/consistency_models/blob/main/cm/train_util.py#L267" rel="external nofollow noopener" target="_blank">file</a>.</p>
+
+<ul>
+  <li>
+<code class="language-plaintext highlighter-rouge">diffusion.progdist_losses</code> is the loss function for progressive distillation.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">consistency_losses</code> is the loss function for consistency distillation.</li>
+  <li><code class="language-plaintext highlighter-rouge">target_model</code></li>
+  <li><code class="language-plaintext highlighter-rouge">teacher_model</code></li>
+  <li><code class="language-plaintext highlighter-rouge">teacher_diffusion</code></li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">forward_backward</code> method</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">def</span> <span class="nf">forward_backward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">cond</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">mp_trainer</span><span class="p">.</span><span class="nf">zero_grad</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">batch</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">self</span><span class="p">.</span><span class="n">microbatch</span><span class="p">):</span>
+            <span class="n">micro</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">self</span><span class="p">.</span><span class="n">microbatch</span><span class="p">].</span><span class="nf">to</span><span class="p">(</span><span class="n">dist_util</span><span class="p">.</span><span class="nf">dev</span><span class="p">())</span>
+            <span class="n">micro_cond</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">self</span><span class="p">.</span><span class="n">microbatch</span><span class="p">].</span><span class="nf">to</span><span class="p">(</span><span class="n">dist_util</span><span class="p">.</span><span class="nf">dev</span><span class="p">())</span>
+                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">cond</span><span class="p">.</span><span class="nf">items</span><span class="p">()</span>
+            <span class="p">}</span>
+            <span class="n">last_batch</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="n">self</span><span class="p">.</span><span class="n">microbatch</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">batch</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">t</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">schedule_sampler</span><span class="p">.</span><span class="nf">sample</span><span class="p">(</span><span class="n">micro</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dist_util</span><span class="p">.</span><span class="nf">dev</span><span class="p">())</span>
+
+            <span class="n">ema</span><span class="p">,</span> <span class="n">num_scales</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">ema_scale_fn</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">global_step</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">training_mode</span> <span class="o">==</span> <span class="sh">"</span><span class="s">progdist</span><span class="sh">"</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">num_scales</span> <span class="o">==</span> <span class="n">self</span><span class="p">.</span><span class="nf">ema_scale_fn</span><span class="p">(</span><span class="mi">0</span><span class="p">)[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">compute_losses</span> <span class="o">=</span> <span class="n">functools</span><span class="p">.</span><span class="nf">partial</span><span class="p">(</span>
+                        <span class="n">self</span><span class="p">.</span><span class="n">diffusion</span><span class="p">.</span><span class="n">progdist_losses</span><span class="p">,</span>
+                        <span class="n">self</span><span class="p">.</span><span class="n">ddp_model</span><span class="p">,</span>
+                        <span class="n">micro</span><span class="p">,</span>
+                        <span class="n">num_scales</span><span class="p">,</span>
+                        <span class="n">target_model</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">teacher_model</span><span class="p">,</span>
+                        <span class="n">target_diffusion</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">teacher_diffusion</span><span class="p">,</span>
+                        <span class="n">model_kwargs</span><span class="o">=</span><span class="n">micro_cond</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">compute_losses</span> <span class="o">=</span> <span class="n">functools</span><span class="p">.</span><span class="nf">partial</span><span class="p">(</span>
+                        <span class="n">self</span><span class="p">.</span><span class="n">diffusion</span><span class="p">.</span><span class="n">progdist_losses</span><span class="p">,</span>
+                        <span class="n">self</span><span class="p">.</span><span class="n">ddp_model</span><span class="p">,</span>
+                        <span class="n">micro</span><span class="p">,</span>
+                        <span class="n">num_scales</span><span class="p">,</span>
+                        <span class="n">target_model</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">target_model</span><span class="p">,</span>
+                        <span class="n">target_diffusion</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">diffusion</span><span class="p">,</span>
+                        <span class="n">model_kwargs</span><span class="o">=</span><span class="n">micro_cond</span><span class="p">,</span>
+                    <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">self</span><span class="p">.</span><span class="n">training_mode</span> <span class="o">==</span> <span class="sh">"</span><span class="s">consistency_distillation</span><span class="sh">"</span><span class="p">:</span>
+                <span class="n">compute_losses</span> <span class="o">=</span> <span class="n">functools</span><span class="p">.</span><span class="nf">partial</span><span class="p">(</span>
+                    <span class="n">self</span><span class="p">.</span><span class="n">diffusion</span><span class="p">.</span><span class="n">consistency_losses</span><span class="p">,</span>
+                    <span class="n">self</span><span class="p">.</span><span class="n">ddp_model</span><span class="p">,</span>
+                    <span class="n">micro</span><span class="p">,</span>
+                    <span class="n">num_scales</span><span class="p">,</span>
+                    <span class="n">target_model</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">target_model</span><span class="p">,</span>
+                    <span class="n">teacher_model</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">teacher_model</span><span class="p">,</span>
+                    <span class="n">teacher_diffusion</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">teacher_diffusion</span><span class="p">,</span>
+                    <span class="n">model_kwargs</span><span class="o">=</span><span class="n">micro_cond</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">self</span><span class="p">.</span><span class="n">training_mode</span> <span class="o">==</span> <span class="sh">"</span><span class="s">consistency_training</span><span class="sh">"</span><span class="p">:</span>
+                <span class="n">compute_losses</span> <span class="o">=</span> <span class="n">functools</span><span class="p">.</span><span class="nf">partial</span><span class="p">(</span>
+                    <span class="n">self</span><span class="p">.</span><span class="n">diffusion</span><span class="p">.</span><span class="n">consistency_losses</span><span class="p">,</span>
+                    <span class="n">self</span><span class="p">.</span><span class="n">ddp_model</span><span class="p">,</span>
+                    <span class="n">micro</span><span class="p">,</span>
+                    <span class="n">num_scales</span><span class="p">,</span>
+                    <span class="n">target_model</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">target_model</span><span class="p">,</span>
+                    <span class="n">model_kwargs</span><span class="o">=</span><span class="n">micro_cond</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="nc">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Unknown training mode </span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">training_mode</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">last_batch</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">self</span><span class="p">.</span><span class="n">use_ddp</span><span class="p">:</span>
+                <span class="n">losses</span> <span class="o">=</span> <span class="nf">compute_losses</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">self</span><span class="p">.</span><span class="n">ddp_model</span><span class="p">.</span><span class="nf">no_sync</span><span class="p">():</span>
+                    <span class="n">losses</span> <span class="o">=</span> <span class="nf">compute_losses</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">consistency_losses</code>.</p>
+
+<ul>
+  <li>
+<code class="language-plaintext highlighter-rouge">distiller = denoise_fn(x_t, t)</code> and <code class="language-plaintext highlighter-rouge">distiller_target = target_denoise_fn(x_t2, t2)</code> are the consistency model output and the target model output, respectively.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">t2</code> is the adjacent time step of <code class="language-plaintext highlighter-rouge">t</code>.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">x_t2</code> is the predicted adjacent point of <code class="language-plaintext highlighter-rouge">x_t</code>.</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+    <span class="k">def</span> <span class="nf">consistency_losses</span><span class="p">(</span>
+        <span class="n">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">,</span>
+        <span class="n">x_start</span><span class="p">,</span>
+        <span class="n">num_scales</span><span class="p">,</span>
+        <span class="n">model_kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">target_model</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">teacher_model</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">teacher_diffusion</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">noise</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">model_kwargs</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">model_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">noise</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">noise</span> <span class="o">=</span> <span class="n">th</span><span class="p">.</span><span class="nf">randn_like</span><span class="p">(</span><span class="n">x_start</span><span class="p">)</span>
+
+        <span class="n">dims</span> <span class="o">=</span> <span class="n">x_start</span><span class="p">.</span><span class="n">ndim</span>
+
+        <span class="c1"># IMPORTANT - f_{\theta}(x,t) - consistency model output
+</span>        <span class="k">def</span> <span class="nf">denoise_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">denoise</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="o">**</span><span class="n">model_kwargs</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">target_model</span><span class="p">:</span>
+
+            <span class="nd">@th.no_grad</span><span class="p">()</span>
+            <span class="k">def</span> <span class="nf">target_denoise_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">denoise</span><span class="p">(</span><span class="n">target_model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="o">**</span><span class="n">model_kwargs</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="nc">NotImplementedError</span><span class="p">(</span><span class="sh">"</span><span class="s">Must have a target model</span><span class="sh">"</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">teacher_model</span><span class="p">:</span>
+
+            <span class="nd">@th.no_grad</span><span class="p">()</span>
+            <span class="k">def</span> <span class="nf">teacher_denoise_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">teacher_diffusion</span><span class="p">.</span><span class="nf">denoise</span><span class="p">(</span><span class="n">teacher_model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="o">**</span><span class="n">model_kwargs</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="nd">@th.no_grad</span><span class="p">()</span>
+        <span class="k">def</span> <span class="nf">heun_solver</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">next_t</span><span class="p">,</span> <span class="n">x0</span><span class="p">):</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">samples</span>
+            <span class="k">if</span> <span class="n">teacher_model</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">denoiser</span> <span class="o">=</span> <span class="n">x0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">denoiser</span> <span class="o">=</span> <span class="nf">teacher_denoise_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+
+            
+            <span class="c1"># IMPORTANT - Euler method
+</span>            <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">denoiser</span><span class="p">)</span> <span class="o">/</span> <span class="nf">append_dims</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">dims</span><span class="p">)</span>
+            <span class="n">samples</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">d</span> <span class="o">*</span> <span class="nf">append_dims</span><span class="p">(</span><span class="n">next_t</span> <span class="o">-</span> <span class="n">t</span><span class="p">,</span> <span class="n">dims</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">teacher_model</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">denoiser</span> <span class="o">=</span> <span class="n">x0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">denoiser</span> <span class="o">=</span> <span class="nf">teacher_denoise_fn</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">next_t</span><span class="p">)</span>
+
+            <span class="n">next_d</span> <span class="o">=</span> <span class="p">(</span><span class="n">samples</span> <span class="o">-</span> <span class="n">denoiser</span><span class="p">)</span> <span class="o">/</span> <span class="nf">append_dims</span><span class="p">(</span><span class="n">next_t</span><span class="p">,</span> <span class="n">dims</span><span class="p">)</span>
+            <span class="n">samples</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="p">(</span><span class="n">d</span> <span class="o">+</span> <span class="n">next_d</span><span class="p">)</span> <span class="o">*</span> <span class="nf">append_dims</span><span class="p">((</span><span class="n">next_t</span> <span class="o">-</span> <span class="n">t</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dims</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">samples</span>
+
+        <span class="nd">@th.no_grad</span><span class="p">()</span>
+        <span class="k">def</span> <span class="nf">euler_solver</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">next_t</span><span class="p">,</span> <span class="n">x0</span><span class="p">):</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">samples</span>
+            <span class="k">if</span> <span class="n">teacher_model</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">denoiser</span> <span class="o">=</span> <span class="n">x0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">denoiser</span> <span class="o">=</span> <span class="nf">teacher_denoise_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">denoiser</span><span class="p">)</span> <span class="o">/</span> <span class="nf">append_dims</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">dims</span><span class="p">)</span>
+            <span class="n">samples</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">d</span> <span class="o">*</span> <span class="nf">append_dims</span><span class="p">(</span><span class="n">next_t</span> <span class="o">-</span> <span class="n">t</span><span class="p">,</span> <span class="n">dims</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">samples</span>
+
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">th</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span>
+            <span class="mi">0</span><span class="p">,</span> <span class="n">num_scales</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">x_start</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],),</span> <span class="n">device</span><span class="o">=</span><span class="n">x_start</span><span class="p">.</span><span class="n">device</span>
+        <span class="p">)</span>
+
+        <span class="n">t</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">sigma_max</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">self</span><span class="p">.</span><span class="n">rho</span><span class="p">)</span> <span class="o">+</span> <span class="n">indices</span> <span class="o">/</span> <span class="p">(</span><span class="n">num_scales</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">sigma_min</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">self</span><span class="p">.</span><span class="n">rho</span><span class="p">)</span> <span class="o">-</span> <span class="n">self</span><span class="p">.</span><span class="n">sigma_max</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">self</span><span class="p">.</span><span class="n">rho</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">t</span><span class="o">**</span><span class="n">self</span><span class="p">.</span><span class="n">rho</span>
+
+        <span class="n">t2</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">sigma_max</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">self</span><span class="p">.</span><span class="n">rho</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">indices</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">num_scales</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">sigma_min</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">self</span><span class="p">.</span><span class="n">rho</span><span class="p">)</span> <span class="o">-</span> <span class="n">self</span><span class="p">.</span><span class="n">sigma_max</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">self</span><span class="p">.</span><span class="n">rho</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">t2</span> <span class="o">=</span> <span class="n">t2</span><span class="o">**</span><span class="n">self</span><span class="p">.</span><span class="n">rho</span>
+
+        <span class="n">x_t</span> <span class="o">=</span> <span class="n">x_start</span> <span class="o">+</span> <span class="n">noise</span> <span class="o">*</span> <span class="nf">append_dims</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">dims</span><span class="p">)</span>
+
+        <span class="n">dropout_state</span> <span class="o">=</span> <span class="n">th</span><span class="p">.</span><span class="nf">get_rng_state</span><span class="p">()</span>
+        <span class="n">distiller</span> <span class="o">=</span> <span class="nf">denoise_fn</span><span class="p">(</span><span class="n">x_t</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">teacher_model</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">x_t2</span> <span class="o">=</span> <span class="nf">euler_solver</span><span class="p">(</span><span class="n">x_t</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">t2</span><span class="p">,</span> <span class="n">x_start</span><span class="p">).</span><span class="nf">detach</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x_t2</span> <span class="o">=</span> <span class="nf">heun_solver</span><span class="p">(</span><span class="n">x_t</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">t2</span><span class="p">,</span> <span class="n">x_start</span><span class="p">).</span><span class="nf">detach</span><span class="p">()</span>
+
+        <span class="n">th</span><span class="p">.</span><span class="nf">set_rng_state</span><span class="p">(</span><span class="n">dropout_state</span><span class="p">)</span>
+        <span class="n">distiller_target</span> <span class="o">=</span> <span class="nf">target_denoise_fn</span><span class="p">(</span><span class="n">x_t2</span><span class="p">,</span> <span class="n">t2</span><span class="p">)</span>
+        <span class="n">distiller_target</span> <span class="o">=</span> <span class="n">distiller_target</span><span class="p">.</span><span class="nf">detach</span><span class="p">()</span>
+
+        <span class="n">snrs</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">get_snr</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="nf">get_weightings</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">weight_schedule</span><span class="p">,</span> <span class="n">snrs</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">sigma_data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">loss_norm</span> <span class="o">==</span> <span class="sh">"</span><span class="s">l1</span><span class="sh">"</span><span class="p">:</span>
+            <span class="n">diffs</span> <span class="o">=</span> <span class="n">th</span><span class="p">.</span><span class="nf">abs</span><span class="p">(</span><span class="n">distiller</span> <span class="o">-</span> <span class="n">distiller_target</span><span class="p">)</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="nf">mean_flat</span><span class="p">(</span><span class="n">diffs</span><span class="p">)</span> <span class="o">*</span> <span class="n">weights</span>
+        <span class="k">elif</span> <span class="n">self</span><span class="p">.</span><span class="n">loss_norm</span> <span class="o">==</span> <span class="sh">"</span><span class="s">l2</span><span class="sh">"</span><span class="p">:</span>
+            <span class="n">diffs</span> <span class="o">=</span> <span class="p">(</span><span class="n">distiller</span> <span class="o">-</span> <span class="n">distiller_target</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="nf">mean_flat</span><span class="p">(</span><span class="n">diffs</span><span class="p">)</span> <span class="o">*</span> <span class="n">weights</span>
+        <span class="k">elif</span> <span class="n">self</span><span class="p">.</span><span class="n">loss_norm</span> <span class="o">==</span> <span class="sh">"</span><span class="s">l2-32</span><span class="sh">"</span><span class="p">:</span>
+            <span class="n">distiller</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="nf">interpolate</span><span class="p">(</span><span class="n">distiller</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="sh">"</span><span class="s">bilinear</span><span class="sh">"</span><span class="p">)</span>
+            <span class="n">distiller_target</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="nf">interpolate</span><span class="p">(</span>
+                <span class="n">distiller_target</span><span class="p">,</span>
+                <span class="n">size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+                <span class="n">mode</span><span class="o">=</span><span class="sh">"</span><span class="s">bilinear</span><span class="sh">"</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">diffs</span> <span class="o">=</span> <span class="p">(</span><span class="n">distiller</span> <span class="o">-</span> <span class="n">distiller_target</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="nf">mean_flat</span><span class="p">(</span><span class="n">diffs</span><span class="p">)</span> <span class="o">*</span> <span class="n">weights</span>
+        <span class="k">elif</span> <span class="n">self</span><span class="p">.</span><span class="n">loss_norm</span> <span class="o">==</span> <span class="sh">"</span><span class="s">lpips</span><span class="sh">"</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">x_start</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">256</span><span class="p">:</span>
+                <span class="n">distiller</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="nf">interpolate</span><span class="p">(</span><span class="n">distiller</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">224</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="sh">"</span><span class="s">bilinear</span><span class="sh">"</span><span class="p">)</span>
+                <span class="n">distiller_target</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="nf">interpolate</span><span class="p">(</span>
+                    <span class="n">distiller_target</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">224</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="sh">"</span><span class="s">bilinear</span><span class="sh">"</span>
+                <span class="p">)</span>
+
+            <span class="n">loss</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">self</span><span class="p">.</span><span class="nf">lpips_loss</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">distiller</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span>
+                    <span class="p">(</span><span class="n">distiller_target</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="o">*</span> <span class="n">weights</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="nc">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Unknown loss norm </span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">loss_norm</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+        <span class="n">terms</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">terms</span><span class="p">[</span><span class="sh">"</span><span class="s">loss</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">loss</span>
+
+        <span class="k">return</span> <span class="n">terms</span>
+</code></pre></div></div>
+
 <h3 id="diffusion-distillation">Diffusion Distillation</h3>
+
+<h4 id="progressive-distillation">Progressive Distillation</h4>
+
+<p>The idea of progressive distillation is to</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion-foundation/2025-10-06-12-36-31-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion-foundation/2025-10-06-12-36-31-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion-foundation/2025-10-06-12-36-31-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/diffusion-foundation/2025-10-06-12-36-31.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
 
 <p>References:</p>
 
@@ -1792,8 +2244,6 @@ Rather than standard gradient descent, the paper proposes an <strong>Exponential
 
 <h3 id="rectified-diffusion">Rectified Diffusion</h3>
 
-<h3 id="caching">Caching</h3>
-
 <p>References:</p>
 
 <ul>
@@ -1801,7 +2251,156 @@ Rather than standard gradient descent, the paper proposes an <strong>Exponential
 </li>
   <li>[2] <a href="https://arxiv.org/pdf/2403.03206" rel="external nofollow noopener" target="_blank">Scaling Rectified Flow Transformers for High-Resolution Image Synthesis</a>
 </li>
-  <li>[3] <a href="https://openaccess.thecvf.com/content/CVPR2024/papers/Ma_DeepCache_Accelerating_Diffusion_Models_for_Free_CVPR_2024_paper.pdf" rel="external nofollow noopener" target="_blank">DeepCache: Accelerating Diffusion Models for Free</a>
+</ul>
+
+<h3 id="caching-in-diffusion-models">Caching in Diffusion Models</h3>
+
+<p>This technique takes advantage of the <strong>U-Net architecture</strong> used in diffusion models, particularly its <strong>skip connections</strong>, which transfer intermediate features from the encoder to the decoder.</p>
+
+<p>The core idea:<br>
+👉 <em>Store intermediate results from step</em> \(t\) <em>(e.g., decoder features)</em> <em>and reuse them at step</em> \(t-1\) <em>instead of recomputing the entire U-Net.</em></p>
+
+<h4 id="u-net-refresher">U-Net Refresher</h4>
+
+<p>A U-Net has two main components:</p>
+
+<ul>
+  <li>
+<strong>Encoder (Down Blocks)</strong> — progressively downsamples the input to a compact high-level representation.</li>
+  <li>
+<strong>Decoder (Up Blocks)</strong> — upsamples the features to reconstruct the image.</li>
+</ul>
+
+<p>Each pair of down and up blocks \(D_i, U_i\) connects through:</p>
+
+<ul>
+  <li>a <strong>main path</strong>: \(D_1 \to D_d \to U_d \to U_1\)</li>
+  <li>
+<strong>skip connections</strong>: \(D_i \to U_i\)</li>
+</ul>
+
+<p>At each layer, the output combines both paths:
+\(U_i = \text{Concat}(D_i, U_{i+1})\)</p>
+
+<h4 id="observation-feature-reuse-across-timesteps">Observation: Feature Reuse Across Timesteps</h4>
+
+<p>During denoising, <strong>adjacent timesteps produce very similar high-level features</strong>:
+\(U_i^{(t)} \approx U_i^{(t-1)}\)</p>
+
+<p>So instead of recomputing these expensive decoder features every step, we can <strong>cache</strong> them:</p>
+
+\[F_c^{(t)} \leftarrow U_i^{(t)} \\
+U_i^{(t-1)} = \text{Concat}(D_i^{(t-1)}, F_c^{(t)})\]
+
+<p>This simple reuse cuts redundant computation and <strong>significantly speeds up inference</strong>.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion-foundation/2025-10-06-20-14-04-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion-foundation/2025-10-06-20-14-04-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion-foundation/2025-10-06-20-14-04-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/diffusion-foundation/2025-10-06-20-14-04.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+
+<h4 id="implementation-overview">Implementation Overview</h4>
+
+<p>I was curious more about the implementation details than the idea. You can find the full implementation in the <a href="https://github.com/horseee/DeepCache/tree/master/DeepCache" rel="external nofollow noopener" target="_blank">DeepCache repository</a>. 
+First, we need to modify the Stable Diffusion pipeline, specifically the <strong>denoising loop</strong>, where cached features are passed to the U-Net.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+    <span class="c1"># predict the noise residual
+</span>    <span class="n">noise_pred</span><span class="p">,</span> <span class="n">prv_features</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">unet</span><span class="p">(</span>
+        <span class="n">latent_model_input</span><span class="p">,</span>
+        <span class="n">t</span><span class="p">,</span>
+        <span class="n">encoder_hidden_states</span><span class="o">=</span><span class="n">prompt_embeds</span><span class="p">,</span>
+        <span class="n">cross_attention_kwargs</span><span class="o">=</span><span class="n">cross_attention_kwargs</span><span class="p">,</span>
+        <span class="n">replicate_prv_feature</span><span class="o">=</span><span class="n">prv_features</span><span class="p">,</span>
+        <span class="n">quick_replicate</span><span class="o">=</span> <span class="n">cache_interval</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">cache_layer_id</span><span class="o">=</span><span class="n">cache_layer_id</span><span class="p">,</span>
+        <span class="n">cache_block_id</span><span class="o">=</span><span class="n">cache_block_id</span><span class="p">,</span>
+        <span class="n">return_dict</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+    <span class="p">)</span>
+</code></pre></div></div>
+
+<p>The U-Net model is defined in the <code class="language-plaintext highlighter-rouge">unet_2d_condition.py</code> <a href="https://github.com/horseee/DeepCache/blob/master/DeepCache/sd/unet_2d_condition.py" rel="external nofollow noopener" target="_blank">file</a>, where <code class="language-plaintext highlighter-rouge">forward</code> method has been modified to support the caching feature.
+Note that the caching applied to <code class="language-plaintext highlighter-rouge">cross-attention</code> layer only.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">quick_replicate</span> <span class="ow">and</span> <span class="n">replicate_prv_feature</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="c1"># Downsampling - nothing change 
+</span>
+    <span class="c1"># Middle - No middle 
+</span>
+    <span class="c1"># Upsampling
+</span>    <span class="n">sample</span> <span class="o">=</span> <span class="n">replicate_prv_feature</span>
+    <span class="c1">#down_block_res_samples = down_block_res_samples[:-1]
+</span>    <span class="k">if</span> <span class="n">cache_block_id</span> <span class="o">==</span> <span class="nf">len</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">down_blocks</span><span class="p">[</span><span class="n">cache_layer_id</span><span class="p">].</span><span class="n">attentions</span><span class="p">)</span> <span class="p">:</span>
+        <span class="n">cache_block_id</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">cache_layer_id</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">cache_block_id</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">upsample_block</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">up_blocks</span><span class="p">):</span>
+
+        <span class="c1"># Skip the blocks that are not the cache layer # IMPORTANT - This is where speed is gained
+</span>        <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nf">len</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">up_blocks</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">cache_layer_id</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="nf">len</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">up_blocks</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">cache_layer_id</span><span class="p">:</span>
+            <span class="n">trunc_upsample_block</span> <span class="o">=</span> <span class="n">cache_block_id</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">trunc_upsample_block</span> <span class="o">=</span> <span class="nf">len</span><span class="p">(</span><span class="n">upsample_block</span><span class="p">.</span><span class="n">resnets</span><span class="p">)</span>
+
+        <span class="n">is_final_block</span> <span class="o">=</span> <span class="n">i</span> <span class="o">==</span> <span class="nf">len</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">up_blocks</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
+        <span class="n">res_samples</span> <span class="o">=</span> <span class="n">down_block_res_samples</span><span class="p">[</span><span class="o">-</span><span class="n">trunc_upsample_block</span><span class="p">:]</span>
+        <span class="n">down_block_res_samples</span> <span class="o">=</span> <span class="n">down_block_res_samples</span><span class="p">[:</span> <span class="o">-</span><span class="n">trunc_upsample_block</span><span class="p">]</span>
+
+        <span class="c1"># if we have not reached the final block and need to forward the
+</span>        <span class="c1"># upsample size, we do it here
+</span>        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_final_block</span> <span class="ow">and</span> <span class="n">forward_upsample_size</span><span class="p">:</span>
+            <span class="n">upsample_size</span> <span class="o">=</span> <span class="n">down_block_res_samples</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+
+        <span class="k">if</span> <span class="nf">hasattr</span><span class="p">(</span><span class="n">upsample_block</span><span class="p">,</span> <span class="sh">"</span><span class="s">has_cross_attention</span><span class="sh">"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">upsample_block</span><span class="p">.</span><span class="n">has_cross_attention</span><span class="p">:</span>
+            <span class="c1">#print(sample.shape, [res_sample.shape for res_sample in res_samples])
+</span>            <span class="n">sample</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="nf">upsample_block</span><span class="p">(</span>
+                <span class="n">hidden_states</span><span class="o">=</span><span class="n">sample</span><span class="p">,</span>
+                <span class="n">temb</span><span class="o">=</span><span class="n">emb</span><span class="p">,</span>
+                <span class="n">res_hidden_states_tuple</span><span class="o">=</span><span class="n">res_samples</span><span class="p">,</span>
+                <span class="n">encoder_hidden_states</span><span class="o">=</span><span class="n">encoder_hidden_states</span><span class="p">,</span>
+                <span class="n">cross_attention_kwargs</span><span class="o">=</span><span class="n">cross_attention_kwargs</span><span class="p">,</span>
+                <span class="n">upsample_size</span><span class="o">=</span><span class="n">upsample_size</span><span class="p">,</span>
+                <span class="n">attention_mask</span><span class="o">=</span><span class="n">attention_mask</span><span class="p">,</span>
+                <span class="n">encoder_attention_mask</span><span class="o">=</span><span class="n">encoder_attention_mask</span><span class="p">,</span>
+                <span class="n">enter_block_number</span><span class="o">=</span><span class="n">cache_block_id</span> <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="nf">len</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">up_blocks</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">cache_layer_id</span> <span class="k">else</span> <span class="bp">None</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sample</span> <span class="o">=</span> <span class="nf">upsample_block</span><span class="p">(</span>
+                <span class="n">hidden_states</span><span class="o">=</span><span class="n">sample</span><span class="p">,</span>
+                <span class="n">temb</span><span class="o">=</span><span class="n">emb</span><span class="p">,</span>
+                <span class="n">res_hidden_states_tuple</span><span class="o">=</span><span class="n">res_samples</span><span class="p">,</span>
+                <span class="n">upsample_size</span><span class="o">=</span><span class="n">upsample_size</span><span class="p">,</span>
+                <span class="n">scale</span><span class="o">=</span><span class="n">lora_scale</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="n">prv_f</span> <span class="o">=</span> <span class="n">replicate_prv_feature</span>
+</code></pre></div></div>
+
+<p>References:</p>
+
+<ul>
+  <li>[1] <a href="https://openaccess.thecvf.com/content/CVPR2024/papers/Ma_DeepCache_Accelerating_Diffusion_Models_for_Free_CVPR_2024_paper.pdf" rel="external nofollow noopener" target="_blank">DeepCache: Accelerating Diffusion Models for Free</a>
 </li>
 </ul>
 
@@ -1810,6 +2409,8 @@ Rather than standard gradient descent, the paper proposes an <strong>Exponential
 \[z_t = (1 - t) x_0 + t \epsilon\]
 
 <p>where \(\epsilon\) is a standard normal random variable and \(t\) is the time step in [0, 1].</p>
+
+<h2 id="multi-modal-diffusion">Multi-modal Diffusion</h2>
 
 <!-- mkdir -p assets/img/diffusion-foundation -->
 <!-- mv _posts/2025-10-01-*.png assets/img/diffusion-foundation/ -->
