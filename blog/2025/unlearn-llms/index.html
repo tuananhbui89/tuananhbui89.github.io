@@ -171,14 +171,31 @@
 </ul>
 </li>
 <li class="toc-entry toc-h2"><a href="#unlearning-methods">Unlearning Methods</a></li>
-<li class="toc-entry toc-h2"><a href="#representation-misdirection-for-unlearning-rmu">Representation Misdirection for Unlearning (RMU)</a></li>
-<li class="toc-entry toc-h2"><a href="#adaptive-rmu-on-effects-of-steering-latent-representation-for-large-language-model-unlearning---aaai-2025">Adaptive RMU (On Effects of Steering Latent Representation for Large Language Model Unlearning - AAAI 2025)</a></li>
+<li class="toc-entry toc-h2">
+<a href="#representation-misdirection-for-unlearning-rmu">Representation Misdirection for Unlearning (RMU)</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#implementation">Implementation</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2">
+<a href="#adaptive-rmu-on-effects-of-steering-latent-representation-for-large-language-model-unlearning---aaai-2025">Adaptive RMU (On Effects of Steering Latent Representation for Large Language Model Unlearning - AAAI 2025)</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#implementation-1">Implementation</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2">
+<a href="#negative-preference-optimization-from-catastrophic-collapse-to-effective-unlearning-colm-2023">Negative Preference Optimization: From Catastrophic Collapse to Effective Unlearning (COLM 2023)</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#implementation-2">Implementation</a></li>
+</ul>
+</li>
 <li class="toc-entry toc-h2">
 <a href="#llm-unlearning-via-loss-adjustment-with-only-forget-data-iclr-2025">LLM Unlearning via Loss Adjustment with Only Forget Data (ICLR 2025)</a>
 <ul>
 <li class="toc-entry toc-h3"><a href="#motivation---eliminating-the-need-for-a-retain-set">Motivation - Eliminating the need for a retain set</a></li>
 <li class="toc-entry toc-h3"><a href="#loss-adjustments-via-f-divergence-maximization">Loss-Adjustments via f-divergence Maximization</a></li>
 <li class="toc-entry toc-h3"><a href="#connection-with-dpo">Connection with DPO</a></li>
+<li class="toc-entry toc-h3"><a href="#implementation-3">Implementation</a></li>
 </ul>
 </li>
 <li class="toc-entry toc-h2">
@@ -643,6 +660,73 @@ To measure verbatim memorization, the paper uses the <a href="https://tuananhbui
 
 <p>where \(\theta^{\text{rm}}\) is the parameters of the model to be optimized, and \(\alpha\) is a hyperparameter.</p>
 
+<h3 id="implementation">Implementation</h3>
+
+<ul>
+  <li>Official Github repo: <a href="https://github.com/centerforaisafety/wmdp" rel="external nofollow noopener" target="_blank">https://github.com/centerforaisafety/wmdp</a>
+</li>
+</ul>
+
+<p>The minimal code of this project is as follows:</p>
+
+<p>Control vector (\(u\)) generation. Each data point in the forget set is associated with a control vector:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">control_vectors_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">forget_data_list</span><span class="p">)):</span>
+        <span class="n">random_vector</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">rand</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span> <span class="n">updated_model</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="n">hidden_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">updated_model</span><span class="p">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">updated_model</span><span class="p">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">control_vec</span> <span class="o">=</span> <span class="n">random_vector</span> <span class="o">/</span> <span class="n">torch</span><span class="p">.</span><span class="nf">norm</span><span class="p">(</span><span class="n">random_vector</span><span class="p">)</span> <span class="o">*</span> <span class="n">args</span><span class="p">.</span><span class="n">steering_coeff_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">control_vectors_list</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">control_vec</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Get the forget and retain activations/losses:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+    <span class="n">unlearn_inputs</span> <span class="o">=</span> <span class="nf">tokenizer</span><span class="p">(</span><span class="n">unlearn_batch</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="sh">"</span><span class="s">pt</span><span class="sh">"</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">truncation</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="n">max_length</span><span class="p">)</span>
+    <span class="n">updated_forget_activations</span> <span class="o">=</span> <span class="nf">forward_with_cache</span><span class="p">(</span><span class="n">updated_model</span><span class="p">,</span> <span class="n">unlearn_inputs</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">updated_module</span><span class="p">,</span> <span class="n">no_grad</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">unlearn_loss</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">nn</span><span class="p">.</span><span class="n">functional</span><span class="p">.</span><span class="nf">mse_loss</span><span class="p">(</span><span class="n">updated_forget_activations</span><span class="p">,</span> <span class="n">control_vec</span><span class="p">)</span>
+
+    <span class="c1"># similar for retain
+</span></code></pre></div></div>
+
+<p>Forward with cache - to get the activations from updated model or frozen model. The <code class="language-plaintext highlighter-rouge">module</code> is the layer of the model that we want to get the activations from.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">frozen_module</span> <span class="o">=</span> <span class="nf">eval</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">module_str</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="sh">"</span><span class="s">frozen_model</span><span class="sh">"</span><span class="p">,</span> <span class="n">layer_id</span><span class="o">=</span><span class="n">args</span><span class="p">.</span><span class="n">layer_id</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">forward_with_cache</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">no_grad</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="c1"># define a tensor with the size of our cached activations
+</span>    <span class="n">cache</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">def</span> <span class="nf">hook</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="nb">input</span><span class="p">,</span> <span class="n">output</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">cache</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">output</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cache</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">None</span> 
+    
+    <span class="n">hook_handle</span> <span class="o">=</span> <span class="n">module</span><span class="p">.</span><span class="nf">register_forward_hook</span><span class="p">(</span><span class="n">hook</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">no_grad</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
+            <span class="n">_</span> <span class="o">=</span> <span class="nf">model</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="nf">model</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
+        
+    <span class="n">hook_handle</span><span class="p">.</span><span class="nf">remove</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">cache</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p><strong>Evaluation Implementation</strong></p>
+
+<p>The evaluation is done using the <a href="https://github.com/EleutherAI/lm-evaluation-harness" rel="external nofollow noopener" target="_blank"><code class="language-plaintext highlighter-rouge">lm-eval-harness</code></a> framework</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">!</span>lm-eval <span class="nt">--model</span> hf <span class="se">\</span>
+    <span class="nt">--model_args</span> <span class="nv">pretrained</span><span class="o">=</span><span class="s2">"checkpoints/rmu/adaptive_HuggingFaceH4/zephyr-7b-beta_alpha-1200-1200_coeffs-6.5-6.5_batches-500_layer-7_scale-5"</span> <span class="se">\</span>
+    <span class="nt">--tasks</span> mmlu,wmdp <span class="se">\</span>
+    <span class="nt">--batch_size</span><span class="o">=</span>16
+</code></pre></div></div>
+
+<p>Basically, it will load the pretrained unlearned model and evaluate it on the MMLU and WMDP tasks.</p>
+
 <h2 id="adaptive-rmu-on-effects-of-steering-latent-representation-for-large-language-model-unlearning---aaai-2025">Adaptive RMU (On Effects of Steering Latent Representation for Large Language Model Unlearning - AAAI 2025)</h2>
 
 <p><strong>Summary</strong></p>
@@ -706,11 +790,129 @@ More specifically, as discussed in Section 4.3 in [4], within early layers, the 
 
 <p>Inspired by the above observation, this paper proposes a <strong>layer-adaptive</strong> RMU method, which uses a different \(c\) for each layer.</p>
 
-\[\mathcal{L}^{\text{adaptive}} = \underbrace{\mathbb{E}_{x_F \in \mathcal{D}_{\text{forget}}} \|h_{\theta^{\text{unlearn}}}^{(l)}(x_F) - \beta\|h_{\theta^{\text{frozen}}}^{(l)}(x_F)\|u\|_2^2}_{\text{adaptive forget loss}} + \underbrace{\alpha \mathbb{E}_{x_R \in \mathcal{D}_{\text{retain}}} \|h_{\theta^{\text{unlearn}}}^{(l)}(x_R) - h_{\theta^{\text{frozen}}}^{(l)}(x_R)\|_2^2}_{\text{retain loss}}\]
+\[\mathcal{L}^{\text{adaptive}} = \underbrace{\mathbb{E}_{x_F \in \mathcal{D}_{\text{forget}}} \|h_{\theta^{\text{unlearn}}}^{(l)}(x_F) - \beta\|h_{\theta^{\text{frozen}}}^{(l)}(x_F)\| \|u\|_2^2}_{\text{adaptive forget loss}} + \underbrace{\alpha \mathbb{E}_{x_R \in \mathcal{D}_{\text{retain}}} \|h_{\theta^{\text{unlearn}}}^{(l)}(x_R) - h_{\theta^{\text{frozen}}}^{(l)}(x_R)\|_2^2}_{\text{retain loss}}\]
 
 <p>where \(\beta \|h_{\theta^{\text{frozen}}}^{(l)}(x_F)\|\) is the <strong>adaptive scaling coefficient</strong> for the forget loss which is computed by the norm of the representation of forget samples in the corresponding layer of the frozen model.</p>
 
 <p>However, it is worth noting that intuitively, the higher \(c\) leads to a more alignment between forget representation and the random unit vector \(u\), which suggests the better unlearning performance - more randomness of the output with the forget prompt. However, it also leads to a worse retaining performance.</p>
+
+<h3 id="implementation-1">Implementation</h3>
+
+<ul>
+  <li>Official Github repo: <a href="https://github.com/RebelsNLU-jaist/llm-unlearning" rel="external nofollow noopener" target="_blank">https://github.com/RebelsNLU-jaist/llm-unlearning</a>
+</li>
+</ul>
+
+<p>Adaptive RMU is heavily adapted from the RMU codebase. Following is the minimal code of the adaptive RMU, which only differs in the loss function:</p>
+
+<p>Recall the code from RMU:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+    <span class="n">unlearn_inputs</span> <span class="o">=</span> <span class="nf">tokenizer</span><span class="p">(</span><span class="n">unlearn_batch</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="sh">"</span><span class="s">pt</span><span class="sh">"</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">truncation</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="n">max_length</span><span class="p">)</span>
+    <span class="n">updated_forget_activations</span> <span class="o">=</span> <span class="nf">forward_with_cache</span><span class="p">(</span><span class="n">updated_model</span><span class="p">,</span> <span class="n">unlearn_inputs</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">updated_module</span><span class="p">,</span> <span class="n">no_grad</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">unlearn_loss</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">nn</span><span class="p">.</span><span class="n">functional</span><span class="p">.</span><span class="nf">mse_loss</span><span class="p">(</span><span class="n">updated_forget_activations</span><span class="p">,</span> <span class="n">control_vec</span><span class="p">)</span>
+
+    <span class="c1"># similar for retain
+</span></code></pre></div></div>
+
+<p>From Adaptive RMU:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">updated_forget_activations</span> <span class="o">=</span> <span class="nf">forward_with_cache</span><span class="p">(</span><span class="n">updated_model</span><span class="p">,</span> <span class="n">unlearn_inputs</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">updated_module</span><span class="p">,</span> <span class="n">no_grad</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">idx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">coeffs</span><span class="p">[</span><span class="sh">"</span><span class="s">0</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">mean</span><span class="p">(</span><span class="n">updated_forget_activations</span><span class="p">.</span><span class="nf">norm</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">).</span><span class="nf">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">).</span><span class="nf">item</span><span class="p">()</span> <span class="o">*</span> <span class="n">args</span><span class="p">.</span><span class="n">scale</span>
+    <span class="k">elif</span> <span class="n">idx</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">coeffs</span><span class="p">[</span><span class="sh">"</span><span class="s">1</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">mean</span><span class="p">(</span><span class="n">updated_forget_activations</span><span class="p">.</span><span class="nf">norm</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">).</span><span class="nf">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">).</span><span class="nf">item</span><span class="p">()</span> <span class="o">*</span> <span class="n">args</span><span class="p">.</span><span class="n">scale</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="n">unlearn_loss</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">nn</span><span class="p">.</span><span class="n">functional</span><span class="p">.</span><span class="nf">mse_loss</span><span class="p">(</span><span class="n">updated_forget_activations</span><span class="p">,</span> <span class="n">control_vec</span> <span class="o">*</span> <span class="n">coeffs</span><span class="p">[</span><span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">topic_idx</span><span class="si">}</span><span class="sh">"</span><span class="p">])</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">topic_idx</code> is the index of the forget topic (either <code class="language-plaintext highlighter-rouge">wmdp-bio</code> or <code class="language-plaintext highlighter-rouge">wmdp-cyber</code>). The author’s code is not optimized yet :v.</p>
+
+<h2 id="negative-preference-optimization-from-catastrophic-collapse-to-effective-unlearning-colm-2023">Negative Preference Optimization: From Catastrophic Collapse to Effective Unlearning (COLM 2023)</h2>
+
+<p>Discussion about DPO can be found in <a href="/blog/2025/nlp-foundation/#ppo-and-dpo">my NLP foundation blog post</a>.</p>
+
+<p><strong>Preference Optimization.</strong> In preference optimization (Ouyang et al., 2022; Bai et al., 2022; Stiennon et al., 2020; Rafailov et al., 2024), we are given a dataset with preference feedbacks \(\mathcal{D}_{\text{paired}} = \{(x_i, y_{i,w}, y_{i,l})\}_{i \in [n]}\), where \((y_{i,w}, y_{i,l})\) are two responses to \(x_i\) generated by a pre-trained model \(\pi_\theta\), and the preference \(y_{i,w} \succ y_{i,l}\) is obtained by human comparison (here “w” stands for “win” and “l” stands for “lose” in a comparison). The goal is to fine-tune \(\pi_\theta\) using \(\mathcal{D}_{\text{paired}}\) to better align it with human preferences. A popular method for preference optimization is Direct Preference Optimization (DPO) (Rafailov et al., 2024), which minimizes</p>
+
+\[\mathcal{L}_{\text{DPO},\beta}(\theta) = -\frac{1}{\beta}\mathbb{E}_{\mathcal{D}_{\text{paired}}} \left[ \log \sigma \left( \beta \log \frac{\pi_\theta(y_w \mid x)}{\pi_{\text{ref}}(y_w \mid x)} - \beta \log \frac{\pi_\theta(y_l \mid x)}{\pi_{\text{ref}}(y_l \mid x)} \right) \right]\]
+
+<p>Here, \(\sigma(t) = 1/(1 + e^{-t})\) is the sigmoid function, \(\beta &gt; 0\) is the inverse temperature, and \(\pi_{\text{ref}}\) is a reference model.</p>
+
+<p><strong>Unlearning as preference optimization.</strong> We observe that the unlearning problem can be cast into the preference optimization framework by treating each \((x_i, y_i) \in \mathcal{D}_{\text{FG}}\) as only providing a negative response \(y_{i,l} = y_i\) without any positive response \(y_{i,w}\). Therefore, we ignore the \(y_w\) term in DPO in Eq. (2) and obtain the Negative Preference Optimization (NPO) loss:</p>
+
+\[\mathcal{L}_{\text{NPO},\beta}(\theta) = -\frac{2}{\beta}\mathbb{E}_{\mathcal{D}_{\text{FG}}} \left[ \log \sigma \left( - \beta \log \frac{\pi_\theta(y \mid x)}{\pi_{\text{ref}}(y \mid x)} \right) \right] = -\frac{2}{\beta}\mathbb{E}_{\mathcal{D}_{\text{FG}}} \left[ \log \left( 1 + \left( \frac{\pi_\theta(y \mid x)}{\pi_{\text{ref}}(y \mid x)} \right)^\beta \right) \right]\]
+
+<p>Minimizing \(\mathcal{L}_{\text{NPO},\beta}\) ensures that the prediction probability on the forget set \(\pi_\theta(y_i \mid x_i)\) is as small as possible, aligning with the goal of unlearning the forget set.</p>
+
+<h3 id="implementation-2">Implementation</h3>
+
+<ul>
+  <li>DPO official Github repo: <a href="https://github.com/eric-mitchell/direct-preference-optimization" rel="external nofollow noopener" target="_blank">https://github.com/eric-mitchell/direct-preference-optimization</a>
+</li>
+  <li>NPO official Github repo: <a href="https://github.com/licong-lin/negative-preference-optimization" rel="external nofollow noopener" target="_blank">https://github.com/licong-lin/negative-preference-optimization</a>
+</li>
+</ul>
+
+<p>Because of the similarity between DPO and NPO, in the following, I will only show the code for DPO.</p>
+
+<p>In the <code class="language-plaintext highlighter-rouge">train.py</code> file, we create the policy and reference models, and call the <code class="language-plaintext highlighter-rouge">trainer</code> to train the policy model. Note that, we disable the dropout of the policy and reference models. In the <a href="https://github.com/eric-mitchell/direct-preference-optimization/blob/main/trainers.py" rel="external nofollow noopener" target="_blank"><code class="language-plaintext highlighter-rouge">trainer</code></a>, we also set the reference model to eval mode.</p>
+
+<p>The DPO loss. Note that, this code also support the IPO (Inverse Preference Optimization) loss.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">dpo_loss</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">policy_chosen_logps</span><span class="p">,</span> <span class="n">policy_rejected_logps</span><span class="p">,</span> <span class="n">reference_chosen_logps</span><span class="p">,</span> <span class="n">reference_rejected_logps</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">ipo</span><span class="p">,</span> <span class="n">reference_free</span><span class="p">,</span> <span class="n">label_smoothing</span><span class="p">):</span>
+    <span class="n">pi_logratios</span> <span class="o">=</span> <span class="n">policy_chosen_logps</span> <span class="o">-</span> <span class="n">policy_rejected_logps</span>
+    <span class="n">ref_logratios</span> <span class="o">=</span> <span class="n">reference_chosen_logps</span> <span class="o">-</span> <span class="n">reference_rejected_logps</span>
+
+    <span class="k">if</span> <span class="n">reference_free</span><span class="p">:</span>
+        <span class="n">ref_logratios</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">logits</span> <span class="o">=</span> <span class="n">pi_logratios</span> <span class="o">-</span> <span class="n">ref_logratios</span>  <span class="c1"># also known as h_{\pi_\theta}^{y_w,y_l}
+</span>
+    <span class="k">if</span> <span class="n">ipo</span><span class="p">:</span>
+        <span class="n">losses</span> <span class="o">=</span> <span class="p">(</span><span class="n">logits</span> <span class="o">-</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">beta</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span>  <span class="c1"># Eq. 17 of https://arxiv.org/pdf/2310.12036v2.pdf
+</span>    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Eq. 3 https://ericmitchell.ai/cdpo.pdf; label_smoothing=0 gives original DPO (Eq. 7 of https://arxiv.org/pdf/2305.18290.pdf)
+</span>        <span class="n">losses</span> <span class="o">=</span> <span class="o">-</span><span class="n">F</span><span class="p">.</span><span class="nf">logsigmoid</span><span class="p">(</span><span class="n">beta</span> <span class="o">*</span> <span class="n">logits</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">label_smoothing</span><span class="p">)</span> <span class="o">-</span> <span class="n">F</span><span class="p">.</span><span class="nf">logsigmoid</span><span class="p">(</span><span class="o">-</span><span class="n">beta</span> <span class="o">*</span> <span class="n">logits</span><span class="p">)</span> <span class="o">*</span> <span class="n">label_smoothing</span>
+
+    <span class="n">chosen_rewards</span> <span class="o">=</span> <span class="n">beta</span> <span class="o">*</span> <span class="p">(</span><span class="n">policy_chosen_logps</span> <span class="o">-</span> <span class="n">reference_chosen_logps</span><span class="p">).</span><span class="nf">detach</span><span class="p">()</span>
+    <span class="n">rejected_rewards</span> <span class="o">=</span> <span class="n">beta</span> <span class="o">*</span> <span class="p">(</span><span class="n">policy_rejected_logps</span> <span class="o">-</span> <span class="n">reference_rejected_logps</span><span class="p">).</span><span class="nf">detach</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">policy_chosen_logps</code> and <code class="language-plaintext highlighter-rouge">policy_rejected_logps</code> are the log probabilities of the chosen and rejected responses of the policy model, respectively. Similar for the <code class="language-plaintext highlighter-rouge">reference_chosen_logps</code> and <code class="language-plaintext highlighter-rouge">reference_rejected_logps</code>, with one difference is that we don’t need to trace the gradients of the reference model.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">policy_chosen_logps</span><span class="p">,</span> <span class="n">policy_rejected_logps</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">concatenated_forward</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">policy</span><span class="p">,</span> <span class="n">batch</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
+    <span class="n">reference_chosen_logps</span><span class="p">,</span> <span class="n">reference_rejected_logps</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">concatenated_forward</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">reference_model</span><span class="p">,</span> <span class="n">batch</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">concatenated_forward</code> function is to get the log probabilities of the chosen and rejected responses of the policy and reference models. To get the log probabilities, we need to use the attention mask because we want to  ignore padding tokens when computing the log probability of a sequence. The attention mask ensures that:</p>
+
+<ol>
+  <li>Padding tokens don’t contribute to the forward pass computation</li>
+  <li>We only sum log probabilities over actual response tokens (not padding)</li>
+</ol>
+
+<p>This is crucial because sequences are batched together and padded to the same length, but we only want to evaluate the model on real tokens, not padding.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">get_log_probs</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Get log probability of labels under the model</span><span class="sh">'</span><span class="s">s logits.</span><span class="sh">"""</span>
+    <span class="c1"># Shift: predict next token
+</span>    <span class="n">logits</span> <span class="o">=</span> <span class="n">logits</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>  <span class="c1"># Remove last prediction
+</span>    <span class="n">labels</span> <span class="o">=</span> <span class="n">labels</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>       <span class="c1"># Remove first label (no prediction for it)
+</span>    
+    <span class="c1"># Mask out padding tokens (marked as -100)
+</span>    <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">labels</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">labels</span><span class="p">[</span><span class="n">labels</span> <span class="o">==</span> <span class="o">-</span><span class="mi">100</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Replace -100 with valid index
+</span>    
+    <span class="c1"># Get log prob for each token
+</span>    <span class="n">log_probs</span> <span class="o">=</span> <span class="n">logits</span><span class="p">.</span><span class="nf">log_softmax</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">token_log_probs</span> <span class="o">=</span> <span class="n">log_probs</span><span class="p">.</span><span class="nf">gather</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">labels</span><span class="p">.</span><span class="nf">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">)).</span><span class="nf">squeeze</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    
+    <span class="c1"># Sum only over non-padding tokens
+</span>    <span class="nf">return </span><span class="p">(</span><span class="n">token_log_probs</span> <span class="o">*</span> <span class="n">mask</span><span class="p">).</span><span class="nf">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div></div>
 
 <h2 id="llm-unlearning-via-loss-adjustment-with-only-forget-data-iclr-2025">LLM Unlearning via Loss Adjustment with Only Forget Data (ICLR 2025)</h2>
 
@@ -813,6 +1015,16 @@ the \(M_{\text{ref}}\) term is a constant w.r.t. \(\theta\) which is the gap bet
 <p>For <strong>KL f-divergence</strong>, \(f^*(u) = e^{u-1}, g^*(v) = v\), hence, \(g^*(\mathbb{P}(x_f, y_e; \theta)) - f^*(g^*(\mathbb{P}(x_f, y_f; \theta))) = \mathbb{P}(x_f, y_e; \theta) - e^{\mathbb{P}(x_f, y_f; \theta)-1}\). We have:</p>
 
 \[L_{\text{FLAT}}(\theta) = -\mathbb{E}_D\left[\frac{\sum_{i=1}^{ \mid y_e \mid} h_\theta(x_f, y_{e,&lt;i})}{\mid y_e \mid} - e^{\frac{\sum_{i=1}^{ \mid y_f \mid} h_\theta(x_f, y_{f,&lt;i})}{\mid y_f \mid}-1}\right].\]
+
+<h3 id="implementation-3">Implementation</h3>
+
+<ul>
+  <li>Official Github repo: <a href="https://github.com/UCSC-REAL/FLAT" rel="external nofollow noopener" target="_blank">https://github.com/UCSC-REAL/FLAT</a>
+</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+</code></pre></div></div>
 
 <h2 id="a-closer-look-at-machine-unlearning-for-large-language-models-iclr-2025">A Closer Look at Machine Unlearning for Large Language Models (ICLR 2025)</h2>
 
@@ -1020,13 +1232,13 @@ Mathematically, the loss function for untargeted unlearning is (borrowing the no
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2024/thoughts/">Random Thoughts and Notes</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/diffusion-foundation/">Foundation of Diffusion Models</a>
   </li>
 
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/diffusion-foundation/">Foundation of Diffusion Models</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2024/thoughts/">Random Thoughts and Notes</a>
   </li>
 
   
