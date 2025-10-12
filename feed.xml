@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-10-12T10:48:00+11:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-10-12T13:08:49+11:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
 </subtitle><entry><title type="html">GPT-5 Series - Safe Completion Training</title><link href="https://tuananhbui89.github.io/blog/2025/safe-completion-training/" rel="alternate" type="text/html" title="GPT-5 Series - Safe Completion Training" /><published>2025-08-08T00:00:00+10:00</published><updated>2025-08-08T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/2025/safe-completion-training</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/safe-completion-training/"><![CDATA[<p>OpenAI just recently <a href="https://openai.com/gpt-5/">released their newest and most powerful model GPT-5</a>. In the post today, I want to talk about one of the most important aspects of LLMs: <strong>How to make them safe against malicious use</strong>.
 In this version, OpenAI introduces a new paradigm called <strong>Safe Completion Training</strong> (which is built on top of  Deliberative Alignment [4])</p>
 
@@ -1393,6 +1393,47 @@ Mathematically, the loss function for untargeted unlearning is (borrowing the no
   <li>Reminder that in gradient descent, we follow the negative gradient direction to update the model parameters, i.e., \(\theta \leftarrow \theta - \eta \nabla_\theta \mathcal{L}\)</li>
   <li>In the first term, we follow the negative direction of \(\nabla_\theta (\log p(y' \mid x; \theta)\) - which aims to reduce the probability of \(P(\mathcal{Y}_{IDK} \mid \mathcal{X}_R)\)</li>
   <li>In the second term, we follow the direction of \(\nabla_\theta (\log p(y \mid x; \theta)\) - which aims to increase the probability of original answer \(P(y \mid \mathcal{X}_R)\)</li>
+</ul>
+
+<h2 id="large-language-models-unlearning"><a href="https://arxiv.org/pdf/2310.10683">Large Language Models Unlearning</a></h2>
+
+<p>Proposed method: Machine Unlearning for LLMs.</p>
+
+<ul>
+  <li>Requires negative examples only, which are easier to collect. (through user reporting or red teaming)</li>
+  <li>It is less computationally expensive, the cost is comparable to fine-tuning. RLHF is slow due to the need of generating samples from the fine-tuned model at current step.</li>
+  <li>It is more effective when we know which training samples cause the misbehavior.</li>
+</ul>
+
+<h3 id="simple-method---gradient-ascent">Simple method - Gradient Ascent</h3>
+
+\[\theta_{t+1} = \theta_t + \lambda \nabla_{\theta} \mathcal{L}(\theta_t)\]
+
+<p>where $\mathcal{L}(\theta_t)$ is the loss function of the model at step $t$ and $\lambda$ is the unlearning rate. This changes the model parameters to not reduce but increase the loss function at the negative examples.</p>
+
+<h3 id="proposed-method">Proposed method</h3>
+
+\[\theta_{t+1} = \theta_t - \epsilon_1 \nabla_{\theta} \mathcal{L}_{\text{fgt}} - \epsilon_2 \nabla_{\theta} \mathcal{L}_{\text{rdn}} - \epsilon_3 \nabla_{\theta} \text{KL}_{\text{nor}}\]
+
+<p>More specifically:</p>
+
+<ul>
+  <li>\(\mathcal{L}_{\text{fgt}} = - \sum_{(x,y) \in D^{\text{fgt}}} \mathcal{L}(x,y;\theta)\): forgetting loss, aiming to make the model forget the negative examples. \(D^{\text{fgt}}\) is the set of negative examples and \(\mathcal{L}\) represents the LLM loss function \(\mathcal{L}(x,y;\theta) = \sum_{i=1}^{\| y \|} l(h_{\theta}(x, y_{&lt;i}), y_i)\). In the experiements, the authors made use of the harmful Q&amp;A pairs from PKU-SafeRLHF dataset.</li>
+  <li>\(\mathcal{L}_{\text{nor}} = \sum_{(x,y) \in D^{\text{nor}}} \sum_{i=1}^{\| y \|} \text{KL} (h_{\theta^o} (x, y_{&lt;i}) \parallel h_{\theta} (x, y_{&lt;i}))\): preserving loss, to make sure the model still performs well on the normal examples. \(D^{\text{nor}}\) is the set of normal examples. In the experiments, the authors used the TruthfulQA dataset as the normal set.</li>
+  <li>\(\mathcal{L}_{\text{rdn}} = - \sum_{(x,.) \in D^{\text{fgt}}, y \in Y^{\text{rdn}}} \mathcal{L}(x,y;\theta)\): random matching loss, to force the model to generate random outputs \(y \in Y^{\text{rdn}}\) on the target queries \(x(x,.) \in D^{\text{fgt}}\).</li>
+</ul>
+
+<p>The third term is a bit tricky that requires a further explaination to me. The authors mentioned in Section 4 that the random matching loss empirically helps both the forgetting and preserving tasks. It is also interesting to see that in preserving loss, the authors used the KL divergence instead of the cross-entropy loss. As explained in Section 3, performance on normal prompts deteriorates easily after unlearning and preserving performance on normal samples is generally harder to achieve than forgetting harmfulness. The KL divergence is a good choice to measure the difference between the fine-tuned model’s output and the original model’s output than the cross-entropy loss which is less sensitive to the difference.</p>
+
+<h3 id="how-to-evaluate">How to evaluate</h3>
+
+<ul>
+  <li>
+    <p>Unlearn performance: In terms of evaluating outputs on harmful prompts, the authors used harmful rate flagged by the PKU moderation model. They also used fluency (the perplexity of generated text tested on OPT-2.7B) and diversity (the number of unique tokens in the generated text) to evaluate the unlearned model. A low perplexity and high diversity are desired.</p>
+  </li>
+  <li>
+    <p>Preserve performance: In terms of evaluating outputs on normal prompts, the authors used the BLEURT score to measure the similarity between the outputs on the normal prompts generated by the unlearned model and the original model. They also evaluated the utility rewards on responses on the TruthfulQA test dataset.</p>
+  </li>
 </ul>
 
 <h2 id="references">References</h2>

@@ -145,6 +145,8 @@
     
     <div id="table-of-contents">
       <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h2"><a href="#some-unfinished-ideas-on-machine-unlearning">Some unfinished ideas on Machine Unlearning</a></li>
+<li class="toc-entry toc-h2"><a href="#safeai-startups">SafeAI Startups</a></li>
 <li class="toc-entry toc-h2"><a href="#robust-unlearning---the-next-challenge-in-unlearning">Robust Unlearning - The next challenge in Unlearning</a></li>
 <li class="toc-entry toc-h2"><a href="#hypothesis--fine-tuning-with-few-examples-in-transformer-based-architectures-over-attention-vs-overfitting">Hypothesis – Fine-Tuning with Few Examples in Transformer-Based Architectures: Over-Attention vs Overfitting</a></li>
 <li class="toc-entry toc-h2"><a href="#hypothesis---shortcut-learning-in-finetuning-diffusion-models-because-of-the-fixed-position">Hypothesis - Shortcut learning in finetuning Diffusion Models because of the fixed position</a></li>
@@ -163,6 +165,10 @@
 <li class="toc-entry toc-h2"><a href="#helmholtz-visiting-researcher-grant">Helmholtz Visiting Researcher Grant</a></li>
 <li class="toc-entry toc-h2"><a href="#where-to-find-potential-collaborators-or-postdoc-positions">Where to find potential collaborators or postdoc positions</a></li>
 <li class="toc-entry toc-h2"><a href="#micromouse-competition">Micromouse Competition</a></li>
+<li class="toc-entry toc-h2"><a href="#trustworthy-machine-learning">Trustworthy Machine Learning</a></li>
+<li class="toc-entry toc-h2"><a href="#safety-checker---the-simple-and-efficient-way-to-deal-with-nsfw-content">Safety Checker - The simple and efficient way to deal with NSFW content</a></li>
+<li class="toc-entry toc-h2"><a href="#football-minimap-prediction">Football Minimap Prediction</a></li>
+<li class="toc-entry toc-h2"><a href="#some-other-silly-ideas">Some other silly ideas</a></li>
 </ul>
     </div>
     <hr>
@@ -172,6 +178,248 @@
 <!-- mv _posts/2025-03-18*.png assets/img/thoughts/ -->
 
 <p>This post is to capture some of my quick thoughts/ideas, readers who don’t know the context, very likely not understand what I am talking about - But it’s oke :D because this is mainly for my own reference.</p>
+
+<h2 id="some-unfinished-ideas-on-machine-unlearning">Some unfinished ideas on Machine Unlearning</h2>
+
+<p><strong>Adversarial Attack on Model Context Protocol (MCP)</strong></p>
+
+<ul>
+  <li>Topic: Generative Models; Trustworthy Machine Learning</li>
+  <li>Date: 2025-04-10</li>
+  <li>Description:
+    <ul>
+      <li>MCP from Anthropic has emerged recently as the new protocol to connect LLMs with Applications and Data.</li>
+      <li>Basically, the developer will provide a list of tools/functions/APIs (developed by themselves) and connect these to the LLM. There is also a agent that can make the decision to use which tool/function/API, based on the user’s request and the tool/function/API’s description.</li>
+      <li>The idea here is: Can we add a malicious tool to the list so that the LLM will use it even though the user’s request is not related to it?</li>
+    </ul>
+  </li>
+</ul>
+
+<p>(Ref: <a href="https://github.com/thangnch/MiAI_MCP/blob/main/agent_call_mcp_sse.py" rel="external nofollow noopener" target="_blank">https://github.com/thangnch/MiAI_MCP/blob/main/agent_call_mcp_sse.py</a>)</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">async</span> <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">mcp_server</span><span class="p">:</span> <span class="n">MCPServer</span><span class="p">):</span>
+    <span class="n">agent</span> <span class="o">=</span> <span class="nc">Agent</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="sh">"</span><span class="s">Assistant</span><span class="sh">"</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+        <span class="n">instructions</span><span class="o">=</span><span class="sh">"</span><span class="s">Use the tools to answer the questions.</span><span class="sh">"</span><span class="p">,</span>
+        <span class="n">mcp_servers</span><span class="o">=</span><span class="p">[</span><span class="n">mcp_server</span><span class="p">],</span>
+        <span class="n">model_settings</span><span class="o">=</span><span class="nc">ModelSettings</span><span class="p">(</span><span class="n">tool_choice</span><span class="o">=</span><span class="sh">"</span><span class="s">auto</span><span class="sh">"</span><span class="p">),</span> <span class="c1"># IMPORTANT POINT HERE
+</span>    <span class="p">)</span>
+
+    <span class="c1"># Run the `get_weather` tool
+</span>    <span class="n">message</span> <span class="o">=</span> <span class="sh">"</span><span class="s">What is the temperature in Hanoi?</span><span class="sh">"</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="se">\n\n</span><span class="s">Running: </span><span class="si">{</span><span class="n">message</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Runner</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">starting_agent</span><span class="o">=</span><span class="n">agent</span><span class="p">,</span> <span class="nb">input</span><span class="o">=</span><span class="p">[{</span><span class="sh">"</span><span class="s">role</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">user</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">content</span><span class="sh">"</span><span class="p">:</span> <span class="n">message</span><span class="p">}],</span> <span class="n">max_turns</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span><span class="c1">#, tracing_disbale = True
+</span>    <span class="nf">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="n">raw_responses</span><span class="p">)</span>
+
+    <span class="c1"># Final turn
+</span>    <span class="n">new_input</span> <span class="o">=</span> <span class="n">result</span><span class="p">.</span><span class="nf">to_input_list</span><span class="p">()</span> <span class="o">+</span> <span class="p">[{</span><span class="sh">"</span><span class="s">role</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">user</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">content</span><span class="sh">"</span><span class="p">:</span> <span class="n">message</span><span class="p">}]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Runner</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">new_input</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Final = </span><span class="sh">"</span><span class="p">,</span><span class="n">result</span><span class="p">.</span><span class="n">final_output</span><span class="p">)</span>
+
+<span class="k">async</span> <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="k">async</span> <span class="k">with</span> <span class="nc">MCPServerSse</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="sh">"</span><span class="s">SSE Python Server</span><span class="sh">"</span><span class="p">,</span>
+        <span class="n">params</span><span class="o">=</span><span class="p">{</span>
+            <span class="sh">"</span><span class="s">url</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">http://localhost:8000/sse</span><span class="sh">"</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">server</span><span class="p">:</span>
+        <span class="k">await</span> <span class="nf">run</span><span class="p">(</span><span class="n">server</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="sh">"</span><span class="s">__main__</span><span class="sh">"</span><span class="p">:</span>
+    <span class="c1"># Let's make sure the user has uv installed
+</span>    <span class="k">if</span> <span class="ow">not</span> <span class="n">shutil</span><span class="p">.</span><span class="nf">which</span><span class="p">(</span><span class="sh">"</span><span class="s">uv</span><span class="sh">"</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="nc">RuntimeError</span><span class="p">(</span>
+            <span class="sh">"</span><span class="s">uv is not installed. Please install it: https://docs.astral.sh/uv/getting-started/installation/</span><span class="sh">"</span>
+        <span class="p">)</span>
+
+
+    <span class="n">asyncio</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="nf">main</span><span class="p">())</span>
+</code></pre></div></div>
+
+<p><strong>Language Inversion</strong></p>
+
+<ul>
+  <li>Topic: Generative Models; Trustworthy Machine Learning</li>
+  <li>Date: 2025-03-26</li>
+  <li>Description:
+    <ul>
+      <li>Textual Inversion is a very popular method to personalize a visual concept by learning a text embedding \(S^*\) that can be used to generate the visual concept.</li>
+      <li>However, its limitation is that you need to modify the text encoder a little bit to include the new token and to share it with others.</li>
+      <li>The idea here is that “Can we describe a visual concept by just a text prompt?” - Think about describing thing for a blind person so that they can “imagine” it.</li>
+      <li>The implication of this idea is that: (1) We can transfer the knowledge easier - because it is text-based (2) we can use these methods as an evaluation metric to measure the quality of a unlearning method.</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Update on 1 Apr 2025:</p>
+
+<ul>
+  <li>Related work: <a href="https://copycat-eval.github.io/" rel="external nofollow noopener" target="_blank">https://copycat-eval.github.io/</a>
+</li>
+</ul>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/aboutme/2025-04-01-16-32-04-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/aboutme/2025-04-01-16-32-04-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/aboutme/2025-04-01-16-32-04-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/aboutme/2025-04-01-16-32-04.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    Example of Copycat-Eval
+</div>
+
+<p><strong>How to unlearn copyrighted concepts - Canva’s real-world case</strong></p>
+
+<ul>
+  <li>Topic: Generative Models; Trustworthy Machine Learning</li>
+  <li>Date: 2025-03-26</li>
+  <li>Description:
+    <ul>
+      <li>I had a great pleasure to present our works with the Machine Learning team at Canva and excited to see several interesting use cases - that they are trying to address - that our works can help.</li>
+      <li>There are also several interesting problems and ideas came from the discussion. I will share them here when the time comes (maybe after having a paper :D or when I can write a detailed blog post).</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>Unlearning with Additional Discriminator/Classifier</strong></p>
+
+<ul>
+  <li>Topic: Generative Models; Trustworthy Machine Learning</li>
+  <li>Date: 2025-03-26</li>
+  <li>Description:
+    <ul>
+      <li>Most of the current unlearning methods are sharing a common principle: \(P_{\theta'}(X) \propto \frac{P_{\theta}(X)}{P_{\theta}(E \mid X)^\eta}\) where \(E\) is the set of unlearn examples (from the ESD paper). Interpreted in another way, the unlearned model is trained so that the probability is inversely proportional to the probability of the unlearn examples, i.e., if \(P_{\theta}(E \mid X)\) is high, then \(P_{\theta'}(X)\) is low.</li>
+      <li>A more recent paper - <a href="https://arxiv.org/abs/2404.05868" rel="external nofollow noopener" target="_blank">Negative Preference Optimization: From Catastrophic Collapse to Effective Unlearning</a> - also follow this similar principle.</li>
+      <li>However, this principle has a limitation that it depends on \(P_{\theta}(E \mid X)\) which is very small if \(E\) is a rare set or in the tail of the data distribution. Intuitively, it is much harder to unlearn rare concepts, likely to cause a catastrophic collapse.</li>
+      <li>I think that we can improve the current unlearning methods by adding an additional discriminator/classifier to the unlearning process, i.e., \(P_{\theta'}(X) \propto \frac{P_{\theta}(X)}{P_{\phi}(E \mid X)^\eta}\) where \(P_{\phi}(E \mid X)\) is the probability of the additional discriminator/classifier.</li>
+      <li>The additional discriminator/classifier can be trained easily given the unlearn set \(E\) and the original model \(\theta\).</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>Optimal Transport inspired Unlearning</strong></p>
+
+<ul>
+  <li>Topic: Generative Models; Trustworthy Machine Learning</li>
+  <li>Date: 2025-03-26</li>
+  <li>Description:
+    <ul>
+      <li>It is an extension of our ICLR 2025 paper. The high-level idea is that we aim to minimize the cost of transporting \(\mu \in P_{\theta}(X)\) to \(\nu \in P_{\theta'}(X)\) where \(P_{\theta}(X)\) and \(P_{\theta'}(X)\) are the probability distributions of the data before and after unlearning.</li>
+      <li>More specifically, \(P_{\theta}(X) = P(E) P_{\theta}(X \mid E) + P(R) P_{\theta}(X \mid R)\) where \(E\) is the set of unlearn examples and \(R\) is the set of retained data. Similarly, \(P_{\theta'}(X) = P(E) P_{\theta'}(X \mid E) + P(R_E) P_{\theta'}(X \mid R_E) + P(R_R) P_{\theta'}(X \mid R_R)\) where \(R_E \cup R_R = R\) and \(R_E \cap R_R = \emptyset\).</li>
+      <li>Then intuitively, the optimal transport cost is minimal when \(P_{\theta'}(X \mid E) \approx 0\) and \(P_{\theta'}(X \mid R_E) \approx P_{\theta}(X \mid R_E)\) and \(R_E\) close to \(E\), which means that we move the mass from \(E\) to \(R_E\) that close to \(E\).</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>Metrics for evaluation Unlearning LLMs</strong></p>
+
+<ul>
+  <li>Topic: Generative Models; Trustworthy Machine Learning</li>
+  <li>Date: 2025-03-18</li>
+  <li>Description:
+    <ul>
+      <li>I came across a new benchmark for unlearning LLMs - <a href="https://openreview.net/forum?id=TArmA033BU" rel="external nofollow noopener" target="_blank">MUSE</a>.</li>
+      <li>We can use a metric like FID score in image generation to evaluate the quality of the unlearned model. We obtain a set of representations from the unlearned model and the original model with the same set of prompts and calculate the difference between the two distributions of their representations given a pretrained encoder like BERT.</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>Unlearning LLMs</strong></p>
+
+<ul>
+  <li>Topic: Generative Models; Trustworthy Machine Learning</li>
+  <li>Date: 2025-03-14</li>
+  <li>Description:
+    <ul>
+      <li>I wrote a blog post about the Unlearning LLMs here: <a href="https://tuananhbui89.github.io/blog/2025/unlearn-llms/">link</a>
+</li>
+      <li>After reading these papers, I have several follow-up ideas (briefly mentioned here) (1) Data-centric unlearning - filtering out the irrelevant data from retain set (2) Create a retain set from forget set (3) The role of random target in unlearning.</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>Multi-Objective Optimization for Unlearning - Dealing with gradient conflict</strong></p>
+
+<ul>
+  <li>Topic: Generative Models; Trustworthy Machine Learning</li>
+  <li>Date: 2025-03-14</li>
+  <li>Description:
+    <ul>
+      <li>This idea came after our NeurIPS 2024 paper. The standard unlearning objective consists of two terms: the forget loss and the retain loss.</li>
+      <li>They might have conflict in direction, e.g., evidence by the drop in performance of the unlearned model on the retain set.</li>
+      <li>We proposed a multi-objective optimization framework (i.e., PCGrad) to deal with this problem.</li>
+      <li>We can also consider it as an additional constraint to choose the optimal retain set.</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>Increasing Expressiveness in Unlearning</strong></p>
+
+<ul>
+  <li>Topic: Generative Models; Trustworthy Machine Learning</li>
+  <li>Date: 2024-08</li>
+  <li>Description:
+    <ul>
+      <li>This idea came from our rebuttal to the NeurIPS 2024 paper, which can be found <a href="https://openreview.net/forum?id=GDz8rkfikp&amp;referrer=%5Bthe%20profile%20of%20Trung%20Le%5D(%2Fprofile%3Fid%3D~Trung_Le2)" rel="external nofollow noopener" target="_blank">here</a> publicly in OpenReview.</li>
+      <li>One of the reviewers asked us about the level of granularity of our method, i.e., whether we can unlearn a “Mercedes logo” only.</li>
+      <li>We proposed an interesting idea (to me :D) that we can use Textual Inversion to learn a visual embedding for the logo and use it as a pointer to unlearn.</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>Better Closed-Form Solution for Unlearning</strong></p>
+
+<ul>
+  <li>Topic: Generative Models; Trustworthy Machine Learning</li>
+  <li>Date: 2025-03-14</li>
+  <li>Description:
+    <ul>
+      <li>There are two main approaches to unlearning: (1) Output-based unlearning: mapping the output with \(c_e\) to output with \(c_t\) - where our NeurIPS 2025 and ICLR 2025 papers belong to(2) Attention-based unlearning: mapping the attention output with \(c_e\) to attention output with \(c_t\) - where TIME, UCE are two representative methods.</li>
+      <li>I wrote a blog post about the two approaches here: <a href="https://tuananhbui89.github.io/blog/2024/erasing-concepts/#unified-concept-editing-in-diffusion-models">link</a>
+</li>
+      <li>I have listed current limitations of the two approaches in the blog post.</li>
+      <li>One of the limitations is the invertibility issue if we don’t have the preserved/retained data. The current solution is to add \(d\) additional presevations along the canonical basis vectors.</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="safeai-startups">SafeAI Startups</h2>
+
+<p>There are of course many other startups that are working on safety and security of AI, but here are the ones that founded by leading researchers in the field in my radar.</p>
+
+<ul>
+  <li>
+    <p><a href="https://www.virtueai.com/team/" rel="external nofollow noopener" target="_blank">Virtue AI</a> Bo Li, Dawn Song, Percy Liang</p>
+  </li>
+  <li>
+    <p><a href="https://www.safe.ai/" rel="external nofollow noopener" target="_blank">Center for AI Safety</a> Dan Hendrycks</p>
+  </li>
+  <li>
+    <p><a href="https://invariantlabs.ai/" rel="external nofollow noopener" target="_blank">Invariant Labs</a> Florian Tramer</p>
+  </li>
+  <li>
+    <p><a href="https://relai.ai/" rel="external nofollow noopener" target="_blank">RelAI</a> Prof. Soheil Feizi, University of Maryland. RELAI offers a unified platform designed to enhance the reliability of artificial intelligence (AI) systems for both individuals and enterprises. <strong>For Individuals:</strong> RELAI Chat: This feature allows users to interact with popular large language models (LLMs) while utilizing RELAI’s advanced verification agents. These agents provide real-time analysis to detect and highlight potential inaccuracies or “hallucinations” in AI-generated responses, ensuring more trustworthy interactions. <strong>For Enterprises:</strong> Comprehensive AI Reliability Solutions: RELAI assists businesses in evaluating and testing their AI models using advanced agents to identify potential issues before deployment. The platform offers system-level safeguards to protect sensitive data and prevent misuse, along with real-time user-facing protections to ensure accuracy. By integrating RELAI’s solutions, users can enhance the dependability and safety of AI applications across various domains.</p>
+  </li>
+  <li>
+    <p><a href="https://www.confident-ai.com/" rel="external nofollow noopener" target="_blank">Confident AI</a> Provide LLM red teaming (safety scanning) and Guardrails Alignment.</p>
+  </li>
+</ul>
 
 <h2 id="robust-unlearning---the-next-challenge-in-unlearning">Robust Unlearning - The next challenge in Unlearning</h2>
 
@@ -701,6 +949,415 @@ Therefore, one of the drawbacks of DFKD is that it is very slow.</p>
 <ul>
   <li><a href="https://youtu.be/ZMQbHMgK2rw" rel="external nofollow noopener" target="_blank">The Fastest Maze-Solving Competition On Earth by Veritasium.</a></li>
   <li><a href="https://invention.si.edu/fosbury-flop-game-changing-technique" rel="external nofollow noopener" target="_blank">The Fosbury Flop—A Game-Changing Technique</a></li>
+</ul>
+
+<h2 id="trustworthy-machine-learning">Trustworthy Machine Learning</h2>
+
+<p><strong>Who behind the wheel?</strong></p>
+
+<p><strong>The wheel</strong> here represents <em>decision-making</em>.<br>
+The closest analogy is Tesla’s <strong>autopilot system</strong> — a machine that takes control of the car. But decision-making driven by AI doesn’t stop at self-driving cars. In many cases, we think humans are still steering, when in fact, AI and machine learning systems are silently guiding our choices.</p>
+
+<p>Examples are everywhere in daily life:</p>
+
+<ul>
+  <li>
+<strong>Shopping on Amazon</strong>: We only see products that the recommendation system decides to show us.</li>
+  <li>
+<strong>Searching on Google</strong>: What we see is filtered, ranked, and prioritized by an algorithm.</li>
+  <li>
+<strong>Navigating from A to B</strong>: The route we take is suggested by a GPS system trained on massive datasets.</li>
+</ul>
+
+<p>In short, AI is no longer just assisting — it’s shaping our decisions. Only a few domains, such as a doctor’s diagnosis or a judge’s ruling, still appear fully under human control. But even those are slowly integrating AI support. As time passes, more decisions will be made — or at least strongly influenced — by machines.</p>
+
+<p><strong>If AI Is Behind the Wheel, Can We Trust It?</strong></p>
+
+<p>Today, the most advanced autonomous vehicles are still <strong>Level 2</strong> on the automation scale — meaning a human must remain alert and ready to take over. Likewise, doctors still make the final call even when aided by diagnostic AI. In such life-and-death scenarios, <em>trust</em> is crucial.</p>
+
+<p>Yet, for less critical tasks — like buying a product, searching online, or following GPS directions — we already trust AI implicitly. We rarely question the output of these systems. So, why do we trust them?</p>
+
+<ul>
+  <li>
+<strong>Convenience and benefit</strong>: AI makes our lives easier. We’re often willing to trade privacy for comfort — like when using voice assistants.</li>
+  <li>
+<strong>Lack of alternatives</strong>: Paper maps are obsolete. If no one learns to drive manually, future drivers may have no choice but to rely entirely on automation.</li>
+  <li>
+<strong>Brand reputation</strong>: Systems built by major companies such as Google, Amazon, or Meta appear credible, which fosters trust.</li>
+  <li>
+<strong>Transparency (or the illusion of it)</strong>: We assume we understand how these systems work — though, in reality, we rarely do.</li>
+</ul>
+
+<p>Because of these reasons, users are often <em>forced</em> to trust AI systems. Meanwhile, <strong>developers</strong> have little incentive to make them truly <em>trustworthy</em>.<br>
+Building robust and interpretable systems is difficult, expensive, and can even reduce performance on standard benchmarks. This explains why topics like <em>Adversarial Machine Learning</em> remain more academic than industrial.</p>
+
+<p><strong>So, Why Bother Building Trustworthy Systems?</strong></p>
+
+<p>Two major reasons are now pushing the industry toward trustworthiness:</p>
+
+<ol>
+  <li>
+<strong>Public awareness</strong>: After repeated incidents involving data leaks, bias, or misinformation, users are becoming more conscious of privacy and fairness.</li>
+  <li>
+<strong>Competition and choice</strong>: As alternatives emerge (e.g., Bing or DuckDuckGo challenging Google), users can choose the platform they trust most — giving companies an incentive to prioritize ethical AI practices.</li>
+</ol>
+
+<p>Ultimately, <em>trust</em> becomes a competitive advantage.<br>
+So yes, building trustworthy AI is difficult — but it’s becoming essential.</p>
+
+<p><strong>What Is Trustworthy Machine Learning?</strong></p>
+
+<p>What makes a person trustworthy? Even that’s not an easy question to answer — and the same applies to machine learning.</p>
+
+<p>A common way to define <strong>Trustworthy Machine Learning (TML)</strong> is through its <em>core properties</em>:</p>
+
+<ul>
+  <li>
+<strong>Explainability</strong> – The model’s behavior can be understood and interpreted.</li>
+  <li>
+<strong>Fairness</strong> – The system avoids bias and discrimination.</li>
+  <li>
+<strong>Privacy preservation</strong> – Data is handled safely and responsibly.</li>
+  <li>
+<strong>Causality</strong> – The model’s reasoning reflects cause-and-effect, not mere correlation.</li>
+  <li>
+<strong>Robustness</strong> – The system maintains reliability under uncertainty or attack.</li>
+</ul>
+
+<p>These dimensions form the foundation of the <a href="https://www.trustworthyml.org/home" rel="external nofollow noopener" target="_blank">Trustworthy ML Initiative</a>.</p>
+
+<p>Another perspective comes from <strong>ML safety research</strong>, such as <em>Unsolved Problems in ML Safety</em>, which narrows trustworthiness to four key areas:</p>
+
+<ul>
+  <li>
+<strong>Robustness</strong> – Stability under distribution shifts or adversarial inputs.</li>
+  <li>
+<strong>Monitoring</strong> – Detecting when models behave unexpectedly.</li>
+  <li>
+<strong>Alignment</strong> – Ensuring the model’s goals align with human intent.</li>
+  <li>
+<strong>Systemic safety</strong> – Preventing large-scale or emergent risks in interconnected systems.</li>
+</ul>
+
+<h2 id="safety-checker---the-simple-and-efficient-way-to-deal-with-nsfw-content">Safety Checker - The simple and efficient way to deal with NSFW content</h2>
+
+<ul>
+  <li>Topic: Generative Models</li>
+  <li>Date: 2024-12-18</li>
+  <li>Description:
+    <ul>
+      <li>I wrote a blog post about the Safety Checker in Stable Diffusion here: <a href="https://tuananhbui89.github.io/blog/2024/safety-checker/">link</a>
+</li>
+      <li>While Machine Unlearning is a interesting and fascinating research topic, I think from a business perspective, updating the Safety Checker is more practical and useful, when the model is already deployed and we need to deal with the new NSFW queries.</li>
+      <li>More specifically, because the (current) Safety Checker is just a alignment model, where we have a pair of text and image encoder to measure the similarity between the key words - that we want to ban/filter - and the generated image. Therefore, it can be updated very easily when we have a new set of key words to ban/filter.</li>
+      <li>We can also think about a new research direction starting from this setting: how to make the Safety Checker more efficient and effective.</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="football-minimap-prediction">Football Minimap Prediction</h2>
+
+<ul>
+  <li>Topic: Business</li>
+  <li>Date: 2018</li>
+  <li>Description:
+    <ul>
+      <li>This is very old idea back in 2018 when I was in Singapore and first time explored to GAN. Back then, I was so excited with Pix2Pix model and its ability to learn the transformation from domain A to domain B, and thought that it can be applied to this problem.</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>Motivation</strong></p>
+
+<p>Currently, the Football TV audiences do not know location of players who not in the current camera frame. Therefore they might has not the full experience as spectators are watching live on the stadium. We can have some simple solutions for this problem, such as using another camera to shoot he entire football field, or using statistical data from the chip attached to the players. However, from the perspective of computer vision engineer, I propose one more solution for the this problem (might be not a good choice but just for fun:), in which I use the GAN model to create a minimap from a camera frame as in the FIFA or PES football video game.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/Football/Full_Frame-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/Football/Full_Frame-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/Football/Full_Frame-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/Football/Full_Frame.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    A sample of a frame from a game in Youtube where the minimap is there for better experience
+</div>
+
+<p>In the case of players in the frame, I use the GAN model (Image 2 Image Translation) to learn the transformation from the player’s position in the frame to the position of the player in the minimap.</p>
+
+<p>In the case of players are not in the current frame: I use [?] to predict a current positions of the players from the previous positions and their trajectory (or you might hope GAN as one size fit all model which can learn not only the current frame but also the invisible players)</p>
+
+<p><strong>Data Collection</strong></p>
+
+<p>Because the real matches on TV don’t have a minimap therefore I use the alternative sources there are FIFA18 and PES18 video on Youtube. Then I do some preprocess to collect and clean data.</p>
+
+<p>Step 1: Cut only the frames which have the minimap within. Because in those videos, it’s not only normal frame (which has a minimap) but also spotlight or review or something else. Therefore I have to manually select the period of time in which there are only normal frames. I sample with the sample rate as 2 frames per second</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/Football/Full_Minimap-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/Football/Full_Minimap-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/Football/Full_Minimap-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/Football/Full_Minimap.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    A minimap from a full frame
+</div>
+
+<p>Step 2: Cut minimap from a full frame and replace it by a random noise window. To avoid overfitting (because full frame also has a minimap) I replace a minimap by a random noise frame.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/Football/Frame_with_Noise-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/Football/Frame_with_Noise-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/Football/Frame_with_Noise-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/Football/Frame_with_Noise.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    A frame with a minimap replaced by a random noise
+</div>
+
+<p>Step 3: Remove bad samples (Those minimap have overlap by line or player within)</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/Football/Bad_example1-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/Football/Bad_example1-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/Football/Bad_example1-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/Football/Bad_example1.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/Football/Bad_example2-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/Football/Bad_example2-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/Football/Bad_example2-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/Football/Bad_example2.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    Bad examples: minimap has overlap by line or player within
+</div>
+
+<p>After 3 steps as above, I have two sets: The camera frame set (with noised minimap) and the minimap set. I will chose camera frame set as a Source and minimap as a Target for Pix2Pix model. (You can swap 2 source and have enjoy the interesting result, in which we can render a camera frame from a minimap). Then I do a preprocessing to have a better dataset for training.</p>
+
+<p>Because the football video game knows locations of not only players in camera frame but also all of players in the game. Therefore it can create a completed minimap that has the locations of all players. TV audiences who have only camera frame cannot do that. They only infer the position of players who are in camera frame, and cannot infer remaining players. Based on this intuition, I improve the model by doing crop the active window in minimap as follow:</p>
+
+<ul>
+  <li>Localize position of the ball (usually has yellow-color in minimap)</li>
+  <li>Crop roughly 1/2 width of minimap (1/4 in the left of ball and 1/4 in the right of ball)</li>
+  <li>Keep the height</li>
+</ul>
+
+<p>I realize that audience change in each frame, and they might made a huge noise to model, which cause training more difficult. Moreover, players is really small in whole frame, and grass is not stable in each frame or each game, therefore, similar to audience, they might lead a huge noise to model. Therefore I design a filter to filter them from a Camera frame using Color Threshold App in Matlab.</p>
+
+<p>Difficulties:</p>
+
+<ul>
+  <li>Pix2Pix model has demonstrated its ability to learn the transformation from domain A to domain B as shown in the paper: Day to night, BW to Color, Aerial to Map. However, in those cases, 2 domain are not too much different. In this case, we need a transformation from 2 completely different domains. It also needs a transformation from 2D - 2D matching in abstract level (model need to know each player is correspond to each circle in minimap). Therefore, it will be very challenge to learn</li>
+  <li>The difference between a Video Game Frame and a Real Camera Frame.</li>
+  <li>Dataset too small and noise.</li>
+</ul>
+
+<p>I think this problem is difficult even humans, but it is worth to try and see what the GAN can do.
+<strong>Revised in 2025</strong>: I think the idea of generating minimap is still interesting and might be more realistic with the current stage of Generative Models.</p>
+
+<h2 id="some-other-silly-ideas">Some other silly ideas</h2>
+
+<p><strong>Chrome Extension Ideas</strong></p>
+
+<ul>
+  <li>Topic: Chrome Extension, Business</li>
+  <li>Date: 2025-06-01</li>
+  <li>Description:
+    <ul>
+      <li>I recently learned about how to build a Chrome Extension and found that there are a lot of interesting ideas that can be implemented.</li>
+      <li>Idea 1: A Price Tracker, so that users can track the price of a product on (any) e-commerce website. When the price is lower than the user’s desired price, the extension will notify the user.</li>
+      <li>Idea 2: A Scratch Copilot</li>
+      <li>Idea 3: Arxiv Review and Comment Sharing. Turn out that is Alphaxiv.</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>Generating Reading Comprehension Questions for Primary School Students</strong></p>
+
+<ul>
+  <li>Topic: Business</li>
+  <li>Date: 2025-03-12</li>
+  <li>Description:
+    <ul>
+      <li>I have a year-3 son and recently, he needs to prepare for his NAPLAN test at school.</li>
+      <li>The free NAPLAN practice samples are very limited. Only available from year 2012-2016, that can just be finished in several hours.</li>
+      <li>We - A typical Asian family - want my son to practice more and prepare better for his test.</li>
+      <li>I think - with the current stage of LLM - we can leverage the model to generate quite a lot of similar questions to practice!</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/aboutme/2025-03-12-16-42-38-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/aboutme/2025-03-12-16-42-38-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/aboutme/2025-03-12-16-42-38-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/aboutme/2025-03-12-16-42-38.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    A sample website that provide reading questions
+</div>
+
+<p><strong>Generating Coloring Book/Sheet for Kids</strong></p>
+
+<ul>
+  <li>Topic: Business</li>
+  <li>Date: 2025-03</li>
+  <li>Description:
+    <ul>
+      <li>Given a picture (e.g., of a kid), generate a personalized coloring book/sheet for the kid with the content from a prompt, personalized with the kid’s face from the picture.</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>Coffee Car - Ice Cream Car - A mobile app to track the food truck</strong></p>
+
+<ul>
+  <li>Topic: Business</li>
+  <li>Date: 2025-03</li>
+  <li>Description:
+    <ul>
+      <li>My wife told me that at her new company, there is a coffee car usually comes to the company at a specific time of a week to sell coffee. Employees usually need to be informed by HR via email - “The coffee car is coming today, bla bla bla”.</li>
+      <li>I think we can have a mobile app that for both sides: the coffee/ice cream truck and the customers.</li>
+      <li>The coffee/ice cream truck can post their schedule, menu, and even their real-time location.</li>
+      <li>The customers can see the menu, the truck’s schedule, to order and pay for the coffee/ice cream.</li>
+      <li>The truck can also send notification to the customers when they arrive at the company.</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>Generating Linkedin profile picture with custombadges</strong></p>
+
+<ul>
+  <li>Topic: Business</li>
+  <li>Date: 2025-03</li>
+  <li>Description:
+    <ul>
+      <li>Currently, Linkedin provides two types of badges <code class="language-plaintext highlighter-rouge">#OpentoWork</code> and <code class="language-plaintext highlighter-rouge">Hiring</code>.</li>
+      <li>But from my perspective, types of badges should be more diverse and more customizable. For example, Phd Students might want <code class="language-plaintext highlighter-rouge">#OpentoIntern</code> while Master Students might want <code class="language-plaintext highlighter-rouge">#SeekingPhDScholarship</code>, etc.</li>
+      <li>I think we can have a website that allows users to generate a Linkedin profile picture with custom badges.</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>TripleZero - Emergency Simulation for Kids training</strong></p>
+
+<ul>
+  <li>Topic: Business</li>
+  <li>Date: 2025-03</li>
+  <li>Description:
+    <ul>
+      <li>A mobile app/game for kids to learn about emergency situations. I found it would be a good idea after my son told me about his first aid training at school.</li>
+      <li>We - or the kids - don’t know how to react in an emergency situation.</li>
+      <li>The app will simulate a real emergency situation, and the kids will need to make decision to save the people in that situation.</li>
+      <li>UI should be similar to Iphone keyboard - but more colorful and cute - to attract kids.</li>
+      <li>The app will utilize the OpenAI voice API to respond to the kids’s questions.</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>Waiting List - Price Drop Notification</strong></p>
+
+<ul>
+  <li>Topic: Business</li>
+  <li>Date: 2019</li>
+  <li>Description:
+    <ul>
+      <li>A Chrome extension that allows users to add an item to a waiting list, an item can be from any website - not just Amazon or other shopping websites - that already has a waiting list feature</li>
+      <li>When the price of the item drops, the extension will notify the user.</li>
+      <li>The user can set a price drop threshold.</li>
+      <li>The idea came after a talk with my wife about her wish to buy a dress but the price was too high and she need to check the website regularly to see if the price has dropped.</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>Melbourne Airport - Available Parking Spot</strong></p>
+
+<ul>
+  <li>Topic: Business</li>
+  <li>Date: 2024</li>
+  <li>Description:
+    <ul>
+      <li>A camera system that can hang on light poles at the parking lot and monitor which parking spot is available.</li>
+      <li>There is a screen or light - red or green - to indicate the availability of the parking spot.</li>
+      <li>The idea came after I was frustrated to find a parking spot there - It took me more than 15 minutes to find a spot. The Melbourne Airport Value Parking is really big.</li>
+      <li>I also found that many people complained about the same problem as me online.</li>
+    </ul>
+  </li>
 </ul>
 
     </div>
