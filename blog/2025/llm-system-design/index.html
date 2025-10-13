@@ -153,7 +153,13 @@
 <li class="toc-entry toc-h2">
 <a href="#fundamental-concepts">Fundamental Concepts</a>
 <ul>
-<li class="toc-entry toc-h3"><a href="#retriever-augmented-generation-rag">Retriever-augmented generation (RAG)</a></li>
+<li class="toc-entry toc-h3">
+<a href="#retriever-augmented-generation-rag">Retriever-augmented generation (RAG)</a>
+<ul>
+<li class="toc-entry toc-h4"><a href="#advanced-rag">Advanced RAG</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h3"><a href="#semantic-search-and-vector-database">Semantic Search and Vector Database</a></li>
 <li class="toc-entry toc-h3"><a href="#prompt-engineering">Prompt Engineering</a></li>
 <li class="toc-entry toc-h3"><a href="#faiss">FAISS</a></li>
 </ul>
@@ -208,6 +214,92 @@
 <h2 id="fundamental-concepts">Fundamental Concepts</h2>
 
 <h3 id="retriever-augmented-generation-rag">Retriever-augmented generation (RAG)</h3>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/2025-llm-system-design/2025-10-12-22-04-47-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/2025-llm-system-design/2025-10-12-22-04-47-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/2025-llm-system-design/2025-10-12-22-04-47-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/2025-llm-system-design/2025-10-12-22-04-47.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    RAG pipeline - Image from [1]
+</div>
+
+<p>RAG is a technique that allows LLMs to access external knowledge sources to generate more accurate and relevant responses. It is a two-step process:</p>
+
+<ol>
+  <li>Retrieve relevant documents from a knowledge base.</li>
+  <li>Generate a response using the retrieved documents as additional context with grounded generation.</li>
+</ol>
+
+<p>In some LLMs APIs (like Cohere’s API), the chat has a document argument to pass in the documents that are relevant to the conversation.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">query</span> <span class="o">=</span> <span class="sh">"</span><span class="s">What is the capital of France?</span><span class="sh">"</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="n">search_api</span><span class="p">.</span><span class="nf">search</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+
+<span class="n">documents</span> <span class="o">=</span> <span class="p">[</span><span class="n">doc</span><span class="p">.</span><span class="n">page_content</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">results</span><span class="p">]</span>
+
+<span class="n">response</span> <span class="o">=</span> <span class="n">llm</span><span class="p">.</span><span class="nf">chat</span><span class="p">(</span><span class="n">message</span><span class="o">=</span><span class="n">query</span><span class="p">,</span> <span class="n">documents</span><span class="o">=</span><span class="n">documents</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>For local LLMs, we can use Langchain to inject relevant documents into the LLM’s context.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">langchain</span> <span class="kn">import</span> <span class="n">PromptTemplate</span>
+
+<span class="c1"># Create a prompt template
+</span><span class="n">template</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">&lt;|user|&gt;
+Relevant documents: {documents}
+
+Provide a concise answer to the following question using the relevant documents provided above.
+{question}
+&lt;|end|&gt;
+&lt;|assistant|&gt;</span><span class="sh">"""</span>
+
+<span class="n">prompt</span> <span class="o">=</span> <span class="nc">PromptTemplate</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="n">template</span><span class="p">,</span> <span class="n">input_variables</span><span class="o">=</span><span class="p">[</span><span class="sh">"</span><span class="s">documents</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">question</span><span class="sh">"</span><span class="p">])</span>
+
+<span class="kn">from</span> <span class="n">langchain.chains</span> <span class="kn">import</span> <span class="n">RetrievalQA</span>
+
+<span class="c1"># RAG pipeline
+</span><span class="n">rag</span> <span class="o">=</span> <span class="n">RetrievalQA</span><span class="p">.</span><span class="nf">from_chain_type</span><span class="p">(</span><span class="n">llm</span><span class="o">=</span><span class="n">llm</span><span class="p">,</span> <span class="n">chain_type</span><span class="o">=</span><span class="sh">"</span><span class="s">stuff</span><span class="sh">"</span><span class="p">,</span> <span class="n">retriever</span><span class="o">=</span><span class="n">db</span><span class="p">.</span><span class="nf">as_retriever</span><span class="p">(),</span><span class="n">chain_type_kwargs</span><span class="o">=</span><span class="p">{</span><span class="sh">"</span><span class="s">prompt</span><span class="sh">"</span><span class="p">:</span> <span class="n">prompt</span><span class="p">})</span>
+</code></pre></div></div>
+
+<h4 id="advanced-rag">Advanced RAG</h4>
+
+<p><strong>Query Rewriting</strong> Using an LLM to rewrite the query to improve the retrieval results.</p>
+
+<p><strong>Multi-hop Retrieval</strong> Using an LLM to break down the query into multiple sub-queries and retrieve relevant documents for each sub-query. For example, if the query is “What are the biggest mining companies in Australia? Are they profitable in 2025?” we might need to first retrieve the list of biggest mining companies in Australia, and then retrieve the financial data for each company to check if they are profitable in 2025.</p>
+
+<h3 id="semantic-search-and-vector-database">Semantic Search and Vector Database</h3>
+
+<p>The core component of RAG is the vector database which is used to store embeddings of the documents and retrieve relevant documents based on the query’s semantic similarity. Unlike the traditional search engine that uses keyword-based matching or rule-based, the semantic search is <code class="language-plaintext highlighter-rouge">dense retrieval</code> that form a semantic space (i.e., with property like two similar documents are close to each other in the semantic space). Contrastive learning, therefore, is a common technique to train the embedding model to improve the semantic search performance.</p>
+
+<p>In terms of system design, I consider more about how to build a vector database in practice rather than the theoretical details.
+More specifically, as discussed in [2], here are some considerations:</p>
+
+<ul>
+  <li>
+<strong>What if the vector database does not have the answer for the query?</strong> In this case, showing the distance between the query and the most similar documents in the vector database can help to make a more informed decision. A lot of search systems present the user with the best info they can get and leave the decision to the user.</li>
+  <li>
+<strong>What if the query is exact match rather than relevant?</strong> In this case, hybrid search, which includes both semantic search and keyword search is a better approach.</li>
+  <li>
+<strong>Domain shift</strong> When the vector database is built on a specific domain that differs from the query domain, the semantic search performance will degrade. Similar to the first challenge, showing meta data might be helpful.</li>
+  <li>
+<strong>Chunking long documents</strong> The best way of chunking long documents depends on the application. Approaches can be: sentence chunking, several sentences per chunk, paragraph chunking. Adding title of documents or overlapping sentences between chunks might be also helpful.</li>
+</ul>
 
 <h3 id="prompt-engineering">Prompt Engineering</h3>
 
@@ -398,6 +490,11 @@ We can have a sub-module to classify the input into different categories and use
 <h2 id="references">References</h2>
 
 <p>[1] Build your first LLM agent application: https://developer.nvidia.com/blog/building-your-first-llm-agent-application/</p>
+
+<p>[2] Hands-on Large Language Models: Language Understanding and Generation</p>
+
+<!-- mkdir -p assets/img/2025-llm-system-design/ -->
+<!-- mv _posts/2025-10-12-*.png assets/img/2025-llm-system-design/ -->
 
     </div>
   </article>
