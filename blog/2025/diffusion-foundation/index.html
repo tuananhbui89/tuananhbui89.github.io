@@ -267,7 +267,14 @@
 </li>
 </ul>
 </li>
-<li class="toc-entry toc-h2"><a href="#multi-modal-diffusion">Multi-modal Diffusion</a></li>
+<li class="toc-entry toc-h2">
+<a href="#vision-language-models">Vision-Language Models</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#representation-learning-in-vision-language-models">Representation Learning in Vision-Language Models</a></li>
+<li class="toc-entry toc-h3"><a href="#pretraining-vision-language-models">Pretraining Vision-Language Models</a></li>
+<li class="toc-entry toc-h3"><a href="#qwen-vl">Qwen VL</a></li>
+</ul>
+</li>
 </ul>
     </div>
     <hr>
@@ -2806,10 +2813,233 @@ Note that the caching applied to <code class="language-plaintext highlighter-rou
 
 <p>where \(\epsilon\) is a standard normal random variable and \(t\) is the time step in [0, 1].</p>
 
-<h2 id="multi-modal-diffusion">Multi-modal Diffusion</h2>
+<h2 id="vision-language-models">Vision-Language Models</h2>
+
+<p>A rapidly growing branch of generative AI focuses on** Vision-Language Models (VLMs)** — a class of multimodal models that can process and generate information across different input types (modalities), such as text, image, video, and audio.
+While the input may come from multiple modalities, <strong>the output is often text</strong> (e.g., in Visual Question Answering, or VQA), but can also be images (e.g., in image captioning or text-to-image generation) or other modalities depending on the task.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/blog/vlm/visual-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/blog/vlm/visual-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/blog/vlm/visual-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/blog/vlm/visual.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Example of a Vision Language Model (VLM) input and output. (Image source: <a href="https://huggingface.co/blog/vlms" rel="external nofollow noopener" target="_blank">Hugging Face</a>)
+</div>
+
+<h3 id="representation-learning-in-vision-language-models">Representation Learning in Vision-Language Models</h3>
+
+<p>In VLMs, the encoder pathway typically includes separate encoders for each modality, followed by a fusion layer that integrates features from the different modalities.
+However, as discussed in [2], there are multiple approaches for learning joint multimodal representations that capture cross-modal interactions:</p>
+
+<ul>
+  <li>
+    <p><strong>Representation Fusion</strong> – integrating information from two or more modalities, effectively reducing the number of separate representations.</p>
+  </li>
+  <li>
+    <p><strong>Representation Coordination</strong> – exchanging information across modalities to enrich each modality’s context while maintaining the same number of representations.</p>
+  </li>
+  <li>
+    <p><strong>Representation Fission</strong> – generating a new, decoupled set of representations (often more than the input count) that captures internal structure such as clusters or latent factors.</p>
+  </li>
+</ul>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion-foundation/2025-10-18-22-12-54-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion-foundation/2025-10-18-22-12-54-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion-foundation/2025-10-18-22-12-54-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/diffusion-foundation/2025-10-18-22-12-54.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Example of representation fusion, coordination, and fission. (Image source: [2])
+</div>
+
+<h3 id="pretraining-vision-language-models">Pretraining Vision-Language Models</h3>
+
+<p>There are various strategies to pretrain Vision-Language Models. The key idea is to align image and text representations and feed the fused representation into a text decoder for generation tasks.
+A common architecture consists of three main components:</p>
+
+<ul>
+  <li>
+<strong>Image Encoder</strong> – processes raw visual data into a sequence of fixed-length embeddings.</li>
+  <li>
+<strong>Multimodal Projector</strong> – aligns image and text representations using a dense neural network.</li>
+  <li>
+<strong>Text Decoder</strong> – generates text output from the fused multimodal representation, usually derived from a pre-trained LLM.</li>
+</ul>
+
+<p>Because the text decoder (or text encoder-decoder) is often initialized from a pretrained LLM, it is typically kept frozen during pretraining. The focus instead is on fine-tuning the multimodal projector, which learns to map the visual features into the same embedding space as the textual features.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/blog/vlm/proj-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/blog/vlm/proj-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/blog/vlm/proj-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/blog/vlm/proj.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Representation fusion in LLaVA. (Image source: <a href="https://huggingface.co/blog/vlms" rel="external nofollow noopener" target="_blank">Hugging Face</a>)
+</div>
+
+<h3 id="qwen-vl">Qwen VL</h3>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="https://camo.githubusercontent.com/657ba407ed6c1cd7ac7a3b8b03201a087f897c3d3be439be9e0e9e81e6865840/68747470733a2f2f7169616e77656e2d7265732e6f73732d616363656c65726174652e616c6979756e63732e636f6d2f5177656e332d564c2f7177656e33766c5f6172632e6a7067-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="https://camo.githubusercontent.com/657ba407ed6c1cd7ac7a3b8b03201a087f897c3d3be439be9e0e9e81e6865840/68747470733a2f2f7169616e77656e2d7265732e6f73732d616363656c65726174652e616c6979756e63732e636f6d2f5177656e332d564c2f7177656e33766c5f6172632e6a7067-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="https://camo.githubusercontent.com/657ba407ed6c1cd7ac7a3b8b03201a087f897c3d3be439be9e0e9e81e6865840/68747470733a2f2f7169616e77656e2d7265732e6f73732d616363656c65726174652e616c6979756e63732e636f6d2f5177656e332d564c2f7177656e33766c5f6172632e6a7067-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="https://camo.githubusercontent.com/657ba407ed6c1cd7ac7a3b8b03201a087f897c3d3be439be9e0e9e81e6865840/68747470733a2f2f7169616e77656e2d7265732e6f73732d616363656c65726174652e616c6979756e63732e636f6d2f5177656e332d564c2f7177656e33766c5f6172632e6a7067" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Qwen3 VL architecture. (Image source: <a href="https://github.com/QwenLM/Qwen3-VL" rel="external nofollow noopener" target="_blank">Qwen3 VL</a>)
+</div>
+
+<p><strong>Qwen1-VL</strong> consists of:</p>
+
+<ul>
+  <li>
+    <p>a Vision Transformer (ViT) as the vision encoder (initialized with pre-trained weights from OpenCLIP’s ViT-bigG),</p>
+  </li>
+  <li>
+    <p>a Large Language Model (LLM) serving as both text encoder and decoder (Qwen1 model), and</p>
+  </li>
+  <li>
+    <p>a Position-Aware Vision-Language Adapter (VL-Adapter) bridging the visual and textual spaces. The VL-Adapter is a single-layer cross-attention module initialized randomly. It employs a set of trainable query vectors and uses visual features as keys for cross-attention, compressing the image feature sequence to a fixed length (typically 256). To preserve spatial information, 2D absolute positional encodings are added to the query-key pairs.</p>
+  </li>
+</ul>
+
+<p><strong>Image Input</strong> Images are processed through the visual encoder and adapter, yielding fixed-length sequences of image features. To differentiate between image feature input and text feature input, two special tokens (<code class="language-plaintext highlighter-rouge">&lt;img&gt;</code> and <code class="language-plaintext highlighter-rouge">&lt;/img&gt;</code>) are appended to the beginning and end of the image feature sequence respectively, signifying the start and end of image content.</p>
+
+<p><strong>Bounding Box Input and Output</strong> Qwen1 VL also supports <strong>bounding box reasoning</strong>, e.g., for object detection task where the query question can be “Can you find the dog in the image?”. In order to have this capability, the input bounding box coordinates are transformed into a specified string format:</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&lt;</span><span class="nt">box</span><span class="o">&gt;(</span><span class="nt">X-top-left</span><span class="o">,</span> <span class="nt">Y-top-left</span><span class="o">),</span> <span class="o">(</span><span class="nt">X-bottom-right</span><span class="o">,</span> <span class="nt">Y-bottom-right</span><span class="o">)&lt;/</span><span class="nt">box</span><span class="o">&gt;</span>
+</code></pre></div></div>
+
+<p>This design allows bounding boxes to be tokenized like text, requiring no extra positional embeddings.
+To link textual descriptions with corresponding regions, additional tokens <code class="language-plaintext highlighter-rouge">&lt;ref&gt;</code> and <code class="language-plaintext highlighter-rouge">&lt;/ref&gt;</code> are introduced, e.g.,</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s1">"&lt;box&gt;(X-topleft, Y-topleft), (X-bottomright, Y-bottomright)&lt;/box&gt;&lt;ref&gt;a dog chasing a cat&lt;/ref&gt;"</span>
+</code></pre></div></div>
+
+<p><strong>Training Qwen1 VL</strong> consists of three stages: two stages of pre-training and a final stage of instruction fine-tuning training.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion-foundation/2025-10-19-08-35-06-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion-foundation/2025-10-19-08-35-06-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion-foundation/2025-10-19-08-35-06-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/diffusion-foundation/2025-10-19-08-35-06.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Three training pipelines for Qwen1 VL. (Image source: <a href="https://arxiv.org/pdf/2308.12966" rel="external nofollow noopener" target="_blank">Qwen1 VL</a>)
+</div>
+
+<ul>
+  <li>
+<strong>Pre-training</strong>: The goal of this stage is to joint the visual understanding (through the visual encoder and adapter) with the text understanding from the LLM model. Therefore, in this stage, only the ViT encoder and the adapter are fine-tuned, while the LLM is frozen. The training set is a large-scale, weakly labeled, web-crawled set of image-text pairs. The objective is to predict the text description of the image.</li>
+  <li>
+<strong>Multitask Pre-training</strong> The goal of this stage is introducing vision-language capabilities to the VLM model (after having a basic visual understanding through pre-training) by introducing high-quality and fine-grained VL annotation data with a larger input resolution and interleaved image-text data. As shown in Table below, the Qwen1 VL was trained on on 7 tasks simultaneously, including image captioning, VQA, OCR, Grounding, etc.</li>
+  <li>
+<strong>Supervised Fine-tuning</strong> The goal of the last stage is to enhance instruction following and dialogue capabilities, resulting the model can work in Chatbot mode. The multi-modal instruction tuning data primarily comes from caption data or dialogue data generated through LLM self-instruction, which often only addresses <strong>single-image dialogue</strong> and reasoning and is limited to image content comprehension. To enhance <strong>multiple-image comprehension</strong>, an additional and manually annotated dataset - which consists of multiple images and set of dialogues - was introduced to train the model. In this stage, we need to optimize the language model and adapter module, while the visual encoder is frozen.</li>
+</ul>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion-foundation/2025-10-19-08-50-32-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion-foundation/2025-10-19-08-50-32-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion-foundation/2025-10-19-08-50-32-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/diffusion-foundation/2025-10-19-08-50-32.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+
+<p>Resources:</p>
+
+<ul>
+  <li>[1] Multimodal machine learning (MMML) Course from CMU <a href="https://cmu-mmml.github.io/" rel="external nofollow noopener" target="_blank">https://cmu-mmml.github.io/</a>
+</li>
+  <li>[2] Liang, P. P., Zadeh, A., &amp; Morency, L. P. (2024). Foundations &amp; trends in multimodal machine learning: Principles, challenges, and open questions. ACM Computing Surveys, 56(10), 1-42.</li>
+  <li>[3] Vision Language Models Explained <a href="https://huggingface.co/blog/vlms" rel="external nofollow noopener" target="_blank">https://huggingface.co/blog/vlms</a>
+</li>
+  <li>[4] What are vision language models (VLMs)? by IBM Research <a href="https://www.ibm.com/think/topics/vision-language-models" rel="external nofollow noopener" target="_blank">https://www.ibm.com/think/topics/vision-language-models</a>
+</li>
+</ul>
 
 <!-- mkdir -p assets/img/diffusion-foundation -->
-<!-- mv _posts/2025-10-01-*.png assets/img/diffusion-foundation/ -->
+<!-- mv _posts/2025-10-18-*.png assets/img/diffusion-foundation/ -->
 
     </div>
   </article>

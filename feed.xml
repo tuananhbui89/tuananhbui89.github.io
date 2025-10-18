@@ -1,5 +1,370 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-10-13T16:34:11+11:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
-</subtitle><entry><title type="html">GPT-5 Series - Safe Completion Training</title><link href="https://tuananhbui89.github.io/blog/2025/safe-completion-training/" rel="alternate" type="text/html" title="GPT-5 Series - Safe Completion Training" /><published>2025-08-08T00:00:00+10:00</published><updated>2025-08-08T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/2025/safe-completion-training</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/safe-completion-training/"><![CDATA[<p>OpenAI just recently <a href="https://openai.com/gpt-5/">released their newest and most powerful model GPT-5</a>. In the post today, I want to talk about one of the most important aspects of LLMs: <strong>How to make them safe against malicious use</strong>.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-10-19T09:18:16+11:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
+</subtitle><entry><title type="html">Less is More - Recursive Reasoning with Tiny Networks</title><link href="https://tuananhbui89.github.io/blog/2025/tiny-recursive-reasoning/" rel="alternate" type="text/html" title="Less is More - Recursive Reasoning with Tiny Networks" /><published>2025-10-14T00:00:00+11:00</published><updated>2025-10-14T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/tiny-recursive-reasoning</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/tiny-recursive-reasoning/"><![CDATA[<h2 id="about-the-paper">About the paper</h2>
+
+<h2 id="implementation">Implementation</h2>
+
+<h3 id="data-preparation">Data preparation</h3>
+
+<h3 id="main-process">Main process</h3>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/2025-tiny-recursive-reasoning/2025-10-15-14-08-38-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/2025-tiny-recursive-reasoning/2025-10-15-14-08-38-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/2025-tiny-recursive-reasoning/2025-10-15-14-08-38-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/2025-tiny-recursive-reasoning/2025-10-15-14-08-38.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    The architecture of the Tiny Recursion Model (TRM) and its processing pipeline. Given an input x (a question), a current prediction y and a latent z, In each reasoning cycle, there are two phases: the first phase is to recursively update latent z given (x, y, z) (i.e., f(x+y, z)) and the second phase is to update the prediction y given (y, z) (i.e., f(y, z)). The whole reasoning process involves multiple cycles of these two phases. In term of terminology, y is the high-level state z-H and z is the low-level state z-L in HRM.
+</div>
+
+<p>The model is fascinating and quite complex. It’s a recursive reasoning architecture with adaptive computation time (ACT), two interacting hidden states \(z_L\) and \(z_H\) and halting logic via Q-learning.</p>
+
+<h4 id="data-flow">Data Flow</h4>
+
+<p>The model maintains two levels of latent states:</p>
+
+<ul>
+  <li>\(z_H\): High-level state with shape <code class="language-plaintext highlighter-rouge">[batch_size, seq_len + puzzle_emb_len, hidden_size]</code> (i.e., the output \(y\) in this paper)</li>
+  <li>\(z_L\): Low-level state with the same shape as \(z_H\) (i.e., the output \(z\) in this paper)</li>
+</ul>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌─────────────────────────────────────────────────────────────┐
+│                        Forward Pass                          │
+└─────────────────────────────────────────────────────────────┘
+
+Input: batch = {inputs, puzzle_identifiers, targets}
+       carry = {z_H, z_L, steps, halted, current_data}<span class="sb">
+
+                         ↓
+           ┌─────────────────────────┐
+           │  Reset carry if halted  │
+           │  z_H = H_init           │
+           │  z_L = L_init           │
+           └─────────────────────────┘
+                         ↓
+           ┌─────────────────────────┐
+           │  Input Embeddings       │
+           │  tokens + puzzle + pos  │
+           └─────────────────────────┘
+                         ↓
+           ┌─────────────────────────────────────┐
+           │  Recursive Reasoning (no grad)      │
+           │  ┌─────────────────────────────┐    │
+           │  │ For h in range(H_cycles-1): │    │
+           │  │   For l in range(L_cycles): │    │
+           │  │     z_L ← L(z_L, z_H + x)   │    │
+           │  │   z_H ← L(z_H, z_L)         │    │
+           │  └─────────────────────────────┘    │
+           └─────────────────────────────────────┘
+                         ↓
+           ┌─────────────────────────────────────┐
+           │  Final Reasoning Cycle (with grad)  │
+           │  For l in range(L_cycles):          │
+           │    z_L ← L(z_L, z_H + x)            │
+           │  z_H ← L(z_H, z_L)                  │
+           └─────────────────────────────────────┘
+                         ↓
+           ┌─────────────────────────┐
+           │  Output Generation      │
+           │  logits = lm_head(z_H)  │
+           │  q_halt = q_head(z_H₀)  │
+           └─────────────────────────┘
+                         ↓
+           ┌─────────────────────────┐
+           │  Halting Decision       │
+           │  (ACT mechanism)        │
+           └─────────────────────────┘
+                         ↓
+</span>Output: new_carry = {z_H', z_L', steps+1, halted', current_data}
+        outputs = {logits, q_halt_logits, q_continue_logits}
+</code></pre></div></div>
+
+<h4 id="q-learning">Q-Learning</h4>
+
+<p><strong>Q-Learning</strong> is a reinforcement learning algorithm that learns to make decisions by estimating the quality <strong>Q-value</strong> of taking specific actions in specific states.
+More specifically, if \(Q(state, action)\) is the expected future reward for taking <code class="language-plaintext highlighter-rouge">action</code> in <code class="language-plaintext highlighter-rouge">state</code>, then the Q-value of the optimal policy can be iteratively updated by the following Bellman equation:</p>
+
+<p>\(Q(s, a) = Q(s, a) + \alpha [r + \gamma \max_{a'} Q(s', a') - Q(s, a)]\)
+where \(r\) is the reward for taking action \(a\) in state \(s\), \(\gamma\) is the discount factor, \(\alpha\) is the learning rate, \(s'\) is the next state, and \(a'\) is the next action.</p>
+
+<p>The Q-value of the optimal policy is the maximum Q-value of all possible actions in all possible states.</p>
+
+\[Q^*(s, a) = \max_{a'} Q(s, a')\]
+
+<p><strong>Q-Learning in TRM</strong></p>
+
+<p>In TRM, the Q-learning is used to learn the halting policy, i.e., when to stop the reasoning process. More specifically, there are two actions need to be considered:</p>
+
+<ul>
+  <li><strong>Halt</strong>: Stop reasoning and return the output answer.</li>
+  <li><strong>Continue</strong>: perform one more reasoning cycle.</li>
+</ul>
+
+<p>In the implementation, the Q-value is the output of the <code class="language-plaintext highlighter-rouge">q_head</code> of the model.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">self</span><span class="p">.</span><span class="n">q_head</span> <span class="o">=</span> <span class="nc">CastedLinear</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="n">hidden_size</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="c1"># 2 actions: halt and continue
+</span><span class="n">q_logits</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">q_head</span><span class="p">(</span><span class="n">z_H</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span> <span class="c1"># Using the first token of the high-level state as the state representation
+</span><span class="n">q_halt_logits</span> <span class="o">=</span> <span class="n">q_logits</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="c1"># Q(state, halt)
+</span><span class="n">q_continue_logits</span> <span class="o">=</span> <span class="n">q_logits</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="c1"># Q(state, continue)
+</span></code></pre></div></div>
+
+<p>The <strong>halting logic</strong> is implemented as follows:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="n">no_ACT_continue</span><span class="p">:</span>
+    <span class="n">halted</span> <span class="o">=</span> <span class="p">(</span><span class="n">q_halt_logits</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="c1"># Halt if Q(halt) is positive
+</span><span class="k">else</span><span class="p">:</span>
+    <span class="n">halted</span> <span class="o">=</span> <span class="p">(</span><span class="n">q_halt_logits</span> <span class="o">&gt;</span> <span class="n">q_continue_logits</span><span class="p">)</span> <span class="c1"># Halt if Q(halt) is greater than Q(continue)
+</span></code></pre></div></div>
+
+<p><strong>Q-Learning Loss</strong></p>
+
+<p>The Q-learning loss is defined in the <code class="language-plaintext highlighter-rouge">ACTLossHead</code> class as below:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">q_halt_loss</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="nf">binary_cross_entropy_with_logits</span><span class="p">(</span>
+    <span class="n">outputs</span><span class="p">[</span><span class="sh">"</span><span class="s">q_halt_logits</span><span class="sh">"</span><span class="p">],</span>        <span class="c1"># Predicted: should we halt?
+</span>    <span class="n">seq_is_correct</span><span class="p">.</span><span class="nf">to</span><span class="p">(...),</span>          <span class="c1"># Target: 1 if sequence is correct, 0 otherwise
+</span>    <span class="n">reduction</span><span class="o">=</span><span class="sh">"</span><span class="s">sum</span><span class="sh">"</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>Where <code class="language-plaintext highlighter-rouge">seq_is_correct</code> is the target for the Q-learning loss, <code class="language-plaintext highlighter-rouge">1</code> if the model’s prediction is completely correct (all tokens match), <code class="language-plaintext highlighter-rouge">0</code> otherwise.
+As noted, <code class="language-plaintext highlighter-rouge">seq_is_correct</code> is binary, either all tokens are correct or the sequence is wrong.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Token-level correctness
+</span><span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">labels</span> <span class="o">!=</span> <span class="n">IGNORE_LABEL_ID</span><span class="p">)</span>  <span class="c1"># Valid positions
+</span><span class="n">is_correct</span> <span class="o">=</span> <span class="n">mask</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">argmax</span><span class="p">(</span><span class="n">outputs</span><span class="p">[</span><span class="sh">"</span><span class="s">logits</span><span class="sh">"</span><span class="p">],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">labels</span><span class="p">)</span>
+
+<span class="c1"># Sequence-level correctness (ALL tokens must be correct)
+</span><span class="n">loss_counts</span> <span class="o">=</span> <span class="n">mask</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># Number of valid tokens per sequence
+</span><span class="n">seq_is_correct</span> <span class="o">=</span> <span class="n">is_correct</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">loss_counts</span>  <span class="c1"># Boolean: all tokens correct?
+</span></code></pre></div></div>
+
+<p><strong>Continue Loss</strong></p>
+
+<p>In addition, the authors also proposed to use the <strong>Q-Continue Loss</strong> (bootstrapped Q-values) (The question <code class="language-plaintext highlighter-rouge">Should we continue?</code> instead of <code class="language-plaintext highlighter-rouge">Should we halt?</code>).
+However, as noted by the authors, while the <code class="language-plaintext highlighter-rouge">Q-continue</code> loss fits Q-learning, but seems totally unnecessary as the <code class="language-plaintext highlighter-rouge">Q-halt</code> loss is enough to learn the halting policy.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="sh">"</span><span class="s">target_q_continue</span><span class="sh">"</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">:</span>
+    <span class="n">q_continue_loss</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="nf">binary_cross_entropy_with_logits</span><span class="p">(</span>
+        <span class="n">outputs</span><span class="p">[</span><span class="sh">"</span><span class="s">q_continue_logits</span><span class="sh">"</span><span class="p">],</span>  <span class="c1"># Predicted: should we continue?
+</span>        <span class="n">outputs</span><span class="p">[</span><span class="sh">"</span><span class="s">target_q_continue</span><span class="sh">"</span><span class="p">],</span>  <span class="c1"># Target: bootstrapped Q-value from next state
+</span>        <span class="n">reduction</span><span class="o">=</span><span class="sh">"</span><span class="s">sum</span><span class="sh">"</span>
+    <span class="p">)</span>
+</code></pre></div></div>
+
+<p>where <code class="language-plaintext highlighter-rouge">target_q_continue</code> is the bootstrapped Q-value from the next state.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">target_q_continue</span> <span class="o">=</span> <span class="nf">sigmoid</span><span class="p">(</span><span class="nf">max</span><span class="p">(</span><span class="n">next_q_halt</span><span class="p">,</span> <span class="n">next_q_continue</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p><strong>Total loss</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">total_loss</span> <span class="o">=</span> <span class="n">lm_loss</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">q_halt_loss</span> <span class="o">+</span> <span class="n">q_continue_loss</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>where <code class="language-plaintext highlighter-rouge">lm_loss</code> is the standard cross-entropy on token predictions.</p>
+
+<p><strong>Training Dynamics of Q-Learning</strong></p>
+
+<p><strong>Early phase: Init Q-head</strong></p>
+
+<p>The Q-head is initialized to (almost) zero for faster learning during bootstrapping, i.e., never halts early (always uses max steps).
+This forces the model to learn basic language understanding before adapting to the reasoning task.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Q head special init
+# Init Q to (almost) zero for faster learning during bootstrapping
+</span><span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
+    <span class="n">self</span><span class="p">.</span><span class="n">q_head</span><span class="p">.</span><span class="n">weight</span><span class="p">.</span><span class="nf">zero_</span><span class="p">()</span>
+    <span class="n">self</span><span class="p">.</span><span class="n">q_head</span><span class="p">.</span><span class="n">bias</span><span class="p">.</span><span class="nf">fill_</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span>  <span class="c1"># type: ignore
+</span></code></pre></div></div>
+
+<p><strong>Phase 2: Learning to halt</strong></p>
+
+<p>As language understanding improves, <code class="language-plaintext highlighter-rouge">seq_is_correct</code> becomes more frequent and reliable, <strong>Q-head</strong> starts to learn correlation between reasoning state and correctness, 
+resulting in the model learning to halt early.</p>
+
+<p><strong>Phase 3: Exploration Refinement</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Force trying different step counts
+</span><span class="n">min_halt_steps</span> <span class="o">=</span> <span class="nf">random_int</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">halt_max_steps</span><span class="p">)</span> <span class="k">with</span> <span class="n">probability</span> <span class="n">ε</span>
+</code></pre></div></div>
+
+<p>The model <strong>exploration</strong> prevents the model always halts at the same step, thus leading to overfitting. This helps to discover optimal reasoning depth for different problems.</p>
+
+<h2 id="applying-to-relation-extraction-problem">Applying to Relation Extraction problem</h2>
+
+<h3 id="relation-extraction-re">Relation Extraction (RE)</h3>
+
+<p>Relation Extraction (RE) is a core task in Natural Language Processing (NLP) that involves identifying and classifying semantic relationships between entities mentioned in text. 
+For example, given the sentence <code class="language-plaintext highlighter-rouge">"John Smith is a patient of Dr. Emily Johnson"</code>, an RE system should detect the relationship between <code class="language-plaintext highlighter-rouge">John Smith</code> and <code class="language-plaintext highlighter-rouge">Dr. Emily Johnson</code> as <code class="language-plaintext highlighter-rouge">"patient of"</code>. 
+Similarly, in the sentence <code class="language-plaintext highlighter-rouge">"Aspirin is used to treat headache"</code>, the identified relationship is <code class="language-plaintext highlighter-rouge">"used to treat"</code> between two entities <code class="language-plaintext highlighter-rouge">Aspirin</code> and <code class="language-plaintext highlighter-rouge">headache</code>.</p>
+
+<p>The set of possible relationships is typically predefined and fixed for a given task. 
+Importantly, the label <code class="language-plaintext highlighter-rouge">"no relation"</code> is also a valid category, indicating that no meaningful semantic link exists between the mentioned entities.</p>
+
+<p>Traditional approaches to RE include rule-based methods, feature-based classifiers, and neural architectures leveraging contextual embeddings such as BERT. 
+Recent advances, however, have explored formulating RE as a question answering (QA) problem, giving rise to methods such as QA4RE.</p>
+
+<h3 id="biored-dataset">BioRED Dataset</h3>
+
+<p>The dataset used in this demo is the <a href="https://github.com/ncbi/BioRED">BioRED dataset</a>. BioRED is a first-of-its-kind biomedical RE corpus with multiple entity types (e.g., gene/protein, disease, chemical) and relation pairs (e.g., gene-disease; chemical-chemical) at the document level, on a set of 600 PubMed abstracts.
+The data, pretrained models (for the RE task) and annotation guidelines are provided in the link: <a href="https://ftp.ncbi.nlm.nih.gov/pub/lu/BioRED/">https://ftp.ncbi.nlm.nih.gov/pub/lu/BioRED/</a>.</p>
+
+<h4 id="data-format">Data Format</h4>
+
+<p>The BioRED dataset adopts the <a href="https://www.ncbi.nlm.nih.gov/research/pubtator">PubTator</a> format, a structured, plain-text representation commonly used for biomedical text annotations. Each document—typically a PubMed abstract—contains both text and text-bound annotations describing entities and relations. The format includes the following components:</p>
+
+<ul>
+  <li><strong>PMID:</strong> The PubMed identifier, followed by the document title and abstract text.</li>
+  <li><strong>Entity annotations:</strong> Each entity is represented as <code class="language-plaintext highlighter-rouge">PMID \t start-index \t end-index \t text-span \t entity_type \t normalized_id</code>.</li>
+  <li><strong>Relation annotations:</strong> Each relation is encoded as <code class="language-plaintext highlighter-rouge">PMID \t relation-type \t normalized_id1 \t normalized_id2 \t novelty</code>.</li>
+</ul>
+
+<p>An example of the PubTator-formatted document is shown below:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Example of PubTator-formatted document
+
+15485686|t|A novel SCN5A mutation manifests as a ...
+
+15485686|a|OBJECTIVE: Congenital long QT syndrome (LQTS) ...
+
+15485686 8 13 SCN5A GeneOrGeneProduct 6331
+
+15485686 56 72 long QT syndrome DiseaseOrPhenotypicFeature D008133
+
+15485686 Association D001919 6331 Novel
+
+15485686 Positive_Correlation D001919 p|SUB|V|1763|M Novel
+</code></pre></div></div>
+
+<p>Each document \(S\) may contain multiple entities \(E_i\) and relations \(R_{ij}\) between them. Importantly, no entity pair \((E_i, E_j)\) has more than one relation in the dataset—each pair is associated with at most a single relation \(R_{ij}\).</p>
+
+<p>Thus, the task in BioRED can be defined as: given a document \(S\) and a set of entities \(E\), extract all relations \(R_{ij}\) that hold between entity pairs \((E_i, E_j)\) within the text.</p>
+
+<h4 id="entity-types">Entity Types</h4>
+
+<p>BioRED defines six entity types (five major biomedical categories and one infrequent type, <em>Cell Line</em>), each normalized to an external biomedical knowledge base. The entity taxonomy is summarized in the table below.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>Entity Type</strong></th>
+      <th><strong>Examples</strong></th>
+      <th><strong>Normalization Source</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Gene (Protein)</td>
+      <td>ABCA1, CYP2D6, BMP</td>
+      <td>NCBI Gene</td>
+    </tr>
+    <tr>
+      <td>Variant (Residue)</td>
+      <td>S276T, rs2234671, c.435C&gt;G</td>
+      <td>dbSNP</td>
+    </tr>
+    <tr>
+      <td>Species</td>
+      <td><em>Homo sapiens</em>, <em>E. coli</em></td>
+      <td>NCBI Taxonomy</td>
+    </tr>
+    <tr>
+      <td>Disease (Symptom)</td>
+      <td>Hypertension, Alzheimer’s disease</td>
+      <td>MEDIC (MeSH + OMIM)</td>
+    </tr>
+    <tr>
+      <td>Chemical</td>
+      <td>Terbutaline, Acetaminophen</td>
+      <td>MeSH: Chemicals and Drugs</td>
+    </tr>
+    <tr>
+      <td>Cell Line</td>
+      <td>MCF7/AdrR</td>
+      <td>Cellosaurus</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><em>Entity types in BioRED and their corresponding normalization sources.</em></p>
+
+<h4 id="relation-types">Relation Types</h4>
+
+<p>BioRED defines a comprehensive set of pairwise relations between concept types. Each relation is explicitly typed—either directional or non-directional—and falls into one of three major semantic categories: 
+<strong>Positive Correlation</strong>, <strong>Negative Correlation</strong>, or <strong>Association</strong>. 
+In addition to these, several specialized relation types capture more specific biomedical interactions, including <strong>Bind</strong>, <strong>Co-treatment</strong>, <strong>Comparison</strong>, <strong>Drug Interaction</strong>, and <strong>Conversion</strong>.</p>
+
+<p>During dataset preprocessing, a special category labeled <strong>None</strong> is added to represent negative examples, denoting entity pairs with no annotated relationship.</p>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/2025-tiny-recursive-reasoning/relations-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/2025-tiny-recursive-reasoning/relations-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/2025-tiny-recursive-reasoning/relations-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/2025-tiny-recursive-reasoning/relations.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption text-center">
+    Relations annotated in the BioRED corpus. (A) Major categories of relation types. (B) Mapping between concept pairs and relation types. Line thickness represents relative frequency of occurrence.
+</div>
+
+<h3 id="data-processing">Data Processing</h3>
+
+<p>In order to apply the TRM to the RE task, we need to convert the BioRED dataset into the format that can be used by the TRM.
+However, there are three main challenges making it is not straightforward:</p>
+
+<ul>
+  <li>Variable Text Length. The current TRM expects a fixed length input (i.e., for the Sudoku puzzle, the input is a 9x9 grid), but biomedical texts vary greatly in length. We need to set a larger sequence length and truncate/padding the texts if necessary.</li>
+  <li>Classification vs Generation task. The TRM is designed for the generation task, while the original RE task is a classification task. One of the approaches can be used is to convert the RE task into a multiple-choice generation task, where the model needs to generate the relation type options for the given entity pairs.</li>
+  <li>Entity awareness. Unlike the Sudoku puzzle, the input in RE task contains the full text of the document and the entity pairs. In the dataset, one document may contain multiple entity pairs with multiple relations between them. Therefore, in order to answer specific relation type for a specific entity pair, the model needs to be aware of that entity pair, distinguish it from other entity pairs. Some potential solutions can be: adding special marker tokens around entities, use entity type embedding or create position-aware prompts. In this demon, we use the simplest solution, that is, adding special marker tokens around entities and move the two entities to the beginning of the input sequence.</li>
+</ul>
+
+<p>The input format is shown below:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Input sequence:
+[CLS] <span class="nt">&lt;E1&gt;</span> entity1_text <span class="nt">&lt;/E1&gt;</span> [SEP] <span class="nt">&lt;E2&gt;</span> entity2_text <span class="nt">&lt;/E2&gt;</span> [SEP] 
+full_text [SEP]
+Options: A) Association B) PositiveCorrelation C) ... [SEP]
+
+Label sequence:
+[-100, -100, ..., -100, A, -100, -100, ...]
+                        ↑
+                   Only supervise answer token
+</code></pre></div></div>
+
+<h2 id="references">References</h2>
+
+<p>[1] Jolicoeur-Martineau, Alexia. “Less is More: Recursive Reasoning with Tiny Networks.” arXiv preprint arXiv:2510.04871 (2025).</p>
+
+<p>[2] Luo, Ling, et al. “BioRED: a rich biomedical relation extraction dataset.” Briefings in Bioinformatics 23.5 (2022): bbac282.</p>
+
+<!-- mkdir -p assets/img/2025-tiny-recursive-reasoning/ -->
+<!-- mv _posts/2025-10-15-*.png assets/img/2025-tiny-recursive-reasoning/ -->]]></content><author><name></name></author><category term="reading" /><category term="genai" /><category term="llm" /><summary type="html"><![CDATA[About the paper]]></summary></entry><entry><title type="html">GPT-5 Series - Safe Completion Training</title><link href="https://tuananhbui89.github.io/blog/2025/safe-completion-training/" rel="alternate" type="text/html" title="GPT-5 Series - Safe Completion Training" /><published>2025-08-08T00:00:00+10:00</published><updated>2025-08-08T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/2025/safe-completion-training</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/safe-completion-training/"><![CDATA[<p>OpenAI just recently <a href="https://openai.com/gpt-5/">released their newest and most powerful model GPT-5</a>. In the post today, I want to talk about one of the most important aspects of LLMs: <strong>How to make them safe against malicious use</strong>.
 In this version, OpenAI introduces a new paradigm called <strong>Safe Completion Training</strong> (which is built on top of  Deliberative Alignment [4])</p>
 
 <iframe width="600" height="338" src="https://www.youtube.com/embed/0Uu_VJeVVfo" title="Introducing GPT-5" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
@@ -4117,10 +4482,224 @@ Note that the caching applied to <code class="language-plaintext highlighter-rou
 
 <p>where \(\epsilon\) is a standard normal random variable and \(t\) is the time step in [0, 1].</p>
 
-<h2 id="multi-modal-diffusion">Multi-modal Diffusion</h2>
+<h2 id="vision-language-models">Vision-Language Models</h2>
+
+<p>A rapidly growing branch of generative AI focuses on** Vision-Language Models (VLMs)** — a class of multimodal models that can process and generate information across different input types (modalities), such as text, image, video, and audio.
+While the input may come from multiple modalities, <strong>the output is often text</strong> (e.g., in Visual Question Answering, or VQA), but can also be images (e.g., in image captioning or text-to-image generation) or other modalities depending on the task.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/blog/vlm/visual-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/blog/vlm/visual-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/blog/vlm/visual-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/blog/vlm/visual.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Example of a Vision Language Model (VLM) input and output. (Image source: <a href="https://huggingface.co/blog/vlms">Hugging Face</a>)
+</div>
+
+<h3 id="representation-learning-in-vision-language-models">Representation Learning in Vision-Language Models</h3>
+
+<p>In VLMs, the encoder pathway typically includes separate encoders for each modality, followed by a fusion layer that integrates features from the different modalities.
+However, as discussed in [2], there are multiple approaches for learning joint multimodal representations that capture cross-modal interactions:</p>
+
+<ul>
+  <li>
+    <p><strong>Representation Fusion</strong> – integrating information from two or more modalities, effectively reducing the number of separate representations.</p>
+  </li>
+  <li>
+    <p><strong>Representation Coordination</strong> – exchanging information across modalities to enrich each modality’s context while maintaining the same number of representations.</p>
+  </li>
+  <li>
+    <p><strong>Representation Fission</strong> – generating a new, decoupled set of representations (often more than the input count) that captures internal structure such as clusters or latent factors.</p>
+  </li>
+</ul>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion-foundation/2025-10-18-22-12-54-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion-foundation/2025-10-18-22-12-54-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion-foundation/2025-10-18-22-12-54-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/diffusion-foundation/2025-10-18-22-12-54.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Example of representation fusion, coordination, and fission. (Image source: [2])
+</div>
+
+<h3 id="pretraining-vision-language-models">Pretraining Vision-Language Models</h3>
+
+<p>There are various strategies to pretrain Vision-Language Models. The key idea is to align image and text representations and feed the fused representation into a text decoder for generation tasks.
+A common architecture consists of three main components:</p>
+
+<ul>
+  <li><strong>Image Encoder</strong> – processes raw visual data into a sequence of fixed-length embeddings.</li>
+  <li><strong>Multimodal Projector</strong> – aligns image and text representations using a dense neural network.</li>
+  <li><strong>Text Decoder</strong> – generates text output from the fused multimodal representation, usually derived from a pre-trained LLM.</li>
+</ul>
+
+<p>Because the text decoder (or text encoder-decoder) is often initialized from a pretrained LLM, it is typically kept frozen during pretraining. The focus instead is on fine-tuning the multimodal projector, which learns to map the visual features into the same embedding space as the textual features.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/blog/vlm/proj-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/blog/vlm/proj-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/blog/vlm/proj-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/blog/vlm/proj.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Representation fusion in LLaVA. (Image source: <a href="https://huggingface.co/blog/vlms">Hugging Face</a>)
+</div>
+
+<h3 id="qwen-vl">Qwen VL</h3>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="https://camo.githubusercontent.com/657ba407ed6c1cd7ac7a3b8b03201a087f897c3d3be439be9e0e9e81e6865840/68747470733a2f2f7169616e77656e2d7265732e6f73732d616363656c65726174652e616c6979756e63732e636f6d2f5177656e332d564c2f7177656e33766c5f6172632e6a7067-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="https://camo.githubusercontent.com/657ba407ed6c1cd7ac7a3b8b03201a087f897c3d3be439be9e0e9e81e6865840/68747470733a2f2f7169616e77656e2d7265732e6f73732d616363656c65726174652e616c6979756e63732e636f6d2f5177656e332d564c2f7177656e33766c5f6172632e6a7067-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="https://camo.githubusercontent.com/657ba407ed6c1cd7ac7a3b8b03201a087f897c3d3be439be9e0e9e81e6865840/68747470733a2f2f7169616e77656e2d7265732e6f73732d616363656c65726174652e616c6979756e63732e636f6d2f5177656e332d564c2f7177656e33766c5f6172632e6a7067-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="https://camo.githubusercontent.com/657ba407ed6c1cd7ac7a3b8b03201a087f897c3d3be439be9e0e9e81e6865840/68747470733a2f2f7169616e77656e2d7265732e6f73732d616363656c65726174652e616c6979756e63732e636f6d2f5177656e332d564c2f7177656e33766c5f6172632e6a7067" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Qwen3 VL architecture. (Image source: <a href="https://github.com/QwenLM/Qwen3-VL">Qwen3 VL</a>)
+</div>
+
+<p><strong>Qwen1-VL</strong> consists of:</p>
+
+<ul>
+  <li>
+    <p>a Vision Transformer (ViT) as the vision encoder (initialized with pre-trained weights from OpenCLIP’s ViT-bigG),</p>
+  </li>
+  <li>
+    <p>a Large Language Model (LLM) serving as both text encoder and decoder (Qwen1 model), and</p>
+  </li>
+  <li>
+    <p>a Position-Aware Vision-Language Adapter (VL-Adapter) bridging the visual and textual spaces. The VL-Adapter is a single-layer cross-attention module initialized randomly. It employs a set of trainable query vectors and uses visual features as keys for cross-attention, compressing the image feature sequence to a fixed length (typically 256). To preserve spatial information, 2D absolute positional encodings are added to the query-key pairs.</p>
+  </li>
+</ul>
+
+<p><strong>Image Input</strong> Images are processed through the visual encoder and adapter, yielding fixed-length sequences of image features. To differentiate between image feature input and text feature input, two special tokens (<code class="language-plaintext highlighter-rouge">&lt;img&gt;</code> and <code class="language-plaintext highlighter-rouge">&lt;/img&gt;</code>) are appended to the beginning and end of the image feature sequence respectively, signifying the start and end of image content.</p>
+
+<p><strong>Bounding Box Input and Output</strong> Qwen1 VL also supports <strong>bounding box reasoning</strong>, e.g., for object detection task where the query question can be “Can you find the dog in the image?”. In order to have this capability, the input bounding box coordinates are transformed into a specified string format:</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&lt;</span><span class="nt">box</span><span class="o">&gt;(</span><span class="nt">X-top-left</span><span class="o">,</span> <span class="nt">Y-top-left</span><span class="o">),</span> <span class="o">(</span><span class="nt">X-bottom-right</span><span class="o">,</span> <span class="nt">Y-bottom-right</span><span class="o">)&lt;/</span><span class="nt">box</span><span class="o">&gt;</span>
+</code></pre></div></div>
+
+<p>This design allows bounding boxes to be tokenized like text, requiring no extra positional embeddings.
+To link textual descriptions with corresponding regions, additional tokens <code class="language-plaintext highlighter-rouge">&lt;ref&gt;</code> and <code class="language-plaintext highlighter-rouge">&lt;/ref&gt;</code> are introduced, e.g.,</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s1">"&lt;box&gt;(X-topleft, Y-topleft), (X-bottomright, Y-bottomright)&lt;/box&gt;&lt;ref&gt;a dog chasing a cat&lt;/ref&gt;"</span>
+</code></pre></div></div>
+
+<p><strong>Training Qwen1 VL</strong> consists of three stages: two stages of pre-training and a final stage of instruction fine-tuning training.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion-foundation/2025-10-19-08-35-06-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion-foundation/2025-10-19-08-35-06-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion-foundation/2025-10-19-08-35-06-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/diffusion-foundation/2025-10-19-08-35-06.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Three training pipelines for Qwen1 VL. (Image source: <a href="https://arxiv.org/pdf/2308.12966">Qwen1 VL</a>)
+</div>
+
+<ul>
+  <li><strong>Pre-training</strong>: The goal of this stage is to joint the visual understanding (through the visual encoder and adapter) with the text understanding from the LLM model. Therefore, in this stage, only the ViT encoder and the adapter are fine-tuned, while the LLM is frozen. The training set is a large-scale, weakly labeled, web-crawled set of image-text pairs. The objective is to predict the text description of the image.</li>
+  <li><strong>Multitask Pre-training</strong> The goal of this stage is introducing vision-language capabilities to the VLM model (after having a basic visual understanding through pre-training) by introducing high-quality and fine-grained VL annotation data with a larger input resolution and interleaved image-text data. As shown in Table below, the Qwen1 VL was trained on on 7 tasks simultaneously, including image captioning, VQA, OCR, Grounding, etc.</li>
+  <li><strong>Supervised Fine-tuning</strong> The goal of the last stage is to enhance instruction following and dialogue capabilities, resulting the model can work in Chatbot mode. The multi-modal instruction tuning data primarily comes from caption data or dialogue data generated through LLM self-instruction, which often only addresses <strong>single-image dialogue</strong> and reasoning and is limited to image content comprehension. To enhance <strong>multiple-image comprehension</strong>, an additional and manually annotated dataset - which consists of multiple images and set of dialogues - was introduced to train the model. In this stage, we need to optimize the language model and adapter module, while the visual encoder is frozen.</li>
+</ul>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion-foundation/2025-10-19-08-50-32-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion-foundation/2025-10-19-08-50-32-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion-foundation/2025-10-19-08-50-32-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/diffusion-foundation/2025-10-19-08-50-32.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+
+<p>Resources:</p>
+
+<ul>
+  <li>[1] Multimodal machine learning (MMML) Course from CMU <a href="https://cmu-mmml.github.io/">https://cmu-mmml.github.io/</a></li>
+  <li>[2] Liang, P. P., Zadeh, A., &amp; Morency, L. P. (2024). Foundations &amp; trends in multimodal machine learning: Principles, challenges, and open questions. ACM Computing Surveys, 56(10), 1-42.</li>
+  <li>[3] Vision Language Models Explained <a href="https://huggingface.co/blog/vlms">https://huggingface.co/blog/vlms</a></li>
+  <li>[4] What are vision language models (VLMs)? by IBM Research <a href="https://www.ibm.com/think/topics/vision-language-models">https://www.ibm.com/think/topics/vision-language-models</a></li>
+</ul>
 
 <!-- mkdir -p assets/img/diffusion-foundation -->
-<!-- mv _posts/2025-10-01-*.png assets/img/diffusion-foundation/ -->]]></content><author><name></name></author><category term="reading" /><category term="diffusion" /><category term="genai" /><summary type="html"><![CDATA[(Work in progress I will gradually add more content when having more time:D Please stay tuned :D)]]></summary></entry><entry><title type="html">FineStyle - Fine-grained Controllable Style Personalization for Text-to-image Models (NeurIPS 2024)</title><link href="https://tuananhbui89.github.io/blog/2025/finestyle/" rel="alternate" type="text/html" title="FineStyle - Fine-grained Controllable Style Personalization for Text-to-image Models (NeurIPS 2024)" /><published>2025-02-28T00:00:00+11:00</published><updated>2025-02-28T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/finestyle</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/finestyle/"><![CDATA[<h2 id="finestyle-fine-grained-controllable-style-personalization-for-text-to-image-models-neurips-2024">FineStyle: Fine-grained Controllable Style Personalization for Text-to-image Models (NeurIPS 2024)</h2>
+<!-- mv _posts/2025-10-18-*.png assets/img/diffusion-foundation/ -->]]></content><author><name></name></author><category term="reading" /><category term="diffusion" /><category term="genai" /><summary type="html"><![CDATA[(Work in progress I will gradually add more content when having more time:D Please stay tuned :D)]]></summary></entry><entry><title type="html">FineStyle - Fine-grained Controllable Style Personalization for Text-to-image Models (NeurIPS 2024)</title><link href="https://tuananhbui89.github.io/blog/2025/finestyle/" rel="alternate" type="text/html" title="FineStyle - Fine-grained Controllable Style Personalization for Text-to-image Models (NeurIPS 2024)" /><published>2025-02-28T00:00:00+11:00</published><updated>2025-02-28T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/finestyle</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/finestyle/"><![CDATA[<h2 id="finestyle-fine-grained-controllable-style-personalization-for-text-to-image-models-neurips-2024">FineStyle: Fine-grained Controllable Style Personalization for Text-to-image Models (NeurIPS 2024)</h2>
 
 <div class="row mt-3">
     <div class="col-sm mt-3 mt-md-0 text-center">
@@ -5877,285 +6456,4 @@ Minimizing the above objective function is directly maximizing the probability o
 <ul>
   <li>RLHF optimizes a reward function designed to capture human preferences, which allows fine-grained control over the model’s behavior.</li>
   <li>Limitation: SFT does not involve direct optimization based on human evaluations.</li>
-</ul>]]></content><author><name></name></author><category term="reading" /><summary type="html"><![CDATA[Introduction]]></summary></entry><entry><title type="html">LLM Series - Part 5 - System Design for LLMs</title><link href="https://tuananhbui89.github.io/blog/2025/llm-system-design/" rel="alternate" type="text/html" title="LLM Series - Part 5 - System Design for LLMs" /><published>2025-01-19T00:00:00+11:00</published><updated>2025-01-19T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/llm-system-design</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/llm-system-design/"><![CDATA[<p>In this blog post, I will discuss the system design for applications that use LLMs as a core component. However, the goal is to prepare for a technical interview rather than to build a real product :D.</p>
-
-<h2 id="fundamental-concepts">Fundamental Concepts</h2>
-
-<h3 id="retriever-augmented-generation-rag">Retriever-augmented generation (RAG)</h3>
-
-<div class="row mt-3 text-center">
-    <div class="col-sm mt-3 mt-md-0">
-        <figure>
-
-  <picture>
-    
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/2025-llm-system-design/2025-10-12-22-04-47-480.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/2025-llm-system-design/2025-10-12-22-04-47-800.webp" />
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/2025-llm-system-design/2025-10-12-22-04-47-1400.webp" />
-    
-
-    <!-- Fallback to the original file -->
-    <img src="/assets/img/2025-llm-system-design/2025-10-12-22-04-47.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
-  </picture>
-
-</figure>
-
-    </div>
-</div>
-<div class="caption text-center">
-    RAG pipeline - Image from [2]
-</div>
-
-<p>RAG is a technique that allows LLMs to access external knowledge sources to generate more accurate and relevant responses. It is a two-step process:</p>
-
-<ol>
-  <li>Retrieve relevant documents from a knowledge base.</li>
-  <li>Generate a response using the retrieved documents as additional context with grounded generation.</li>
-</ol>
-
-<p>In some LLMs APIs (like Cohere’s API), the chat has a document argument to pass in the documents that are relevant to the conversation.</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">query</span> <span class="o">=</span> <span class="sh">"</span><span class="s">What is the capital of France?</span><span class="sh">"</span>
-
-<span class="n">results</span> <span class="o">=</span> <span class="n">search_api</span><span class="p">.</span><span class="nf">search</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
-
-<span class="n">documents</span> <span class="o">=</span> <span class="p">[</span><span class="n">doc</span><span class="p">.</span><span class="n">page_content</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">results</span><span class="p">]</span>
-
-<span class="n">response</span> <span class="o">=</span> <span class="n">llm</span><span class="p">.</span><span class="nf">chat</span><span class="p">(</span><span class="n">message</span><span class="o">=</span><span class="n">query</span><span class="p">,</span> <span class="n">documents</span><span class="o">=</span><span class="n">documents</span><span class="p">)</span>
-</code></pre></div></div>
-
-<p>For local LLMs, we can use Langchain to inject relevant documents into the LLM’s context.</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">langchain</span> <span class="kn">import</span> <span class="n">PromptTemplate</span>
-
-<span class="c1"># Create a prompt template
-</span><span class="n">template</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">&lt;|user|&gt;
-Relevant documents: {documents}
-
-Provide a concise answer to the following question using the relevant documents provided above.
-{question}
-&lt;|end|&gt;
-&lt;|assistant|&gt;</span><span class="sh">"""</span>
-
-<span class="n">prompt</span> <span class="o">=</span> <span class="nc">PromptTemplate</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="n">template</span><span class="p">,</span> <span class="n">input_variables</span><span class="o">=</span><span class="p">[</span><span class="sh">"</span><span class="s">documents</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">question</span><span class="sh">"</span><span class="p">])</span>
-
-<span class="kn">from</span> <span class="n">langchain.chains</span> <span class="kn">import</span> <span class="n">RetrievalQA</span>
-
-<span class="c1"># RAG pipeline
-</span><span class="n">rag</span> <span class="o">=</span> <span class="n">RetrievalQA</span><span class="p">.</span><span class="nf">from_chain_type</span><span class="p">(</span><span class="n">llm</span><span class="o">=</span><span class="n">llm</span><span class="p">,</span> <span class="n">chain_type</span><span class="o">=</span><span class="sh">"</span><span class="s">stuff</span><span class="sh">"</span><span class="p">,</span> <span class="n">retriever</span><span class="o">=</span><span class="n">db</span><span class="p">.</span><span class="nf">as_retriever</span><span class="p">(),</span><span class="n">chain_type_kwargs</span><span class="o">=</span><span class="p">{</span><span class="sh">"</span><span class="s">prompt</span><span class="sh">"</span><span class="p">:</span> <span class="n">prompt</span><span class="p">})</span>
-</code></pre></div></div>
-
-<h4 id="advanced-rag">Advanced RAG</h4>
-
-<p><strong>Query Rewriting</strong> Using an LLM to rewrite the query to improve the retrieval results.</p>
-
-<p><strong>Multi-hop Retrieval</strong> Using an LLM to break down the query into multiple sub-queries and retrieve relevant documents for each sub-query. For example, if the query is “What are the biggest mining companies in Australia? Are they profitable in 2025?” we might need to first retrieve the list of biggest mining companies in Australia, and then retrieve the financial data for each company to check if they are profitable in 2025.</p>
-
-<h3 id="semantic-search-and-vector-database">Semantic Search and Vector Database</h3>
-
-<p>The core component of RAG is the vector database which is used to store embeddings of the documents and retrieve relevant documents based on the query’s semantic similarity. Unlike the traditional search engine that uses keyword-based matching or rule-based, the semantic search is <code class="language-plaintext highlighter-rouge">dense retrieval</code> that form a semantic space (i.e., with property like two similar documents are close to each other in the semantic space). Contrastive learning, therefore, is a common technique to train the embedding model to improve the semantic search performance.</p>
-
-<p>In terms of system design, I consider more about how to build a vector database in practice rather than the theoretical details.
-More specifically, as discussed in [2], here are some considerations:</p>
-
-<ul>
-  <li><strong>What if the vector database does not have the answer for the query?</strong> In this case, showing the distance between the query and the most similar documents in the vector database can help to make a more informed decision. A lot of search systems present the user with the best info they can get and leave the decision to the user.</li>
-  <li><strong>What if the query is exact match rather than relevant?</strong> In this case, hybrid search, which includes both semantic search and keyword search is a better approach.</li>
-  <li><strong>Domain shift</strong> When the vector database is built on a specific domain that differs from the query domain, the semantic search performance will degrade. Similar to the first challenge, showing meta data might be helpful.</li>
-  <li><strong>Chunking long documents</strong> The best way of chunking long documents depends on the application. Approaches can be: sentence chunking, several sentences per chunk, paragraph chunking. Adding title of documents or overlapping sentences between chunks might be also helpful.</li>
-</ul>
-
-<h3 id="faiss">FAISS</h3>
-
-<p><strong>Indexing Vectors</strong></p>
-
-<p>FAISS creates an index to store and organize vectors efficiently. The indexing method affects performance:</p>
-
-<ul>
-  <li>Flat Index (IndexFlatL2) → Exact k-NN search (slow but accurate).</li>
-  <li>IVF (Inverted File Index) → Faster search with approximate results.</li>
-  <li>HNSW (Hierarchical Navigable Small World) → Graph-based ANN search (fast &amp; accurate).</li>
-</ul>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">faiss</span>
-<span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
-
-<span class="c1"># Generate random 512-dimension vectors for products
-</span><span class="n">dimension</span> <span class="o">=</span> <span class="mi">512</span>
-<span class="n">num_vectors</span> <span class="o">=</span> <span class="mi">10000</span>
-<span class="n">vectors</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">random</span><span class="p">((</span><span class="n">num_vectors</span><span class="p">,</span> <span class="n">dimension</span><span class="p">)).</span><span class="nf">astype</span><span class="p">(</span><span class="sh">'</span><span class="s">float32</span><span class="sh">'</span><span class="p">)</span>
-
-<span class="c1"># Create a FAISS index
-</span><span class="n">index</span> <span class="o">=</span> <span class="n">faiss</span><span class="p">.</span><span class="nc">IndexFlatL2</span><span class="p">(</span><span class="n">dimension</span><span class="p">)</span>  <span class="c1"># L2 distance (Euclidean)
-</span><span class="n">index</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">vectors</span><span class="p">)</span>  <span class="c1"># Add vectors to the index
-</span></code></pre></div></div>
-
-<p><strong>Searching for Similar Items</strong></p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Generate a random query vector
-</span><span class="n">query_vector</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">random</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">dimension</span><span class="p">)).</span><span class="nf">astype</span><span class="p">(</span><span class="sh">'</span><span class="s">float32</span><span class="sh">'</span><span class="p">)</span>
-
-<span class="c1"># Find the top 5 nearest neighbors
-</span><span class="n">k</span> <span class="o">=</span> <span class="mi">5</span>
-<span class="n">distances</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="n">index</span><span class="p">.</span><span class="nf">search</span><span class="p">(</span><span class="n">query_vector</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
-
-<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Nearest Neighbors:</span><span class="sh">"</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
-<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Distances:</span><span class="sh">"</span><span class="p">,</span> <span class="n">distances</span><span class="p">)</span>
-</code></pre></div></div>
-
-<h3 id="prompt-engineering">Prompt Engineering</h3>
-
-<h2 id="core-components-of-an-llm-system">Core components of an LLM system</h2>
-
-<h3 id="input-handling-and-processing">Input handling and processing</h3>
-
-<p>Because each application has different input types, for example, code will differ from clinical notes, we need to have a module that can handle specific input types related to the application.</p>
-
-<h3 id="knowledge-base-and-data-resources">Knowledge Base and Data Resources</h3>
-
-<p>The purpose of this module is to:</p>
-
-<ul>
-  <li>Provide the necessary related knowledge to the LLM.</li>
-  <li>To store user-specific data for personalized output/decision.</li>
-</ul>
-
-<p>This can be done by:</p>
-
-<ul>
-  <li>Vector database tools like <a href="https://www.pinecone.io/">Pinecone</a> or <a href="https://github.com/facebookresearch/faiss">Faiss</a>.</li>
-  <li>Flat file system.</li>
-</ul>
-
-<h3 id="the-core-llm-powered-module">The core LLM-powered module</h3>
-
-<p>This is the main module that uses the LLM to generate the output/decision.</p>
-
-<h4 id="prompting-module">Prompting module</h4>
-
-<p>This can be integrated into the core LLM-powered module to improve the quality of the output/decision.
-We can have a sub-module to classify the input into different categories and use different prompt templates for each category.</p>
-
-<p>We can also leverage the response from the LLM as well as the user feedback to improve the prompt.</p>
-
-<h3 id="filtering-and-validation">Filtering and Validation</h3>
-
-<ul>
-  <li>Validation by rule-based logic check, to make sure the output/input is correct and valid. However, because of the rule-based nature, it is not always flexible to handle all cases.</li>
-  <li>Validation by another machine learning model, for example, another LLM model or a uncertainty estimation model.</li>
-  <li>Optional human-in-the-loop (HITL) validation by a human expert, especially in critical applications like medical diagnosis.</li>
-</ul>
-
-<h3 id="safe-guarding">Safe Guarding</h3>
-
-<h3 id="agentic-framework">Agentic Framework</h3>
-
-<h4 id="agent-tools">Agent Tools</h4>
-
-<p>These are external tools or resources that the LLM can access to perform specitic actions or gather information. This could be a calculator, a search API, or a external database.</p>
-
-<h4 id="multi-agent-system">Multi-agent system</h4>
-
-<h2 id="data-distribution-shifts-and-monitoring">Data Distribution Shifts and Monitoring</h2>
-
-<h2 id="continual-learning">Continual Learning</h2>
-
-<h2 id="evaluation">Evaluation</h2>
-
-<h3 id="offline-evaluation">Offline Evaluation</h3>
-
-<h3 id="test-in-production">Test in Production</h3>
-
-<h2 id="deployment-and-scaling">Deployment and Scaling</h2>
-
-<h2 id="case-study">Case Study</h2>
-
-<h3 id="discuss-on-user-journey">Discuss on User Journey</h3>
-
-<p>User journey describes how a user interacts with a product, starting from the first touchpoint - i.e.,user’s input, to the final interaction - i.e., displaying the result to the user.</p>
-
-<p>Discussing on the user journey helps us to understand the flow interaction between the user and the product, and identify the core components that are involved in the interaction.</p>
-
-<h3 id="recommender-system">Recommender System</h3>
-
-<p><strong>User Interaction Layer</strong></p>
-
-<ul>
-  <li>Chat Interface: Users can describe their interests, ask questions, and discuss product features.</li>
-  <li>Input Handling: Supports text-based and voice-based interactions.</li>
-</ul>
-
-<p><strong>NLP Module</strong></p>
-
-<ul>
-  <li>Intent Recognition: Extracts user intent (e.g., “I want a lightweight laptop for travel”).</li>
-  <li>Entity Extraction: Identifies key product attributes (e.g., “lightweight,” “laptop,” “travel”).</li>
-  <li>Sentiment Analysis: Understands user sentiment to refine recommendations.</li>
-</ul>
-
-<p><strong>Product Database</strong></p>
-
-<ul>
-  <li>Structure: Contains product details, including:
-    <ul>
-      <li>Name, Category, Price</li>
-      <li>Features &amp; Specifications</li>
-      <li>User Reviews &amp; Ratings</li>
-    </ul>
-  </li>
-</ul>
-
-<p>The most important component of this module is the embedding model to convert all the data into vectors so that we can use the vector database to store and search for similar items. The ideal vector space should be able to capture the semantic meaning of the data, i.e., the more similar the data is, the closer the vectors are in the vector space.</p>
-
-<p>The most commonly used embedding models fall into three categories:</p>
-
-<p>1️⃣ General-Purpose Text Embeddings (Best for Q&amp;A, knowledge retrieval)</p>
-
-<p>2️⃣ Domain-Specific Embeddings (Optimized for medical, legal, code, etc.)</p>
-
-<p>3️⃣ Multimodal Embeddings (For text + images)</p>
-
-<p><strong>Recommendation Engine</strong></p>
-
-<ul>
-  <li>Content-Based Filtering: Matches user preferences with product attributes.</li>
-  <li>Collaborative Filtering: Uses customer behavior data to suggest items others with similar preferences liked.</li>
-  <li>Hybrid Approach: Combines content-based and collaborative filtering.</li>
-</ul>
-
-<p><strong>RAG-based recommendation</strong></p>
-
-<p>RAG is built on two main components:</p>
-
-<p>1️⃣ Retriever (Information Fetching)</p>
-
-<ul>
-  <li>Dense Vector Search (FAISS, Annoy, Pinecone, Weaviate, ChromaDB) that uses embeddings (e.g., BERT, SBERT, DPR) to find semantically similar documents.</li>
-  <li>Traditional Search (BM25, ElasticSearch, Google Search API) that retrieves documents using keyword-based matching.</li>
-</ul>
-
-<p>2️⃣ Generator (Text Generation)</p>
-
-<ul>
-  <li>Pre-trained LLMs (GPT, BART, T5, LLaMA) generate responses using the retrieved documents as additional context.</li>
-  <li>Can use fine-tuned models for domain-specific responses (e.g., finance, medical).</li>
-</ul>
-
-<p><strong>Key Steps in RAG</strong>:</p>
-
-<p>1️⃣ User Input → A query is given (e.g., “What are the latest gaming laptops?”).</p>
-
-<p>2️⃣ Retrieval Module → Finds the most relevant documents using vector search (FAISS, BM25, ElasticSearch, etc.).</p>
-
-<p>3️⃣ Context Injection → The retrieved documents are passed to the generation model.</p>
-
-<p>4️⃣ Response Generation → The model generates a final, coherent answer using both the query and retrieved documents.</p>
-
-<h2 id="references">References</h2>
-
-<p>[1] Build your first LLM agent application: https://developer.nvidia.com/blog/building-your-first-llm-agent-application/</p>
-
-<p>[2] Hands-on Large Language Models: Language Understanding and Generation</p>
-
-<!-- mkdir -p assets/img/2025-llm-system-design/ -->
-<!-- mv _posts/2025-10-12-*.png assets/img/2025-llm-system-design/ -->]]></content><author><name></name></author><category term="genai" /><category term="llm" /><category term="tutorial" /><category term="reading" /><summary type="html"><![CDATA[How to break into $100k+ salary roles - part 5]]></summary></entry></feed>
+</ul>]]></content><author><name></name></author><category term="reading" /><summary type="html"><![CDATA[Introduction]]></summary></entry></feed>
