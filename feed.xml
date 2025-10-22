@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-10-19T09:18:16+11:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-10-22T18:34:12+11:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
 </subtitle><entry><title type="html">Less is More - Recursive Reasoning with Tiny Networks</title><link href="https://tuananhbui89.github.io/blog/2025/tiny-recursive-reasoning/" rel="alternate" type="text/html" title="Less is More - Recursive Reasoning with Tiny Networks" /><published>2025-10-14T00:00:00+11:00</published><updated>2025-10-14T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/tiny-recursive-reasoning</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/tiny-recursive-reasoning/"><![CDATA[<h2 id="about-the-paper">About the paper</h2>
 
 <h2 id="implementation">Implementation</h2>
@@ -3660,6 +3660,211 @@ I’ve explored a proposal linking this to <strong>Machine Unlearning</strong> (
 
 <h3 id="control-net">Control-Net</h3>
 
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion-foundation/2025-10-19-14-12-44-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion-foundation/2025-10-19-14-12-44-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion-foundation/2025-10-19-14-12-44-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/diffusion-foundation/2025-10-19-14-12-44.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Stable Diffusion's U-Net architecture connected with a ControlNet on the encoder blocks and middle block. (Image source: [1])
+</div>
+
+<p><strong>ControlNet Block</strong></p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion-foundation/2025-10-19-14-18-17-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion-foundation/2025-10-19-14-18-17-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion-foundation/2025-10-19-14-18-17-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/diffusion-foundation/2025-10-19-14-18-17.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    ControlNet block. (Image source: [1])
+</div>
+
+<p>Suppose \(\mathcal{F}_{\theta}(x)\) is the original U-Net block that transforms an input feature map \(x\) to an output feature map \(y = \mathcal{F}_{\theta}(x)\):</p>
+
+<p>The ControlNet block is then defined as:</p>
+
+\[y_c = \mathcal{F}_{\theta}(x) + \mathcal{Z}_{\phi_{z_2}}\left( x + \mathcal{F}_{\theta_c} \left( \mathcal{Z}_{\phi_{z_1}}(x) \right) \right)\]
+
+<p>where \(\mathcal{Z}_{\phi_{z_1}}(x)\) and \(\mathcal{Z}_{\phi_{z_2}}(x)\) are the zero convolution blocks parameters by \(\phi_{z_1}\) and \(\phi_{z_2}\), respectively.
+In the first training step, \(\phi_{z_1}\) and \(\phi_{z_2}\) are initialized to be the zero matrix, resulting in \(y_c = y = \mathcal{F}_{\theta}(x)\), making the ControlNet block has no influence on the generation process.</p>
+
+<p><strong>Why Zero Convolution?</strong></p>
+
+<p>First, by initializing the zero convolution blocks to be the zero matrix, the ControlNet block has no influence on the generation process at the first training step.
+However, during the backpropagation, the gradient of the zero convolution blocks is not zero, resulting in the zero convolution blocks being updated.
+More specifically,</p>
+
+\[\frac{\partial L}{\partial \phi_{z_2}} = \frac{\partial L}{\partial y_c} \cdot \frac{\partial y_c}{\partial \phi_{z_2}}\]
+
+\[\frac{\partial L}{\partial \phi_{z_2}} = \frac{\partial L}{\partial y_c} \cdot \frac{\partial \mathcal{F}_{\theta}(x) + \mathcal{Z}_{\phi_{z_2}}\left( z_1 \right)}{\partial \phi_{z_2}}\]
+
+<p>assuming the convolution layer is just a simple linear layer, i.e., \(\mathcal{Z}_{\phi_{z_2}}(z_1) = \phi_{z_2} \cdot z_1\), then:</p>
+
+\[\frac{\partial L}{\partial \phi_{z_2}} = \frac{\partial L}{\partial y_c} \cdot \frac{\partial \mathcal{F}_{\theta}(x) + \phi_{z_2} \cdot z_1}{\partial \phi_{z_2}}\]
+
+\[\frac{\partial L}{\partial \phi_{z_2}} = \frac{\partial L}{\partial y_c} \cdot\cdot z_1\]
+
+<p>where \(z_1\) is the output of the zero convolution block, which is not zero but \(x\) at the first training step.</p>
+
+<p>By using zero convolution rather than a standard convolution layer (which is initialized by non-zero matrix), it first reduces the noise (even small) from the non-zero initial value.
+More over, by frozing the backbone U-Net branch, the model can focus/force the additional control information to be encoded into the new ControlNet branch.</p>
+
+<p><strong>What if the backbone is not U-Net?</strong></p>
+
+<p>Recent diffusion models such as DiT or Flux use the transformer architecture as a backbone instead of the U-Net architecture. However, the ControlNet block can still be applicable to these models.</p>
+
+<p>For example, in ControlNet Flux, source code is here: <a href="https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/controlnets/controlnet_flux.py">https://github.com/huggingface/diffusers/blob/main/src/diffusers/models/controlnets/controlnet_flux.py</a></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># ControlNet Block for Flux Transformer Architecture
+# Unlike U-Net which has encoder/decoder structure, Flux uses transformer blocks
+</span>
+<span class="k">def</span> <span class="nf">flux_controlnet_forward</span><span class="p">(</span>
+    <span class="n">hidden_states</span><span class="p">,</span>      <span class="c1"># x: input latent features
+</span>    <span class="n">controlnet_cond</span><span class="p">,</span>    <span class="c1"># conditioning image (e.g., canny edge, depth map)
+</span>    <span class="n">conditioning_scale</span><span class="p">,</span> <span class="c1"># scale factor for controlnet influence
+</span>    <span class="n">encoder_hidden_states</span><span class="p">,</span>  <span class="c1"># text embeddings
+</span>    <span class="n">timestep</span><span class="p">,</span>          <span class="c1"># diffusion timestep
+</span>    <span class="c1"># ... other parameters
+</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">
+    Main difference from U-Net ControlNet:
+    - U-Net: Applies ControlNet on encoder blocks + middle block
+    - Flux: Applies ControlNet on transformer blocks + single transformer blocks
+    </span><span class="sh">"""</span>
+    
+    <span class="c1"># ===== STEP 1: Embed the input latents =====
+</span>    <span class="c1"># Original backbone: x_embedded = X_embedder(x)
+</span>    <span class="n">hidden_states</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">x_embedder</span><span class="p">(</span><span class="n">hidden_states</span><span class="p">)</span>  <span class="c1"># F_θ pathway starts
+</span>    
+    <span class="c1"># ===== STEP 2: Process conditioning input =====
+</span>    <span class="c1"># Z_φ_z1(c): First zero-conv on conditioning
+</span>    <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">input_hint_block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="c1"># Process conditioning image through conv blocks
+</span>        <span class="n">controlnet_cond</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">input_hint_block</span><span class="p">(</span><span class="n">controlnet_cond</span><span class="p">)</span>
+        <span class="c1"># Reshape to match latent spatial dimensions
+</span>        <span class="n">controlnet_cond</span> <span class="o">=</span> <span class="nf">reshape_to_patches</span><span class="p">(</span><span class="n">controlnet_cond</span><span class="p">)</span>
+    
+    <span class="c1"># ===== STEP 3: Apply ControlNet injection =====
+</span>    <span class="c1"># This is where: y_c = F_θ(x) + Z_φ_z2(x + F_θ_c(Z_φ_z1(c)))
+</span>    <span class="c1"># Simplified in Flux as: hidden_states = hidden_states + controlnet_x_embedder(cond)
+</span>    
+    <span class="c1"># controlnet_x_embedder is initialized as zero_module (zero convolution)
+</span>    <span class="c1"># At step 0: φ_z2 = 0, so this adds nothing
+</span>    <span class="c1"># During training: φ_z2 learns to inject control information
+</span>    <span class="n">hidden_states</span> <span class="o">=</span> <span class="n">hidden_states</span> <span class="o">+</span> <span class="n">self</span><span class="p">.</span><span class="nf">controlnet_x_embedder</span><span class="p">(</span><span class="n">controlnet_cond</span><span class="p">)</span>
+    
+    <span class="c1"># ===== STEP 4: Prepare time and text embeddings =====
+</span>    <span class="n">timestep</span> <span class="o">=</span> <span class="n">timestep</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">hidden_states</span><span class="p">.</span><span class="n">dtype</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span>
+    <span class="n">temb</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">time_text_embed</span><span class="p">(</span><span class="n">timestep</span><span class="p">,</span> <span class="n">pooled_projections</span><span class="p">)</span>
+    <span class="n">encoder_hidden_states</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">context_embedder</span><span class="p">(</span><span class="n">encoder_hidden_states</span><span class="p">)</span>
+    
+    <span class="c1"># ===== STEP 5: Forward through transformer blocks (F_θ_c pathway) =====
+</span>    <span class="c1"># Store intermediate outputs for ControlNet residuals
+</span>    <span class="n">block_samples</span> <span class="o">=</span> <span class="p">()</span>
+    
+    <span class="k">for</span> <span class="n">index_block</span><span class="p">,</span> <span class="n">block</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">transformer_blocks</span><span class="p">):</span>
+        <span class="c1"># F_θ_c: ControlNet's copy of transformer blocks
+</span>        <span class="n">encoder_hidden_states</span><span class="p">,</span> <span class="n">hidden_states</span> <span class="o">=</span> <span class="nf">block</span><span class="p">(</span>
+            <span class="n">hidden_states</span><span class="o">=</span><span class="n">hidden_states</span><span class="p">,</span>
+            <span class="n">encoder_hidden_states</span><span class="o">=</span><span class="n">encoder_hidden_states</span><span class="p">,</span>
+            <span class="n">temb</span><span class="o">=</span><span class="n">temb</span><span class="p">,</span>
+            <span class="n">image_rotary_emb</span><span class="o">=</span><span class="n">image_rotary_emb</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># Collect intermediate features
+</span>        <span class="n">block_samples</span> <span class="o">=</span> <span class="n">block_samples</span> <span class="o">+</span> <span class="p">(</span><span class="n">hidden_states</span><span class="p">,)</span>
+    
+    <span class="c1"># ===== STEP 6: Forward through single transformer blocks =====
+</span>    <span class="n">single_block_samples</span> <span class="o">=</span> <span class="p">()</span>
+    
+    <span class="k">for</span> <span class="n">index_block</span><span class="p">,</span> <span class="n">block</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">single_transformer_blocks</span><span class="p">):</span>
+        <span class="n">encoder_hidden_states</span><span class="p">,</span> <span class="n">hidden_states</span> <span class="o">=</span> <span class="nf">block</span><span class="p">(</span>
+            <span class="n">hidden_states</span><span class="o">=</span><span class="n">hidden_states</span><span class="p">,</span>
+            <span class="n">encoder_hidden_states</span><span class="o">=</span><span class="n">encoder_hidden_states</span><span class="p">,</span>
+            <span class="n">temb</span><span class="o">=</span><span class="n">temb</span><span class="p">,</span>
+            <span class="n">image_rotary_emb</span><span class="o">=</span><span class="n">image_rotary_emb</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">single_block_samples</span> <span class="o">=</span> <span class="n">single_block_samples</span> <span class="o">+</span> <span class="p">(</span><span class="n">hidden_states</span><span class="p">,)</span>
+    
+    <span class="c1"># ===== STEP 7: Apply zero convolutions to create residuals =====
+</span>    <span class="c1"># Z_φ_z2: Second zero-conv on ControlNet features
+</span>    <span class="c1"># These are initialized to zero, so at step 0: output = 0
+</span>    
+    <span class="n">controlnet_block_samples</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="k">for</span> <span class="n">block_sample</span><span class="p">,</span> <span class="n">controlnet_block</span> <span class="ow">in</span> <span class="nf">zip</span><span class="p">(</span><span class="n">block_samples</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">controlnet_blocks</span><span class="p">):</span>
+        <span class="c1"># controlnet_block is zero_module(Linear): implements Z_φ_z2
+</span>        <span class="n">block_sample</span> <span class="o">=</span> <span class="nf">controlnet_block</span><span class="p">(</span><span class="n">block_sample</span><span class="p">)</span>
+        <span class="n">controlnet_block_samples</span> <span class="o">=</span> <span class="n">controlnet_block_samples</span> <span class="o">+</span> <span class="p">(</span><span class="n">block_sample</span><span class="p">,)</span>
+    
+    <span class="n">controlnet_single_block_samples</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="k">for</span> <span class="n">single_block_sample</span><span class="p">,</span> <span class="n">controlnet_block</span> <span class="ow">in</span> <span class="nf">zip</span><span class="p">(</span><span class="n">single_block_samples</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">controlnet_single_blocks</span><span class="p">):</span>
+        <span class="n">single_block_sample</span> <span class="o">=</span> <span class="nf">controlnet_block</span><span class="p">(</span><span class="n">single_block_sample</span><span class="p">)</span>
+        <span class="n">controlnet_single_block_samples</span> <span class="o">=</span> <span class="n">controlnet_single_block_samples</span> <span class="o">+</span> <span class="p">(</span><span class="n">single_block_sample</span><span class="p">,)</span>
+    
+    <span class="c1"># ===== STEP 8: Scale the residuals =====
+</span>    <span class="c1"># Apply conditioning_scale to control the strength of ControlNet
+</span>    <span class="n">controlnet_block_samples</span> <span class="o">=</span> <span class="p">[</span><span class="n">sample</span> <span class="o">*</span> <span class="n">conditioning_scale</span> <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">controlnet_block_samples</span><span class="p">]</span>
+    <span class="n">controlnet_single_block_samples</span> <span class="o">=</span> <span class="p">[</span><span class="n">sample</span> <span class="o">*</span> <span class="n">conditioning_scale</span> <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">controlnet_single_block_samples</span><span class="p">]</span>
+    
+    <span class="c1"># ===== STEP 9: Return residuals to be added in main pipeline =====
+</span>    <span class="c1"># These residuals will be added to the original Flux transformer outputs
+</span>    <span class="c1"># In the main pipeline: y_c = F_θ(x) + controlnet_residuals
+</span>    <span class="k">return</span> <span class="nc">FluxControlNetOutput</span><span class="p">(</span>
+        <span class="n">controlnet_block_samples</span><span class="o">=</span><span class="n">controlnet_block_samples</span><span class="p">,</span>
+        <span class="n">controlnet_single_block_samples</span><span class="o">=</span><span class="n">controlnet_single_block_samples</span><span class="p">,</span>
+    <span class="p">)</span>
+</code></pre></div></div>
+
+<p>U-Net ControlNet:</p>
+
+<ul>
+  <li>Applies to: Encoder blocks + Middle block</li>
+  <li>Connection: Skip connections in U-Net architecture</li>
+  <li>Formula:\(y_c = \mathcal{F}_{\theta}(x) + \mathcal{Z}_{\phi_{z_2}}\left( x + \mathcal{F}_{\theta_c} \left( \mathcal{Z}_{\phi_{z_1}}(x) \right) \right)\)</li>
+</ul>
+
+<p>Flux ControlNet:</p>
+
+<ul>
+  <li>Applies to: Transformer blocks + Single transformer blocks</li>
+  <li>Connection: Residual addition to transformer outputs</li>
+  <li>Formula: Same concept, but adapted for transformer architecture</li>
+</ul>
+
+<p>References:</p>
+
+<ul>
+  <li>[1] <a href="https://arxiv.org/pdf/2302.05543">Adding Conditional Control to Text-to-Image Diffusion Models</a></li>
+</ul>
+
 <h3 id="image-prompt">Image Prompt</h3>
 
 <p>Beyond controlling the generation process using text prompt, there is a hot topic in the community to control using image information/layout/prompt - which has a huge potential in applications, e.g., image inpainting, image-to-image generation, etc. In the standard Stable Diffusion, the condition embedding \(c_t\) is just a text embedding \(c_t = E_t(y)\) where \(y\) is the text prompt and \(E_t\) is a pre-trained text encoder such as CLIP.
@@ -3794,11 +3999,20 @@ The model becomes the original Stable Diffusion when \(\lambda = 0\).</p>
 
 <h3 id="training-pipeline">Training Pipeline</h3>
 
-<p><strong>Training data</strong> for inpainting is a combination of three components: <strong>original image</strong> as ground truth, <strong>masked image</strong> as input, and <strong>prompt</strong> as condition to provide the context of the missing region.</p>
+<p><strong>Training data</strong> for inpainting is a combination of three components: <strong>original image</strong> as ground truth, <strong>masked image</strong> as input, and <strong>prompt</strong> as condition to provide the context of the missing region. The ground truth image can be from real and large-scale dataset such as LAION-5B or MSCOCO 2017. More specifically, in the LAION-5B, the text near each image is treated as a caption describing that image. Images and captions are filtered and embedded using OpenAI’s CLIP model, which checks how well the text matches the image (using cosine similarity). Only pairs with high image–text similarity are kept.</p>
 
-<p>To ensure the model is robust, a variety of mask shapes and sizes can be used, including <strong>Rectangular</strong>, <strong>Free-form masks</strong>, and <strong>arbitrary shapes</strong></p>
+<p>To ensure the model is robust, a variety of mask shapes and sizes can be used, including <strong>Rectangular</strong>, <strong>Free-form masks</strong>, and <strong>arbitrary shapes</strong>. More advanced methods use masks based on actual objects in the image (e.g., using segmentation masks). It has been noted that this technique can help to improve the alignment.</p>
 
 <p><strong>Loss function</strong> for inpainting is a combination of <strong>pixel-wise reconstruction loss</strong> and <strong>perceptual loss</strong> (or <strong>Style loss</strong>). If using GANs, the <strong>adversarial loss</strong> is used to ensure the inpainted regions are perceptually realistic under the discriminator perspective.</p>
+
+<h3 id="tricks-in-training-image-inpainting">Tricks in Training Image Inpainting</h3>
+
+<p><strong>Initialization of the model</strong></p>
+
+<p><strong>Single small mask at a time</strong></p>
+
+<p><strong>Consistency between Mask-Prompt-Context</strong> How to ensure the consistency between the masked region, the prompt, and the context? Groundtruth image can be generated from the original model rather than the real image, which can has a better correlation with the prompt.
+Data augmentation like adding target object to the background can also help to create controllable training data.</p>
 
 <h3 id="challenges-in-image-inpainting">Challenges in Image Inpainting</h3>
 
@@ -3811,6 +4025,54 @@ The model becomes the original Stable Diffusion when \(\lambda = 0\).</p>
 <p><strong>Perceptual realism</strong>: is another key challenge. Even if the inpainted regions are visually consistent, they may not align with human perception. For example, an inpainting might produce unrealistic shadows or reflections or overly smooth, or having artificial artifacts.</p>
 
 <p><strong>Large missing regions</strong>: The size of missing area is directly proportional to the difficulty of the task.</p>
+
+<h3 id="hd-painter-high-resolution-and-prompt-faithful-text-guided-image-inpainting-withdiffusion-models">HD-PAINTER: HIGH-RESOLUTION AND PROMPT-FAITHFUL TEXT-GUIDED IMAGE INPAINTING WITHDIFFUSION MODELS</h3>
+
+<p>In this section, we will discuss a recent work accepted on ICLR 2025 on image inpainting with diffusion models.</p>
+
+<p>The challenge that this work addresses is <strong>prompt neglect</strong> which means that the inpainting model ignores the user’s prompt and instead fill the masked region based on the surrounding visual context.
+This challenge of prompt neglect exhibits in two specific ways:</p>
+
+<ul>
+  <li><strong>Background dominance</strong>: The model fills the masked area with a continuation of the background, essentially ignoring the object or concept described in the prompt.</li>
+  <li><strong>Nearby object dominance</strong>: The model completes a nearby object that is partially covered by the mask, rather than generating the new object requested by the prompt.</li>
+</ul>
+
+<p><strong>Root cause of prompt neglect</strong>
+While the weak image-text alignment is a well acknowledged problem in the community, previous works have attributed this problem to the random masking strategy and the misalignment between the global prompts with the local context of the masked region during training.
+However, in this work, the authors hypothesize that the standard <strong>self-attention</strong> layers contribute to the problem. These layers are “prompt-free” and <strong>reinforce local contextual similarity</strong> between the new pixels and the existing background pixels, thus undermining the prompt’s instructions.</p>
+
+<p><strong>Proposed solution</strong></p>
+
+<p>The authors introduce <strong>Prompt-Aware Introverted Attention</strong>, a training-free mechanism that modifies the self-attention layer to <strong>integrate the prompt information</strong>. Specifically, if a pixel in the “know region” (unmasked) is semantically close to the prompt, suggesting that the generated pixel should be semantically influenced by its surrounding context, i.e., <strong>outside-in</strong> effect. If the “know region” is not relevant to the prompt, its attention score should be scaled down, reducing the influence of the surrounding context to the generated pixel.</p>
+
+<p>Note that the input prompt is to describe the desired generated region only, not the entire image.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion-foundation/2025-10-19-12-06-58-480.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion-foundation/2025-10-19-12-06-58-800.webp" />
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion-foundation/2025-10-19-12-06-58-1400.webp" />
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/diffusion-foundation/2025-10-19-12-06-58.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();" />
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+
+<p>References:</p>
+
+<ul>
+  <li><a href="https://openreview.net/pdf?id=6lB5qtdYAg">HD-PAINTER: HIGH-RESOLUTION AND PROMPT-FAITHFUL TEXT-GUIDED IMAGE INPAINTING WITHDIFFUSION MODELS</a></li>
+</ul>
 
 <h2 id="accelerating-diffusion-models">Accelerating Diffusion Models</h2>
 
@@ -4322,6 +4584,12 @@ The train loop is defined in the <code class="language-plaintext highlighter-rou
 
 <h3 id="rectified-diffusion">Rectified Diffusion</h3>
 
+<p>Rectified Flows define the forward process as straight paths between the data distribution and a standard normal distribution [2], i.e.,</p>
+
+\[z_t = (1 - t) x_0 + t \epsilon\]
+
+<p>where \(\epsilon\) is a standard normal random variable and \(t\) is the time step in [0, 1].</p>
+
 <p>References:</p>
 
 <ul>
@@ -4475,12 +4743,6 @@ Note that the caching applied to <code class="language-plaintext highlighter-rou
 <ul>
   <li>[1] <a href="https://openaccess.thecvf.com/content/CVPR2024/papers/Ma_DeepCache_Accelerating_Diffusion_Models_for_Free_CVPR_2024_paper.pdf">DeepCache: Accelerating Diffusion Models for Free</a></li>
 </ul>
-
-<p>Rectified Flows define the forward process as straight paths between the data distribution and a standard normal distribution [2], i.e.,</p>
-
-\[z_t = (1 - t) x_0 + t \epsilon\]
-
-<p>where \(\epsilon\) is a standard normal random variable and \(t\) is the time step in [0, 1].</p>
 
 <h2 id="vision-language-models">Vision-Language Models</h2>
 

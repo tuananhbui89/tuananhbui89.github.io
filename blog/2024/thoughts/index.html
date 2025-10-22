@@ -145,6 +145,8 @@
     
     <div id="table-of-contents">
       <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h2"><a href="#large-scale-image-text-pair-dataset-ie-laion-5b-and-the-pain-it-causes-to-text-to-image-generative-models">Large-scale Image-Text Pair Dataset (i.e., LAION-5B) and the Pain It Causes to Text-to-Image Generative Models</a></li>
+<li class="toc-entry toc-h2"><a href="#some-thoughts-on-recent-a-definition-of-agi-paper">Some thoughts on recent “A definition of AGI” paper</a></li>
 <li class="toc-entry toc-h2"><a href="#some-unfinished-ideas-on-machine-unlearning">Some unfinished ideas on Machine Unlearning</a></li>
 <li class="toc-entry toc-h2"><a href="#safeai-startups">SafeAI Startups</a></li>
 <li class="toc-entry toc-h2"><a href="#robust-unlearning---the-next-challenge-in-unlearning">Robust Unlearning - The next challenge in Unlearning</a></li>
@@ -178,6 +180,83 @@
 <!-- mv _posts/2025-03-18*.png assets/img/thoughts/ -->
 
 <p>This post is to capture some of my quick thoughts/ideas, readers who don’t know the context, very likely not understand what I am talking about - But it’s oke :D because this is mainly for my own reference.</p>
+
+<h2 id="large-scale-image-text-pair-dataset-ie-laion-5b-and-the-pain-it-causes-to-text-to-image-generative-models">Large-scale Image-Text Pair Dataset (i.e., LAION-5B) and the Pain It Causes to Text-to-Image Generative Models</h2>
+
+<p>LAION-5B is a massive dataset of around 5 billion image–text pairs, widely used for training text-to-image generative models such as Stable Diffusion. However, when looking into how this dataset was created, I began to form a hypothesis: while its scale enables impressive generalization, it may also introduce fundamental issues that affect how these models learn fine-grained visual–textual relationships.</p>
+
+<p><strong>How is LAION (or similar large-scale image–text pair datasets) created?</strong></p>
+
+<p>The LAION datasets are built from the Common Crawl web corpus, a gigantic public snapshot of the internet.
+Here’s the general process:</p>
+
+<ul>
+  <li>Each webpage is scanned for image URLs, alt-texts, and nearby captions or paragraphs.</li>
+  <li>The text near an image is treated as that image’s caption.</li>
+  <li>These image–caption pairs are filtered and embedded using OpenAI’s CLIP model, which measures how well the text matches the image via cosine similarity.</li>
+  <li>Only pairs with high CLIP similarity are kept.</li>
+</ul>
+
+<p>This approach allows the creation of billions of training pairs with minimal manual labeling — but it comes with trade-offs.</p>
+
+<p><strong>The Problem</strong></p>
+
+<p>While CLIP-based filtering ensures that the image and text are globally related, the local alignment between individual words and visual regions is often weak or missing.</p>
+
+<p>For example, a caption might correctly describe the overall image (“a man standing near a red car”) but not specify which region corresponds to “man” or “car”. Even worse, captions are often noisy, incomplete, or ambiguous.</p>
+
+<p>This weak alignment can lead to semantic confusion during model training.
+As a result, even though models like Stable Diffusion can generate stunning and varied images, they still struggle with local or compositional consistency — how specific attributes combine in one object.
+A well-known issue in T2I generation is semantic leakage.
+For example, a prompt like “a man with red hair wearing a white shirt” might result in an image of a man with “white hair” and “red shirt”.
+From a global CLIP perspective, this image still scores highly because all key concepts (“man,” “red,” “white,” “hair,” “shirt”) appear somewhere — but the relationships among them are wrong.</p>
+
+<p>This explains why prompt engineering has become such a common practice. Users often craft detailed and repetitive prompts (“a man, red hair, white shirt, front view, portrait lighting”) to explicitly guide the model toward the intended local concept composition.</p>
+
+<p><strong>Ideas for Improvement</strong></p>
+
+<p>To address these weaknesses, two possible directions come to mind:</p>
+
+<ul>
+  <li>
+<strong>Local Alignment Metric</strong>: Instead of relying solely on a global CLIP similarity score, a new local alignment metric could evaluate how well each concept in the caption corresponds to a specific region in the image. This would allow us to select training pairs with stronger fine-grained alignment.</li>
+  <li>
+<strong>Localizing Mechanism</strong>: Another approach is to design models or datasets with explicit image–text localization — linking particular image regions to caption segments (Image–Text links). Alternatively, a self-localizing mechanism could ensure that related concepts within the text (e.g., “white hair” and “red shirt”) stay grouped together during training (Text–Text links).</li>
+</ul>
+
+<p>Both ideas aim to move beyond coarse, global matching and toward datasets that teach generative models how concepts fit together spatially and semantically.</p>
+
+<h2 id="some-thoughts-on-recent-a-definition-of-agi-paper">Some thoughts on recent “A definition of AGI” paper</h2>
+
+<p>The paper is <a href="https://www.agidefinition.ai/paper.pdf" rel="external nofollow noopener" target="_blank">A definition of AGI</a> by a large group of researchers from different institutions, leaded by Dan Hendrycks.</p>
+
+<p>It proposes a set of core cognitive metrics to evaluate AGI capabilities:</p>
+
+<ul>
+  <li>General Knowledge (K): The breadth of factual understanding of the world, encompassing commonsense, culture, science, social science, and history.</li>
+  <li>Reading and Writing Ability (RW): Proficiency in consuming and producing written language, from basic decoding to complex comprehension, composition, and usage.</li>
+  <li>Mathematical Ability (M): The depth of mathematical knowledge and skills across arithmetic, algebra, geometry, probability, and calculus.</li>
+  <li>On-the-Spot Reasoning (R): The flexible control of attention to solve novel problems without relying exclusively on previously learned schemas, tested via deduction and induction.</li>
+  <li>Working Memory (WM): The ability to maintain and manipulate information in active
+attention across textual, auditory, and visual modalities.</li>
+  <li>Long-Term Memory Storage (MS): The capability to continually learn new information (associative, meaningful, and verbatim).</li>
+  <li>Long-Term Memory Retrieval (MR): The fluency and precision of accessing stored knowledge, including the critical ability to avoid confabulation (hallucinations).</li>
+  <li>Visual Processing (V): The ability to perceive, analyze, reason about, generate, and scan visual information.</li>
+  <li>Auditory Processing (A): The capacity to discriminate, recognize, and work creatively with auditory stimuli, including speech, rhythm, and music.</li>
+  <li>Speed (S): The ability to perform simple cognitive tasks quickly, encompassing perceptual speed, reaction times, and processing fluency.</li>
+</ul>
+
+<p><strong>My reflections:</strong></p>
+
+<p>While the proposed framework is comprehensive and structured, I think it still leaves out one of the most essential aspects of general intelligence — the ability to learn autonomously and reflect upon one’s own reasoning.</p>
+
+<p>In humans, this corresponds to metacognition — the awareness and regulation of our own thought processes. For AGI, this would mean not only performing well across these ten dimensions but also recognizing when it is wrong, adapting its strategies, and improving without explicit external supervision. Such self-reflective learning is arguably the defining quality that distinguishes a merely powerful model from a genuinely general intelligence.</p>
+
+<p>Another thought concerns what could be seen as a “singularity” in the context of these metrics.
+Traditionally, the technological singularity refers to the point at which an AI system becomes self-improving or sentient.
+I think the similar <strong>measure singularity</strong> point in term of measuring AGI - the moment when an AI system becomes capable of evaluating and measuring the consciousness or general intelligence of other AI systems.
+Once this point is reached, the act of measurement itself becomes recursive: the evaluator and the evaluated share the same cognitive footing.
+At that point, we might no longer need external benchmarks or human-defined tests — the models themselves could serve as both subject and assessor of intelligence.</p>
 
 <h2 id="some-unfinished-ideas-on-machine-unlearning">Some unfinished ideas on Machine Unlearning</h2>
 
@@ -1377,13 +1456,13 @@ So yes, building trustworthy AI is difficult — but it’s becoming essential.<
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/nlp-foundation/">LLM Series - Part 1 - Important Concepts in NLP</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/diffusion-foundation/">Foundation of Diffusion Models</a>
   </li>
 
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/diffusion-foundation/">Foundation of Diffusion Models</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/nlp-foundation/">LLM Series - Part 1 - Important Concepts in NLP</a>
   </li>
 
   
