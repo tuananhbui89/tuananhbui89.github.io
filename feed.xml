@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-10-22T18:34:12+11:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.2">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-10-24T17:13:22+11:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
 </subtitle><entry><title type="html">Less is More - Recursive Reasoning with Tiny Networks</title><link href="https://tuananhbui89.github.io/blog/2025/tiny-recursive-reasoning/" rel="alternate" type="text/html" title="Less is More - Recursive Reasoning with Tiny Networks" /><published>2025-10-14T00:00:00+11:00</published><updated>2025-10-14T00:00:00+11:00</updated><id>https://tuananhbui89.github.io/blog/2025/tiny-recursive-reasoning</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2025/tiny-recursive-reasoning/"><![CDATA[<h2 id="about-the-paper">About the paper</h2>
 
 <h2 id="implementation">Implementation</h2>
@@ -2053,7 +2053,7 @@ Imagine dropping a blob of ink into a glass of water:</p>
   <p>Brownian motion <strong>describes the random movement</strong> of tiny particles (like pollen grains in water) due to <strong>collisions with molecules</strong>. This randomness is similar to how noise is added in diffusion models.</p>
 </blockquote>
 
-<h3 id="advantages-of-diffusion-models">Advantages of Diffusion Models</h3>
+<h3 id="advantages-of-diffusion-models-and-the-trade-offs">Advantages of Diffusion Models and the Trade-offs</h3>
 
 <p>Diffusion models offer several key advantages over traditional generative models like GANs and VAEs:</p>
 
@@ -2068,29 +2068,89 @@ Imagine dropping a blob of ink into a glass of water:</p>
     <p><strong>Sample Diversity</strong>: Similar to VAEs, diffusion models maximize likelihood which ensures coverage of all modes in the training dataset. This leads to more diverse outputs compared to GANs which can suffer from mode collapse.</p>
   </li>
   <li>
-    <p><strong>Flexible Architecture</strong>: The multi-step denoising process enables additional functionalities like inpainting or image-to-image generation by manipulating the input noise, without requiring architectural changes.</p>
-  </li>
-  <li>
-    <p><strong>Consistent Quality</strong>: The gradual denoising process is more robust and consistent compared to GANs where quality can vary significantly between samples.</p>
+    <p><strong>Guidance Ability</strong>: The generation process of Diffusion models can be guided by external conditions, such as text prompts, images, or other modalities. While the conditional generation can also be possible with VAEs or GANs, the guidance ability of Diffusion models is more flexible, thanks to (1) the multi-step nature of the generation process, that can generate samples in a coarse-to-fine manner, and (2) the separable between the control signal (through the cross-attention layers) and the data diversity (through prior Gaussian distribution), making the concept space more detachable from the data manifold. You can unlearn (machine unlearning) a specific concept or inject a new concept (personalization) without hurting too much the other concepts or changing model architecture.</p>
   </li>
 </ol>
 
-<p>The main trade-off is generation speed - diffusion models require multiple neural network passes to generate samples, making them slower than single-pass models like GANs and VAEs. However, various sampling optimization techniques have been developed to significantly reduce this computational overhead.</p>
+<p>However, diffusion models still have some trade-offs, but have been greatly mitigated by the massive research efforts in the community.</p>
 
-<h3 id="disadvantages-of-diffusion-models">Disadvantages of Diffusion Models</h3>
+<p>The main trade-off is generation speed - diffusion models require multiple neural network passes to generate samples, making them slower than single-pass models like GANs and VAEs. However, various sampling optimization techniques have been developed to significantly reduce this computational overhead, such as <a href="https://arxiv.org/abs/2202.00512">Diffusion Distillation</a> or <a href="https://arxiv.org/abs/2303.01469">Consistency Models</a>, that can generate samples even in a <a href="https://arxiv.org/abs/2311.18828">single step</a>.</p>
 
-<p>While diffusion models have significant advantages, they also come with some trade-offs:</p>
+<p>Another trade-off is the training complexity, as it requires to cover all diffusion steps to train the model, which is multiple times expensive than training a single-step model.</p>
+
+<h3 id="a-brief-history-of-diffusion-models-and-their-variants">A Brief History of Diffusion Models and Their Variants</h3>
+
+<p>Before diffusion models took over, the field of <em>generative modeling</em> was dominated by two major families: <strong>VAEs</strong> and <strong>GANs</strong>, where their glory era spans from 2014 until 2020.</p>
+
+<p><strong>Variational Autoencoders (VAEs)</strong>, introduced by <a href="https://arxiv.org/abs/1312.6114">Kingma and Welling (2013)</a>, were the first deep generative models with a solid probabilistic foundation. They use <strong>variational inference</strong> and the <strong>reparameterization trick</strong> to learn a latent space that allows smooth interpolation and sampling:</p>
+
+\[z \sim q_\phi(z|x), \quad x \sim p_\theta(x|z)\]
+
+<p>VAEs are elegant and interpretable, but their samples often appeared <strong>blurry</strong> due to the Gaussian decoder assumption.</p>
+
+<p><strong>Generative Adversarial Networks (GANs)</strong>, proposed by <a href="https://arxiv.org/abs/1406.2661">Goodfellow et al. (2014)</a>, took a completely different path — framing generation as a <strong>two-player game</strong> between a generator \(G\) and discriminator \(D\):</p>
+
+\[\min_G \max_D \; \mathbb{E}_{x \sim p_{\text{data}}}[\log D(x)] + \mathbb{E}_{z \sim p(z)}[\log (1 - D(G(z)))]\]
+
+<p>GANs quickly dominated image generation, producing strikingly sharp and realistic results. Yann LeCun famously called GANs <strong>“the most interesting idea in the last 10 years in machine learning.”</strong></p>
+
+<p>However, GANs were notoriously <strong>hard to train</strong> (mode collapse, instability), and VAEs struggled with <strong>sample quality</strong>.</p>
+
+<p><strong>The Roots: Score-Based Generative Modeling</strong></p>
+
+<p>The foundation of diffusion models lies in score-based generative modeling, which began with <a href="https://www.jmlr.org/papers/volume6/hyvarinen05a/hyvarinen05a.pdf">Hyvärinen, Aapo, and Peter Dayan. “Estimation of non-normalized statistical models by score matching.”</a> in 2005, where the first time proposed the score matching loss to estimate the score function \(\nabla_x \log p(x)\) of the data distribution rather than modeling the data distribution \(p(x)\) directly.</p>
+
+\[\mathcal{L}_{ScoreMatching}(\theta) = \mathbb{E}_{x} \left[ \| s_\theta(x) - \nabla_x \log p(x) \|^2 \right]\]
+
+<p>This idea shifted focus from learning explicit probabilities to learning <strong>how to move data toward higher density regions</strong>.</p>
+
+<p><strong>Denoising Score Matching (DSM)</strong></p>
+
+<p>Building on this, <em>Vincent (2011)</em> proposed <strong>Denoising Score Matching (DSM)</strong>, observing that learning from <em>noisy data</em> is more stable.<br />
+By perturbing the data with a known noise distribution, and then learning how to reverse the noise to get the clean data, the goal now is to estimate the score function \(\nabla_x \log p(x)\) from the noisy data.</p>
+
+\[\mathcal{L}_{DSM}(\theta) = \mathbb{E}_{t, x_0 \sim p(x_0), x_t \sim q(x_t \mid x_0)} \left[ \| s_\theta(x_t, t) - \nabla_{x_t} \log q(x_t \mid x_0) \|^2 \right]\]
+
+<p>where \(q(x_t \mid x_0)\) is the noise distribution, and \(x_0\) is the clean data. This <strong>denoising</strong> process later becomes the <strong>core mechanism</strong> of modern diffusion models.</p>
+
+<p><strong>Diffusion Probabilistic Models (Sohl-Dickstein et al., 2015)</strong></p>
+
+<p>Sohl-Dickstein et al., 2015 – “Deep Unsupervised Learning using Nonequilibrium Thermodynamics” introduced Diffusion Probabilistic Models (DPM), inspired by nonequilibrium thermodynamics, with forward diffusion process gradually adding Gaussian noise to the data, and reverse diffusion process learns to denoise step by step. This was the first formalization of <em>iterative denoising as generation</em>. However, at the time, these models did not work well on large-scale datasets and did not get much attention from the community.</p>
+
+<p><strong>The Modern Rebirth: DDPM (Ho, Jain, Abbeel, 2020)</strong></p>
+
+<p>Diffusion Models rebirth in 2020 with the introduction of DDPM (Denoising Diffusion Probabilistic Models) (Ho, Ajay, Abbeel) at NeurIPS 2020, reintroducing and refining Sohl-Dickstein’s idea with modern deep learning tools. Crucial improvements include simplified training objective equivalent to denoising score matching, reparameterization trick to predict the noise using a neural network, and demonstration on large-scale datasets with high-quality image comparable to GANs.</p>
+
+<p>One year earlier, at NeurIPS 2019, Song and Ermon also reintroduced the idea of Hyvärinen et al., 2005 and Vincent 2011, with a novel sampling algorithm called <strong>Langevin Dynamics</strong> that allows to sample from the data distribution using the score function.</p>
+
+\[x_{t-1} = x_t + \epsilon \nabla_x \log p_{t}(x_t) + \sqrt{2\epsilon} z\]
+
+<p>where \(\epsilon\) is a small positive constant and \(z \sim \mathcal{N}(0, I)\) is a standard Gaussian noise.</p>
+
+<p><strong>The Unified View: Score-Based SDEs (Song et al., 2021)</strong></p>
+
+<p>At ICLR 2021, <em>Song et al.</em> introduced<br />
+<strong>“Score-Based Generative Modeling through Stochastic Differential Equations”</strong>,<br />
+which unified all previous methods — score matching, DDPM, and DDIM — under one continuous-time framework.</p>
+
+<p>They showed that diffusion models correspond to solving an SDE:</p>
+
+\[dx_t = f(x_t, t)\,dt + g(t)\,dw_t\]
+
+<p>and its reverse-time counterpart uses the learned score ( \nabla_x \log p_t(x) ).<br />
+This framework established that:</p>
 
 <ul>
-  <li>Slow Sampling: The reverse process requires multiple denoising steps, making inference slower compared to GANs.</li>
-  <li>Compute Intensive: Training requires large amounts of data and computational power.</li>
-  <li>Memory Usage: They require storing multiple intermediate noise distributions, making them more memory-intensive.</li>
-  <li>Complex Implementation: The multi-step nature of diffusion models makes them more complex to implement compared to single-step models.</li>
+  <li><strong>DDPM</strong> is a discrete stochastic version.</li>
+  <li><strong>DDIM</strong> is a deterministic ODE version.</li>
+  <li><strong>Score-based models</strong> are equivalent up to reparameterization.</li>
 </ul>
+
+<p>Diffusion models succeeded where VAEs were blurry and GANs were unstable. They combined the best of both worlds - the training stability of VAEs and the sample quality of GANs. Together, these advances reshaped the landscape of generative modeling — leading to today’s foundation models like <strong>Stable Diffusion</strong> and <strong>DALL·E 3</strong>, which trace their roots back to <em>score matching in 2005</em>.</p>
 
 <h2 id="mathematical-foundation">Mathematical Foundation</h2>
 
-<p>Diffusion models are built on a deep interplay between <strong>differential equations</strong>, <strong>probability theory</strong>, and <strong>variational inference</strong>. To understand why the model works, we need to trace how these ideas connect: from describing how systems evolve over time, to modeling probability densities, to designing trainable objectives.</p>
+<p>Diffusion models are built on a deep interplay between <strong>differential equations</strong>, <strong>probability theory</strong>, and <strong>variational inference</strong>. To understand why the model works, we need to trace how these ideas connect: from describing how systems evolve over time, to modeling probability densities, to designing trainable objectives. While it seems complicated at first glance, the more I dive into it, the more I realize the beauty and elegance of Diffusion Models.</p>
 
 <h3 id="differential-equations-odes-and-sdes">Differential Equations: ODEs and SDEs</h3>
 
