@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <!-- Head -->
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    <!-- Metadata, OpenGraph and Schema.org -->
+    
+
+    <!-- Standard metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>CS336 Lecture 7 - Parallelism | Tuan-Anh  Bui</title>
+    <meta name="author" content="Tuan-Anh  Bui">
+    <meta name="description" content="AI Summary of CS336 Lecture">
+    <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
+
+
+    <!-- Bootstrap & MDB -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+    <!-- Bootstrap Table -->
+    <link defer rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+
+    <!-- Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
+
+    
+
+    <!-- Styles -->
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
+    
+    <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+    <link rel="canonical" href="https://tuananhbui89.github.io/blog/2025/cs336-lec07/">
+
+    <!-- Dark Mode -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark">
+    <script src="/assets/js/theme.js?96d6b3e1c3604aca8b6134c7afdd5db6"></script>
+    <script src="/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script>
+    
+
+  </head>
+
+  <!-- Body -->
+  <body class="fixed-top-nav ">
+
+    <!-- Header -->
+    <header>
+
+      <!-- Nav Bar -->
+      <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top">
+        <div class="container">
+          <a class="navbar-brand title font-weight-lighter" href="/"><span class="font-weight-bold">Tuan-Anh </span>Bui</a>
+          <!-- Navbar Toggle -->
+          <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar top-bar"></span>
+            <span class="icon-bar middle-bar"></span>
+            <span class="icon-bar bottom-bar"></span>
+          </button>
+
+          <div class="collapse navbar-collapse text-right" id="navbarNav">
+            <ul class="navbar-nav ml-auto flex-nowrap">
+
+              <!-- About -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/">about</a>
+              </li>
+              
+              <!-- Blog -->
+              <li class="nav-item active">
+                <a class="nav-link" href="/blog/">blog<span class="sr-only">(current)</span></a>
+              </li>
+
+              <!-- Other pages -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/publications/">publications</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/projects/">projects</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/repositories/">repositories</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/teaching/"></a>
+              </li>
+
+              <!-- Toogle theme mode -->
+              <li class="toggle-container">
+                <button id="light-toggle" title="Change theme">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Scrolling Progress Bar -->
+      <progress id="progress" value="0">
+        <div class="progress-container">
+          <span class="progress-bar"></span>
+        </div>
+      </progress>
+    </header>
+
+
+    <!-- Content -->
+    <div class="container mt-5">
+      
+        <!-- _layouts/post.html -->
+<!-- Page/Post style -->
+<style type="text/css">
+  
+</style>
+
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">CS336 Lecture 7 - Parallelism</h1>
+    <p class="post-meta">December 8, 2025</p>
+    <p class="post-tags">
+      <a href="/blog/2025"> <i class="fas fa-calendar fa-sm"></i> 2025 </a>
+        ·  
+        <a href="/blog/tag/genai">
+          <i class="fas fa-hashtag fa-sm"></i> genai</a>  
+          <a href="/blog/tag/llm">
+          <i class="fas fa-hashtag fa-sm"></i> llm</a>  
+          <a href="/blog/tag/tutorial">
+          <i class="fas fa-hashtag fa-sm"></i> tutorial</a>  
+          <a href="/blog/tag/reading">
+          <i class="fas fa-hashtag fa-sm"></i> reading</a>  
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    
+    <div id="table-of-contents">
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#lecture-overview-and-objectives">Lecture overview and objectives</a></li>
+<li class="toc-entry toc-h1"><a href="#motivation-for-multi-machine-scaling-from-compute-requirements">Motivation for multi-machine scaling from compute requirements</a></li>
+<li class="toc-entry toc-h1"><a href="#memory-scaling-motivates-model-sharding-across-devices">Memory scaling motivates model sharding across devices</a></li>
+<li class="toc-entry toc-h1"><a href="#hardware-hierarchy-and-interconnect-tiers-influence-parallelization-choices">Hardware hierarchy and interconnect tiers influence parallelization choices</a></li>
+<li class="toc-entry toc-h1"><a href="#collective-communication-primitives-and-their-equivalences">Collective communication primitives and their equivalences</a></li>
+<li class="toc-entry toc-h1"><a href="#differences-between-gpu-and-tpu-networking-and-implications-for-collectives">Differences between GPU and TPU networking and implications for collectives</a></li>
+<li class="toc-entry toc-h1"><a href="#data-center-as-the-new-unit-of-compute-and-collective-centric-performance-reasoning">Data center as the new unit of compute and collective-centric performance reasoning</a></li>
+<li class="toc-entry toc-h1"><a href="#three-high-level-parallelism-axes-data-model-and-activation">Three high-level parallelism axes: data, model, and activation</a></li>
+<li class="toc-entry toc-h1"><a href="#naive-data-parallelism-implements-synchronous-sgd-with-full-parameter-replication">Naive data parallelism implements synchronous SGD with full-parameter replication</a></li>
+<li class="toc-entry toc-h1"><a href="#data-parallel-tradeoffs-compute-saturation-versus-communication-and-memory-replication">Data-parallel tradeoffs: compute saturation versus communication and memory replication</a></li>
+<li class="toc-entry toc-h1"><a href="#optimizer-state-explosion-and-its-impact-on-memory">Optimizer-state explosion and its impact on memory</a></li>
+<li class="toc-entry toc-h1"><a href="#zero-stage-1-optimizer-state-sharding-reduces-per-device-optimizer-memory-by-sharding-state">ZeRO stage 1 (optimizer state sharding) reduces per-device optimizer memory by sharding state</a></li>
+<li class="toc-entry toc-h1"><a href="#zero-stage-2-shards-gradients-incrementally-during-backward-pass-to-limit-peak-memory">ZeRO stage 2 shards gradients incrementally during backward pass to limit peak memory</a></li>
+<li class="toc-entry toc-h1"><a href="#zero-stage-3--fsdp-fully-shards-parameters-gradients-and-optimizer-state-with-on-demand-parameter-communication">ZeRO stage 3 / FSDP fully shards parameters, gradients, and optimizer state with on-demand parameter communication</a></li>
+<li class="toc-entry toc-h1"><a href="#practical-performance-of-zero-stages-and-memory-efficiency-examples">Practical performance of ZeRO stages and memory efficiency examples</a></li>
+<li class="toc-entry toc-h1"><a href="#batch-size-is-a-limited-resource-that-constrains-data-parallel-scalability">Batch size is a limited resource that constrains data parallel scalability</a></li>
+<li class="toc-entry toc-h1"><a href="#model-parallelism-partitions-model-state-across-devices-to-reduce-memory-and-activation-cost">Model parallelism partitions model state across devices to reduce memory and activation cost</a></li>
+<li class="toc-entry toc-h1"><a href="#pipeline-parallelism-partitions-layers-across-devices-and-exposes-pipeline-bubbles">Pipeline parallelism partitions layers across devices and exposes pipeline bubbles</a></li>
+<li class="toc-entry toc-h1"><a href="#zero-bubble-dual-pipelining-reduces-idle-time-by-rescheduling-weight-gradient-computations">Zero-bubble (dual) pipelining reduces idle time by rescheduling weight-gradient computations</a></li>
+<li class="toc-entry toc-h1"><a href="#tensor-parallelism-splits-large-matrix-multiplies-into-submatrices-and-uses-collective-sums">Tensor parallelism splits large matrix multiplies into submatrices and uses collective sums</a></li>
+<li class="toc-entry toc-h1"><a href="#comparing-pipeline-and-tensor-parallelism-and-common-combinations">Comparing pipeline and tensor parallelism and common combinations</a></li>
+<li class="toc-entry toc-h1"><a href="#activation-memory-is-dynamically-large-and-can-dominate-peak-memory-usage">Activation memory is dynamically large and can dominate peak memory usage</a></li>
+<li class="toc-entry toc-h1"><a href="#activation-memory-per-layer-formula-and-the-residual-straggler-terms-after-tensor-parallelism">Activation memory per-layer formula and the residual ‘straggler’ terms after tensor parallelism</a></li>
+<li class="toc-entry toc-h1"><a href="#sequence-parallel-activation-sharding-and-recomputation-minimize-activation-memory">Sequence-parallel (activation) sharding and recomputation minimize activation memory</a></li>
+<li class="toc-entry toc-h1"><a href="#additional-parallelism-variants-ring-context-attention-and-expert-sparse-parallelism">Additional parallelism variants: ring (context) attention and expert (sparse) parallelism</a></li>
+<li class="toc-entry toc-h1"><a href="#tradeoffs-summary-across-distributed-parallel-strategies">Tradeoffs summary across distributed-parallel strategies</a></li>
+<li class="toc-entry toc-h1"><a href="#batch-size-to-device-ratio-determines-which-hybrid-parallelism-is-optimal">Batch-size-to-device ratio determines which hybrid parallelism is optimal</a></li>
+<li class="toc-entry toc-h1"><a href="#practical-rule-of-thumb-for-multi-dimensional-parallelism-3d4d">Practical rule-of-thumb for multi-dimensional parallelism (3D/4D)</a></li>
+<li class="toc-entry toc-h1"><a href="#case-studies-megatron-lm-deepseek-llama-3-and-tpu-based-examples">Case studies: Megatron-LM, DeepSeek, LLaMA 3, and TPU-based examples</a></li>
+<li class="toc-entry toc-h1"><a href="#operational-challenges-at-scale-including-hardware-failures-and-data-integrity">Operational challenges at scale including hardware failures and data integrity</a></li>
+<li class="toc-entry toc-h1"><a href="#final-synthesis-combine-parallelism-axes-and-follow-simple-rules-of-thumb">Final synthesis: combine parallelism axes and follow simple rules of thumb</a></li>
+</ul>
+    </div>
+    <hr>
+    
+    <div id="markdown-content">
+      <div style="display: flex; justify-content: center;">
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/l1RJcDjzK8M" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen="">
+    </iframe>
+</div>
+
+<h1 id="lecture-overview-and-objectives">Lecture overview and objectives</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/00-00-48-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/00-00-48-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/00-00-48-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/00-00-48.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The lecture introduces <strong>multi-machine optimization</strong> for training very large machine learning models, focusing on <strong>parallelism across machines</strong> to address compute and memory constraints.<br></p>
+
+<p>It reframes the problem as moving beyond single-GPU throughput optimization to using <strong>multiple servers and accelerators</strong>, and stresses that <strong>communication patterns</strong> and <strong>hardware topology</strong> critically determine which parallelization techniques are effective.<br></p>
+
+<p>Planned coverage:</p>
+<ul>
+  <li>
+<strong>Networking basics</strong> (interconnect hierarchies and their costs)</li>
+  <li>
+<strong>Parallelization paradigms</strong> (data, model, activation/sequence axes)</li>
+  <li>
+<strong>Case studies</strong> and practical heuristics for combining techniques to fit models that do not fit on a single GPU while maximizing throughput and respecting memory limits<br>
+</li>
+</ul>
+
+<p>Objective: combine different parallelization strategies to train models that exceed single-GPU capacity while maximizing throughput and honoring memory limits.<br></p>
+
+<hr>
+
+<h1 id="motivation-for-multi-machine-scaling-from-compute-requirements">Motivation for multi-machine scaling from compute requirements</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/00-02-09-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/00-02-09-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/00-02-09-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/00-02-09.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Large-scale language models require aggregate compute that outpaces single-GPU FLOPS growth, so <strong>distributed multi-machine systems</strong> are necessary to reach exascale-class training throughput.<br></p>
+
+<p>Key points:</p>
+<ul>
+  <li>High-end supercomputers demonstrate that state-of-the-art training requires distributing compute across many nodes rather than waiting for single-device advances.</li>
+  <li>Investing in <strong>multi-node parallelism</strong> unlocks orders-of-magnitude more FLOPS than any single accelerator.<br>
+</li>
+</ul>
+
+<p>This compute motivation justifies the forthcoming discussion of distributed algorithms and system-level tradeoffs that enable large-model training.<br></p>
+
+<hr>
+
+<h1 id="memory-scaling-motivates-model-sharding-across-devices">Memory scaling motivates model sharding across devices</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/00-03-08-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/00-03-08-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/00-03-08-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/00-03-08.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Model parameter counts are growing faster than individual accelerator memory, so <strong>billions-parameter</strong> models routinely exceed a single GPU’s capacity and must be distributed across devices.<br></p>
+
+<p>Implications and strategies:</p>
+<ul>
+  <li>Accelerator memory increases slowly relative to model size → a hard constraint requiring <strong>sharding techniques</strong> for parameters, optimizer state, and activations.</li>
+  <li>Addressing <strong>memory scaling</strong> is as important as compute scaling: models need both capacity for parameters and working memory for optimizer state and activations.</li>
+  <li>Common strategies motivated by memory pressure: <strong>optimizer-state sharding</strong>, <strong>parameter sharding</strong>, activation management, and other memory-saving techniques.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="hardware-hierarchy-and-interconnect-tiers-influence-parallelization-choices">Hardware hierarchy and interconnect tiers influence parallelization choices</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/00-04-15-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/00-04-15-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/00-04-15-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/00-04-15.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Hardware topology creates a strong communication-performance gradient that drives placement decisions.<br></p>
+
+<p>Highlights:</p>
+<ul>
+  <li>
+<strong>Node-local interconnects</strong> (e.g., <strong>NVLink</strong>, <strong>NVSwitch</strong>) provide very high bandwidth and low latency between GPUs within a machine.</li>
+  <li>
+<strong>Inter-node links</strong> (e.g., <strong>HDR InfiniBand</strong>) are substantially slower; cross-rack or large-scale switches can be slower still.</li>
+  <li>Result: <strong>intra-node collectives</strong> are much cheaper than <strong>inter-node collectives</strong>, and performance can shift again beyond ~256 GPUs due to differing switch fabrics.<br>
+</li>
+</ul>
+
+<p>Design rule: place bandwidth-hungry synchronizations inside the fast connectivity domain and minimize or restructure communication across slower links. This explains rules of thumb like applying <strong>tensor-parallel</strong> techniques within a node and using <strong>data</strong> or <strong>pipeline parallelism</strong> across nodes.<br></p>
+
+<hr>
+
+<h1 id="collective-communication-primitives-and-their-equivalences">Collective communication primitives and their equivalences</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/00-06-47-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/00-06-47-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/00-06-47-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/00-06-47.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Distributed training communication cost can be modeled by counting collective primitives, because most parallel algorithms compose these operations.<br></p>
+
+<p>Common collectives (with short descriptions):</p>
+<ul>
+  <li>
+<strong>All-reduce</strong>: compute a global reduction (e.g., sum) and distribute the result to all ranks.</li>
+  <li>
+<strong>Broadcast</strong>: copy a single rank’s tensor to all ranks.</li>
+  <li>
+<strong>Reduce</strong>: gather and reduce inputs to a single rank.</li>
+  <li>
+<strong>All-gather</strong>: concatenate shards from all ranks into full tensors on every rank.</li>
+  <li>
+<strong>Reduce-scatter</strong>: perform a reduction and distribute different output shards to different ranks.<br>
+</li>
+</ul>
+
+<p>Practical note: in bandwidth-limited regimes, <strong>all-reduce</strong> ≈ <strong>reduce-scatter</strong> followed by <strong>all-gather</strong>, so counting these primitives gives a good first-order model for communication overhead in parallel training.<br></p>
+
+<hr>
+
+<h1 id="differences-between-gpu-and-tpu-networking-and-implications-for-collectives">Differences between GPU and TPU networking and implications for collectives</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/00-09-32-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/00-09-32-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/00-09-32-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/00-09-32.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Different accelerator/network architectures favor different communication patterns and therefore different parallel algorithms.<br></p>
+
+<p>Comparison:</p>
+<ul>
+  <li>
+<strong>GPU-based clusters</strong>: node-centric high-speed links plus slower inter-node fabrics → arbitrary communication patterns up to a scale.</li>
+  <li>
+<strong>TPU-style toroidal mesh</strong>: neighbor-to-neighbor high-bandwidth links favor locality and neighbor-based collective algorithms.<br>
+</li>
+</ul>
+
+<p>Implications:</p>
+<ul>
+  <li>
+<strong>Collective-heavy workloads</strong> can benefit from torus-like topologies at scale.</li>
+  <li>
+<strong>Heterogeneous or irregular communication</strong> patterns often favor GPU cluster fabrics with broader connectivity.<br>
+</li>
+</ul>
+
+<p>Choice of accelerator and network topology influences optimal system design and parallelism choices.<br></p>
+
+<hr>
+
+<h1 id="data-center-as-the-new-unit-of-compute-and-collective-centric-performance-reasoning">Data center as the new unit of compute and collective-centric performance reasoning</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/00-11-01-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/00-11-01-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/00-11-01-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/00-11-01.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>At datacenter scale, the unit of computation becomes the <strong>entire cluster</strong>, and scalable algorithms aim for linear scaling of both usable model size (memory) and aggregate compute with the number of devices.<br></p>
+
+<p>Design goals and modeling approach:</p>
+<ul>
+  <li>Achieve <strong>linear memory scaling</strong> (train larger models) and <strong>linear compute scaling</strong> (increase effective throughput).</li>
+  <li>Use collective-primitive counting as the primary performance model because many algorithms are built from those building blocks.<br>
+</li>
+</ul>
+
+<p>Reasoning about the number and type of collectives is sufficient for estimating bandwidth-limited performance at scale.<br></p>
+
+<hr>
+
+<h1 id="three-high-level-parallelism-axes-data-model-and-activation">Three high-level parallelism axes: data, model, and activation</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/00-13-21-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/00-13-21-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/00-13-21-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/00-13-21.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Scaling strategies decompose into three fundamental axes: <strong>data parallelism</strong>, <strong>model parallelism</strong>, and <strong>activation (sequence) parallelism</strong>.<br></p>
+
+<p>Definitions:</p>
+<ul>
+  <li>
+<strong>Data parallelism</strong>: replicate parameters and shard minibatches across replicas; synchronize gradients.</li>
+  <li>
+<strong>Model parallelism</strong>: shard parameters across devices (e.g., pipeline or tensor parallelism); transfer activations between devices.</li>
+  <li>
+<strong>Activation (sequence) parallelism</strong>: shard activations across devices or time (sequence positions) to reduce activation memory.<br>
+</li>
+</ul>
+
+<p>Combining these axes provides the tools to jointly scale compute and memory while balancing communication, computation, and batch-size constraints.<br></p>
+
+<hr>
+
+<h1 id="naive-data-parallelism-implements-synchronous-sgd-with-full-parameter-replication">Naive data parallelism implements synchronous SGD with full-parameter replication</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/00-14-40-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/00-14-40-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/00-14-40-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/00-14-40.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Naive data parallelism workflow (synchronous):<br></p>
+
+<ol>
+  <li>Split each minibatch into M micro-batches and send one micro-batch to each device.</li>
+  <li>Place identical model replicas on each device and compute per-device gradients.</li>
+  <li>Synchronize gradients via an <strong>all-reduce</strong> across replicas.</li>
+  <li>Perform the parameter update on each replica.<br>
+</li>
+</ol>
+
+<p>Properties:</p>
+<ul>
+  <li>Near-linear compute scaling when each device receives a sufficiently large micro-batch to saturate compute.</li>
+  <li>Poor memory scaling because parameters and optimizer state are replicated on every device.</li>
+  <li>Communication overhead ≈ twice the model parameter size per update in bandwidth-limited all-reduce regimes.</li>
+  <li>Assumes sufficiently large global batch sizes to amortize synchronization costs.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="data-parallel-tradeoffs-compute-saturation-versus-communication-and-memory-replication">Data-parallel tradeoffs: compute saturation versus communication and memory replication</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/00-15-34-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/00-15-34-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/00-15-34-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/00-15-34.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Practical limits of naive data parallelism:<br></p>
+
+<ul>
+  <li>Good compute scaling only when micro-batches per device are large enough to utilize accelerators.</li>
+  <li>Communication cost grows with model size and occurs every synchronous step.</li>
+  <li>Memory scaling is unfavorable: every device stores full parameters and optimizer state (often multiple copies), which is problematic for optimizers like <strong>Adam</strong>.</li>
+  <li>Conclusion: naive data parallelism is simple and effective up to a point but insufficient when model+optimizer-state exceed single-device capacity or when communication dominates.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="optimizer-state-explosion-and-its-impact-on-memory">Optimizer-state explosion and its impact on memory</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/00-17-02-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/00-17-02-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/00-17-02-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/00-17-02.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Modern optimizers increase per-parameter memory requirements significantly.<br></p>
+
+<p>Details:</p>
+<ul>
+  <li>Optimizers like <strong>Adam</strong> require storing first and second moments and often <strong>master weights</strong>, which can multiply per-parameter memory by factors approaching <strong>eight</strong> compared to one parameter copy.</li>
+  <li>In mixed-precision training, master weights + gradients + moments can produce effective overheads on the order of <strong>~16 bytes per parameter</strong> in some implementations.</li>
+  <li>Because of this <strong>optimizer-state dominance</strong>, replicating parameters across devices is frequently infeasible for very large models; addressing optimizer-state memory is a prerequisite to multi-billion-parameter scaling.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="zero-stage-1-optimizer-state-sharding-reduces-per-device-optimizer-memory-by-sharding-state">ZeRO stage 1 (optimizer state sharding) reduces per-device optimizer memory by sharding state</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/00-20-34-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/00-20-34-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/00-20-34-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/00-20-34.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>ZeRO Stage 1</strong> shards optimizer-state tensors (e.g., Adam moments) across devices while still replicating parameters and gradients, reducing per-device memory without changing gradient semantics.<br></p>
+
+<p>Core mechanism (high-level steps):</p>
+<ol>
+  <li>Gradients are computed on all devices.</li>
+  <li>Use <strong>reduce-scatter</strong> to aggregate the summed gradients for each parameter shard onto its owning device.</li>
+  <li>The owning device updates its local shard with its local optimizer state.</li>
+  <li>Use <strong>all-gather</strong> to distribute updated parameter shards back to replicas.<br>
+</li>
+</ol>
+
+<p>Notes: in bandwidth-limited regimes this sequence (reduce-scatter → local update → all-gather) matches the communication cost of a traditional all-reduce but lowers memory by removing replicated optimizer state.<br></p>
+
+<hr>
+
+<h1 id="zero-stage-2-shards-gradients-incrementally-during-backward-pass-to-limit-peak-memory">ZeRO stage 2 shards gradients incrementally during backward pass to limit peak memory</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/00-26-06-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/00-26-06-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/00-26-06-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/00-26-06.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>ZeRO Stage 2</strong> extends stage 1 by also <strong>sharding gradients</strong> so no device materializes the full gradient vector, bounding peak memory usage.<br></p>
+
+<p>Key behavior:</p>
+<ul>
+  <li>During the backward pass, layers are processed sequentially and gradient contributions for a layer are immediately sent (via reductions) to the device that owns the corresponding parameter shard.</li>
+  <li>Once a layer’s gradients are communicated and incorporated, local gradient buffers are freed to keep memory low.</li>
+  <li>This <strong>streaming</strong> approach requires more frequent, fine-grained synchronization (layer-by-layer reduces and frees) but keeps the same total communication volume while lowering peak memory compared to stage 1.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="zero-stage-3--fsdp-fully-shards-parameters-gradients-and-optimizer-state-with-on-demand-parameter-communication">ZeRO stage 3 / FSDP fully shards parameters, gradients, and optimizer state with on-demand parameter communication</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/00-33-04-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/00-33-04-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/00-33-04-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/00-33-04.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>ZeRO Stage 3</strong> (fully-sharded data parallel; e.g., <strong>FSDP</strong>) shards parameters, gradients, and optimizer state so each device holds only its parameter shard.<br></p>
+
+<p>Runtime behavior and optimizations:</p>
+<ul>
+  <li>During forward/backward, parameters are requested and communicated <strong>on demand</strong> for local computation.</li>
+  <li>The runtime <strong>overlaps communication and computation</strong> by prefetching parameter shards before they are needed.</li>
+  <li>Operations occur at layer granularity using <strong>all-gather</strong> and <strong>reduce-scatter</strong>, and shards/gradients are freed immediately after use to minimize memory.<br>
+</li>
+</ul>
+
+<p>Trade-offs:</p>
+<ul>
+  <li>Stage 3 increases the number of collectives (roughly <strong>3×</strong> parameter size total bandwidth work vs naive all-reduce’s ~<strong>2×</strong>), but careful overlap and pipelining keep runtime overhead low in practice while delivering maximal per-device memory savings.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="practical-performance-of-zero-stages-and-memory-efficiency-examples">Practical performance of ZeRO stages and memory efficiency examples</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/00-40-01-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/00-40-01-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/00-40-01-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/00-40-01.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Summary of <strong>ZeRO</strong> trade-offs:<br></p>
+
+<ul>
+  <li>
+<strong>Stage 1</strong>: memory wins with no extra bandwidth cost compared to standard all-reduce.</li>
+  <li>
+<strong>Stage 2</strong>: further reduces peak memory via layer-granularity synchronization at the cost of more frequent collects.</li>
+  <li>
+<strong>Stage 3 (FSDP)</strong>: largest per-device memory reduction but higher total collective count; practical overlap/pipelining often keeps runtime overhead modest.<br>
+</li>
+</ul>
+
+<p>Practical consequence: full-sharding can enable orders-of-magnitude larger model fits on a fixed node count (e.g., enabling tens of billions of parameters where naive replication would not fit), making ZeRO variants the standard approach when memory is the bottleneck and the extra implementation/communication complexity is acceptable.<br></p>
+
+<hr>
+
+<h1 id="batch-size-is-a-limited-resource-that-constrains-data-parallel-scalability">Batch size is a limited resource that constrains data parallel scalability</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/00-43-51-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/00-43-51-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/00-43-51-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/00-43-51.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Global batch size constrains how many devices can be used under data parallelism because each device must process at least one micro-batch.<br></p>
+
+<p>Important points:</p>
+<ul>
+  <li>Data parallelism cannot exceed global batch size without <strong>gradient accumulation</strong>.</li>
+  <li>There are <strong>diminishing returns</strong>: beyond a critical batch size, the marginal benefit of increasing batch size (variance reduction per optimization step) drops sharply.</li>
+  <li>Treat batch size as a constrained resource to allocate across parallelism axes.</li>
+  <li>
+<strong>Gradient accumulation</strong> trades additional temporal computation for an effectively larger batch size when memory prevents larger per-step batches.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="model-parallelism-partitions-model-state-across-devices-to-reduce-memory-and-activation-cost">Model parallelism partitions model state across devices to reduce memory and activation cost</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/00-45-23-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/00-45-23-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/00-45-23-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/00-45-23.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Model parallelism</strong> places different parameters on different devices (rather than replicating them), transferring activations between devices instead of parameters.<br></p>
+
+<p>Main categories:</p>
+<ul>
+  <li>
+<strong>Pipeline parallelism</strong>: cut the network along depth, assign contiguous layer groups to devices, pass activations forward/backward.</li>
+  <li>
+<strong>Tensor parallelism</strong>: split large matrix multiplies across devices and perform partial sums via collectives.<br>
+</li>
+</ul>
+
+<p>Use cases: model or activation sizes exceed single-device capacity; often combined with data parallelism to achieve both memory and throughput scaling.<br></p>
+
+<hr>
+
+<h1 id="pipeline-parallelism-partitions-layers-across-devices-and-exposes-pipeline-bubbles">Pipeline parallelism partitions layers across devices and exposes pipeline bubbles</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/00-47-33-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/00-47-33-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/00-47-33-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/00-47-33.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Pipeline parallelism</strong> assigns contiguous layer groups to different devices and streams micro-batches through the device pipeline so stages can work concurrently.<br></p>
+
+<p>Practical considerations:</p>
+<ul>
+  <li>Naive scheduling produces <strong>pipeline bubbles</strong> (idle periods) because stages wait for upstream activations, causing poor utilization when micro-batch counts are small relative to pipeline stages.</li>
+  <li>Mitigations: <strong>micro-batching</strong> (split minibatch into micro-batches) and scheduling strategies like <strong>1F1B</strong> to overlap forward/backward passes.</li>
+  <li>Pipeline efficiency remains sensitive to micro-batch size and scheduling complexity.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="zero-bubble-dual-pipelining-reduces-idle-time-by-rescheduling-weight-gradient-computations">Zero-bubble (dual) pipelining reduces idle time by rescheduling weight-gradient computations</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/00-52-14-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/00-52-14-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/00-52-14-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/00-52-14.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Advanced pipeline optimizations hide idle time by scheduling independent work into pipeline bubbles.<br></p>
+
+<p>Techniques and trade-offs:</p>
+<ul>
+  <li>Split backward work into <strong>activation-backpropagation</strong> and <strong>weight-gradient computation</strong>; weight-gradient updates are independent and can fill original pipeline bubbles.</li>
+  <li>Methods like <strong>dual-pipelining</strong> put weight-gradient calculations into otherwise idle slots to improve utilization.</li>
+  <li>These techniques increase implementation complexity: manipulating autodiff order, maintaining fine-grained task queues, and ensuring correctness under dynamic scheduling—powerful but operationally costly.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="tensor-parallelism-splits-large-matrix-multiplies-into-submatrices-and-uses-collective-sums">Tensor parallelism splits large matrix multiplies into submatrices and uses collective sums</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/00-57-43-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/00-57-43-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/00-57-43-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/00-57-43.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Tensor parallelism</strong> partitions the width (or height) of large linear transforms across devices: each device holds submatrices, computes local partial results, and uses collectives (typically <strong>all-reduce</strong>) to sum partial activations or gradients.<br></p>
+
+<p>Characteristics:</p>
+<ul>
+  <li>Parallelizes dominant linear algebra kernels and avoids pipeline bubbles because each layer runs in parallel across devices.</li>
+  <li>Requires very high interconnect <strong>bandwidth</strong> and low <strong>latency</strong>.</li>
+  <li>Most efficient <strong>within a single node</strong> (e.g., up to 8 GPUs over NVLink/NVSwitch) and shows rapidly diminishing throughput across slower inter-node links.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="comparing-pipeline-and-tensor-parallelism-and-common-combinations">Comparing pipeline and tensor parallelism and common combinations</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/01-01-05-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/01-01-05-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/01-01-05-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/01-01-05.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Combining parallelism in real systems:<br></p>
+
+<ul>
+  <li>
+<strong>Tensor parallelism</strong>: applied inside nodes to split matrix computation.</li>
+  <li>
+<strong>Pipeline parallelism</strong> (and/or model sharding): applied across nodes to stretch model capacity.</li>
+  <li>
+<strong>Data parallelism</strong>: layered on top to scale aggregate throughput.<br>
+</li>
+</ul>
+
+<p>Choice depends on topology, available batch size, and implementation complexity; hybrid strategies are the practical norm.<br></p>
+
+<hr>
+
+<h1 id="activation-memory-is-dynamically-large-and-can-dominate-peak-memory-usage">Activation memory is dynamically large and can dominate peak memory usage</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/01-03-26-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/01-03-26-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/01-03-26-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/01-03-26.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Activation tensors accumulate during the forward pass and are freed during backward, producing dynamic memory profiles where peak memory often occurs mid-backward.<br></p>
+
+<p>Consequences and mitigations:</p>
+<ul>
+  <li>For deep or long-sequence models, <strong>activation storage</strong> can dominate per-device memory; parameter/optimizer sharding alone does not remove this pressure.</li>
+  <li>Techniques to manage activation memory: <strong>activation sharding</strong> (sequence/position partitioning), <strong>recomputation</strong> (trade extra compute for reduced storage), and <strong>attention-specific optimizations</strong> (e.g., <strong>flash attention</strong>).<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="activation-memory-per-layer-formula-and-the-residual-straggler-terms-after-tensor-parallelism">Activation memory per-layer formula and the residual ‘straggler’ terms after tensor parallelism</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/01-07-03-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/01-07-03-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/01-07-03-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/01-07-03.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Per-layer activation memory can be approximated by the expression <strong>SBH<em>34 + 5</em>A*S/H</strong>, where:</p>
+<ul>
+  <li>
+<strong>S</strong> = sequence length</li>
+  <li>
+<strong>B</strong> = batch size</li>
+  <li>
+<strong>H</strong> = hidden size</li>
+  <li>
+<strong>A</strong> = attention-cost factor<br>
+</li>
+</ul>
+
+<p>Interpretation:</p>
+<ul>
+  <li>The first term corresponds to MLP and pointwise costs; the second term captures quadratic attention costs.</li>
+  <li>
+<strong>Tensor parallelism</strong> divides many matrix-related activation terms by the tensor-parallel factor <strong>T</strong>, but pointwise operations (layer norms, dropouts, small residuals) create a residual <strong>SBH*10</strong>-like term that does not split cleanly and scales with model size.</li>
+  <li>To reduce these straggler terms, apply <strong>sequence-parallel</strong> techniques (partition activations across sequence positions) and <strong>attention recomputation</strong> (e.g., flash attention) to lower quadratic memory footprints.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="sequence-parallel-activation-sharding-and-recomputation-minimize-activation-memory">Sequence-parallel (activation) sharding and recomputation minimize activation memory</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/01-09-55-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/01-09-55-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/01-09-55-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/01-09-55.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Sequence-parallel and recomputation techniques:<br></p>
+
+<ul>
+  <li>
+<strong>Sequence parallelism</strong>: partition sequence positions across devices so pointwise ops act on disjoint slices; requires <strong>all-gather</strong> / <strong>reduce-scatter</strong> at specific points to assemble/distribute tensors for dense ops.</li>
+  <li>
+<strong>Activation recomputation</strong>: trade extra FLOPS for memory by recomputing intermediate activations on demand instead of storing them.</li>
+  <li>
+<strong>Attention optimizations</strong> (flash attention): reduce S^2 memory and compute costs.<br>
+</li>
+</ul>
+
+<p>Combining tensor parallelism, sequence parallelism, and recomputation approaches a near-minimal activation memory lower bound (roughly <strong>SBH*34/T</strong> after partitioning), enabling much larger effective models per device.<br></p>
+
+<hr>
+
+<h1 id="additional-parallelism-variants-ring-context-attention-and-expert-sparse-parallelism">Additional parallelism variants: ring (context) attention and expert (sparse) parallelism</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/01-10-49-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/01-10-49-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/01-10-49-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/01-10-49.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Variants addressing specific bottlenecks:<br></p>
+
+<ul>
+  <li>
+<strong>Ring / context-parallel attention</strong>: computes attention by circulating keys/values in a ring so each device handles a subset of queries and receives streamed key-value tiles; reduces per-device memory by using an online tiling pattern (good for long-context attention).</li>
+  <li>
+<strong>Expert parallelism (Mixture of Experts, MoE)</strong>: partitions MLP capacity into many experts across devices and activates only a sparse subset per input. It resembles tensor parallelism but requires <strong>routing</strong> mechanisms and <strong>load balancing</strong> because routing is input-dependent and communication patterns are irregular.<br>
+</li>
+</ul>
+
+<p>These variants tackle long-context memory (ring attention) and parameter-count scaling with sparsity (MoE), but introduce routing/communication complexity.<br></p>
+
+<hr>
+
+<h1 id="tradeoffs-summary-across-distributed-parallel-strategies">Tradeoffs summary across distributed-parallel strategies</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/01-12-54-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/01-12-54-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/01-12-54-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/01-12-54.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Trade-offs across parallelization strategies:<br></p>
+
+<ul>
+  <li>
+<strong>Data-parallel (DDP)</strong>: simple and bandwidth-friendly but replicates memory.</li>
+  <li>
+<strong>ZeRO / FSDP</strong>: reduces memory at modest bandwidth cost and integrates cleanly with existing models.</li>
+  <li>
+<strong>Pipeline parallelism</strong>: reduces parameter/activation memory per device and can be spread across nodes, but consumes batch-size and is complex to implement.</li>
+  <li>
+<strong>Tensor parallelism</strong>: scales matrix computation without consuming batch-size but requires high-bandwidth, low-latency interconnects and frequent collectives.<br>
+</li>
+</ul>
+
+<p>Selecting a hybrid strategy requires evaluating: network topology, per-device memory limits, global batch-size constraints, and operational cost of implementation and maintenance.<br></p>
+
+<hr>
+
+<h1 id="batch-size-to-device-ratio-determines-which-hybrid-parallelism-is-optimal">Batch-size-to-device ratio determines which hybrid parallelism is optimal</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/01-15-36-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/01-15-36-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/01-15-36-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/01-15-36.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Simple performance model mapping global batch size to parallelism mixes:<br></p>
+
+<ul>
+  <li>
+<strong>Tiny batch size per device</strong>: communication dominates; no technique is efficient.</li>
+  <li>
+<strong>Moderate batch sizes</strong>: combine <strong>ZeRO/FSDP</strong> with <strong>tensor parallelism</strong> to reach compute-bound operation.</li>
+  <li>
+<strong>Large batch sizes</strong>: pure data parallelism (or ZeRO with data parallelism) suffices for high utilization.<br>
+</li>
+</ul>
+
+<p>Practical lever: increasing effective batch size via <strong>gradient accumulation</strong> trades wall-clock time for improved communication efficiency, so batch-size management is central when tuning parallelism for a hardware fleet.<br></p>
+
+<hr>
+
+<h1 id="practical-rule-of-thumb-for-multi-dimensional-parallelism-3d4d">Practical rule-of-thumb for multi-dimensional parallelism (3D/4D)</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/01-17-40-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/01-17-40-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/01-17-40-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/01-17-40.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>A practical sequence (heuristic) for combining parallelism:<br></p>
+
+<ol>
+  <li>Fit model and activations in memory using <strong>tensor parallelism</strong> first (apply up to the number of GPUs per node).</li>
+  <li>If needed, use <strong>ZeRO Stage 3 (FSDP)</strong> or <strong>pipeline parallelism</strong> across machines to further reduce per-device memory.</li>
+  <li>Scale aggregate throughput with <strong>data parallelism</strong> across many replicas.</li>
+  <li>If batch size is insufficient to hide pipeline latency, use <strong>gradient accumulation</strong> to increase effective batch size and reduce synchronization frequency.<br>
+</li>
+</ol>
+
+<p>This heuristic often yields near-linear aggregate throughput and provides a reproducible path for choosing which parallelism axes to use at each scale.<br></p>
+
+<hr>
+
+<h1 id="case-studies-megatron-lm-deepseek-llama-3-and-tpu-based-examples">Case studies: Megatron-LM, DeepSeek, LLaMA 3, and TPU-based examples</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/01-20-54-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/01-20-54-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/01-20-54-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/01-20-54.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Case study patterns from large-scale training papers and release notes:<br></p>
+
+<ul>
+  <li>
+<strong>Megatron-LM</strong>: tensor parallelism (commonly 1–8-way) combined with pipeline and data parallelism to scale from billions to trillions of parameters.</li>
+  <li>
+<strong>DeepSeek variants</strong>: mix tensor, sequence, pipeline, and ZeRO Stage 1.</li>
+  <li>
+<strong>LLaMA 3</strong>: practical combination of tensor parallelism (e.g., 8-way), pipeline stages, FSDP-like sharding, and context-parallel techniques for long-context phases.</li>
+  <li>
+<strong>TPU-based systems (e.g., GMA2)</strong>: leverage toroidal mesh networking to expand model-parallel extents.<br>
+</li>
+</ul>
+
+<p>These case studies validate earlier rules of thumb: practical systems almost always combine multiple parallelism axes tailored to hardware and workload.<br></p>
+
+<hr>
+
+<h1 id="operational-challenges-at-scale-including-hardware-failures-and-data-integrity">Operational challenges at scale including hardware failures and data integrity</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/01-23-46-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/01-23-46-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/01-23-46-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/01-23-46.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Operational risks and reliability concerns for large-scale distributed runs:<br></p>
+
+<ul>
+  <li>Common failures: GPU hardware failures, node maintenance interruptions, and <strong>silent data corruption</strong>. Production runs often see hundreds of interruptions.</li>
+  <li>Essential mechanisms: <strong>checkpointing</strong>, redundancy, validation, and observability to detect silent numerical corruption.</li>
+  <li>Operational robustness (fault tolerance, monitoring, and validation) is as important as algorithmic scaling when running multi-week, multi-thousand-GPU training campaigns.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="final-synthesis-combine-parallelism-axes-and-follow-simple-rules-of-thumb">Final synthesis: combine parallelism axes and follow simple rules of thumb</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec07/01-24-30-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec07/01-24-30-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec07/01-24-30-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec07/01-24-30.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Practical summary and topology-aware heuristics:<br></p>
+
+<ul>
+  <li>Combine <strong>data</strong>, <strong>model</strong> (tensor or pipeline), and <strong>activation</strong> (sequence) parallelism to balance limited resources—memory, bandwidth, compute, and batch size—while respecting hardware topology.</li>
+  <li>Heuristics: apply <strong>tensor parallelism</strong> within nodes; use <strong>ZeRO/pipeline</strong> to fit models across nodes; scale throughput with <strong>data parallelism</strong>; use <strong>sequence/activation sharding</strong> and <strong>recomputation</strong> to minimize activation memory.</li>
+  <li>Use <strong>gradient accumulation</strong> to trade time for larger effective batch sizes when necessary.</li>
+  <li>Implementation notes: careful overlap of communication and computation plus attention to operational robustness enable near-linear aggregate throughput in practice.<br>
+</li>
+</ul>
+
+<hr>
+
+
+    </div>
+  </article>
+
+
+  
+    
+    <br>
+    <hr>
+    <br>
+    <ul class="list-disc pl-8"></ul>
+
+    <!-- Adds related posts to the end of an article -->
+    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
+    <p class="mb-2">Here are some more articles you might like to read next:</p>
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs336-lec08/">CS336 Lecture 8 -  Parallelism - Part 2</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/diffusion-foundation/">The Foundations and Frontiers of Diffusion Models</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs336-lec04/">CS336 Lecture 4 - Mixture of experts</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/nlp-foundation/">LLM Series - Part 1 - Important Concepts in NLP</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs336-lec05/">CS336 Lecture 5 - GPUs</a>
+  </li>
+
+</div>
+
+      
+    </div>
+
+    <!-- Footer -->    
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        © Copyright 2025 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+
+      </div>
+    </footer>
+
+    <!-- JavaScripts -->
+    <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- Bootsrap & MDB scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    <!-- Masonry & imagesLoaded -->
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
+    
+  <!-- Medium Zoom JS -->
+  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/zoom.js"></script>
+
+  <!-- Bootstrap Table -->
+  <script defer src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+
+  <!-- Load Common JS -->
+  <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
+  <script defer src="/assets/js/common.js?acdb9690d7641b2f8d40529018c71a01"></script>
+  <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    <!-- MathJax -->
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        tags: 'ams'
+      }
+    };
+  </script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KGSMMS9MS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-7KGSMMS9MS');
+  </script>
+    
+
+<!-- Scrolling Progress Bar -->
+<script type="text/javascript">
+  /*
+   * This JavaScript code has been adapted from the article 
+   * https://css-tricks.com/reading-position-indicator/ authored by Pankaj Parashar, 
+   * published on the website https://css-tricks.com on the 7th of May, 2014.
+   * Couple of changes were made to the original code to make it compatible 
+   * with the `al-foio` theme.
+   */
+  const progressBar = $("#progress");
+  /*
+   * We set up the bar after all elements are done loading.
+   * In some cases, if the images in the page are larger than the intended
+   * size they'll have on the page, they'll be resized via CSS to accomodate
+   * the desired size. This mistake, however, breaks the computations as the
+   * scroll size is computed as soon as the elements finish loading.
+   * To account for this, a minimal delay was introduced before computing the
+   * values.
+   */
+  window.onload = function () {
+    setTimeout(progressBarSetup, 50);
+  };
+  /*
+   * We set up the bar according to the browser.
+   * If the browser supports the progress element we use that.
+   * Otherwise, we resize the bar thru CSS styling
+   */
+  function progressBarSetup() {
+    if ("max" in document.createElement("progress")) {
+      initializeProgressElement();
+      $(document).on("scroll", function() {
+        progressBar.attr({ value: getCurrentScrollPosition() });
+      });
+      $(window).on("resize", initializeProgressElement);
+    } else {
+      resizeProgressBar();
+      $(document).on("scroll", resizeProgressBar);
+      $(window).on("resize", resizeProgressBar);
+    }
+  }
+  /*
+   * The vertical scroll position is the same as the number of pixels that
+   * are hidden from view above the scrollable area. Thus, a value > 0 is
+   * how much the user has scrolled from the top
+   */
+  function getCurrentScrollPosition() {
+    return $(window).scrollTop();
+  }
+
+  function initializeProgressElement() {
+    let navbarHeight = $("#navbar").outerHeight(true);
+    $("body").css({ "padding-top": navbarHeight });
+    $("progress-container").css({ "padding-top": navbarHeight });
+    progressBar.css({ top: navbarHeight });
+    progressBar.attr({
+      max: getDistanceToScroll(),
+      value: getCurrentScrollPosition(),
+    });
+  }
+  /*
+   * The offset between the html document height and the browser viewport
+   * height will be greater than zero if vertical scroll is possible.
+   * This is the distance the user can scroll
+   */
+  function getDistanceToScroll() {
+    return $(document).height() - $(window).height();
+  }
+
+  function resizeProgressBar() {
+    progressBar.css({ width: getWidthPercentage() + "%" });
+  }
+  // The scroll ratio equals the percentage to resize the bar
+  function getWidthPercentage() {
+    return (getCurrentScrollPosition() / getDistanceToScroll()) * 100;
+  }
+</script>
+
+    
+  </body>
+</html>

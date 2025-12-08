@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <!-- Head -->
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    <!-- Metadata, OpenGraph and Schema.org -->
+    
+
+    <!-- Standard metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>CS336 Lecture 8 -  Parallelism - Part 2 | Tuan-Anh  Bui</title>
+    <meta name="author" content="Tuan-Anh  Bui">
+    <meta name="description" content="AI Summary of CS336 Lecture">
+    <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
+
+
+    <!-- Bootstrap & MDB -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+    <!-- Bootstrap Table -->
+    <link defer rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+
+    <!-- Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
+
+    
+
+    <!-- Styles -->
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
+    
+    <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+    <link rel="canonical" href="https://tuananhbui89.github.io/blog/2025/cs336-lec08/">
+
+    <!-- Dark Mode -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark">
+    <script src="/assets/js/theme.js?96d6b3e1c3604aca8b6134c7afdd5db6"></script>
+    <script src="/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script>
+    
+
+  </head>
+
+  <!-- Body -->
+  <body class="fixed-top-nav ">
+
+    <!-- Header -->
+    <header>
+
+      <!-- Nav Bar -->
+      <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top">
+        <div class="container">
+          <a class="navbar-brand title font-weight-lighter" href="/"><span class="font-weight-bold">Tuan-Anh </span>Bui</a>
+          <!-- Navbar Toggle -->
+          <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar top-bar"></span>
+            <span class="icon-bar middle-bar"></span>
+            <span class="icon-bar bottom-bar"></span>
+          </button>
+
+          <div class="collapse navbar-collapse text-right" id="navbarNav">
+            <ul class="navbar-nav ml-auto flex-nowrap">
+
+              <!-- About -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/">about</a>
+              </li>
+              
+              <!-- Blog -->
+              <li class="nav-item active">
+                <a class="nav-link" href="/blog/">blog<span class="sr-only">(current)</span></a>
+              </li>
+
+              <!-- Other pages -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/publications/">publications</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/projects/">projects</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/repositories/">repositories</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/teaching/"></a>
+              </li>
+
+              <!-- Toogle theme mode -->
+              <li class="toggle-container">
+                <button id="light-toggle" title="Change theme">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Scrolling Progress Bar -->
+      <progress id="progress" value="0">
+        <div class="progress-container">
+          <span class="progress-bar"></span>
+        </div>
+      </progress>
+    </header>
+
+
+    <!-- Content -->
+    <div class="container mt-5">
+      
+        <!-- _layouts/post.html -->
+<!-- Page/Post style -->
+<style type="text/css">
+  
+</style>
+
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">CS336 Lecture 8 -  Parallelism - Part 2</h1>
+    <p class="post-meta">December 8, 2025</p>
+    <p class="post-tags">
+      <a href="/blog/2025"> <i class="fas fa-calendar fa-sm"></i> 2025 </a>
+        ·  
+        <a href="/blog/tag/genai">
+          <i class="fas fa-hashtag fa-sm"></i> genai</a>  
+          <a href="/blog/tag/llm">
+          <i class="fas fa-hashtag fa-sm"></i> llm</a>  
+          <a href="/blog/tag/tutorial">
+          <i class="fas fa-hashtag fa-sm"></i> tutorial</a>  
+          <a href="/blog/tag/reading">
+          <i class="fas fa-hashtag fa-sm"></i> reading</a>  
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    
+    <div id="table-of-contents">
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#multi-gpu-training-requires-structuring-computation-to-minimize-inter-device-data-transfer">Multi-GPU training requires structuring computation to minimize inter-device data transfer.</a></li>
+<li class="toc-entry toc-h1"><a href="#lecture-content-is-organized-into-two-parts-collective-operations-implementation-and-distributed-training-strategies-with-benchmarking-and-code-examples">Lecture content is organized into two parts: collective operations implementation and distributed training strategies with benchmarking and code examples.</a></li>
+<li class="toc-entry toc-h1"><a href="#collective-operations-provide-standardized-multi-device-primitives-such-as-broadcast-scatter-gather-reduce-all-gather-and-reduce-scatter-for-coordinating-distributed-computation">Collective operations provide standardized multi-device primitives such as broadcast, scatter, gather, reduce, all-gather, and reduce-scatter for coordinating distributed computation.</a></li>
+<li class="toc-entry toc-h1"><a href="#gpu-system-topologies-form-a-hierarchy-sm-l1-hbm-pcie-nvlink-nvswitch-and-influence-where-and-how-collective-communication-is-executed">GPU system topologies form a hierarchy (SM L1, HBM, PCIe, NVLink, NVSwitch) and influence where and how collective communication is executed.</a></li>
+<li class="toc-entry toc-h1"><a href="#topology-discovery-tools-reveal-inter-gpu-links-such-as-nvlink-and-show-how-network-cards-and-pcie-paths-connect-gpus-and-cpus-which-affects-communication-strategies">Topology-discovery tools reveal inter-GPU links such as NVLink and show how network cards and PCIe paths connect GPUs and CPUs, which affects communication strategies.</a></li>
+<li class="toc-entry toc-h1"><a href="#nccl-nvidia-collective-communications-library-implements-low-level-gpu-aware-collectives-and-torchdistributed-provides-a-higher-level-multi-backend-interface-for-python-workloads">NCCL (NVIDIA Collective Communications Library) implements low-level GPU-aware collectives and torch.distributed provides a higher-level, multi-backend interface for Python workloads.</a></li>
+<li class="toc-entry toc-h1"><a href="#distributed-processes-must-initialize-a-process-group-and-use-synchronization-primitives-like-barrier-to-coordinate-multi-process-execution">Distributed processes must initialize a process group and use synchronization primitives like barrier to coordinate multi-process execution.</a></li>
+<li class="toc-entry toc-h1"><a href="#all-reduce-aggregates-values-across-ranks-using-an-associative-operation-and-places-the-same-reduced-result-on-every-participating-rank-typically-in-place-on-the-input-tensor">All-reduce aggregates values across ranks using an associative operation and places the same reduced result on every participating rank, typically in-place on the input tensor.</a></li>
+<li class="toc-entry toc-h1"><a href="#reduce-scatter-computes-a-reduction-across-ranks-and-distributes-disjoint-portions-of-the-reduced-tensor-to-different-ranks-producing-a-smaller-local-output-per-rank">Reduce-scatter computes a reduction across ranks and distributes disjoint portions of the reduced tensor to different ranks, producing a smaller local output per rank.</a></li>
+<li class="toc-entry toc-h1"><a href="#all-gather-concatenates-tensors-from-all-ranks-so-that-each-rank-ends-up-with-the-full-collection-and-when-paired-with-reduce-scatter-it-composes-to-an-all-reduce">All-gather concatenates tensors from all ranks so that each rank ends up with the full collection, and when paired with reduce-scatter it composes to an all-reduce.</a></li>
+<li class="toc-entry toc-h1"><a href="#collective-operations-require-consistent-tensor-shapes-across-ranks-and-a-convention-for-which-tensor-dimension-maps-to-devices-in-sharded-operations">Collective operations require consistent tensor shapes across ranks and a convention for which tensor dimension maps to devices in sharded operations.</a></li>
+<li class="toc-entry toc-h1"><a href="#reliable-benchmarking-of-collectives-requires-warm-up-synchronization-and-precise-byte-accounting-to-compute-effective-bandwidth">Reliable benchmarking of collectives requires warm-up, synchronization, and precise byte accounting to compute effective bandwidth.</a></li>
+<li class="toc-entry toc-h1"><a href="#reduce-scatter-benchmarks-follow-the-same-methodological-steps-as-all-reduce-but-typically-report-different-effective-bandwidth-due-to-different-traffic-patterns-and-less-broadcast-traffic">Reduce-scatter benchmarks follow the same methodological steps as all-reduce but typically report different effective bandwidth due to different traffic patterns and less broadcast traffic.</a></li>
+<li class="toc-entry toc-h1"><a href="#distributed-training-strategies-data-tensor-pipeline-can-be-understood-by-applying-them-to-a-deep-mlp-as-a-representative-compute-bound-workload">Distributed training strategies (data, tensor, pipeline) can be understood by applying them to a deep MLP as a representative compute-bound workload.</a></li>
+<li class="toc-entry toc-h1"><a href="#data-parallel-ddp-training-replicates-the-model-on-each-device-partitions-the-batch-across-ranks-and-synchronizes-gradients-via-all-reduce-after-the-backward-pass">Data-parallel (DDP) training replicates the model on each device, partitions the batch across ranks, and synchronizes gradients via all-reduce after the backward pass.</a></li>
+<li class="toc-entry toc-h1"><a href="#tensor-parallelism-shards-parameter-matrices-for-example-across-the-hidden-dimension-computes-local-partial-activations-and-uses-all-gather-to-assemble-full-activations-for-subsequent-layers">Tensor parallelism shards parameter matrices (for example across the hidden dimension), computes local partial activations, and uses all-gather to assemble full activations for subsequent layers.</a></li>
+<li class="toc-entry toc-h1"><a href="#pipeline-parallelism-partitions-layers-across-devices-and-streams-microbatches-through-the-partitioned-model-using-point-to-point-sends-and-receives-to-improve-utilization">Pipeline parallelism partitions layers across devices and streams microbatches through the partitioned model using point-to-point sends and receives to improve utilization.</a></li>
+<li class="toc-entry toc-h1"><a href="#overlapping-communication-and-computation-via-asynchronous-sendsreceives-and-handles-reduces-stalls-and-improves-gpu-utilization-in-pipeline-and-other-parallel-schemes">Overlapping communication and computation via asynchronous sends/receives and handles reduces stalls and improves GPU utilization in pipeline and other parallel schemes.</a></li>
+<li class="toc-entry toc-h1"><a href="#full-pipeline-training-requires-coordinating-forwards-and-backwards-across-ranks-handling-last-stage-loss-computation-and-implementing-backward-stage-sends-to-propagate-gradients-upstream">Full pipeline training requires coordinating forwards and backwards across ranks, handling last-stage loss computation, and implementing backward-stage sends to propagate gradients upstream.</a></li>
+<li class="toc-entry toc-h1"><a href="#high-level-frameworks-such-as-jax-expose-sharding-primitives-so-users-can-specify-how-tensor-dimensions-are-partitioned-and-let-the-compiler-generate-the-underlying-communication-and-kernel-launches">High-level frameworks such as JAX expose sharding primitives so users can specify how tensor dimensions are partitioned and let the compiler generate the underlying communication and kernel launches.</a></li>
+<li class="toc-entry toc-h1"><a href="#parallelization-choices-trade-off-computation-communication-and-memory-recomputation-checkpointing-and-sharding-are-recurring-techniques-and-hardware-evolution-maintains-a-multi-level-hierarchy-of-limits">Parallelization choices trade off computation, communication, and memory; recomputation, checkpointing, and sharding are recurring techniques, and hardware evolution maintains a multi-level hierarchy of limits.</a></li>
+<li class="toc-entry toc-h1"><a href="#practical-implementation-questions-include-handling-data-dependent-state-batchnorm-using-high-level-libraries-fsdp-activation-checkpointing-apis-specialized-hardware-trade-offs-incremental-training-and-how-collectives-are-executed-at-runtime">Practical implementation questions include handling data-dependent state (batchnorm), using high-level libraries (FSDP), activation checkpointing APIs, specialized hardware trade-offs, incremental training, and how collectives are executed at runtime.</a></li>
+</ul>
+    </div>
+    <hr>
+    
+    <div id="markdown-content">
+      <div style="display: flex; justify-content: center;">
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/LHpr5ytssLo" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen="">
+    </iframe>
+</div>
+
+<h1 id="multi-gpu-training-requires-structuring-computation-to-minimize-inter-device-data-transfer">Multi-GPU training requires structuring computation to minimize inter-device data transfer.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec08/00-01-57-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec08/00-01-57-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec08/00-01-57-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec08/00-01-57.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Modern multi-GPU systems expose a multi-level <strong>memory and communication hierarchy</strong> where compute units (SMs) perform arithmetic that fetches inputs from different tiers:</p>
+
+<ul>
+  <li>
+<strong>On-chip caches</strong> (e.g., <strong>L1</strong>) for the fastest, smallest accesses</li>
+  <li>
+<strong>High-bandwidth on-device memory</strong> (<strong>HBM</strong>) for larger working sets</li>
+  <li>
+<strong>Remote device memory</strong> reached over interconnects (PCIe, NVLink, network) for the slowest accesses<br>
+</li>
+</ul>
+
+<p>Data transfers across these levels are <strong>orders of magnitude slower</strong> than on-chip arithmetic, so maximizing <strong>arithmetic intensity</strong> and avoiding unnecessary transfers is central to performance.<br></p>
+
+<p>Common techniques to reduce memory traffic:</p>
+
+<ul>
+  <li>
+<strong>Fusion</strong>: combine operations to eliminate intermediate writes/reads</li>
+  <li>
+<strong>Tiling</strong>: work on local tiles in a scratchpad before committing results to slower tiers</li>
+</ul>
+
+<p>When scaling across GPUs and nodes, <strong>model parameters</strong> and <strong>optimizer state</strong> are either <strong>replicated</strong> or <strong>sharded</strong>, and the chosen distribution determines communication volume and latency.<br></p>
+
+<p>Design goal: keep data <strong>local as long as possible</strong> — this is the primary systems objective for efficient multi-GPU training.<br></p>
+
+<hr>
+
+<h1 id="lecture-content-is-organized-into-two-parts-collective-operations-implementation-and-distributed-training-strategies-with-benchmarking-and-code-examples">Lecture content is organized into two parts: collective operations implementation and distributed training strategies with benchmarking and code examples.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec08/00-04-15-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec08/00-04-15-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec08/00-04-15-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec08/00-04-15.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The material is organized into two complementary parts:</p>
+
+<ol>
+  <li>
+<strong>Building blocks</strong> — collective communication primitives and their low-level implementations</li>
+  <li>
+<strong>Higher-level distributed training strategies</strong> — data, tensor, and pipeline parallelism<br>
+</li>
+</ol>
+
+<p>Teaching approach:</p>
+
+<ul>
+  <li>Emphasize <strong>concrete code examples</strong> so concepts map directly to implementation</li>
+  <li>Use <strong>benchmarks</strong> to reveal performance effects of different designs</li>
+  <li>Combine theory (primitives) with practice (real code) so students see both how and why performance differs<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="collective-operations-provide-standardized-multi-device-primitives-such-as-broadcast-scatter-gather-reduce-all-gather-and-reduce-scatter-for-coordinating-distributed-computation">Collective operations provide standardized multi-device primitives such as broadcast, scatter, gather, reduce, all-gather, and reduce-scatter for coordinating distributed computation.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec08/00-06-29-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec08/00-06-29-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec08/00-06-29-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec08/00-06-29.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Collective operations</strong> are foundational primitives in parallel programming that hide point-to-point bookkeeping and provide efficient coordinated data movement across devices.<br></p>
+
+<p>Core terms:</p>
+
+<ul>
+  <li>
+<strong>World size</strong>: number of participating devices</li>
+  <li>
+<strong>Rank</strong>: device index within the group<br>
+</li>
+</ul>
+
+<p>Common collectives:</p>
+
+<ul>
+  <li>
+<strong>Broadcast</strong>: copy a tensor from one rank to all ranks</li>
+  <li>
+<strong>Scatter</strong>: distribute distinct pieces of a tensor to different ranks</li>
+  <li>
+<strong>Gather</strong>: collect pieces from ranks onto a single destination</li>
+  <li>
+<strong>Reduce</strong>: apply an associative, commutative operation (sum, min, max) while gathering results</li>
+  <li>
+<strong>All-gather</strong>: concatenate/stack data from every rank onto every rank</li>
+  <li>
+<strong>Reduce-scatter</strong>: reduce across ranks and scatter disjoint portions of the reduced result</li>
+  <li>
+<strong>All-reduce</strong>: functionally equivalent to reduce followed by all-gather; commonly used for synchronizing gradients in training<br>
+</li>
+</ul>
+
+<p>Correct use requires consistent matching of calls across ranks and agreement on shapes and orderings.<br></p>
+
+<hr>
+
+<h1 id="gpu-system-topologies-form-a-hierarchy-sm-l1-hbm-pcie-nvlink-nvswitch-and-influence-where-and-how-collective-communication-is-executed">GPU system topologies form a hierarchy (SM L1, HBM, PCIe, NVLink, NVSwitch) and influence where and how collective communication is executed.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec08/00-09-49-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec08/00-09-49-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec08/00-09-49-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec08/00-09-49.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>GPU nodes contain multiple memory and interconnect levels:</p>
+
+<ul>
+  <li>Tiny on-SM <strong>L1</strong> caches for immediate operands</li>
+  <li>Larger high-bandwidth <strong>device memory</strong> (<strong>HBM</strong>) for layer state and activations</li>
+  <li>Host-level links (<strong>PCIe</strong>) and cluster interconnects for cross-node transfers<br>
+</li>
+</ul>
+
+<p>Traditional GPU-to-GPU transfers used the host (PCIe + Ethernet), incurring kernel and copy overheads that throttled throughput.<br></p>
+
+<p>Modern designs use <strong>device-aware interconnects</strong> such as <strong>NVLink</strong> and <strong>NVSwitch</strong> to bypass the host, providing much higher aggregate bandwidth and lower latency and thereby changing optimal communication strategies.<br></p>
+
+<p>The relative costs of on-chip accesses vs. inter-node links determine whether <strong>replication</strong>, <strong>sharding</strong>, or <strong>recomputation</strong> is preferable in a design.<br></p>
+
+<hr>
+
+<h1 id="topology-discovery-tools-reveal-inter-gpu-links-such-as-nvlink-and-show-how-network-cards-and-pcie-paths-connect-gpus-and-cpus-which-affects-communication-strategies">Topology-discovery tools reveal inter-GPU links such as NVLink and show how network cards and PCIe paths connect GPUs and CPUs, which affects communication strategies.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec08/00-12-19-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec08/00-12-19-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec08/00-12-19-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec08/00-12-19.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Topology visibility</strong> matters: system utilities report which GPU pairs are directly connected by high-bandwidth links and which require routing over PCIe or network interfaces.<br></p>
+
+<p>Practical implications:</p>
+
+<ul>
+  <li>In an eight-GPU node, many pairs are connected by <strong>NVLink lanes</strong> while other traffic still traverses <strong>PCIe</strong> or network adapters</li>
+  <li>This <strong>heterogeneous connectivity</strong> influences collective implementations and performance optimizations</li>
+  <li>
+<strong>Network interface cards</strong> and the <strong>host CPU</strong> remain part of the topology for coordination and non-GPU backends<br>
+</li>
+</ul>
+
+<p>Correctly interpreting topology lets libraries and applications choose minimal-latency / maximum-bandwidth paths for collective transfers.<br></p>
+
+<hr>
+
+<h1 id="nccl-nvidia-collective-communications-library-implements-low-level-gpu-aware-collectives-and-torchdistributed-provides-a-higher-level-multi-backend-interface-for-python-workloads">NCCL (NVIDIA Collective Communications Library) implements low-level GPU-aware collectives and torch.distributed provides a higher-level, multi-backend interface for Python workloads.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec08/00-14-45-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec08/00-14-45-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec08/00-14-45-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec08/00-14-45.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>NCCL</strong> translates high-level collective semantics into optimized, hardware-aware packet transfers and CUDA kernels that move and reduce data across GPUs.<br></p>
+
+<p>Key behaviors:</p>
+
+<ul>
+  <li>Performs <strong>topology discovery</strong> and <strong>path optimization</strong> during initialization</li>
+  <li>Emits device-side kernels and transfers that exploit link topology and in-network features where available<br>
+</li>
+</ul>
+
+<p>Higher-level frameworks expose these primitives:</p>
+
+<ul>
+  <li>
+<strong>torch.distributed</strong> wraps backend libraries and exposes ops such as <strong>all-reduce</strong>, <strong>all-gather</strong>, <strong>reduce-scatter</strong>, and point-to-point sends/receives to Python programs</li>
+  <li>Supports multiple backends (e.g., <strong>NCCL</strong> for GPUs, <strong>Gloo</strong> for CPUs), enabling portability while retaining backend-specific performance characteristics<br>
+</li>
+</ul>
+
+<p>These libraries also offer <strong>asynchronous operations</strong> and expert features for overlapping communication and computation, but exact performance depends on hardware, tensor sizes, and library internals.<br></p>
+
+<hr>
+
+<h1 id="distributed-processes-must-initialize-a-process-group-and-use-synchronization-primitives-like-barrier-to-coordinate-multi-process-execution">Distributed processes must initialize a process group and use synchronization primitives like barrier to coordinate multi-process execution.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec08/00-17-15-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec08/00-17-15-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec08/00-17-15-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec08/00-17-15.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>A typical distributed workload spawns multiple processes (commonly one per device) that run the same function with different rank indices.<br></p>
+
+<p>Initialization process:</p>
+
+<ul>
+  <li>Processes <strong>rendezvous</strong> via a host-based coordinator to establish a <strong>process group</strong>
+</li>
+  <li>Initialization exchanges topology and membership info — distinct from the heavy tensor traffic handled by the collective library</li>
+  <li>A <strong>barrier</strong> primitive provides an explicit synchronization point, useful for ordered side effects (logging), deterministic benchmarking, and coordination before launching collectives<br>
+</li>
+</ul>
+
+<p>Proper initialization and synchronization prevent mismatched collectives that would otherwise hang or deadlock.<br></p>
+
+<hr>
+
+<h1 id="all-reduce-aggregates-values-across-ranks-using-an-associative-operation-and-places-the-same-reduced-result-on-every-participating-rank-typically-in-place-on-the-input-tensor">All-reduce aggregates values across ranks using an associative operation and places the same reduced result on every participating rank, typically in-place on the input tensor.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec08/00-19-06-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec08/00-19-06-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec08/00-19-06-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec08/00-19-06.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>All-reduce</strong> applies a commutative, associative operation (typically sum or average) across corresponding tensor elements from every rank and writes the aggregated result back to the provided output (often in-place).<br></p>
+
+<p>Practical notes:</p>
+
+<ul>
+  <li>Implementations support <strong>synchronous</strong> and <strong>asynchronous</strong> variants; async all-reduce returns a handle to overlap communication with computation</li>
+  <li>Canonical use: <strong>gradient synchronization</strong> in synchronous data-parallel training — all ranks obtain identical averaged gradients after backward pass</li>
+  <li>Correct use requires matching collective calls and careful attention to tensor <strong>shapes</strong> and <strong>dtypes</strong> across ranks<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="reduce-scatter-computes-a-reduction-across-ranks-and-distributes-disjoint-portions-of-the-reduced-tensor-to-different-ranks-producing-a-smaller-local-output-per-rank">Reduce-scatter computes a reduction across ranks and distributes disjoint portions of the reduced tensor to different ranks, producing a smaller local output per rank.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec08/00-20-31-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec08/00-20-31-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec08/00-20-31-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec08/00-20-31.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Reduce-scatter</strong> combines reduction and scattering:</p>
+
+<ul>
+  <li>Takes an input whose one dimension corresponds to <strong>world size</strong> and performs a per-segment reduction across ranks</li>
+  <li>Delivers each reduced segment to the corresponding destination rank; the output is the per-rank portion (often smaller than the full tensor)<br>
+</li>
+</ul>
+
+<p>When to use:</p>
+
+<ul>
+  <li>Useful when algorithms expect <strong>partitioned reduced outputs</strong> rather than full replication</li>
+  <li>Can reduce total communication compared to separate reduce and scatter steps</li>
+</ul>
+
+<p>Implementation caveats:</p>
+
+<ul>
+  <li>Ensure <strong>dimension alignment</strong> and consistent element ordering so segments map to ranks deterministically<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="all-gather-concatenates-tensors-from-all-ranks-so-that-each-rank-ends-up-with-the-full-collection-and-when-paired-with-reduce-scatter-it-composes-to-an-all-reduce">All-gather concatenates tensors from all ranks so that each rank ends up with the full collection, and when paired with reduce-scatter it composes to an all-reduce.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec08/00-21-48-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec08/00-21-48-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec08/00-21-48-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec08/00-21-48.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>All-gather</strong> assembles a full tensor from per-rank inputs by concatenating or stacking so every rank receives the complete assembled tensor.<br></p>
+
+<p>Usage patterns:</p>
+
+<ul>
+  <li>Reconstruct full activation or parameter vectors when preceding stages computed only a <strong>shard</strong>
+</li>
+  <li>Combined with <strong>reduce-scatter</strong> (reduce-scatter followed by all-gather) the composition is functionally equivalent to an <strong>all-reduce</strong> because the reduced segments are redistributed so every rank obtains the complete reduced result<br>
+</li>
+</ul>
+
+<p>All-gather is therefore a key building block for implementing higher-level collective behaviors from lower-level primitives.<br></p>
+
+<hr>
+
+<h1 id="collective-operations-require-consistent-tensor-shapes-across-ranks-and-a-convention-for-which-tensor-dimension-maps-to-devices-in-sharded-operations">Collective operations require consistent tensor shapes across ranks and a convention for which tensor dimension maps to devices in sharded operations.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec08/00-23-06-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec08/00-23-06-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec08/00-23-06-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec08/00-23-06.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Many collectives infer a mapping from a tensor dimension to <strong>world size</strong> (for example, reduce-scatter often assumes one dimension equals the number of devices and partitions along that axis).<br></p>
+
+<p>Practical guidance:</p>
+
+<ul>
+  <li>All ranks must supply tensors with <strong>compatible shapes</strong> and consistent partitioning rules</li>
+  <li>Mismatched dimensionality or stride assumptions lead to runtime errors or incorrect placements</li>
+  <li>Use <strong>small synthetic examples</strong> to test shape conventions before integrating collectives into larger code paths<br>
+</li>
+</ul>
+
+<p>Careful shape management simplifies debugging and ensures deterministic mapping from tensor segments to device ranks.<br></p>
+
+<hr>
+
+<h1 id="reliable-benchmarking-of-collectives-requires-warm-up-synchronization-and-precise-byte-accounting-to-compute-effective-bandwidth">Reliable benchmarking of collectives requires warm-up, synchronization, and precise byte accounting to compute effective bandwidth.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec08/00-26-07-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec08/00-26-07-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec08/00-26-07-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec08/00-26-07.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Benchmark methodology essentials:</p>
+
+<ul>
+  <li>
+<strong>Warm up</strong> kernels and CUDA context to avoid first-call overheads</li>
+  <li>
+<strong>Synchronize</strong> all ranks before timing to ensure consistent start and end points<br>
+</li>
+</ul>
+
+<p>Byte accounting:</p>
+
+<ul>
+  <li>Depends on the operation: for <strong>all-reduce</strong> each rank contributes tensor bytes and typically sends and receives data such that a factor-of-two term appears in total traffic accounting (send plus receive)</li>
+  <li>
+<strong>Reduce-scatter</strong> omits the broadcast-back component in its accounting<br>
+</li>
+</ul>
+
+<p>Compute aggregate bandwidth as total transferred bytes divided by measured wall-clock duration. Results depend on tensor size, world size, backend optimizations, and topology — interpret benchmark results as <strong>relative comparisons</strong> across configurations rather than absolute hardware maxima.<br></p>
+
+<hr>
+
+<h1 id="reduce-scatter-benchmarks-follow-the-same-methodological-steps-as-all-reduce-but-typically-report-different-effective-bandwidth-due-to-different-traffic-patterns-and-less-broadcast-traffic">Reduce-scatter benchmarks follow the same methodological steps as all-reduce but typically report different effective bandwidth due to different traffic patterns and less broadcast traffic.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec08/00-30-30-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec08/00-30-30-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec08/00-30-30-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec08/00-30-30.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Reduce-scatter benchmarking notes:</p>
+
+<ul>
+  <li>Construct an input whose relevant dimension <strong>scales with world size</strong>, warm up kernels, synchronize, and measure elapsed time for the operation</li>
+  <li>Because reduce-scatter reduces and scatters disjoint portions without a global broadcast back, its traffic accounting <strong>omits the round-trip factor</strong> present in all-reduce calculations — often yielding numerically smaller bandwidth estimates for the same element counts<br>
+</li>
+</ul>
+
+<p>Variations arise from backend optimizations (e.g., in-network aggregation) and hardware features, so interpretation requires careful comparison to theoretical link rates and other measurements.<br></p>
+
+<p>End-to-end benchmarking is necessary to reveal real-world throughput characteristics for different collectives.<br></p>
+
+<hr>
+
+<h1 id="distributed-training-strategies-data-tensor-pipeline-can-be-understood-by-applying-them-to-a-deep-mlp-as-a-representative-compute-bound-workload">Distributed training strategies (data, tensor, pipeline) can be understood by applying them to a deep MLP as a representative compute-bound workload.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec08/00-32-52-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec08/00-32-52-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec08/00-32-52-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec08/00-32-52.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>MLPs</strong> are a simple yet representative workload:</p>
+
+<ul>
+  <li>Each layer is dominated by <strong>matrix multiplies</strong> and nonlinearities, making MLPs useful pedagogical examples for distributed strategies</li>
+  <li>Parallelization strategies:
+    <ul>
+      <li>
+<strong>Data parallelism</strong>: split the batch dimension</li>
+      <li>
+<strong>Tensor parallelism</strong>: shard model dimensions (e.g., hidden width)</li>
+      <li>
+<strong>Pipeline parallelism</strong>: partition layers across devices<br>
+</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Examining these approaches on MLPs reveals core patterns that generalize to transformers while keeping implementation and reasoning tractable.<br></p>
+
+<hr>
+
+<h1 id="data-parallel-ddp-training-replicates-the-model-on-each-device-partitions-the-batch-across-ranks-and-synchronizes-gradients-via-all-reduce-after-the-backward-pass">Data-parallel (DDP) training replicates the model on each device, partitions the batch across ranks, and synchronizes gradients via all-reduce after the backward pass.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec08/00-37-00-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec08/00-37-00-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec08/00-37-00-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec08/00-37-00.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Data-parallel training</strong> flow:</p>
+
+<ol>
+  <li>Each rank receives a disjoint slice of the global minibatch and runs forward/backward on a full replica of the model</li>
+  <li>After backward, an <strong>all-reduce</strong> averages gradients across ranks</li>
+  <li>Each rank updates parameters with the same aggregated gradient, resulting in synchronized parameters across devices<br>
+</li>
+</ol>
+
+<p>Trade-offs:</p>
+
+<ul>
+  <li>Scales straightforwardly with replicas</li>
+  <li>Requires communicating gradients of the <strong>full model</strong> each step and synchronizing at the collective barrier point<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="tensor-parallelism-shards-parameter-matrices-for-example-across-the-hidden-dimension-computes-local-partial-activations-and-uses-all-gather-to-assemble-full-activations-for-subsequent-layers">Tensor parallelism shards parameter matrices (for example across the hidden dimension), computes local partial activations, and uses all-gather to assemble full activations for subsequent layers.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec08/00-43-25-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec08/00-43-25-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec08/00-43-25-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec08/00-43-25.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Tensor parallelism</strong>:</p>
+
+<ul>
+  <li>Divides model tensors along one or more model dimensions so each rank stores and computes on only a <strong>slice</strong> of each layer’s parameters</li>
+  <li>Forward pass: each rank computes <strong>partial activations</strong> for its shard; an <strong>all-gather</strong> assembles the full activation required by the next stage</li>
+  <li>Backward pass: symmetric communication propagates gradients to the appropriate parameter shards and typically mirrors the forward communication pattern<br>
+</li>
+</ul>
+
+<p>Trade-offs: reduces memory footprint per device but increases interconnect traffic for activations and intermediates, so it benefits from <strong>high-bandwidth, low-latency links</strong>.<br></p>
+
+<hr>
+
+<h1 id="pipeline-parallelism-partitions-layers-across-devices-and-streams-microbatches-through-the-partitioned-model-using-point-to-point-sends-and-receives-to-improve-utilization">Pipeline parallelism partitions layers across devices and streams microbatches through the partitioned model using point-to-point sends and receives to improve utilization.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec08/00-47-48-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec08/00-47-48-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec08/00-47-48-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec08/00-47-48.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Pipeline parallelism</strong> assigns contiguous layer groups to different ranks so each rank is responsible for a stage of the network.<br></p>
+
+<p>Streaming with microbatches:</p>
+
+<ol>
+  <li>Subdivide the global batch into <strong>microbatches</strong>
+</li>
+  <li>Stream microbatches through stages; each stage receives activations from the previous stage, computes local layers, and forwards activations to the next stage via point-to-point sends/receives</li>
+  <li>Interleave forward and backward microbatches to keep stages busy and reduce pipeline bubbles<br>
+</li>
+</ol>
+
+<p>Implementation notes:</p>
+
+<ul>
+  <li>Uses <strong>send/receive</strong> primitives rather than collectives</li>
+  <li>Naive implementations suffer from idle pipeline bubbles and synchronous blocking</li>
+  <li>Advanced implementations use asynchronous sends/receives, microbatching, and careful scheduling to overlap compute and communication and minimize stalls<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="overlapping-communication-and-computation-via-asynchronous-sendsreceives-and-handles-reduces-stalls-and-improves-gpu-utilization-in-pipeline-and-other-parallel-schemes">Overlapping communication and computation via asynchronous sends/receives and handles reduces stalls and improves GPU utilization in pipeline and other parallel schemes.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec08/00-52-19-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec08/00-52-19-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec08/00-52-19-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec08/00-52-19.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Modern collective and point-to-point APIs provide <strong>asynchronous</strong> variants that return completion handles so communication can be launched while computation continues on other streams.<br></p>
+
+<p>Common pattern:</p>
+
+<ul>
+  <li>Launch <strong>nonblocking sends/receives</strong> (device-side kernels move data independently of the CPU thread)</li>
+  <li>Continue useful computation (process other microbatches, local work)</li>
+  <li>
+<strong>Synchronize on handles</strong> before accessing transferred data to ensure correctness<br>
+</li>
+</ul>
+
+<p>Caveats:</p>
+
+<ul>
+  <li>Ordering of multiple sends to the same destination is preserved by stream semantics, but matching receives and careful coordination are required to avoid mismatches.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="full-pipeline-training-requires-coordinating-forwards-and-backwards-across-ranks-handling-last-stage-loss-computation-and-implementing-backward-stage-sends-to-propagate-gradients-upstream">Full pipeline training requires coordinating forwards and backwards across ranks, handling last-stage loss computation, and implementing backward-stage sends to propagate gradients upstream.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec08/00-56-37-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec08/00-56-37-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec08/00-56-37-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec08/00-56-37.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>In a complete pipeline implementation the final stage computes the loss for a microbatch and initiates backward propagation by computing gradients and sending contributions back to the previous stage.<br></p>
+
+<p>Backward scheduling:</p>
+
+<ul>
+  <li>Must be interleaved with forward microbatches to avoid deadlocks and minimize stalls — more complex than forward-only streaming logic</li>
+  <li>Requires bookkeeping for which microbatch corresponds to which backward activation</li>
+  <li>Often uses asynchronous operations to overlap communications and computation<br>
+</li>
+</ul>
+
+<p>Production systems typically encapsulate this complexity in libraries that manage ordering, handles, and partial failures instead of leaving manual control to application code.<br></p>
+
+<hr>
+
+<h1 id="high-level-frameworks-such-as-jax-expose-sharding-primitives-so-users-can-specify-how-tensor-dimensions-are-partitioned-and-let-the-compiler-generate-the-underlying-communication-and-kernel-launches">High-level frameworks such as JAX expose sharding primitives so users can specify how tensor dimensions are partitioned and let the compiler generate the underlying communication and kernel launches.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec08/00-59-35-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec08/00-59-35-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec08/00-59-35-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec08/00-59-35.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>JAX</strong> and similar systems let users declare data and model sharding by mapping tensor axes to device axes; the compiler synthesizes the required collectives and kernel code to realize the sharding across available devices.<br></p>
+
+<p>Tooling:</p>
+
+<ul>
+  <li>Higher-level toolkits (e.g., the referenced <strong>Lavanter</strong> example) allow concise specifications of <strong>FSDP</strong> or tensor-parallel strategies in only a few lines of code</li>
+  <li>Benefit: conceptual simplicity and portability — users describe partitioning and the system optimizes mapping and communication</li>
+  <li>Trade-off: less direct low-level control compared to hand-crafted <strong>PyTorch + NCCL</strong> implementations, though compiler-generated code is often sufficiently performant and much easier to maintain<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="parallelization-choices-trade-off-computation-communication-and-memory-recomputation-checkpointing-and-sharding-are-recurring-techniques-and-hardware-evolution-maintains-a-multi-level-hierarchy-of-limits">Parallelization choices trade off computation, communication, and memory; recomputation, checkpointing, and sharding are recurring techniques, and hardware evolution maintains a multi-level hierarchy of limits.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec08/01-02-09-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec08/01-02-09-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec08/01-02-09-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec08/01-02-09.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Parallelization can be viewed as cutting either the data or various model dimensions:</p>
+
+<ul>
+  <li>Batch (data)</li>
+  <li>Width/hidden (tensor parallelism)</li>
+  <li>Depth/layers (pipeline parallelism)</li>
+  <li>Context/sequence length (e.g., for sequences)<br>
+</li>
+</ul>
+
+<p>Memory vs. compute trade-offs:</p>
+
+<ul>
+  <li>
+<strong>Activation checkpointing</strong> (recompute on demand) trades extra compute for reduced memory and fewer transfers</li>
+  <li>Alternatively, storing activations or moving them to remote device memory trades memory pressure for communication overhead<br>
+</li>
+</ul>
+
+<p>Hardware trends:</p>
+
+<ul>
+  <li>Increases in on-chip memory and link bandwidth shift but do not eliminate trade-offs, since model size tends to grow in parallel with hardware capabilities</li>
+  <li>Understanding the trade space and available library primitives is necessary to design scalable training systems rather than relying solely on future hardware advances<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="practical-implementation-questions-include-handling-data-dependent-state-batchnorm-using-high-level-libraries-fsdp-activation-checkpointing-apis-specialized-hardware-trade-offs-incremental-training-and-how-collectives-are-executed-at-runtime">Practical implementation questions include handling data-dependent state (batchnorm), using high-level libraries (FSDP), activation checkpointing APIs, specialized hardware trade-offs, incremental training, and how collectives are executed at runtime.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec08/01-09-10-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec08/01-09-10-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec08/01-09-10-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec08/01-09-10.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Batch-dependent statistics (e.g., <strong>BatchNorm</strong>) introduce global state that complicates naive data-parallel schemes, whereas normalization methods that do not depend on batch-wide statistics (e.g., <strong>LayerNorm</strong>) avoid that problem.<br></p>
+
+<p>Distributed solutions and tooling:</p>
+
+<ul>
+  <li>Synchronize batch statistics across ranks or use normalization variants suited to sharded training</li>
+  <li>PyTorch provides higher-level solutions such as <strong>FSDP</strong> for parameter sharding and memory-efficient training</li>
+  <li>Both PyTorch and JAX expose <strong>activation checkpointing</strong> APIs to selectively recompute activations and trade compute for memory<br>
+</li>
+</ul>
+
+<p>Other considerations:</p>
+
+<ul>
+  <li>Specialized inference/training hardware (Cerebras, GROQ) emphasizes large on-chip memory and different trade-offs, reducing communication but possibly limiting flexibility</li>
+  <li>Incremental/continued training is conceptually straightforward (gradient steps and checkpoints) but requires practical handling of <strong>optimizer state placement</strong> and consistency<br>
+</li>
+</ul>
+
+<p>Runtime orchestration:</p>
+
+<ul>
+  <li>The CPU typically invokes libraries (NCCL, Gloo) to orchestrate collectives; those libraries launch GPU kernels and manage device-side transfers so data movement and reductions execute efficiently on the devices themselves.<br>
+</li>
+</ul>
+
+<hr>
+
+
+    </div>
+  </article>
+
+
+  
+    
+    <br>
+    <hr>
+    <br>
+    <ul class="list-disc pl-8"></ul>
+
+    <!-- Adds related posts to the end of an article -->
+    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
+    <p class="mb-2">Here are some more articles you might like to read next:</p>
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs336-lec07/">CS336 Lecture 7 - Parallelism</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/diffusion-foundation/">The Foundations and Frontiers of Diffusion Models</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/nlp-foundation/">LLM Series - Part 1 - Important Concepts in NLP</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2024/thoughts/">Random Thoughts and Notes</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs336-lec05/">CS336 Lecture 5 - GPUs</a>
+  </li>
+
+</div>
+
+      
+    </div>
+
+    <!-- Footer -->    
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        © Copyright 2025 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+
+      </div>
+    </footer>
+
+    <!-- JavaScripts -->
+    <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- Bootsrap & MDB scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    <!-- Masonry & imagesLoaded -->
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
+    
+  <!-- Medium Zoom JS -->
+  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/zoom.js"></script>
+
+  <!-- Bootstrap Table -->
+  <script defer src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+
+  <!-- Load Common JS -->
+  <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
+  <script defer src="/assets/js/common.js?acdb9690d7641b2f8d40529018c71a01"></script>
+  <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    <!-- MathJax -->
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        tags: 'ams'
+      }
+    };
+  </script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KGSMMS9MS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-7KGSMMS9MS');
+  </script>
+    
+
+<!-- Scrolling Progress Bar -->
+<script type="text/javascript">
+  /*
+   * This JavaScript code has been adapted from the article 
+   * https://css-tricks.com/reading-position-indicator/ authored by Pankaj Parashar, 
+   * published on the website https://css-tricks.com on the 7th of May, 2014.
+   * Couple of changes were made to the original code to make it compatible 
+   * with the `al-foio` theme.
+   */
+  const progressBar = $("#progress");
+  /*
+   * We set up the bar after all elements are done loading.
+   * In some cases, if the images in the page are larger than the intended
+   * size they'll have on the page, they'll be resized via CSS to accomodate
+   * the desired size. This mistake, however, breaks the computations as the
+   * scroll size is computed as soon as the elements finish loading.
+   * To account for this, a minimal delay was introduced before computing the
+   * values.
+   */
+  window.onload = function () {
+    setTimeout(progressBarSetup, 50);
+  };
+  /*
+   * We set up the bar according to the browser.
+   * If the browser supports the progress element we use that.
+   * Otherwise, we resize the bar thru CSS styling
+   */
+  function progressBarSetup() {
+    if ("max" in document.createElement("progress")) {
+      initializeProgressElement();
+      $(document).on("scroll", function() {
+        progressBar.attr({ value: getCurrentScrollPosition() });
+      });
+      $(window).on("resize", initializeProgressElement);
+    } else {
+      resizeProgressBar();
+      $(document).on("scroll", resizeProgressBar);
+      $(window).on("resize", resizeProgressBar);
+    }
+  }
+  /*
+   * The vertical scroll position is the same as the number of pixels that
+   * are hidden from view above the scrollable area. Thus, a value > 0 is
+   * how much the user has scrolled from the top
+   */
+  function getCurrentScrollPosition() {
+    return $(window).scrollTop();
+  }
+
+  function initializeProgressElement() {
+    let navbarHeight = $("#navbar").outerHeight(true);
+    $("body").css({ "padding-top": navbarHeight });
+    $("progress-container").css({ "padding-top": navbarHeight });
+    progressBar.css({ top: navbarHeight });
+    progressBar.attr({
+      max: getDistanceToScroll(),
+      value: getCurrentScrollPosition(),
+    });
+  }
+  /*
+   * The offset between the html document height and the browser viewport
+   * height will be greater than zero if vertical scroll is possible.
+   * This is the distance the user can scroll
+   */
+  function getDistanceToScroll() {
+    return $(document).height() - $(window).height();
+  }
+
+  function resizeProgressBar() {
+    progressBar.css({ width: getWidthPercentage() + "%" });
+  }
+  // The scroll ratio equals the percentage to resize the bar
+  function getWidthPercentage() {
+    return (getCurrentScrollPosition() / getDistanceToScroll()) * 100;
+  }
+</script>
+
+    
+  </body>
+</html>

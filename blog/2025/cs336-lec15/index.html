@@ -1,0 +1,1655 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <!-- Head -->
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    <!-- Metadata, OpenGraph and Schema.org -->
+    
+
+    <!-- Standard metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>CS336 Lecture 15 - Alignment - SFT/RLHF | Tuan-Anh  Bui</title>
+    <meta name="author" content="Tuan-Anh  Bui">
+    <meta name="description" content="AI Summary of CS336 Lecture">
+    <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
+
+
+    <!-- Bootstrap & MDB -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+    <!-- Bootstrap Table -->
+    <link defer rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+
+    <!-- Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
+
+    
+
+    <!-- Styles -->
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
+    
+    <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+    <link rel="canonical" href="https://tuananhbui89.github.io/blog/2025/cs336-lec15/">
+
+    <!-- Dark Mode -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark">
+    <script src="/assets/js/theme.js?96d6b3e1c3604aca8b6134c7afdd5db6"></script>
+    <script src="/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script>
+    
+
+  </head>
+
+  <!-- Body -->
+  <body class="fixed-top-nav ">
+
+    <!-- Header -->
+    <header>
+
+      <!-- Nav Bar -->
+      <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top">
+        <div class="container">
+          <a class="navbar-brand title font-weight-lighter" href="/"><span class="font-weight-bold">Tuan-Anh </span>Bui</a>
+          <!-- Navbar Toggle -->
+          <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar top-bar"></span>
+            <span class="icon-bar middle-bar"></span>
+            <span class="icon-bar bottom-bar"></span>
+          </button>
+
+          <div class="collapse navbar-collapse text-right" id="navbarNav">
+            <ul class="navbar-nav ml-auto flex-nowrap">
+
+              <!-- About -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/">about</a>
+              </li>
+              
+              <!-- Blog -->
+              <li class="nav-item active">
+                <a class="nav-link" href="/blog/">blog<span class="sr-only">(current)</span></a>
+              </li>
+
+              <!-- Other pages -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/publications/">publications</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/projects/">projects</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/repositories/">repositories</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/teaching/"></a>
+              </li>
+
+              <!-- Toogle theme mode -->
+              <li class="toggle-container">
+                <button id="light-toggle" title="Change theme">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Scrolling Progress Bar -->
+      <progress id="progress" value="0">
+        <div class="progress-container">
+          <span class="progress-bar"></span>
+        </div>
+      </progress>
+    </header>
+
+
+    <!-- Content -->
+    <div class="container mt-5">
+      
+        <!-- _layouts/post.html -->
+<!-- Page/Post style -->
+<style type="text/css">
+  
+</style>
+
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">CS336 Lecture 15 - Alignment - SFT/RLHF</h1>
+    <p class="post-meta">December 8, 2025</p>
+    <p class="post-tags">
+      <a href="/blog/2025"> <i class="fas fa-calendar fa-sm"></i> 2025 </a>
+        ·  
+        <a href="/blog/tag/genai">
+          <i class="fas fa-hashtag fa-sm"></i> genai</a>  
+          <a href="/blog/tag/llm">
+          <i class="fas fa-hashtag fa-sm"></i> llm</a>  
+          <a href="/blog/tag/tutorial">
+          <i class="fas fa-hashtag fa-sm"></i> tutorial</a>  
+          <a href="/blog/tag/reading">
+          <i class="fas fa-hashtag fa-sm"></i> reading</a>  
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    
+    <div id="table-of-contents">
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#lecture-overview-and-objectives">Lecture overview and objectives</a></li>
+<li class="toc-entry toc-h1"><a href="#motivation-for-post-training-and-the-chatgpt-transition">Motivation for post-training and the ChatGPT transition</a></li>
+<li class="toc-entry toc-h1"><a href="#instructgpt-three-step-pipeline-and-lecture-structure">InstructGPT three-step pipeline and lecture structure</a></li>
+<li class="toc-entry toc-h1"><a href="#importance-of-post-training-data-quality-and-collection-considerations">Importance of post-training data quality and collection considerations</a></li>
+<li class="toc-entry toc-h1"><a href="#flan-dataset-paradigm-aggregating-existing-nlp-datasets">FLAN dataset paradigm: aggregating existing NLP datasets</a></li>
+<li class="toc-entry toc-h1"><a href="#openassistant-and-alpaca-paradigms-for-instruction-data">OpenAssistant and Alpaca paradigms for instruction data</a></li>
+<li class="toc-entry toc-h1"><a href="#concrete-examples-from-flan-and-implications-for-instruction-tuning">Concrete examples from FLAN and implications for instruction tuning</a></li>
+<li class="toc-entry toc-h1"><a href="#alpaca-generation-pipeline-and-response-style-differences">Alpaca generation pipeline and response style differences</a></li>
+<li class="toc-entry toc-h1"><a href="#crowdsourcing-interactive-exercise-and-annotator-response-patterns">Crowdsourcing interactive exercise and annotator response patterns</a></li>
+<li class="toc-entry toc-h1"><a href="#annotator-difficulties-and-the-incentives-for-ai-generated-feedback">Annotator difficulties and the incentives for AI-generated feedback</a></li>
+<li class="toc-entry toc-h1"><a href="#evaluation-trade-offs-chat-style-judgments-versus-benchmark-metrics">Evaluation trade-offs: chat-style judgments versus benchmark metrics</a></li>
+<li class="toc-entry toc-h1"><a href="#risk-of-teaching-hallucination-via-rich-sft-data-and-the-citation-failure-mode">Risk of teaching hallucination via rich SFT data and the citation failure mode</a></li>
+<li class="toc-entry toc-h1"><a href="#mitigation-perspective-abstention-tools-and-reinforcement-approaches">Mitigation perspective: abstention, tools, and reinforcement approaches</a></li>
+<li class="toc-entry toc-h1"><a href="#counterintuitive-nature-of-high-quality-instruction-data">Counterintuitive nature of ‘high-quality’ instruction data</a></li>
+<li class="toc-entry toc-h1"><a href="#safety-tuning-and-refusal-trade-offs">Safety tuning and refusal trade-offs</a></li>
+<li class="toc-entry toc-h1"><a href="#scaling-instruction-tuning-via-mid-training-data-mixing">Scaling instruction tuning via mid-training data mixing</a></li>
+<li class="toc-entry toc-h1"><a href="#mini-cpm-example-of-two-stage-training-and-data-mix-composition">Mini-CPM example of two-stage training and data mix composition</a></li>
+<li class="toc-entry toc-h1"><a href="#practical-implication-the-ambiguous-meaning-of-base-models">Practical implication: the ambiguous meaning of ‘base models’</a></li>
+<li class="toc-entry toc-h1"><a href="#concept-thinking-tokens-and-adaptive-pre-training-limitations">Concept: thinking tokens and adaptive pre-training limitations</a></li>
+<li class="toc-entry toc-h1"><a href="#star-and-quiet-star-style-approaches-for-training-internal-thought-processes">STAR and Quiet-STAR-style approaches for training internal thought processes</a></li>
+<li class="toc-entry toc-h1"><a href="#style-imprinting-and-token-pattern-learning-in-sft-emoji-example">Style imprinting and token-pattern learning in SFT (emoji example)</a></li>
+<li class="toc-entry toc-h1"><a href="#instruction-tuning-and-knowledge-acquisition-limits">Instruction tuning and knowledge acquisition limits</a></li>
+<li class="toc-entry toc-h1"><a href="#transition-to-reinforcement-learning-from-human-feedback-rlhf-conceptual-framing">Transition to reinforcement learning from human feedback (RLHF) conceptual framing</a></li>
+<li class="toc-entry toc-h1"><a href="#two-primary-rationales-for-rlhf-data-cost-and-generator-validator-asymmetry">Two primary rationales for RLHF: data cost and generator-validator asymmetry</a></li>
+<li class="toc-entry toc-h1"><a href="#rlhf-pipeline-pairwise-feedback-reward-modeling-and-policy-optimization">RLHF pipeline: pairwise feedback, reward modeling, and policy optimization</a></li>
+<li class="toc-entry toc-h1"><a href="#annotation-guidelines-and-practicalities-for-pairwise-preference-collection">Annotation guidelines and practicalities for pairwise preference collection</a></li>
+<li class="toc-entry toc-h1"><a href="#interactive-pairwise-evaluation-exercise-outcomes-and-empirical-difficulty">Interactive pairwise evaluation exercise outcomes and empirical difficulty</a></li>
+<li class="toc-entry toc-h1"><a href="#ethical-demographic-and-bias-considerations-in-rlhf-annotation">Ethical, demographic, and bias considerations in RLHF annotation</a></li>
+<li class="toc-entry toc-h1"><a href="#ai-generated-feedback-adoption-datasets-and-length-confounds">AI-generated feedback adoption, datasets, and length confounds</a></li>
+<li class="toc-entry toc-h1"><a href="#on-policy-versus-off-policy-preference-data-and-prompt-sourcing">On-policy versus off-policy preference data and prompt sourcing</a></li>
+<li class="toc-entry toc-h1"><a href="#capabilities-of-self-improvement-loops-and-practical-limits">Capabilities of self-improvement loops and practical limits</a></li>
+<li class="toc-entry toc-h1"><a href="#formal-rlhf-objective-and-reward-modeling-instructgpt-equation">Formal RLHF objective and reward modeling (InstructGPT equation)</a></li>
+<li class="toc-entry toc-h1"><a href="#policy-optimization-via-policy-gradients-and-ppo-po-overview">Policy optimization via policy gradients and PPO (PO) overview</a></li>
+<li class="toc-entry toc-h1"><a href="#direct-preference-optimization-dpo-derivation-and-practical-advantages">Direct Preference Optimization (DPO) derivation and practical advantages</a></li>
+</ul>
+    </div>
+    <hr>
+    
+    <div id="markdown-content">
+      <div style="display: flex; justify-content: center;">
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/Dfu7vC9jo4w" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen="">
+    </iframe>
+</div>
+
+<h1 id="lecture-overview-and-objectives">Lecture overview and objectives</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/00-01-44-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/00-01-44-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/00-01-44-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/00-01-44.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment outlines the scope and schedule of the lecture series, highlighting a transition from <strong>pre-training</strong> to <strong>post-training</strong> techniques with a primary focus on <strong>reinforcement learning from human feedback (RLHF)</strong> and <strong>safety/alignment</strong>.<br></p>
+
+<p>The immediate goals are defined as:</p>
+<ul>
+  <li>Convert large <strong>pre-trained language models</strong> into <strong>useful</strong>, <strong>controllable</strong>, and <strong>safe instruction-following systems</strong>.</li>
+  <li>Preview follow-up material on <strong>verifiable reward-based training</strong>.<br>
+</li>
+</ul>
+
+<p>This lecture is positioned within a <strong>two-part post-training module</strong> and frames the central problem statement that subsequent sections address:</p>
+<ol>
+  <li>How to transform a general pre-trained model into a <strong>deployable instruction-following system</strong>.</li>
+  <li>How to add <strong>guard rails</strong> and achieve <strong>product-quality behavior</strong>.<br>
+</li>
+</ol>
+
+<hr>
+
+<h1 id="motivation-for-post-training-and-the-chatgpt-transition">Motivation for post-training and the ChatGPT transition</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/00-03-57-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/00-03-57-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/00-03-57-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/00-03-57.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment motivates <strong>post-training</strong> by contrasting large-scale <strong>pre-training</strong> (e.g., GPT-3) with product-ready <strong>instruction-following systems</strong> (e.g., ChatGPT).<br></p>
+
+<p>Key points:</p>
+<ul>
+  <li>
+<strong>Pre-training</strong> encodes many capabilities distributed across parameters, but it does <strong>not reliably produce instruction-following behavior</strong> without targeted post-training.</li>
+  <li>Product constraints like <strong>usability</strong>, <strong>toxicity control</strong>, and <strong>guard rails</strong> make post-training practically essential.<br>
+</li>
+</ul>
+
+<p>The section highlights broader considerations that drive post-training work:</p>
+<ul>
+  <li>
+<strong>Societal impact</strong> of deployed models.</li>
+  <li>Research questions on <strong>data collection</strong>, <strong>algorithms</strong>, and <strong>scalability</strong> required to make pre-trained models safe and useful in real products.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="instructgpt-three-step-pipeline-and-lecture-structure">InstructGPT three-step pipeline and lecture structure</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/00-05-14-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/00-05-14-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/00-05-14-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/00-05-14.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment introduces the <strong>InstructGPT three-step post-training pipeline</strong> as the organizing framework:</p>
+<ol>
+  <li>
+<strong>Supervised fine-tuning (SFT)</strong> on demonstrations.</li>
+  <li>
+<strong>Reward modeling</strong> from pairwise feedback.</li>
+  <li>
+<strong>Reinforcement learning</strong> for policy optimization.<br>
+</li>
+</ol>
+
+<p>The lecture will follow this structure, covering:</p>
+<ul>
+  <li>
+<strong>SFT</strong> (leftmost block) first.</li>
+  <li>Then <strong>pairwise feedback</strong> and <strong>RLHF</strong>.</li>
+  <li>Finally practical and algorithmic details.<br>
+</li>
+</ul>
+
+<p>It sets up two axes of concern for SFT:</p>
+<ul>
+  <li>The <strong>nature and cost of training data</strong>.</li>
+  <li>The <strong>adaptation method</strong> (e.g., gradient-based fine-tuning vs. alternative approaches).<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="importance-of-post-training-data-quality-and-collection-considerations">Importance of post-training data quality and collection considerations</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/00-06-28-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/00-06-28-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/00-06-28-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/00-06-28.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment argues that <strong>post-training data matters more than ever</strong> due to <strong>small-data, high-leverage effects</strong>: noisy instruction-tuning data can provably harm model behavior and desirable behaviors must be encoded precisely.<br></p>
+
+<p>Practical concerns for data collection include:</p>
+<ul>
+  <li>
+<strong>Annotator expertise</strong> and variability.</li>
+  <li>
+<strong>Annotation cost</strong> and incentives.</li>
+  <li>
+<strong>Style and length variability</strong> across examples.</li>
+  <li>
+<strong>Safety coverage</strong> and handling edge cases.</li>
+  <li>Trade-offs between <strong>quantity</strong> and <strong>per-example quality</strong>.<br>
+</li>
+</ul>
+
+<p>The segment positions these considerations as prerequisites for selecting downstream algorithmic approaches, noting that some data types (e.g., <strong>expert demonstrations</strong>, <strong>pairwise feedback</strong>) are more directly usable than others.<br></p>
+
+<hr>
+
+<h1 id="flan-dataset-paradigm-aggregating-existing-nlp-datasets">FLAN dataset paradigm: aggregating existing NLP datasets</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/00-07-16-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/00-07-16-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/00-07-16-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/00-07-16.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment documents the <strong>FLAN</strong> paradigm: many standard supervised NLP datasets (QA, classification, NLI, etc.) are reformatted and aggregated into a single <strong>instruction-style corpus</strong> for instruction tuning.<br></p>
+
+<p>How FLAN works and why it’s used:</p>
+<ul>
+  <li>It <strong>leverages existing labeled benchmarks</strong> (e.g., Natural Instructions, adversarial QA) to provide broad task coverage at scale.</li>
+  <li>Requires <strong>minimal human authoring</strong> of new chat-style examples since it reformats existing datasets.<br>
+</li>
+</ul>
+
+<p>Strengths and weaknesses:</p>
+<ul>
+  <li>Strengths: <strong>scale</strong>, <strong>task diversity</strong>.</li>
+  <li>Weaknesses: <strong>surgical reformatting</strong> can produce <strong>unnatural prompt-response distributions</strong> that differ from real chat interactions and introduce distributional artifacts.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="openassistant-and-alpaca-paradigms-for-instruction-data">OpenAssistant and Alpaca paradigms for instruction data</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/00-07-58-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/00-07-58-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/00-07-58-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/00-07-58.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment contrasts two other paradigms: <strong>OpenAssistant</strong> and <strong>Alpaca</strong>.<br></p>
+
+<p>OpenAssistant:</p>
+<ul>
+  <li>A <strong>crowdsourced, human-authored</strong> instruction dataset.</li>
+  <li>Produces <strong>long, detailed responses</strong> and often includes <strong>citations</strong>.</li>
+  <li>Emphasizes <strong>human quality</strong> and richness.<br>
+</li>
+</ul>
+
+<p>Alpaca:</p>
+<ul>
+  <li>Starts from a <strong>small seed of human-written instructions</strong> that are expanded by a <strong>language model</strong> and filled by a stronger model (a <strong>distillation-style</strong> process).</li>
+  <li>Emphasizes <strong>cheap synthetic instruction data</strong> that closely matches conversational inputs.<br>
+</li>
+</ul>
+
+<p>Trade-offs and differences:</p>
+<ul>
+  <li>
+<strong>Diversity</strong> and <strong>authoring cost</strong> differ dramatically.</li>
+  <li>Artifact profiles vary by paradigm: <strong>response length</strong>, <strong>citation behavior</strong>, and <strong>multimodal style</strong> are distinct across them.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="concrete-examples-from-flan-and-implications-for-instruction-tuning">Concrete examples from FLAN and implications for instruction tuning</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/00-09-16-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/00-09-16-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/00-09-16-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/00-09-16.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment inspects representative <strong>FLAN</strong> examples (article highlights, multiple-choice classification, email subject generation, E2E text generation) to show how reformatted benchmark data appears when repurposed for instruction tuning.<br></p>
+
+<p>Key observations:</p>
+<ul>
+  <li>Much of FLAN-style data is <strong>task-centric</strong>, often <strong>brief</strong>, and <strong>visibly constructed</strong>.</li>
+  <li>This brevity and artificial construction can create a <strong>mismatch</strong> with real chat-style user interactions.<br>
+</li>
+</ul>
+
+<p>Conclusion: aggregated benchmark data provides <strong>scale</strong> but introduces <strong>distributional artifacts</strong> that can bias instruction-following behavior and style.<br></p>
+
+<hr>
+
+<h1 id="alpaca-generation-pipeline-and-response-style-differences">Alpaca generation pipeline and response style differences</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/00-11-06-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/00-11-06-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/00-11-06-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/00-11-06.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment describes the <strong>Alpaca pipeline</strong> in detail:</p>
+<ol>
+  <li>Start with a set of <strong>human-written instructions</strong>.</li>
+  <li>Use a <strong>language model</strong> to generate augmented instructions.</li>
+  <li>Use an <strong>instruction-capable model</strong> (e.g., InstructGPT) to produce long-form completions.<br>
+</li>
+</ol>
+
+<p>Characteristics and trade-offs:</p>
+<ul>
+  <li>
+<strong>Alpaca-style data</strong> tends to produce <strong>conversational, long-form, chat-like</strong> inputs and outputs compared to terse FLAN outputs.</li>
+  <li>Generated data can be <strong>less diverse</strong> in instruction forms and may <strong>preserve biases or limitations</strong> of the generator.<br>
+</li>
+</ul>
+
+<p>Emphasis: there is a trade-off between <strong>human-authored richness</strong> and <strong>model-generated scale and uniformity</strong>.<br></p>
+
+<hr>
+
+<h1 id="crowdsourcing-interactive-exercise-and-annotator-response-patterns">Crowdsourcing interactive exercise and annotator response patterns</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/00-13-09-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/00-13-09-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/00-13-09-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/00-13-09.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment reports on a crowdsourcing-style interactive exercise where participants author instruction-following responses, illustrating typical annotator behaviors and quality differences.<br></p>
+
+<p>Empirical findings:</p>
+<ul>
+  <li>Many annotators produce <strong>short, low-effort responses</strong> under time pressure.</li>
+  <li>Obtaining <strong>high-quality, long-form human responses</strong> is <strong>costly</strong> and difficult to scale.<br>
+</li>
+</ul>
+
+<p>Common artifacts in crowd data:</p>
+<ul>
+  <li>
+<strong>Emoji insertion</strong>, <strong>templated answers</strong>, <strong>shallow factuality checking</strong>.</li>
+  <li>The practical challenge of eliciting <strong>consistent, detailed demonstrations</strong> at scale is substantial.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="annotator-difficulties-and-the-incentives-for-ai-generated-feedback">Annotator difficulties and the incentives for AI-generated feedback</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/00-15-38-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/00-15-38-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/00-15-38-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/00-15-38.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment analyzes why annotators often produce short or low-quality responses: <strong>time constraints</strong>, <strong>lack of motivation</strong>, and <strong>task unfamiliarity</strong>.<br></p>
+
+<p>Empirical observation: human and AI evaluators tend to <strong>prefer longer, more detailed outputs ~60–70% of the time</strong>, which introduces bias toward verbosity if evaluation or reward correlates with length.<br></p>
+
+<p>This partly explains the rise of <strong>AI-generated feedback</strong>: models like <strong>GPT-4</strong> produce long, polished outputs at low marginal cost, making <strong>synthetic supervision</strong> attractive to practitioners.<br></p>
+
+<hr>
+
+<h1 id="evaluation-trade-offs-chat-style-judgments-versus-benchmark-metrics">Evaluation trade-offs: chat-style judgments versus benchmark metrics</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/00-17-48-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/00-17-48-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/00-17-48-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/00-17-48.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment compares <strong>open-ended chat-style evaluation</strong> methods (user engagement, chatbot arena, AlpacaEval) with <strong>traditional benchmark evaluations</strong> (e.g., MMLU).<br></p>
+
+<p>Trade-offs:</p>
+<ul>
+  <li>Chat-style evaluations capture <strong>user-facing quality</strong> and <strong>preference</strong>, but introduce confounders such as <strong>output length</strong> and <strong>style</strong>.</li>
+  <li>Benchmarks provide <strong>stable, task-specific fidelity metrics</strong> that are less sensitive to surface stylistic changes.<br>
+</li>
+</ul>
+
+<p>Recommendation: use a <strong>diverse evaluation suite</strong> combining interactive preference tests and standardized benchmarks to mitigate evaluation biases during post-training.<br></p>
+
+<hr>
+
+<h1 id="risk-of-teaching-hallucination-via-rich-sft-data-and-the-citation-failure-mode">Risk of teaching hallucination via rich SFT data and the citation failure mode</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/00-19-22-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/00-19-22-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/00-19-22-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/00-19-22.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment articulates a key failure mode: when <strong>SFT</strong> displays high-quality, citation-rich targets that the base model does not already know, the model can learn <strong>superficial structural patterns</strong> (e.g., append a citation) rather than correct factual retrieval.<br></p>
+
+<p>Two simultaneous effects of such SFT examples:</p>
+<ul>
+  <li>When the model <strong>already encodes</strong> the fact, the SFT can produce <strong>correct knowledge acquisition</strong>.</li>
+  <li>When the model <strong>lacks</strong> the underlying knowledge, SFT encourages <strong>hallucinatory fabrications</strong> of supporting details.<br>
+</li>
+</ul>
+
+<p>This is a <strong>distributional mismatch</strong>: SFT can incentivize inappropriate surface-level completions if the model cannot <strong>reliably ground</strong> answers.<br></p>
+
+<hr>
+
+<h1 id="mitigation-perspective-abstention-tools-and-reinforcement-approaches">Mitigation perspective: abstention, tools, and reinforcement approaches</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/00-21-37-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/00-21-37-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/00-21-37-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/00-21-37.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment explores mitigation strategies for <strong>hallucination</strong> and inappropriate surface behavior:</p>
+<ul>
+  <li>Train models to <strong>abstain</strong> when uncertain.</li>
+  <li>
+<strong>Augment</strong> models with <strong>retrieval/tooling</strong> to ground claims.</li>
+  <li>Use <strong>reinforcement learning</strong> methods to selectively teach behaviors the model can reliably perform.<br>
+</li>
+</ul>
+
+<p>Practical notes:</p>
+<ul>
+  <li>
+<strong>Abstention</strong> and <strong>tool-use</strong> require explicit dataset design or tool-augmented training.</li>
+  <li>
+<strong>RLHF</strong> and reward-based methods can in principle shape models to prefer abstention or verification when factuality is not assured.<br>
+</li>
+</ul>
+
+<p>Empirical point: models reproduce <strong>known facts</strong> more readily than they learn <strong>new unknown facts</strong> through small SFT datasets.<br></p>
+
+<hr>
+
+<h1 id="counterintuitive-nature-of-high-quality-instruction-data">Counterintuitive nature of ‘high-quality’ instruction data</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/00-24-57-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/00-24-57-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/00-24-57-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/00-24-57.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment summarizes a counterintuitive conclusion: <strong>highly correct and knowledge-rich SFT datasets</strong> can nevertheless <strong>degrade downstream behavior</strong> because they encourage outputs that mimic high-level structures without true grounding.<br></p>
+
+<p>Why this paradox matters:</p>
+<ul>
+  <li>Exposing a model to expert outputs is <strong>insufficient</strong> if the model lacks the internal representation to support those outputs truthfully.</li>
+  <li>Motivates <strong>cautious dataset engineering</strong>, careful <strong>distillation practices</strong>, and <strong>alignment-aware training</strong>.<br>
+</li>
+</ul>
+
+<p>Recommendation: prefer techniques that allow the model to <strong>abstain</strong> or <strong>request tools</strong> rather than forcing proximate but potentially false completions.<br></p>
+
+<hr>
+
+<h1 id="safety-tuning-and-refusal-trade-offs">Safety tuning and refusal trade-offs</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/00-28-19-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/00-28-19-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/00-28-19-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/00-28-19.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment addresses <strong>safety-specific post-training</strong> considerations, describing <strong>safety tuning</strong> as targeted instruction-tuning that mixes refusal, content moderation, and safer completions into training data.<br></p>
+
+<p>Central trade-off:</p>
+<ul>
+  <li>
+<strong>Excessive refusal</strong> reduces utility by blocking legitimate, nuanced queries.</li>
+  <li>
+<strong>Insufficient refusal</strong> allows harmful or toxic outputs to surface.<br>
+</li>
+</ul>
+
+<p>Evidence and practice:</p>
+<ul>
+  <li>Even <strong>small curated safety datasets</strong> (on the order of hundreds of examples) can meaningfully alter behavior.</li>
+  <li>
+<strong>Mixing safety data</strong> into broader instruction tuning is a pragmatic mitigation strategy.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="scaling-instruction-tuning-via-mid-training-data-mixing">Scaling instruction tuning via mid-training data mixing</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/00-30-31-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/00-30-31-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/00-30-31-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/00-30-31.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment explains the practice of <strong>mixing instruction-tuning or high-quality supervision datasets</strong> into later stages of large-scale pre-training (a <strong>mid-training</strong> or <strong>decay-stage mix</strong>).<br></p>
+
+<p>Operational recipe:</p>
+<ol>
+  <li>Conduct standard <strong>pre-training</strong>.</li>
+  <li>Transition into a <strong>decay stage</strong> where the learning rate is annealed.</li>
+  <li>Progressively add higher-quality or <strong>instructional data</strong> into the training mix to integrate instruction-following behavior without catastrophic forgetting.<br>
+</li>
+</ol>
+
+<p>Discussion: mid-training blending blurs the boundary between a <strong>base</strong> pre-trained model and a <strong>post-trained</strong> instruction-tuned model and provides empirical leverage by integrating behavioral data at scale.<br></p>
+
+<hr>
+
+<h1 id="mini-cpm-example-of-two-stage-training-and-data-mix-composition">Mini-CPM example of two-stage training and data mix composition</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/00-31-50-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/00-31-50-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/00-31-50-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/00-31-50.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment uses the <strong>mini-CPM</strong> example to illustrate concrete data-mix engineering: a primary pre-training phase of common-crawl, code, and large corpora followed by a decay/second stage that injects Wikipedia, code-SFT, chat data, and instruction-adjacent corpora.<br></p>
+
+<p>Design rationale:</p>
+<ul>
+  <li>The <strong>decay stage</strong> intentionally contains a <strong>non-pure mixture</strong> (retaining some pre-training data) to avoid catastrophic forgetting.</li>
+  <li>This smoothly shifts model behavior toward <strong>instruction-following</strong> while preserving core capabilities.<br>
+</li>
+</ul>
+
+<p>Empirical note: this two-stage approach is widely used in practice and is effective at integrating instruction-style behaviors into large transformers.<br></p>
+
+<hr>
+
+<h1 id="practical-implication-the-ambiguous-meaning-of-base-models">Practical implication: the ambiguous meaning of ‘base models’</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/00-32-47-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/00-32-47-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/00-32-47-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/00-32-47.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment highlights that widespread mid-training and data mixing complicate the notion of a canonical <strong>“base model”</strong>: many labeled base checkpoints are already influenced by instruction-like data.<br></p>
+
+<p>Consequences for evaluation and comparison:</p>
+<ul>
+  <li>Claims about model capabilities should account for whether the claimed base model includes <strong>mid-training instruction mixtures</strong> or represents <strong>pure pre-training</strong>.</li>
+  <li>Recommend <strong>careful documentation</strong> of data mixtures and training stages when reporting model baselines and public releases.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="concept-thinking-tokens-and-adaptive-pre-training-limitations">Concept: thinking tokens and adaptive pre-training limitations</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/00-35-06-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/00-35-06-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/00-35-06-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/00-35-06.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment discusses an idea to embed <strong>‘thought’ or verification tokens</strong> in pre-training to make the model check its knowledge during training, then assesses practical limitations.<br></p>
+
+<p>Key observations:</p>
+<ul>
+  <li>Adaptive schemes that check whether the model <strong>knows</strong> a fact before applying supervision begin to resemble <strong>reinforcement learning</strong> because they require conditional updates based on current model state.</li>
+  <li>Engineering constraints: static pre-training datasets and batched computation make <strong>adaptive per-example decisions</strong> difficult at pre-training scale without an RL-style training loop and dynamic data generation.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="star-and-quiet-star-style-approaches-for-training-internal-thought-processes">STAR and Quiet-STAR-style approaches for training internal thought processes</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/00-38-01-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/00-38-01-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/00-38-01-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/00-38-01.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment connects internal verification ideas to existing methods such as <strong>STAR</strong> and <strong>Quiet-STAR</strong>, which train models to generate intermediate <strong>‘thought’ traces</strong> and then reinforce those traces conditionally on final correctness.<br></p>
+
+<p>Operational pattern:</p>
+<ol>
+  <li>Predict a <strong>chain-of-thought</strong> or internal reasoning sequence.</li>
+  <li>Evaluate the outcome.</li>
+  <li>Reinforce thought traces that lead to <strong>correct outputs</strong>.<br>
+</li>
+</ol>
+
+<p>Interpretation: these methods effectively implement a form of <strong>reward-guided supervised learning</strong>, akin to early RL-style interventions that shape internal reasoning behaviors.<br></p>
+
+<hr>
+
+<h1 id="style-imprinting-and-token-pattern-learning-in-sft-emoji-example">Style imprinting and token-pattern learning in SFT (emoji example)</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/00-39-51-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/00-39-51-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/00-39-51-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/00-39-51.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment analyzes how <strong>instruction tuning</strong> reliably transfers <strong>output style</strong> and <strong>token-level signatures</strong>—using the emoji example to illustrate that routine post-training tokens get reproduced.<br></p>
+
+<p>Main takeaways:</p>
+<ul>
+  <li>Instruction tuning most reliably teaches the <strong>‘type signature’</strong> or <strong>surface style</strong> of outputs (formatting, length, token presence).</li>
+  <li>
+<strong>Deeper grounded behavior</strong> requires sufficiently diverse and content-rich supervision relative to pre-trained knowledge.<br>
+</li>
+</ul>
+
+<p>The segment emphasizes: surface-style learning is a <strong>predictable outcome of SFT</strong>, while substantive content learning is <strong>scale- and distribution-dependent</strong>.<br></p>
+
+<hr>
+
+<h1 id="instruction-tuning-and-knowledge-acquisition-limits">Instruction tuning and knowledge acquisition limits</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/00-41-18-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/00-41-18-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/00-41-18-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/00-41-18.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment clarifies that <strong>instruction tuning can teach new factual knowledge</strong> if it is <strong>scaled and diversified</strong> sufficiently—especially when integrated via <strong>mid-training</strong>—but smaller SFT-only routines typically have limited capacity to reliably instill novel world knowledge.<br></p>
+
+<p>Key distinctions:</p>
+<ul>
+  <li>Differences hinge on <strong>data scale</strong>, <strong>diversity</strong>, and whether instruction examples are exposed in a <strong>pre-training-like mixing regime</strong>.</li>
+  <li>
+<strong>Mid-training hybrids</strong> bridge pre-training knowledge acquisition and SFT behavioral shaping, enabling both content learning and style transfer.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="transition-to-reinforcement-learning-from-human-feedback-rlhf-conceptual-framing">Transition to reinforcement learning from human feedback (RLHF) conceptual framing</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/00-42-38-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/00-42-38-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/00-42-38-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/00-42-38.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment sets up the conceptual transition from <strong>probabilistic generative modeling</strong> to a <strong>reward-maximization perspective</strong>: instead of estimating a generative reference distribution p*, <strong>RLHF</strong> treats the LM as a <strong>policy π(y|x)</strong> to be optimized for expected reward <strong>R(x,y)</strong>.<br></p>
+
+<p>Formal objective shift:</p>
+<ul>
+  <li>Training target becomes any policy that attains <strong>high expected reward</strong> under a <strong>human-aligned reward function</strong>.</li>
+  <li>This <strong>decouples</strong> training from the goal of matching a specific data distribution and reframes the problem as <strong>policy optimization</strong>.<br>
+</li>
+</ul>
+
+<p>The segment motivates RLHF on conceptual grounds and contrasts <strong>distributional imitation</strong> with <strong>policy optimization</strong>.<br></p>
+
+<hr>
+
+<h1 id="two-primary-rationales-for-rlhf-data-cost-and-generator-validator-asymmetry">Two primary rationales for RLHF: data cost and generator-validator asymmetry</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/00-44-41-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/00-44-41-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/00-44-41-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/00-44-41.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment articulates two practical motivations for <strong>RLHF</strong>:</p>
+<ol>
+  <li>
+<strong>Expert demonstrations</strong> are expensive to collect at scale.</li>
+  <li>
+<strong>Human validators</strong> can often <strong>judge or compare outputs</strong> more cheaply and sometimes more reliably than producing full demonstrations, creating a <strong>generator–validator gap</strong>.<br>
+</li>
+</ol>
+
+<p>Empirical evidence: validators sometimes <strong>prefer model outputs</strong> to their own generations, making <strong>preference data</strong> an efficient supervisory signal.<br></p>
+
+<p>The segment frames <strong>pairwise preference collection</strong> and <strong>reward modeling</strong> as approaches that leverage cheaper validator comparisons to guide policy optimization.<br></p>
+
+<hr>
+
+<h1 id="rlhf-pipeline-pairwise-feedback-reward-modeling-and-policy-optimization">RLHF pipeline: pairwise feedback, reward modeling, and policy optimization</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/00-47-54-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/00-47-54-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/00-47-54-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/00-47-54.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment outlines the standard <strong>RLHF pipeline</strong>:</p>
+<ol>
+  <li>Collect model outputs (<strong>rollouts</strong>).</li>
+  <li>Collect <strong>pairwise human preferences</strong> comparing outputs.</li>
+  <li>Train a <strong>reward model</strong> to predict scalar scores that explain pairwise judgments (e.g., Bradley–Terry/logistic differences).</li>
+  <li>Optimize the policy to increase expected reward, often with a <strong>KL penalty</strong> to limit divergence.<br>
+</li>
+</ol>
+
+<p>Practical details:</p>
+<ul>
+  <li>Data collection interfaces include <strong>side-by-side comparisons</strong> and guidelines emphasizing <strong>helpfulness/truthfulness/harmlessness</strong>.</li>
+  <li>
+<strong>Annotation guidelines</strong> shape reward model semantics; the reward model operationalizes human preferences into a differentiable scalar objective for RL.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="annotation-guidelines-and-practicalities-for-pairwise-preference-collection">Annotation guidelines and practicalities for pairwise preference collection</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/00-51-46-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/00-51-46-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/00-51-46-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/00-51-46.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment reviews concrete <strong>annotation guidelines</strong> used in practice (e.g., InstructGPT, leaked Bard guidelines) that operationalize evaluation into pillars such as <strong>helpfulness</strong>, <strong>truthfulness</strong>, and <strong>harmlessness</strong>, plus style considerations and rating scales.<br></p>
+
+<p>Practical constraints and sensitivities:</p>
+<ul>
+  <li>Annotator time budgets are often <strong>around one minute per example</strong>.</li>
+  <li>Early RLHF efforts used <strong>small annotator pools</strong>, increasing susceptibility to bias.</li>
+  <li>
+<strong>Clear instructions</strong>, rater training, and vendor management materially affect the reliability and systematic biases of preference data.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="interactive-pairwise-evaluation-exercise-outcomes-and-empirical-difficulty">Interactive pairwise evaluation exercise outcomes and empirical difficulty</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/00-55-00-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/00-55-00-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/00-55-00-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/00-55-00.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment reports on an in-class <strong>pairwise evaluation exercise</strong>, documenting empirical challenges:</p>
+<ul>
+  <li>Limited time drastically reduces factual checking.</li>
+  <li>Annotators often choose <strong>longer but hallucinated responses</strong>.</li>
+  <li>Distinguishing correctness requires <strong>decomposing outputs into verifiable claims</strong>, which is labor-intensive.<br>
+</li>
+</ul>
+
+<p>Conclusion: large-scale, high-quality pairwise annotation is <strong>hard, expensive</strong>, and susceptible to annotator shortcuts (e.g., copying model outputs into comparator tools).<br></p>
+
+<hr>
+
+<h1 id="ethical-demographic-and-bias-considerations-in-rlhf-annotation">Ethical, demographic, and bias considerations in RLHF annotation</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/00-57-56-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/00-57-56-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/00-57-56-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/00-57-56.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment discusses ethical and bias considerations in <strong>RLHF data collection</strong>, including annotator compensation, demographic composition effects, and cultural/regional value alignment shifts induced by annotator pools.<br></p>
+
+<p>Empirical evidence: annotator nationality and background can <strong>systematically alter model preferences</strong> (alignment shifts correlated with annotator locations), and different annotator cohorts sometimes <strong>prioritize format over factuality</strong>.<br></p>
+
+<p>Recommendations: careful <strong>annotator selection</strong>, fair <strong>payment practices</strong>, and <strong>transparency about annotator demographics</strong> to mitigate unwanted alignment shifts.<br></p>
+
+<hr>
+
+<h1 id="ai-generated-feedback-adoption-datasets-and-length-confounds">AI-generated feedback adoption, datasets, and length confounds</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/01-00-41-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/01-00-41-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/01-00-41-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/01-00-41.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment surveys the adoption of <strong>AI-generated feedback</strong> for preference labeling (e.g., using GPT-4 or other LMs as cheaper raters), noting strong empirical agreement between AI judges and humans and cost advantages of synthetic raters.<br></p>
+
+<p>Examples and strategies:</p>
+<ul>
+  <li>Projects that heavily use LM-generated preference labels include <strong>UltraFeedback</strong>, <strong>Tulu3</strong>.</li>
+  <li>
+<strong>Constitutional AI</strong> is cited as a rule-based synthetic supervision strategy.<br>
+</li>
+</ul>
+
+<p>Warning: a dominant confound is that both human preferences and automated judges <strong>correlate with output length</strong>, causing reward signals to favor <strong>verbosity</strong> unless explicitly controlled.<br></p>
+
+<hr>
+
+<h1 id="on-policy-versus-off-policy-preference-data-and-prompt-sourcing">On-policy versus off-policy preference data and prompt sourcing</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/01-03-14-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/01-03-14-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/01-03-14-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/01-03-14.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment defines <strong>on-policy preference data</strong> as comparisons sampled from the model being trained and <strong>off-policy data</strong> as comparisons drawn from other models or pre-existing corpora.<br></p>
+
+<p>Roles and trade-offs:</p>
+<ul>
+  <li>
+<strong>Off-policy data</strong> help characterize the broader landscape of possible outputs and can bootstrap reward models.</li>
+  <li>
+<strong>On-policy data</strong> provide targeted feedback for local policy improvement.<br>
+</li>
+</ul>
+
+<p>Prompt sourcing note: using prompts with known answers or existing ground truth helps in some domains (e.g., math) but does not generalize to many open-ended tasks where correctness is subjective or hard to adjudicate.<br></p>
+
+<hr>
+
+<h1 id="capabilities-of-self-improvement-loops-and-practical-limits">Capabilities of self-improvement loops and practical limits</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/01-05-06-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/01-05-06-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/01-05-06-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/01-05-06.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment examines <strong>self-improvement</strong> strategies where models generate outputs and then judge or refine them iteratively, exploiting latent pre-training information via clever prompting and self-refinement.<br></p>
+
+<p>Key caveats:</p>
+<ul>
+  <li>Models theoretically contain vast pre-training information, but <strong>empirical upper bounds and scaling behavior are uncertain</strong>.</li>
+  <li>Effectiveness depends heavily on <strong>prompt engineering</strong>, <strong>model size</strong>, and the nature of the self-critique loop.<br>
+</li>
+</ul>
+
+<p>Framing: self-improvement is both an <strong>information-theoretic</strong> and empirical question; practical effectiveness varies across tasks.<br></p>
+
+<hr>
+
+<h1 id="formal-rlhf-objective-and-reward-modeling-instructgpt-equation">Formal RLHF objective and reward modeling (InstructGPT equation)</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/01-06-40-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/01-06-40-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/01-06-40-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/01-06-40.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment presents the formal <strong>RLHF optimization objective</strong> popularized by InstructGPT: maximize expected reward under a learned reward model while constraining the policy with a <strong>KL divergence</strong> term relative to a reference policy (often the SFT policy).<br></p>
+
+<p>Objective components:</p>
+<ul>
+  <li>
+<strong>Expected reward</strong> term: Eπ[R(x,y)].</li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>
+<strong>KL penalty</strong>: β KL(π</td>
+          <td> </td>
+          <td>π_ref) to prevent excessive deviation and catastrophic forgetting.</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>The reward model is learned from pairwise comparisons via a <strong>Bradley–Terry/logistic</strong> observation model mapping comparative judgments to scalar utilities.<br>
+</li>
+</ul>
+
+<p>Additional regularization may be added to maintain desirable pre-training behaviors.<br></p>
+
+<hr>
+
+<h1 id="policy-optimization-via-policy-gradients-and-ppo-po-overview">Policy optimization via policy gradients and PPO (PO) overview</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/01-09-17-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/01-09-17-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/01-09-17-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/01-09-17.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment introduces <strong>policy-gradient-based methods</strong> used in RLHF (e.g., the PPO family), deriving gradients for expected reward and describing variance-reduction via advantage estimates and baseline subtraction.<br></p>
+
+<p>Practical algorithmic elements:</p>
+<ol>
+  <li>Collect rollouts from the current policy.</li>
+  <li>Compute <strong>advantages</strong> (reward minus baseline).</li>
+  <li>Apply importance-weighted gradient updates for off-policy corrections if needed.</li>
+  <li>Constrain updates using <strong>ratio clipping</strong> or <strong>KL penalties</strong> to stabilize training.<br>
+</li>
+</ol>
+
+<p>Note: <strong>PPO-style clipping</strong> replaces explicit constrained optimization with a practical surrogate that limits policy update magnitudes.<br></p>
+
+<hr>
+
+<h1 id="direct-preference-optimization-dpo-derivation-and-practical-advantages">Direct Preference Optimization (DPO) derivation and practical advantages</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec15/01-12-41-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec15/01-12-41-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec15/01-12-41-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec15/01-12-41.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment derives <strong>Direct Preference Optimization (DPO)</strong> by making a nonparametric mapping between policy and implied reward, using the <strong>Bradley–Terry</strong> model for pairwise comparisons, and converting the RLHF objective into a supervised, maximum-likelihood-like loss over preferences.<br></p>
+
+<p>Core steps and rationale:</p>
+<ul>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>Assume the optimal policy satisfies π*(y</td>
+          <td>x) ∝ p_ref(y</td>
+          <td>x) exp(α R(x,y)).</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>Invert this relationship to express <strong>R</strong> in terms of <strong>π</strong> and <strong>π_ref</strong>.</li>
+  <li>Optimize <strong>π</strong> directly by minimizing a <strong>preference-based likelihood</strong> without an explicit learned reward model or on-policy importance correction.<br>
+</li>
+</ul>
+
+<p>Pragmatic benefits of DPO:</p>
+<ul>
+  <li>
+<strong>Removes the explicit reward model</strong>.</li>
+  <li>Offers <strong>simpler training dynamics</strong>.</li>
+  <li>Empirically effective as a <strong>less complex alternative</strong> to PPO-style RLHF.<br>
+</li>
+</ul>
+
+<hr>
+
+
+    </div>
+  </article>
+
+
+  
+    
+    <br>
+    <hr>
+    <br>
+    <ul class="list-disc pl-8"></ul>
+
+    <!-- Adds related posts to the end of an article -->
+    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
+    <p class="mb-2">Here are some more articles you might like to read next:</p>
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/nlp-foundation/">LLM Series - Part 1 - Important Concepts in NLP</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/diffusion-foundation/">The Foundations and Frontiers of Diffusion Models</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2024/thoughts/">Random Thoughts and Notes</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/deepseek/">DeepSeek-R1</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs336-lec16/">CS336 Lecture 16 - Alignment - RL</a>
+  </li>
+
+</div>
+
+      
+    </div>
+
+    <!-- Footer -->    
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        © Copyright 2025 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+
+      </div>
+    </footer>
+
+    <!-- JavaScripts -->
+    <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- Bootsrap & MDB scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    <!-- Masonry & imagesLoaded -->
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
+    
+  <!-- Medium Zoom JS -->
+  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/zoom.js"></script>
+
+  <!-- Bootstrap Table -->
+  <script defer src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+
+  <!-- Load Common JS -->
+  <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
+  <script defer src="/assets/js/common.js?acdb9690d7641b2f8d40529018c71a01"></script>
+  <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    <!-- MathJax -->
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        tags: 'ams'
+      }
+    };
+  </script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KGSMMS9MS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-7KGSMMS9MS');
+  </script>
+    
+
+<!-- Scrolling Progress Bar -->
+<script type="text/javascript">
+  /*
+   * This JavaScript code has been adapted from the article 
+   * https://css-tricks.com/reading-position-indicator/ authored by Pankaj Parashar, 
+   * published on the website https://css-tricks.com on the 7th of May, 2014.
+   * Couple of changes were made to the original code to make it compatible 
+   * with the `al-foio` theme.
+   */
+  const progressBar = $("#progress");
+  /*
+   * We set up the bar after all elements are done loading.
+   * In some cases, if the images in the page are larger than the intended
+   * size they'll have on the page, they'll be resized via CSS to accomodate
+   * the desired size. This mistake, however, breaks the computations as the
+   * scroll size is computed as soon as the elements finish loading.
+   * To account for this, a minimal delay was introduced before computing the
+   * values.
+   */
+  window.onload = function () {
+    setTimeout(progressBarSetup, 50);
+  };
+  /*
+   * We set up the bar according to the browser.
+   * If the browser supports the progress element we use that.
+   * Otherwise, we resize the bar thru CSS styling
+   */
+  function progressBarSetup() {
+    if ("max" in document.createElement("progress")) {
+      initializeProgressElement();
+      $(document).on("scroll", function() {
+        progressBar.attr({ value: getCurrentScrollPosition() });
+      });
+      $(window).on("resize", initializeProgressElement);
+    } else {
+      resizeProgressBar();
+      $(document).on("scroll", resizeProgressBar);
+      $(window).on("resize", resizeProgressBar);
+    }
+  }
+  /*
+   * The vertical scroll position is the same as the number of pixels that
+   * are hidden from view above the scrollable area. Thus, a value > 0 is
+   * how much the user has scrolled from the top
+   */
+  function getCurrentScrollPosition() {
+    return $(window).scrollTop();
+  }
+
+  function initializeProgressElement() {
+    let navbarHeight = $("#navbar").outerHeight(true);
+    $("body").css({ "padding-top": navbarHeight });
+    $("progress-container").css({ "padding-top": navbarHeight });
+    progressBar.css({ top: navbarHeight });
+    progressBar.attr({
+      max: getDistanceToScroll(),
+      value: getCurrentScrollPosition(),
+    });
+  }
+  /*
+   * The offset between the html document height and the browser viewport
+   * height will be greater than zero if vertical scroll is possible.
+   * This is the distance the user can scroll
+   */
+  function getDistanceToScroll() {
+    return $(document).height() - $(window).height();
+  }
+
+  function resizeProgressBar() {
+    progressBar.css({ width: getWidthPercentage() + "%" });
+  }
+  // The scroll ratio equals the percentage to resize the bar
+  function getWidthPercentage() {
+    return (getCurrentScrollPosition() / getDistanceToScroll()) * 100;
+  }
+</script>
+
+    
+  </body>
+</html>

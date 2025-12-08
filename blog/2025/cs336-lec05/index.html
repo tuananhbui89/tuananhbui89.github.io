@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <!-- Head -->
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    <!-- Metadata, OpenGraph and Schema.org -->
+    
+
+    <!-- Standard metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>CS336 Lecture 5 - GPUs | Tuan-Anh  Bui</title>
+    <meta name="author" content="Tuan-Anh  Bui">
+    <meta name="description" content="AI Summary of CS336 Lecture">
+    <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
+
+
+    <!-- Bootstrap & MDB -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+    <!-- Bootstrap Table -->
+    <link defer rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+
+    <!-- Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
+
+    
+
+    <!-- Styles -->
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
+    
+    <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+    <link rel="canonical" href="https://tuananhbui89.github.io/blog/2025/cs336-lec05/">
+
+    <!-- Dark Mode -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark">
+    <script src="/assets/js/theme.js?96d6b3e1c3604aca8b6134c7afdd5db6"></script>
+    <script src="/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script>
+    
+
+  </head>
+
+  <!-- Body -->
+  <body class="fixed-top-nav ">
+
+    <!-- Header -->
+    <header>
+
+      <!-- Nav Bar -->
+      <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top">
+        <div class="container">
+          <a class="navbar-brand title font-weight-lighter" href="/"><span class="font-weight-bold">Tuan-Anh </span>Bui</a>
+          <!-- Navbar Toggle -->
+          <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar top-bar"></span>
+            <span class="icon-bar middle-bar"></span>
+            <span class="icon-bar bottom-bar"></span>
+          </button>
+
+          <div class="collapse navbar-collapse text-right" id="navbarNav">
+            <ul class="navbar-nav ml-auto flex-nowrap">
+
+              <!-- About -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/">about</a>
+              </li>
+              
+              <!-- Blog -->
+              <li class="nav-item active">
+                <a class="nav-link" href="/blog/">blog<span class="sr-only">(current)</span></a>
+              </li>
+
+              <!-- Other pages -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/publications/">publications</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/projects/">projects</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/repositories/">repositories</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/teaching/"></a>
+              </li>
+
+              <!-- Toogle theme mode -->
+              <li class="toggle-container">
+                <button id="light-toggle" title="Change theme">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Scrolling Progress Bar -->
+      <progress id="progress" value="0">
+        <div class="progress-container">
+          <span class="progress-bar"></span>
+        </div>
+      </progress>
+    </header>
+
+
+    <!-- Content -->
+    <div class="container mt-5">
+      
+        <!-- _layouts/post.html -->
+<!-- Page/Post style -->
+<style type="text/css">
+  
+</style>
+
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">CS336 Lecture 5 - GPUs</h1>
+    <p class="post-meta">December 8, 2025</p>
+    <p class="post-tags">
+      <a href="/blog/2025"> <i class="fas fa-calendar fa-sm"></i> 2025 </a>
+        ·  
+        <a href="/blog/tag/genai">
+          <i class="fas fa-hashtag fa-sm"></i> genai</a>  
+          <a href="/blog/tag/llm">
+          <i class="fas fa-hashtag fa-sm"></i> llm</a>  
+          <a href="/blog/tag/tutorial">
+          <i class="fas fa-hashtag fa-sm"></i> tutorial</a>  
+          <a href="/blog/tag/reading">
+          <i class="fas fa-hashtag fa-sm"></i> reading</a>  
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    
+    <div id="table-of-contents">
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#lecture-objectives-and-roadmap">Lecture objectives and roadmap</a></li>
+<li class="toc-entry toc-h1"><a href="#compute-scaling-motivates-hardware-focused-optimization">Compute scaling motivates hardware-focused optimization</a></li>
+<li class="toc-entry toc-h1"><a href="#cpus-optimize-latency-while-gpus-optimize-throughput">CPUs optimize latency while GPUs optimize throughput</a></li>
+<li class="toc-entry toc-h1"><a href="#gpu-physical-chip-structure-and-memory-proximity-determine-performance">GPU physical chip structure and memory proximity determine performance</a></li>
+<li class="toc-entry toc-h1"><a href="#gpu-execution-granularity-blocks-warps-and-threads">GPU execution granularity: blocks, warps and threads</a></li>
+<li class="toc-entry toc-h1"><a href="#logical-memory-model-registers-shared-and-global-memory">Logical memory model: registers, shared, and global memory</a></li>
+<li class="toc-entry toc-h1"><a href="#tpu-architecture-is-conceptually-similar-to-gpus-with-mxu-specialization">TPU architecture is conceptually similar to GPUs with MXU specialization</a></li>
+<li class="toc-entry toc-h1"><a href="#matrix-multiplies-and-tensor-cores-drive-gpu-value-for-ml">Matrix multiplies and tensor cores drive GPU value for ML</a></li>
+<li class="toc-entry toc-h1"><a href="#compute-has-outpaced-memory-growth-making-memory-movement-the-bottleneck">Compute has outpaced memory growth, making memory movement the bottleneck</a></li>
+<li class="toc-entry toc-h1"><a href="#summary-of-gpu-characteristics-to-guide-optimization">Summary of GPU characteristics to guide optimization</a></li>
+<li class="toc-entry toc-h1"><a href="#roofline-model-explains-memory--vs-compute-bound-regimes">Roofline model explains memory- vs compute-bound regimes</a></li>
+<li class="toc-entry toc-h1"><a href="#warp-divergence-from-conditionals-degrades-throughput">Warp divergence from conditionals degrades throughput</a></li>
+<li class="toc-entry toc-h1"><a href="#lower-precision-arithmetic-increases-effective-memory-bandwidth">Lower-precision arithmetic increases effective memory bandwidth</a></li>
+<li class="toc-entry toc-h1"><a href="#operator-fusion-reduces-global-memory-traffic-by-composing-kernels">Operator fusion reduces global memory traffic by composing kernels</a></li>
+<li class="toc-entry toc-h1"><a href="#recomputation-trades-compute-for-memory-to-reduce-global-accesses">Recomputation trades compute for memory to reduce global accesses</a></li>
+<li class="toc-entry toc-h1"><a href="#dram-burst-transfers-and-memory-coalescing-shape-effective-bandwidth">DRAM burst transfers and memory coalescing shape effective bandwidth</a></li>
+<li class="toc-entry toc-h1"><a href="#tiling-reuses-on-chip-memory-to-amortize-global-memory-cost">Tiling reuses on-chip memory to amortize global memory cost</a></li>
+<li class="toc-entry toc-h1"><a href="#tiling-arithmetic-global-reads-scale-with-nt-and-shared-reads-scale-with-t">Tiling arithmetic: global reads scale with N/T and shared reads scale with T</a></li>
+<li class="toc-entry toc-h1"><a href="#tile-size-discretization-and-alignment-cause-large-throughput-variance">Tile-size discretization and alignment cause large throughput variance</a></li>
+<li class="toc-entry toc-h1"><a href="#wave-quantization-tiles-sm-count-and-occupancy-create-cliffs">Wave quantization: tiles, SM count and occupancy create cliffs</a></li>
+<li class="toc-entry toc-h1"><a href="#practical-optimization-checklist-for-gpu-kernels">Practical optimization checklist for GPU kernels</a></li>
+<li class="toc-entry toc-h1"><a href="#flash-attention-uses-tiling-and-recomputation-to-reduce-hbm-accesses-for-attention">Flash Attention uses tiling and recomputation to reduce HBM accesses for attention</a></li>
+<li class="toc-entry toc-h1"><a href="#attention-computation-is-tiled-but-softmax-is-a-global-normalization-challenge">Attention computation is tiled but softmax is a global normalization challenge</a></li>
+<li class="toc-entry toc-h1"><a href="#online-softmax-enables-tile-by-tile-softmax-computation">Online softmax enables tile-by-tile softmax computation</a></li>
+<li class="toc-entry toc-h1"><a href="#flash-attention-integrates-tiled-matmuls-and-recomputation-for-forward-and-backward-passes">Flash Attention integrates tiled matmuls and recomputation for forward and backward passes</a></li>
+<li class="toc-entry toc-h1"><a href="#final-takeaway-optimize-data-movement-first-then-compute">Final takeaway: optimize data movement first, then compute</a></li>
+</ul>
+    </div>
+    <hr>
+    
+    <div id="markdown-content">
+      <div style="display: flex; justify-content: center;">
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/6OBtO9niT00" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen="">
+    </iframe>
+</div>
+
+<h1 id="lecture-objectives-and-roadmap">Lecture objectives and roadmap</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec05/00-01-46-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec05/00-01-46-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec05/00-01-46-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec05/00-01-46.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The lecture introduces the goals: demystify <strong>CUDA / GPUs</strong> and equip practitioners to accelerate model components with <strong>GPU-aware algorithms and implementations</strong>.<br></p>
+
+<p>Roadmap (three parts):<br></p>
+<ul>
+  <li>
+<strong>Understand GPU hardware and execution model</strong> — learn SMs, warps, memory hierarchy, latency vs throughput tradeoffs.<br>
+</li>
+  <li>
+<strong>Analyze performance characteristics</strong> — why GPUs are fast on some workloads and slow on others, and how to measure bottlenecks.<br>
+</li>
+  <li>
+<strong>Apply lessons to implement high-performance primitives</strong> — practical examples such as <strong>Flash Attention</strong>.<br>
+</li>
+</ul>
+
+<p>The segment also frames assignments and resources for deeper study, and sets expectations for the remainder of the talk.<br></p>
+
+<hr>
+
+<h1 id="compute-scaling-motivates-hardware-focused-optimization">Compute scaling motivates hardware-focused optimization</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec05/00-04-55-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec05/00-04-55-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec05/00-04-55-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec05/00-04-55.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Compute scaling and historical semiconductor trends explain why <strong>parallel hardware</strong> matters for modern deep learning workloads.<br></p>
+
+<ul>
+  <li>
+<strong>Dennard scaling</strong> and <strong>Moore’s Law</strong> drove decades of single-thread frequency and IPC increases. <br>
+</li>
+  <li>When single-thread throughput plateaued, the performance story shifted to <strong>parallel scaling across many cores</strong>. <br>
+</li>
+  <li>The result: exponential growth in <strong>aggregate integer / FLOP throughput</strong> across GPU generations. <br>
+</li>
+  <li>Consequence: efficient utilization of <strong>massively parallel accelerators</strong> is the key lever for model scaling and performance.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="cpus-optimize-latency-while-gpus-optimize-throughput">CPUs optimize latency while GPUs optimize throughput</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec05/00-08-11-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec05/00-08-11-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec05/00-08-11-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec05/00-08-11.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>CPUs and GPUs are architected for different goals, which dictates different programming and algorithmic approaches.<br></p>
+
+<ul>
+  <li>
+<strong>CPUs</strong>:<br>
+    <ul>
+      <li>Allocate significant die area to <strong>control logic</strong>, <strong>branch prediction</strong>, and single-thread performance.<br>
+</li>
+      <li>Optimized to minimize <strong>latency for individual tasks</strong> and handle complex control flow.<br>
+</li>
+    </ul>
+  </li>
+  <li>
+<strong>GPUs</strong>:<br>
+    <ul>
+      <li>Trade control for <strong>massive numbers of ALUs</strong> to maximize <strong>aggregate throughput</strong>.<br>
+</li>
+      <li>Expose many simple processing elements that execute the same instruction across many data elements (<strong>SIMT</strong>).<br>
+</li>
+      <li>Deliver extremely high parallel <strong>FLOPS</strong> at the cost of higher per-thread latency and simplified control.<br>
+</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Implication: design for <strong>latency-sensitive</strong> workloads on CPUs and <strong>throughput-oriented</strong> workloads on GPUs, with algorithms and kernels matched accordingly.<br></p>
+
+<hr>
+
+<h1 id="gpu-physical-chip-structure-and-memory-proximity-determine-performance">GPU physical chip structure and memory proximity determine performance</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec05/00-11-46-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec05/00-11-46-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec05/00-11-46-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec05/00-11-46.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>A GPU chip is organized into many <strong>Streaming Multiprocessors (SMs)</strong> with a layered memory system and strong locality considerations.<br></p>
+
+<ul>
+  <li>Per-SM fast memory: <strong>registers</strong>, <strong>L1</strong>, and <strong>shared memory</strong> (very low latency).<br>
+</li>
+  <li>Chip-level caches and external memory: <strong>L2</strong> and external DRAM (HBM or GDDR) (much higher latency).<br>
+</li>
+  <li>Physical proximity matters: on‑SM accesses take <strong>tens of cycles</strong>, global memory accesses can take <strong>hundreds of cycles</strong>.<br>
+</li>
+</ul>
+
+<p>Design implication: <strong>minimize transfers from global memory</strong> and exploit SM-local storage to keep compute units busy.<br></p>
+
+<hr>
+
+<h1 id="gpu-execution-granularity-blocks-warps-and-threads">GPU execution granularity: blocks, warps and threads</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec05/00-14-19-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec05/00-14-19-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec05/00-14-19-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec05/00-14-19.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>GPU execution organizes work into blocks, warps, and threads — understanding this mapping is critical for high utilization.<br></p>
+
+<ul>
+  <li>
+<strong>Block</strong>: the unit scheduled onto an SM; contains many threads and can use shared memory visible to the block.<br>
+</li>
+  <li>
+<strong>Warp</strong>: typically 32 threads that execute the <strong>same instruction</strong> in lockstep (SIMT).<br>
+</li>
+  <li>
+<strong>Thread</strong>: the smallest program unit, with private registers.<br>
+</li>
+</ul>
+
+<p>Key points:<br></p>
+<ul>
+  <li>A block is assigned to a <strong>single SM</strong> and is executed in warps.<br>
+</li>
+  <li>All threads in a warp must follow the <strong>same instruction stream</strong>; divergence penalizes utilization.<br>
+</li>
+  <li>Kernel design must consider mapping from <strong>blocks → SMs</strong> and <strong>threads → warps</strong> to achieve memory coalescing and high occupancy.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="logical-memory-model-registers-shared-and-global-memory">Logical memory model: registers, shared, and global memory</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec05/00-15-44-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec05/00-15-44-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec05/00-15-44-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec05/00-15-44.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The GPU programming model exposes a hierarchy of logical memories — use each level for its intended purpose.<br></p>
+
+<ul>
+  <li>
+<strong>Per-thread registers</strong>: fastest storage; hold frequently used scalar and temporary values.<br>
+</li>
+  <li>
+<strong>Per-block shared memory</strong>: programmable on-SM scratchpad for collaborative reuse across threads in a block.<br>
+</li>
+  <li>
+<strong>Global memory</strong>: high-latency, visible across blocks; used for large data and inter-block communication.<br>
+</li>
+</ul>
+
+<p>Kernel design rules:<br></p>
+<ul>
+  <li>Keep <strong>hot working sets</strong> in registers / shared memory.<br>
+</li>
+  <li>Minimize <strong>global memory</strong> reads/writes and use it mainly for large persistent storage or cross-block communication.<br>
+</li>
+  <li>Structure kernels to exploit on-SM storage for reuse and locality.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="tpu-architecture-is-conceptually-similar-to-gpus-with-mxu-specialization">TPU architecture is conceptually similar to GPUs with MXU specialization</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec05/00-17-30-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec05/00-17-30-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec05/00-17-30-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec05/00-17-30.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>TPUs share several high-level concepts with GPUs but emphasize specialized matrix hardware.<br></p>
+
+<ul>
+  <li>Commonalities:<br>
+    <ul>
+      <li>Many local compute units, <strong>on-chip fast memory</strong>, and external <strong>high-bandwidth memory</strong>.<br>
+</li>
+      <li>Importance of data locality and tiling strategies.<br>
+</li>
+    </ul>
+  </li>
+  <li>Distinctive TPU features:<br>
+    <ul>
+      <li>Large, highly-optimized <strong>matrix multiply unit (MXU)</strong> for batched matrix multiplies.<br>
+</li>
+      <li>Scalar/vector units for control and element-wise ops, plus specialized on-core memory for tensor operands and accumulators.<br>
+</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Practical takeaway: many GPU optimization patterns (tiling, data locality, memory-hierarchy awareness) carry over to TPU programming, though <strong>interconnect and multi-chip parallelism</strong> differ and must be handled separately.<br></p>
+
+<hr>
+
+<h1 id="matrix-multiplies-and-tensor-cores-drive-gpu-value-for-ml">Matrix multiplies and tensor cores drive GPU value for ML</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec05/00-20-57-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec05/00-20-57-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec05/00-20-57-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec05/00-20-57.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Modern accelerators became dominant because <strong>matrix multiply throughput</strong> outpaced general-purpose FLOPS growth, especially after adding specialized hardware like <strong>tensor cores</strong>.<br></p>
+
+<ul>
+  <li>
+<strong>Tensor cores</strong> provide very high-throughput <strong>mixed-precision matrix multiplication</strong> primitives.<br>
+</li>
+  <li>These units deliver orders-of-magnitude higher <strong>MAP (matrix arithmetic) FLOPS</strong> for matrix operations compared to scalar/non-matrix ops.<br>
+</li>
+  <li>Result: neural architectures and kernels are designed to make the bulk of computation <strong>MAP-friendly</strong> to exploit hardware specialization and achieve superior end-to-end performance.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="compute-has-outpaced-memory-growth-making-memory-movement-the-bottleneck">Compute has outpaced memory growth, making memory movement the bottleneck</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec05/00-24-04-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec05/00-24-04-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec05/00-24-04-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec05/00-24-04.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>External memory bandwidth (host interconnects and device global memory) has grown much more slowly than raw compute capacity, creating a compute-versus-memory imbalance.<br></p>
+
+<ul>
+  <li>Many GPUs are now <strong>compute-rich but memory-starved</strong>.<br>
+</li>
+  <li>End-to-end performance is increasingly determined by how efficiently an algorithm moves data between <strong>DRAM and on-chip buffers</strong>, not just raw FLOPS.<br>
+</li>
+  <li>Designing hardware-efficient algorithms therefore focuses on <strong>minimizing global memory traffic</strong> and <strong>maximizing reuse</strong> in fast on-chip storage.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="summary-of-gpu-characteristics-to-guide-optimization">Summary of GPU characteristics to guide optimization</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec05/00-25-42-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec05/00-25-42-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec05/00-25-42-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec05/00-25-42.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Key GPU facts and the recurring optimization goals they imply:<br></p>
+
+<ul>
+  <li>
+<strong>Massively parallel SIMT execution</strong> — exploits regular, lockstep work across many threads.<br>
+</li>
+  <li>
+<strong>SM-local fast memory vs. slower global memory</strong> — locality and proximity drive performance.<br>
+</li>
+  <li>
+<strong>Hardware preference for matrix multiplies</strong> — matrix-friendly code maps best to peak throughput.<br>
+</li>
+</ul>
+
+<p>Repeated optimization checklist:<br></p>
+<ul>
+  <li>Avoid <strong>branch divergence</strong>.<br>
+</li>
+  <li>Maximize <strong>data locality</strong> in shared memory and registers.<br>
+</li>
+  <li>Optimize memory access patterns (coalescing and alignment).<br>
+</li>
+  <li>Structure work to match SM and warp granularities.<br>
+Keeping these characteristics in mind provides a consistent toolkit for improving GPU kernel performance.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="roofline-model-explains-memory--vs-compute-bound-regimes">Roofline model explains memory- vs compute-bound regimes</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec05/00-27-25-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec05/00-27-25-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec05/00-27-25-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec05/00-27-25.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The roofline model partitions performance into <strong>memory-bound</strong> and <strong>compute-bound</strong> regimes using <strong>arithmetic intensity</strong> (FLOPS per byte).<br></p>
+
+<ul>
+  <li>Low arithmetic intensity or small problems → <strong>memory-bound</strong>: performance limited by global memory bandwidth (diagonal slope on the roofline).<br>
+</li>
+  <li>High arithmetic intensity and large problems → <strong>compute-bound</strong>: kernel can saturate compute and operate at the flat peak of the roofline.<br>
+</li>
+</ul>
+
+<p>Practical implication: increase arithmetic intensity (for example, via <strong>tiling</strong>, <strong>fusion</strong>, or <strong>lower-precision storage</strong>) to move kernels from the memory-limited to the compute-limited regime and unlock higher throughput.<br></p>
+
+<hr>
+
+<h1 id="warp-divergence-from-conditionals-degrades-throughput">Warp divergence from conditionals degrades throughput</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec05/00-29-03-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec05/00-29-03-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec05/00-29-03-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec05/00-29-03.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Warps execute the same instruction; divergent branches inside a warp serialize execution and reduce effective parallelism.<br></p>
+
+<ul>
+  <li>If threads in a warp take different control paths, the GPU runs each branch path in turn while <strong>masking</strong> inactive threads.<br>
+</li>
+  <li>Divergence causes utilization and throughput to drop dramatically because only a subset of threads execute at a time.<br>
+</li>
+</ul>
+
+<p>Strategies to preserve SIMT efficiency:<br></p>
+<ul>
+  <li>Avoid <strong>intra-warp control-flow divergence</strong> where possible.<br>
+</li>
+  <li>Structure workloads so divergent behavior is <strong>segregated across warps</strong> (e.g., group similar-control-flow threads together).<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="lower-precision-arithmetic-increases-effective-memory-bandwidth">Lower-precision arithmetic increases effective memory bandwidth</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec05/00-31-40-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec05/00-31-40-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec05/00-31-40-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec05/00-31-40.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Reducing numeric precision (FP32 → FP16/BF16 → INT8) provides substantial bandwidth and capacity benefits when done carefully.<br></p>
+
+<ul>
+  <li>Lower precision reduces per-value storage and transfer costs, effectively multiplying usable <strong>memory bandwidth</strong> and on-chip cache capacity.<br>
+</li>
+  <li>
+<strong>Mixed-precision</strong> commonly stores matrix inputs in low precision while keeping <strong>accumulators in higher precision (FP32)</strong> to preserve numerical stability.<br>
+</li>
+  <li>Special care is required for operations with <strong>high dynamic range</strong> or sensitivity to rounding.<br>
+</li>
+</ul>
+
+<p>When memory is the bottleneck, moving to lower-precision representations often yields large throughput gains with modest algorithmic changes and careful numerical engineering.<br></p>
+
+<hr>
+
+<h1 id="operator-fusion-reduces-global-memory-traffic-by-composing-kernels">Operator fusion reduces global memory traffic by composing kernels</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec05/00-35-31-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec05/00-35-31-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec05/00-35-31-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec05/00-35-31.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Operator fusion combines multiple sequential small operations into a single kernel so data stays in registers or shared memory.<br></p>
+
+<ul>
+  <li>Fusion eliminates intermediate writes to and reads from <strong>global memory</strong>, drastically reducing memory traffic and launch overhead for small operators.<br>
+</li>
+  <li>Compilers and frameworks (for example, <strong>torch.compile</strong> or fused CUDA kernels) can perform fusion automatically.<br>
+</li>
+  <li>Result: increased <strong>arithmetic intensity</strong> and improved end-to-end throughput for fused operator sequences.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="recomputation-trades-compute-for-memory-to-reduce-global-accesses">Recomputation trades compute for memory to reduce global accesses</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec05/00-39-36-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec05/00-39-36-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec05/00-39-36-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec05/00-39-36.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Recomputation (checkpointing) trades extra FLOPS for reduced memory traffic by recomputing intermediates instead of storing them in global memory.<br></p>
+
+<ul>
+  <li>Useful when a workload is <strong>memory-bound and compute-rich</strong>: use idle compute cycles to regenerate data that would otherwise require expensive DRAM reads.<br>
+</li>
+  <li>Trade-offs to consider:<br>
+    <ul>
+      <li>Wall-clock improvement depends on the relative cost of recompute FLOPS vs. DRAM access latency and bandwidth.<br>
+</li>
+      <li>Numerical determinism and reproducibility constraints.<br>
+</li>
+      <li>Memory footprint vs. recompute overhead balance.<br>
+Implementations must carefully choose which activations to checkpoint and which to recompute during the backward pass.<br>
+</li>
+    </ul>
+  </li>
+</ul>
+
+<hr>
+
+<h1 id="dram-burst-transfers-and-memory-coalescing-shape-effective-bandwidth">DRAM burst transfers and memory coalescing shape effective bandwidth</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec05/00-44-19-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec05/00-44-19-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec05/00-44-19-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec05/00-44-19.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>DRAM returns contiguous bursts of data per access; GPUs exploit this via <strong>coalesced memory accesses</strong>.<br></p>
+
+<ul>
+  <li>A single DRAM access typically fetches a contiguous <strong>burst section</strong>, bringing neighboring addresses into an on-chip buffer.<br>
+</li>
+  <li>GPUs <strong>coalesce</strong> memory requests from threads in a warp so that nearby accesses combine into a single transfer, greatly amplifying throughput.<br>
+</li>
+</ul>
+
+<p>Kernel design implications:<br></p>
+<ul>
+  <li>Layout arrays and choose memory strides so warp threads request <strong>nearby addresses</strong> (match row-major vs column-major to access pattern).<br>
+</li>
+  <li>Proper alignment and stride choices maximize coalescing and eliminate superfluous DRAM transactions.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="tiling-reuses-on-chip-memory-to-amortize-global-memory-cost">Tiling reuses on-chip memory to amortize global memory cost</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec05/00-50-01-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec05/00-50-01-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec05/00-50-01-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec05/00-50-01.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Tiling partitions large matrix or tensor computations into small sub-blocks that fit into shared memory to maximize reuse.<br></p>
+
+<ol>
+  <li>Load a tile from global memory into <strong>shared memory</strong> once.<br>
+</li>
+  <li>Reuse that tile for many FLOPS inside the SM.<br>
+</li>
+  <li>Write results back to DRAM once when finished.<br>
+</li>
+</ol>
+
+<p>Benefits and considerations:<br></p>
+<ul>
+  <li>Tiling reduces global reads by a factor proportional to the tile dimension <strong>T</strong>, increasing arithmetic intensity.<br>
+</li>
+  <li>Effective tiling requires tuning <strong>tile sizes</strong> to shared memory capacity, ensuring coalesced loads, and matching tile shapes to the hardware’s preferred micro-tiles.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="tiling-arithmetic-global-reads-scale-with-nt-and-shared-reads-scale-with-t">Tiling arithmetic: global reads scale with N/T and shared reads scale with T</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec05/00-55-54-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec05/00-55-54-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec05/00-55-54-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec05/00-55-54.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>For an N×N matrix multiply with tile size T, global memory loads per operand are reduced from O(N) per result to approximately O(N/T) per tile plus O(T) reuse inside shared memory.<br></p>
+
+<ul>
+  <li>The total number of global memory reads is reduced by roughly a factor of <strong>T</strong> compared to the naive non-tiled algorithm (modulo tiling overhead and alignment constraints).<br>
+</li>
+  <li>This reduction in DRAM traffic is the primary reason tiled matrix multiplication dramatically increases arithmetic intensity and overall device utilization on modern GPUs.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="tile-size-discretization-and-alignment-cause-large-throughput-variance">Tile-size discretization and alignment cause large throughput variance</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec05/01-00-56-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec05/01-00-56-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec05/01-00-56-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec05/01-00-56.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Tile sizing, matrix dimension divisibility, and hardware granularities produce quantized performance behavior that must be managed.<br></p>
+
+<ul>
+  <li>
+<strong>Non-divisible dimensions</strong> create partially filled tiles that underutilize threads and SM resources.<br>
+</li>
+  <li>
+<strong>Misaligned tiles</strong> can break DRAM burst coalescing and double memory transactions.<br>
+</li>
+  <li>These discretization effects produce wavelike performance curves as problem sizes change.<br>
+</li>
+</ul>
+
+<p>Mitigation strategies:<br></p>
+<ul>
+  <li>Carefully select or <strong>pad dimensions</strong> to align with tile sizes, warp size, and burst alignment.<br>
+</li>
+  <li>Tune tile sizes to avoid pathological underutilization on typical problem sizes.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="wave-quantization-tiles-sm-count-and-occupancy-create-cliffs">Wave quantization: tiles, SM count and occupancy create cliffs</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec05/01-03-44-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec05/01-03-44-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec05/01-03-44-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec05/01-03-44.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The number of tiles (blocks) relative to the physical SM count yields <strong>occupancy quantization</strong> and wave-based dispatch behavior.<br></p>
+
+<ul>
+  <li>If total tiles barely exceed or fall short of the SM count, work dispatch happens in <strong>waves</strong>, creating utilization cliffs.<br>
+</li>
+  <li>Small changes in matrix dimension can change the number of tiles from evenly mapping across SMs to leaving many SMs idle while a few execute leftover tiles, producing large throughput drops.<br>
+</li>
+</ul>
+
+<p>Avoidance techniques:<br></p>
+<ul>
+  <li>Choose tile sizes and partitions that <strong>distribute work evenly</strong> across all SMs.<br>
+</li>
+  <li>Increase the number of independent blocks (more fine-grained partitioning) to <strong>smooth occupancy</strong> and avoid wave cliffs.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="practical-optimization-checklist-for-gpu-kernels">Practical optimization checklist for GPU kernels</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec05/01-04-37-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec05/01-04-37-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec05/01-04-37-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec05/01-04-37.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Effective GPU optimization centers on minimizing global memory accesses and maximizing on-chip reuse via coalescing, fusion, and shared-memory tiling.<br></p>
+
+<p>Key tactics:<br></p>
+<ul>
+  <li>Design access patterns for <strong>burst-coalesced reads</strong> and proper alignment.<br>
+</li>
+  <li>
+<strong>Fuse</strong> small operators into single kernels to avoid intermediate global writes.<br>
+</li>
+  <li>
+<strong>Tile</strong> computations to fit shared memory and reuse loaded data for many FLOPS.<br>
+</li>
+  <li>
+<strong>Trade compute for memory</strong> with recomputation/checkpointing when DRAM is the bottleneck.<br>
+</li>
+  <li>Choose <strong>numeric precision</strong> that balances bandwidth savings with numerical stability.<br>
+</li>
+</ul>
+
+<p>Collectively, these strategies increase arithmetic intensity and move kernels toward the compute-bound roofline.<br></p>
+
+<hr>
+
+<h1 id="flash-attention-uses-tiling-and-recomputation-to-reduce-hbm-accesses-for-attention">Flash Attention uses tiling and recomputation to reduce HBM accesses for attention</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec05/01-05-46-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec05/01-05-46-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec05/01-05-46-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec05/01-05-46.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Flash Attention</strong> implements attention with tiled matrix multiplies and an <strong>online softmax</strong>, enabling exact attention with sub-quadratic HBM accesses.<br></p>
+
+<ul>
+  <li>Keeps as much intermediate data in <strong>shared memory</strong> as possible.<br>
+</li>
+  <li>Computes softmax normalization terms <strong>incrementally per tile</strong> (online), avoiding materializing large N×N matrices in global memory.<br>
+</li>
+  <li>Trades extra local computation and careful tiling for dramatically fewer global reads/writes, yielding large speedups for long-context transformer attention.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="attention-computation-is-tiled-but-softmax-is-a-global-normalization-challenge">Attention computation is tiled but softmax is a global normalization challenge</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec05/01-08-50-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec05/01-08-50-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec05/01-08-50-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec05/01-08-50.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Attention decomposes into three steps: compute <strong>QK^T</strong>, apply a row-wise <strong>softmax</strong>, then multiply by <strong>V</strong> — the softmax normalization is the algorithmic challenge for tiled execution.<br></p>
+
+<ul>
+  <li>The KQ product can be tiled and accumulated across tiles.<br>
+</li>
+  <li>The <strong>row-wise softmax normalization</strong> requires the sum of exponentials per row — a global reduction if done naively.<br>
+</li>
+  <li>Materializing full N×N logits violates on-chip memory limits, so a <strong>tile-by-tile online algorithm</strong> that maintains per-row state is required to evaluate softmax without full-matrix storage.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="online-softmax-enables-tile-by-tile-softmax-computation">Online softmax enables tile-by-tile softmax computation</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec05/01-11-51-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec05/01-11-51-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec05/01-11-51-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec05/01-11-51.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The online softmax algorithm maintains a running maximum and a running sum of exponentials corrected for changes in the maximum as new elements arrive — enabling streaming, numerically stable normalization.<br></p>
+
+<ul>
+  <li>For each incoming tile of logits the algorithm:<br>
+    <ul>
+      <li>Updates the <strong>running max</strong> for the row.<br>
+</li>
+      <li>
+<strong>Rescales the running sum</strong> to account for any max change and adds the tile’s contributions.<br>
+</li>
+    </ul>
+  </li>
+  <li>This telescoping/online formulation preserves numerical stability and computes the normalization factor from per-tile state, avoiding the need to store full N×N logits in global memory.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="flash-attention-integrates-tiled-matmuls-and-recomputation-for-forward-and-backward-passes">Flash Attention integrates tiled matmuls and recomputation for forward and backward passes</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec05/01-12-51-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec05/01-12-51-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec05/01-12-51-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec05/01-12-51.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Flash Attention forward and backward mechanics combine tiling, online reduction, and recomputation to avoid N^2 storage while remaining exact.<br></p>
+
+<p>Forward pass (high level):<br></p>
+<ol>
+  <li>Tile Q and K, compute dot-product tiles and accumulate per-row logits.<br>
+</li>
+  <li>Update <strong>online softmax</strong> statistics per row tile (running max and sum).<br>
+</li>
+  <li>Apply normalized weights to V in tiled form — <strong>no N×N matrix</strong> is materialized in HBM.<br>
+</li>
+</ol>
+
+<p>Backward pass strategy:<br></p>
+<ul>
+  <li>Use <strong>recomputation</strong>: re-evaluate tiles on the fly during gradient propagation instead of storing N^2 activations to global memory.<br>
+</li>
+  <li>Trade extra FLOPS for reduced DRAM traffic and memory footprint.<br>
+</li>
+</ul>
+
+<p>Combined effect: tiling, coalesced accesses, online reduction, selective low precision, and recomputation yield significant throughput and memory-efficiency improvements in Flash Attention implementations.<br></p>
+
+<hr>
+
+<h1 id="final-takeaway-optimize-data-movement-first-then-compute">Final takeaway: optimize data movement first, then compute</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec05/01-13-35-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec05/01-13-35-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec05/01-13-35-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec05/01-13-35.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Hardware trends make <strong>memory movement</strong> the dominant limiter for large models, so algorithm and implementation efforts should prioritize minimizing global memory traffic and maximizing on-chip reuse.<br></p>
+
+<p>Practical toolkit for high performance:<br></p>
+<ul>
+  <li>Lower precision when safe (mixed-precision).<br>
+</li>
+  <li>Fuse operators to avoid intermediate DRAM writes.<br>
+</li>
+  <li>Coalesce memory accesses and align buffers for bursts.<br>
+</li>
+  <li>Tile to exploit shared memory and increase reuse.<br>
+</li>
+  <li>Recompute activations selectively to trade FLOPS for reduced DRAM access.<br>
+</li>
+</ul>
+
+<p>Applied systematically, these techniques raise arithmetic intensity, move kernels toward compute-bound performance, and enable state-of-the-art primitives such as <strong>Flash Attention</strong> for scalable transformer training and inference.<br></p>
+
+<hr>
+
+
+    </div>
+  </article>
+
+
+  
+    
+    <br>
+    <hr>
+    <br>
+    <ul class="list-disc pl-8"></ul>
+
+    <!-- Adds related posts to the end of an article -->
+    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
+    <p class="mb-2">Here are some more articles you might like to read next:</p>
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs336-lec07/">CS336 Lecture 7 - Parallelism</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs336-lec08/">CS336 Lecture 8 -  Parallelism - Part 2</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/diffusion-foundation/">The Foundations and Frontiers of Diffusion Models</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/nlp-foundation/">LLM Series - Part 1 - Important Concepts in NLP</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs336-lec01/">CS336 Lecture 1 - Overview and Tokenization</a>
+  </li>
+
+</div>
+
+      
+    </div>
+
+    <!-- Footer -->    
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        © Copyright 2025 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+
+      </div>
+    </footer>
+
+    <!-- JavaScripts -->
+    <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- Bootsrap & MDB scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    <!-- Masonry & imagesLoaded -->
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
+    
+  <!-- Medium Zoom JS -->
+  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/zoom.js"></script>
+
+  <!-- Bootstrap Table -->
+  <script defer src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+
+  <!-- Load Common JS -->
+  <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
+  <script defer src="/assets/js/common.js?acdb9690d7641b2f8d40529018c71a01"></script>
+  <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    <!-- MathJax -->
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        tags: 'ams'
+      }
+    };
+  </script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KGSMMS9MS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-7KGSMMS9MS');
+  </script>
+    
+
+<!-- Scrolling Progress Bar -->
+<script type="text/javascript">
+  /*
+   * This JavaScript code has been adapted from the article 
+   * https://css-tricks.com/reading-position-indicator/ authored by Pankaj Parashar, 
+   * published on the website https://css-tricks.com on the 7th of May, 2014.
+   * Couple of changes were made to the original code to make it compatible 
+   * with the `al-foio` theme.
+   */
+  const progressBar = $("#progress");
+  /*
+   * We set up the bar after all elements are done loading.
+   * In some cases, if the images in the page are larger than the intended
+   * size they'll have on the page, they'll be resized via CSS to accomodate
+   * the desired size. This mistake, however, breaks the computations as the
+   * scroll size is computed as soon as the elements finish loading.
+   * To account for this, a minimal delay was introduced before computing the
+   * values.
+   */
+  window.onload = function () {
+    setTimeout(progressBarSetup, 50);
+  };
+  /*
+   * We set up the bar according to the browser.
+   * If the browser supports the progress element we use that.
+   * Otherwise, we resize the bar thru CSS styling
+   */
+  function progressBarSetup() {
+    if ("max" in document.createElement("progress")) {
+      initializeProgressElement();
+      $(document).on("scroll", function() {
+        progressBar.attr({ value: getCurrentScrollPosition() });
+      });
+      $(window).on("resize", initializeProgressElement);
+    } else {
+      resizeProgressBar();
+      $(document).on("scroll", resizeProgressBar);
+      $(window).on("resize", resizeProgressBar);
+    }
+  }
+  /*
+   * The vertical scroll position is the same as the number of pixels that
+   * are hidden from view above the scrollable area. Thus, a value > 0 is
+   * how much the user has scrolled from the top
+   */
+  function getCurrentScrollPosition() {
+    return $(window).scrollTop();
+  }
+
+  function initializeProgressElement() {
+    let navbarHeight = $("#navbar").outerHeight(true);
+    $("body").css({ "padding-top": navbarHeight });
+    $("progress-container").css({ "padding-top": navbarHeight });
+    progressBar.css({ top: navbarHeight });
+    progressBar.attr({
+      max: getDistanceToScroll(),
+      value: getCurrentScrollPosition(),
+    });
+  }
+  /*
+   * The offset between the html document height and the browser viewport
+   * height will be greater than zero if vertical scroll is possible.
+   * This is the distance the user can scroll
+   */
+  function getDistanceToScroll() {
+    return $(document).height() - $(window).height();
+  }
+
+  function resizeProgressBar() {
+    progressBar.css({ width: getWidthPercentage() + "%" });
+  }
+  // The scroll ratio equals the percentage to resize the bar
+  function getWidthPercentage() {
+    return (getCurrentScrollPosition() / getDistanceToScroll()) * 100;
+  }
+</script>
+
+    
+  </body>
+</html>
