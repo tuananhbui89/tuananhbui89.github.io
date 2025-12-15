@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <!-- Head -->
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    <!-- Metadata, OpenGraph and Schema.org -->
+    
+
+    <!-- Standard metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Karpathy Series - Let's build the GPT Tokenizer | Tuan-Anh  Bui</title>
+    <meta name="author" content="Tuan-Anh  Bui">
+    <meta name="description" content="AI Summary Lecture">
+    <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
+
+
+    <!-- Bootstrap & MDB -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+    <!-- Bootstrap Table -->
+    <link defer rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+
+    <!-- Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
+
+    
+
+    <!-- Styles -->
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
+    
+    <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+    <link rel="canonical" href="https://tuananhbui89.github.io/blog/2025/karpathy-lec11/">
+
+    <!-- Dark Mode -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark">
+    <script src="/assets/js/theme.js?96d6b3e1c3604aca8b6134c7afdd5db6"></script>
+    <script src="/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script>
+    
+
+  </head>
+
+  <!-- Body -->
+  <body class="fixed-top-nav ">
+
+    <!-- Header -->
+    <header>
+
+      <!-- Nav Bar -->
+      <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top">
+        <div class="container">
+          <a class="navbar-brand title font-weight-lighter" href="/"><span class="font-weight-bold">Tuan-Anh </span>Bui</a>
+          <!-- Navbar Toggle -->
+          <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar top-bar"></span>
+            <span class="icon-bar middle-bar"></span>
+            <span class="icon-bar bottom-bar"></span>
+          </button>
+
+          <div class="collapse navbar-collapse text-right" id="navbarNav">
+            <ul class="navbar-nav ml-auto flex-nowrap">
+
+              <!-- About -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/">about</a>
+              </li>
+              
+              <!-- Blog -->
+              <li class="nav-item active">
+                <a class="nav-link" href="/blog/">blog<span class="sr-only">(current)</span></a>
+              </li>
+
+              <!-- Other pages -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/publications/">publications</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/projects/">projects</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/repositories/">repositories</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/teaching/"></a>
+              </li>
+
+              <!-- Toogle theme mode -->
+              <li class="toggle-container">
+                <button id="light-toggle" title="Change theme">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Scrolling Progress Bar -->
+      <progress id="progress" value="0">
+        <div class="progress-container">
+          <span class="progress-bar"></span>
+        </div>
+      </progress>
+    </header>
+
+
+    <!-- Content -->
+    <div class="container mt-5">
+      
+        <!-- _layouts/post.html -->
+<!-- Page/Post style -->
+<style type="text/css">
+  
+</style>
+
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Karpathy Series - Let's build the GPT Tokenizer</h1>
+    <p class="post-meta">December 15, 2025</p>
+    <p class="post-tags">
+      <a href="/blog/2025"> <i class="fas fa-calendar fa-sm"></i> 2025 </a>
+        ·  
+        <a href="/blog/tag/genai">
+          <i class="fas fa-hashtag fa-sm"></i> genai</a>  
+          <a href="/blog/tag/llm">
+          <i class="fas fa-hashtag fa-sm"></i> llm</a>  
+          <a href="/blog/tag/tutorial">
+          <i class="fas fa-hashtag fa-sm"></i> tutorial</a>  
+          <a href="/blog/tag/reading">
+          <i class="fas fa-hashtag fa-sm"></i> reading</a>  
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    
+    <div id="table-of-contents">
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#tokenization-is-a-necessary-and-often-problematic-preprocessing-step-for-large-language-models">Tokenization is a necessary and often problematic preprocessing step for large language models</a></li>
+<li class="toc-entry toc-h1"><a href="#a-naive-character-level-tokenizer-maps-each-character-to-a-unique-integer-and-feeds-embeddings-to-the-transformer">A naive character-level tokenizer maps each character to a unique integer and feeds embeddings to the Transformer</a></li>
+<li class="toc-entry toc-h1"><a href="#modern-llm-tokenizers-operate-on-subword-or-byte-level-chunks-and-are-typically-constructed-with-algorithms-like-byte-pair-encoding">Modern LLM tokenizers operate on subword or byte-level chunks and are typically constructed with algorithms like byte-pair encoding</a></li>
+<li class="toc-entry toc-h1"><a href="#tokenization-causes-many-surprising-application-level-behaviors-in-llms">Tokenization causes many surprising application-level behaviors in LLMs</a></li>
+<li class="toc-entry toc-h1"><a href="#interactive-tokenizer-visualizers-expose-token-boundaries-whitespace-handling-and-model-specific-token-ids">Interactive tokenizer visualizers expose token boundaries, whitespace handling, and model-specific token IDs</a></li>
+<li class="toc-entry toc-h1"><a href="#numeric-strings-are-tokenized-inconsistently-and-arbitrarily-which-impairs-arithmetic-and-digit-level-tasks">Numeric strings are tokenized inconsistently and arbitrarily which impairs arithmetic and digit-level tasks</a></li>
+<li class="toc-entry toc-h1"><a href="#tokenization-is-case-sensitive-and-context-sensitive-causing-identical-surface-strings-to-map-to-different-tokens">Tokenization is case-sensitive and context-sensitive, causing identical surface strings to map to different tokens</a></li>
+<li class="toc-entry toc-h1"><a href="#poor-tokenization-of-indentation-and-repeated-whitespace-makes-code-inefficient-to-represent-and-reduces-effective-context">Poor tokenization of indentation and repeated whitespace makes code inefficient to represent and reduces effective context</a></li>
+<li class="toc-entry toc-h1"><a href="#improvements-in-tokenization-larger-vocabulary-and-better-whitespace-grouping-materially-improve-model-performance-on-code-and-length-of-context">Improvements in tokenization (larger vocabulary and better whitespace grouping) materially improve model performance on code and length of context</a></li>
+<li class="toc-entry toc-h1"><a href="#strings-in-python-are-sequences-of-unicode-code-points-ord-reveals-codepoint-integers-but-using-them-directly-as-tokens-is-problematic">Strings in Python are sequences of Unicode code points; ord() reveals codepoint integers but using them directly as tokens is problematic</a></li>
+<li class="toc-entry toc-h1"><a href="#byte-encodings-utf-81632-transform-code-points-into-byte-streams-utf-8-is-the-ubiquitous-variable-length-choice">Byte encodings (UTF-8/16/32) transform code points into byte streams; UTF-8 is the ubiquitous variable-length choice</a></li>
+<li class="toc-entry toc-h1"><a href="#byte-pair-encoding-bpe-compresses-byte-or-character-sequences-by-iteratively-merging-frequent-adjacent-pairs-into-new-tokens">Byte-Pair Encoding (BPE) compresses byte or character sequences by iteratively merging frequent adjacent pairs into new tokens</a></li>
+<li class="toc-entry toc-h1"><a href="#implementing-bpe-requires-counting-adjacent-pair-frequencies-and-applying-pair-replacements-practical-code-iterates-until-the-target-vocab-size">Implementing BPE requires counting adjacent pair frequencies and applying pair replacements; practical code iterates until the target vocab size</a></li>
+<li class="toc-entry toc-h1"><a href="#training-a-tokenizer-on-larger-corpora-and-choosing-the-merge-count-determines-compression-ratio-and-vocabulary-composition">Training a tokenizer on larger corpora and choosing the merge count determines compression ratio and vocabulary composition</a></li>
+<li class="toc-entry toc-h1"><a href="#the-tokenizer-is-a-separate-preprocessing-artifact-with-its-own-training-set-and-resulting-encodedecode-functions">The tokenizer is a separate preprocessing artifact with its own training set and resulting encode/decode functions</a></li>
+<li class="toc-entry toc-h1"><a href="#decoding-tokens-to-text-concatenates-token-byte-sequences-and-decodes-via-utf-8-with-error-handling">Decoding tokens to text concatenates token byte sequences and decodes via UTF-8 with error handling</a></li>
+<li class="toc-entry toc-h1"><a href="#encoding-text-into-tokens-applies-merges-in-merge-order-and-must-respect-merge-eligibility-and-order-constraints">Encoding text into tokens applies merges in merge-order and must respect merge eligibility and order constraints</a></li>
+<li class="toc-entry toc-h1"><a href="#real-world-tokenizers-add-manual-heuristics-to-bpe-regex-chunking-prevents-semantically-bad-merges">Real-world tokenizers add manual heuristics to BPE: regex chunking prevents semantically bad merges</a></li>
+<li class="toc-entry toc-h1"><a href="#regex-based-chunking-contains-many-subtle-language-and-unicode-issues-apostrophes-case-whitespace-handling">Regex-based chunking contains many subtle language and Unicode issues (apostrophes, case, whitespace handling)</a></li>
+<li class="toc-entry toc-h1"><a href="#the-inference-code-for-gpt-2s-tokenizer-encoderpy-implements-bpe-application-but-the-original-training-code-was-not-released">The inference code for GPT-2’s tokenizer (encoder.py) implements BPE application but the original training code was not released</a></li>
+</ul>
+    </div>
+    <hr>
+    
+    <div id="markdown-content">
+      <div style="display: flex; justify-content: center;">
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/zduSFxRajkE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen="">
+    </iframe>
+</div>
+
+<h1 id="tokenization-is-a-necessary-and-often-problematic-preprocessing-step-for-large-language-models">Tokenization is a necessary and often problematic preprocessing step for large language models</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec11/00-00-13-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec11/00-00-13-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec11/00-00-13-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec11/00-00-13.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Tokenization</strong> is the process that translates raw text strings into discrete <strong>token sequences</strong> that language models operate on — it converts text into integer indices used to look up trainable <strong>embedding vectors</strong>.<br></p>
+
+<p>Because tokenization defines the model’s input units, it introduces subtle <strong>failure modes</strong> and <strong>distribution mismatches</strong> that often explain odd model behavior. What looks like an architecture bug frequently traces back to tokenizer choices, so practitioners must understand tokenization in detail to: <br></p>
+
+<ul>
+  <li>Diagnose errors across multilingual and special-character inputs<br>
+</li>
+  <li>Design token vocabularies and preprocessing pipelines<br>
+</li>
+  <li>Evaluate tokenization as a distinct part of the <strong>data pipeline</strong>, engineered and tested independently of model architecture<br>
+</li>
+</ul>
+
+<p>Tokenization therefore requires careful engineering, monitoring, and evaluation rather than being an incidental preprocessing step.<br></p>
+
+<hr>
+
+<h1 id="a-naive-character-level-tokenizer-maps-each-character-to-a-unique-integer-and-feeds-embeddings-to-the-transformer">A naive character-level tokenizer maps each character to a unique integer and feeds embeddings to the Transformer</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec11/00-01-23-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec11/00-01-23-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec11/00-01-23-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec11/00-01-23.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>A <strong>character-level tokenizer</strong> builds a vocabulary of the individual characters observed in the corpus and maps each character to an integer token ID.<br></p>
+
+<ul>
+  <li>Every character in a string becomes one token; the model learns a trainable <strong>embedding row</strong> per character that feeds into the Transformer.<br>
+</li>
+  <li>Pros: simple, stable, and pedagogically useful.<br>
+</li>
+  <li>Cons: highly inefficient for long-range dependencies because sequence lengths are large while embeddings/softmax sizes remain small — this forces long context windows and poor compression.<br>
+</li>
+</ul>
+
+<p>Character tokenizers can work for small-domain tasks, but they lack the compression needed to scale to web-scale corpora without prohibitive context lengths.<br></p>
+
+<hr>
+
+<h1 id="modern-llm-tokenizers-operate-on-subword-or-byte-level-chunks-and-are-typically-constructed-with-algorithms-like-byte-pair-encoding">Modern LLM tokenizers operate on subword or byte-level chunks and are typically constructed with algorithms like byte-pair encoding</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec11/00-03-19-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec11/00-03-19-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec11/00-03-19-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec11/00-03-19.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>State-of-the-art models use variable-length <strong>subword chunks</strong> or <strong>byte-level units</strong> rather than pure character tokenizers, often built with algorithms like <strong>byte-pair encoding (BPE)</strong>.<br></p>
+
+<ul>
+  <li>
+<strong>BPE</strong> iteratively merges frequently co-occurring token pairs to trade vocabulary size against sequence length.<br>
+</li>
+  <li>Tokens are the atomic units of attention and context, so <strong>vocabulary size</strong> and <strong>chunking</strong> directly determine how much raw text a model can attend to and how it must generalize.<br>
+</li>
+  <li>Papers (e.g., GPT-2) report concrete vocabulary and context settings (for example, ~<strong>50k tokens</strong> and <strong>1,024 token</strong> context) because these numbers materially affect model behavior.<br>
+</li>
+</ul>
+
+<p>Choosing chunking strategy and vocabulary size is therefore fundamental to model capacity and efficiency.<br></p>
+
+<hr>
+
+<h1 id="tokenization-causes-many-surprising-application-level-behaviors-in-llms">Tokenization causes many surprising application-level behaviors in LLMs</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec11/00-05-06-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec11/00-05-06-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec11/00-05-06-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec11/00-05-06.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Many LLM quirks — spelling issues, weak non-English performance, odd JSON/YAML outputs, trailing-space artifacts — often originate in <strong>tokenization</strong> rather than the Transformer itself.<br></p>
+
+<ul>
+  <li>Tokenization determines what the model treats as <strong>atomic units</strong>, which affects training frequency of tokens and the model’s generalization burden.<br>
+</li>
+  <li>Because tokenizers are a preprocessing stage trained separately and can differ across datasets/models, they are a frequent source of <strong>domain mismatch</strong> and hard-to-diagnose bugs.<br>
+</li>
+  <li>Diagnosing these issues typically requires inspection of <strong>token boundaries</strong> and <strong>vocabularies</strong> rather than only model weights or architecture.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="interactive-tokenizer-visualizers-expose-token-boundaries-whitespace-handling-and-model-specific-token-ids">Interactive tokenizer visualizers expose token boundaries, whitespace handling, and model-specific token IDs</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec11/00-06-39-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec11/00-06-39-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec11/00-06-39-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec11/00-06-39.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Browser-based <strong>tokenizer visualizers</strong> are practical debugging tools: they split text into colored, indexed tokens and reveal implementation details.<br></p>
+
+<p>What these tools show and why they matter: <br></p>
+
+<ul>
+  <li>Whether <strong>whitespace</strong> is part of tokens (e.g., “ space+word” vs “word”)<br>
+</li>
+  <li>Token IDs for punctuation, digits, and other glyphs<br>
+</li>
+  <li>Differences in segmentation between tokenizers (e.g., GPT-2 vs GPT-4) for the same input<br>
+</li>
+</ul>
+
+<p>Uses: prompt debugging, measuring token counts, and evaluating tokenizer efficiency for target domains like code or multilingual text. Visual inspection often reveals why identical surface forms are treated differently depending on position, surrounding whitespace, or case.<br></p>
+
+<hr>
+
+<h1 id="numeric-strings-are-tokenized-inconsistently-and-arbitrarily-which-impairs-arithmetic-and-digit-level-tasks">Numeric strings are tokenized inconsistently and arbitrarily which impairs arithmetic and digit-level tasks</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec11/00-08-27-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec11/00-08-27-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec11/00-08-27-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec11/00-08-27.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>There is no canonical way to tokenize <strong>numbers</strong> across models: some numeral sequences are a single token, others split into several tokens, determined by training-time merges rather than numeric semantics.<br></p>
+
+<ul>
+  <li>This arbitrary segmentation complicates digit-oriented tasks (digit manipulation, arithmetic, exact string ops) because the model lacks a consistent per-digit representation.<br>
+</li>
+  <li>When correctness requires digit-level manipulation, you often must force explicit <strong>character-level handling</strong> in prompts or preprocessing to ensure predictable tokenization.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="tokenization-is-case-sensitive-and-context-sensitive-causing-identical-surface-strings-to-map-to-different-tokens">Tokenization is case-sensitive and context-sensitive, causing identical surface strings to map to different tokens</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec11/00-10-25-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec11/00-10-25-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec11/00-10-25-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec11/00-10-25.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Tokenizers often treat case and surrounding whitespace as part of token identity: uppercase vs lowercase or tokens at sentence starts vs after whitespace can map to different IDs.<br></p>
+
+<ul>
+  <li>The same letters can have different token IDs depending on <strong>case</strong> and whether a <strong>leading space</strong> is present.<br>
+</li>
+  <li>Consequence: the model may need separate embeddings or must rely on parameter-sharing to associate variants, increasing data requirements and fragmentation.<br>
+</li>
+  <li>Mitigation: normalize or augment training/prompt data to reduce rare-token fragmentation and make variants more consistent.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="poor-tokenization-of-indentation-and-repeated-whitespace-makes-code-inefficient-to-represent-and-reduces-effective-context">Poor tokenization of indentation and repeated whitespace makes code inefficient to represent and reduces effective context</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec11/00-12-11-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec11/00-12-11-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec11/00-12-11-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec11/00-12-11.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>When a tokenizer treats each space as a distinct token (as older GPT-2 tokenizers did), whitespace-sensitive formats like Python become <strong>token-bloat</strong> heavy and consume large parts of the model’s fixed context window.<br></p>
+
+<ul>
+  <li>Denser tokenizers that group repeated spaces or indentation into single tokens substantially improve effective context utilization.<br>
+</li>
+  <li>For code modeling, grouping common indentation patterns into tokens is a practical optimization that increases the amount of useful code the model can attend to without changing the architecture.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="improvements-in-tokenization-larger-vocabulary-and-better-whitespace-grouping-materially-improve-model-performance-on-code-and-length-of-context">Improvements in tokenization (larger vocabulary and better whitespace grouping) materially improve model performance on code and length of context</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec11/00-13-59-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec11/00-13-59-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec11/00-13-59-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec11/00-13-59.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Increasing <strong>vocabulary size</strong> (e.g., from ~50k to ~100k) while engineering merges that group common whitespace and indentation can reduce sequence length and densify inputs.<br></p>
+
+<ul>
+  <li>Effect: the same Transformer architecture can attend to more raw characters per context length, improving tasks like code completion.<br>
+</li>
+  <li>Trade-off: larger vocabularies increase <strong>embedding table</strong> size and <strong>softmax</strong> cost at the output, so vocabulary size is a hyperparameter balancing compression vs. parameter overhead.<br>
+</li>
+  <li>Practical gain comes from careful tokenizer design and training on representative corpora (including code) to learn useful merges.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="strings-in-python-are-sequences-of-unicode-code-points-ord-reveals-codepoint-integers-but-using-them-directly-as-tokens-is-problematic">Strings in Python are sequences of Unicode code points; ord() reveals codepoint integers but using them directly as tokens is problematic</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec11/00-16-36-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec11/00-16-36-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec11/00-16-36-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec11/00-16-36.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Python strings represent text as immutable sequences of <strong>Unicode code points</strong> (roughly 150k code points across scripts). The built-in ord() maps a single character to its Unicode code point integer.<br></p>
+
+<ul>
+  <li>Using code point integers directly as tokens creates a very large, brittle vocabulary (and is sensitive to Unicode updates).<br>
+</li>
+  <li>Raw code points also fail to provide sequence compression or control over vocabulary density, motivating the use of byte encodings and <strong>subword schemes</strong> instead.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="byte-encodings-utf-81632-transform-code-points-into-byte-streams-utf-8-is-the-ubiquitous-variable-length-choice">Byte encodings (UTF-8/16/32) transform code points into byte streams; UTF-8 is the ubiquitous variable-length choice</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec11/00-21-03-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec11/00-21-03-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec11/00-21-03-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec11/00-21-03.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Unicode has multiple binary encodings: <strong>UTF-8</strong> (1–4 bytes, ASCII-compatible), <strong>UTF-16</strong> (2 or 4 bytes), and <strong>UTF-32</strong> (fixed 4 bytes).<br></p>
+
+<ul>
+  <li>UTF-8 is the web’s de facto standard because it is compact for ASCII and backward-compatible.<br>
+</li>
+  <li>Encoding text to UTF-8 yields a sequence of bytes that can serve as a base representation for tokenization.<br>
+</li>
+  <li>But treating raw <strong>bytes</strong> as tokens gives a tiny vocabulary (256) and very long sequences, which is inefficient for autoregressive models with limited attention — so further compression (e.g., BPE) is required.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="byte-pair-encoding-bpe-compresses-byte-or-character-sequences-by-iteratively-merging-frequent-adjacent-pairs-into-new-tokens">Byte-Pair Encoding (BPE) compresses byte or character sequences by iteratively merging frequent adjacent pairs into new tokens</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec11/00-25-26-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec11/00-25-26-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec11/00-25-26-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec11/00-25-26.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Byte-Pair Encoding (BPE)</strong> starts from a base vocabulary (bytes or observed code points) and repeatedly merges the most frequent adjacent token pairs to create new tokens.<br></p>
+
+<ol>
+  <li>Compute frequencies of adjacent token pairs across the corpus.<br>
+</li>
+  <li>Select the most frequent pair and create a new token representing their concatenation.<br>
+</li>
+  <li>Replace all occurrences of that pair with the new token, incrementing vocabulary size by one and reducing average sequence length.<br>
+</li>
+</ol>
+
+<p>This loop continues until a target vocabulary size is reached, producing a <strong>merges table</strong> and a <strong>token-to-bytes</strong> mapping used for deterministic encoding/decoding. BPE provides a tunable trade-off between vocabulary size and sequence compression.<br></p>
+
+<hr>
+
+<h1 id="implementing-bpe-requires-counting-adjacent-pair-frequencies-and-applying-pair-replacements-practical-code-iterates-until-the-target-vocab-size">Implementing BPE requires counting adjacent pair frequencies and applying pair replacements; practical code iterates until the target vocab size</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec11/00-30-13-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec11/00-30-13-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec11/00-30-13-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec11/00-30-13.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>A BPE training loop operates as follows:<br></p>
+
+<ol>
+  <li>Count statistics of all consecutive token pairs in the corpus.<br>
+</li>
+  <li>Select the most frequent pair.<br>
+</li>
+  <li>Mint a new token identifier for that pair and replace every occurrence in the corpus.<br>
+</li>
+  <li>Update pair statistics and repeat until the desired number of merges (vocabulary size) is reached.<br>
+</li>
+</ol>
+
+<p>Implementation notes and pitfalls: <br></p>
+
+<ul>
+  <li>Use robust pair counting and efficient data structures to avoid quadratic costs.<br>
+</li>
+  <li>Perform careful in-place replacement to avoid index errors when spans overlap.<br>
+</li>
+  <li>Track merges as parent→children mappings to support later encoding and decoding.<br>
+</li>
+</ul>
+
+<p>The final merges list plus the base token mapping form the tokenizer able to compress inputs deterministically using the learned merge sequence.<br></p>
+
+<hr>
+
+<h1 id="training-a-tokenizer-on-larger-corpora-and-choosing-the-merge-count-determines-compression-ratio-and-vocabulary-composition">Training a tokenizer on larger corpora and choosing the merge count determines compression ratio and vocabulary composition</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec11/00-37-23-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec11/00-37-23-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec11/00-37-23-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec11/00-37-23.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>When BPE is trained on longer, representative corpora, pair frequencies stabilize and more useful merges are learned.<br></p>
+
+<ul>
+  <li>Increasing merges produces larger vocabularies and greater compression; the merges dictionary forms a hierarchical forest of binary merges enabling encoding/decoding by concatenation.<br>
+</li>
+  <li>The compression ratio scales with the number of merges and corpus characteristics, so vocabulary size is tuned to balance embedding/softmax cost against available context length.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="the-tokenizer-is-a-separate-preprocessing-artifact-with-its-own-training-set-and-resulting-encodedecode-functions">The tokenizer is a separate preprocessing artifact with its own training set and resulting encode/decode functions</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec11/00-44-31-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec11/00-44-31-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec11/00-44-31-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec11/00-44-31.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>A trained tokenizer is an independent, serializable artifact that maps raw text to token IDs and back.<br></p>
+
+<ul>
+  <li>Typical outputs: the base <strong>token-to-bytes</strong> map (vocab) and the <strong>merges</strong> table.<br>
+</li>
+  <li>Tokenizers are usually trained beforehand (possibly on a different dataset than the LM corpus) and applied once to the LM training corpus to produce token streams stored for model training.<br>
+</li>
+</ul>
+
+<p>Because tokenizers determine the effective distribution the model sees, tokenizer choices materially affect the downstream model and must be versioned and validated as separate artifacts.<br></p>
+
+<hr>
+
+<h1 id="decoding-tokens-to-text-concatenates-token-byte-sequences-and-decodes-via-utf-8-with-error-handling">Decoding tokens to text concatenates token byte sequences and decodes via UTF-8 with error handling</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec11/00-51-21-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec11/00-51-21-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec11/00-51-21-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec11/00-51-21.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Decoding</strong> maps each token ID back to its bytes representation, concatenates those bytes, and decodes using UTF-8 to produce a Python string.<br></p>
+
+<ul>
+  <li>Not every byte sequence is valid UTF-8, so decoders must specify an <strong>error policy</strong> (e.g., errors=’replace’) to handle invalid sequences robustly.<br>
+</li>
+  <li>Robust decoders therefore maintain the vocab mapping and use UTF-8 decoding with replacement semantics to avoid exceptions and to surface out-of-distribution outputs safely.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="encoding-text-into-tokens-applies-merges-in-merge-order-and-must-respect-merge-eligibility-and-order-constraints">Encoding text into tokens applies merges in merge-order and must respect merge eligibility and order constraints</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec11/00-59-04-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec11/00-59-04-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec11/00-59-04-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec11/00-59-04.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Encoding</strong> proceeds by converting text to UTF-8 bytes, mapping bytes to initial token IDs, and then applying permitted merges in the exact order they were created during training.<br></p>
+
+<p>A practical encoder typically: <br></p>
+
+<ol>
+  <li>Convert text → UTF-8 bytes → initial token list.<br>
+</li>
+  <li>Compute adjacent-pair candidates on the current token list.<br>
+</li>
+  <li>Look up which candidates appear in the merges table, prioritizing merges with smaller merge indices (earlier merges).<br>
+</li>
+  <li>Replace eligible pairs iteratively until no eligible merges remain or the sequence is fully merged.<br>
+</li>
+</ol>
+
+<p>Edge cases: handle short inputs, ensure merge lookups return sentinels for ineligible pairs, and preserve merge order to guarantee deterministic encoding.<br></p>
+
+<hr>
+
+<h1 id="real-world-tokenizers-add-manual-heuristics-to-bpe-regex-chunking-prevents-semantically-bad-merges">Real-world tokenizers add manual heuristics to BPE: regex chunking prevents semantically bad merges</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec11/01-06-09-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec11/01-06-09-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec11/01-06-09-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec11/01-06-09.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>OpenAI’s GPT-2 tokenizer applies a preprocessing <strong>chunking</strong> step (a complex regex) that segments text into categories — letters, numbers, punctuation, whitespace — and runs BPE only within those chunks.<br></p>
+
+<ul>
+  <li>Rationale: prevent undesirable merges such as joining words to punctuation or mixing letters with numbers, which would create many spurious tokens and fragment the vocabulary (e.g., treating ‘dog.’ differently from ‘dog?’).<br>
+</li>
+  <li>These handcrafted chunking heuristics make merges more semantically coherent than blind corpus-level BPE and are important production refinements.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="regex-based-chunking-contains-many-subtle-language-and-unicode-issues-apostrophes-case-whitespace-handling">Regex-based chunking contains many subtle language and Unicode issues (apostrophes, case, whitespace handling)</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec11/01-11-21-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec11/01-11-21-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec11/01-11-21-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec11/01-11-21.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The chunking regex must handle language-agnostic classes while accounting for script-specific details and whitespace behavior.<br></p>
+
+<ul>
+  <li>It needs to consider accent marks, Unicode apostrophes and glyph variants, case sensitivity, and whitespace grouping.<br>
+</li>
+  <li>Small differences (e.g., ignoring a specific apostrophe glyph or case) change merge eligibility, which affects token frequency and downstream performance.<br>
+</li>
+  <li>The regex often preserves <strong>leading spaces</strong> as part of tokens (so tokens encode “ space+word” vs “word”) and uses lookahead logic to prioritize common “space+word” combinations.<br>
+</li>
+</ul>
+
+<p>These heuristics are performant but brittle — they require careful testing across multilingual and code corpora to avoid edge-case failures.<br></p>
+
+<hr>
+
+<h1 id="the-inference-code-for-gpt-2s-tokenizer-encoderpy-implements-bpe-application-but-the-original-training-code-was-not-released">The inference code for GPT-2’s tokenizer (encoder.py) implements BPE application but the original training code was not released</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec11/01-16-01-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec11/01-16-01-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec11/01-16-01-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec11/01-16-01.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The released GPT-2 encoder artifacts enable deterministic encoding/decoding even though the original merge-training code was not published.<br></p>
+
+<ul>
+  <li>Two artifacts: <strong>encoder.json</strong> (maps token IDs to byte sequences) and <strong>vocab.bpe</strong> (lists the merge operations).<br>
+</li>
+  <li>The released encoder implements the same BPE encode/decode flow: iteratively apply merges according to the merges table and provide encode/decode functions for inference.<br>
+</li>
+</ul>
+
+<p>Using these two artifacts, one can reproduce GPT-2’s tokenization behavior exactly for encoding, decoding, and debugging purposes.<br></p>
+
+<hr>
+
+
+    </div>
+  </article>
+
+
+  
+    
+    <br>
+    <hr>
+    <br>
+    <ul class="list-disc pl-8"></ul>
+
+    <!-- Adds related posts to the end of an article -->
+    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
+    <p class="mb-2">Here are some more articles you might like to read next:</p>
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/nlp-foundation/">LLM Series - Part 1 - Important Concepts in NLP</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/diffusion-foundation/">The Foundations and Frontiers of Diffusion Models</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2024/thoughts/">Random Thoughts and Notes</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs336-lec01/">CS336 Lecture 1 - Overview and Tokenization</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/karpathy-lec12/">Karpathy Series - Let's build GPT from scratch</a>
+  </li>
+
+</div>
+
+      
+    </div>
+
+    <!-- Footer -->    
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        © Copyright 2025 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+
+      </div>
+    </footer>
+
+    <!-- JavaScripts -->
+    <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- Bootsrap & MDB scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    <!-- Masonry & imagesLoaded -->
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
+    
+  <!-- Medium Zoom JS -->
+  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/zoom.js"></script>
+
+  <!-- Bootstrap Table -->
+  <script defer src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+
+  <!-- Load Common JS -->
+  <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
+  <script defer src="/assets/js/common.js?acdb9690d7641b2f8d40529018c71a01"></script>
+  <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    <!-- MathJax -->
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        tags: 'ams'
+      }
+    };
+  </script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KGSMMS9MS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-7KGSMMS9MS');
+  </script>
+    
+
+<!-- Scrolling Progress Bar -->
+<script type="text/javascript">
+  /*
+   * This JavaScript code has been adapted from the article 
+   * https://css-tricks.com/reading-position-indicator/ authored by Pankaj Parashar, 
+   * published on the website https://css-tricks.com on the 7th of May, 2014.
+   * Couple of changes were made to the original code to make it compatible 
+   * with the `al-foio` theme.
+   */
+  const progressBar = $("#progress");
+  /*
+   * We set up the bar after all elements are done loading.
+   * In some cases, if the images in the page are larger than the intended
+   * size they'll have on the page, they'll be resized via CSS to accomodate
+   * the desired size. This mistake, however, breaks the computations as the
+   * scroll size is computed as soon as the elements finish loading.
+   * To account for this, a minimal delay was introduced before computing the
+   * values.
+   */
+  window.onload = function () {
+    setTimeout(progressBarSetup, 50);
+  };
+  /*
+   * We set up the bar according to the browser.
+   * If the browser supports the progress element we use that.
+   * Otherwise, we resize the bar thru CSS styling
+   */
+  function progressBarSetup() {
+    if ("max" in document.createElement("progress")) {
+      initializeProgressElement();
+      $(document).on("scroll", function() {
+        progressBar.attr({ value: getCurrentScrollPosition() });
+      });
+      $(window).on("resize", initializeProgressElement);
+    } else {
+      resizeProgressBar();
+      $(document).on("scroll", resizeProgressBar);
+      $(window).on("resize", resizeProgressBar);
+    }
+  }
+  /*
+   * The vertical scroll position is the same as the number of pixels that
+   * are hidden from view above the scrollable area. Thus, a value > 0 is
+   * how much the user has scrolled from the top
+   */
+  function getCurrentScrollPosition() {
+    return $(window).scrollTop();
+  }
+
+  function initializeProgressElement() {
+    let navbarHeight = $("#navbar").outerHeight(true);
+    $("body").css({ "padding-top": navbarHeight });
+    $("progress-container").css({ "padding-top": navbarHeight });
+    progressBar.css({ top: navbarHeight });
+    progressBar.attr({
+      max: getDistanceToScroll(),
+      value: getCurrentScrollPosition(),
+    });
+  }
+  /*
+   * The offset between the html document height and the browser viewport
+   * height will be greater than zero if vertical scroll is possible.
+   * This is the distance the user can scroll
+   */
+  function getDistanceToScroll() {
+    return $(document).height() - $(window).height();
+  }
+
+  function resizeProgressBar() {
+    progressBar.css({ width: getWidthPercentage() + "%" });
+  }
+  // The scroll ratio equals the percentage to resize the bar
+  function getWidthPercentage() {
+    return (getCurrentScrollPosition() / getDistanceToScroll()) * 100;
+  }
+</script>
+
+    
+  </body>
+</html>

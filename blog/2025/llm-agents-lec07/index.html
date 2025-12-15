@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <!-- Head -->
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    <!-- Metadata, OpenGraph and Schema.org -->
+    
+
+    <!-- Standard metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Agent 07 - Building an Agent from Scratch by AI Engineer | Tuan-Anh  Bui</title>
+    <meta name="author" content="Tuan-Anh  Bui">
+    <meta name="description" content="AI Summary Lecture">
+    <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
+
+
+    <!-- Bootstrap & MDB -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+    <!-- Bootstrap Table -->
+    <link defer rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+
+    <!-- Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
+
+    
+
+    <!-- Styles -->
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
+    
+    <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+    <link rel="canonical" href="https://tuananhbui89.github.io/blog/2025/llm-agents-lec07/">
+
+    <!-- Dark Mode -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark">
+    <script src="/assets/js/theme.js?96d6b3e1c3604aca8b6134c7afdd5db6"></script>
+    <script src="/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script>
+    
+
+  </head>
+
+  <!-- Body -->
+  <body class="fixed-top-nav ">
+
+    <!-- Header -->
+    <header>
+
+      <!-- Nav Bar -->
+      <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top">
+        <div class="container">
+          <a class="navbar-brand title font-weight-lighter" href="/"><span class="font-weight-bold">Tuan-Anh </span>Bui</a>
+          <!-- Navbar Toggle -->
+          <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar top-bar"></span>
+            <span class="icon-bar middle-bar"></span>
+            <span class="icon-bar bottom-bar"></span>
+          </button>
+
+          <div class="collapse navbar-collapse text-right" id="navbarNav">
+            <ul class="navbar-nav ml-auto flex-nowrap">
+
+              <!-- About -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/">about</a>
+              </li>
+              
+              <!-- Blog -->
+              <li class="nav-item active">
+                <a class="nav-link" href="/blog/">blog<span class="sr-only">(current)</span></a>
+              </li>
+
+              <!-- Other pages -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/publications/">publications</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/projects/">projects</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/repositories/">repositories</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/teaching/"></a>
+              </li>
+
+              <!-- Toogle theme mode -->
+              <li class="toggle-container">
+                <button id="light-toggle" title="Change theme">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Scrolling Progress Bar -->
+      <progress id="progress" value="0">
+        <div class="progress-container">
+          <span class="progress-bar"></span>
+        </div>
+      </progress>
+    </header>
+
+
+    <!-- Content -->
+    <div class="container mt-5">
+      
+        <!-- _layouts/post.html -->
+<!-- Page/Post style -->
+<style type="text/css">
+  
+</style>
+
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Agent 07 - Building an Agent from Scratch by AI Engineer</h1>
+    <p class="post-meta">December 15, 2025</p>
+    <p class="post-tags">
+      <a href="/blog/2025"> <i class="fas fa-calendar fa-sm"></i> 2025 </a>
+        ·  
+        <a href="/blog/tag/genai">
+          <i class="fas fa-hashtag fa-sm"></i> genai</a>  
+          <a href="/blog/tag/llm">
+          <i class="fas fa-hashtag fa-sm"></i> llm</a>  
+          <a href="/blog/tag/tutorial">
+          <i class="fas fa-hashtag fa-sm"></i> tutorial</a>  
+          <a href="/blog/tag/reading">
+          <i class="fas fa-hashtag fa-sm"></i> reading</a>  
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    
+    <div id="table-of-contents">
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#talk-goals-demonstrate-a-minimal-agent-enable-experimentation-with-code-and-build-intuition-for-agent-components">Talk goals: demonstrate a minimal agent, enable experimentation with code, and build intuition for agent components</a></li>
+<li class="toc-entry toc-h1"><a href="#slides-and-code-are-published-and-attendees-are-encouraged-to-try-the-repository">Slides and code are published and attendees are encouraged to try the repository.</a></li>
+<li class="toc-entry toc-h1"><a href="#an-agent-is-composed-of-an-llm-memory-planning-tools-and-a-loop-or-conditional-control-flow">An agent is composed of an LLM, memory, planning, tools, and a loop or conditional control flow.</a></li>
+<li class="toc-entry toc-h1"><a href="#step-0-start-with-a-basic-chat-completion-llm-call-to-produce-a-baseline-response">Step 0: Start with a basic chat-completion LLM call to produce a baseline response.</a></li>
+<li class="toc-entry toc-h1"><a href="#step-1-add-a-conditional-evaluator-llm-that-judges-whether-the-previous-answer-is-complete">Step 1: Add a conditional evaluator LLM that judges whether the previous answer is complete.</a></li>
+<li class="toc-entry toc-h1"><a href="#tools-are-external-functions-described-by-a-json-schema-that-the-llm-can-request-the-client-to-call-the-client-must-invoke-these-tool-calls-and-return-results-to-the-llm">Tools are external functions described by a JSON schema that the LLM can request the client to call; the client must invoke these tool calls and return results to the LLM.</a></li>
+<li class="toc-entry toc-h1"><a href="#tool-execution-can-fail-due-to-schema-validation-or-parameter-constraints-exposing-the-need-for-robust-error-handling">Tool execution can fail due to schema validation or parameter constraints, exposing the need for robust error handling.</a></li>
+<li class="toc-entry toc-h1"><a href="#step-3-refactor-to-support-parallel-tool-calls-and-attach-tool-call-identifiers-for-tracing">Step 3: Refactor to support parallel tool calls and attach tool-call identifiers for tracing.</a></li>
+<li class="toc-entry toc-h1"><a href="#step-4-implement-explicit-planning-via-a-to-do-list-to-provide-readablewritable-state-and-drive-multi-step-task-execution">Step 4: Implement explicit planning via a to-do list to provide readable/writable state and drive multi-step task execution.</a></li>
+<li class="toc-entry toc-h1"><a href="#example-run-the-agent-used-the-to-do-planner-with-search-and-browse-tools-to-gather-and-summarize-information-about-building-agents-without-a-framework">Example run: the agent used the to-do planner with search and browse tools to gather and summarize information about building agents without a framework.</a></li>
+<li class="toc-entry toc-h1"><a href="#practical-example-the-agent-coordinated-multiple-searches-and-browsing-steps-to-plan-a-local-date-and-dining-options">Practical example: the agent coordinated multiple searches and browsing steps to plan a local date and dining options.</a></li>
+<li class="toc-entry toc-h1"><a href="#next-steps-integrate-vector-databases-or-rag-pipelines-iterate-on-agent-design-and-leverage-the-published-code-and-slides-for-further-experimentation">Next steps: integrate vector databases or RAG pipelines, iterate on agent design, and leverage the published code and slides for further experimentation.</a></li>
+</ul>
+    </div>
+    <hr>
+    
+    <div id="markdown-content">
+      <div style="display: flex; justify-content: center;">
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/xzXdLRUyjUg" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen="">
+    </iframe>
+</div>
+
+<h1 id="talk-goals-demonstrate-a-minimal-agent-enable-experimentation-with-code-and-build-intuition-for-agent-components">Talk goals: demonstrate a minimal agent, enable experimentation with code, and build intuition for agent components</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/llm-agents/frames/lec07/00-00-24-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/llm-agents/frames/lec07/00-00-24-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/llm-agents/frames/lec07/00-00-24-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/llm-agents/frames/lec07/00-00-24.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The talk sets three primary objectives to orient the audience and the repository work:<br></p>
+
+<ol>
+  <li>
+<strong>Expose a minimal, operational definition of an agent</strong> — a compact, implementable specification that you can run and reason about.<br>
+</li>
+  <li>
+<strong>Encourage hands-on experimentation</strong> — clone, run, and deliberately break the included code so learners see behavior change in real time.<br>
+</li>
+  <li>
+<strong>Provide intuition for foundational building blocks</strong> used by agent frameworks — so subsequent examples map directly to implementable components.<br>
+</li>
+</ol>
+
+<ul>
+  <li>Emphasis is placed on the <strong>pedagogical value of iterating on code</strong> to observe the transition from deterministic, scripted behavior to emergent, agent-like behavior.<br>
+</li>
+  <li>The goal framing prioritizes <strong>practical learning and conceptual clarity</strong>, setting expectations for the rest of the talk and motivating active engagement with the provided repository and slides.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="slides-and-code-are-published-and-attendees-are-encouraged-to-try-the-repository">Slides and code are published and attendees are encouraged to try the repository.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/llm-agents/frames/lec07/00-00-55-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/llm-agents/frames/lec07/00-00-55-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/llm-agents/frames/lec07/00-00-55-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/llm-agents/frames/lec07/00-00-55.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The presenter shares the canonical artifacts and a call to action:<br></p>
+
+<ul>
+  <li>
+<strong>Slides, code, and social/contact links</strong> are provided up front so attendees can follow along.<br>
+</li>
+  <li>Attendees are explicitly encouraged to <strong>clone, run, and modify the example repository</strong> as the primary learning path.<br>
+</li>
+</ul>
+
+<p>Recommended learning strategies emphasized in this segment:<br></p>
+<ul>
+  <li>
+<strong>Rapid iteration</strong> — make small changes and observe outcomes quickly.<br>
+</li>
+  <li>
+<strong>Fault injection</strong> — introduce errors intentionally to reveal where deterministic code starts behaving like an agent.<br>
+</li>
+  <li>Treat the rest of the presentation as a <strong>guided tour of the codebase</strong>, not just theory, and consult the published artifacts for hands-on practice.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="an-agent-is-composed-of-an-llm-memory-planning-tools-and-a-loop-or-conditional-control-flow">An agent is composed of an LLM, memory, planning, tools, and a loop or conditional control flow.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/llm-agents/frames/lec07/00-01-22-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/llm-agents/frames/lec07/00-01-22-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/llm-agents/frames/lec07/00-01-22-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/llm-agents/frames/lec07/00-01-22.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Agent definition (operational):</strong> an architecture that combines a <strong>large language model (LLM)</strong> with persistent <strong>memory</strong>, <strong>planning logic</strong>, and <strong>external tools</strong>, all orchestrated by a looping control structure.<br></p>
+
+<ul>
+  <li>
+<strong>Memory</strong>: readable and writable state the agent uses to persist context across iterations.<br>
+</li>
+  <li>
+<strong>Loop</strong>: the control structure implementing conditional repetition and termination logic.<br>
+</li>
+  <li>
+<strong>Planning</strong>: decomposes tasks into substeps or a to-do list the agent can act on using tools.<br>
+</li>
+  <li>
+<strong>Tools</strong>: external capabilities (e.g., web search, browsing) invoked by the agent to perform actions outside the LLM.<br>
+</li>
+</ul>
+
+<p>This decomposition makes it easy to <strong>reorder or refactor responsibilities</strong> across components during implementation and aids clear mapping from concept to code.<br></p>
+
+<hr>
+
+<h1 id="step-0-start-with-a-basic-chat-completion-llm-call-to-produce-a-baseline-response">Step 0: Start with a basic chat-completion LLM call to produce a baseline response.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/llm-agents/frames/lec07/00-01-51-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/llm-agents/frames/lec07/00-01-51-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/llm-agents/frames/lec07/00-01-51-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/llm-agents/frames/lec07/00-01-51.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Initial baseline implementation (single-turn generation):<br></p>
+
+<ol>
+  <li>Call a standard <strong>chat completion</strong> endpoint via the provider API to generate a baseline answer to a user prompt.<br>
+</li>
+  <li>Observe this as the simplest agent behavior: <strong>single-turn</strong>, fully deterministic request/response semantics given identical model parameters and context.<br>
+</li>
+</ol>
+
+<ul>
+  <li>The baseline is intentionally minimal to serve as a clear control case before adding validation, tooling, and state.<br>
+</li>
+  <li>Implementation checklist at this stage:
+    <ul>
+      <li>Verify <strong>API call patterns</strong>.</li>
+      <li>Confirm <strong>message formatting</strong>.</li>
+      <li>Validate <strong>response parsing</strong>.<br>
+</li>
+    </ul>
+  </li>
+</ul>
+
+<hr>
+
+<h1 id="step-1-add-a-conditional-evaluator-llm-that-judges-whether-the-previous-answer-is-complete">Step 1: Add a conditional evaluator LLM that judges whether the previous answer is complete.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/llm-agents/frames/lec07/00-02-42-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/llm-agents/frames/lec07/00-02-42-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/llm-agents/frames/lec07/00-02-42-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/llm-agents/frames/lec07/00-02-42.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Introduce a secondary LLM acting as a <strong>strict critic / judge</strong> to validate generated responses:<br></p>
+
+<ul>
+  <li>The judge LLM evaluates the initial LLM response against a <strong>completion criterion</strong> and returns a <strong>forced JSON schema</strong> (for example, a Boolean field named <strong>done</strong>) so downstream client code can decide to continue or terminate.<br>
+</li>
+  <li>The judge is invoked with instructions to produce a <strong>deterministic JSON object</strong>, reducing ambiguity about whether the user intent has been satisfied.<br>
+</li>
+</ul>
+
+<p>Benefits and caveats:<br></p>
+<ul>
+  <li>This two-step pattern <strong>separates generation and validation</strong>, enabling iterative or corrective behavior without hard-coded client heuristics.<br>
+</li>
+  <li>Still dependent on <strong>accurate judge prompts</strong> and <strong>strict schema enforcement</strong>; incorrect judge outputs or lax schema handling can produce false positives or premature termination.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="tools-are-external-functions-described-by-a-json-schema-that-the-llm-can-request-the-client-to-call-the-client-must-invoke-these-tool-calls-and-return-results-to-the-llm">Tools are external functions described by a JSON schema that the LLM can request the client to call; the client must invoke these tool calls and return results to the LLM.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/llm-agents/frames/lec07/00-04-54-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/llm-agents/frames/lec07/00-04-54-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/llm-agents/frames/lec07/00-04-54-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/llm-agents/frames/lec07/00-04-54.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Tools are modeled as function-like endpoints that the client registers with the LLM:<br></p>
+
+<ul>
+  <li>Each tool includes:
+    <ul>
+      <li><strong>name</strong></li>
+      <li><strong>description</strong></li>
+      <li><strong>strictness flag</strong></li>
+      <li>
+<strong>parameter schema</strong><br>
+</li>
+    </ul>
+  </li>
+  <li>When the LLM decides to use a tool, it returns an object indicating <strong>which tool</strong> to call and <strong>with which parameters</strong>.<br>
+</li>
+  <li>The OpenAI SDK (and similar SDKs) <strong>does not execute arbitrary tool logic</strong> on behalf of the client:
+    <ul>
+      <li>The client must <strong>parse the tool request</strong>,</li>
+      <li>
+<strong>Execute the corresponding local function or external API</strong> (e.g., a Google search wrapper),</li>
+      <li>Then <strong>append the tool response back into the conversation</strong> for the LLM to consume.<br>
+</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Design principles and safety:<br></p>
+<ul>
+  <li>This pattern lets the LLM <strong>orchestrate external actions</strong> while keeping side effects and security checks under <strong>client control</strong>.<br>
+</li>
+  <li>Tool configuration must include <strong>precise parameter validation</strong> to avoid runtime failures and support deterministic tooling behavior for the agent.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="tool-execution-can-fail-due-to-schema-validation-or-parameter-constraints-exposing-the-need-for-robust-error-handling">Tool execution can fail due to schema validation or parameter constraints, exposing the need for robust error handling.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/llm-agents/frames/lec07/00-06-56-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/llm-agents/frames/lec07/00-06-56-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/llm-agents/frames/lec07/00-06-56-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/llm-agents/frames/lec07/00-06-56.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>A concrete failure mode was demonstrated: an unhandled rejection due to a tool schema validation constraint on a <strong>location</strong> parameter.<br></p>
+
+<ul>
+  <li>Tool schemas may restrict allowable strings; <strong>improper inputs must be caught and handled</strong> by client code.<br>
+</li>
+  <li>The judge LLM may still assert <strong>completion</strong> even if a tool call failed, so you must <strong>reconcile LLM judgments with observable tool execution outcomes</strong>.<br>
+</li>
+</ul>
+
+<p>Practical mitigations:<br></p>
+<ul>
+  <li>Design <strong>retry</strong>, <strong>fallback</strong>, and <strong>error-reporting</strong> strategies.<br>
+</li>
+  <li>Ensure tool parameter schemas are <strong>compatible with likely LLM outputs</strong> (or sanitize LLM outputs before calling tools).<br>
+</li>
+  <li>Proper validation prevents brittle behavior and reduces false-positive completion signals from the judge.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="step-3-refactor-to-support-parallel-tool-calls-and-attach-tool-call-identifiers-for-tracing">Step 3: Refactor to support parallel tool calls and attach tool-call identifiers for tracing.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/llm-agents/frames/lec07/00-08-47-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/llm-agents/frames/lec07/00-08-47-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/llm-agents/frames/lec07/00-08-47-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/llm-agents/frames/lec07/00-08-47.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Refactor: move the complete-with-tools logic into a utility module and add parallel execution semantics.<br></p>
+
+<p>Key changes and rationale:<br></p>
+<ol>
+  <li>Support multiple tool invocations per LLM turn and execute them <strong>concurrently</strong> (for example, using <strong>Promise.all</strong>) to increase throughput.<br>
+</li>
+  <li>Associate each tool invocation with a <strong>tool-call ID</strong> so the client can include that ID when appending the tool response back into the conversation; the LLM can then correlate responses to requests.<br>
+</li>
+  <li>Treat tools conceptually as <strong>text transformations</strong> (typically string-to-string) and standardize how results are <strong>serialized</strong> into the conversational context.<br>
+</li>
+</ol>
+
+<ul>
+  <li>This refactor enables cases where the LLM asks the same tool to be called multiple times with different parameters and improves overall performance and traceability.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="step-4-implement-explicit-planning-via-a-to-do-list-to-provide-readablewritable-state-and-drive-multi-step-task-execution">Step 4: Implement explicit planning via a to-do list to provide readable/writable state and drive multi-step task execution.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/llm-agents/frames/lec07/00-12-26-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/llm-agents/frames/lec07/00-12-26-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/llm-agents/frames/lec07/00-12-26-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/llm-agents/frames/lec07/00-12-26.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Introduce an explicit <strong>to-do list</strong> as a manipulable memory structure that consolidates planning, iteration control, and state persistence:<br></p>
+
+<ul>
+  <li>Operational model:
+    <ul>
+      <li>The LLM is prompted to <strong>always create a plan</strong> by writing to the to-do list before performing actions.<br>
+</li>
+      <li>Client-side tools implement operations with defined parameter schemas:
+        <ul>
+          <li><strong>add_todo</strong></li>
+          <li><strong>mark_done</strong></li>
+          <li><strong>check_done</strong></li>
+          <li>
+<strong>list_todos</strong><br>
+</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>The to-do list acts as both the <strong>planner</strong> and the <strong>working memory</strong> for multi-step workflows:
+    <ul>
+      <li>Tasks can be <strong>added</strong>, <strong>marked done</strong>, <strong>listed</strong>, and <strong>queried</strong> via tool endpoints.<br>
+</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Guardrails and recommendations:<br></p>
+<ul>
+  <li>Use <strong>maximum iteration counts</strong>, <strong>context pruning policies</strong>, or other termination heuristics to prevent infinite loops or non-converging invocation patterns.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="example-run-the-agent-used-the-to-do-planner-with-search-and-browse-tools-to-gather-and-summarize-information-about-building-agents-without-a-framework">Example run: the agent used the to-do planner with search and browse tools to gather and summarize information about building agents without a framework.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/llm-agents/frames/lec07/00-15-39-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/llm-agents/frames/lec07/00-15-39-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/llm-agents/frames/lec07/00-15-39-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/llm-agents/frames/lec07/00-15-39.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Example: running a to-do-driven workflow to answer “how to build agents without a framework”:<br></p>
+
+<ul>
+  <li>The agent generated a plan such as <strong>(search, summarize, check sufficiency)</strong> and wrote it to the to-do list.<br>
+</li>
+  <li>It invoked <strong>searchGoogle</strong> and <strong>browseWeb</strong> tools, ingested returned markdown, summarized key points, and <strong>marked relevant to-dos done</strong>.<br>
+</li>
+  <li>The agent delegated final goal verification to the <strong>judge</strong> tool.<br>
+</li>
+</ul>
+
+<p>Outcome and takeaways:<br></p>
+<ul>
+  <li>The pipeline produced a concise summary enumerating core recommendations:
+    <ul>
+      <li><strong>Define tools</strong></li>
+      <li><strong>Maintain memory for context</strong></li>
+      <li><strong>Implement a loop for iteration</strong></li>
+      <li><strong>Employ prompt engineering</strong></li>
+      <li>
+<strong>Prefer direct API/state storage</strong> for certain operations<br>
+</li>
+    </ul>
+  </li>
+  <li>This example illustrates how <strong>planning, tooling, and evaluation</strong> work together to produce coherent multi-step answers and shows the value of <strong>serializing intermediate results</strong> back into the conversation for traceability and re-evaluation by the LLM.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="practical-example-the-agent-coordinated-multiple-searches-and-browsing-steps-to-plan-a-local-date-and-dining-options">Practical example: the agent coordinated multiple searches and browsing steps to plan a local date and dining options.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/llm-agents/frames/lec07/00-17-40-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/llm-agents/frames/lec07/00-17-40-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/llm-agents/frames/lec07/00-17-40-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/llm-agents/frames/lec07/00-17-40.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>User example: planning a date within a specified time window — demonstrates multi-step orchestration:<br></p>
+
+<ul>
+  <li>The agent <strong>decomposed the goal</strong> into to-dos (activities, timing, dinner).<br>
+</li>
+  <li>It executed local searches for activities and restaurants, <strong>browsed web pages</strong> to extract markdown summaries, and <strong>marked tasks complete</strong> as content was collected.<br>
+</li>
+  <li>The agent compiled candidate activities and restaurant options and returned a <strong>prioritized suggestion list</strong> to the user.<br>
+</li>
+</ul>
+
+<p>Lessons learned:<br></p>
+<ul>
+  <li>The run is not flawless but shows how <strong>incremental enhancements</strong> to tools, schemas, and memory rapidly improve practical utility.<br>
+</li>
+  <li>Implementers should <strong>iteratively refine tool parameter schemas</strong> and <strong>browsing parsers</strong> to increase reliability.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="next-steps-integrate-vector-databases-or-rag-pipelines-iterate-on-agent-design-and-leverage-the-published-code-and-slides-for-further-experimentation">Next steps: integrate vector databases or RAG pipelines, iterate on agent design, and leverage the published code and slides for further experimentation.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/llm-agents/frames/lec07/00-19-07-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/llm-agents/frames/lec07/00-19-07-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/llm-agents/frames/lec07/00-19-07-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/llm-agents/frames/lec07/00-19-07.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Next steps and recommended extensions to the architecture:<br></p>
+
+<ul>
+  <li>
+<strong>Persist browsed content and tool outputs</strong> into a vector database (for example, <strong>Chroma</strong>) to enable <strong>retrieval-augmented generation (RAG)</strong> and longer-term memory across sessions.<br>
+</li>
+  <li>Injecting scraped pages into an <strong>embedding store</strong> allows:
+    <ul>
+      <li>
+<strong>Semantic retrieval</strong> of past results,</li>
+      <li>Reduced <strong>context window pressure</strong>,</li>
+      <li>Improved <strong>factual grounding</strong> of agent responses.<br>
+</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Closing call to action:<br></p>
+<ul>
+  <li>Experiment with the open-sourced code, contribute improvements, or provide feedback.<br>
+</li>
+  <li>The provided <strong>slides and code links</strong> plus contact information support follow-up collaboration.<br>
+</li>
+  <li>These next steps position the basic agent components for <strong>production-grade improvements</strong> such as better grounding, state management, and iterative evaluation.<br>
+</li>
+</ul>
+
+<hr>
+
+
+    </div>
+  </article>
+
+
+  
+    
+    <br>
+    <hr>
+    <br>
+    <ul class="list-disc pl-8"></ul>
+
+    <!-- Adds related posts to the end of an article -->
+    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
+    <p class="mb-2">Here are some more articles you might like to read next:</p>
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/nlp-foundation/">LLM Series - Part 1 - Important Concepts in NLP</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/diffusion-foundation/">The Foundations and Frontiers of Diffusion Models</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2024/thoughts/">Random Thoughts and Notes</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/llm-agents-lec03/">Agent 03 - Stanford Webinar - Agentic AI - A Progression of Language Model Usage</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/karpathy-lec09/">Karpathy Series - How I use LLMs</a>
+  </li>
+
+</div>
+
+      
+    </div>
+
+    <!-- Footer -->    
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        © Copyright 2025 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+
+      </div>
+    </footer>
+
+    <!-- JavaScripts -->
+    <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- Bootsrap & MDB scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    <!-- Masonry & imagesLoaded -->
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
+    
+  <!-- Medium Zoom JS -->
+  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/zoom.js"></script>
+
+  <!-- Bootstrap Table -->
+  <script defer src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+
+  <!-- Load Common JS -->
+  <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
+  <script defer src="/assets/js/common.js?acdb9690d7641b2f8d40529018c71a01"></script>
+  <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    <!-- MathJax -->
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        tags: 'ams'
+      }
+    };
+  </script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KGSMMS9MS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-7KGSMMS9MS');
+  </script>
+    
+
+<!-- Scrolling Progress Bar -->
+<script type="text/javascript">
+  /*
+   * This JavaScript code has been adapted from the article 
+   * https://css-tricks.com/reading-position-indicator/ authored by Pankaj Parashar, 
+   * published on the website https://css-tricks.com on the 7th of May, 2014.
+   * Couple of changes were made to the original code to make it compatible 
+   * with the `al-foio` theme.
+   */
+  const progressBar = $("#progress");
+  /*
+   * We set up the bar after all elements are done loading.
+   * In some cases, if the images in the page are larger than the intended
+   * size they'll have on the page, they'll be resized via CSS to accomodate
+   * the desired size. This mistake, however, breaks the computations as the
+   * scroll size is computed as soon as the elements finish loading.
+   * To account for this, a minimal delay was introduced before computing the
+   * values.
+   */
+  window.onload = function () {
+    setTimeout(progressBarSetup, 50);
+  };
+  /*
+   * We set up the bar according to the browser.
+   * If the browser supports the progress element we use that.
+   * Otherwise, we resize the bar thru CSS styling
+   */
+  function progressBarSetup() {
+    if ("max" in document.createElement("progress")) {
+      initializeProgressElement();
+      $(document).on("scroll", function() {
+        progressBar.attr({ value: getCurrentScrollPosition() });
+      });
+      $(window).on("resize", initializeProgressElement);
+    } else {
+      resizeProgressBar();
+      $(document).on("scroll", resizeProgressBar);
+      $(window).on("resize", resizeProgressBar);
+    }
+  }
+  /*
+   * The vertical scroll position is the same as the number of pixels that
+   * are hidden from view above the scrollable area. Thus, a value > 0 is
+   * how much the user has scrolled from the top
+   */
+  function getCurrentScrollPosition() {
+    return $(window).scrollTop();
+  }
+
+  function initializeProgressElement() {
+    let navbarHeight = $("#navbar").outerHeight(true);
+    $("body").css({ "padding-top": navbarHeight });
+    $("progress-container").css({ "padding-top": navbarHeight });
+    progressBar.css({ top: navbarHeight });
+    progressBar.attr({
+      max: getDistanceToScroll(),
+      value: getCurrentScrollPosition(),
+    });
+  }
+  /*
+   * The offset between the html document height and the browser viewport
+   * height will be greater than zero if vertical scroll is possible.
+   * This is the distance the user can scroll
+   */
+  function getDistanceToScroll() {
+    return $(document).height() - $(window).height();
+  }
+
+  function resizeProgressBar() {
+    progressBar.css({ width: getWidthPercentage() + "%" });
+  }
+  // The scroll ratio equals the percentage to resize the bar
+  function getWidthPercentage() {
+    return (getCurrentScrollPosition() / getDistanceToScroll()) * 100;
+  }
+</script>
+
+    
+  </body>
+</html>

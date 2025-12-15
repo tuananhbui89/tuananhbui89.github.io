@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <!-- Head -->
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    <!-- Metadata, OpenGraph and Schema.org -->
+    
+
+    <!-- Standard metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Karpathy Series - Bulding Makemore Part 4 - Becoming a Backprop Ninja | Tuan-Anh  Bui</title>
+    <meta name="author" content="Tuan-Anh  Bui">
+    <meta name="description" content="AI Summary Lecture">
+    <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
+
+
+    <!-- Bootstrap & MDB -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+    <!-- Bootstrap Table -->
+    <link defer rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+
+    <!-- Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
+
+    
+
+    <!-- Styles -->
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
+    
+    <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+    <link rel="canonical" href="https://tuananhbui89.github.io/blog/2025/karpathy-lec05/">
+
+    <!-- Dark Mode -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark">
+    <script src="/assets/js/theme.js?96d6b3e1c3604aca8b6134c7afdd5db6"></script>
+    <script src="/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script>
+    
+
+  </head>
+
+  <!-- Body -->
+  <body class="fixed-top-nav ">
+
+    <!-- Header -->
+    <header>
+
+      <!-- Nav Bar -->
+      <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top">
+        <div class="container">
+          <a class="navbar-brand title font-weight-lighter" href="/"><span class="font-weight-bold">Tuan-Anh </span>Bui</a>
+          <!-- Navbar Toggle -->
+          <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar top-bar"></span>
+            <span class="icon-bar middle-bar"></span>
+            <span class="icon-bar bottom-bar"></span>
+          </button>
+
+          <div class="collapse navbar-collapse text-right" id="navbarNav">
+            <ul class="navbar-nav ml-auto flex-nowrap">
+
+              <!-- About -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/">about</a>
+              </li>
+              
+              <!-- Blog -->
+              <li class="nav-item active">
+                <a class="nav-link" href="/blog/">blog<span class="sr-only">(current)</span></a>
+              </li>
+
+              <!-- Other pages -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/publications/">publications</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/projects/">projects</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/repositories/">repositories</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/teaching/"></a>
+              </li>
+
+              <!-- Toogle theme mode -->
+              <li class="toggle-container">
+                <button id="light-toggle" title="Change theme">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Scrolling Progress Bar -->
+      <progress id="progress" value="0">
+        <div class="progress-container">
+          <span class="progress-bar"></span>
+        </div>
+      </progress>
+    </header>
+
+
+    <!-- Content -->
+    <div class="container mt-5">
+      
+        <!-- _layouts/post.html -->
+<!-- Page/Post style -->
+<style type="text/css">
+  
+</style>
+
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Karpathy Series - Bulding Makemore Part 4 - Becoming a Backprop Ninja</h1>
+    <p class="post-meta">December 15, 2025</p>
+    <p class="post-tags">
+      <a href="/blog/2025"> <i class="fas fa-calendar fa-sm"></i> 2025 </a>
+        ·  
+        <a href="/blog/tag/genai">
+          <i class="fas fa-hashtag fa-sm"></i> genai</a>  
+          <a href="/blog/tag/llm">
+          <i class="fas fa-hashtag fa-sm"></i> llm</a>  
+          <a href="/blog/tag/tutorial">
+          <i class="fas fa-hashtag fa-sm"></i> tutorial</a>  
+          <a href="/blog/tag/reading">
+          <i class="fas fa-hashtag fa-sm"></i> reading</a>  
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    
+    <div id="table-of-contents">
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#manual-tensor-level-backward-implementation-exposes-autograd-internals-and-prevents-silent-failures">Manual tensor-level backward implementation exposes autograd internals and prevents silent failures</a></li>
+<li class="toc-entry toc-h1"><a href="#manual-gradient-programming-was-historically-standard-and-facilitated-numerical-gradient-checking-in-research-code">Manual gradient programming was historically standard and facilitated numerical gradient checking in research code</a></li>
+<li class="toc-entry toc-h1"><a href="#the-notebook-implements-a-two-layer-mlp-with-batch-normalization-and-a-sequence-of-exercises-to-derive-manual-backward-passes">The notebook implements a two-layer MLP with batch normalization and a sequence of exercises to derive manual backward passes</a></li>
+<li class="toc-entry toc-h1"><a href="#gradient-of-the-batch-averaged-negative-log-probabilities-with-respect-to-extracted-log-probabilities-equals--1n-at-selected-target-indices-and-zero-elsewhere">Gradient of the batch-averaged negative log-probabilities with respect to extracted log-probabilities equals -1/N at selected target indices and zero elsewhere</a></li>
+<li class="toc-entry toc-h1"><a href="#the-elementwise-logarithm-backpropagates-by-multiplying-the-upstream-gradient-by-1probability-amplifying-low-probability-examples">The elementwise logarithm backpropagates by multiplying the upstream gradient by 1/probability, amplifying low-probability examples</a></li>
+<li class="toc-entry toc-h1"><a href="#softmax-normalization-backpropagates-through-exponentiation-a-summation-with-broadcasting-and-a-numerically-stable-max-subtraction-that-has-negligible-gradient">Softmax normalization backpropagates through exponentiation, a summation with broadcasting, and a numerically-stable max subtraction that has negligible gradient</a></li>
+<li class="toc-entry toc-h1"><a href="#backward-pass-through-a-linear-dense-layer-is-expressible-as-matrix-multiplications-and-vector-sums-derived-by-shape-matching">Backward pass through a linear (dense) layer is expressible as matrix multiplications and vector sums derived by shape matching</a></li>
+<li class="toc-entry toc-h1"><a href="#the-tanh-activation-backward-uses-the-identity-ddx-tanhx--1---tanhx2-and-batch-norm-scaleshift-parameters-accumulate-gradients-across-the-batch">The tanh activation backward uses the identity d/dx tanh(x) = 1 - tanh(x)^2, and batch-norm scale/shift parameters accumulate gradients across the batch</a></li>
+<li class="toc-entry toc-h1"><a href="#batch-normalization-forward-computes-per-feature-mean-and-variance-and-the-choice-of-normalization-denominator-n-vs-n-1-changes-bias-properties">Batch normalization forward computes per-feature mean and variance and the choice of normalization denominator (N vs N-1) changes bias properties</a></li>
+<li class="toc-entry toc-h1"><a href="#backpropagation-through-batch-normalization-requires-careful-topological-ordering-and-handling-of-broadcasts-sums-and-fan-outs">Backpropagation through batch normalization requires careful topological ordering and handling of broadcasts, sums, and fan-outs</a></li>
+<li class="toc-entry toc-h1"><a href="#concatenation-reshape-view-and-embedding-lookup-backward-passes-undo-the-forward-indexing-and-accumulate-repeated-contributions">Concatenation, reshape (view), and embedding lookup backward passes undo the forward indexing and accumulate repeated contributions</a></li>
+<li class="toc-entry toc-h1"><a href="#the-analytic-gradient-of-cross-entropy-with-softmax-simplifies-to-softmax-probabilities-minus-a-one-hot-label-and-is-scaled-by-the-batch-size-mean">The analytic gradient of cross-entropy with softmax simplifies to softmax probabilities minus a one-hot label and is scaled by the batch size mean</a></li>
+<li class="toc-entry toc-h1"><a href="#logits-gradients-act-as-per-row-conservation-forces-that-push-down-incorrect-probabilities-and-pull-up-the-correct-one-with-zero-net-sum">Logits gradients act as per-row conservation ‘forces’ that push down incorrect probabilities and pull up the correct one with zero net sum</a></li>
+<li class="toc-entry toc-h1"><a href="#the-closed-form-backward-formula-for-batch-normalization-condenses-many-atomic-derivatives-into-an-efficient-per-feature-expression-that-uses-batch-level-statistics">The closed-form backward formula for batch normalization condenses many atomic derivatives into an efficient per-feature expression that uses batch-level statistics</a></li>
+<li class="toc-entry toc-h1"><a href="#a-complete-manual-backward-pass-assembled-from-validated-component-derivatives-can-replace-autograd-for-training-and-yield-equivalent-results">A complete manual backward pass assembled from validated component derivatives can replace autograd for training and yield equivalent results</a></li>
+</ul>
+    </div>
+    <hr>
+    
+    <div id="markdown-content">
+      <div style="display: flex; justify-content: center;">
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/q8SA3rM6ckI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen="">
+    </iframe>
+</div>
+
+<h1 id="manual-tensor-level-backward-implementation-exposes-autograd-internals-and-prevents-silent-failures">Manual tensor-level backward implementation exposes autograd internals and prevents silent failures</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec05/00-01-30-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec05/00-01-30-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec05/00-01-30-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec05/00-01-30.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Implementing <strong>backpropagation</strong> at the <strong>tensor level</strong> makes explicit the gradient computations that <strong>autograd</strong> otherwise hides, enabling precise debugging and avoidance of subtle bugs.<br></p>
+
+<p>Writing <strong>manual backward passes</strong> clarifies how each intermediate tensor contributes to the loss and where gradients can <strong>vanish</strong> or <strong>explode</strong>—this is essential when diagnosing <strong>saturated activations</strong>, <strong>dead neurons</strong>, or incorrect gradient manipulations (for example, <strong>clipping the loss instead of clipping gradients</strong>).<br></p>
+
+<p>Implementing tensor-level derivatives forces correct handling of <strong>broadcasting</strong>, <strong>accumulation</strong>, and <strong>numerical stability</strong>, and it serves as a pedagogical exercise that strengthens intuition about <strong>gradient flow</strong>.<br></p>
+
+<p>This approach is not an argument against autograd in production; rather, it provides a concrete <strong>safety net</strong> and a deeper understanding for debugging and for designing architectures.<br></p>
+
+<hr>
+
+<h1 id="manual-gradient-programming-was-historically-standard-and-facilitated-numerical-gradient-checking-in-research-code">Manual gradient programming was historically standard and facilitated numerical gradient checking in research code</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec05/00-05-03-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec05/00-05-03-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec05/00-05-03-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec05/00-05-03.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Historically, researchers wrote <strong>explicit backward passes</strong> because auto-differentiation frameworks were not broadly available.<br></p>
+
+<p>Common workflows used languages like <strong>Matlab</strong> or early <strong>numpy</strong> code to compute gradients and updates manually. Techniques such as <strong>contrastive divergence</strong> and bespoke <strong>gradient estimators</strong> required inline manipulation of gradients and parameter updates.<br></p>
+
+<p>As a result, a gradient-checking tandem of <strong>analytic</strong> and <strong>numerical gradients</strong> became standard practice.<br></p>
+
+<p>Implementing manual backward computations encourages construction of <strong>numerical gradient checks</strong> (finite-difference checks) to validate analytic derivatives before large-scale experiments.<br></p>
+
+<p>This historical perspective shows manual differentiation’s role in rigorous model development and in building intuition about when and why gradients behave pathologically.<br></p>
+
+<hr>
+
+<h1 id="the-notebook-implements-a-two-layer-mlp-with-batch-normalization-and-a-sequence-of-exercises-to-derive-manual-backward-passes">The notebook implements a two-layer MLP with batch normalization and a sequence of exercises to derive manual backward passes</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec05/00-09-37-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec05/00-09-37-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec05/00-09-37-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec05/00-09-37.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The working environment defines a two-layer <strong>multilayer perceptron (MLP)</strong> with the following components:<br></p>
+
+<ul>
+  <li>
+<strong>Embedding table</strong><br>
+</li>
+  <li>
+<strong>First linear layer</strong><br>
+</li>
+  <li>
+<strong>Batch normalization</strong><br>
+</li>
+  <li>
+<strong>tanh nonlinearity</strong><br>
+</li>
+  <li>
+<strong>Second linear layer</strong><br>
+</li>
+  <li>An explicit <strong>cross-entropy loss</strong><br>
+</li>
+</ul>
+
+<p>The notebook provides starter code, utilities to compare <strong>manual versus PyTorch gradients</strong>, and <strong>small-bias random initialization</strong> to unmask implementation errors.<br></p>
+
+<p>Intermediate tensors are retained during the forward pass so their derivatives can be computed and compared.<br></p>
+
+<p>A helper function compares elementwise equality and the maximum difference between manual and autograd gradients.<br></p>
+
+<p>The course of work is organized into exercises:<br></p>
+
+<ol>
+  <li>Backprop through the fully decomposed <strong>loss graph</strong>.<br>
+</li>
+  <li>Derive the analytic <strong>cross-entropy gradient</strong> with respect to logits.<br>
+</li>
+  <li>Derive an efficient <strong>batch-normalization backward</strong> formula.<br>
+</li>
+  <li>Assemble the full <strong>manual training loop</strong> and compare results with autograd.<br>
+</li>
+</ol>
+
+<hr>
+
+<h1 id="gradient-of-the-batch-averaged-negative-log-probabilities-with-respect-to-extracted-log-probabilities-equals--1n-at-selected-target-indices-and-zero-elsewhere">Gradient of the batch-averaged negative log-probabilities with respect to extracted log-probabilities equals -1/N at selected target indices and zero elsewhere</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec05/00-15-31-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec05/00-15-31-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec05/00-15-31-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec05/00-15-31.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>When the loss is computed as the mean negative log-probability of the correct class across a batch, the derivative with respect to each extracted log-probability (one per example) is:<br></p>
+
+<ul>
+  <li>
+<strong>-1/N</strong> at the positions selected by the label indices<br>
+</li>
+  <li>
+<strong>0</strong> for all other logit locations<br>
+</li>
+</ul>
+
+<p>Shape consistency requires the gradient tensor to match the log-probabilities tensor (e.g., <strong>batch_size × num_classes</strong>).<br></p>
+
+<p>Implementation pattern:<br></p>
+
+<ul>
+  <li>Initialize with <strong>zeros_like(log_probs)</strong>.<br>
+</li>
+  <li>Assign <strong>-1.0 / N</strong> to the indexed positions corresponding to the ground-truth labels.<br>
+</li>
+</ul>
+
+<p>This derivative is straightforward, cheap to implement, and serves as the base of the <strong>chain rule</strong> for backpropagating through subsequent layers.<br></p>
+
+<p>Validate it against autograd using <strong>exact</strong> or <strong>allclose</strong> comparisons.<br></p>
+
+<hr>
+
+<h1 id="the-elementwise-logarithm-backpropagates-by-multiplying-the-upstream-gradient-by-1probability-amplifying-low-probability-examples">The elementwise logarithm backpropagates by multiplying the upstream gradient by 1/probability, amplifying low-probability examples</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec05/00-22-36-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec05/00-22-36-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec05/00-22-36-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec05/00-22-36.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>For an elementwise log operation y = log(x) the local derivative is <strong>dy/dx = 1/x</strong>, so the gradient flowing into the predecessor tensor is the upstream gradient multiplied elementwise by <strong>1/x</strong>.<br></p>
+
+<p>In the <strong>cross-entropy–softmax</strong> decomposition this means gradients associated with very small predicted probabilities are <strong>amplified</strong> (1 / small_value), which increases the corrective signal for severely underpredicted true classes.<br></p>
+
+<p>Implementation note:<br></p>
+
+<ul>
+  <li>Compute this as an elementwise multiply of <strong>d_log_probs</strong> by <strong>1.0 / probs</strong> (or <strong>probs.reciprocal()</strong>).<br>
+</li>
+  <li>Respect the original tensor shapes and <strong>broadcasting semantics</strong>.<br>
+</li>
+</ul>
+
+<p>This step highlights why <strong>numerical stability</strong> and correct probability handling matter in the backward pass.<br></p>
+
+<hr>
+
+<h1 id="softmax-normalization-backpropagates-through-exponentiation-a-summation-with-broadcasting-and-a-numerically-stable-max-subtraction-that-has-negligible-gradient">Softmax normalization backpropagates through exponentiation, a summation with broadcasting, and a numerically-stable max subtraction that has negligible gradient</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec05/00-31-17-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec05/00-31-17-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec05/00-31-17-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec05/00-31-17.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Softmax is implemented as:<br></p>
+
+<ul>
+  <li>
+<strong>counts = exp(logits - max_per_row)</strong> (subtract per-row max for numerical stability)<br>
+</li>
+  <li>
+<strong>probs = counts * (count_sum_inverse)</strong> where <strong>count_sum_inverse = 1 / sum(counts)</strong><br>
+</li>
+</ul>
+
+<p>Backpropagation follows from elementwise derivatives:<br></p>
+
+<ul>
+  <li>d(exp(x))/dx = <strong>exp(x)</strong><br>
+</li>
+  <li>d(1/sum)/dsum = <strong>-1 * sum^{-2}</strong> (power rule)<br>
+</li>
+</ul>
+
+<p>Practical considerations:<br></p>
+
+<ul>
+  <li>When tensors are <strong>broadcast</strong> (e.g., a column vector of sums broadcast across columns), the backward pass must account for tensor replication by <strong>summing gradients across the broadcasted dimension</strong>.<br>
+</li>
+  <li>When a scalar or row is reused across columns, gradients from each use are <strong>summed into the original variable</strong>.<br>
+</li>
+  <li>The subtraction of the per-row maximum for numerical stability does not change the softmax output; it yields gradients that are theoretically zero and only produce tiny floating-point residuals in practice.<br>
+</li>
+  <li>Careful <strong>shape reasoning</strong> (for example, use of <strong>keepdim</strong> in sums and appropriate transposes) is required to preserve correspondence with autograd.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="backward-pass-through-a-linear-dense-layer-is-expressible-as-matrix-multiplications-and-vector-sums-derived-by-shape-matching">Backward pass through a linear (dense) layer is expressible as matrix multiplications and vector sums derived by shape matching</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec05/00-43-41-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec05/00-43-41-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec05/00-43-41-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec05/00-43-41.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>For a linear forward pass <strong>D = H W + b</strong> with shapes:<br></p>
+
+<ul>
+  <li>H: <strong>(batch, Nhidden)</strong><br>
+</li>
+  <li>W: <strong>(Nhidden, Nclasses)</strong><br>
+</li>
+  <li>b: <strong>(Nclasses,)</strong><br>
+</li>
+</ul>
+
+<p>the backward propagation reduces to:<br></p>
+
+<ul>
+  <li>
+<strong>dH = dD W^T</strong><br>
+</li>
+  <li>
+<strong>dW = H^T dD</strong><br>
+</li>
+  <li>
+<strong>db = sum_rows(dD)</strong> (sum over the batch axis)<br>
+</li>
+</ul>
+
+<p>These formulas follow from expanding scalar dot-products in the forward pass and applying the <strong>chain rule</strong> elementwise, then recognizing the summed contributions as matrix multiplications plus appropriate transpositions.<br></p>
+
+<p>Shape analysis yields which transpose and summation axes must be used—only one configuration makes the matrix dimensions conform.<br></p>
+
+<p>Implement these formulas using efficient <strong>BLAS-backed matrix operations</strong> and verify by comparing to autograd gradients.<br></p>
+
+<hr>
+
+<h1 id="the-tanh-activation-backward-uses-the-identity-ddx-tanhx--1---tanhx2-and-batch-norm-scaleshift-parameters-accumulate-gradients-across-the-batch">The tanh activation backward uses the identity d/dx tanh(x) = 1 - tanh(x)^2, and batch-norm scale/shift parameters accumulate gradients across the batch</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec05/00-55-22-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec05/00-55-22-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec05/00-55-22-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec05/00-55-22.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>For a <strong>tanh</strong> nonlinearity a = tanh(z) the local derivative is <strong>da/dz = 1 - a^2</strong>, where <strong>a</strong> is the tanh output.<br></p>
+
+<ul>
+  <li>The upstream gradient is multiplied elementwise by <strong>(1 - a^2)</strong> to yield <strong>dZ</strong>.<br>
+</li>
+  <li>Computing this using the <strong>activation output</strong> avoids recomputing hyperbolic functions of the input.<br>
+</li>
+</ul>
+
+<p>In <strong>batch normalization</strong>, the affine parameters are handled simply:<br></p>
+
+<ul>
+  <li>
+<strong>dgamma = sum_over_batch(d_pre-activation * x_hat)</strong><br>
+</li>
+  <li>
+<strong>dbeta = sum_over_batch(d_pre-activation)</strong><br>
+</li>
+</ul>
+
+<p>These sums must respect the broadcasting that occurred in the forward pass and typically collapse the batch dimension while retaining feature dimensionality.<br></p>
+
+<p>Implementation must ensure correct use of <strong>keepdim</strong> or <strong>reshape</strong> so that <strong>gamma/beta</strong> gradients have the intended shapes and can be applied in parameter updates.<br></p>
+
+<hr>
+
+<h1 id="batch-normalization-forward-computes-per-feature-mean-and-variance-and-the-choice-of-normalization-denominator-n-vs-n-1-changes-bias-properties">Batch normalization forward computes per-feature mean and variance and the choice of normalization denominator (N vs N-1) changes bias properties</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec05/01-04-19-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec05/01-04-19-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec05/01-04-19-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec05/01-04-19.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Batch normalization decomposes into the following steps:<br></p>
+
+<ul>
+  <li>Per-feature mean: <strong>mu = (1/m) sum x</strong><br>
+</li>
+  <li>Centered differences: <strong>x - mu</strong><br>
+</li>
+  <li>Variance estimate: <strong>sigma^2 = (1/(m-1)) sum (x - mu)^2</strong> (or biased <strong>1/m</strong> alternative)<br>
+</li>
+  <li>Regularization with <strong>epsilon</strong> to prevent divide-by-zero<br>
+</li>
+  <li>Inverse square-root scaling to produce <strong>x_hat = (x - mu) * (sigma^2 + eps)^{-1/2}</strong><br>
+</li>
+</ul>
+
+<p>Implementation decision point:<br></p>
+
+<ul>
+  <li>Using <strong>(N-1)</strong> (Bessel correction) produces an <strong>unbiased variance estimator</strong> for small sample sizes and avoids systematic underestimation that the biased <strong>1/N</strong> estimator produces.<br>
+</li>
+  <li>This choice affects training-time statistics and the calibration of running means/variances used at inference.<br>
+</li>
+  <li>Some frameworks historically mix biased estimation at training and unbiased at inference, creating a <strong>train–test mismatch</strong>; consistent use of an unbiased estimator (<strong>1/(N-1)</strong>) is recommended for small mini-batches.<br>
+</li>
+</ul>
+
+<p>Numerically, <strong>epsilon</strong> prevents divide-by-zero and the inverse-root is efficiently implemented as a power <strong>-0.5</strong>, followed by broadcasting to align feature dimensions.<br></p>
+
+<hr>
+
+<h1 id="backpropagation-through-batch-normalization-requires-careful-topological-ordering-and-handling-of-broadcasts-sums-and-fan-outs">Backpropagation through batch normalization requires careful topological ordering and handling of broadcasts, sums, and fan-outs</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec05/01-13-55-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec05/01-13-55-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec05/01-13-55-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec05/01-13-55.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The backward pass for <strong>batch normalization</strong> is implemented by traversing the computational graph in <strong>topologically sorted order</strong>:<br></p>
+
+<ol>
+  <li>Propagate gradients from <strong>dY</strong> to <strong>dX_hat</strong> (via <strong>gamma</strong>).<br>
+</li>
+  <li>Propagate from <strong>dX_hat</strong> to <strong>d_var</strong> and <strong>d_mu</strong>.<br>
+</li>
+  <li>Finally compute <strong>dX</strong>, because <strong>mu</strong> and <strong>var</strong> are shared scalars that fan out into many <strong>X_hat</strong> nodes.<br>
+</li>
+</ol>
+
+<p>Key implementation points:<br></p>
+
+<ul>
+  <li>Operations that summed across the batch during the forward pass imply <strong>replication in the backward pass</strong> and vice versa.<br>
+</li>
+  <li>Gradients that come from replicated uses must be <strong>summed along the same axis</strong> used for reduction (often the batch axis with <strong>keepdim</strong> semantics).<br>
+</li>
+  <li>A practical implementation constructs intermediate gradients with <strong>zeros_like</strong>, uses <strong>ones-matrix multiplications</strong> to replicate or broadcast, and accumulates contributions from multiple branches using <strong>+=</strong> to account for fan-outs.<br>
+</li>
+</ul>
+
+<p>Check each intermediate against autograd to ensure correctness.<br></p>
+
+<hr>
+
+<h1 id="concatenation-reshape-view-and-embedding-lookup-backward-passes-undo-the-forward-indexing-and-accumulate-repeated-contributions">Concatenation, reshape (view), and embedding lookup backward passes undo the forward indexing and accumulate repeated contributions</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec05/01-22-35-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec05/01-22-35-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec05/01-22-35-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec05/01-22-35.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Reshaping (<strong>view</strong>) is a no-op with respect to memory layout, so the backward pass simply <strong>reshapes the upstream gradient</strong> back to the original operand shape (e.g., call <strong>.view(original_shape)</strong> on the gradient).<br></p>
+
+<p>For <strong>concatenation</strong> or explicit stacking that created a larger tensor from smaller tensors, the backward pass <strong>slices the upstream gradient</strong> to match each original component and assigns those slices to the corresponding gradient variables.<br></p>
+
+<p>An <strong>embedding lookup</strong> performed via integer indexing maps rows of an embedding matrix into a batched tensor; the backward pass reverses this by:<br></p>
+
+<ul>
+  <li>Initializing an embedding gradient matrix of <strong>zeros</strong>.<br>
+</li>
+  <li>For each lookup index, <strong>adding</strong> the corresponding vector gradient into the embedding gradient row (accumulating with <strong>+=</strong> if an index appears multiple times).<br>
+</li>
+</ul>
+
+<p>When a vectorized <strong>scatter-add</strong> operation is available it is preferred; otherwise a loop that accumulates contributions is correct and must preserve shapes.<br></p>
+
+<hr>
+
+<h1 id="the-analytic-gradient-of-cross-entropy-with-softmax-simplifies-to-softmax-probabilities-minus-a-one-hot-label-and-is-scaled-by-the-batch-size-mean">The analytic gradient of cross-entropy with softmax simplifies to softmax probabilities minus a one-hot label and is scaled by the batch size mean</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec05/01-29-22-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec05/01-29-22-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec05/01-29-22-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec05/01-29-22.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>For a single example with softmax probabilities <strong>p = softmax(logits)</strong> and true label <strong>y</strong>, the derivative of the negative log-likelihood with respect to logits is:<br></p>
+
+<ul>
+  <li>∂L/∂logit_i = <strong>p_i</strong> for <strong>i ≠ y</strong><br>
+</li>
+  <li>∂L/∂logit_y = <strong>p_y − 1</strong><br>
+</li>
+</ul>
+
+<p>This compact form arises after differentiating the softmax and log and canceling common terms.<br></p>
+
+<p>For a batch loss computed by averaging over <strong>N</strong> examples, this gradient is additionally <strong>divided by N</strong>.<br></p>
+
+<p>Implementation recipe:<br></p>
+
+<ol>
+  <li>Compute <strong>p</strong> across rows.<br>
+</li>
+  <li>Subtract <strong>1</strong> at the ground-truth indices.<br>
+</li>
+  <li>Divide by the <strong>batch size</strong>.<br>
+</li>
+</ol>
+
+<p>This analytic expression is far more efficient than decomposing the loss into many atomic ops and backpropagating through each step, and it matches autograd to floating-point tolerance.<br></p>
+
+<hr>
+
+<h1 id="logits-gradients-act-as-per-row-conservation-forces-that-push-down-incorrect-probabilities-and-pull-up-the-correct-one-with-zero-net-sum">Logits gradients act as per-row conservation ‘forces’ that push down incorrect probabilities and pull up the correct one with zero net sum</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec05/01-34-30-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec05/01-34-30-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec05/01-34-30-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec05/01-34-30.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The gradient vector for each example’s logits can be interpreted as a set of <strong>forces that conserve mass</strong>:<br></p>
+
+<ul>
+  <li>The per-class gradient entries <strong>sum to zero</strong>, meaning the total probability mass is <strong>redistributed</strong> rather than created or destroyed.<br>
+</li>
+  <li>Each incorrect class receives a <strong>negative pull</strong> proportional to its predicted probability <strong>p_i</strong>.<br>
+</li>
+  <li>The true class receives a <strong>positive push</strong> of magnitude <strong>1 − p_y</strong>.<br>
+</li>
+</ul>
+
+<p>Thus, confident mispredictions produce <strong>large corrective gradients</strong>. This physical metaphor explains why gradient magnitudes reflect both the <strong>confidence</strong> and the <strong>correctness</strong> of predictions and clarifies how local manipulations at the logits propagate through the network to update parameters.<br></p>
+
+<hr>
+
+<h1 id="the-closed-form-backward-formula-for-batch-normalization-condenses-many-atomic-derivatives-into-an-efficient-per-feature-expression-that-uses-batch-level-statistics">The closed-form backward formula for batch normalization condenses many atomic derivatives into an efficient per-feature expression that uses batch-level statistics</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec05/01-43-18-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec05/01-43-18-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec05/01-43-18-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec05/01-43-18.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Deriving <strong>dL/dX</strong> for batch-normalized activations yields a compact <strong>vectorized expression</strong> that combines:<br></p>
+
+<ul>
+  <li>The <strong>upstream gradient</strong><br>
+</li>
+  <li>The per-feature <strong>inverse-standard-deviation</strong> factors<br>
+</li>
+  <li>The <strong>mean of upstream gradients</strong> over the batch<br>
+</li>
+  <li>Inner products with the <strong>centered inputs</strong><br>
+</li>
+</ul>
+
+<p>Algebraic simplification consolidates terms involving <strong>(var + eps)^{-3/2}</strong> and sums over batch elements into three additive components.<br></p>
+
+<p>The final formula computes the gradient in parallel for all features by using elementwise multiplications, <strong>reductions (sums)</strong> over the batch axis, and appropriately shaped <strong>broadcasting</strong> so the same per-feature scalar factors apply across the batch.<br></p>
+
+<p>Implementing this analytic backward-pass is substantially more efficient than backpropagating through each intermediate step and must be carefully validated against autograd across all features to ensure broadcasting and accumulation are correct.<br></p>
+
+<hr>
+
+<h1 id="a-complete-manual-backward-pass-assembled-from-validated-component-derivatives-can-replace-autograd-for-training-and-yield-equivalent-results">A complete manual backward pass assembled from validated component derivatives can replace autograd for training and yield equivalent results</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec05/01-52-40-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec05/01-52-40-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec05/01-52-40-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec05/01-52-40.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Assembling the previously derived manual gradients—<strong>analytic cross-entropy</strong>, <strong>linear-layer matrix derivatives</strong>, <strong>tanh nonlinearity</strong>, <strong>batch-normalization closed-form gradient</strong>, <strong>embedding lookup accumulation</strong>—produces a full backward pass that computes parameter gradients without calling <strong>loss.backward</strong>.<br></p>
+
+<p>When parameter updates use these manually computed gradients inside a <strong>torch.no_grad</strong> block, the training loop behaves <strong>equivalently to autograd-based training</strong> up to floating-point tolerances; small numerical differences on the order of <strong>1e-9</strong> are typical.<br></p>
+
+<p>This end-to-end implementation verifies correctness by comparing per-parameter gradients to autograd, then proceeds to update weights and biases, calibrate running BN statistics, evaluate losses, and sample from the model.<br></p>
+
+<p>Manual implementation provides full transparency into <strong>gradient flow</strong> and is a valuable debugging and educational tool, even though autograd remains the practical choice for day-to-day development.<br></p>
+
+<hr>
+
+
+    </div>
+  </article>
+
+
+  
+    
+    <br>
+    <hr>
+    <br>
+    <ul class="list-disc pl-8"></ul>
+
+    <!-- Adds related posts to the end of an article -->
+    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
+    <p class="mb-2">Here are some more articles you might like to read next:</p>
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/diffusion-foundation/">The Foundations and Frontiers of Diffusion Models</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/karpathy-lec01/">Karpathy Series - Building Micrograd</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/nlp-foundation/">LLM Series - Part 1 - Important Concepts in NLP</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/karpathy-lec03/">Karpathy Series - Bulding Makemore Part 2 - MLP</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/karpathy-lec10/">Karpathy Series - Let's reproduce GPT-2</a>
+  </li>
+
+</div>
+
+      
+    </div>
+
+    <!-- Footer -->    
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        © Copyright 2025 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+
+      </div>
+    </footer>
+
+    <!-- JavaScripts -->
+    <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- Bootsrap & MDB scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    <!-- Masonry & imagesLoaded -->
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
+    
+  <!-- Medium Zoom JS -->
+  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/zoom.js"></script>
+
+  <!-- Bootstrap Table -->
+  <script defer src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+
+  <!-- Load Common JS -->
+  <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
+  <script defer src="/assets/js/common.js?acdb9690d7641b2f8d40529018c71a01"></script>
+  <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    <!-- MathJax -->
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        tags: 'ams'
+      }
+    };
+  </script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KGSMMS9MS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-7KGSMMS9MS');
+  </script>
+    
+
+<!-- Scrolling Progress Bar -->
+<script type="text/javascript">
+  /*
+   * This JavaScript code has been adapted from the article 
+   * https://css-tricks.com/reading-position-indicator/ authored by Pankaj Parashar, 
+   * published on the website https://css-tricks.com on the 7th of May, 2014.
+   * Couple of changes were made to the original code to make it compatible 
+   * with the `al-foio` theme.
+   */
+  const progressBar = $("#progress");
+  /*
+   * We set up the bar after all elements are done loading.
+   * In some cases, if the images in the page are larger than the intended
+   * size they'll have on the page, they'll be resized via CSS to accomodate
+   * the desired size. This mistake, however, breaks the computations as the
+   * scroll size is computed as soon as the elements finish loading.
+   * To account for this, a minimal delay was introduced before computing the
+   * values.
+   */
+  window.onload = function () {
+    setTimeout(progressBarSetup, 50);
+  };
+  /*
+   * We set up the bar according to the browser.
+   * If the browser supports the progress element we use that.
+   * Otherwise, we resize the bar thru CSS styling
+   */
+  function progressBarSetup() {
+    if ("max" in document.createElement("progress")) {
+      initializeProgressElement();
+      $(document).on("scroll", function() {
+        progressBar.attr({ value: getCurrentScrollPosition() });
+      });
+      $(window).on("resize", initializeProgressElement);
+    } else {
+      resizeProgressBar();
+      $(document).on("scroll", resizeProgressBar);
+      $(window).on("resize", resizeProgressBar);
+    }
+  }
+  /*
+   * The vertical scroll position is the same as the number of pixels that
+   * are hidden from view above the scrollable area. Thus, a value > 0 is
+   * how much the user has scrolled from the top
+   */
+  function getCurrentScrollPosition() {
+    return $(window).scrollTop();
+  }
+
+  function initializeProgressElement() {
+    let navbarHeight = $("#navbar").outerHeight(true);
+    $("body").css({ "padding-top": navbarHeight });
+    $("progress-container").css({ "padding-top": navbarHeight });
+    progressBar.css({ top: navbarHeight });
+    progressBar.attr({
+      max: getDistanceToScroll(),
+      value: getCurrentScrollPosition(),
+    });
+  }
+  /*
+   * The offset between the html document height and the browser viewport
+   * height will be greater than zero if vertical scroll is possible.
+   * This is the distance the user can scroll
+   */
+  function getDistanceToScroll() {
+    return $(document).height() - $(window).height();
+  }
+
+  function resizeProgressBar() {
+    progressBar.css({ width: getWidthPercentage() + "%" });
+  }
+  // The scroll ratio equals the percentage to resize the bar
+  function getWidthPercentage() {
+    return (getCurrentScrollPosition() / getDistanceToScroll()) * 100;
+  }
+</script>
+
+    
+  </body>
+</html>

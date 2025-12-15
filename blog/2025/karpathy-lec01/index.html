@@ -1,0 +1,1612 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <!-- Head -->
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    <!-- Metadata, OpenGraph and Schema.org -->
+    
+
+    <!-- Standard metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Karpathy Series - Building Micrograd | Tuan-Anh  Bui</title>
+    <meta name="author" content="Tuan-Anh  Bui">
+    <meta name="description" content="AI Summary Lecture">
+    <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
+
+
+    <!-- Bootstrap & MDB -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+    <!-- Bootstrap Table -->
+    <link defer rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+
+    <!-- Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
+
+    
+
+    <!-- Styles -->
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
+    
+    <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+    <link rel="canonical" href="https://tuananhbui89.github.io/blog/2025/karpathy-lec01/">
+
+    <!-- Dark Mode -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark">
+    <script src="/assets/js/theme.js?96d6b3e1c3604aca8b6134c7afdd5db6"></script>
+    <script src="/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script>
+    
+
+  </head>
+
+  <!-- Body -->
+  <body class="fixed-top-nav ">
+
+    <!-- Header -->
+    <header>
+
+      <!-- Nav Bar -->
+      <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top">
+        <div class="container">
+          <a class="navbar-brand title font-weight-lighter" href="/"><span class="font-weight-bold">Tuan-Anh </span>Bui</a>
+          <!-- Navbar Toggle -->
+          <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar top-bar"></span>
+            <span class="icon-bar middle-bar"></span>
+            <span class="icon-bar bottom-bar"></span>
+          </button>
+
+          <div class="collapse navbar-collapse text-right" id="navbarNav">
+            <ul class="navbar-nav ml-auto flex-nowrap">
+
+              <!-- About -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/">about</a>
+              </li>
+              
+              <!-- Blog -->
+              <li class="nav-item active">
+                <a class="nav-link" href="/blog/">blog<span class="sr-only">(current)</span></a>
+              </li>
+
+              <!-- Other pages -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/publications/">publications</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/projects/">projects</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/repositories/">repositories</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/teaching/"></a>
+              </li>
+
+              <!-- Toogle theme mode -->
+              <li class="toggle-container">
+                <button id="light-toggle" title="Change theme">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Scrolling Progress Bar -->
+      <progress id="progress" value="0">
+        <div class="progress-container">
+          <span class="progress-bar"></span>
+        </div>
+      </progress>
+    </header>
+
+
+    <!-- Content -->
+    <div class="container mt-5">
+      
+        <!-- _layouts/post.html -->
+<!-- Page/Post style -->
+<style type="text/css">
+  
+</style>
+
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Karpathy Series - Building Micrograd</h1>
+    <p class="post-meta">December 15, 2025</p>
+    <p class="post-tags">
+      <a href="/blog/2025"> <i class="fas fa-calendar fa-sm"></i> 2025 </a>
+        ·  
+        <a href="/blog/tag/genai">
+          <i class="fas fa-hashtag fa-sm"></i> genai</a>  
+          <a href="/blog/tag/llm">
+          <i class="fas fa-hashtag fa-sm"></i> llm</a>  
+          <a href="/blog/tag/tutorial">
+          <i class="fas fa-hashtag fa-sm"></i> tutorial</a>  
+          <a href="/blog/tag/reading">
+          <i class="fas fa-hashtag fa-sm"></i> reading</a>  
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    
+    <div id="table-of-contents">
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#lecture-overview-and-objectives">Lecture overview and objectives</a></li>
+<li class="toc-entry toc-h1"><a href="#micrograd-purpose-and-definition-of-autograd">Micrograd purpose and definition of autograd</a></li>
+<li class="toc-entry toc-h1"><a href="#illustrative-scalar-computation-graph-and-forwardbackward-usage">Illustrative scalar computation graph and forward/backward usage</a></li>
+<li class="toc-entry toc-h1"><a href="#meaning-of-computed-gradients-for-inputs">Meaning of computed gradients for inputs</a></li>
+<li class="toc-entry toc-h1"><a href="#neural-networks-as-mathematical-expressions-and-scalar-engine-tradeoffs">Neural networks as mathematical expressions and scalar engine tradeoffs</a></li>
+<li class="toc-entry toc-h1"><a href="#micrograd-repository-structure-and-minimalism">Micrograd repository structure and minimalism</a></li>
+<li class="toc-entry toc-h1"><a href="#defining-a-scalar-function-and-visualizing-it">Defining a scalar function and visualizing it</a></li>
+<li class="toc-entry toc-h1"><a href="#numerical-approximation-of-derivatives-via-finite-differences">Numerical approximation of derivatives via finite differences</a></li>
+<li class="toc-entry toc-h1"><a href="#partial-derivatives-and-sensitivity-for-multi-input-functions">Partial derivatives and sensitivity for multi-input functions</a></li>
+<li class="toc-entry toc-h1"><a href="#implementing-the-value-class-and-primitive-operators">Implementing the Value class and primitive operators</a></li>
+<li class="toc-entry toc-h1"><a href="#visualizing-computation-graphs-with-graphviz-and-labeling-nodes">Visualizing computation graphs with graphviz and labeling nodes</a></li>
+<li class="toc-entry toc-h1"><a href="#introducing-grad-and-initializing-backprop-base-case">Introducing .grad and initializing backprop base case</a></li>
+<li class="toc-entry toc-h1"><a href="#manual-backpropagation-for-product-nodes-and-local-derivatives">Manual backpropagation for product nodes and local derivatives</a></li>
+<li class="toc-entry toc-h1"><a href="#applying-the-chain-rule-to-addition-nodes-and-routing-gradients">Applying the chain rule to addition nodes and routing gradients</a></li>
+<li class="toc-entry toc-h1"><a href="#recursing-chain-rule-to-compute-leaf-gradients-and-numeric-verification">Recursing chain rule to compute leaf gradients and numeric verification</a></li>
+<li class="toc-entry toc-h1"><a href="#using-gradient-information-to-perform-a-parameter-update">Using gradient information to perform a parameter update</a></li>
+<li class="toc-entry toc-h1"><a href="#mathematical-model-of-a-neuron-and-activation-function-choice">Mathematical model of a neuron and activation function choice</a></li>
+<li class="toc-entry toc-h1"><a href="#implementing-tanh-as-a-value-operation-and-its-backward-rule">Implementing tanh as a Value operation and its backward rule</a></li>
+<li class="toc-entry toc-h1"><a href="#automating-local-backward-logic-by-storing-closures-in-nodes">Automating local backward logic by storing closures in nodes</a></li>
+<li class="toc-entry toc-h1"><a href="#topological-sorting-and-implementing-valuebackward">Topological sorting and implementing Value.backward</a></li>
+<li class="toc-entry toc-h1"><a href="#gradient-accumulation-bug-on-reused-variables-and-the-accumulation-fix">Gradient accumulation bug on reused variables and the accumulation fix</a></li>
+<li class="toc-entry toc-h1"><a href="#convenience-wrappers-for-numeric-constants-and-right-side-operations">Convenience wrappers for numeric constants and right-side operations</a></li>
+<li class="toc-entry toc-h1"><a href="#adding-exppower-division-subtraction-primitives-and-equivalence-of-decomposed-tanh">Adding exp/power, division, subtraction primitives and equivalence of decomposed tanh</a></li>
+<li class="toc-entry toc-h1"><a href="#neural-modules-neuron-layer-and-mlp-abstractions-matching-common-apis">Neural modules: neuron, layer, and MLP abstractions matching common APIs</a></li>
+<li class="toc-entry toc-h1"><a href="#dataset-construction-loss-definition-mse-and-computing-gradients-for-training">Dataset construction, loss definition (MSE), and computing gradients for training</a></li>
+<li class="toc-entry toc-h1"><a href="#parameter-update-loop-learning-rate-selection-and-iterative-optimization">Parameter update loop, learning rate selection, and iterative optimization</a></li>
+<li class="toc-entry toc-h1"><a href="#zeroing-gradients-across-iterations-and-consequences-of-forgetting-to-zero">Zeroing gradients across iterations and consequences of forgetting to zero</a></li>
+<li class="toc-entry toc-h1"><a href="#comparison-with-pytorch-implementation-details-and-registering-custom-ops">Comparison with PyTorch implementation details and registering custom ops</a></li>
+<li class="toc-entry toc-h1"><a href="#summary-of-principles-expressions-loss-backprop-and-gradient-descent">Summary of principles: expressions, loss, backprop, and gradient descent</a></li>
+</ul>
+    </div>
+    <hr>
+    
+    <div id="markdown-content">
+      <div style="display: flex; justify-content: center;">
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/VMj-3S1tku0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen="">
+    </iframe>
+</div>
+
+<h1 id="lecture-overview-and-objectives">Lecture overview and objectives</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec01/00-00-11-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec01/00-00-11-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec01/00-00-11-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec01/00-00-11.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The lecture motivates showing neural network training <strong>under the hood</strong> by building a minimal automatic-differentiation engine called <strong>micrograd</strong> and implementing a tiny network end-to-end.<br></p>
+
+<p>The exercise is framed as starting from an empty Jupyter notebook and proceeding step-by-step to define:</p>
+<ul>
+  <li>
+<strong>data structures</strong> for values and graph connectivity<br>
+</li>
+  <li>
+<strong>forward evaluation</strong> to compute numeric outputs<br>
+</li>
+  <li>
+<strong>backward propagation</strong> to compute gradients<br>
+</li>
+  <li>a simple <strong>training loop</strong> to update parameters<br>
+</li>
+</ul>
+
+<p>Intended outcome:</p>
+<ul>
+  <li>both conceptual and practical understanding of <strong>backpropagation</strong>, <strong>autograd</strong>, and how simple operations compose into trainable networks<br>
+</li>
+  <li>emphasis on <strong>pedagogical clarity</strong> over production performance so every mechanical detail is visible and explicit<br>
+</li>
+</ul>
+
+<p>This walkthrough lets readers see how the pieces fit before scaling to larger frameworks or vectorized implementations.<br></p>
+
+<hr>
+
+<h1 id="micrograd-purpose-and-definition-of-autograd">Micrograd purpose and definition of autograd</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec01/00-00-53-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec01/00-00-53-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec01/00-00-53-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec01/00-00-53.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Micrograd</strong> is presented as a compact <strong>autograd</strong> engine — where <strong>autograd</strong> means automatic computation of gradients — that implements <strong>backpropagation</strong> to compute gradients of a scalar loss with respect to internal variables or weights.<br></p>
+
+<p>Key points:</p>
+<ul>
+  <li>
+<strong>Backpropagation</strong> efficiently computes derivatives via the <strong>chain rule</strong>.<br>
+</li>
+  <li>Those derivatives enable iterative optimization of parameters to minimize a loss function.<br>
+</li>
+  <li>Conceptually, <strong>micrograd</strong> is the mathematical core analogous to the gradient machinery inside larger libraries (e.g., <strong>PyTorch</strong>, <strong>JAX</strong>).<br>
+</li>
+  <li>Scope is intentionally limited: demonstrate how arbitrary mathematical expressions can be instrumented to compute gradients so neural-network training becomes straightforward.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="illustrative-scalar-computation-graph-and-forwardbackward-usage">Illustrative scalar computation graph and forward/backward usage</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec01/00-02-19-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec01/00-02-19-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec01/00-02-19-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec01/00-02-19.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>A simple example builds scalar inputs wrapped in a <strong>Value</strong> object and composes arithmetic operations to form a computation graph.<br></p>
+
+<p>Flow:</p>
+<ol>
+  <li>Create scalar inputs as <strong>Value</strong> instances.<br>
+</li>
+  <li>Combine them with operations (add, mul, pow, neg, etc.) to form an expression graph.<br>
+</li>
+  <li>The forward pass reads numeric outputs from a <strong>data</strong> attribute on the resulting <strong>Value</strong>.<br>
+</li>
+  <li>Calling <strong>.backward()</strong> on the final output triggers reverse-mode differentiation and populates <strong>.grad</strong> fields on every node.<br>
+</li>
+</ol>
+
+<p>Implementation detail:</p>
+<ul>
+  <li>Each operation records pointers to operand <strong>Value</strong> instances and an operation label, building a directed acyclic graph (DAG).<br>
+</li>
+</ul>
+
+<p>Takeaway: arbitrary mathematical expressions — not just neural layers — are valid targets for automatic differentiation.<br></p>
+
+<hr>
+
+<h1 id="meaning-of-computed-gradients-for-inputs">Meaning of computed gradients for inputs</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec01/00-03-52-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec01/00-03-52-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec01/00-03-52-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec01/00-03-52.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Computed gradients are interpreted as <strong>sensitivities</strong>: they quantify how a small change in an input affects the output.<br></p>
+
+<p>Notes:</p>
+<ul>
+  <li>The numerical value of <strong>a.grad</strong> or <strong>b.grad</strong> is the instantaneous slope ∂output/∂input at the current evaluation point.<br>
+</li>
+  <li>A <strong>positive gradient</strong> means increasing the input increases the output; a negative gradient means the opposite.<br>
+</li>
+  <li>Gradients provide a <strong>local linear approximation</strong> used by optimizers to decide how to nudge parameters.<br>
+</li>
+</ul>
+
+<p>In short: gradients are the fundamental signal exploited by gradient-based optimization methods.<br></p>
+
+<hr>
+
+<h1 id="neural-networks-as-mathematical-expressions-and-scalar-engine-tradeoffs">Neural networks as mathematical expressions and scalar engine tradeoffs</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec01/00-05-21-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec01/00-05-21-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec01/00-05-21-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec01/00-05-21.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Neural networks are just particular classes of mathematical expressions that map data and weights to predictions and losses.<br></p>
+
+<p>Consequences:</p>
+<ul>
+  <li>A <strong>general-purpose autograd engine</strong> that handles arbitrary expressions therefore subsumes the needs of neural-network training.<br>
+</li>
+  <li>
+<strong>Micrograd</strong> intentionally operates at the scalar <strong>Value</strong> level for pedagogical simplicity, making the implementation tiny and explicit but inefficient for large models.<br>
+</li>
+  <li>Production frameworks group scalars into <strong>tensors</strong> and use vectorized operations to exploit parallel hardware — efficiency changes, but the core calculus does not.<br>
+</li>
+</ul>
+
+<p>This section clarifies the distinction between pedagogical minimalism and production efficiency while emphasizing unchanged mathematical principles.<br></p>
+
+<hr>
+
+<h1 id="micrograd-repository-structure-and-minimalism">Micrograd repository structure and minimalism</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec01/00-06-51-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec01/00-06-51-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec01/00-06-51-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec01/00-06-51.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Micrograd</strong> is an intentionally tiny codebase with two main files:</p>
+<ul>
+  <li>
+<strong>engine.py</strong> — the autograd engine implementing the core <strong>Value</strong> data structure and backward mechanics (roughly a hundred lines of Python).<br>
+</li>
+  <li>
+<strong>nn.py</strong> — a small neural-network library built on top of the engine with simple abstractions for neurons, layers, and multilayer perceptrons.<br>
+</li>
+</ul>
+
+<p>Goals of this layout:</p>
+<ul>
+  <li>Showcase that essential ideas behind neural training are compact and comprehensible.<br>
+</li>
+  <li>Highlight that larger libraries primarily add <strong>efficiency</strong>, <strong>convenience</strong>, and <strong>device support</strong>.<br>
+</li>
+</ul>
+
+<p>This frames upcoming implementation tasks and motivates understanding each piece before scaling up.<br></p>
+
+<hr>
+
+<h1 id="defining-a-scalar-function-and-visualizing-it">Defining a scalar function and visualizing it</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec01/00-08-52-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec01/00-08-52-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec01/00-08-52-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec01/00-08-52.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>A scalar test function (e.g., a quadratic) is defined to build intuition about function shape and derivatives.<br></p>
+
+<p>Practice:</p>
+<ul>
+  <li>Plot <strong>f(x)</strong> over a range to visualize curvature and critical points.<br>
+</li>
+  <li>Use concrete evaluations (e.g., <strong>f(3.0)=20</strong>) to ground later differentiation examples.<br>
+</li>
+</ul>
+
+<p>Visual inspection helps reason about:</p>
+<ul>
+  <li>Sign and magnitude of derivatives at different x values (positive slope on the right, negative on the left, zero slope at the minimum).<br>
+</li>
+</ul>
+
+<p>This simple scalar example seeds the transition to numerical and automatic differentiation.<br></p>
+
+<hr>
+
+<h1 id="numerical-approximation-of-derivatives-via-finite-differences">Numerical approximation of derivatives via finite differences</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec01/00-11-41-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec01/00-11-41-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec01/00-11-41-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec01/00-11-41.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The derivative is introduced formally as the limit of (f(x+h) - f(x)) / h as h → 0, and practical finite-difference approximation uses small but finite h (e.g., 1e-3).<br></p>
+
+<p>Practical notes:</p>
+<ul>
+  <li>Floating-point precision limits the smallest useful h — too small h can produce noisy estimates.<br>
+</li>
+  <li>For simple polynomials, finite differences reproduce analytic results (e.g., analytic f’(3) for 3x^2 - 4x + 5).<br>
+</li>
+  <li>Finite differences serve both as a diagnostic and as an intuitive bridge to <strong>automatic differentiation</strong>, which computes exact derivatives up to floating-point error without symbolic manipulation.<br>
+</li>
+</ul>
+
+<p>Emphasize the rise-over-run interpretation and numerical-stability considerations when using finite differences.<br></p>
+
+<hr>
+
+<h1 id="partial-derivatives-and-sensitivity-for-multi-input-functions">Partial derivatives and sensitivity for multi-input functions</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec01/00-16-07-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec01/00-16-07-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec01/00-16-07-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec01/00-16-07.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Partial derivatives are extended to functions of multiple scalar inputs via finite-difference experiments.<br></p>
+
+<p>Method:</p>
+<ul>
+  <li>Perturb one input at a time by h and compute (f(…, a+h, …) - f(…, a, …)) / h to estimate ∂f/∂a.<br>
+</li>
+  <li>Repeat for each input to obtain ∂d/∂a, ∂d/∂b, ∂d/∂c.<br>
+</li>
+</ul>
+
+<p>Illustration:</p>
+<ul>
+  <li>For d(a,b,c) = a*b + c, perturbing a yields derivative equal to b, matching analytic expectation.<br>
+</li>
+</ul>
+
+<p>Takeaway: each partial derivative measures local sensitivity holding other inputs fixed, and these local sensitivities compose via the chain rule in larger graphs — the intuition needed for backpropagation across many inputs.<br></p>
+
+<hr>
+
+<h1 id="implementing-the-value-class-and-primitive-operators">Implementing the Value class and primitive operators</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec01/00-21-35-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec01/00-21-35-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec01/00-21-35-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec01/00-21-35.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Introduce the <strong>Value</strong> class as a container for a scalar plus bookkeeping fields required for autograd:<br></p>
+
+<p>Core fields:</p>
+<ul>
+  <li>
+<strong>data</strong> — numeric scalar value.<br>
+</li>
+  <li>
+<strong>prev / children</strong> — references to operand Value nodes (graph edges).<br>
+</li>
+  <li>
+<strong>op</strong> — operation label (e.g., ‘+’, ‘*’, ‘tanh’).<br>
+</li>
+  <li>
+<strong>grad</strong> — gradient initialized to zero.<br>
+</li>
+</ul>
+
+<p>Operator overloading:</p>
+<ul>
+  <li>Implement <strong>__add__</strong>, <strong>__mul__</strong>, etc., to produce new <strong>Value</strong> instances whose <strong>data</strong> is computed from operands and that record parents and operation type.<br>
+</li>
+</ul>
+
+<p>Result:</p>
+<ul>
+  <li>An explicit computation graph of <strong>Value</strong> nodes where leaves are inputs/parameters and internal nodes are intermediate computations, enabling traversal for gradient propagation.<br>
+</li>
+</ul>
+
+<p>Implementation choices include convenience wrappers for readable string formatting and using tuple/set representations for children to balance readability and efficiency.<br></p>
+
+<hr>
+
+<h1 id="visualizing-computation-graphs-with-graphviz-and-labeling-nodes">Visualizing computation graphs with graphviz and labeling nodes</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec01/00-26-33-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec01/00-26-33-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec01/00-26-33-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec01/00-26-33.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>A <strong>drawdot</strong> routine is added to traverse the <strong>Value</strong> computation graph and emit a Graphviz representation for visualization.<br></p>
+
+<p>What it renders:</p>
+<ul>
+  <li>Nodes for <strong>Value</strong> containers and fake operator nodes for readability.<br>
+</li>
+  <li>Labeled edges tracing parent-child relationships so each Value maps back to source expressions.<br>
+</li>
+</ul>
+
+<p>Benefits:</p>
+<ul>
+  <li>Makes the forward computational structure visible.<br>
+</li>
+  <li>Aids reasoning about forward and backward passes and helps verify that <strong>.prev</strong> and <strong>.op</strong> fields were set correctly.<br>
+</li>
+</ul>
+
+<p>This visualization is a practical debugging and pedagogical tool for understanding how expressions expand into a computation DAG.<br></p>
+
+<hr>
+
+<h1 id="introducing-grad-and-initializing-backprop-base-case">Introducing .grad and initializing backprop base case</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec01/00-31-00-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec01/00-31-00-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec01/00-31-00-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec01/00-31-00.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Each <strong>Value</strong> instance has a <strong>.grad</strong> attribute representing d(output)/d(node) at the current evaluation; it is initialized to zero to indicate no influence before backpropagation.<br></p>
+
+<p>Seeding the backward pass:</p>
+<ul>
+  <li>The derivative of the output with respect to itself is <strong>one</strong>, so the final output node’s <strong>.grad</strong> is set to <strong>1.0</strong> to start accumulation.<br>
+</li>
+</ul>
+
+<p>Purpose:</p>
+<ul>
+  <li>Explicit <strong>.grad</strong> storage prepares nodes for local backward updates and makes gradient-accumulation semantics clear: gradients measure sensitivity at the current evaluation point.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="manual-backpropagation-for-product-nodes-and-local-derivatives">Manual backpropagation for product nodes and local derivatives</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec01/00-35-18-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec01/00-35-18-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec01/00-35-18-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec01/00-35-18.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Backpropagation through a multiplication node is illustrated using local derivatives and upstream gradient chaining.<br></p>
+
+<p>Example:</p>
+<ul>
+  <li>For <strong>z = x * y</strong>, local derivatives are ∂z/∂x = y and ∂z/∂y = x.<br>
+</li>
+  <li>The incoming gradient at z is multiplied by these local factors to propagate to x.grad and y.grad.<br>
+</li>
+</ul>
+
+<p>Validation:</p>
+<ul>
+  <li>The segment shows computing dl/dd and dl/df for a composed example and confirms results algebraically and with finite differences.<br>
+</li>
+</ul>
+
+<p>Takeaway: each node only needs its local derivative formulas and current operand values to route gradients backward via the chain rule — reinforcing the modularity of autograd where primitive operations supply simple routing rules.<br></p>
+
+<hr>
+
+<h1 id="applying-the-chain-rule-to-addition-nodes-and-routing-gradients">Applying the chain rule to addition nodes and routing gradients</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec01/00-41-52-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec01/00-41-52-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec01/00-41-52-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec01/00-41-52.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The <strong>chain rule</strong> is presented for composition and applied to addition nodes to show gradient routing through sums.<br></p>
+
+<p>Principle:</p>
+<ul>
+  <li>For composition z(y(x)), dz/dx = dz/dy * dy/dx.<br>
+</li>
+</ul>
+
+<p>Addition example:</p>
+<ul>
+  <li>For <strong>d = c + e</strong>, local derivatives ∂d/∂c and ∂d/∂e are both <strong>1.0</strong>, so the incoming gradient is copied to both children.<br>
+</li>
+</ul>
+
+<p>Implications:</p>
+<ul>
+  <li>Sum nodes act as <strong>distributors</strong> of gradient flow.<br>
+</li>
+  <li>Distinguish local derivatives (simple, per-node) from the global gradient accumulated through the graph.<br>
+</li>
+</ul>
+
+<p>This mechanism is used to compute dl/dc and dl/de by multiplying dl/dd by local derivatives (ones) and assigning to <strong>c.grad</strong> and <strong>e.grad</strong>.<br></p>
+
+<hr>
+
+<h1 id="recursing-chain-rule-to-compute-leaf-gradients-and-numeric-verification">Recursing chain rule to compute leaf gradients and numeric verification</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec01/00-48-13-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec01/00-48-13-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec01/00-48-13-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec01/00-48-13.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Backpropagation through multiplication nodes is extended to compute gradients for leaf inputs a and b by multiplying upstream gradients by local derivatives (∂e/∂a = b, ∂e/∂b = a).<br></p>
+
+<p>Illustration:</p>
+<ul>
+  <li>The example graph derives <strong>a.grad = 6</strong> and <strong>b.grad = -4</strong> algebraically and confirms these values numerically with finite differences.<br>
+</li>
+</ul>
+
+<p>General pattern:</p>
+<ul>
+  <li>At each node, multiply incoming gradient by the node’s local Jacobian entries and <strong>accumulate</strong> into operand gradients.<br>
+</li>
+</ul>
+
+<p>This validates that reverse-mode differentiation via local chain-rule multiplications yields correct partial derivatives for all leaves.<br></p>
+
+<hr>
+
+<h1 id="using-gradient-information-to-perform-a-parameter-update">Using gradient information to perform a parameter update</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec01/00-51-28-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec01/00-51-28-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec01/00-51-28-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec01/00-51-28.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Once gradients for leaf nodes (parameters) are available, a small parameter update step is demonstrated.<br></p>
+
+<p>Update rule:</p>
+<ul>
+  <li>Parameters are nudged by the gradient scaled by a step size (learning rate): parameter -= lr * grad.<br>
+</li>
+</ul>
+
+<p>Notes:</p>
+<ul>
+  <li>Moving parameters in the positive gradient direction increases the output; when minimizing a loss, updates move <strong>opposite</strong> to the gradient sign.<br>
+</li>
+  <li>A single-step update illustrates how gradient information becomes actionable and foreshadows iterative training loops used later.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="mathematical-model-of-a-neuron-and-activation-function-choice">Mathematical model of a neuron and activation function choice</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec01/00-56-20-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec01/00-56-20-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec01/00-56-20-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec01/00-56-20.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>A neuron’s forward computation is defined and motivated:<br></p>
+
+<p>Definition:</p>
+<ul>
+  <li>
+<strong>output = tanh(w · x + b)</strong> — a weighted sum of inputs plus bias followed by a nonlinearity.<br>
+</li>
+</ul>
+
+<p>Interpretation:</p>
+<ul>
+  <li>Inputs and weights interact multiplicatively at synapses.<br>
+</li>
+  <li>Biases shift activation thresholds.<br>
+</li>
+  <li>The <strong>tanh</strong> activation squashes output into [-1, 1], introducing saturation useful for representation learning.<br>
+</li>
+</ul>
+
+<p>Implementation decision:</p>
+<ul>
+  <li>
+<strong>tanh</strong> can be implemented as a composite of exponentials or as a single primitive if its local derivative is supplied; this choice affects clarity and convenience in the educational implementation.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="implementing-tanh-as-a-value-operation-and-its-backward-rule">Implementing tanh as a Value operation and its backward rule</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec01/01-08-31-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec01/01-08-31-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec01/01-08-31-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec01/01-08-31.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Tanh</strong> is implemented as a custom <strong>Value</strong> operation with its own local backward rule:<br></p>
+
+<p>Local derivative:</p>
+<ul>
+  <li>d/dx tanh(x) = 1 - tanh(x)^2.<br>
+</li>
+</ul>
+
+<p>Implementation detail:</p>
+<ul>
+  <li>The returned <strong>Value</strong> stores the computed tanh output so the backward closure can reference it efficiently during backpropagation.<br>
+</li>
+  <li>The backward closure multiplies the incoming gradient by <strong>(1 - output^2)</strong> and accumulates it into the child node’s <strong>.grad</strong>.<br>
+</li>
+</ul>
+
+<p>Verification:</p>
+<ul>
+  <li>The computed gradient is checked numerically to confirm correctness and to demonstrate composed forward passes including tanh behave as expected.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="automating-local-backward-logic-by-storing-closures-in-nodes">Automating local backward logic by storing closures in nodes</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec01/01-19-30-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec01/01-19-30-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec01/01-19-30-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec01/01-19-30.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Each <strong>Value</strong> node stores a small function closure (<strong>_backward</strong>) that performs the node-specific local chain-rule propagation into operand gradients when invoked.<br></p>
+
+<p>Mechanics:</p>
+<ul>
+  <li>For primitives like addition, multiplication, and tanh, <strong>_backward</strong> captures runtime values (operand data or tanh output) and encodes the local derivative formula.<br>
+</li>
+  <li>During the global backward traversal, the algorithm simply invokes each node’s <strong>_backward</strong> closure without hard-coding operator-specific behavior.<br>
+</li>
+</ul>
+
+<p>Design benefit:</p>
+<ul>
+  <li>Local differentiation logic is encoded next to forward computation while the global backward routine remains generic and uniform.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="topological-sorting-and-implementing-valuebackward">Topological sorting and implementing Value.backward</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec01/01-24-30-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec01/01-24-30-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec01/01-24-30-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec01/01-24-30.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Automatic backward execution requires visiting nodes in an order where children are processed before parents; this is achieved via a <strong>topological sort</strong> of the computation DAG.<br></p>
+
+<p>Algorithm:</p>
+<ol>
+  <li>Recursively traverse children to build a topological ordering of nodes.<br>
+</li>
+  <li>Set the final output’s <strong>.grad = 1.0</strong> to seed the pass.<br>
+</li>
+  <li>Iterate the topo list in reverse and invoke each node’s <strong>_backward</strong> closure to accumulate gradients.<br>
+</li>
+</ol>
+
+<p>Result:</p>
+<ul>
+  <li>Guarantees correct reverse-mode propagation for arbitrary DAGs and encapsulates the entire backward evaluation in a single <strong>.backward()</strong> call.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="gradient-accumulation-bug-on-reused-variables-and-the-accumulation-fix">Gradient accumulation bug on reused variables and the accumulation fix</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec01/01-28-20-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec01/01-28-20-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec01/01-28-20-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec01/01-28-20.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>A subtle bug arises when a variable is used multiple times (e.g., <strong>b = a + a</strong>) and backward implementations overwrite operand gradients instead of accumulating them.<br></p>
+
+<p>Correct behavior:</p>
+<ul>
+  <li>Contributions from multiple downstream paths must be <strong>summed</strong>, so backward routines must use <strong>+=</strong> when updating operand <strong>.grad</strong> fields.<br>
+</li>
+</ul>
+
+<p>Fix:</p>
+<ul>
+  <li>Change assignments to accumulations, re-run tests, and verify cases like <strong>a + a</strong> produce the expected factor-of-two gradients.<br>
+</li>
+</ul>
+
+<p>Lesson:</p>
+<ul>
+  <li>Proper gradient initialization and additive accumulation are essential in reverse-mode AD to reflect multiple gradient paths correctly.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="convenience-wrappers-for-numeric-constants-and-right-side-operations">Convenience wrappers for numeric constants and right-side operations</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec01/01-31-40-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec01/01-31-40-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec01/01-31-40-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec01/01-31-40.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>To allow mixing <strong>Value</strong> objects with Python numeric literals (e.g., <strong>a + 1</strong> or <strong>2 * a</strong>), the operator implementations wrap non-Value operands into <strong>Value</strong> instances automatically.<br></p>
+
+<p>Additional API ergonomics:</p>
+<ul>
+  <li>Implement right-hand operator fallbacks (e.g., <strong>__rmul__</strong>) so Python calls into <strong>Value</strong> when native numeric types are on the left.<br>
+</li>
+</ul>
+
+<p>Benefit:</p>
+<ul>
+  <li>The <strong>Value</strong> API behaves similarly to numeric types and lets users write expressive mathematical code without manually wrapping constants, while preserving forward and backward semantics.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="adding-exppower-division-subtraction-primitives-and-equivalence-of-decomposed-tanh">Adding exp/power, division, subtraction primitives and equivalence of decomposed tanh</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec01/01-36-00-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec01/01-36-00-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec01/01-36-00-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec01/01-36-00.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Exponentiation and related operations are implemented along with composition strategies to avoid duplicating logic:<br></p>
+
+<p>Implementations:</p>
+<ul>
+  <li>
+<strong>exp</strong> and power operations: forward computations plus local backward rules (d/dx e^x = e^x; power rule for x^n).<br>
+</li>
+  <li>
+<strong>Division</strong> implemented as multiplication by a power of -1: a / b = a * b**-1 so reciprocal behavior reuses the power primitive.<br>
+</li>
+  <li>
+<strong>Subtraction</strong> and <strong>negation</strong> composed from primitives (negation as multiplication by -1, subtraction as addition of a negation).<br>
+</li>
+</ul>
+
+<p>Validation:</p>
+<ul>
+  <li>Implementing <strong>tanh</strong> as a composite of exponentials produces identical forward values and backward gradients as the single-operation tanh version, demonstrating correctness and modularity of composed operations.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="neural-modules-neuron-layer-and-mlp-abstractions-matching-common-apis">Neural modules: neuron, layer, and MLP abstractions matching common APIs</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec01/01-44-10-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec01/01-44-10-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec01/01-44-10-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec01/01-44-10.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>A <strong>Neuron</strong> class is implemented with weight and bias <strong>Value</strong> parameters and a call operator that computes dot product + bias followed by an activation.<br></p>
+
+<p>Higher-level modules:</p>
+<ul>
+  <li>
+<strong>Layer</strong>: a collection of <strong>Neuron</strong> instances evaluated in parallel.<br>
+</li>
+  <li>
+<strong>MLP</strong>: chains <strong>Layer</strong>s sequentially to form multilayer perceptrons.<br>
+</li>
+</ul>
+
+<p>API conventions:</p>
+<ul>
+  <li>Each module exposes a <strong>parameters()</strong> method that aggregates leaf <strong>Value</strong> parameter instances so external optimization code can iterate them.<br>
+</li>
+  <li>The design mirrors mainstream frameworks (e.g., PyTorch’s <strong>nn.Module</strong>) to make the micrograd API familiar in concept.<br>
+</li>
+</ul>
+
+<p>This encapsulation separates forward computation from parameter management and simplifies building networks of arbitrary depth and width.<br></p>
+
+<hr>
+
+<h1 id="dataset-construction-loss-definition-mse-and-computing-gradients-for-training">Dataset construction, loss definition (MSE), and computing gradients for training</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec01/01-56-30-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec01/01-56-30-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec01/01-56-30-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec01/01-56-30.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>A small toy dataset of input vectors and scalar targets is created to demonstrate supervised learning with the MLP.<br></p>
+
+<p>Loss and training:</p>
+<ul>
+  <li>Run the MLP on each example to produce predictions.<br>
+</li>
+  <li>Define <strong>mean squared error (MSE)</strong> as the average squared difference between predictions and targets, producing a single scalar loss.<br>
+</li>
+  <li>Calling <strong>loss.backward()</strong> populates gradients for all parameter <strong>Value</strong>s across the examples because the loss graph chains back through each forward evaluation.<br>
+</li>
+</ul>
+
+<p>Use of gradients:</p>
+<ul>
+  <li>Inspecting parameter <strong>.grad</strong> values indicates whether increasing a weight will increase or decrease the loss and thus guides updates.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="parameter-update-loop-learning-rate-selection-and-iterative-optimization">Parameter update loop, learning rate selection, and iterative optimization</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec01/02-07-30-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec01/02-07-30-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec01/02-07-30-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec01/02-07-30.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>A training loop repeatedly:</p>
+<ol>
+  <li>Performs forward passes to compute predictions.<br>
+</li>
+  <li>Computes the scalar loss (MSE).<br>
+</li>
+  <li>Calls <strong>.backward()</strong> to populate gradients.<br>
+</li>
+  <li>Updates parameters by subtracting <strong>lr * grad</strong> for each parameter.<br>
+</li>
+</ol>
+
+<p>Observations:</p>
+<ul>
+  <li>Different learning rates affect convergence speed and stability: too small = slow progress; too large = instability or exploding loss.<br>
+</li>
+  <li>The shown process is basic <strong>stochastic gradient descent (SGD)</strong> with full-batch updates in the toy example, and it generalizes to mini-batches and more advanced optimizers.<br>
+</li>
+</ul>
+
+<p>Repeated forward-backward-update cycles progressively reduce loss and improve predictions on the toy task.<br></p>
+
+<hr>
+
+<h1 id="zeroing-gradients-across-iterations-and-consequences-of-forgetting-to-zero">Zeroing gradients across iterations and consequences of forgetting to zero</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec01/02-16-30-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec01/02-16-30-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec01/02-16-30-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec01/02-16-30.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Gradients must be reset to zero prior to each backward pass because <strong>.grad</strong> updates accumulate via <strong>+=</strong>.<br></p>
+
+<p>Pitfall:</p>
+<ul>
+  <li>Forgetting to zero gradients causes accumulation across iterations and scales updates unpredictably, producing incorrect or unstable training dynamics.<br>
+</li>
+</ul>
+
+<p>Fix:</p>
+<ul>
+  <li>Iterate over parameters and set <strong>p.grad = 0</strong> before calling <strong>backward()</strong> each iteration.<br>
+</li>
+</ul>
+
+<p>This mirrors standard practice in production frameworks and is essential for correct iterative optimization.<br></p>
+
+<hr>
+
+<h1 id="comparison-with-pytorch-implementation-details-and-registering-custom-ops">Comparison with PyTorch implementation details and registering custom ops</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec01/02-23-00-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec01/02-23-00-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec01/02-23-00-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec01/02-23-00.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Compare micrograd’s scalar <strong>Value</strong> abstraction to production tensors (e.g., PyTorch):<br></p>
+
+<p>Comparative points:</p>
+<ul>
+  <li>
+<strong>PyTorch</strong> generalizes the same autograd ideas to n-dimensional <strong>tensors</strong> for parallel, efficient CPU/GPU computation and exposes similar <strong>data</strong> and <strong>grad</strong> attributes and a <strong>backward</strong> API.<br>
+</li>
+  <li>The lecture inspects where <strong>tanh</strong> backward is implemented in PyTorch’s C++/CUDA kernels and shows how to register custom ops by providing forward and backward implementations that match micrograd’s conceptual contract.<br>
+</li>
+</ul>
+
+<p>Conclusion:</p>
+<ul>
+  <li>Micrograd’s small, explicit design scales conceptually to production libraries, while production code adds complexity for device support, datatypes, and performance engineering.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="summary-of-principles-expressions-loss-backprop-and-gradient-descent">Summary of principles: expressions, loss, backprop, and gradient descent</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec01/02-25-25-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec01/02-25-25-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec01/02-25-25-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec01/02-25-25.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Recap and pipeline summary:<br></p>
+
+<p>Core ideas:</p>
+<ul>
+  <li>Neural networks are mathematical expressions parameterized by weights mapping inputs to outputs; a scalar loss measures performance and is minimized via gradient-based updates.<br>
+</li>
+  <li>
+<strong>Backpropagation</strong> (reverse-mode differentiation) computes exact derivatives of the loss with respect to all parameters by chaining local derivatives at each operation.<br>
+</li>
+  <li>The <strong>micrograd</strong> implementation contains the mathematical essentials of larger frameworks; the remaining differences are engineering for tensors, devices, and scale.<br>
+</li>
+</ul>
+
+<p>End-to-end pipeline:</p>
+<ol>
+  <li>Define model.<br>
+</li>
+  <li>Compute forward pass (predictions).<br>
+</li>
+  <li>Compute scalar loss.<br>
+</li>
+  <li>Backpropagate gradients via <strong>.backward()</strong>.<br>
+</li>
+  <li>Update parameters (parameter -= lr * grad).<br>
+</li>
+  <li>Iterate.<br>
+</li>
+</ol>
+
+<p>This ties together the lecture: the tiny engine exposes every moving part so the learner understands both theory and practice before moving to production systems.<br></p>
+
+<hr>
+
+
+    </div>
+  </article>
+
+
+  
+    
+    <br>
+    <hr>
+    <br>
+    <ul class="list-disc pl-8"></ul>
+
+    <!-- Adds related posts to the end of an article -->
+    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
+    <p class="mb-2">Here are some more articles you might like to read next:</p>
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/diffusion-foundation/">The Foundations and Frontiers of Diffusion Models</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/nlp-foundation/">LLM Series - Part 1 - Important Concepts in NLP</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2024/thoughts/">Random Thoughts and Notes</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/karpathy-lec12/">Karpathy Series - Let's build GPT from scratch</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs336-lec07/">CS336 Lecture 7 - Parallelism</a>
+  </li>
+
+</div>
+
+      
+    </div>
+
+    <!-- Footer -->    
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        © Copyright 2025 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+
+      </div>
+    </footer>
+
+    <!-- JavaScripts -->
+    <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- Bootsrap & MDB scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    <!-- Masonry & imagesLoaded -->
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
+    
+  <!-- Medium Zoom JS -->
+  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/zoom.js"></script>
+
+  <!-- Bootstrap Table -->
+  <script defer src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+
+  <!-- Load Common JS -->
+  <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
+  <script defer src="/assets/js/common.js?acdb9690d7641b2f8d40529018c71a01"></script>
+  <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    <!-- MathJax -->
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        tags: 'ams'
+      }
+    };
+  </script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KGSMMS9MS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-7KGSMMS9MS');
+  </script>
+    
+
+<!-- Scrolling Progress Bar -->
+<script type="text/javascript">
+  /*
+   * This JavaScript code has been adapted from the article 
+   * https://css-tricks.com/reading-position-indicator/ authored by Pankaj Parashar, 
+   * published on the website https://css-tricks.com on the 7th of May, 2014.
+   * Couple of changes were made to the original code to make it compatible 
+   * with the `al-foio` theme.
+   */
+  const progressBar = $("#progress");
+  /*
+   * We set up the bar after all elements are done loading.
+   * In some cases, if the images in the page are larger than the intended
+   * size they'll have on the page, they'll be resized via CSS to accomodate
+   * the desired size. This mistake, however, breaks the computations as the
+   * scroll size is computed as soon as the elements finish loading.
+   * To account for this, a minimal delay was introduced before computing the
+   * values.
+   */
+  window.onload = function () {
+    setTimeout(progressBarSetup, 50);
+  };
+  /*
+   * We set up the bar according to the browser.
+   * If the browser supports the progress element we use that.
+   * Otherwise, we resize the bar thru CSS styling
+   */
+  function progressBarSetup() {
+    if ("max" in document.createElement("progress")) {
+      initializeProgressElement();
+      $(document).on("scroll", function() {
+        progressBar.attr({ value: getCurrentScrollPosition() });
+      });
+      $(window).on("resize", initializeProgressElement);
+    } else {
+      resizeProgressBar();
+      $(document).on("scroll", resizeProgressBar);
+      $(window).on("resize", resizeProgressBar);
+    }
+  }
+  /*
+   * The vertical scroll position is the same as the number of pixels that
+   * are hidden from view above the scrollable area. Thus, a value > 0 is
+   * how much the user has scrolled from the top
+   */
+  function getCurrentScrollPosition() {
+    return $(window).scrollTop();
+  }
+
+  function initializeProgressElement() {
+    let navbarHeight = $("#navbar").outerHeight(true);
+    $("body").css({ "padding-top": navbarHeight });
+    $("progress-container").css({ "padding-top": navbarHeight });
+    progressBar.css({ top: navbarHeight });
+    progressBar.attr({
+      max: getDistanceToScroll(),
+      value: getCurrentScrollPosition(),
+    });
+  }
+  /*
+   * The offset between the html document height and the browser viewport
+   * height will be greater than zero if vertical scroll is possible.
+   * This is the distance the user can scroll
+   */
+  function getDistanceToScroll() {
+    return $(document).height() - $(window).height();
+  }
+
+  function resizeProgressBar() {
+    progressBar.css({ width: getWidthPercentage() + "%" });
+  }
+  // The scroll ratio equals the percentage to resize the bar
+  function getWidthPercentage() {
+    return (getCurrentScrollPosition() / getDistanceToScroll()) * 100;
+  }
+</script>
+
+    
+  </body>
+</html>

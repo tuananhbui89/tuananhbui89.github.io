@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <!-- Head -->
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    <!-- Metadata, OpenGraph and Schema.org -->
+    
+
+    <!-- Standard metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Karpathy Series - Let's build GPT from scratch | Tuan-Anh  Bui</title>
+    <meta name="author" content="Tuan-Anh  Bui">
+    <meta name="description" content="AI Summary Lecture">
+    <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
+
+
+    <!-- Bootstrap & MDB -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+    <!-- Bootstrap Table -->
+    <link defer rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+
+    <!-- Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
+
+    
+
+    <!-- Styles -->
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
+    
+    <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+    <link rel="canonical" href="https://tuananhbui89.github.io/blog/2025/karpathy-lec12/">
+
+    <!-- Dark Mode -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark">
+    <script src="/assets/js/theme.js?96d6b3e1c3604aca8b6134c7afdd5db6"></script>
+    <script src="/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script>
+    
+
+  </head>
+
+  <!-- Body -->
+  <body class="fixed-top-nav ">
+
+    <!-- Header -->
+    <header>
+
+      <!-- Nav Bar -->
+      <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top">
+        <div class="container">
+          <a class="navbar-brand title font-weight-lighter" href="/"><span class="font-weight-bold">Tuan-Anh </span>Bui</a>
+          <!-- Navbar Toggle -->
+          <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar top-bar"></span>
+            <span class="icon-bar middle-bar"></span>
+            <span class="icon-bar bottom-bar"></span>
+          </button>
+
+          <div class="collapse navbar-collapse text-right" id="navbarNav">
+            <ul class="navbar-nav ml-auto flex-nowrap">
+
+              <!-- About -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/">about</a>
+              </li>
+              
+              <!-- Blog -->
+              <li class="nav-item active">
+                <a class="nav-link" href="/blog/">blog<span class="sr-only">(current)</span></a>
+              </li>
+
+              <!-- Other pages -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/publications/">publications</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/projects/">projects</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/repositories/">repositories</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/teaching/"></a>
+              </li>
+
+              <!-- Toogle theme mode -->
+              <li class="toggle-container">
+                <button id="light-toggle" title="Change theme">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Scrolling Progress Bar -->
+      <progress id="progress" value="0">
+        <div class="progress-container">
+          <span class="progress-bar"></span>
+        </div>
+      </progress>
+    </header>
+
+
+    <!-- Content -->
+    <div class="container mt-5">
+      
+        <!-- _layouts/post.html -->
+<!-- Page/Post style -->
+<style type="text/css">
+  
+</style>
+
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Karpathy Series - Let's build GPT from scratch</h1>
+    <p class="post-meta">December 15, 2025</p>
+    <p class="post-tags">
+      <a href="/blog/2025"> <i class="fas fa-calendar fa-sm"></i> 2025 </a>
+        ·  
+        <a href="/blog/tag/genai">
+          <i class="fas fa-hashtag fa-sm"></i> genai</a>  
+          <a href="/blog/tag/llm">
+          <i class="fas fa-hashtag fa-sm"></i> llm</a>  
+          <a href="/blog/tag/tutorial">
+          <i class="fas fa-hashtag fa-sm"></i> tutorial</a>  
+          <a href="/blog/tag/reading">
+          <i class="fas fa-hashtag fa-sm"></i> reading</a>  
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    
+    <div id="table-of-contents">
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#chatgpt-demonstrates-probabilistic-sequence-completion">ChatGPT demonstrates probabilistic sequence completion.</a></li>
+<li class="toc-entry toc-h1"><a href="#the-transformer-architecture-underlies-modern-autoregressive-language-models-like-gpt">The Transformer architecture underlies modern autoregressive language models like GPT.</a></li>
+<li class="toc-entry toc-h1"><a href="#a-minimal-educational-goal-is-to-train-a-character-level-transformer-on-a-small-dataset">A minimal educational goal is to train a character-level Transformer on a small dataset.</a></li>
+<li class="toc-entry toc-h1"><a href="#nanogpt-is-a-minimal-codebase-that-reproduces-transformer-training-behavior">NanoGPT is a minimal codebase that reproduces Transformer training behavior.</a></li>
+<li class="toc-entry toc-h1"><a href="#load-and-inspect-the-training-corpus-in-a-reproducible-environment">Load and inspect the training corpus in a reproducible environment.</a></li>
+<li class="toc-entry toc-h1"><a href="#construct-the-character-vocabulary-and-determine-the-vocabulary-size">Construct the character vocabulary and determine the vocabulary size.</a></li>
+<li class="toc-entry toc-h1"><a href="#tokenization-design-trades-vocabulary-size-for-sequence-length">Tokenization design trades vocabulary size for sequence length.</a></li>
+<li class="toc-entry toc-h1"><a href="#encode-the-entire-dataset-as-a-contiguous-integer-tensor">Encode the entire dataset as a contiguous integer tensor.</a></li>
+<li class="toc-entry toc-h1"><a href="#split-data-into-training-and-validation-subsets-and-define-block-size-for-contexts">Split data into training and validation subsets and define block size for contexts.</a></li>
+<li class="toc-entry toc-h1"><a href="#each-sampled-chunk-contains-multiple-training-examples-via-shifted-inputs-and-targets">Each sampled chunk contains multiple training examples via shifted inputs and targets.</a></li>
+<li class="toc-entry toc-h1"><a href="#train-the-model-to-handle-contexts-ranging-from-single-token-up-to-block-size-during-inference">Train the model to handle contexts ranging from single token up to block size during inference.</a></li>
+<li class="toc-entry toc-h1"><a href="#batching-stacks-multiple-independent-chunks-for-parallel-processing">Batching stacks multiple independent chunks for parallel processing.</a></li>
+<li class="toc-entry toc-h1"><a href="#the-simplest-language-model-is-a-bigram-model-implemented-via-token-embeddings">The simplest language model is a bigram model implemented via token embeddings.</a></li>
+<li class="toc-entry toc-h1"><a href="#compute-cross-entropy-loss-by-reshaping-logits-and-targets-to-match-framework-expectations">Compute cross-entropy loss by reshaping logits and targets to match framework expectations.</a></li>
+<li class="toc-entry toc-h1"><a href="#implement-autoregressive-generation-by-sampling-from-softmaxed-logits-at-the-last-time-step">Implement autoregressive generation by sampling from softmaxed logits at the last time step.</a></li>
+<li class="toc-entry toc-h1"><a href="#initialize-and-optimize-the-model-with-adam-then-run-a-standard-training-loop">Initialize and optimize the model with Adam, then run a standard training loop.</a></li>
+<li class="toc-entry toc-h1"><a href="#initial-training-of-the-bigram-model-reduces-loss-but-cannot-capture-long-range-context">Initial training of the bigram model reduces loss but cannot capture long-range context.</a></li>
+<li class="toc-entry toc-h1"><a href="#package-the-notebook-code-into-a-script-with-device-handling-and-stable-loss-estimation">Package the notebook code into a script with device handling and stable loss estimation.</a></li>
+<li class="toc-entry toc-h1"><a href="#self-attention-can-be-approximated-as-weighted-aggregation-of-past-token-vectors-initially-illustrated-by-cumulative-averaging">Self-attention can be approximated as weighted aggregation of past token vectors, initially illustrated by cumulative averaging.</a></li>
+<li class="toc-entry toc-h1"><a href="#lower-triangular-weight-matrices-and-batched-matrix-multiplication-vectorize-prefix-aggregation">Lower-triangular weight matrices and batched matrix multiplication vectorize prefix aggregation.</a></li>
+<li class="toc-entry toc-h1"><a href="#masking-with-negative-infinity-and-softmax-produces-normalized-causal-affinity-weights">Masking with negative infinity and softmax produces normalized, causal affinity weights.</a></li>
+<li class="toc-entry toc-h1"><a href="#introduce-embeddings-and-an-output-projection-to-separate-token-identity-and-model-dimensionality">Introduce embeddings and an output projection to separate token identity and model dimensionality.</a></li>
+<li class="toc-entry toc-h1"><a href="#self-attention-computes-data-dependent-affinities-via-query-key-dot-products-and-aggregates-values-accordingly">Self-attention computes data-dependent affinities via query-key dot products and aggregates values accordingly.</a></li>
+<li class="toc-entry toc-h1"><a href="#attention-is-a-general-communication-mechanism-with-graph-and-positional-considerations">Attention is a general communication mechanism with graph and positional considerations.</a></li>
+<li class="toc-entry toc-h1"><a href="#scale-dot-product-attention-by-1sqrtd_k-to-control-variance-and-softmax-sharpness">Scale dot-product attention by 1/sqrt(d_k) to control variance and softmax sharpness.</a></li>
+<li class="toc-entry toc-h1"><a href="#implement-a-single-self-attention-head-module-and-integrate-it-into-the-model-while-enforcing-context-cropping">Implement a single self-attention head module and integrate it into the model while enforcing context cropping.</a></li>
+<li class="toc-entry toc-h1"><a href="#training-with-a-single-scaled-attention-head-yields-modest-gains-while-multi-head-attention-improves-representation-capacity">Training with a single scaled attention head yields modest gains, while multi-head attention improves representation capacity.</a></li>
+<li class="toc-entry toc-h1"><a href="#add-a-per-position-feed-forward-network-to-allow-tokens-to-process-gathered-context-independently">Add a per-position feed-forward network to allow tokens to process gathered context independently.</a></li>
+<li class="toc-entry toc-h1"><a href="#stack-transformer-blocks-with-residual-projections-to-enable-deep-architectures">Stack Transformer blocks with residual projections to enable deep architectures.</a></li>
+<li class="toc-entry toc-h1"><a href="#use-feed-forward-inner-expansion-and-layernorm-pre-norm-to-stabilize-training">Use feed-forward inner expansion and LayerNorm (pre-norm) to stabilize training.</a></li>
+<li class="toc-entry toc-h1"><a href="#add-dropout-and-scale-up-model-hyperparameters-to-improve-generalization-and-capacity">Add dropout and scale up model hyperparameters to improve generalization and capacity.</a></li>
+<li class="toc-entry toc-h1"><a href="#a-decoder-only-transformer-implements-autoregressive-language-modeling-encoder-decoder-variants-support-conditioned-sequence-to-sequence-tasks">A decoder-only Transformer implements autoregressive language modeling; encoder-decoder variants support conditioned sequence-to-sequence tasks.</a></li>
+<li class="toc-entry toc-h1"><a href="#large-scale-models-require-pre-training-on-massive-corpora-then-fine-tuning-and-alignment-to-become-useful-assistants">Large-scale models require pre-training on massive corpora then fine-tuning and alignment to become useful assistants.</a></li>
+<li class="toc-entry toc-h1"><a href="#nanogpt-implementation-details-and-summary-of-the-educational-reproduction">NanoGPT implementation details and summary of the educational reproduction.</a></li>
+</ul>
+    </div>
+    <hr>
+    
+    <div id="markdown-content">
+      <div style="display: flex; justify-content: center;">
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/kCc8FmEb1nY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen="">
+    </iframe>
+</div>
+
+<h1 id="chatgpt-demonstrates-probabilistic-sequence-completion">ChatGPT demonstrates probabilistic sequence completion.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/00-01-02-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/00-01-02-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/00-01-02-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/00-01-02.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>A conversational AI like <strong>ChatGPT</strong> implements a language model that generates text by <strong>sequentially completing</strong> a given input sequence.<br></p>
+
+<p>The model produces token-by-token outputs in a <strong>probabilistic</strong> manner, so the same prompt can yield different plausible continuations on different runs.<br></p>
+
+<p>Key points:<br></p>
+<ul>
+  <li>
+<strong>Tokens</strong> can be words, subwords, or characters.<br>
+</li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>The model estimates <strong>conditional probabilities</strong> of the next token given prior context: P(next_token</td>
+          <td>previous_tokens).<br>
+</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>This inherent probabilistic completion behavior is the foundation for <strong>prompt engineering</strong>, creative generation, and sampling variability.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="the-transformer-architecture-underlies-modern-autoregressive-language-models-like-gpt">The Transformer architecture underlies modern autoregressive language models like GPT.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/00-02-38-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/00-02-38-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/00-02-38-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/00-02-38.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The <strong>Transformer</strong>, introduced in “Attention Is All You Need” (2017), is the core sequence model used in GPT-style systems.<br></p>
+
+<p>Highlights:<br></p>
+<ul>
+  <li>It <strong>replaced recurrence with attention mechanisms</strong> that compute data-dependent interactions across sequence positions.<br>
+</li>
+  <li>This enables <strong>scalable parallel computation</strong> across time steps instead of sequential recurrence.<br>
+</li>
+  <li>
+<strong>GPT</strong> = <strong>Generative Pre-trained Transformer</strong>: a Transformer pre-trained on large corpora and then adapted for downstream tasks.<br>
+</li>
+  <li>The architecture began in machine translation but became the foundation for many large-scale language models with relatively minor modifications.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="a-minimal-educational-goal-is-to-train-a-character-level-transformer-on-a-small-dataset">A minimal educational goal is to train a character-level Transformer on a small dataset.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/00-04-19-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/00-04-19-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/00-04-19-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/00-04-19.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>A compact, instructive variant of GPT can be trained on a toy corpus such as <strong>tiny Shakespeare</strong> (Shakespeare’s works concatenated into a small text file).<br></p>
+
+<p>Why this is useful:<br></p>
+<ul>
+  <li>Training a <strong>character-level model</strong> simplifies tokenization and implementation while preserving the pedagogical value of sequence modeling and attention.<br>
+</li>
+  <li>The model predicts the next character conditioned on preceding characters and, after training, can generate arbitrary-length text in the training corpus’ style.<br>
+</li>
+  <li>This setup demonstrates core concepts of <strong>autoregressive generation</strong> without requiring massive compute or internet-scale data.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="nanogpt-is-a-minimal-codebase-that-reproduces-transformer-training-behavior">NanoGPT is a minimal codebase that reproduces Transformer training behavior.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/00-06-15-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/00-06-15-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/00-06-15-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/00-06-15.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>NanoGPT</strong> is a compact GitHub repository that implements Transformer training with very small code (two main files), illustrating the essential components required to reproduce known baselines.<br></p>
+
+<p>Notable aspects:<br></p>
+<ul>
+  <li>Shows that a correct implementation plus modest compute can replicate smaller released models (e.g., <strong>GPT-2 small</strong>) on standard datasets.<br>
+</li>
+  <li>Separates <strong>model definition</strong> from the <strong>training script</strong>, and includes utilities for loading pretrained weights.<br>
+</li>
+  <li>Demonstrates real-world engineering practices in a simplified form with an instructional goal: develop the model from scratch in a notebook for clarity.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="load-and-inspect-the-training-corpus-in-a-reproducible-environment">Load and inspect the training corpus in a reproducible environment.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/00-07-48-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/00-07-48-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/00-07-48-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/00-07-48.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Begin experiments in a shareable environment such as a <strong>Google Colab</strong> notebook:<br></p>
+
+<ol>
+  <li>Download the <strong>tiny Shakespeare</strong> corpus and load it as a single string for processing.<br>
+</li>
+  <li>Confirm dataset size and inspect initial characters to validate data integrity and encoding assumptions.<br>
+</li>
+  <li>Use the notebook to enable step-by-step development, reproducibility, and sharing of the training workflow and artifacts.<br>
+</li>
+</ol>
+
+<p>This initial validation helps catch I/O and encoding issues before further modeling steps.<br></p>
+
+<hr>
+
+<h1 id="construct-the-character-vocabulary-and-determine-the-vocabulary-size">Construct the character vocabulary and determine the vocabulary size.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/00-09-00-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/00-09-00-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/00-09-00-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/00-09-00.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Extract the set of unique characters in the corpus and sort them to obtain a stable <strong>vocabulary ordering</strong>.<br></p>
+
+<p>Key consequences:<br></p>
+<ul>
+  <li>
+<strong>Vocabulary size</strong> = number of unique tokens the model will consider (e.g., ~65 characters for tiny Shakespeare, including whitespace and punctuation).<br>
+</li>
+  <li>The vocabulary defines the model’s <strong>output dimensionality</strong> and the size of the <strong>embedding table</strong>.<br>
+</li>
+  <li>Character-level vocabularies are compact but produce <strong>longer sequences</strong>; establish a deterministic char→int mapping for encoding/decoding model I/O.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="tokenization-design-trades-vocabulary-size-for-sequence-length">Tokenization design trades vocabulary size for sequence length.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/00-10-50-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/00-10-50-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/00-10-50-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/00-10-50.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Tokenization</strong> converts raw text into integer sequences according to a vocabulary schema.<br></p>
+
+<p>Options and trade-offs:<br></p>
+<ul>
+  <li>
+<strong>Character-level tokenizers</strong>: tiny vocabulary, simple mapping, longer sequences — preferred for instructional clarity.<br>
+</li>
+  <li>
+<strong>Subword tokenizers</strong> (e.g., <strong>SentencePiece</strong>, <strong>Byte-Pair Encoding</strong>): larger vocabularies (tens of thousands), shorter sequences — used in practical large-scale models.<br>
+</li>
+  <li>The tokenizer choice determines embedding table size, tokenization/de-tokenization logic, and batching behavior.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="encode-the-entire-dataset-as-a-contiguous-integer-tensor">Encode the entire dataset as a contiguous integer tensor.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/00-12-56-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/00-12-56-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/00-12-56-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/00-12-56.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>After defining encoder and decoder mappings, translate the whole corpus into a single long integer sequence and wrap it into a framework tensor (e.g., a <strong>PyTorch tensor</strong>) to serve as the data array.<br></p>
+
+<p>Benefits and checks:<br></p>
+<ul>
+  <li>Contiguous representation simplifies sampling random chunks for training and splitting into train/validation segments.<br>
+</li>
+  <li>Storing the dataset as a tensor facilitates efficient slicing and batching during mini-batch construction.<br>
+</li>
+  <li>Confirm correctness by inspecting correspondence between text slices and integer slices.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="split-data-into-training-and-validation-subsets-and-define-block-size-for-contexts">Split data into training and validation subsets and define block size for contexts.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/00-14-31-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/00-14-31-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/00-14-31-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/00-14-31.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Partition the data tensor into a training portion (e.g., first 90%) and a held-out validation portion (last 10%) to monitor generalization and detect overfitting.<br></p>
+
+<p>Workflow and definitions:<br></p>
+<ol>
+  <li>Define a maximum context length commonly called <strong>block_size</strong> or <strong>context length</strong>.<br>
+</li>
+  <li>Training samples are randomly extracted contiguous chunks of length <strong>block_size</strong> (with a target offset), not the entire corpus at once.<br>
+</li>
+  <li>Working with chunks reduces memory/compute requirements and enables the model to learn dependencies across shorter contexts.<br>
+</li>
+  <li>Keep the validation split hidden during training as an unbiased generalization estimate.<br>
+</li>
+</ol>
+
+<hr>
+
+<h1 id="each-sampled-chunk-contains-multiple-training-examples-via-shifted-inputs-and-targets">Each sampled chunk contains multiple training examples via shifted inputs and targets.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/00-16-16-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/00-16-16-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/00-16-16-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/00-16-16.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>When extracting a chunk of length <strong>block_size + 1</strong> from the sequence, construct inputs and targets as follows:<br></p>
+
+<ol>
+  <li>Inputs X = the first <strong>block_size</strong> tokens of the chunk.<br>
+</li>
+  <li>Targets Y = the following tokens offset by one (the next token for each input position).<br>
+</li>
+  <li>This packs <strong>block_size</strong> training examples (one per time position) into each chunk and lets the model learn to predict the next token from all prefix lengths up to the block size.<br>
+</li>
+</ol>
+
+<p>The offset-by-one construction is fundamental to <strong>autoregressive next-token prediction</strong>.<br></p>
+
+<hr>
+
+<h1 id="train-the-model-to-handle-contexts-ranging-from-single-token-up-to-block-size-during-inference">Train the model to handle contexts ranging from single token up to block size during inference.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/00-17-39-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/00-17-39-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/00-17-39-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/00-17-39.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Include examples with context lengths from 1 up to <strong>block_size</strong> during training to condition the model on short and long contexts.<br></p>
+
+<p>Implications:<br></p>
+<ul>
+  <li>This is critical for sampling, where generation often begins with a minimal prompt and the context progressively grows.<br>
+</li>
+  <li>The model must generalize to intermediate context sizes during autoregressive sampling; longer-than-block_size contexts must be truncated.<br>
+</li>
+  <li>Truncation is necessary because <strong>positional embeddings</strong> are defined up to block_size.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="batching-stacks-multiple-independent-chunks-for-parallel-processing">Batching stacks multiple independent chunks for parallel processing.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/00-19-39-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/00-19-39-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/00-19-39-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/00-19-39.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Add a batch dimension by sampling multiple random chunk offsets to create a batch of independent sequences and stack these into a tensor of shape <strong>(batch_size, block_size)</strong> for efficient parallel processing on accelerators.<br></p>
+
+<p>Practical notes:<br></p>
+<ul>
+  <li>Batching keeps hardware utilization high and enables parallel gradient computation across independent examples (batches do not exchange information).<br>
+</li>
+  <li>Use randomized extraction of chunk offsets and a reproducible RNG seed for deterministic experiment replication.<br>
+</li>
+  <li>Batched targets are handled analogously and later flattened for loss computation to match expected shapes.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="the-simplest-language-model-is-a-bigram-model-implemented-via-token-embeddings">The simplest language model is a bigram model implemented via token embeddings.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/00-22-37-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/00-22-37-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/00-22-37-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/00-22-37.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>A <strong>bigram model</strong> predicts the next token solely from the identity of the current token using a token embedding table that is directly interpreted as logits for the next-token distribution.<br></p>
+
+<p>Implementation and role:<br></p>
+<ul>
+  <li>In PyTorch: an nn.Embedding shaped <strong>(vocab_size, vocab_size)</strong> so each token index indexes a row that scores all possible next tokens.<br>
+</li>
+  <li>The bigram model ignores context beyond the current token but can capture local correlations (some tokens strongly predict specific followers).<br>
+</li>
+  <li>Use this simple model as a baseline and a clean starting point before adding contextual mechanisms like attention.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="compute-cross-entropy-loss-by-reshaping-logits-and-targets-to-match-framework-expectations">Compute cross-entropy loss by reshaping logits and targets to match framework expectations.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/00-26-03-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/00-26-03-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/00-26-03-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/00-26-03.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>For multi-dimensional logits with shape <strong>(B, T, C)</strong>, frameworks like PyTorch require rearrangement to a two-dimensional shape <strong>(B<em>T, C)** before calling cross-entropy; similarly, targets of shape **(B, T)** must be flattened to **(B</em>T,)</strong>.<br></p>
+
+<p>Practical checklist:<br></p>
+<ul>
+  <li>Reshape or view tensors so the channel dimension is preserved as the second dimension and batch-time positions become the first flattened dimension.<br>
+</li>
+  <li>This aligns predictions and labels for negative log-likelihood computation and produces a scalar loss measuring next-token predictive quality.<br>
+</li>
+  <li>Sanity-check the initialization by comparing expected random-start loss to <strong>-log(1 / vocab_size)</strong>.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="implement-autoregressive-generation-by-sampling-from-softmaxed-logits-at-the-last-time-step">Implement autoregressive generation by sampling from softmaxed logits at the last time step.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/00-29-33-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/00-29-33-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/00-29-33-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/00-29-33.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Generation</strong> extends an input context by repeatedly calling the model and sampling next tokens.<br></p>
+
+<p>Canonical generation loop:<br></p>
+<ol>
+  <li>Run the model on the current context and extract logits for the <strong>last time step</strong>.<br>
+</li>
+  <li>Convert logits to probabilities via <strong>softmax</strong>.<br>
+</li>
+  <li>Sample the next token with a multinomial draw and append it to the running context.<br>
+</li>
+  <li>Repeat for the desired number of new tokens to produce a variable-length sequence.<br>
+</li>
+</ol>
+
+<p>Implementation tips:<br></p>
+<ul>
+  <li>Make targets optional in the model forward to support both training (return loss) and generation (return logits).<br>
+</li>
+  <li>Batched generation returns a batch of sequences that can be decoded back to text by mapping token indices to characters/words.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="initialize-and-optimize-the-model-with-adam-then-run-a-standard-training-loop">Initialize and optimize the model with Adam, then run a standard training loop.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/00-33-34-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/00-33-34-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/00-33-34-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/00-33-34.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Create an optimizer such as <strong>Adam</strong> with a suitable learning rate (e.g., ~3e-4 typical, though small networks may require adjustments) and perform the canonical training loop:<br></p>
+
+<ol>
+  <li>Sample a batch.<br>
+</li>
+  <li>Compute loss.<br>
+</li>
+  <li>Zero gradients.<br>
+</li>
+  <li>Backpropagate.<br>
+</li>
+  <li>Step the optimizer.<br>
+</li>
+</ol>
+
+<p>Training practices:<br></p>
+<ul>
+  <li>Monitor loss over many iterations and increase batch size and iteration count when scaling to larger models.<br>
+</li>
+  <li>Use periodic evaluation on the held-out validation split to detect overfitting and tune hyperparameters (learning rate, batch size, etc.).<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="initial-training-of-the-bigram-model-reduces-loss-but-cannot-capture-long-range-context">Initial training of the bigram model reduces loss but cannot capture long-range context.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/00-37-27-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/00-37-27-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/00-37-27-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/00-37-27.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Training the bigram model with gradient-based optimization typically reduces loss from random initialization but remains limited because tokens do not communicate beyond immediate neighbors.<br></p>
+
+<p>Consequences and motivation:<br></p>
+<ul>
+  <li>Tokens cannot access historical context, so predictions rely only on local correlations.<br>
+</li>
+  <li>Improving next-token prediction requires mechanisms for tokens to access and aggregate relevant information from previous positions—this motivates <strong>attention mechanisms</strong>.<br>
+</li>
+  <li>The observed loss reduction confirms optimization is working and sets a baseline for architectural improvements.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="package-the-notebook-code-into-a-script-with-device-handling-and-stable-loss-estimation">Package the notebook code into a script with device handling and stable loss estimation.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/00-40-17-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/00-40-17-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/00-40-17-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/00-40-17.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Converting the notebook into a script centralizes hyperparameters, supports running on GPUs by managing device placement, and adds engineering features such as checkpointing and evaluation scheduling.<br></p>
+
+<p>Suggested engineering additions:<br></p>
+<ul>
+  <li>Add checkpoint saving/loading and device management.<br>
+</li>
+  <li>Implement an <strong>estimate_loss</strong> routine that averages training and validation loss over several batches to reduce noise.<br>
+</li>
+  <li>Use evaluation mode and <strong>torch.no_grad()</strong> during validation to avoid gradient computation and reduce memory usage.<br>
+</li>
+</ul>
+
+<p>These production-oriented changes improve reproducibility and interpretability of training runs.<br></p>
+
+<hr>
+
+<h1 id="self-attention-can-be-approximated-as-weighted-aggregation-of-past-token-vectors-initially-illustrated-by-cumulative-averaging">Self-attention can be approximated as weighted aggregation of past token vectors, initially illustrated by cumulative averaging.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/00-43-51-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/00-43-51-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/00-43-51-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/00-43-51.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>A simple communication mechanism for sequential tokens is to aggregate preceding token vectors by <strong>averaging</strong>, producing a context summary for each position.<br></p>
+
+<p>Notes and trade-offs:<br></p>
+<ul>
+  <li>A naive loop implementation is correct but inefficient; it serves as an intuitive toy illustration of past→present information flow.<br>
+</li>
+  <li>This bag-of-words style aggregation demonstrates the goal of attention: fuse information from previous positions into per-token representations.<br>
+</li>
+  <li>The next step is to express such aggregations as batched matrix multiplications for efficiency.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="lower-triangular-weight-matrices-and-batched-matrix-multiplication-vectorize-prefix-aggregation">Lower-triangular weight matrices and batched matrix multiplication vectorize prefix aggregation.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/00-49-02-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/00-49-02-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/00-49-02-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/00-49-02.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>A lower-triangular binary matrix of ones can sum all prefixes for each position via a single batched matrix multiplication:<br></p>
+
+<ul>
+  <li>Multiply a <strong>(T, T)</strong> lower-triangular matrix by a <strong>(B, T, C)</strong> token tensor to produce <strong>(B, T, C)</strong> prefix sums.<br>
+</li>
+  <li>Normalizing the rows of the triangular matrix yields <strong>prefix averages</strong> instead of sums.<br>
+</li>
+  <li>Using batched <strong>GEMM</strong> applies this operation independently across batch elements and eliminates explicit loops, yielding large performance gains on GPUs.<br>
+</li>
+</ul>
+
+<p>This matrix formulation is the algebraic foundation enabling efficient <strong>masked attention</strong> implementations.<br></p>
+
+<hr>
+
+<h1 id="masking-with-negative-infinity-and-softmax-produces-normalized-causal-affinity-weights">Masking with negative infinity and softmax produces normalized, causal affinity weights.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/00-53-18-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/00-53-18-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/00-53-18-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/00-53-18.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>To enforce causality in attention, set the non-allowed (future) entries of the <strong>T×T</strong> weight matrix to <strong>negative infinity</strong> and then apply softmax across each row:<br></p>
+
+<ul>
+  <li>Filling masked positions with <strong>-inf</strong> ensures their contribution becomes zero after exponentiation and normalization, enforcing autoregressive constraints.<br>
+</li>
+  <li>Parameterize the unmasked entries as learnable affinities so the model can compute data-dependent weights via softmax to selectively aggregate information.<br>
+</li>
+</ul>
+
+<p>This <strong>masked softmax</strong> pattern is the computational primitive that enables causal attention in decoders.<br></p>
+
+<hr>
+
+<h1 id="introduce-embeddings-and-an-output-projection-to-separate-token-identity-and-model-dimensionality">Introduce embeddings and an output projection to separate token identity and model dimensionality.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/00-57-53-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/00-57-53-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/00-57-53-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/00-57-53.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Replace the trivial logits-as-embeddings approach with:<br></p>
+<ul>
+  <li>A <strong>token embedding</strong> of dimension <strong>embed_dim</strong>.<br>
+</li>
+  <li>A separate linear <strong>language modeling head</strong> that projects model features back to vocabulary logits.<br>
+</li>
+</ul>
+
+<p>Also:<br></p>
+<ul>
+  <li>Add <strong>positional embeddings</strong> indexed by time position and add them to token embeddings so attention can distinguish positions.<br>
+</li>
+  <li>Combined token + positional embeddings form the input representations consumed by subsequent attention layers.<br>
+</li>
+</ul>
+
+<p>This decouples embedding dimensionality from vocabulary size and enables richer continuous feature spaces.<br></p>
+
+<hr>
+
+<h1 id="self-attention-computes-data-dependent-affinities-via-query-key-dot-products-and-aggregates-values-accordingly">Self-attention computes data-dependent affinities via query-key dot products and aggregates values accordingly.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/01-05-08-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/01-05-08-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/01-05-08-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/01-05-08.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Each token emits three learned linear projections: <strong>query (Q)</strong>, <strong>key (K)</strong>, and <strong>value (V)</strong> vectors.<br></p>
+
+<p>Computation steps:<br></p>
+<ol>
+  <li>Compute affinities as <strong>Q × Kᵀ</strong> (batched) to obtain a <strong>B × T × T</strong> affinity tensor.<br>
+</li>
+  <li>Apply causal masking and <strong>softmax</strong> to convert affinities into normalized attention weights.<br>
+</li>
+  <li>Multiply these weights with the <strong>V</strong> matrix to produce aggregated, context-aware outputs per position.<br>
+</li>
+</ol>
+
+<p>The output dimension equals the head size and captures information from selected past tokens weighted by their learned relevance.<br></p>
+
+<hr>
+
+<h1 id="attention-is-a-general-communication-mechanism-with-graph-and-positional-considerations">Attention is a general communication mechanism with graph and positional considerations.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/01-10-30-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/01-10-30-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/01-10-30-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/01-10-30.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Interpretation and generalization of attention:<br></p>
+<ul>
+  <li>Attention is directed communication in a graph where nodes aggregate weighted information from neighbors; in autoregressive modeling the connectivity is triangular to prevent future→past flow.<br>
+</li>
+  <li>Attention operates on unordered sets of vectors, so <strong>positional encodings</strong> are required to inject sequence order.<br>
+</li>
+  <li>Batch elements are independent pools of nodes processed in parallel with batched matrix ops.<br>
+</li>
+  <li>Attention generalizes to encoder-decoder and cross-attention when queries and keys/values originate from different sources; mask and connectivity choices tailor attention to the task.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="scale-dot-product-attention-by-1sqrtd_k-to-control-variance-and-softmax-sharpness">Scale dot-product attention by 1/sqrt(d_k) to control variance and softmax sharpness.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/01-13-18-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/01-13-18-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/01-13-18-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/01-13-18.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>When Q and K vectors have approximately unit variance, their dot product variance grows with head dimensionality; divide dot products by <strong>sqrt(d_k)</strong> to stabilize the attention logits.<br></p>
+
+<p>Rationale:<br></p>
+<ul>
+  <li>Scaling prevents the softmax from becoming extremely peaky at initialization and preserves diffuse weight distributions that allow gradients to propagate.<br>
+</li>
+  <li>Without scaling, larger head sizes would produce overly confident one-hot attention distributions and hamper learning, especially early in training.<br>
+</li>
+</ul>
+
+<p>This <strong>scaled dot-product</strong> formulation is standard practice in Transformer implementations.<br></p>
+
+<hr>
+
+<h1 id="implement-a-single-self-attention-head-module-and-integrate-it-into-the-model-while-enforcing-context-cropping">Implement a single self-attention head module and integrate it into the model while enforcing context cropping.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/01-17-18-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/01-17-18-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/01-17-18-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/01-17-18.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Encapsulate key-query-value projections, the causal triangular mask (as a non-parameter buffer), scaled dot-product computation, softmax normalization, and value aggregation into a reusable <strong>Head</strong> class.<br></p>
+
+<p>Implementation tips:<br></p>
+<ul>
+  <li>Register the lower-triangular mask as a <strong>buffer</strong> so it moves with the module across devices but is not treated as an optimizer parameter.<br>
+</li>
+  <li>During autoregressive generation, crop the input context to at most <strong>block_size</strong> to match positional embedding capacity and avoid index overflow.<br>
+</li>
+</ul>
+
+<p>This modular head becomes the building block for multi-head attention and deeper stacks.<br></p>
+
+<hr>
+
+<h1 id="training-with-a-single-scaled-attention-head-yields-modest-gains-while-multi-head-attention-improves-representation-capacity">Training with a single scaled attention head yields modest gains, while multi-head attention improves representation capacity.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/01-22-50-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/01-22-50-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/01-22-50-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/01-22-50.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Replacing the bigram model with a single <strong>self-attention head</strong> enables data-dependent communication across positions and typically reduces validation loss modestly.<br></p>
+
+<p>Extending to <strong>multi-head attention</strong>:<br></p>
+<ul>
+  <li>Creates parallel communication channels (heads) that each capture different pairwise or feature-specific interactions.<br>
+</li>
+  <li>Concatenate head outputs and project back to the embedding dimension to enrich representational capacity.<br>
+</li>
+  <li>Empirically, multi-head attention reduces validation loss further vs. a single head and is analogous to grouped convolutions where separate groups learn complementary patterns.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="add-a-per-position-feed-forward-network-to-allow-tokens-to-process-gathered-context-independently">Add a per-position feed-forward network to allow tokens to process gathered context independently.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/01-27-20-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/01-27-20-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/01-27-20-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/01-27-20.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>After attention aggregates information across positions, apply a <strong>position-wise MLP</strong> (linear → nonlinearity → linear) independently to each token to let it transform and reason about the aggregated context.<br></p>
+
+<p>Notes:<br></p>
+<ul>
+  <li>The feed-forward block is applied identically and independently at each time position, complementing communication from attention.<br>
+</li>
+  <li>Interleaving attention and feed-forward layers allows the model to both exchange information and elaborate features hierarchically.<br>
+</li>
+  <li>Adding this stage typically improves expressivity and validation performance.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="stack-transformer-blocks-with-residual-projections-to-enable-deep-architectures">Stack Transformer blocks with residual projections to enable deep architectures.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/01-31-00-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/01-31-00-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/01-31-00-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/01-31-00.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Compose <strong>Transformer blocks</strong> that intersperse multi-head self-attention and position-wise feed-forward layers, include <strong>residual (skip) connections</strong> around each sub-layer, and project back to the embedding dimension.<br></p>
+
+<p>Why this structure matters:<br></p>
+<ul>
+  <li>Residual connections provide gradient highways that preserve signal from later loss gradients back to earlier layers, making deep networks feasible and improving optimization dynamics.<br>
+</li>
+  <li>Apply a linear projection after concatenated multi-head outputs to return to the residual pathway and enable parameter-efficient composition.<br>
+</li>
+  <li>This block structure is the canonical <strong>Transformer decoder block</strong> used in GPT-style models.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="use-feed-forward-inner-expansion-and-layernorm-pre-norm-to-stabilize-training">Use feed-forward inner expansion and LayerNorm (pre-norm) to stabilize training.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/01-35-00-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/01-35-00-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/01-35-00-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/01-35-00.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Expand the feed-forward inner layer dimensionality (commonly a factor of four) to increase per-token computation capacity, and apply <strong>LayerNorm</strong> before each sub-layer (<strong>pre-norm</strong>) to normalize feature statistics at initialization.<br></p>
+
+<p>Practical benefits:<br></p>
+<ul>
+  <li>Pre-norm LayerNorm normalizes across the embedding dimension per token and includes learned scale and bias.<br>
+</li>
+  <li>These choices improve gradient conditioning compared to post-norm in many setups, reducing training instability in deeper stacks.<br>
+</li>
+  <li>Together with residuals and inner expansion, pre-norm LayerNorm fosters faster convergence and better final performance.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="add-dropout-and-scale-up-model-hyperparameters-to-improve-generalization-and-capacity">Add dropout and scale up model hyperparameters to improve generalization and capacity.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/01-39-00-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/01-39-00-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/01-39-00-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/01-39-00.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Introduce <strong>dropout</strong> on attention probabilities and residual outputs as regularization that randomly zeroes activations during training.<br></p>
+
+<p>Scaling model capacity:<br></p>
+<ul>
+  <li>Increase batch size, block size (e.g., 256), embedding dimension (e.g., 384), number of heads, number of layers, and adjust learning rate appropriately.<br>
+</li>
+  <li>With moderate scaling and GPU training (e.g., A100), validation loss can drop substantially, showing how capacity and regularization jointly drive gains.<br>
+</li>
+  <li>Larger models require careful regularization and hyperparameter tuning to remain optimizable.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="a-decoder-only-transformer-implements-autoregressive-language-modeling-encoder-decoder-variants-support-conditioned-sequence-to-sequence-tasks">A decoder-only Transformer implements autoregressive language modeling; encoder-decoder variants support conditioned sequence-to-sequence tasks.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/01-43-30-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/01-43-30-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/01-43-30-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/01-43-30.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The implemented model is a <strong>decoder-only Transformer</strong> that uses causal masking so tokens cannot attend to <strong>future</strong> positions, making it suitable for unconditioned autoregressive generation (as in GPT).<br></p>
+
+<p>Contrast with the original architecture:<br></p>
+<ul>
+  <li>“Attention Is All You Need” used an <strong>encoder-decoder</strong> configuration for sequence-to-sequence tasks (e.g., translation): the encoder processes source tokens with full bidirectional attention and the decoder cross-attends to encoder outputs.<br>
+</li>
+  <li>
+<strong>Decoder-only</strong> models omit the encoder and cross-attention, simplifying the architecture for pure language modeling.<br>
+</li>
+  <li>To turn a pre-trained decoder into an assistant-like agent (e.g., ChatGPT), additional <strong>fine-tuning and alignment</strong> stages are required.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="large-scale-models-require-pre-training-on-massive-corpora-then-fine-tuning-and-alignment-to-become-useful-assistants">Large-scale models require pre-training on massive corpora then fine-tuning and alignment to become useful assistants.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/01-50-30-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/01-50-30-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/01-50-30-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/01-50-30.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Pre-training and alignment pipeline overview:<br></p>
+
+<ol>
+  <li>
+<strong>Pre-training</strong>: train a large decoder-only Transformer on vast corpora of internet text to learn general language modeling capabilities — model and token scale during pre-training determine much downstream capability.<br>
+</li>
+  <li>
+<strong>Supervised fine-tuning</strong>: adapt the generic model on labeled question-answer pairs and other supervised datasets.<br>
+</li>
+  <li>
+<strong>Preference learning</strong>: collect human preference data and train a <strong>reward model</strong> to score outputs.<br>
+</li>
+  <li>
+<strong>Reinforcement Learning from Human Feedback (RLHF)</strong>: optimize the sampling policy (e.g., via <strong>PPO</strong>) against the reward model to produce controlled, helpful, and safe assistant behavior.<br>
+</li>
+</ol>
+
+<p>These alignment stages are often data- and compute-intensive beyond pre-training.<br></p>
+
+<hr>
+
+<h1 id="nanogpt-implementation-details-and-summary-of-the-educational-reproduction">NanoGPT implementation details and summary of the educational reproduction.</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/karpathy/frames/lec12/01-55-39-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/karpathy/frames/lec12/01-55-39-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/karpathy/frames/lec12/01-55-39-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/karpathy/frames/lec12/01-55-39.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>NanoGPT</strong> separates model definition and training utilities into concise files (e.g., model.py and train.py) and implements core Transformer features consistent with standard GPT variants.<br></p>
+
+<p>Included practicalities:<br></p>
+<ul>
+  <li>Causal self-attention, multi-head aggregation, position-wise MLPs, <strong>LayerNorm</strong>, residual projections, and generation routines.<br>
+</li>
+  <li>Checkpointing, selective weight decay, optional dropout, device management, and support for scaling/loading checkpoints.<br>
+</li>
+  <li>Educational reproduction shows a complete Transformer-based language model can be implemented in a few hundred lines and, when scaled appropriately on GPU, produce plausible Shakespeare-like output from a small corpus.<br>
+</li>
+</ul>
+
+<p>The project focuses on the <strong>pre-training</strong> stage and leaves complex alignment pipelines (reward models, RLHF) as higher-level extensions.<br></p>
+
+<hr>
+
+
+    </div>
+  </article>
+
+
+  
+    
+    <br>
+    <hr>
+    <br>
+    <ul class="list-disc pl-8"></ul>
+
+    <!-- Adds related posts to the end of an article -->
+    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
+    <p class="mb-2">Here are some more articles you might like to read next:</p>
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/diffusion-foundation/">The Foundations and Frontiers of Diffusion Models</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/nlp-foundation/">LLM Series - Part 1 - Important Concepts in NLP</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/karpathy-lec10/">Karpathy Series - Let's reproduce GPT-2</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2024/thoughts/">Random Thoughts and Notes</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/karpathy-lec03/">Karpathy Series - Bulding Makemore Part 2 - MLP</a>
+  </li>
+
+</div>
+
+      
+    </div>
+
+    <!-- Footer -->    
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        © Copyright 2025 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+
+      </div>
+    </footer>
+
+    <!-- JavaScripts -->
+    <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- Bootsrap & MDB scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    <!-- Masonry & imagesLoaded -->
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
+    
+  <!-- Medium Zoom JS -->
+  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/zoom.js"></script>
+
+  <!-- Bootstrap Table -->
+  <script defer src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+
+  <!-- Load Common JS -->
+  <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
+  <script defer src="/assets/js/common.js?acdb9690d7641b2f8d40529018c71a01"></script>
+  <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    <!-- MathJax -->
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        tags: 'ams'
+      }
+    };
+  </script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KGSMMS9MS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-7KGSMMS9MS');
+  </script>
+    
+
+<!-- Scrolling Progress Bar -->
+<script type="text/javascript">
+  /*
+   * This JavaScript code has been adapted from the article 
+   * https://css-tricks.com/reading-position-indicator/ authored by Pankaj Parashar, 
+   * published on the website https://css-tricks.com on the 7th of May, 2014.
+   * Couple of changes were made to the original code to make it compatible 
+   * with the `al-foio` theme.
+   */
+  const progressBar = $("#progress");
+  /*
+   * We set up the bar after all elements are done loading.
+   * In some cases, if the images in the page are larger than the intended
+   * size they'll have on the page, they'll be resized via CSS to accomodate
+   * the desired size. This mistake, however, breaks the computations as the
+   * scroll size is computed as soon as the elements finish loading.
+   * To account for this, a minimal delay was introduced before computing the
+   * values.
+   */
+  window.onload = function () {
+    setTimeout(progressBarSetup, 50);
+  };
+  /*
+   * We set up the bar according to the browser.
+   * If the browser supports the progress element we use that.
+   * Otherwise, we resize the bar thru CSS styling
+   */
+  function progressBarSetup() {
+    if ("max" in document.createElement("progress")) {
+      initializeProgressElement();
+      $(document).on("scroll", function() {
+        progressBar.attr({ value: getCurrentScrollPosition() });
+      });
+      $(window).on("resize", initializeProgressElement);
+    } else {
+      resizeProgressBar();
+      $(document).on("scroll", resizeProgressBar);
+      $(window).on("resize", resizeProgressBar);
+    }
+  }
+  /*
+   * The vertical scroll position is the same as the number of pixels that
+   * are hidden from view above the scrollable area. Thus, a value > 0 is
+   * how much the user has scrolled from the top
+   */
+  function getCurrentScrollPosition() {
+    return $(window).scrollTop();
+  }
+
+  function initializeProgressElement() {
+    let navbarHeight = $("#navbar").outerHeight(true);
+    $("body").css({ "padding-top": navbarHeight });
+    $("progress-container").css({ "padding-top": navbarHeight });
+    progressBar.css({ top: navbarHeight });
+    progressBar.attr({
+      max: getDistanceToScroll(),
+      value: getCurrentScrollPosition(),
+    });
+  }
+  /*
+   * The offset between the html document height and the browser viewport
+   * height will be greater than zero if vertical scroll is possible.
+   * This is the distance the user can scroll
+   */
+  function getDistanceToScroll() {
+    return $(document).height() - $(window).height();
+  }
+
+  function resizeProgressBar() {
+    progressBar.css({ width: getWidthPercentage() + "%" });
+  }
+  // The scroll ratio equals the percentage to resize the bar
+  function getWidthPercentage() {
+    return (getCurrentScrollPosition() / getDistanceToScroll()) * 100;
+  }
+</script>
+
+    
+  </body>
+</html>
