@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <!-- Head -->
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    <!-- Metadata, OpenGraph and Schema.org -->
+    
+
+    <!-- Standard metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Stanford CS236 - Deep Generative Models I 2023 I Lecture 17 - Discrete Latent Variable Models | Tuan-Anh  Bui</title>
+    <meta name="author" content="Tuan-Anh  Bui">
+    <meta name="description" content="AI Summary Lecture">
+    <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
+
+
+    <!-- Bootstrap & MDB -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+    <!-- Bootstrap Table -->
+    <link defer rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+
+    <!-- Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
+
+    
+
+    <!-- Styles -->
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
+    
+    <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+    <link rel="canonical" href="https://tuananhbui89.github.io/blog/2025/cs236-2023-lec17/">
+
+    <!-- Dark Mode -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark">
+    <script src="/assets/js/theme.js?96d6b3e1c3604aca8b6134c7afdd5db6"></script>
+    <script src="/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script>
+    
+
+  </head>
+
+  <!-- Body -->
+  <body class="fixed-top-nav ">
+
+    <!-- Header -->
+    <header>
+
+      <!-- Nav Bar -->
+      <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top">
+        <div class="container">
+          <a class="navbar-brand title font-weight-lighter" href="/"><span class="font-weight-bold">Tuan-Anh </span>Bui</a>
+          <!-- Navbar Toggle -->
+          <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar top-bar"></span>
+            <span class="icon-bar middle-bar"></span>
+            <span class="icon-bar bottom-bar"></span>
+          </button>
+
+          <div class="collapse navbar-collapse text-right" id="navbarNav">
+            <ul class="navbar-nav ml-auto flex-nowrap">
+
+              <!-- About -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/">about</a>
+              </li>
+              
+              <!-- Blog -->
+              <li class="nav-item active">
+                <a class="nav-link" href="/blog/">blog<span class="sr-only">(current)</span></a>
+              </li>
+
+              <!-- Other pages -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/publications/">publications</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/projects/">projects</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/repositories/">repositories</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/teaching/"></a>
+              </li>
+
+              <!-- Toogle theme mode -->
+              <li class="toggle-container">
+                <button id="light-toggle" title="Change theme">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Scrolling Progress Bar -->
+      <progress id="progress" value="0">
+        <div class="progress-container">
+          <span class="progress-bar"></span>
+        </div>
+      </progress>
+    </header>
+
+
+    <!-- Content -->
+    <div class="container mt-5">
+      
+        <!-- _layouts/post.html -->
+<!-- Page/Post style -->
+<style type="text/css">
+  
+</style>
+
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Stanford CS236 - Deep Generative Models I 2023 I Lecture 17 - Discrete Latent Variable Models</h1>
+    <p class="post-meta">December 18, 2025</p>
+    <p class="post-tags">
+      <a href="/blog/2025"> <i class="fas fa-calendar fa-sm"></i> 2025 </a>
+        ·  
+        <a href="/blog/tag/genai">
+          <i class="fas fa-hashtag fa-sm"></i> genai</a>  
+          <a href="/blog/tag/llm">
+          <i class="fas fa-hashtag fa-sm"></i> llm</a>  
+          <a href="/blog/tag/tutorial">
+          <i class="fas fa-hashtag fa-sm"></i> tutorial</a>  
+          <a href="/blog/tag/reading">
+          <i class="fas fa-hashtag fa-sm"></i> reading</a>  
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    
+    <div id="table-of-contents">
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#lecture-overview-and-plan">Lecture overview and plan</a></li>
+<li class="toc-entry toc-h1"><a href="#score-based-models-and-ddpms-are-equivalent-perspectives-on-noisingdenoising-generative-modeling">Score-based models and DDPMs are equivalent perspectives on noising/denoising generative modeling</a></li>
+<li class="toc-entry toc-h1"><a href="#elbo-training-reduces-to-learning-a-sequence-of-denoisers-and-score-functions">ELBO training reduces to learning a sequence of denoisers and score functions</a></li>
+<li class="toc-entry toc-h1"><a href="#continuous-time-diffusion-the-diffusion-limit-generalizes-discrete-step-ddpms">Continuous-time diffusion (the diffusion limit) generalizes discrete-step DDPMs</a></li>
+<li class="toc-entry toc-h1"><a href="#the-forward-process-is-an-sde-with-drift-and-diffusion-describing-noise-addition">The forward process is an SDE with drift and diffusion describing noise addition</a></li>
+<li class="toc-entry toc-h1"><a href="#reverse-time-sde-introduces-a-score-dependent-drift-used-for-sampling">Reverse-time SDE introduces a score-dependent drift used for sampling</a></li>
+<li class="toc-entry toc-h1"><a href="#score-estimation-and-discretization-yield-ddpm-like-denoising-updates">Score estimation and discretization yield DDPM-like denoising updates</a></li>
+<li class="toc-entry toc-h1"><a href="#an-equivalent-deterministic-ode-flow-exists-with-identical-marginals">An equivalent deterministic ODE (flow) exists with identical marginals</a></li>
+<li class="toc-entry toc-h1"><a href="#likelihood-evaluation-via-ode-change-of-variables-uses-trace-jacobian-integration">Likelihood evaluation via ODE change-of-variables uses trace-Jacobian integration</a></li>
+<li class="toc-entry toc-h1"><a href="#sampling-tradeoffs-odes-give-faster-deterministic-samples-while-sdes-provide-robustness">Sampling tradeoffs: ODEs give faster deterministic samples while SDEs provide robustness</a></li>
+<li class="toc-entry toc-h1"><a href="#accelerated-sampling-methods-ddim-and-coarse-discretization-reduce-step-count">Accelerated sampling methods (DDIM and coarse discretization) reduce step count</a></li>
+<li class="toc-entry toc-h1"><a href="#parallel-in-time-ode-solvers-trade-compute-for-wall-clock-speed-by-denoising-trajectory-segments-concurrently">Parallel-in-time ODE solvers trade compute for wall-clock speed by denoising trajectory segments concurrently</a></li>
+<li class="toc-entry toc-h1"><a href="#progressive-distillation-and-consistency-models-compress-multi-step-samplers-into-very-few-steps">Progressive distillation and consistency models compress multi-step samplers into very few steps</a></li>
+<li class="toc-entry toc-h1"><a href="#latent-diffusion-uses-a-vae-style-encoder-to-reduce-dimensionality-and-accelerate-training-and-sampling">Latent diffusion uses a VAE-style encoder to reduce dimensionality and accelerate training and sampling</a></li>
+<li class="toc-entry toc-h1"><a href="#conditional-generation-is-implemented-by-supplying-side-information-to-the-scoredenoiser-network">Conditional generation is implemented by supplying side information to the score/denoiser network</a></li>
+<li class="toc-entry toc-h1"><a href="#bayesian-conditioning-via-classifier-guidance-posterior-scores-equal-prior-plus-likelihood-score">Bayesian conditioning via classifier guidance: posterior scores equal prior plus likelihood score</a></li>
+<li class="toc-entry toc-h1"><a href="#classifier-guidance-and-classifier-free-guidance-provide-practical-conditioning-mechanisms">Classifier guidance and classifier-free guidance provide practical conditioning mechanisms</a></li>
+<li class="toc-entry toc-h1"><a href="#applications-include-image-editing-inverse-problems-and-medical-imaging-where-likelihoods-encode-measurement-physics">Applications include image editing, inverse problems, and medical imaging where likelihoods encode measurement physics</a></li>
+<li class="toc-entry toc-h1"><a href="#classifier-free-guidance-and-other-practical-tricks-avoid-explicit-classifier-training">Classifier-free guidance and other practical tricks avoid explicit classifier training</a></li>
+<li class="toc-entry toc-h1"><a href="#recent-engineering-advances-yield-real-time-or-very-low-step-generation-by-combining-distillation-latent-models-and-advanced-solvers">Recent engineering advances yield real-time or very low-step generation by combining distillation, latent models, and advanced solvers</a></li>
+<li class="toc-entry toc-h1"><a href="#summary-score-estimation-unlocks-multiple-inference-paradigms-and-practical-tradeoffs">Summary: score estimation unlocks multiple inference paradigms and practical tradeoffs</a></li>
+</ul>
+    </div>
+    <hr>
+    
+    <div id="markdown-content">
+      <div style="display: flex; justify-content: center;">
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/vBv7Mf1zsg8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen="">
+    </iframe>
+</div>
+
+<h1 id="lecture-overview-and-plan">Lecture overview and plan</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec17/00-00-20-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec17/00-00-20-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec17/00-00-20-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec17/00-00-20.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment outlines the lecture’s objective to continue the exploration of <strong>diffusion models</strong> and to connect them with <strong>stochastic differential equations (SDEs)</strong> and <strong>ODE-based samplers</strong>.<br></p>
+
+<p>It frames <strong>score-based models</strong> and <strong>denoising diffusion probabilistic models (DDPMs)</strong> as two perspectives on the same <strong>noising/denoising family</strong> of generative models and motivates moving from <strong>discrete-time VAEs</strong> to <strong>continuous-time</strong> formulations.<br></p>
+
+<p>Practical interests emphasized in the lecture:<br></p>
+<ul>
+  <li>
+<strong>Efficient samplers</strong> (fewer model evaluations, accelerated integrators)</li>
+  <li>
+<strong>Exact and approximate likelihood evaluation</strong> (continuous-time change-of-variables)</li>
+  <li>
+<strong>Conditional generation techniques</strong> (text-to-image, classifier-guided sampling)</li>
+</ul>
+
+<p>The stage is set for formal descriptions of:<br></p>
+<ol>
+  <li>
+<strong>Forward noising processes</strong> (how data is corrupted over time)</li>
+  <li>
+<strong>Reverse-time dynamics</strong> (how to undo corruption using scores/denoisers)</li>
+  <li>
+<strong>Algorithmic implications</strong> for sampling and training (discretizations, solvers, and trade-offs)<br>
+</li>
+</ol>
+
+<hr>
+
+<h1 id="score-based-models-and-ddpms-are-equivalent-perspectives-on-noisingdenoising-generative-modeling">Score-based models and DDPMs are equivalent perspectives on noising/denoising generative modeling</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec17/00-01-47-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec17/00-01-47-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec17/00-01-47-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec17/00-01-47.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Score-based models</strong> and <strong>denoising diffusion probabilistic models (DDPMs)</strong> are two ways to define the same family of distributions obtained by progressively adding noise to data and learning a reverse process to remove that noise.<br></p>
+
+<p>Key structure:<br></p>
+<ul>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>The <strong>forward (encoder) process</strong> is a sequence of Gaussian perturbations **q(x_t</td>
+          <td>x_{t-1})** that gradually destroys data structure until pure noise is reached.</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>The <strong>learned reverse (decoder)</strong> defines **p_θ(x_{t-1}</td>
+          <td>x_t)**, typically parameterized as Gaussians whose means are predicted by neural networks.</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+
+<p>Optimization link:<br></p>
+<ul>
+  <li>Optimizing the variational <strong>ELBO</strong> for DDPMs reduces, after algebra, to matching the reverse decoders to the forward noising transitions.</li>
+  <li>This matching is equivalent to learning <strong>denoisers</strong> or <strong>score functions</strong> at each noise level.</li>
+</ul>
+
+<p>Consequence:<br></p>
+<ul>
+  <li>Training either framework yields a sequence of denoisers: in DDPMs these are <strong>discrete-step decoders</strong>, and in score-based models they are <strong>noise-conditional score estimators</strong>.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="elbo-training-reduces-to-learning-a-sequence-of-denoisers-and-score-functions">ELBO training reduces to learning a sequence of denoisers and score functions</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec17/00-04-00-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec17/00-04-00-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec17/00-04-00-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec17/00-04-00.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The <strong>variational ELBO</strong> for diffusion models decomposes into terms that are KL divergences between the forward noising path and the modelled reverse path.<br></p>
+
+<p>Important simplifications:<br></p>
+<ul>
+  <li>These KL terms simplify to <strong>denoising</strong> or <strong>score-matching</strong> objectives at individual noise levels.</li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>Learning the optimal reverse conditional **p_θ(x_{t-1}</td>
+          <td>x_t)** therefore amounts to estimating the <strong>score</strong> of the perturbed-data density or equivalently training <strong>denoisers</strong> that map noisy inputs to cleaner reconstructions.</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+
+<p>Discrete vs continuous:<br></p>
+<ul>
+  <li>In the <strong>discrete DDPM</strong> setup you train a finite set of denoisers (one per step).</li>
+  <li>In the <strong>continuous</strong> formulation you train a continuum of denoisers (scores indexed by time).</li>
+</ul>
+
+<p>Why architectures and losses align:<br></p>
+<ul>
+  <li>This formal equivalence explains why architectures and loss functions in <strong>score-based models</strong> and <strong>DDPMs</strong> are closely related.</li>
+  <li>It also explains why sampling updates resemble <strong>Langevin-type gradient steps plus noise</strong>.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="continuous-time-diffusion-the-diffusion-limit-generalizes-discrete-step-ddpms">Continuous-time diffusion (the diffusion limit) generalizes discrete-step DDPMs</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec17/00-06-15-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec17/00-06-15-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec17/00-06-15-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec17/00-06-15.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Taking the <strong>diffusion limit</strong> replaces the discrete sequence of noise levels with a continuum indexed by <strong>t ∈ [0, T]</strong>, producing marginal densities <strong>p_t(x)</strong> that interpolate from data (t=0) to noise (t=T).<br></p>
+
+<p>How this arises:<br></p>
+<ul>
+  <li>Viewing forward noising as an infinitesimal limit of Gaussian perturbations leads to an <strong>SDE</strong> that describes how <strong>x_t</strong> evolves under infinitesimal drift and diffusion.</li>
+</ul>
+
+<p>Practical benefits of the continuous view:<br></p>
+<ul>
+  <li>Access to continuous-time tools: <strong>SDE/ODE solvers</strong>, <strong>Fokker–Planck</strong> analysis.</li>
+  <li>Unified interpretation: <strong>DDPMs</strong> and <strong>score-based methods</strong> appear as discretizations of the same underlying process.</li>
+  <li>Motivates more sophisticated numerical schemes and sampler designs because discrete DDPMs are time discretizations of the continuum.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="the-forward-process-is-an-sde-with-drift-and-diffusion-describing-noise-addition">The forward process is an SDE with drift and diffusion describing noise addition</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec17/00-08-45-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec17/00-08-45-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec17/00-08-45-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec17/00-08-45.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Formally the forward noising process can be written as an SDE: <strong>dX_t = f(X_t,t) dt + g(t) dW_t</strong>, where:<br></p>
+<ul>
+  <li>
+<strong>f(X_t,t)</strong> is the <strong>drift</strong> field,</li>
+  <li>
+<strong>g(t)</strong> scales the noise, and</li>
+  <li>
+<strong>dW_t</strong> is the <strong>Wiener increment</strong> (Brownian motion).<br>
+</li>
+</ul>
+
+<p>Key points:<br></p>
+<ul>
+  <li>In the simple isotropic noising case <strong>f = 0</strong>, and the dynamics reduce to <strong>pure diffusion</strong>.</li>
+  <li>The differential notation <strong>dX_t</strong> captures infinitesimal changes obtained by taking finer discretizations of the discrete chain; integrating these infinitesimal updates yields the observed smoothed densities <strong>p_t(x)</strong>.</li>
+  <li>Each marginal <strong>p_t(x)</strong> is a smoothed version of the data density because the forward SDE corresponds to incremental convolution with Gaussian kernels.<br>
+</li>
+</ul>
+
+<p>Why this matters:<br></p>
+<ul>
+  <li>The SDE formalism provides the precise probabilistic object whose <strong>reverse-time dynamics</strong> will be used for generative sampling.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="reverse-time-sde-introduces-a-score-dependent-drift-used-for-sampling">Reverse-time SDE introduces a score-dependent drift used for sampling</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec17/00-11-45-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec17/00-11-45-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec17/00-11-45-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec17/00-11-45.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Reversing the forward SDE in time yields another SDE whose drift depends on the <strong>score</strong> (the gradient of log density) of the forward marginal <strong>p_t(x)</strong>.<br></p>
+
+<p>Intuition and sampling procedure:<br></p>
+<ol>
+  <li>The <strong>score term</strong> provides the structured velocity field needed to move samples from noise toward regions of high data probability.</li>
+  <li>To sample from the data distribution, initialize <strong>x_T</strong> from the simple prior and integrate the <strong>reverse SDE</strong> toward <strong>t = 0</strong>.</li>
+  <li>Doing this requires access to the time-dependent score <strong>s(x,t) = ∇_x log p_t(x)</strong>.</li>
+</ol>
+
+<p>Notes on drift:<br></p>
+<ul>
+  <li>When the forward SDE has <strong>zero drift</strong>, the reverse SDE’s drift is exactly the score term.</li>
+  <li>If the forward SDE includes drift, that drift must be transformed appropriately in the reverse dynamics.</li>
+</ul>
+
+<p>Practical implication:<br></p>
+<ul>
+  <li>The need to know <strong>s(x,t)</strong> motivates training neural networks to estimate it by <strong>score matching</strong> so the reverse SDE can be simulated approximately during inference.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="score-estimation-and-discretization-yield-ddpm-like-denoising-updates">Score estimation and discretization yield DDPM-like denoising updates</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec17/00-15-15-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec17/00-15-15-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec17/00-15-15-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec17/00-15-15.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The <strong>score-based training objective</strong> estimates the continuum family of scores <strong>s(x,t)</strong> for all <strong>t</strong> using <strong>noise-conditional score matching</strong> losses, which regress model scores to true scores in an L2 sense under perturbed-data distributions.<br></p>
+
+<p>From training to sampling:<br></p>
+<ul>
+  <li>Plugging estimated scores into the reverse SDE and discretizing time gives iterative update rules that are algebraically equivalent to the denoising and Langevin-style steps used in DDPMs: at each discrete time step, follow the estimated score and add a controlled noise term.</li>
+</ul>
+
+<p>Discretization trade-offs:<br></p>
+<ul>
+  <li>
+<strong>More steps</strong> → smaller numerical error, closer to continuous reverse flow.</li>
+  <li>
+<strong>Fewer, larger steps</strong> → faster, but introduce bias.</li>
+</ul>
+
+<p>Hybrid samplers:<br></p>
+<ul>
+  <li>Combining a <strong>predictor</strong> (deterministic step) and a <strong>corrector</strong> (stochastic refinement) yields hybrid samplers that trade compute for sample accuracy.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="an-equivalent-deterministic-ode-flow-exists-with-identical-marginals">An equivalent deterministic ODE (flow) exists with identical marginals</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec17/00-18-45-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec17/00-18-45-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec17/00-18-45-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec17/00-18-45.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Under mild conditions the stochastic reverse dynamics can be reparameterized into a <strong>deterministic ODE</strong> whose flow preserves the same family of marginal densities <strong>p_t(x)</strong> as the SDE.<br></p>
+
+<p>Consequences and structure:<br></p>
+<ul>
+  <li>The <strong>ODE removes per-step stochasticity</strong> and concentrates randomness into the initial condition.</li>
+  <li>The ODE defines an <strong>invertible mapping</strong> between latent noise <strong>x_T</strong> and data <strong>x_0</strong>, so solving it forward or backward yields a <strong>continuous normalizing flow</strong> parameterized by the score or related network.</li>
+  <li>This enables interpreting diffusion models as <strong>continuous-time normalizing flows</strong> and leveraging <strong>neural ODE</strong> machinery: the model becomes a neural ODE whose vector field is given by score-derived functions.</li>
+  <li>The deterministic ODE has unique, non-crossing trajectories, ensuring <strong>invertibility</strong> and enabling exact change-of-variable computations for likelihoods given an exact score.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="likelihood-evaluation-via-ode-change-of-variables-uses-trace-jacobian-integration">Likelihood evaluation via ODE change-of-variables uses trace-Jacobian integration</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec17/00-22-15-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec17/00-22-15-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec17/00-22-15-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec17/00-22-15.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>For the deterministic ODE formulation the likelihood of a data point can be computed by mapping it to the latent noise space via solving the ODE backward and applying the continuous change-of-variables formula.<br></p>
+
+<p>Concretely:<br></p>
+<ul>
+  <li>The log-likelihood obeys <strong>log p(x_0) = log p(x_T) + ∫_0^T -Tr(∂f/∂x)(x_t,t) dt</strong>, where <strong>f</strong> is the ODE vector field and <strong>Tr(∂f/∂x)</strong> is the trace of its Jacobian.</li>
+  <li>The integral can be evaluated alongside ODE integration using black-box ODE solvers and <strong>stochastic trace estimators</strong> when dimensions are large.</li>
+</ul>
+
+<p>Practical notes:<br></p>
+<ul>
+  <li>Numerical ODE solver technology gives access to <strong>adaptive step-size control</strong>, <strong>higher-order methods</strong>, and other techniques to improve sampling speed and accuracy.</li>
+  <li>This perspective enables competitive likelihood estimation even when training used score-matching rather than maximum likelihood.</li>
+  <li>Computing likelihoods requires integrating and potentially differentiating through the ODE solver for training-time likelihood optimization (numerically intensive), but evaluation alone is practical.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="sampling-tradeoffs-odes-give-faster-deterministic-samples-while-sdes-provide-robustness">Sampling tradeoffs: ODEs give faster deterministic samples while SDEs provide robustness</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec17/00-25-30-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec17/00-25-30-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec17/00-25-30-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec17/00-25-30.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Trade-offs between ODE and SDE samplers:<br></p>
+<ul>
+  <li>
+<strong>ODE (deterministic)</strong> samplers: faster, noise-free generation, can use large adaptive steps, and enable exact likelihood computation if the score is exact.</li>
+  <li>
+<strong>SDE (stochastic)</strong> samplers and <strong>predictor-corrector</strong> hybrids: maintain stochasticity at each step, keeping inputs closer to the training distribution and often reducing compounding error—usually higher sample quality at greater compute cost.</li>
+</ul>
+
+<p>Discretization bias is the central tradeoff:<br></p>
+<ul>
+  <li>
+<strong>Coarse discretization</strong> (fewer, larger steps) → speed but greater numerical error.</li>
+  <li>
+<strong>Fine discretization</strong> (many small steps) → accuracy but higher compute.</li>
+</ul>
+
+<p>Hybrid approaches and MCMC-style refinements give a flexible accuracy-vs-cost spectrum for inference.<br></p>
+
+<hr>
+
+<h1 id="accelerated-sampling-methods-ddim-and-coarse-discretization-reduce-step-count">Accelerated sampling methods (DDIM and coarse discretization) reduce step count</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec17/00-28-45-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec17/00-28-45-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec17/00-28-45-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec17/00-28-45.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Accelerated samplers</strong> exploit structure in diffusion dynamics to reduce required model evaluations from thousands to tens or hundreds while keeping acceptable sample quality.<br></p>
+
+<p>Examples and techniques:<br></p>
+<ul>
+  <li>
+<strong>DDIM</strong> (deterministic non-Markovian samplers): re-parameterizes steps to take larger jumps along a discretized approximation of the reverse dynamics.</li>
+  <li>
+<strong>Closed-form solutions</strong> for linear components of the SDE allow coarser time grids and larger steps, dramatically reducing network calls.</li>
+</ul>
+
+<p>Practical considerations:<br></p>
+<ul>
+  <li>Coarse discretization yields large speed-ups but increases approximation error.</li>
+  <li>Discretization granularity is a tunable knob traded against fidelity; advanced step selection and bespoke integrators further improve coarse-step samplers.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="parallel-in-time-ode-solvers-trade-compute-for-wall-clock-speed-by-denoising-trajectory-segments-concurrently">Parallel-in-time ODE solvers trade compute for wall-clock speed by denoising trajectory segments concurrently</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec17/00-32-14-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec17/00-32-14-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec17/00-32-14-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec17/00-32-14.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Parallel-in-time</strong> techniques partition the ODE trajectory and use multiple accelerators to estimate trajectory segments concurrently instead of sequentially.<br></p>
+
+<p>How it works and trade-offs:<br></p>
+<ul>
+  <li>Relies on good initial guesses for trajectory segments and iterative refinement.</li>
+  <li>Many GPUs refine different temporal windows in parallel, effectively denoising multiple timesteps at once.</li>
+  <li>This reduces wall-clock latency at the expense of greater aggregate compute and communication overhead.</li>
+</ul>
+
+<p>When it’s useful:<br></p>
+<ul>
+  <li>Particularly effective for large models with stringent latency requirements and abundant parallel resources.</li>
+  <li>Produces the same asymptotic solution as sequential integration but with much lower response time when engineered carefully.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="progressive-distillation-and-consistency-models-compress-multi-step-samplers-into-very-few-steps">Progressive distillation and consistency models compress multi-step samplers into very few steps</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec17/00-35-59-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec17/00-35-59-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec17/00-35-59-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec17/00-35-59.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Progressive distillation</strong> compresses multi-step denoising into progressively fewer steps by training student networks to emulate a teacher’s multi-step behavior.<br></p>
+
+<p>Procedure (high-level):<br></p>
+<ol>
+  <li>Train a teacher that performs k denoising steps.</li>
+  <li>Train a student to map the teacher’s state after k steps to the teacher’s state after 2k steps.</li>
+  <li>Recursively repeat, halving the step budget each distillation round until a small-step or one-step sampler is obtained.</li>
+</ol>
+
+<p>Outcomes and relatives:<br></p>
+<ul>
+  <li>Produces exponential compression of the original step budget and dramatically reduces inference cost while preserving sample quality.</li>
+  <li>
+<strong>Consistency models</strong> pursue a related objective by directly learning mappings from noisy inputs to denoised outputs that are consistent across step sizes; they enable one-shot or very low-step generation with specialized losses.</li>
+</ul>
+
+<p>These distilled and consistency approaches are core to recent real-time text-to-image demos.<br></p>
+
+<hr>
+
+<h1 id="latent-diffusion-uses-a-vae-style-encoder-to-reduce-dimensionality-and-accelerate-training-and-sampling">Latent diffusion uses a VAE-style encoder to reduce dimensionality and accelerate training and sampling</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec17/00-39-59-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec17/00-39-59-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec17/00-39-59-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec17/00-39-59.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Latent diffusion models</strong> insert an encoder/decoder pair (VAE or autoencoder) upstream of the diffusion prior so the diffusion operates in a lower-dimensional continuous latent space rather than raw pixel space.<br></p>
+
+<p>Why this helps:<br></p>
+<ul>
+  <li>Pretraining the encoder/decoder to prioritize reconstruction quality lets the diffusion prior act on <strong>compact latent codes</strong>, reducing memory and compute costs while retaining perceptual fidelity via the decoder.</li>
+  <li>Enables scaling diffusion models to very large datasets and high resolutions.</li>
+  <li>Supports modalities where raw inputs are discrete (e.g., text) by first mapping to continuous latents.</li>
+</ul>
+
+<p>Implementation notes:<br></p>
+<ul>
+  <li>Often the encoder is pretrained and frozen for diffusion training, so the diffusion prior need not strictly match a Gaussian latent prior from the VAE; <strong>weak regularization</strong> suffices when the diffusion model acts as a powerful learned prior.</li>
+  <li>This design underlies large-scale systems such as <strong>Stable Diffusion</strong>.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="conditional-generation-is-implemented-by-supplying-side-information-to-the-scoredenoiser-network">Conditional generation is implemented by supplying side information to the score/denoiser network</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec17/00-44-59-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec17/00-44-59-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec17/00-44-59-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec17/00-44-59.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Conditional diffusion modeling</strong> of <strong>p(x | y)</strong> requires the score/denoiser to accept the conditioning variable <strong>y</strong> (class labels, captions, measurements) in addition to the noisy image <strong>x_t</strong> and time <strong>t</strong>.<br></p>
+
+<p>Architectural choices for injecting y:<br></p>
+<ul>
+  <li>
+<strong>Concatenation</strong> of embeddings with inputs,</li>
+  <li>
+<strong>FiLM layers</strong> (feature-wise linear modulation),</li>
+  <li>
+<strong>Cross-attention</strong> between image latents and text embeddings.</li>
+</ul>
+
+<p>Effect on sampling:<br></p>
+<ul>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>The conditional score **s(x,t</td>
+          <td>y)** steers reverse dynamics toward regions of the data manifold compatible with <strong>y</strong>, enabling conditional sampling by integrating the conditional SDE/ODE.</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>Proper handling of the conditioning signal at each noise level is essential because the denoiser must reason about both noisy inputs and the desired conditioning simultaneously.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="bayesian-conditioning-via-classifier-guidance-posterior-scores-equal-prior-plus-likelihood-score">Bayesian conditioning via classifier guidance: posterior scores equal prior plus likelihood score</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec17/00-50-00-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec17/00-50-00-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec17/00-50-00-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec17/00-50-00.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>By Bayes’ rule <strong>p(x | y) ∝ p(x) p(y | x)</strong>, and taking gradients of log densities yields the posterior score as the sum of the prior score and the likelihood score:<br></p>
+<ul>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>**∇_x log p(x</td>
+          <td>y) = ∇_x log p(x) + ∇_x log p(y</td>
+          <td>x)**.<br>
+</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+
+<p>Practical use:<br></p>
+<ul>
+  <li>This identity lets you perform conditional sampling without retraining a conditional diffusion model by augmenting the prior score estimator with gradients from a <strong>classifier</strong> or a <strong>differentiable likelihood</strong> term.</li>
+  <li>The intractable normalization constant disappears under gradient differentiation, making <strong>score-level Bayes conditioning</strong> tractable so long as gradients of the likelihood or classifier w.r.t. inputs are available.</li>
+</ul>
+
+<table>
+  <tbody>
+    <tr>
+      <td>This provides a principled method to steer unconditional generative models toward desired attributes defined by **p(y</td>
+      <td>x)**.<br>
+</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr>
+
+<h1 id="classifier-guidance-and-classifier-free-guidance-provide-practical-conditioning-mechanisms">Classifier guidance and classifier-free guidance provide practical conditioning mechanisms</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec17/00-54-00-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec17/00-54-00-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec17/00-54-00-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec17/00-54-00.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Classifier guidance</strong> uses an external classifier to compute <strong>∇_x log p(y | x)</strong> and adds this term to the prior score during sampling, but the classifier must be evaluated on <strong>noisy inputs x_t</strong> or be adapted to those noise levels.<br></p>
+
+<p><strong>Classifier-free guidance</strong> sidesteps a separate classifier by training a single diffusion model on both conditional and unconditional data, then forming an implicit classifier by taking a scaled difference between conditional and unconditional score estimates during sampling.<br></p>
+
+<p>Comparison and practice:<br></p>
+<ul>
+  <li>Both approaches approximate the posterior score and allow controllable sampling without computing normalization integrals.</li>
+  <li>
+<strong>Classifier-free guidance</strong> is often preferred for pipeline simplicity and empirical sample quality.</li>
+  <li>These guidance techniques are used for editing, conditional synthesis, and inverse problems by defining the likelihood term appropriately.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="applications-include-image-editing-inverse-problems-and-medical-imaging-where-likelihoods-encode-measurement-physics">Applications include image editing, inverse problems, and medical imaging where likelihoods encode measurement physics</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec17/00-58-00-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec17/00-58-00-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec17/00-58-00-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec17/00-58-00.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The score-based Bayes conditioning framework naturally handles <strong>inverse problems</strong> where the likelihood <strong>p(y | x)</strong> describes a measurement process (e.g., MRI acquisition).<br></p>
+
+<p>How it applies:<br></p>
+<ul>
+  <li>Adding the measurement gradient to the prior score yields principled posterior sampling for <strong>reconstruction</strong> and <strong>uncertainty quantification</strong>.</li>
+  <li>For interactive editing, conditioning signals can be sparse (sketches, strokes), and the forward model plus denoiser produce coherent conditioned images by following the posterior score during reverse sampling.</li>
+  <li>
+<strong>Text-to-image</strong>: a caption embedding serves as <strong>y</strong> and conditions the denoiser, typically implemented via <strong>cross-attention</strong> between image latents and text embeddings.</li>
+</ul>
+
+<p>Deployment trade-offs:<br></p>
+<ul>
+  <li>Balance <strong>conditioning strength</strong>, computational budget, and the fidelity of pretrained encoders/classifiers used in the guidance term.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="classifier-free-guidance-and-other-practical-tricks-avoid-explicit-classifier-training">Classifier-free guidance and other practical tricks avoid explicit classifier training</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec17/01-02-00-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec17/01-02-00-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec17/01-02-00-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec17/01-02-00.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Classifier-free guidance</strong> achieves the effect of classifier guidance by training a model that sometimes sees conditioning <strong>y</strong> and sometimes sees none, then computing a guidance vector as the difference between conditional and unconditional score outputs scaled by a guidance weight at sampling time.<br></p>
+
+<p>Practical alternatives and tricks:<br></p>
+<ul>
+  <li>Estimating gradients w.r.t. noisy inputs, using <strong>learned guidance models</strong>, or approximating likelihood gradients through <strong>surrogate models</strong>.</li>
+  <li>These variants aim for stability and scalability in large models.</li>
+</ul>
+
+<p>Empirical preference:<br></p>
+<ul>
+  <li>Simple, robust conditioning procedures like <strong>classifier-free guidance</strong> are favored because they integrate easily into existing diffusion architectures and scale to large datasets.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="recent-engineering-advances-yield-real-time-or-very-low-step-generation-by-combining-distillation-latent-models-and-advanced-solvers">Recent engineering advances yield real-time or very low-step generation by combining distillation, latent models, and advanced solvers</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec17/01-06-00-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec17/01-06-00-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec17/01-06-00-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec17/01-06-00.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>State-of-the-art systems achieve real-time or near-real-time text-to-image synthesis by composing several advances:<br></p>
+<ul>
+  <li>
+<strong>Latent diffusion</strong> (operate in compact latent spaces)</li>
+  <li>
+<strong>Large pretrained text encoders</strong> (strong conditioning representations)</li>
+  <li>
+<strong>Progressive distillation</strong> (compress many steps into a few)</li>
+  <li>
+<strong>Optimized ODE/SDE solvers</strong> including <strong>parallel-in-time</strong> algorithms</li>
+</ul>
+
+<p>Practical outcome:<br></p>
+<ul>
+  <li>Groups like Stability AI combine these elements to trade aggregate compute for low wall-clock latency while preserving perceptual quality.</li>
+  <li>The continuous-time perspective unifies these techniques and enables principled derivation of new solvers, consistency objectives, and distillation strategies that further reduce inference cost.</li>
+</ul>
+
+<p>Result: a rich toolbox for selecting trade-offs between <strong>sample quality</strong>, <strong>compute</strong>, and <strong>latency</strong> tailored to application constraints.<br></p>
+
+<hr>
+
+<h1 id="summary-score-estimation-unlocks-multiple-inference-paradigms-and-practical-tradeoffs">Summary: score estimation unlocks multiple inference paradigms and practical tradeoffs</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec17/01-10-43-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec17/01-10-43-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec17/01-10-43-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec17/01-10-43.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Estimating the time-dependent <strong>score function</strong> is the central learning problem that enables multiple inference paradigms:<br></p>
+<ul>
+  <li>
+<strong>Stochastic reverse SDE sampling</strong> (robust, high quality)</li>
+  <li>
+<strong>Deterministic ODE flow sampling</strong> (fast transforms, likelihoods)</li>
+  <li>
+<strong>Accelerated coarse-step samplers</strong> (fewer evaluations)</li>
+  <li>
+<strong>Conditional generation</strong> via score-level Bayes manipulation (guided sampling)</li>
+</ul>
+
+<p>Each paradigm presents a different accuracy-compute trade-off:<br></p>
+<ul>
+  <li>
+<strong>SDEs</strong>: robustness and high quality</li>
+  <li>
+<strong>ODEs</strong>: faster deterministic transforms and likelihood evaluation</li>
+  <li>
+<strong>Distillation/consistency models</strong>: compress multi-step dynamics into few- or single-step generation</li>
+</ul>
+
+<p>Latent diffusion models reduce dimensionality to scale, while <strong>classifier-free guidance</strong> and other conditioning tricks make controlled generation practical at scale.<br></p>
+
+<p>Together, these techniques form a unified framework for modern diffusion-based generative modeling, spanning theory to high-performance engineering.<br></p>
+
+<hr>
+
+
+    </div>
+  </article>
+
+
+  
+    
+    <br>
+    <hr>
+    <br>
+    <ul class="list-disc pl-8"></ul>
+
+    <!-- Adds related posts to the end of an article -->
+    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
+    <p class="mb-2">Here are some more articles you might like to read next:</p>
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec06/">MIT 6.S184 - Lecture 6 - Diffusion for Protein Generation</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec05/">MIT 6.S184 - Lecture 5 - Diffusion for Robotics</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec04/">MIT 6.S184 - Lecture 4 - Building an Image Generator</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec03/">MIT 6.S184 - Lecture 3 - Training Flow and Diffusion Models</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec02/">MIT 6.S184 - Lecture 2 -  Constructing a Training Target</a>
+  </li>
+
+</div>
+
+      
+    </div>
+
+    <!-- Footer -->    
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        © Copyright 2025 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+
+      </div>
+    </footer>
+
+    <!-- JavaScripts -->
+    <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- Bootsrap & MDB scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    <!-- Masonry & imagesLoaded -->
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
+    
+  <!-- Medium Zoom JS -->
+  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/zoom.js"></script>
+
+  <!-- Bootstrap Table -->
+  <script defer src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+
+  <!-- Load Common JS -->
+  <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
+  <script defer src="/assets/js/common.js?acdb9690d7641b2f8d40529018c71a01"></script>
+  <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    <!-- MathJax -->
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        tags: 'ams'
+      }
+    };
+  </script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KGSMMS9MS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-7KGSMMS9MS');
+  </script>
+    
+
+<!-- Scrolling Progress Bar -->
+<script type="text/javascript">
+  /*
+   * This JavaScript code has been adapted from the article 
+   * https://css-tricks.com/reading-position-indicator/ authored by Pankaj Parashar, 
+   * published on the website https://css-tricks.com on the 7th of May, 2014.
+   * Couple of changes were made to the original code to make it compatible 
+   * with the `al-foio` theme.
+   */
+  const progressBar = $("#progress");
+  /*
+   * We set up the bar after all elements are done loading.
+   * In some cases, if the images in the page are larger than the intended
+   * size they'll have on the page, they'll be resized via CSS to accomodate
+   * the desired size. This mistake, however, breaks the computations as the
+   * scroll size is computed as soon as the elements finish loading.
+   * To account for this, a minimal delay was introduced before computing the
+   * values.
+   */
+  window.onload = function () {
+    setTimeout(progressBarSetup, 50);
+  };
+  /*
+   * We set up the bar according to the browser.
+   * If the browser supports the progress element we use that.
+   * Otherwise, we resize the bar thru CSS styling
+   */
+  function progressBarSetup() {
+    if ("max" in document.createElement("progress")) {
+      initializeProgressElement();
+      $(document).on("scroll", function() {
+        progressBar.attr({ value: getCurrentScrollPosition() });
+      });
+      $(window).on("resize", initializeProgressElement);
+    } else {
+      resizeProgressBar();
+      $(document).on("scroll", resizeProgressBar);
+      $(window).on("resize", resizeProgressBar);
+    }
+  }
+  /*
+   * The vertical scroll position is the same as the number of pixels that
+   * are hidden from view above the scrollable area. Thus, a value > 0 is
+   * how much the user has scrolled from the top
+   */
+  function getCurrentScrollPosition() {
+    return $(window).scrollTop();
+  }
+
+  function initializeProgressElement() {
+    let navbarHeight = $("#navbar").outerHeight(true);
+    $("body").css({ "padding-top": navbarHeight });
+    $("progress-container").css({ "padding-top": navbarHeight });
+    progressBar.css({ top: navbarHeight });
+    progressBar.attr({
+      max: getDistanceToScroll(),
+      value: getCurrentScrollPosition(),
+    });
+  }
+  /*
+   * The offset between the html document height and the browser viewport
+   * height will be greater than zero if vertical scroll is possible.
+   * This is the distance the user can scroll
+   */
+  function getDistanceToScroll() {
+    return $(document).height() - $(window).height();
+  }
+
+  function resizeProgressBar() {
+    progressBar.css({ width: getWidthPercentage() + "%" });
+  }
+  // The scroll ratio equals the percentage to resize the bar
+  function getWidthPercentage() {
+    return (getCurrentScrollPosition() / getDistanceToScroll()) * 100;
+  }
+</script>
+
+    
+  </body>
+</html>

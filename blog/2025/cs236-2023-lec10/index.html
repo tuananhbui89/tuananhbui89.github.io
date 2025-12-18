@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <!-- Head -->
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    <!-- Metadata, OpenGraph and Schema.org -->
+    
+
+    <!-- Standard metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Stanford CS236 - Deep Generative Models I 2023 I Lecture 10 - GANs | Tuan-Anh  Bui</title>
+    <meta name="author" content="Tuan-Anh  Bui">
+    <meta name="description" content="AI Summary Lecture">
+    <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
+
+
+    <!-- Bootstrap & MDB -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+    <!-- Bootstrap Table -->
+    <link defer rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+
+    <!-- Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
+
+    
+
+    <!-- Styles -->
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
+    
+    <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+    <link rel="canonical" href="https://tuananhbui89.github.io/blog/2025/cs236-2023-lec10/">
+
+    <!-- Dark Mode -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark">
+    <script src="/assets/js/theme.js?96d6b3e1c3604aca8b6134c7afdd5db6"></script>
+    <script src="/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script>
+    
+
+  </head>
+
+  <!-- Body -->
+  <body class="fixed-top-nav ">
+
+    <!-- Header -->
+    <header>
+
+      <!-- Nav Bar -->
+      <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top">
+        <div class="container">
+          <a class="navbar-brand title font-weight-lighter" href="/"><span class="font-weight-bold">Tuan-Anh </span>Bui</a>
+          <!-- Navbar Toggle -->
+          <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar top-bar"></span>
+            <span class="icon-bar middle-bar"></span>
+            <span class="icon-bar bottom-bar"></span>
+          </button>
+
+          <div class="collapse navbar-collapse text-right" id="navbarNav">
+            <ul class="navbar-nav ml-auto flex-nowrap">
+
+              <!-- About -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/">about</a>
+              </li>
+              
+              <!-- Blog -->
+              <li class="nav-item active">
+                <a class="nav-link" href="/blog/">blog<span class="sr-only">(current)</span></a>
+              </li>
+
+              <!-- Other pages -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/publications/">publications</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/projects/">projects</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/repositories/">repositories</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/teaching/"></a>
+              </li>
+
+              <!-- Toogle theme mode -->
+              <li class="toggle-container">
+                <button id="light-toggle" title="Change theme">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Scrolling Progress Bar -->
+      <progress id="progress" value="0">
+        <div class="progress-container">
+          <span class="progress-bar"></span>
+        </div>
+      </progress>
+    </header>
+
+
+    <!-- Content -->
+    <div class="container mt-5">
+      
+        <!-- _layouts/post.html -->
+<!-- Page/Post style -->
+<style type="text/css">
+  
+</style>
+
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Stanford CS236 - Deep Generative Models I 2023 I Lecture 10 - GANs</h1>
+    <p class="post-meta">December 18, 2025</p>
+    <p class="post-tags">
+      <a href="/blog/2025"> <i class="fas fa-calendar fa-sm"></i> 2025 </a>
+        ·  
+        <a href="/blog/tag/genai">
+          <i class="fas fa-hashtag fa-sm"></i> genai</a>  
+          <a href="/blog/tag/llm">
+          <i class="fas fa-hashtag fa-sm"></i> llm</a>  
+          <a href="/blog/tag/tutorial">
+          <i class="fas fa-hashtag fa-sm"></i> tutorial</a>  
+          <a href="/blog/tag/reading">
+          <i class="fas fa-hashtag fa-sm"></i> reading</a>  
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    
+    <div id="table-of-contents">
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#generative-adversarial-networks-train-implicit-generative-models-via-a-minimax-game-between-a-generator-and-a-discriminator">Generative Adversarial Networks train implicit generative models via a minimax game between a generator and a discriminator</a></li>
+<li class="toc-entry toc-h1"><a href="#f-divergences-generalize-kl-by-scoring-density-ratios-with-a-convex-scalar-function">F-divergences generalize KL by scoring density ratios with a convex scalar function</a></li>
+<li class="toc-entry toc-h1"><a href="#direct-evaluation-of-f-divergences-is-infeasible-in-likelihood-free-settings-because-density-ratios-require-access-to-probabilities-under-data-or-model-distributions">Direct evaluation of f-divergences is infeasible in likelihood-free settings because density ratios require access to probabilities under data or model distributions</a></li>
+<li class="toc-entry toc-h1"><a href="#the-convex-conjugate-fenchel-conjugate-provides-a-variational-representation-that-moves-f-applied-to-a-density-ratio-into-a-supremum-over-linear-terms-involving-that-ratio">The convex conjugate (Fenchel conjugate) provides a variational representation that moves f applied to a density ratio into a supremum over linear terms involving that ratio</a></li>
+<li class="toc-entry toc-h1"><a href="#parametrizing-the-supremum-witness-by-a-neural-network-yields-a-sample-based-lower-bound-on-the-f-divergence-and-a-discriminator-training-objective">Parametrizing the supremum witness by a neural network yields a sample-based lower bound on the f-divergence and a discriminator training objective</a></li>
+<li class="toc-entry toc-h1"><a href="#f-gan-formulates-a-practical-minimax-objective-that-approximately-minimizes-a-chosen-f-divergence-by-alternating-discriminator-and-generator-updates">F-GAN formulates a practical minimax objective that approximately minimizes a chosen f-divergence by alternating discriminator and generator updates</a></li>
+<li class="toc-entry toc-h1"><a href="#the-wasserstein-earth-mover-distance-measures-distribution-mismatch-via-optimal-transport-and-remains-meaningful-when-supports-are-disjoint">The Wasserstein (Earth Mover) distance measures distribution mismatch via optimal transport and remains meaningful when supports are disjoint</a></li>
+<li class="toc-entry toc-h1"><a href="#the-kantorovichrubinstein-dual-expresses-wasserstein-1-as-a-supremum-over-1-lipschitz-witness-functions-enabling-a-gan-style-critic-when-lipschitzness-is-enforced">The Kantorovich–Rubinstein dual expresses Wasserstein-1 as a supremum over 1-Lipschitz witness functions, enabling a GAN-style critic when Lipschitzness is enforced</a></li>
+<li class="toc-entry toc-h1"><a href="#wasserstein-gan-objectives-mitigate-vanishing-gradients-and-training-instability-common-with-jskl-based-gans-but-require-careful-enforcement-of-the-lipschitz-constraint">Wasserstein-GAN objectives mitigate vanishing gradients and training instability common with JS/KL-based GANs but require careful enforcement of the Lipschitz constraint</a></li>
+<li class="toc-entry toc-h1"><a href="#bi-directional-gan-variants-introduce-an-encoder-to-infer-latent-variables-by-training-a-discriminator-on-joint-datalatent-pairs">Bi-directional GAN variants introduce an encoder to infer latent variables by training a discriminator on joint (data,latent) pairs</a></li>
+</ul>
+    </div>
+    <hr>
+    
+    <div id="markdown-content">
+      <div style="display: flex; justify-content: center;">
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/M3Fkvu78ZXc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen="">
+    </iframe>
+</div>
+
+<h1 id="generative-adversarial-networks-train-implicit-generative-models-via-a-minimax-game-between-a-generator-and-a-discriminator">Generative Adversarial Networks train implicit generative models via a minimax game between a generator and a discriminator</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec10/00-03-17-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec10/00-03-17-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec10/00-03-17-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec10/00-03-17.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Generative Adversarial Networks (<strong>GANs</strong>) frame generative modeling as a <strong>two-player minimax optimization</strong>: a <strong>generator</strong> maps samples from a simple prior to model samples, while a <strong>discriminator</strong> performs binary classification between real and generated samples.<br></p>
+
+<ul>
+  <li>The <strong>discriminator</strong> is trained to maximize classification accuracy (equivalently minimize negative cross-entropy).<br>
+</li>
+  <li>The <strong>generator</strong> is trained to minimize the discriminator’s ability to distinguish real from fake, producing a <strong>saddle-point objective</strong>.<br>
+</li>
+</ul>
+
+<p>Under an <strong>optimal discriminator</strong> assumption, the generator’s objective corresponds to minimizing a divergence between the data distribution and the model distribution; in the original formulation this reduces (up to scale and shift) to the <strong>Jensen–Shannon divergence</strong>.<br></p>
+
+<p>Because the generator can be an <strong>implicit model</strong> that only requires sampling (not likelihood evaluation), GANs enable flexible architectures that avoid explicit density factorization or tractable probability evaluation.<br></p>
+
+<hr>
+
+<h1 id="f-divergences-generalize-kl-by-scoring-density-ratios-with-a-convex-scalar-function">F-divergences generalize KL by scoring density ratios with a convex scalar function</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec10/00-09-45-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec10/00-09-45-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec10/00-09-45-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec10/00-09-45.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>An <strong>f-divergence</strong> defines a family of discrepancy measures between two distributions P and Q by taking an expectation under Q of a convex scalar function f applied to the <strong>density ratio</strong> u(x) = p(x)/q(x): D_f(P||Q) = E_{x~Q}[ f(u(x)) ].<br></p>
+
+<p>Key properties of f: it must be <strong>convex</strong>, <strong>lower semi-continuous</strong>, and satisfy <strong>f(1) = 0</strong>, which ensures non-negativity of the divergence and zero value iff P = Q under mild conditions.<br></p>
+
+<p>Common examples (choices of f) include:</p>
+<ul>
+  <li>f(u) = u log u → <strong>Kullback–Leibler (KL)</strong> divergence<br>
+</li>
+  <li>f(u) = −log u → <strong>reverse KL</strong><br>
+</li>
+  <li>A symmetric choice of f → <strong>Jensen–Shannon</strong> divergence<br>
+</li>
+  <li>Other choices → <strong>squared Hellinger</strong>, <strong>total variation</strong>, etc.<br>
+</li>
+</ul>
+
+<p>The <strong>f-divergence family</strong> therefore provides a flexible framework for penalizing different kinds of discrepancies between distributions by changing the shape of f.<br></p>
+
+<hr>
+
+<h1 id="direct-evaluation-of-f-divergences-is-infeasible-in-likelihood-free-settings-because-density-ratios-require-access-to-probabilities-under-data-or-model-distributions">Direct evaluation of f-divergences is infeasible in likelihood-free settings because density ratios require access to probabilities under data or model distributions</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec10/00-18-43-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec10/00-18-43-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec10/00-18-43-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec10/00-18-43.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The definition of <strong>f-divergences</strong> depends on density ratios p(x)/q(x), which requires evaluating either the model density q(x) or the data density p(x).<br></p>
+
+<ul>
+  <li>In practical <strong>likelihood-free</strong> scenarios the data density p_data is unknown and <strong>implicit models</strong> do not provide tractable q(x), so the divergence cannot be computed directly.<br>
+</li>
+  <li>While sample averages can approximate expectations when the expectation measure is accessible via samples, the dependence on the <strong>density ratio inside f</strong> prevents straightforward sample-only optimization.<br>
+</li>
+</ul>
+
+<p>Therefore a reformulation is required that expresses the f-divergence (or a bound thereof) in terms of expectations that only require sampling from P and Q. <br>
+The subsequent <strong>variational reformulation</strong> uses <strong>convex duality</strong> to move the dependence on the density ratio into a linear term that can be estimated by a <strong>classifier-like function</strong>.<br></p>
+
+<hr>
+
+<h1 id="the-convex-conjugate-fenchel-conjugate-provides-a-variational-representation-that-moves-f-applied-to-a-density-ratio-into-a-supremum-over-linear-terms-involving-that-ratio">The convex conjugate (Fenchel conjugate) provides a variational representation that moves f applied to a density ratio into a supremum over linear terms involving that ratio</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec10/00-27-13-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec10/00-27-13-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec10/00-27-13-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec10/00-27-13.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Given a scalar convex function f, its <strong>convex (Fenchel) conjugate</strong> f* is defined by f*(t) = sup_{u} (u t − f(u)).<br></p>
+
+<p>Useful properties:</p>
+<ul>
+  <li>f* is <strong>convex</strong> in t.<br>
+</li>
+  <li>The <strong>biconjugate</strong> f** is a lower bound to f, with equality when f is convex and lower semi-continuous.<br>
+</li>
+</ul>
+
+<p>Applying this pointwise to f evaluated at the density ratio u(x) = p(x)/q(x) yields the identity<br>
+f(u(x)) = f<strong>(u(x)) = sup_{t} (t u(x) − f*(t)), which converts the nonlinear dependence on u(x) into a **linear dependence</strong> on u(x) under an outer supremum.<br></p>
+
+<p>Substituting this into the expectation under Q and simplifying produces a difference of two expectations — one under P and one under Q — making the expression amenable to <strong>sample-based estimation</strong> and inviting the introduction of a parametrized <strong>witness function</strong> t(x) (a discriminator) to approximate the supremum.<br></p>
+
+<hr>
+
+<h1 id="parametrizing-the-supremum-witness-by-a-neural-network-yields-a-sample-based-lower-bound-on-the-f-divergence-and-a-discriminator-training-objective">Parametrizing the supremum witness by a neural network yields a sample-based lower bound on the f-divergence and a discriminator training objective</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec10/00-33-21-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec10/00-33-21-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec10/00-33-21-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec10/00-33-21.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>For each x the supremum over t can be represented by a function <strong>T(x)</strong> that maps x to the optimal t-value.<br></p>
+
+<ul>
+  <li>Restricting T to a parametric family (e.g., neural networks parameterized by φ) converts the pointwise supremum into a tractable inner maximization over φ.<br>
+</li>
+  <li>Evaluating the resulting expression yields the objective: E_{x~P}[ T(x) ] − E_{x~Q}[ f*( T(x) ) ], which can be approximated with <strong>Monte Carlo</strong> samples from P (data) and Q (model).<br>
+</li>
+</ul>
+
+<p>Training becomes a <strong>minimax</strong> procedure: maximize this lower bound over φ (the discriminator/witness) and minimize over θ (the generator).<br></p>
+
+<p>Numbered training flow:</p>
+<ol>
+  <li>Sample real data x ~ P and latent z ~ p(z), compute generated samples G_θ(z).<br>
+</li>
+  <li>Update φ by gradient ascent to increase E_P[T_φ(x)] − E_Q[f*(T_φ(x))].<br>
+</li>
+  <li>Update θ by gradient descent to reduce the bound (i.e., make generated samples harder to distinguish).<br>
+</li>
+</ol>
+
+<p>The bound is tight if the discriminator family is sufficiently expressive and the inner maximization is solved well.<br></p>
+
+<hr>
+
+<h1 id="f-gan-formulates-a-practical-minimax-objective-that-approximately-minimizes-a-chosen-f-divergence-by-alternating-discriminator-and-generator-updates">F-GAN formulates a practical minimax objective that approximately minimizes a chosen f-divergence by alternating discriminator and generator updates</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec10/00-42-45-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec10/00-42-45-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec10/00-42-45-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec10/00-42-45.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The <strong>f-GAN training objective</strong> sets up the minimax optimization<br>
+min_{θ} max_{φ} [ E_{x~P_data}[ T_φ(x) ] − E_{z~p(z)}[ f*( T_φ( G_θ(z) ) ) ] ],<br>
+where <strong>G_θ</strong> defines the implicit model Q_θ via sampling from a prior p(z), and <strong>T_φ</strong> is a neural-network witness that approximates the conjugate supremum.<br></p>
+
+<ul>
+  <li>Selecting different f functions yields different divergences: the f for u log u recovers <strong>KL-like</strong> behavior; the f that gives Jensen–Shannon recovers the original <strong>GAN</strong> objective up to constants.<br>
+</li>
+  <li>In practice this provides a <strong>likelihood-free estimator</strong> of an f-divergence up to the approximation power of the discriminator.<br>
+</li>
+</ul>
+
+<p>Caveats: minimizing an approximate lower bound can succeed empirically but may inherit bias from limited discriminator capacity and finite-sample optimization errors.<br></p>
+
+<hr>
+
+<h1 id="the-wasserstein-earth-mover-distance-measures-distribution-mismatch-via-optimal-transport-and-remains-meaningful-when-supports-are-disjoint">The Wasserstein (Earth Mover) distance measures distribution mismatch via optimal transport and remains meaningful when supports are disjoint</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec10/00-55-37-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec10/00-55-37-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec10/00-55-37-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec10/00-55-37.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The <strong>Wasserstein-1 distance (earth mover distance)</strong> quantifies discrepancy by the minimal expected transport cost required to move probability mass from distribution P to distribution Q:<br>
+W(P,Q) = inf_{γ ∈ Γ(P,Q)} E_{(x,y)~γ}[ c(x,y) ], where Γ(P,Q) is the set of couplings with marginals P and Q and c(x,y) is a ground cost (commonly L1 or L2 distance).<br></p>
+
+<ul>
+  <li>The primal (transport) formulation interprets probability mass as piles of earth and seeks an optimal transport plan γ that moves mass with minimal total cost.<br>
+</li>
+  <li>It is well-defined even when P and Q have <strong>disjoint supports</strong>, avoiding pathological constant or infinite values that can arise with some f-divergences.<br>
+</li>
+  <li>The transport formulation is a linear program over couplings and provides a <strong>metric</strong> with smooth sensitivity to small changes in support location, yielding richer gradient information for generator updates when supports are initially disjoint.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="the-kantorovichrubinstein-dual-expresses-wasserstein-1-as-a-supremum-over-1-lipschitz-witness-functions-enabling-a-gan-style-critic-when-lipschitzness-is-enforced">The Kantorovich–Rubinstein dual expresses Wasserstein-1 as a supremum over 1-Lipschitz witness functions, enabling a GAN-style critic when Lipschitzness is enforced</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec10/01-06-01-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec10/01-06-01-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec10/01-06-01-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec10/01-06-01.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The <strong>dual form</strong> of the Wasserstein-1 distance is:<br>
+W(P,Q) = sup_{f: Lip(f) ≤ 1} [ E_{x~P}[ f(x) ] − E_{x~Q}[ f(x) ] ], i.e., the supremum over all scalar functions f with <strong>Lipschitz constant ≤ 1</strong> yields the optimal transport cost.<br></p>
+
+<ul>
+  <li>This converts the intractable coupling optimization into a variational optimization over a function space and suggests training a parametrized <strong>critic</strong> network f_φ to approximate the supremum.<br>
+</li>
+  <li>Enforcing the <strong>Lip≤1</strong> constraint is critical; practical approximations include <strong>weight clipping</strong> or <strong>gradient penalties</strong> on the critic.<br>
+</li>
+</ul>
+
+<p>The resulting minimax training is: min_{θ} max_{φ, Lip≤1} E_{x~P}[ f_φ(x) ] − E_{z~p(z)}[ f_φ( G_θ(z) ) ], which serves as a practical surrogate for the Wasserstein distance and often yields smoother gradients for the generator.<br></p>
+
+<hr>
+
+<h1 id="wasserstein-gan-objectives-mitigate-vanishing-gradients-and-training-instability-common-with-jskl-based-gans-but-require-careful-enforcement-of-the-lipschitz-constraint">Wasserstein-GAN objectives mitigate vanishing gradients and training instability common with JS/KL-based GANs but require careful enforcement of the Lipschitz constraint</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec10/01-12-23-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec10/01-12-23-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec10/01-12-23-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec10/01-12-23.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Wasserstein-based critics</strong> produce loss landscapes that vary smoothly as the generator distribution moves, addressing regimes where <strong>JS</strong> or <strong>KL</strong> are flat or infinite due to disjoint supports and where discriminator outputs lead to vanishing or unstable generator gradients.<br></p>
+
+<ul>
+  <li>Empirically, this smoother signal often stabilizes training and helps the generator learn meaningful updates even when initial samples are far from data.<br>
+</li>
+  <li>The benefit depends on adequately constraining the critic’s <strong>Lipschitz constant</strong>; practical strategies include:<br>
+    <ul>
+      <li>
+<strong>Weight clipping</strong> (simple but can limit expressivity).<br>
+</li>
+      <li>
+        <table>
+          <tbody>
+            <tr>
+              <td>
+<strong>Gradient-norm penalties</strong> (e.g., penalize</td>
+              <td> </td>
+              <td>∇_x f_φ(x)</td>
+              <td> </td>
+              <td>− 1) which more directly encourage 1-Lipschitz behavior.<br>
+</td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p>These approximations introduce their own limitations and do not guarantee exact equivalence to the true Wasserstein distance, yet they commonly improve stability in large-scale neural GAN training.<br></p>
+
+<hr>
+
+<h1 id="bi-directional-gan-variants-introduce-an-encoder-to-infer-latent-variables-by-training-a-discriminator-on-joint-datalatent-pairs">Bi-directional GAN variants introduce an encoder to infer latent variables by training a discriminator on joint (data,latent) pairs</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec10/01-21-17-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec10/01-21-17-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec10/01-21-17-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec10/01-21-17.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Latent inference in GANs</strong> augments the generator G(z) → x with an <strong>encoder</strong> E(x) → z and trains a discriminator that operates on paired inputs (x, z) to distinguish joint samples from two joint distributions.<br></p>
+
+<ul>
+  <li>Model joint samples: ( G(z), z ) with z ~ prior p(z).<br>
+</li>
+  <li>Encoder joint samples: ( x, E(x) ) with x ~ data.<br>
+</li>
+</ul>
+
+<p>The discriminator learns to differentiate model-generated pairs from encoder-produced pairs, while the encoder and generator are trained adversarially to make the two joint distributions indistinguishable.<br></p>
+
+<ul>
+  <li>When successful, the encoder approximates the inverse of the generator and provides <strong>latent embeddings</strong> for real data.<br>
+</li>
+  <li>This <strong>bi-directional adversarial training</strong> (e.g., <strong>BiGAN</strong>, <strong>ALI</strong>) yields a deterministic encoder mapping observed x to latent z without requiring tractable likelihoods or KL penalties.<br>
+</li>
+  <li>At inference time the encoder is used to obtain features for downstream tasks; the training objective enforces consistency between prior samples and encoder outputs via <strong>adversarial two-sample testing</strong> rather than explicit variational bounds.<br>
+</li>
+</ul>
+
+<hr>
+
+
+    </div>
+  </article>
+
+
+  
+    
+    <br>
+    <hr>
+    <br>
+    <ul class="list-disc pl-8"></ul>
+
+    <!-- Adds related posts to the end of an article -->
+    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
+    <p class="mb-2">Here are some more articles you might like to read next:</p>
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec06/">MIT 6.S184 - Lecture 6 - Diffusion for Protein Generation</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec05/">MIT 6.S184 - Lecture 5 - Diffusion for Robotics</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec04/">MIT 6.S184 - Lecture 4 - Building an Image Generator</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec03/">MIT 6.S184 - Lecture 3 - Training Flow and Diffusion Models</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec02/">MIT 6.S184 - Lecture 2 -  Constructing a Training Target</a>
+  </li>
+
+</div>
+
+      
+    </div>
+
+    <!-- Footer -->    
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        © Copyright 2025 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+
+      </div>
+    </footer>
+
+    <!-- JavaScripts -->
+    <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- Bootsrap & MDB scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    <!-- Masonry & imagesLoaded -->
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
+    
+  <!-- Medium Zoom JS -->
+  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/zoom.js"></script>
+
+  <!-- Bootstrap Table -->
+  <script defer src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+
+  <!-- Load Common JS -->
+  <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
+  <script defer src="/assets/js/common.js?acdb9690d7641b2f8d40529018c71a01"></script>
+  <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    <!-- MathJax -->
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        tags: 'ams'
+      }
+    };
+  </script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KGSMMS9MS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-7KGSMMS9MS');
+  </script>
+    
+
+<!-- Scrolling Progress Bar -->
+<script type="text/javascript">
+  /*
+   * This JavaScript code has been adapted from the article 
+   * https://css-tricks.com/reading-position-indicator/ authored by Pankaj Parashar, 
+   * published on the website https://css-tricks.com on the 7th of May, 2014.
+   * Couple of changes were made to the original code to make it compatible 
+   * with the `al-foio` theme.
+   */
+  const progressBar = $("#progress");
+  /*
+   * We set up the bar after all elements are done loading.
+   * In some cases, if the images in the page are larger than the intended
+   * size they'll have on the page, they'll be resized via CSS to accomodate
+   * the desired size. This mistake, however, breaks the computations as the
+   * scroll size is computed as soon as the elements finish loading.
+   * To account for this, a minimal delay was introduced before computing the
+   * values.
+   */
+  window.onload = function () {
+    setTimeout(progressBarSetup, 50);
+  };
+  /*
+   * We set up the bar according to the browser.
+   * If the browser supports the progress element we use that.
+   * Otherwise, we resize the bar thru CSS styling
+   */
+  function progressBarSetup() {
+    if ("max" in document.createElement("progress")) {
+      initializeProgressElement();
+      $(document).on("scroll", function() {
+        progressBar.attr({ value: getCurrentScrollPosition() });
+      });
+      $(window).on("resize", initializeProgressElement);
+    } else {
+      resizeProgressBar();
+      $(document).on("scroll", resizeProgressBar);
+      $(window).on("resize", resizeProgressBar);
+    }
+  }
+  /*
+   * The vertical scroll position is the same as the number of pixels that
+   * are hidden from view above the scrollable area. Thus, a value > 0 is
+   * how much the user has scrolled from the top
+   */
+  function getCurrentScrollPosition() {
+    return $(window).scrollTop();
+  }
+
+  function initializeProgressElement() {
+    let navbarHeight = $("#navbar").outerHeight(true);
+    $("body").css({ "padding-top": navbarHeight });
+    $("progress-container").css({ "padding-top": navbarHeight });
+    progressBar.css({ top: navbarHeight });
+    progressBar.attr({
+      max: getDistanceToScroll(),
+      value: getCurrentScrollPosition(),
+    });
+  }
+  /*
+   * The offset between the html document height and the browser viewport
+   * height will be greater than zero if vertical scroll is possible.
+   * This is the distance the user can scroll
+   */
+  function getDistanceToScroll() {
+    return $(document).height() - $(window).height();
+  }
+
+  function resizeProgressBar() {
+    progressBar.css({ width: getWidthPercentage() + "%" });
+  }
+  // The scroll ratio equals the percentage to resize the bar
+  function getWidthPercentage() {
+    return (getCurrentScrollPosition() / getDistanceToScroll()) * 100;
+  }
+</script>
+
+    
+  </body>
+</html>

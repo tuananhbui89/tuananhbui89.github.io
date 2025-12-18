@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <!-- Head -->
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    <!-- Metadata, OpenGraph and Schema.org -->
+    
+
+    <!-- Standard metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Stanford CS236 - Deep Generative Models I 2023 I Lecture 8 - Normalizing Flows | Tuan-Anh  Bui</title>
+    <meta name="author" content="Tuan-Anh  Bui">
+    <meta name="description" content="AI Summary Lecture">
+    <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
+
+
+    <!-- Bootstrap & MDB -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+    <!-- Bootstrap Table -->
+    <link defer rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+
+    <!-- Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
+
+    
+
+    <!-- Styles -->
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
+    
+    <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+    <link rel="canonical" href="https://tuananhbui89.github.io/blog/2025/cs236-2023-lec08/">
+
+    <!-- Dark Mode -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark">
+    <script src="/assets/js/theme.js?96d6b3e1c3604aca8b6134c7afdd5db6"></script>
+    <script src="/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script>
+    
+
+  </head>
+
+  <!-- Body -->
+  <body class="fixed-top-nav ">
+
+    <!-- Header -->
+    <header>
+
+      <!-- Nav Bar -->
+      <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top">
+        <div class="container">
+          <a class="navbar-brand title font-weight-lighter" href="/"><span class="font-weight-bold">Tuan-Anh </span>Bui</a>
+          <!-- Navbar Toggle -->
+          <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar top-bar"></span>
+            <span class="icon-bar middle-bar"></span>
+            <span class="icon-bar bottom-bar"></span>
+          </button>
+
+          <div class="collapse navbar-collapse text-right" id="navbarNav">
+            <ul class="navbar-nav ml-auto flex-nowrap">
+
+              <!-- About -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/">about</a>
+              </li>
+              
+              <!-- Blog -->
+              <li class="nav-item active">
+                <a class="nav-link" href="/blog/">blog<span class="sr-only">(current)</span></a>
+              </li>
+
+              <!-- Other pages -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/publications/">publications</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/projects/">projects</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/repositories/">repositories</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/teaching/"></a>
+              </li>
+
+              <!-- Toogle theme mode -->
+              <li class="toggle-container">
+                <button id="light-toggle" title="Change theme">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Scrolling Progress Bar -->
+      <progress id="progress" value="0">
+        <div class="progress-container">
+          <span class="progress-bar"></span>
+        </div>
+      </progress>
+    </header>
+
+
+    <!-- Content -->
+    <div class="container mt-5">
+      
+        <!-- _layouts/post.html -->
+<!-- Page/Post style -->
+<style type="text/css">
+  
+</style>
+
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Stanford CS236 - Deep Generative Models I 2023 I Lecture 8 - Normalizing Flows</h1>
+    <p class="post-meta">December 18, 2025</p>
+    <p class="post-tags">
+      <a href="/blog/2025"> <i class="fas fa-calendar fa-sm"></i> 2025 </a>
+        ·  
+        <a href="/blog/tag/genai">
+          <i class="fas fa-hashtag fa-sm"></i> genai</a>  
+          <a href="/blog/tag/llm">
+          <i class="fas fa-hashtag fa-sm"></i> llm</a>  
+          <a href="/blog/tag/tutorial">
+          <i class="fas fa-hashtag fa-sm"></i> tutorial</a>  
+          <a href="/blog/tag/reading">
+          <i class="fas fa-hashtag fa-sm"></i> reading</a>  
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    
+    <div id="table-of-contents">
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#normalizing-flows-define-deterministic-invertible-latent-variable-models-that-allow-exact-likelihood-evaluation">Normalizing flows define deterministic invertible latent-variable models that allow exact likelihood evaluation</a></li>
+<li class="toc-entry toc-h1"><a href="#exact-likelihoods-for-flows-are-computed-by-the-change-of-variables-formula-including-the-jacobian-determinant">Exact likelihoods for flows are computed by the change-of-variables formula including the Jacobian determinant</a></li>
+<li class="toc-entry toc-h1"><a href="#flows-permit-exact-likelihoods-without-variational-approximations-but-require-equal-input-and-latent-dimensionality">Flows permit exact likelihoods without variational approximations but require equal input and latent dimensionality</a></li>
+<li class="toc-entry toc-h1"><a href="#composing-simple-invertible-layers-yields-flexible-normalizing-flows">Composing simple invertible layers yields flexible normalizing flows</a></li>
+<li class="toc-entry toc-h1"><a href="#architectural-design-must-guarantee-invertibility-and-efficient-determinantinverse-computation">Architectural design must guarantee invertibility and efficient determinant/inverse computation</a></li>
+<li class="toc-entry toc-h1"><a href="#planar-and-low-dimensional-visualizations-illustrate-how-flows-warp-simple-priors-into-complex-densities">Planar and low-dimensional visualizations illustrate how flows warp simple priors into complex densities</a></li>
+<li class="toc-entry toc-h1"><a href="#maximum-likelihood-training-for-flows-uses-exact-likelihoods-computed-by-inversion-and-jacobian-determinants">Maximum-likelihood training for flows uses exact likelihoods computed by inversion and Jacobian determinants</a></li>
+<li class="toc-entry toc-h1"><a href="#triangular-jacobian-structure-and-autoregressive-ordering-yield-linear-time-determinant-computation">Triangular Jacobian structure and autoregressive ordering yield linear-time determinant computation</a></li>
+<li class="toc-entry toc-h1"><a href="#additive-coupling-layers-nice-partition-variables-and-apply-simple-invertible-updates-with-unit-jacobian">Additive coupling layers (NICE) partition variables and apply simple, invertible updates with unit Jacobian</a></li>
+<li class="toc-entry toc-h1"><a href="#volume-preserving-coupling-plus-simple-rescaling-can-produce-useful-image-models-but-has-limitations">Volume-preserving coupling plus simple rescaling can produce useful image models but has limitations</a></li>
+<li class="toc-entry toc-h1"><a href="#realnvp-extends-additive-coupling-by-combining-shift-and-scale-to-obtain-expressive-non-volume-preserving-layers">RealNVP extends additive coupling by combining shift and scale to obtain expressive, non-volume-preserving layers</a></li>
+<li class="toc-entry toc-h1"><a href="#latent-interpolations-and-empirical-behavior-show-flows-learn-meaningful-one-to-one-representations">Latent interpolations and empirical behavior show flows learn meaningful one-to-one representations</a></li>
+<li class="toc-entry toc-h1"><a href="#autoregressive-models-are-a-special-case-of-flows-continuous-conditionals-correspond-to-sequential-shift-and-scale-transforms">Autoregressive models are a special case of flows: continuous conditionals correspond to sequential shift-and-scale transforms</a></li>
+<li class="toc-entry toc-h1"><a href="#inverse-autoregressive-flows-iaf-trade-off-fast-sampling-for-expensive-inversion-enabling-single-shot-generation">Inverse autoregressive flows (IAF) trade off fast sampling for expensive inversion, enabling single-shot generation</a></li>
+<li class="toc-entry toc-h1"><a href="#teacher-student-distillation-leverages-flows-to-obtain-fast-samplers-from-autoregressive-teachers-parallel-wavenet-example">Teacher-student distillation leverages flows to obtain fast samplers from autoregressive teachers (Parallel WaveNet example)</a></li>
+<li class="toc-entry toc-h1"><a href="#flows-operate-on-continuous-densities-masked-convolutionalinvertible-convolutions-extend-flow-design-to-images">Flows operate on continuous densities; masked convolutional/invertible convolutions extend flow design to images</a></li>
+<li class="toc-entry toc-h1"><a href="#gaussianization-and-cdf-based-transforms-provide-an-alternative-perspective-on-flows-by-iteratively-mapping-data-to-a-simple-prior">Gaussianization and CDF-based transforms provide an alternative perspective on flows by iteratively mapping data to a simple prior</a></li>
+</ul>
+    </div>
+    <hr>
+    
+    <div id="markdown-content">
+      <div style="display: flex; justify-content: center;">
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/qgTvgBCOyn8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen="">
+    </iframe>
+</div>
+
+<h1 id="normalizing-flows-define-deterministic-invertible-latent-variable-models-that-allow-exact-likelihood-evaluation">Normalizing flows define deterministic invertible latent-variable models that allow exact likelihood evaluation</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec08/00-00-38-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec08/00-00-38-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec08/00-00-38-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec08/00-00-38.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>A <strong>normalizing flow</strong> is a <strong>latent-variable model</strong> that maps simple latent variables <strong>Z</strong> to observed variables <strong>X</strong> using a deterministic, <strong>invertible mapping</strong> <strong>F_Θ</strong>.<br></p>
+
+<p>The mapping is parameterized (typically by neural networks).<br></p>
+
+<p>Because the mapping is invertible, inference of <strong>Z</strong> given <strong>X</strong> reduces to applying the inverse mapping <strong>F_Θ⁻¹</strong>, and likelihoods can be computed <strong>exactly</strong> rather than approximated with variational encoders—combining expressive generative modeling with <strong>tractable likelihood computation</strong> suitable for <strong>maximum-likelihood training</strong>.<br></p>
+
+<hr>
+
+<h1 id="exact-likelihoods-for-flows-are-computed-by-the-change-of-variables-formula-including-the-jacobian-determinant">Exact likelihoods for flows are computed by the change-of-variables formula including the Jacobian determinant</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec08/00-02-07-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec08/00-02-07-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec08/00-02-07-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec08/00-02-07.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The probability density for an observed x under a flow is</p>
+
+<ul>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>p_X(x) = p_Z(z)</td>
+          <td>det(dz/dx)</td>
+          <td>, where <strong>z = F_Θ⁻¹(x)</strong> and <strong>dz/dx</strong> is the Jacobian of the inverse mapping.<br>
+</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+
+<p>Intuitively:</p>
+
+<ul>
+  <li>The prior probability of the corresponding latent <strong>z</strong> is adjusted by the local expansion or contraction of volume encoded by the <strong>determinant of the Jacobian</strong>.<br>
+</li>
+  <li>Computing that determinant accurately is essential to produce a normalized density that integrates to one.<br>
+</li>
+</ul>
+
+<p>In practice the determinant is handled via structural constraints on layers or algebraic manipulations that make evaluation tractable.<br></p>
+
+<hr>
+
+<h1 id="flows-permit-exact-likelihoods-without-variational-approximations-but-require-equal-input-and-latent-dimensionality">Flows permit exact likelihoods without variational approximations but require equal input and latent dimensionality</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec08/00-04-02-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec08/00-04-02-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec08/00-04-02-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec08/00-04-02.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Normalizing flows avoid variational approximations because inference is exact when the mapping is invertible and the Jacobian determinant is computable.<br></p>
+
+<p>A necessary modeling constraint is that the latent vector <strong>Z</strong> and data <strong>X</strong> must have the <strong>same dimensionality</strong> for the mapping to be <strong>bijective</strong>.<br></p>
+
+<p>This contrasts with <strong>VAEs</strong>, where the latent dimension can be lower than the data dimension and compression is explicit. The equal-dimension requirement therefore:</p>
+
+<ul>
+  <li>Shapes architectural choices (you must design bijective primitives), and<br>
+</li>
+  <li>Influences downstream use of the latent space: the latent is a <strong>one-to-one representation</strong> rather than a compressed encoding.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="composing-simple-invertible-layers-yields-flexible-normalizing-flows">Composing simple invertible layers yields flexible normalizing flows</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec08/00-06-31-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec08/00-06-31-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec08/00-06-31-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec08/00-06-31.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Normalizing flows build complex mappings by composing multiple simple invertible layers <strong>f₁, f₂, …, f_M</strong> parameterized by neural networks.<br></p>
+
+<p>Key points:</p>
+
+<ul>
+  <li>If each layer is invertible then the composition is invertible.<br>
+</li>
+  <li>The overall Jacobian determinant equals the product of per-layer determinants, so architectures focus on layer primitives that are:
+    <ul>
+      <li>Individually <strong>invertible</strong>,<br>
+</li>
+      <li>
+<strong>Efficiently invertible</strong>, and<br>
+</li>
+      <li>Yield <strong>tractable determinants</strong>.<br>
+</li>
+    </ul>
+  </li>
+  <li>Stacking many simple layers produces expressive transformations analogous to deep networks built from simple blocks.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="architectural-design-must-guarantee-invertibility-and-efficient-determinantinverse-computation">Architectural design must guarantee invertibility and efficient determinant/inverse computation</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec08/00-09-30-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec08/00-09-30-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec08/00-09-30-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec08/00-09-30.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Practical flow design requires three operational properties:</p>
+
+<ol>
+  <li>
+<strong>Guaranteed invertibility</strong> for all parameter settings.<br>
+</li>
+  <li>
+<strong>Efficient computation of the inverse mapping</strong>.<br>
+</li>
+  <li>
+<strong>Tractable evaluation of the Jacobian determinant</strong>.<br>
+</li>
+</ol>
+
+<p>Naively computing determinants of general n×n Jacobians costs <strong>O(n³)</strong> and is prohibitive for high-dimensional data.<br></p>
+
+<p>Standard engineering solutions:</p>
+
+<ul>
+  <li>Constrain layer computations so the Jacobian has special structure (e.g., <strong>triangular</strong>, <strong>diagonal</strong>, or <strong>low-rank modifications</strong>) that permit linear- or near-linear-time determinant computation.<br>
+</li>
+  <li>Choose architectures so inversion can be computed analytically or via cheap iterative schemes.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="planar-and-low-dimensional-visualizations-illustrate-how-flows-warp-simple-priors-into-complex-densities">Planar and low-dimensional visualizations illustrate how flows warp simple priors into complex densities</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec08/00-13-00-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec08/00-13-00-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec08/00-13-00-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec08/00-13-00.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Flows can be visualized in 2D where successive invertible layers warp an initial simple prior (e.g., <strong>spherical Gaussian</strong> or <strong>uniform square</strong>) into progressively more complex densities.<br></p>
+
+<p>Visualization insights:</p>
+
+<ul>
+  <li>Each layer applies a local deformation that redistributes probability mass.<br>
+</li>
+  <li>Repeated composition enables <strong>multi-modal</strong> and highly structured target densities.<br>
+</li>
+  <li>These examples show how expressive distributions arise from simple primitives by iterative remapping and provide intuition for deep flow design in higher dimensions.<br>
+</li>
+  <li>They underscore that even simple layer formulas can produce complex global transformations when stacked.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="maximum-likelihood-training-for-flows-uses-exact-likelihoods-computed-by-inversion-and-jacobian-determinants">Maximum-likelihood training for flows uses exact likelihoods computed by inversion and Jacobian determinants</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec08/00-17-00-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec08/00-17-00-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec08/00-17-00-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec08/00-17-00.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Flows are trained by maximizing the average <strong>log-likelihood</strong> of training data, which is computable via:</p>
+
+<ol>
+  <li>Inversion of each <strong>x</strong> to <strong>z</strong> using <strong>F_Θ⁻¹</strong>.<br>
+</li>
+  <li>Evaluation of the prior density <strong>p_Z(z)</strong>.<br>
+</li>
+  <li>Addition of the <strong>log-determinant</strong> term from the change-of-variables formula.<br>
+</li>
+</ol>
+
+<p>Because both terms are explicit given a tractable inverse and determinant, gradients with respect to parameters <strong>Θ</strong> can be computed and standard gradient-based optimization applied.<br></p>
+
+<p>This direct likelihood training mirrors autoregressive and other exact-likelihood approaches and avoids variational <strong>ELBO</strong> approximations—the optimization target places probability mass near observed data by tuning the sequence of invertible layers.<br></p>
+
+<hr>
+
+<h1 id="triangular-jacobian-structure-and-autoregressive-ordering-yield-linear-time-determinant-computation">Triangular Jacobian structure and autoregressive ordering yield linear-time determinant computation</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec08/00-21-00-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec08/00-21-00-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec08/00-21-00-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec08/00-21-00.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>One effective way to make Jacobian determinants cheap is to design layers whose Jacobians are <strong>triangular</strong> under some ordering of variables.<br></p>
+
+<p>Mechanism and consequence:</p>
+
+<ul>
+  <li>If each output dimension depends only on a subset of input dimensions (e.g., only previous inputs in an ordering), many off-diagonal partials are zero and the Jacobian becomes triangular.<br>
+</li>
+  <li>The determinant of a triangular matrix equals the product of diagonal entries, allowing <strong>O(n)</strong> determinant evaluation.<br>
+</li>
+  <li>This insight motivates architectures that impose computational graphs similar to autoregressive models or <strong>masked convolutions</strong> to achieve tractable determinants.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="additive-coupling-layers-nice-partition-variables-and-apply-simple-invertible-updates-with-unit-jacobian">Additive coupling layers (NICE) partition variables and apply simple, invertible updates with unit Jacobian</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec08/00-28-00-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec08/00-28-00-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec08/00-28-00-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec08/00-28-00.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>An <strong>additive coupling layer</strong> (as used in <strong>NICE</strong>) splits the input into two subsets <strong>x₁</strong> and <strong>x₂</strong>, leaves <strong>x₁</strong> unchanged, and replaces <strong>x₂</strong> by <strong>x₂ + m_Θ(x₁)</strong> where <strong>m_Θ</strong> is an arbitrary neural network.<br></p>
+
+<p>Properties:</p>
+
+<ul>
+  <li>The forward mapping is trivially invertible because <strong>x₁</strong> is copied and <strong>x₂</strong> is recovered by subtraction.<br>
+</li>
+  <li>The Jacobian is block-triangular with an identity diagonal, so its determinant equals <strong>one</strong>.<br>
+</li>
+  <li>Such layers are <strong>volume-preserving</strong> and the coupling network <strong>m_Θ</strong> can be arbitrarily flexible while preserving invertibility and cheap inversion.<br>
+</li>
+  <li>Stacking many coupling layers with different partitions yields expressive but computationally tractable flows.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="volume-preserving-coupling-plus-simple-rescaling-can-produce-useful-image-models-but-has-limitations">Volume-preserving coupling plus simple rescaling can produce useful image models but has limitations</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec08/00-36-30-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec08/00-36-30-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec08/00-36-30-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec08/00-36-30.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Volume-preserving coupling layers can be supplemented by learnable elementwise <strong>rescaling factors</strong> to introduce non-volume-preserving transforms and enable the model to expand or contract volume along coordinates.<br></p>
+
+<p>Notes:</p>
+
+<ul>
+  <li>The rescaling layer outputs a <strong>diagonal Jacobian</strong> with determinant equal to the product of scale factors, which is cheap to compute and invertible provided scales are nonzero.<br>
+</li>
+  <li>Empirically, stacks of coupling and rescaling layers (with permuted partitions between layers) can model image datasets like <strong>MNIST, SVHN,</strong> and <strong>CIFAR-10</strong> and produce plausible samples, though sample quality may lag state-of-the-art generative models.<br>
+</li>
+  <li>These designs demonstrate that relatively simple primitives, stacked sufficiently deep, yield practical density estimators.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="realnvp-extends-additive-coupling-by-combining-shift-and-scale-to-obtain-expressive-non-volume-preserving-layers">RealNVP extends additive coupling by combining shift and scale to obtain expressive, non-volume-preserving layers</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec08/00-43-00-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec08/00-43-00-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec08/00-43-00-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec08/00-43-00.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>RealNVP</strong> coupling layers generalize additive coupling by applying both an additive shift <strong>μ_Θ(x₁)</strong> and an elementwise scale <strong>exp(α_Θ(x₁))</strong> to the second partition:</p>
+
+<ul>
+  <li>x₂’ = (x₂ + μ_Θ(x₁)) * exp(α_Θ(x₁)).<br>
+</li>
+</ul>
+
+<p>Properties:</p>
+
+<ul>
+  <li>The mapping remains trivially invertible because <strong>x₁</strong> is preserved and <strong>x₂</strong> is recovered by subtracting <strong>μ_Θ</strong> and dividing by the scale.<br>
+</li>
+  <li>The Jacobian is lower-triangular with diagonal entries equal to the exponentiated scaling factors, so the <strong>log-determinant</strong> reduces to a sum of <strong>α_Θ</strong> outputs.<br>
+</li>
+  <li>Allowing learned scaling factors makes the layer strictly more flexible than volume-preserving coupling layers.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="latent-interpolations-and-empirical-behavior-show-flows-learn-meaningful-one-to-one-representations">Latent interpolations and empirical behavior show flows learn meaningful one-to-one representations</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec08/00-50-30-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec08/00-50-30-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec08/00-50-30-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec08/00-50-30.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Although flow latents have the same dimensionality as data and are therefore not compressive in the <strong>VAE</strong> sense, flow-trained latent spaces exhibit structure meaningful for tasks such as <strong>interpolation</strong>.<br></p>
+
+<p>How interpolation is used:</p>
+
+<ul>
+  <li>Map real data to latent <strong>Z</strong> via inversion.<br>
+</li>
+  <li>Interpolate in <strong>Z</strong>-space (e.g., along geodesics or linearly after appropriate normalization).<br>
+</li>
+  <li>Decode back to data space to obtain smooth transitions.<br>
+</li>
+</ul>
+
+<p>Empirical results show plausible interpolation trajectories for faces and scenes, indicating flows learn semantically useful coordinate systems despite <strong>bijectivity</strong>, supporting flows for representation tasks where invertibility and smoothness are valued.<br></p>
+
+<hr>
+
+<h1 id="autoregressive-models-are-a-special-case-of-flows-continuous-conditionals-correspond-to-sequential-shift-and-scale-transforms">Autoregressive models are a special case of flows: continuous conditionals correspond to sequential shift-and-scale transforms</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec08/00-58-30-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec08/00-58-30-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec08/00-58-30-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec08/00-58-30.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>A continuous autoregressive model with Gaussian conditionals can be represented as a flow by treating independent standard normals <strong>z_i</strong> as base noise and mapping them sequentially with shift-and-scale transforms whose parameters depend on previous outputs.<br></p>
+
+<p>Key equivalences:</p>
+
+<ul>
+  <li>Sampling the autoregressive model (z -&gt; x) corresponds to shifting and scaling <strong>z_i</strong> using means and variances predicted from earlier x values, matching the functional form of coupling or affine transforms.<br>
+</li>
+  <li>From the likelihood perspective, inverting the mapping (x -&gt; z) can be done in parallel because all conditionals’ parameters are computable from the observed <strong>x</strong>.<br>
+</li>
+  <li>Thus autoregressive models inherit the flow property and the same <strong>triangular Jacobian</strong> structure for tractable determinant computation.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="inverse-autoregressive-flows-iaf-trade-off-fast-sampling-for-expensive-inversion-enabling-single-shot-generation">Inverse autoregressive flows (IAF) trade off fast sampling for expensive inversion, enabling single-shot generation</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec08/01-05-30-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec08/01-05-30-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec08/01-05-30-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec08/01-05-30.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>By swapping roles of <strong>x</strong> and <strong>z</strong> in an autoregressive flow one obtains an <strong>inverse autoregressive flow (IAF)</strong> where the forward direction z-&gt;x is parallel and hence allows single-step sampling of the entire output.<br></p>
+
+<p>Trade-offs:</p>
+
+<ul>
+  <li>Benefit: <strong>fast generation</strong> (parallel sampling).<br>
+</li>
+  <li>Cost: inversion (x-&gt;z) becomes sequential because each inversion step requires previously recovered latents, making <strong>likelihood evaluation expensive</strong> at training time.<br>
+</li>
+</ul>
+
+<p>Conversely, <strong>masked autoregressive flows (MAF)</strong> are the opposite: <strong>efficient likelihoods, slow sampling</strong>. The two families are duals under variable relabeling and their trade-offs guide use cases.<br></p>
+
+<hr>
+
+<h1 id="teacher-student-distillation-leverages-flows-to-obtain-fast-samplers-from-autoregressive-teachers-parallel-wavenet-example">Teacher-student distillation leverages flows to obtain fast samplers from autoregressive teachers (Parallel WaveNet example)</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec08/01-12-30-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec08/01-12-30-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec08/01-12-30-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec08/01-12-30.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>A practical pipeline distills a high-quality autoregressive teacher trained by maximum likelihood into a fast-sampling student <strong>IAF</strong> by minimizing <strong>KL(student || teacher)</strong>.<br></p>
+
+<p>Typical distillation steps:</p>
+
+<ol>
+  <li>Train a high-quality autoregressive teacher (maximum-likelihood).<br>
+</li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>Train a student IAF to minimize KL(student</td>
+          <td> </td>
+          <td>teacher), which requires:</td>
+        </tr>
+      </tbody>
+    </table>
+    <ul>
+      <li>Sampling from the <strong>student</strong>, and<br>
+</li>
+      <li>Evaluating <strong>teacher</strong> likelihoods of those samples.<br>
+</li>
+    </ul>
+  </li>
+  <li>The student must be easy to sample from and able to evaluate its own sample densities efficiently (true for invertible student models when student latent codes are known).<br>
+</li>
+</ol>
+
+<p>This distillation yields fast generation models that approximate teacher behavior (e.g., used in <strong>Parallel WaveNet</strong> for speech generation).<br></p>
+
+<hr>
+
+<h1 id="flows-operate-on-continuous-densities-masked-convolutionalinvertible-convolutions-extend-flow-design-to-images">Flows operate on continuous densities; masked convolutional/invertible convolutions extend flow design to images</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec08/01-19-24-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec08/01-19-24-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec08/01-19-24-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec08/01-19-24.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Normalizing flows apply to <strong>continuous</strong> probability densities and are not directly applicable to discrete data such as token sequences because the change-of-variables formula requires a continuous domain.<br></p>
+
+<p>For image modeling:</p>
+
+<ul>
+  <li>Flow layers can be implemented with <strong>masked</strong> or specially constrained <strong>convolutions</strong> so that the resulting Jacobian is triangular and invertible, enabling efficient determinant computation.<br>
+</li>
+  <li>Masking enforces an ordering over pixels and channels similar to PixelCNN-style autoregressive masks, giving invertible convolutional primitives that preserve tractable density computation.<br>
+</li>
+  <li>Such convolutional flow layers can be stacked to model high-dimensional image distributions while exploiting locality.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="gaussianization-and-cdf-based-transforms-provide-an-alternative-perspective-on-flows-by-iteratively-mapping-data-to-a-simple-prior">Gaussianization and CDF-based transforms provide an alternative perspective on flows by iteratively mapping data to a simple prior</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec08/01-19-24-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec08/01-19-24-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec08/01-19-24-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec08/01-19-24.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Training a flow to maximize likelihood can be viewed equivalently as transforming data through the inverse mapping toward a simple prior such as a <strong>standard Gaussian</strong>.<br></p>
+
+<p>One-dimensional intuition:</p>
+
+<ul>
+  <li>The <strong>probability integral transform</strong> maps a variable’s CDF to a uniform random variable, and composing with the inverse Gaussian CDF maps it to Gaussian marginals.<br>
+</li>
+</ul>
+
+<p>Practical perspective:</p>
+
+<ul>
+  <li>
+<strong>Gaussianization layers</strong> apply marginal transforms and simple rotations or couplings iteratively to make the joint distribution increasingly Gaussian.<br>
+</li>
+  <li>This connects flows to classical statistical techniques (e.g., <strong>copulas</strong>, marginal transforms) and motivates layers that progressively “whiten” the data distribution.<br>
+</li>
+</ul>
+
+<hr>
+
+
+    </div>
+  </article>
+
+
+  
+    
+    <br>
+    <hr>
+    <br>
+    <ul class="list-disc pl-8"></ul>
+
+    <!-- Adds related posts to the end of an article -->
+    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
+    <p class="mb-2">Here are some more articles you might like to read next:</p>
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec06/">MIT 6.S184 - Lecture 6 - Diffusion for Protein Generation</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec05/">MIT 6.S184 - Lecture 5 - Diffusion for Robotics</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec04/">MIT 6.S184 - Lecture 4 - Building an Image Generator</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec03/">MIT 6.S184 - Lecture 3 - Training Flow and Diffusion Models</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec02/">MIT 6.S184 - Lecture 2 -  Constructing a Training Target</a>
+  </li>
+
+</div>
+
+      
+    </div>
+
+    <!-- Footer -->    
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        © Copyright 2025 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+
+      </div>
+    </footer>
+
+    <!-- JavaScripts -->
+    <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- Bootsrap & MDB scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    <!-- Masonry & imagesLoaded -->
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
+    
+  <!-- Medium Zoom JS -->
+  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/zoom.js"></script>
+
+  <!-- Bootstrap Table -->
+  <script defer src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+
+  <!-- Load Common JS -->
+  <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
+  <script defer src="/assets/js/common.js?acdb9690d7641b2f8d40529018c71a01"></script>
+  <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    <!-- MathJax -->
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        tags: 'ams'
+      }
+    };
+  </script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KGSMMS9MS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-7KGSMMS9MS');
+  </script>
+    
+
+<!-- Scrolling Progress Bar -->
+<script type="text/javascript">
+  /*
+   * This JavaScript code has been adapted from the article 
+   * https://css-tricks.com/reading-position-indicator/ authored by Pankaj Parashar, 
+   * published on the website https://css-tricks.com on the 7th of May, 2014.
+   * Couple of changes were made to the original code to make it compatible 
+   * with the `al-foio` theme.
+   */
+  const progressBar = $("#progress");
+  /*
+   * We set up the bar after all elements are done loading.
+   * In some cases, if the images in the page are larger than the intended
+   * size they'll have on the page, they'll be resized via CSS to accomodate
+   * the desired size. This mistake, however, breaks the computations as the
+   * scroll size is computed as soon as the elements finish loading.
+   * To account for this, a minimal delay was introduced before computing the
+   * values.
+   */
+  window.onload = function () {
+    setTimeout(progressBarSetup, 50);
+  };
+  /*
+   * We set up the bar according to the browser.
+   * If the browser supports the progress element we use that.
+   * Otherwise, we resize the bar thru CSS styling
+   */
+  function progressBarSetup() {
+    if ("max" in document.createElement("progress")) {
+      initializeProgressElement();
+      $(document).on("scroll", function() {
+        progressBar.attr({ value: getCurrentScrollPosition() });
+      });
+      $(window).on("resize", initializeProgressElement);
+    } else {
+      resizeProgressBar();
+      $(document).on("scroll", resizeProgressBar);
+      $(window).on("resize", resizeProgressBar);
+    }
+  }
+  /*
+   * The vertical scroll position is the same as the number of pixels that
+   * are hidden from view above the scrollable area. Thus, a value > 0 is
+   * how much the user has scrolled from the top
+   */
+  function getCurrentScrollPosition() {
+    return $(window).scrollTop();
+  }
+
+  function initializeProgressElement() {
+    let navbarHeight = $("#navbar").outerHeight(true);
+    $("body").css({ "padding-top": navbarHeight });
+    $("progress-container").css({ "padding-top": navbarHeight });
+    progressBar.css({ top: navbarHeight });
+    progressBar.attr({
+      max: getDistanceToScroll(),
+      value: getCurrentScrollPosition(),
+    });
+  }
+  /*
+   * The offset between the html document height and the browser viewport
+   * height will be greater than zero if vertical scroll is possible.
+   * This is the distance the user can scroll
+   */
+  function getDistanceToScroll() {
+    return $(document).height() - $(window).height();
+  }
+
+  function resizeProgressBar() {
+    progressBar.css({ width: getWidthPercentage() + "%" });
+  }
+  // The scroll ratio equals the percentage to resize the bar
+  function getWidthPercentage() {
+    return (getCurrentScrollPosition() / getDistanceToScroll()) * 100;
+  }
+</script>
+
+    
+  </body>
+</html>

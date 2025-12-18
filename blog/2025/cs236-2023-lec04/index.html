@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <!-- Head -->
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    <!-- Metadata, OpenGraph and Schema.org -->
+    
+
+    <!-- Standard metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Stanford CS236 - Deep Generative Models I 2023 I Lecture 4 - Maximum Likelihood Learning | Tuan-Anh  Bui</title>
+    <meta name="author" content="Tuan-Anh  Bui">
+    <meta name="description" content="AI Summary Lecture">
+    <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
+
+
+    <!-- Bootstrap & MDB -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+    <!-- Bootstrap Table -->
+    <link defer rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+
+    <!-- Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
+
+    
+
+    <!-- Styles -->
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
+    
+    <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+    <link rel="canonical" href="https://tuananhbui89.github.io/blog/2025/cs236-2023-lec04/">
+
+    <!-- Dark Mode -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark">
+    <script src="/assets/js/theme.js?96d6b3e1c3604aca8b6134c7afdd5db6"></script>
+    <script src="/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script>
+    
+
+  </head>
+
+  <!-- Body -->
+  <body class="fixed-top-nav ">
+
+    <!-- Header -->
+    <header>
+
+      <!-- Nav Bar -->
+      <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top">
+        <div class="container">
+          <a class="navbar-brand title font-weight-lighter" href="/"><span class="font-weight-bold">Tuan-Anh </span>Bui</a>
+          <!-- Navbar Toggle -->
+          <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar top-bar"></span>
+            <span class="icon-bar middle-bar"></span>
+            <span class="icon-bar bottom-bar"></span>
+          </button>
+
+          <div class="collapse navbar-collapse text-right" id="navbarNav">
+            <ul class="navbar-nav ml-auto flex-nowrap">
+
+              <!-- About -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/">about</a>
+              </li>
+              
+              <!-- Blog -->
+              <li class="nav-item active">
+                <a class="nav-link" href="/blog/">blog<span class="sr-only">(current)</span></a>
+              </li>
+
+              <!-- Other pages -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/publications/">publications</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/projects/">projects</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/repositories/">repositories</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/teaching/"></a>
+              </li>
+
+              <!-- Toogle theme mode -->
+              <li class="toggle-container">
+                <button id="light-toggle" title="Change theme">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Scrolling Progress Bar -->
+      <progress id="progress" value="0">
+        <div class="progress-container">
+          <span class="progress-bar"></span>
+        </div>
+      </progress>
+    </header>
+
+
+    <!-- Content -->
+    <div class="container mt-5">
+      
+        <!-- _layouts/post.html -->
+<!-- Page/Post style -->
+<style type="text/css">
+  
+</style>
+
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Stanford CS236 - Deep Generative Models I 2023 I Lecture 4 - Maximum Likelihood Learning</h1>
+    <p class="post-meta">December 18, 2025</p>
+    <p class="post-tags">
+      <a href="/blog/2025"> <i class="fas fa-calendar fa-sm"></i> 2025 </a>
+        ·  
+        <a href="/blog/tag/genai">
+          <i class="fas fa-hashtag fa-sm"></i> genai</a>  
+          <a href="/blog/tag/llm">
+          <i class="fas fa-hashtag fa-sm"></i> llm</a>  
+          <a href="/blog/tag/tutorial">
+          <i class="fas fa-hashtag fa-sm"></i> tutorial</a>  
+          <a href="/blog/tag/reading">
+          <i class="fas fa-hashtag fa-sm"></i> reading</a>  
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    
+    <div id="table-of-contents">
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#rnns-parameterize-autoregressive-models-using-a-fixed-size-recurrent-state">RNNs parameterize autoregressive models using a fixed-size recurrent state</a></li>
+<li class="toc-entry toc-h1"><a href="#rnns-suffer-from-representational-bottlenecks-and-training-inefficiencies-due-to-unrolled-recursion">RNNs suffer from representational bottlenecks and training inefficiencies due to unrolled recursion</a></li>
+<li class="toc-entry toc-h1"><a href="#attention-computes-relevance-between-query-and-key-vectors-to-form-context-weighted-predictions">Attention computes relevance between query and key vectors to form context-weighted predictions</a></li>
+<li class="toc-entry toc-h1"><a href="#self-attention-and-masking-enable-parallel-autoregressive-transformers-that-scale-efficiently">Self-attention and masking enable parallel, autoregressive Transformers that scale efficiently</a></li>
+<li class="toc-entry toc-h1"><a href="#autoregressive-models-can-be-applied-to-images-by-treating-pixels-and-channels-as-sequence-elements-with-masked-dependencies">Autoregressive models can be applied to images by treating pixels (and channels) as sequence elements with masked dependencies</a></li>
+<li class="toc-entry toc-h1"><a href="#masked-convolutions-and-attention-on-images-enforce-autoregressivity-but-introduce-architectural-trade-offs">Masked convolutions and attention on images enforce autoregressivity but introduce architectural trade-offs</a></li>
+<li class="toc-entry toc-h1"><a href="#choosing-an-ordering-for-non-sequential-data-is-arbitrary-and-can-be-learned-but-often-uses-simple-heuristics">Choosing an ordering for non-sequential data is arbitrary and can be learned but often uses simple heuristics</a></li>
+<li class="toc-entry toc-h1"><a href="#transformer-and-convolutional-autoregressive-models-can-match-or-outperform-rnns-in-training-efficiency-while-rnns-retain-inference-time-advantages">Transformer and convolutional autoregressive models can match or outperform RNNs in training efficiency while RNNs retain inference-time advantages</a></li>
+<li class="toc-entry toc-h1"><a href="#autoregressive-likelihoods-permit-sample-based-anomaly-detection-and-can-distinguish-adversarially-perturbed-inputs">Autoregressive likelihoods permit sample-based anomaly detection and can distinguish adversarially perturbed inputs</a></li>
+<li class="toc-entry toc-h1"><a href="#learning-begins-with-defining-objectives-and-the-desiderata-for-model-approximation-density-estimation-is-a-canonical-target">Learning begins with defining objectives and the desiderata for model approximation; density estimation is a canonical target</a></li>
+<li class="toc-entry toc-h1"><a href="#the-kullbackleibler-divergence-quantifies-distributional-discrepancy-and-has-an-information-theoretic-compression-interpretation">The Kullback–Leibler divergence quantifies distributional discrepancy and has an information-theoretic compression interpretation</a></li>
+<li class="toc-entry toc-h1"><a href="#minimizing-forward-kl-between-the-data-distribution-and-model-reduces-to-maximizing-expected-log-likelihood-under-the-data-and-yields-maximum-likelihood-estimation">Minimizing forward KL between the data distribution and model reduces to maximizing expected log-likelihood under the data and yields maximum likelihood estimation</a></li>
+<li class="toc-entry toc-h1"><a href="#the-empirical-average-monte-carlo-approximates-expectations-and-yields-the-practical-mle-objective-implemented-as-negative-log-likelihood-over-the-dataset">The empirical average (Monte Carlo) approximates expectations and yields the practical MLE objective implemented as negative log-likelihood over the dataset</a></li>
+<li class="toc-entry toc-h1"><a href="#gradient-based-optimization-of-autoregressive-models-uses-backpropagation-and-stochastic-minibatch-estimates-for-scalability">Gradient-based optimization of autoregressive models uses backpropagation and stochastic minibatch estimates for scalability</a></li>
+<li class="toc-entry toc-h1"><a href="#generalization-requires-controlling-model-complexity-via-regularization-validation-and-biasvariance-trade-offs">Generalization requires controlling model complexity via regularization, validation, and bias–variance trade-offs</a></li>
+</ul>
+    </div>
+    <hr>
+    
+    <div id="markdown-content">
+      <div style="display: flex; justify-content: center;">
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/bt3dqcbMLa0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen="">
+    </iframe>
+</div>
+
+<h1 id="rnns-parameterize-autoregressive-models-using-a-fixed-size-recurrent-state">RNNs parameterize autoregressive models using a fixed-size recurrent state</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec04/00-00-35-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec04/00-00-35-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec04/00-00-35-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec04/00-00-35.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Recurrent neural networks (RNNs)</strong> implement <strong>autoregressive probabilistic models</strong> by maintaining a fixed-size <strong>hidden state</strong> that summarizes past observations and conditions the distribution over the next token or pixel.<br></p>
+
+<ul>
+  <li>The hidden state is <strong>updated recurrently</strong> as new symbols are observed.</li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>The state at time t parameterizes the conditional distribution **p(x_t</td>
+          <td>x_1:t-1)**.</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>This parameterization yields a model family whose parameter count is <strong>independent of sequence length</strong>.</li>
+  <li>It is applicable at token/character levels and to <strong>pixel-by-pixel image generation</strong>.<br>
+</li>
+</ul>
+
+<p>By casting next-step prediction as a sequence of per-step classification problems conditioned on the rolling state, RNNs provide a straightforward mechanism for <strong>sampling</strong> and <strong>likelihood computation</strong> via the <strong>chain rule</strong>.<br></p>
+
+<hr>
+
+<h1 id="rnns-suffer-from-representational-bottlenecks-and-training-inefficiencies-due-to-unrolled-recursion">RNNs suffer from representational bottlenecks and training inefficiencies due to unrolled recursion</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec04/00-02-04-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec04/00-02-04-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec04/00-02-04-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec04/00-02-04.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Using a single fixed-size hidden vector to summarize arbitrarily long context creates a <strong>representational bottleneck</strong> that can fail to capture long-range dependencies.<br></p>
+
+<ul>
+  <li>Training requires <strong>unrolling the recurrent computation through time</strong>, which:
+    <ul>
+      <li>Reduces parallelism across time steps,</li>
+      <li>Increases wall-clock training time,</li>
+      <li>Complicates optimization because gradients must propagate through many steps.</li>
+    </ul>
+  </li>
+  <li>Long-range dependencies thus exacerbate <strong>vanishing</strong> or <strong>exploding gradients</strong>, making RNNs slower and harder to train in practice despite their theoretical expressivity.<br>
+</li>
+</ul>
+
+<p>These practical limitations motivate alternative architectures that avoid sequential unrolling during training.<br></p>
+
+<hr>
+
+<h1 id="attention-computes-relevance-between-query-and-key-vectors-to-form-context-weighted-predictions">Attention computes relevance between query and key vectors to form context-weighted predictions</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec04/00-04-03-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec04/00-04-03-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec04/00-04-03-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec04/00-04-03.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Attention mechanisms</strong> compute a relevance score between a <strong>query</strong> vector and a set of <strong>key</strong> vectors (commonly via a dot product), then convert those scores into a normalized attention distribution (typically with <strong>softmax</strong>).<br></p>
+
+<ul>
+  <li>The resulting <strong>attention weights</strong> are used to form a weighted average of <strong>value</strong> vectors, producing a <strong>context vector</strong> that selectively aggregates information from the entire past sequence.</li>
+  <li>The <strong>query–key–value</strong> formulation generalizes retrieval: the model can focus on specific past elements instead of compressing all history into a single hidden state.</li>
+  <li>This selective access improves modeling of <strong>long-range</strong> and <strong>structured dependencies</strong>.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="self-attention-and-masking-enable-parallel-autoregressive-transformers-that-scale-efficiently">Self-attention and masking enable parallel, autoregressive Transformers that scale efficiently</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec04/00-07-39-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec04/00-07-39-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec04/00-07-39-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec04/00-07-39.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Self-attention stacks</strong> let each position attend to all previous positions and, with appropriate <strong>causal masking</strong>, enforce an <strong>autoregressive</strong> factorization while permitting highly parallel feed-forward computation across positions.<br></p>
+
+<ol>
+  <li>
+<strong>Causal masking</strong> prevents attention to future tokens so the model remains autoregressive.</li>
+  <li>
+<strong>Stacking multiple attention layers</strong> increases representational depth without temporal recursion.</li>
+  <li>The approach yields:
+    <ul>
+      <li>Massive GPU parallelism,</li>
+      <li>Efficient loss evaluation across all positions,</li>
+      <li>The scaling behavior behind state-of-the-art autoregressive language models (e.g., <strong>GPT</strong> variants).<br>
+</li>
+    </ul>
+  </li>
+</ol>
+
+<hr>
+
+<h1 id="autoregressive-models-can-be-applied-to-images-by-treating-pixels-and-channels-as-sequence-elements-with-masked-dependencies">Autoregressive models can be applied to images by treating pixels (and channels) as sequence elements with masked dependencies</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec04/00-12-10-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec04/00-12-10-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec04/00-12-10-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec04/00-12-10.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Images can be modeled autoregressively by <strong>linearizing pixels into a sequence</strong> (e.g., raster scan order) and defining a conditional distribution for each pixel given preceding pixels.<br></p>
+
+<ul>
+  <li>For color images, channels (red, green, blue) are further factorized so that later channels condition on previously generated channels for the same pixel.</li>
+  <li>Each conditional is a discrete or continuous distribution over pixel intensities and is parameterized by an <strong>RNN, CNN,</strong> or <strong>attention-based</strong> network with masking that enforces the chosen ordering.</li>
+  <li>
+<strong>Sampling</strong> and <strong>likelihood evaluation</strong> follow directly from the chain rule, but naive sequential evaluation is slow—hence <strong>masked convolutions</strong> or masked attention implementations are used to speed up training and generation.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="masked-convolutions-and-attention-on-images-enforce-autoregressivity-but-introduce-architectural-trade-offs">Masked convolutions and attention on images enforce autoregressivity but introduce architectural trade-offs</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec04/00-15-42-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec04/00-15-42-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec04/00-15-42-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec04/00-15-42.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Convolutional architectures</strong> can be adapted to autoregressive image modeling by zeroing-out kernel entries or applying <strong>causal masks</strong> so predictions for a target pixel do not depend on future pixels.<br></p>
+
+<ul>
+  <li>This enables efficient parallel <strong>matrix-multiplication</strong> implementations on modern hardware.</li>
+  <li>However, <strong>masked convolutions</strong> can create <strong>receptive-field blind spots</strong> unless kernels and layer arrangements are designed carefully. Architectural tricks (e.g., <strong>staggered masks</strong> or <strong>mixed masks</strong>) are used to cover all relevant context.</li>
+  <li>
+<strong>Transformer-style masked self-attention</strong> can also be applied to images and has shown promise, although it can be <strong>computationally heavier</strong> than convolutional or diffusion-based approaches at large scale.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="choosing-an-ordering-for-non-sequential-data-is-arbitrary-and-can-be-learned-but-often-uses-simple-heuristics">Choosing an ordering for non-sequential data is arbitrary and can be learned but often uses simple heuristics</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec04/00-18-38-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec04/00-18-38-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec04/00-18-38-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec04/00-18-38.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>For data without a canonical temporal ordering (like images), one must select an ordering to define an autoregressive factorization.<br></p>
+
+<ul>
+  <li>Common choices include <strong>top-left-to-bottom-right raster order</strong>, but alternative or <strong>learned permutations</strong> can be explored.</li>
+  <li>The chosen ordering affects which dependencies are <strong>local</strong> versus <strong>long-range</strong> under the factorization.</li>
+  <li>Empirically, models are often <strong>robust to different orderings</strong>; learned orderings can yield modest improvements but are <strong>combinatorially expensive</strong> to optimize and search over.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="transformer-and-convolutional-autoregressive-models-can-match-or-outperform-rnns-in-training-efficiency-while-rnns-retain-inference-time-advantages">Transformer and convolutional autoregressive models can match or outperform RNNs in training efficiency while RNNs retain inference-time advantages</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec04/00-22-59-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec04/00-22-59-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec04/00-22-59-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec04/00-22-59.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Transformers</strong> and <strong>masked convolutional</strong> models enable parallel training and efficient loss evaluation, making them preferable for large-scale training and state-of-the-art generative performance.<br></p>
+
+<ul>
+  <li>
+<strong>RNNs</strong>, while theoretically expressive, are slower to train because of sequential unrolling.</li>
+  <li>RNNs retain an advantage at <strong>incremental inference</strong>: compressing past context into a small state vector can reduce per-step computation when generating sequences online.</li>
+  <li>The architecture choice depends on trade-offs between:
+    <ul>
+      <li>Training-time <strong>parallelism</strong>,</li>
+      <li>Inference-time <strong>efficiency</strong>,</li>
+      <li>Relevant <strong>inductive biases</strong> for the task and data.<br>
+</li>
+    </ul>
+  </li>
+</ul>
+
+<hr>
+
+<h1 id="autoregressive-likelihoods-permit-sample-based-anomaly-detection-and-can-distinguish-adversarially-perturbed-inputs">Autoregressive likelihoods permit sample-based anomaly detection and can distinguish adversarially perturbed inputs</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec04/00-28-00-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec04/00-28-00-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec04/00-28-00-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec04/00-28-00.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Autoregressive generative models</strong> assign a likelihood to each input via the product of conditionals, enabling applications such as <strong>anomaly detection</strong> by thresholding model likelihoods.<br></p>
+
+<ul>
+  <li>Inputs with substantially lower likelihood than typical training data can be flagged as anomalous.</li>
+  <li>Pixel-level models trained by <strong>maximum likelihood</strong> have demonstrated separation between natural images and <strong>adversarially perturbed</strong> images in likelihood histograms (often reported in <strong>bits per dimension</strong>), indicating learned conditionals capture subtle pixel dependencies.</li>
+  <li>While likelihood-based defenses are not universally robust to adaptive attacks, pre-trained autoregressive models can still provide a practical mechanism for detecting certain classes of <strong>distributional shifts</strong> and adversarial perturbations.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="learning-begins-with-defining-objectives-and-the-desiderata-for-model-approximation-density-estimation-is-a-canonical-target">Learning begins with defining objectives and the desiderata for model approximation; density estimation is a canonical target</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec04/00-33-58-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec04/00-33-58-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec04/00-33-58-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec04/00-33-58.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The <strong>learning problem</strong> specifies:</p>
+<ul>
+  <li>A family of <strong>parameterized distributions</strong>,</li>
+  <li>A dataset of i.i.d. samples drawn from an unknown data distribution, and</li>
+  <li>
+    <p>A notion of <strong>similarity or distance</strong> between distributions to guide parameter selection.<br></p>
+  </li>
+  <li>A canonical goal is <strong>density estimation</strong>—approximating the full joint distribution so likelihoods and conditionals are accurate for downstream tasks such as <strong>sampling, conditioning,</strong> and <strong>anomaly detection</strong>.</li>
+  <li>Alternative objectives may focus on task-specific conditionals or <strong>discriminative objectives</strong> when the full joint is not required.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="the-kullbackleibler-divergence-quantifies-distributional-discrepancy-and-has-an-information-theoretic-compression-interpretation">The Kullback–Leibler divergence quantifies distributional discrepancy and has an information-theoretic compression interpretation</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec04/00-42-26-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec04/00-42-26-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec04/00-42-26-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec04/00-42-26.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The <strong>KL divergence</strong> D_KL(p || q) = E_p[log p(x)/q(x)] measures how much the model distribution q diverges from the data distribution p by averaging log-probability ratios under p.<br></p>
+
+<ul>
+  <li>KL is <strong>nonnegative</strong> and equals zero iff p = q almost everywhere.</li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>It has an operational interpretation in terms of <strong>coding inefficiency</strong>: using codes optimized for q instead of the true p incurs an expected excess code length equal to D_KL(p</td>
+          <td> </td>
+          <td>q).</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>KL is <strong>asymmetric</strong>; choosing which argument is the data distribution versus the model (forward vs reverse KL) induces different behaviors:
+    <ul>
+      <li>
+        <table>
+          <tbody>
+            <tr>
+              <td>**Forward KL (D_KL(p</td>
+              <td> </td>
+              <td>q))** tends to be <strong>mass-covering</strong>, encouraging q to cover p’s support.</td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+      <li>
+        <table>
+          <tbody>
+            <tr>
+              <td>**Reverse KL (D_KL(q</td>
+              <td> </td>
+              <td>p))** tends to be <strong>mode-seeking</strong>, focusing q on high-density modes of p.<br>
+</td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<hr>
+
+<h1 id="minimizing-forward-kl-between-the-data-distribution-and-model-reduces-to-maximizing-expected-log-likelihood-under-the-data-and-yields-maximum-likelihood-estimation">Minimizing forward KL between the data distribution and model reduces to maximizing expected log-likelihood under the data and yields maximum likelihood estimation</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec04/00-51-27-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec04/00-51-27-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec04/00-51-27-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec04/00-51-27.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>By expanding D_KL(p_data || p_theta) = E_p_data[log p_data(x) - log p_theta(x)] and noting the first term does not depend on theta, <strong>minimizing KL over theta</strong> is equivalent to <strong>maximizing</strong> E_p_data[log p_theta(x)] — the expected log-likelihood.<br></p>
+
+<ul>
+  <li>In practice, the expectation under the unknown data distribution is approximated with the <strong>empirical average</strong> over the dataset, producing the <strong>maximum likelihood</strong> objective: maximize the average log probability that the model assigns to training samples.</li>
+  <li>This connects an information-theoretic divergence minimization principle to the practical training objective used for autoregressive models.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="the-empirical-average-monte-carlo-approximates-expectations-and-yields-the-practical-mle-objective-implemented-as-negative-log-likelihood-over-the-dataset">The empirical average (Monte Carlo) approximates expectations and yields the practical MLE objective implemented as negative log-likelihood over the dataset</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec04/00-59-08-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec04/00-59-08-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec04/00-59-08-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec04/00-59-08.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The expectation E_p_data[log p_theta(x)] is approximated by the sample average (1/N) sum_{i=1}^N log p_theta(x^{(i)}), a Monte Carlo estimator of the population objective.<br></p>
+
+<ul>
+  <li>For autoregressive models each log p_theta(x^{(i)}) decomposes into a sum of conditional log-probabilities via the chain rule.</li>
+  <li>Consequently, the dataset log-likelihood reduces to summing <strong>cross-entropy losses</strong> for the per-step conditionals across examples and positions.</li>
+  <li>Maximizing this empirical log-likelihood is the standard <strong>MLE</strong> procedure, implemented in practice by minimizing the <strong>negative log-likelihood</strong> (cross-entropy) over the training set.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="gradient-based-optimization-of-autoregressive-models-uses-backpropagation-and-stochastic-minibatch-estimates-for-scalability">Gradient-based optimization of autoregressive models uses backpropagation and stochastic minibatch estimates for scalability</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec04/01-05-09-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec04/01-05-09-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec04/01-05-09-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec04/01-05-09.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Closed-form solutions rarely exist for high-dimensional neural models, so parameters are optimized via <strong>gradient-based methods</strong> (e.g., <strong>stochastic gradient descent</strong> variants) using gradients computed by <strong>backpropagation</strong> through the network that parameterizes the conditionals.<br></p>
+
+<ul>
+  <li>The full-dataset gradient is an expectation over the empirical distribution and is approximated with <strong>minibatch Monte Carlo</strong>: gradients are computed on small random subsets of training examples to produce unbiased, lower-cost gradient estimates for parameter updates.</li>
+  <li>
+<strong>Parameter sharing</strong> across conditionals (e.g., through a single neural network) is standard.</li>
+  <li>Training leverages parallel computation for per-minibatch forward/backward passes while preserving the autoregressive decomposition in the loss.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="generalization-requires-controlling-model-complexity-via-regularization-validation-and-biasvariance-trade-offs">Generalization requires controlling model complexity via regularization, validation, and bias–variance trade-offs</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec04/01-15-52-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec04/01-15-52-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec04/01-15-52-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec04/01-15-52.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Blindly maximizing empirical likelihood can lead to <strong>memorization</strong> and poor generalization on unseen samples; practitioners therefore apply regularization and model-selection practices to improve robustness.<br></p>
+
+<ul>
+  <li>Common strategies:
+    <ul>
+      <li>Constrain the <strong>hypothesis class</strong> or add <strong>regularization</strong> terms (e.g., <strong>weight decay</strong>),</li>
+      <li>Use <strong>held-out validation sets</strong> for model selection,</li>
+      <li>Apply <strong>early stopping</strong> and <strong>parameter sharing</strong>.</li>
+    </ul>
+  </li>
+  <li>The <strong>bias–variance trade-off</strong> guides choices: overly restrictive models exhibit <strong>bias</strong> (underfitting), while overly flexible models exhibit <strong>variance</strong> (overfitting).</li>
+  <li>Practical mechanisms include <strong>cross-validation</strong>, monitoring validation loss, and using inductive biases that favor simpler or structured solutions to balance approximation capacity and robustness.<br>
+</li>
+</ul>
+
+<hr>
+
+
+    </div>
+  </article>
+
+
+  
+    
+    <br>
+    <hr>
+    <br>
+    <ul class="list-disc pl-8"></ul>
+
+    <!-- Adds related posts to the end of an article -->
+    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
+    <p class="mb-2">Here are some more articles you might like to read next:</p>
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec06/">MIT 6.S184 - Lecture 6 - Diffusion for Protein Generation</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec05/">MIT 6.S184 - Lecture 5 - Diffusion for Robotics</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec04/">MIT 6.S184 - Lecture 4 - Building an Image Generator</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec03/">MIT 6.S184 - Lecture 3 - Training Flow and Diffusion Models</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec02/">MIT 6.S184 - Lecture 2 -  Constructing a Training Target</a>
+  </li>
+
+</div>
+
+      
+    </div>
+
+    <!-- Footer -->    
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        © Copyright 2025 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+
+      </div>
+    </footer>
+
+    <!-- JavaScripts -->
+    <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- Bootsrap & MDB scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    <!-- Masonry & imagesLoaded -->
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
+    
+  <!-- Medium Zoom JS -->
+  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/zoom.js"></script>
+
+  <!-- Bootstrap Table -->
+  <script defer src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+
+  <!-- Load Common JS -->
+  <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
+  <script defer src="/assets/js/common.js?acdb9690d7641b2f8d40529018c71a01"></script>
+  <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    <!-- MathJax -->
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        tags: 'ams'
+      }
+    };
+  </script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KGSMMS9MS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-7KGSMMS9MS');
+  </script>
+    
+
+<!-- Scrolling Progress Bar -->
+<script type="text/javascript">
+  /*
+   * This JavaScript code has been adapted from the article 
+   * https://css-tricks.com/reading-position-indicator/ authored by Pankaj Parashar, 
+   * published on the website https://css-tricks.com on the 7th of May, 2014.
+   * Couple of changes were made to the original code to make it compatible 
+   * with the `al-foio` theme.
+   */
+  const progressBar = $("#progress");
+  /*
+   * We set up the bar after all elements are done loading.
+   * In some cases, if the images in the page are larger than the intended
+   * size they'll have on the page, they'll be resized via CSS to accomodate
+   * the desired size. This mistake, however, breaks the computations as the
+   * scroll size is computed as soon as the elements finish loading.
+   * To account for this, a minimal delay was introduced before computing the
+   * values.
+   */
+  window.onload = function () {
+    setTimeout(progressBarSetup, 50);
+  };
+  /*
+   * We set up the bar according to the browser.
+   * If the browser supports the progress element we use that.
+   * Otherwise, we resize the bar thru CSS styling
+   */
+  function progressBarSetup() {
+    if ("max" in document.createElement("progress")) {
+      initializeProgressElement();
+      $(document).on("scroll", function() {
+        progressBar.attr({ value: getCurrentScrollPosition() });
+      });
+      $(window).on("resize", initializeProgressElement);
+    } else {
+      resizeProgressBar();
+      $(document).on("scroll", resizeProgressBar);
+      $(window).on("resize", resizeProgressBar);
+    }
+  }
+  /*
+   * The vertical scroll position is the same as the number of pixels that
+   * are hidden from view above the scrollable area. Thus, a value > 0 is
+   * how much the user has scrolled from the top
+   */
+  function getCurrentScrollPosition() {
+    return $(window).scrollTop();
+  }
+
+  function initializeProgressElement() {
+    let navbarHeight = $("#navbar").outerHeight(true);
+    $("body").css({ "padding-top": navbarHeight });
+    $("progress-container").css({ "padding-top": navbarHeight });
+    progressBar.css({ top: navbarHeight });
+    progressBar.attr({
+      max: getDistanceToScroll(),
+      value: getCurrentScrollPosition(),
+    });
+  }
+  /*
+   * The offset between the html document height and the browser viewport
+   * height will be greater than zero if vertical scroll is possible.
+   * This is the distance the user can scroll
+   */
+  function getDistanceToScroll() {
+    return $(document).height() - $(window).height();
+  }
+
+  function resizeProgressBar() {
+    progressBar.css({ width: getWidthPercentage() + "%" });
+  }
+  // The scroll ratio equals the percentage to resize the bar
+  function getWidthPercentage() {
+    return (getCurrentScrollPosition() / getDistanceToScroll()) * 100;
+  }
+</script>
+
+    
+  </body>
+</html>

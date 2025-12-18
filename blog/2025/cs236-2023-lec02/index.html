@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <!-- Head -->
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    <!-- Metadata, OpenGraph and Schema.org -->
+    
+
+    <!-- Standard metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Stanford CS236 - Deep Generative Models I 2023 I Lecture 2 - Background | Tuan-Anh  Bui</title>
+    <meta name="author" content="Tuan-Anh  Bui">
+    <meta name="description" content="AI Summary Lecture">
+    <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
+
+
+    <!-- Bootstrap & MDB -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+    <!-- Bootstrap Table -->
+    <link defer rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+
+    <!-- Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
+
+    
+
+    <!-- Styles -->
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
+    
+    <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+    <link rel="canonical" href="https://tuananhbui89.github.io/blog/2025/cs236-2023-lec02/">
+
+    <!-- Dark Mode -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark">
+    <script src="/assets/js/theme.js?96d6b3e1c3604aca8b6134c7afdd5db6"></script>
+    <script src="/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script>
+    
+
+  </head>
+
+  <!-- Body -->
+  <body class="fixed-top-nav ">
+
+    <!-- Header -->
+    <header>
+
+      <!-- Nav Bar -->
+      <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top">
+        <div class="container">
+          <a class="navbar-brand title font-weight-lighter" href="/"><span class="font-weight-bold">Tuan-Anh </span>Bui</a>
+          <!-- Navbar Toggle -->
+          <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar top-bar"></span>
+            <span class="icon-bar middle-bar"></span>
+            <span class="icon-bar bottom-bar"></span>
+          </button>
+
+          <div class="collapse navbar-collapse text-right" id="navbarNav">
+            <ul class="navbar-nav ml-auto flex-nowrap">
+
+              <!-- About -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/">about</a>
+              </li>
+              
+              <!-- Blog -->
+              <li class="nav-item active">
+                <a class="nav-link" href="/blog/">blog<span class="sr-only">(current)</span></a>
+              </li>
+
+              <!-- Other pages -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/publications/">publications</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/projects/">projects</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/repositories/">repositories</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/teaching/"></a>
+              </li>
+
+              <!-- Toogle theme mode -->
+              <li class="toggle-container">
+                <button id="light-toggle" title="Change theme">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Scrolling Progress Bar -->
+      <progress id="progress" value="0">
+        <div class="progress-container">
+          <span class="progress-bar"></span>
+        </div>
+      </progress>
+    </header>
+
+
+    <!-- Content -->
+    <div class="container mt-5">
+      
+        <!-- _layouts/post.html -->
+<!-- Page/Post style -->
+<style type="text/css">
+  
+</style>
+
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Stanford CS236 - Deep Generative Models I 2023 I Lecture 2 - Background</h1>
+    <p class="post-meta">December 18, 2025</p>
+    <p class="post-tags">
+      <a href="/blog/2025"> <i class="fas fa-calendar fa-sm"></i> 2025 </a>
+        ·  
+        <a href="/blog/tag/genai">
+          <i class="fas fa-hashtag fa-sm"></i> genai</a>  
+          <a href="/blog/tag/llm">
+          <i class="fas fa-hashtag fa-sm"></i> llm</a>  
+          <a href="/blog/tag/tutorial">
+          <i class="fas fa-hashtag fa-sm"></i> tutorial</a>  
+          <a href="/blog/tag/reading">
+          <i class="fas fa-hashtag fa-sm"></i> reading</a>  
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    
+    <div id="table-of-contents">
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#course-overview-and-objectives">Course overview and objectives</a></li>
+<li class="toc-entry toc-h1"><a href="#problem-statement-data-are-samples-from-an-unknown-distribution-p_data">Problem statement: data are samples from an unknown distribution P_data</a></li>
+<li class="toc-entry toc-h1"><a href="#model-family-loss-function-and-projection-based-optimization">Model family, loss function, and projection-based optimization</a></li>
+<li class="toc-entry toc-h1"><a href="#applications-of-learned-probability-distributions">Applications of learned probability distributions</a></li>
+<li class="toc-entry toc-h1"><a href="#representing-probability-distributions-and-the-curse-of-dimensionality">Representing probability distributions and the curse of dimensionality</a></li>
+<li class="toc-entry toc-h1"><a href="#discrete-pixel-modeling-and-combinatorial-explosion-in-color-spaces">Discrete pixel modeling and combinatorial explosion in color spaces</a></li>
+<li class="toc-entry toc-h1"><a href="#binary-image-example-and-the-exponential-state-space-2n">Binary image example and the exponential state space 2^n</a></li>
+<li class="toc-entry toc-h1"><a href="#assuming-independence-to-reduce-parameters-and-its-limitations">Assuming independence to reduce parameters and its limitations</a></li>
+<li class="toc-entry toc-h1"><a href="#chain-rule-autoregressive-factorization-for-joint-distributions">Chain rule (autoregressive factorization) for joint distributions</a></li>
+<li class="toc-entry toc-h1"><a href="#parameter-explosion-in-naive-autoregressive-models-and-markov-assumptions">Parameter explosion in naive autoregressive models and Markov assumptions</a></li>
+<li class="toc-entry toc-h1"><a href="#bayesian-networks-directed-graphical-models-as-structured-factorization">Bayesian networks (directed graphical models) as structured factorization</a></li>
+<li class="toc-entry toc-h1"><a href="#example-bayesian-network-modeling-exam-difficulty-intelligence-grades">Example Bayesian network: modeling exam difficulty, intelligence, grades</a></li>
+<li class="toc-entry toc-h1"><a href="#using-graphical-models-versus-neural-networks-for-conditional-structure">Using graphical models versus neural networks for conditional structure</a></li>
+<li class="toc-entry toc-h1"><a href="#generative-modeling-applied-to-discriminative-tasks-the-naive-bayes-classifier">Generative modeling applied to discriminative tasks: the Naive Bayes classifier</a></li>
+<li class="toc-entry toc-h1"><a href="#discriminative-versus-generative-factorization-and-practical-trade-offs">Discriminative versus generative factorization and practical trade-offs</a></li>
+<li class="toc-entry toc-h1"><a href="#logistic-regression-as-a-functional-parametrization-of-pyx">Logistic regression as a functional parametrization of P(Y|X)</a></li>
+<li class="toc-entry toc-h1"><a href="#neural-networks-as-richer-functional-parameterizations-and-deep-autoregressive-models">Neural networks as richer functional parameterizations and deep autoregressive models</a></li>
+<li class="toc-entry toc-h1"><a href="#design-choices-for-deep-generative-models-factorization-parameter-tying-and-assumptions">Design choices for deep generative models: factorization, parameter tying, and assumptions</a></li>
+<li class="toc-entry toc-h1"><a href="#continuous-variables-probability-density-functions-and-latent-variable-generative-models-mixtures-and-vaes">Continuous variables, probability density functions, and latent-variable generative models (mixtures and VAEs)</a></li>
+</ul>
+    </div>
+    <hr>
+    
+    <div id="markdown-content">
+      <div style="display: flex; justify-content: center;">
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/rNEujZmD2Tg" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen="">
+    </iframe>
+</div>
+
+<h1 id="course-overview-and-objectives">Course overview and objectives</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec02/00-00-44-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec02/00-00-44-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec02/00-00-44-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec02/00-00-44.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Provides a high-level roadmap for the lecture series that orients the listener around three goals:<br></p>
+
+<ul>
+  <li>Define what we mean by <strong>generative models</strong> and introduce <strong>graphical models</strong>.<br>
+</li>
+  <li>Explain the <strong>generative vs. discriminative</strong> distinction and when each viewpoint is useful.<br>
+</li>
+  <li>Motivate using <strong>neural networks</strong> to combat the <strong>curse of dimensionality</strong> when modeling complex data like images and text.<br>
+</li>
+</ul>
+
+<p>The overview frames subsequent material around three components needed for generative modeling: <strong>data</strong>, a <strong>model family</strong>, and a <strong>similarity / loss metric</strong>.<br></p>
+<ul>
+  <li>Changing any of these components yields different classes of generative models (for example: <strong>autoregressive models</strong>, <strong>diffusion models</strong>, <strong>GANs</strong>).<br>
+</li>
+</ul>
+
+<p>Taken together, this situates <strong>deep generative modeling</strong> as an exploration of representational and algorithmic choices that balance <strong>expressivity</strong> and <strong>tractability</strong>.<br></p>
+
+<hr>
+
+<h1 id="problem-statement-data-are-samples-from-an-unknown-distribution-p_data">Problem statement: data are samples from an unknown distribution P_data</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec02/00-02-43-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec02/00-02-43-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec02/00-02-43-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec02/00-02-43.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Defines the core problem: approximate an unknown data-generating distribution <strong>P_data</strong> from observed samples.<br></p>
+
+<ul>
+  <li>A successful approximation lets us <strong>sample</strong> to generate new data and supports many downstream tasks (imputation, anomaly detection, etc.).<br>
+</li>
+  <li>Treat <strong>P_data</strong> as an object to be approximated by a parameterized model family <strong>P_theta</strong>.<br>
+</li>
+  <li>The central goal becomes finding the member of that family closest to <strong>P_data</strong> according to a chosen notion of <strong>distance</strong> or <strong>loss</strong>.<br>
+</li>
+</ul>
+
+<p>This formulation highlights that data-driven modeling reduces to design choices about the <strong>model family</strong>, the <strong>divergence or loss</strong>, and the <strong>optimization method</strong> used to fit theta.<br></p>
+
+<hr>
+
+<h1 id="model-family-loss-function-and-projection-based-optimization">Model family, loss function, and projection-based optimization</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec02/00-05-15-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec02/00-05-15-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec02/00-05-15-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec02/00-05-15.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Describes the three fundamental components of generative modeling and how they interact:<br></p>
+
+<ol>
+  <li>
+<strong>Model family {P_theta}</strong> — a parameterized set of probability distributions that encodes representational assumptions.<br>
+</li>
+  <li>
+<strong>Distance / loss</strong> — a metric that determines which discrepancies between distributions matter for the application.<br>
+</li>
+  <li>
+<strong>Optimization procedure</strong> — the algorithm that projects <strong>P_data</strong> onto the model family by minimizing the chosen loss.<br>
+</li>
+</ol>
+
+<ul>
+  <li>The <strong>model family</strong> controls representational capacity and inductive biases.<br>
+</li>
+  <li>The <strong>loss</strong> dictates the kinds of errors we prioritize (e.g., mode coverage vs. sample fidelity).<br>
+</li>
+  <li>The <strong>optimizer</strong> governs what solutions are reachable in practice.<br>
+</li>
+</ul>
+
+<p>Together these components determine <strong>inductive biases</strong>, <strong>computational tractability</strong>, and the types of errors a generative model will make.<br></p>
+
+<hr>
+
+<h1 id="applications-of-learned-probability-distributions">Applications of learned probability distributions</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec02/00-08-18-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec02/00-08-18-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec02/00-08-18-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec02/00-08-18.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Enumerates practical uses for a learned approximation <strong>P_theta</strong>:<br></p>
+
+<ul>
+  <li>
+<strong>Sampling</strong>: generate new, synthetic data drawn from the modeled distribution.<br>
+</li>
+  <li>
+<strong>Density estimation</strong>: assign likelihoods or scores to inputs under the model.<br>
+</li>
+  <li>
+<strong>Anomaly detection</strong>: flag low-likelihood events as outliers.<br>
+</li>
+  <li>
+<strong>Unsupervised feature discovery</strong>: extract latent structure or representations useful for downstream tasks.<br>
+</li>
+</ul>
+
+<p>A learned density gives a principled measure of how typical an input is under the data manifold, enabling additional tasks such as:<br></p>
+<ul>
+  <li>
+<strong>Imputation</strong>, <strong>controllable generation</strong>, <strong>semi-supervised learning</strong>, and <strong>discovery of axes of variation</strong> in the dataset.<br>
+</li>
+</ul>
+
+<p>These capabilities show why modeling the full distribution is valuable beyond pure classification objectives.<br></p>
+
+<hr>
+
+<h1 id="representing-probability-distributions-and-the-curse-of-dimensionality">Representing probability distributions and the curse of dimensionality</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec02/00-11-34-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec02/00-11-34-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec02/00-11-34-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec02/00-11-34.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Introduces the core representational challenge: probability distributions over high-dimensional spaces are intractable to represent naively because the number of possible outcomes grows exponentially with dimensionality.<br></p>
+
+<ul>
+  <li>Contrast trivial low-dimensional cases (e.g., <strong>Bernoulli</strong>, <strong>categorical</strong>) with high-dimensional structured objects (images, text).<br>
+</li>
+  <li>A direct tabular representation of the joint becomes impossible for realistic data: storage and estimation blow up exponentially.<br>
+</li>
+</ul>
+
+<p>This motivates the need for <strong>structural assumptions</strong> or <strong>compact parameterizations</strong> to obtain tractable models.<br></p>
+
+<hr>
+
+<h1 id="discrete-pixel-modeling-and-combinatorial-explosion-in-color-spaces">Discrete pixel modeling and combinatorial explosion in color spaces</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec02/00-15-05-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec02/00-15-05-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec02/00-15-05-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec02/00-15-05.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Explains how modeling pixel-level color distributions leads to combinatorial growth:<br></p>
+
+<ul>
+  <li>With discrete RGB channels of 256 levels each, a single pixel can take <strong>256^3</strong> possible colors.<br>
+</li>
+  <li>A full joint over many pixels quickly becomes <strong>astronomically large</strong>, since a fully general joint requires specifying a probability for every discrete configuration.<br>
+</li>
+</ul>
+
+<p>Therefore, practical modeling requires <strong>structured factorizations</strong> or <strong>function-based parameterizations</strong> (e.g., neural networks) to compress representation and avoid the parameter explosion inherent in naive approaches.<br></p>
+
+<hr>
+
+<h1 id="binary-image-example-and-the-exponential-state-space-2n">Binary image example and the exponential state space 2^n</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec02/00-17-55-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec02/00-17-55-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec02/00-17-55-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec02/00-17-55.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Illustrates the discrete-state explosion using black-and-white images:<br></p>
+
+<ul>
+  <li>Model an image as <strong>n</strong> binary pixels ⇒ there are <strong>2^n</strong> possible images.<br>
+</li>
+  <li>Even modest-resolution images produce an intractably large state space, so storing or learning a full table of probabilities is impossible in practice.<br>
+</li>
+</ul>
+
+<p>This forces us to adopt further assumptions—such as <strong>independence</strong>, <strong>conditional independence</strong>, or <strong>functional approximations</strong>—that dramatically reduce parameter count.<br></p>
+
+<hr>
+
+<h1 id="assuming-independence-to-reduce-parameters-and-its-limitations">Assuming independence to reduce parameters and its limitations</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec02/00-19-58-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec02/00-19-58-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec02/00-19-58-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec02/00-19-58.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Describes the extreme approximation of modeling all pixels (or features) as <strong>independent</strong>:<br></p>
+
+<ul>
+  <li>The joint becomes a product of marginals, reducing parameters from exponential to <strong>linear</strong> in the number of variables.<br>
+</li>
+  <li>Representation and learning become trivial under this assumption.<br>
+</li>
+</ul>
+
+<p>However, independence is typically far too strong for real-world data, which exhibit rich dependencies across dimensions, so samples from an independence model fail to capture coherent structure in images or text.<br></p>
+
+<p>This trade-off exemplifies the tension between <strong>tractability</strong> and <strong>fidelity</strong> in model design.<br></p>
+
+<hr>
+
+<h1 id="chain-rule-autoregressive-factorization-for-joint-distributions">Chain rule (autoregressive factorization) for joint distributions</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec02/00-22-41-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec02/00-22-41-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec02/00-22-41-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec02/00-22-41.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Presents the <strong>chain rule of probability</strong> as a fully general factorization:<br></p>
+
+<ul>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>Any joint can be written as P(x1) P(x2</td>
+          <td>x1) P(x3</td>
+          <td>x1,x2) … .<br>
+</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>This factorization underlies <strong>autoregressive models</strong>, enabling sequential <strong>sampling</strong> and <strong>likelihood evaluation</strong> by modeling each conditional in turn.<br>
+</li>
+</ul>
+
+<p>While the chain rule gives a principled decomposition of a complex joint into conditional factors, without further assumptions the conditionals themselves can still be intractably high-dimensional.<br></p>
+
+<hr>
+
+<h1 id="parameter-explosion-in-naive-autoregressive-models-and-markov-assumptions">Parameter explosion in naive autoregressive models and Markov assumptions</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec02/00-26-15-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec02/00-26-15-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec02/00-26-15-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec02/00-26-15.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Analyzes parameter count for an unrestricted autoregressive factorization and how to make it tractable:<br></p>
+
+<ul>
+  <li>An unrestricted factorization remains <strong>exponential</strong> because each conditional may require parameters for every configuration of its parents.<br>
+</li>
+  <li>Introducing <strong>Markov</strong> or <strong>limited-history</strong> conditional-independence assumptions (e.g., depend only on the previous <strong>k</strong> variables) reduces parameters from exponential to <strong>polynomial</strong> or <strong>linear</strong> in sequence length.<br>
+</li>
+</ul>
+
+<p>These conditional-independence simplifications trade <strong>expressive power</strong> for <strong>tractability</strong> and form the basis of practical autoregressive and sequence models.<br></p>
+
+<hr>
+
+<h1 id="bayesian-networks-directed-graphical-models-as-structured-factorization">Bayesian networks (directed graphical models) as structured factorization</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec02/00-30-42-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec02/00-30-42-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec02/00-30-42-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec02/00-30-42.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Defines <strong>Bayesian networks</strong> as directed acyclic graphs (DAGs) that encode a factorization of a joint distribution into local conditionals:<br></p>
+
+<ul>
+  <li>Each node depends only on its <strong>parents</strong> in the graph.<br>
+</li>
+  <li>A Bayesian network is specified by a <strong>graph structure</strong> and a set of <strong>conditional probability tables</strong> or parameterized conditionals.<br>
+</li>
+  <li>A topological ordering plus the chain rule guarantees that the product of the local conditionals yields a valid joint distribution.<br>
+</li>
+</ul>
+
+<p>The graph structure encodes <strong>conditional independencies</strong> that can yield large representational savings when dependencies are local and parent sets are small.<br></p>
+
+<hr>
+
+<h1 id="example-bayesian-network-modeling-exam-difficulty-intelligence-grades">Example Bayesian network: modeling exam difficulty, intelligence, grades</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec02/00-34-37-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec02/00-34-37-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec02/00-34-37-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec02/00-34-37.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Presents a concrete Bayesian network example (exam difficulty, student intelligence, grades, SAT score):<br></p>
+
+<ul>
+  <li>The joint factorizes into local conditionals according to the DAG (some nodes have no parents → marginals; others depend on a subset of variables).<br>
+</li>
+  <li>You only specify small conditional tables for each node instead of a full joint, reducing parameter complexity.<br>
+</li>
+</ul>
+
+<p>The example clarifies how <strong>domain assumptions</strong> translate into graph structure and how those assumptions simplify <strong>learning</strong> and <strong>inference</strong>.<br></p>
+
+<hr>
+
+<h1 id="using-graphical-models-versus-neural-networks-for-conditional-structure">Using graphical models versus neural networks for conditional structure</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec02/00-37-43-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec02/00-37-43-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec02/00-37-43-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec02/00-37-43.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Summarizes the role of graphical models and motivates a shift to neural parameterizations:<br></p>
+
+<ul>
+  <li>
+<strong>Graphical models (Bayesian networks)</strong> are a principled tool to factorize and simplify joints via conditional independence.<br>
+</li>
+  <li>This lecture favors a softer approach: use <strong>neural networks</strong> to parameterize conditionals.<br>
+</li>
+</ul>
+
+<p>Neural conditionals relax strict independence assumptions and scale better to high-dimensional inputs, while retaining a graphical-model flavor by composing local conditionals into a global generative process—preparing the transition from classical PGMs to <strong>deep generative models</strong>.<br></p>
+
+<hr>
+
+<h1 id="generative-modeling-applied-to-discriminative-tasks-the-naive-bayes-classifier">Generative modeling applied to discriminative tasks: the Naive Bayes classifier</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec02/00-41-37-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec02/00-41-37-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec02/00-41-37-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec02/00-41-37.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Describes <strong>Naive Bayes</strong> as a simple generative classifier:<br></p>
+
+<ul>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>It models the joint <strong>P(X, Y)</strong> by assuming conditional independence of features given the label, then uses <strong>Bayes’ rule</strong> to compute **P(Y</td>
+          <td>X)** at prediction time.<br>
+</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>Parameter estimation reduces to counting or estimating <strong>P(Y)</strong> and **P(X_i</td>
+          <td>Y)** for each feature, which is tractable.<br>
+</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+
+<table>
+  <tbody>
+    <tr>
+      <td>Despite violated independence assumptions, Naive Bayes is often effective in practice and highlights the generative approach of modeling features explicitly, contrasting with purely discriminative methods that model **P(Y</td>
+      <td>X)** directly.<br>
+</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr>
+
+<h1 id="discriminative-versus-generative-factorization-and-practical-trade-offs">Discriminative versus generative factorization and practical trade-offs</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec02/00-45-59-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec02/00-45-59-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec02/00-45-59-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec02/00-45-59.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Compares <strong>discriminative</strong> and <strong>generative</strong> modeling approaches:<br></p>
+
+<ul>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>
+<strong>Discriminative models</strong>: directly model **P(Y</td>
+          <td>X)** (or a predictive function), focusing only on the predictive task and often being more efficient when prediction is the sole goal.<br>
+</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>
+<strong>Generative models</strong>: model the full joint <strong>P(X, Y)</strong> (e.g., **P(Y) P(X</td>
+          <td>Y)<strong>) or other factorizations, supporting broader tasks such as **sampling</strong>, <strong>imputation</strong>, and <strong>density estimation</strong>.<br>
+</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+
+<p>Both approaches face exponential complexity when inputs are high-dimensional, so both require simplifying assumptions or parametric function classes to be practical.<br></p>
+
+<hr>
+
+<h1 id="logistic-regression-as-a-functional-parametrization-of-pyx">Logistic regression as a functional parametrization of P(Y|X)</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec02/00-51-54-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec02/00-51-54-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec02/00-51-54-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec02/00-51-54.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Explains how discriminative models avoid a tabular representation by assuming a functional form for <strong>P(Y | X)</strong>:<br></p>
+
+<ul>
+  <li>
+<strong>Logistic regression</strong> is the canonical example: map a linear combination of features through a <strong>sigmoid</strong> to produce a probability in [0,1].<br>
+</li>
+  <li>This replaces an intractable lookup table with a low-parameter function <strong>f_alpha(X)</strong> that generalizes across feature vectors and can be trained from labeled data.<br>
+</li>
+</ul>
+
+<p>Logistic regression illustrates how imposing a simple functional form makes learning feasible while trading off representational capacity for <strong>parsimony</strong> and <strong>statistical efficiency</strong>.<br></p>
+
+<hr>
+
+<h1 id="neural-networks-as-richer-functional-parameterizations-and-deep-autoregressive-models">Neural networks as richer functional parameterizations and deep autoregressive models</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec02/01-02-55-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec02/01-02-55-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec02/01-02-55-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec02/01-02-55.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Describes how <strong>neural networks</strong> generalize logistic regression to richer function classes:<br></p>
+
+<ul>
+  <li>Neural nets compute <strong>nonlinear features</strong> of X (layers like A X + b followed by activations and additional layers) before mapping to probabilities.<br>
+</li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>This provides far greater representational capacity for **P(Y</td>
+          <td>X)** or for conditional factors in chain-rule factorizations.<br>
+</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+
+<table>
+  <tbody>
+    <tr>
+      <td>In generative modeling, this capacity underpins <strong>deep autoregressive models</strong>, where neural networks parameterize each conditional **P(x_t</td>
+      <td>x_&lt;t)<strong>. Scaling to long sequences requires **weight tying</strong> and careful architectural design.<br>
+</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr>
+
+<h1 id="design-choices-for-deep-generative-models-factorization-parameter-tying-and-assumptions">Design choices for deep generative models: factorization, parameter tying, and assumptions</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec02/01-12-59-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec02/01-12-59-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec02/01-12-59-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec02/01-12-59.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Summarizes the core design levers for deep generative models:<br></p>
+
+<ul>
+  <li>Choose a <strong>factorization</strong> (chain rule, BN structure, latent-variable model).<br>
+</li>
+  <li>Decide how to <strong>simplify or parameterize conditionals</strong> (conditional independence, parametric functions, neural networks).<br>
+</li>
+  <li>Determine <strong>parameter tying / shared architectures</strong> to enable scalable learning across positions or time steps.<br>
+</li>
+</ul>
+
+<p>Every choice trades <strong>expressivity</strong>, <strong>statistical efficiency</strong>, and <strong>computational tractability</strong>. Common successful patterns replace explicit independence with <strong>learned neural conditionals</strong> that are tied across positions or conditioned on latent variables.<br></p>
+
+<hr>
+
+<h1 id="continuous-variables-probability-density-functions-and-latent-variable-generative-models-mixtures-and-vaes">Continuous variables, probability density functions, and latent-variable generative models (mixtures and VAEs)</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec02/01-18-01-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec02/01-18-01-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec02/01-18-01-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec02/01-18-01.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Extends discrete concepts to continuous domains and introduces latent-variable generative patterns:<br></p>
+
+<ul>
+  <li>Replace <strong>probability mass functions</strong> with <strong>probability density functions</strong> and assume parameterized functional forms (e.g., <strong>Gaussian</strong>, <strong>uniform</strong>) for tractability.<br>
+</li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>Bayesian-network-style factorizations naturally produce <strong>mixture models</strong> (e.g., a discrete latent Z chooses a cluster, then **X</td>
+          <td>Z** is Gaussian).<br>
+</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>
+<strong>Latent-variable models</strong> combine a simple prior <strong>P(Z)</strong> with neural-network-parameterized conditionals **P(X</td>
+          <td>Z; theta)** to obtain expressive families.<br>
+</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+
+<p>This is the generative-process pattern used in <strong>variational autoencoders</strong>: sample latent <strong>Z</strong> from a simple prior, compute conditional parameters via neural networks, then sample <strong>X</strong> from the resulting conditional density.<br></p>
+
+<hr>
+
+
+    </div>
+  </article>
+
+
+  
+    
+    <br>
+    <hr>
+    <br>
+    <ul class="list-disc pl-8"></ul>
+
+    <!-- Adds related posts to the end of an article -->
+    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
+    <p class="mb-2">Here are some more articles you might like to read next:</p>
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec06/">MIT 6.S184 - Lecture 6 - Diffusion for Protein Generation</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec05/">MIT 6.S184 - Lecture 5 - Diffusion for Robotics</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec04/">MIT 6.S184 - Lecture 4 - Building an Image Generator</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec03/">MIT 6.S184 - Lecture 3 - Training Flow and Diffusion Models</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec02/">MIT 6.S184 - Lecture 2 -  Constructing a Training Target</a>
+  </li>
+
+</div>
+
+      
+    </div>
+
+    <!-- Footer -->    
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        © Copyright 2025 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+
+      </div>
+    </footer>
+
+    <!-- JavaScripts -->
+    <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- Bootsrap & MDB scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    <!-- Masonry & imagesLoaded -->
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
+    
+  <!-- Medium Zoom JS -->
+  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/zoom.js"></script>
+
+  <!-- Bootstrap Table -->
+  <script defer src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+
+  <!-- Load Common JS -->
+  <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
+  <script defer src="/assets/js/common.js?acdb9690d7641b2f8d40529018c71a01"></script>
+  <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    <!-- MathJax -->
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        tags: 'ams'
+      }
+    };
+  </script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KGSMMS9MS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-7KGSMMS9MS');
+  </script>
+    
+
+<!-- Scrolling Progress Bar -->
+<script type="text/javascript">
+  /*
+   * This JavaScript code has been adapted from the article 
+   * https://css-tricks.com/reading-position-indicator/ authored by Pankaj Parashar, 
+   * published on the website https://css-tricks.com on the 7th of May, 2014.
+   * Couple of changes were made to the original code to make it compatible 
+   * with the `al-foio` theme.
+   */
+  const progressBar = $("#progress");
+  /*
+   * We set up the bar after all elements are done loading.
+   * In some cases, if the images in the page are larger than the intended
+   * size they'll have on the page, they'll be resized via CSS to accomodate
+   * the desired size. This mistake, however, breaks the computations as the
+   * scroll size is computed as soon as the elements finish loading.
+   * To account for this, a minimal delay was introduced before computing the
+   * values.
+   */
+  window.onload = function () {
+    setTimeout(progressBarSetup, 50);
+  };
+  /*
+   * We set up the bar according to the browser.
+   * If the browser supports the progress element we use that.
+   * Otherwise, we resize the bar thru CSS styling
+   */
+  function progressBarSetup() {
+    if ("max" in document.createElement("progress")) {
+      initializeProgressElement();
+      $(document).on("scroll", function() {
+        progressBar.attr({ value: getCurrentScrollPosition() });
+      });
+      $(window).on("resize", initializeProgressElement);
+    } else {
+      resizeProgressBar();
+      $(document).on("scroll", resizeProgressBar);
+      $(window).on("resize", resizeProgressBar);
+    }
+  }
+  /*
+   * The vertical scroll position is the same as the number of pixels that
+   * are hidden from view above the scrollable area. Thus, a value > 0 is
+   * how much the user has scrolled from the top
+   */
+  function getCurrentScrollPosition() {
+    return $(window).scrollTop();
+  }
+
+  function initializeProgressElement() {
+    let navbarHeight = $("#navbar").outerHeight(true);
+    $("body").css({ "padding-top": navbarHeight });
+    $("progress-container").css({ "padding-top": navbarHeight });
+    progressBar.css({ top: navbarHeight });
+    progressBar.attr({
+      max: getDistanceToScroll(),
+      value: getCurrentScrollPosition(),
+    });
+  }
+  /*
+   * The offset between the html document height and the browser viewport
+   * height will be greater than zero if vertical scroll is possible.
+   * This is the distance the user can scroll
+   */
+  function getDistanceToScroll() {
+    return $(document).height() - $(window).height();
+  }
+
+  function resizeProgressBar() {
+    progressBar.css({ width: getWidthPercentage() + "%" });
+  }
+  // The scroll ratio equals the percentage to resize the bar
+  function getWidthPercentage() {
+    return (getCurrentScrollPosition() / getDistanceToScroll()) * 100;
+  }
+</script>
+
+    
+  </body>
+</html>

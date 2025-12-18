@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <!-- Head -->
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    <!-- Metadata, OpenGraph and Schema.org -->
+    
+
+    <!-- Standard metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Stanford CS236 - Deep Generative Models I 2023 I Lecture 11 - Energy Based Models | Tuan-Anh  Bui</title>
+    <meta name="author" content="Tuan-Anh  Bui">
+    <meta name="description" content="AI Summary Lecture">
+    <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
+
+
+    <!-- Bootstrap & MDB -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+    <!-- Bootstrap Table -->
+    <link defer rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+
+    <!-- Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
+
+    
+
+    <!-- Styles -->
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
+    
+    <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+    <link rel="canonical" href="https://tuananhbui89.github.io/blog/2025/cs236-2023-lec11/">
+
+    <!-- Dark Mode -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark">
+    <script src="/assets/js/theme.js?96d6b3e1c3604aca8b6134c7afdd5db6"></script>
+    <script src="/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script>
+    
+
+  </head>
+
+  <!-- Body -->
+  <body class="fixed-top-nav ">
+
+    <!-- Header -->
+    <header>
+
+      <!-- Nav Bar -->
+      <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top">
+        <div class="container">
+          <a class="navbar-brand title font-weight-lighter" href="/"><span class="font-weight-bold">Tuan-Anh </span>Bui</a>
+          <!-- Navbar Toggle -->
+          <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar top-bar"></span>
+            <span class="icon-bar middle-bar"></span>
+            <span class="icon-bar bottom-bar"></span>
+          </button>
+
+          <div class="collapse navbar-collapse text-right" id="navbarNav">
+            <ul class="navbar-nav ml-auto flex-nowrap">
+
+              <!-- About -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/">about</a>
+              </li>
+              
+              <!-- Blog -->
+              <li class="nav-item active">
+                <a class="nav-link" href="/blog/">blog<span class="sr-only">(current)</span></a>
+              </li>
+
+              <!-- Other pages -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/publications/">publications</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/projects/">projects</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/repositories/">repositories</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/teaching/"></a>
+              </li>
+
+              <!-- Toogle theme mode -->
+              <li class="toggle-container">
+                <button id="light-toggle" title="Change theme">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Scrolling Progress Bar -->
+      <progress id="progress" value="0">
+        <div class="progress-container">
+          <span class="progress-bar"></span>
+        </div>
+      </progress>
+    </header>
+
+
+    <!-- Content -->
+    <div class="container mt-5">
+      
+        <!-- _layouts/post.html -->
+<!-- Page/Post style -->
+<style type="text/css">
+  
+</style>
+
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Stanford CS236 - Deep Generative Models I 2023 I Lecture 11 - Energy Based Models</h1>
+    <p class="post-meta">December 18, 2025</p>
+    <p class="post-tags">
+      <a href="/blog/2025"> <i class="fas fa-calendar fa-sm"></i> 2025 </a>
+        ·  
+        <a href="/blog/tag/genai">
+          <i class="fas fa-hashtag fa-sm"></i> genai</a>  
+          <a href="/blog/tag/llm">
+          <i class="fas fa-hashtag fa-sm"></i> llm</a>  
+          <a href="/blog/tag/tutorial">
+          <i class="fas fa-hashtag fa-sm"></i> tutorial</a>  
+          <a href="/blog/tag/reading">
+          <i class="fas fa-hashtag fa-sm"></i> reading</a>  
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    
+    <div id="table-of-contents">
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#lecture-overview-and-generative-model-design-space">Lecture overview and generative model design space</a></li>
+<li class="toc-entry toc-h1"><a href="#likelihood-based-models-impose-structural-constraints-to-ensure-valid-densities">Likelihood-based models impose structural constraints to ensure valid densities</a></li>
+<li class="toc-entry toc-h1"><a href="#motivation-for-energy-based-models-as-a-flexible-probabilistic-parametrization">Motivation for energy based models as a flexible probabilistic parametrization</a></li>
+<li class="toc-entry toc-h1"><a href="#probabilistic-models-must-satisfy-non-negativity-and-normalization-constraints">Probabilistic models must satisfy non-negativity and normalization constraints</a></li>
+<li class="toc-entry toc-h1"><a href="#why-normalization-is-hard-and-how-to-form-normalized-densities-from-unnormalized-functions">Why normalization is hard and how to form normalized densities from unnormalized functions</a></li>
+<li class="toc-entry toc-h1"><a href="#partition-function-concept-normalization-by-division-and-consequences">Partition function concept, normalization by division, and consequences</a></li>
+<li class="toc-entry toc-h1"><a href="#classical-examples-and-the-exponential-family-as-normalized-quotients">Classical examples and the exponential family as normalized quotients</a></li>
+<li class="toc-entry toc-h1"><a href="#relations-between-normalized-model-constructions-and-compositional-architectures">Relations between normalized-model constructions and compositional architectures</a></li>
+<li class="toc-entry toc-h1"><a href="#formal-definition-of-an-energy-based-model-and-choice-of-exponential-parametrization">Formal definition of an energy based model and choice of exponential parametrization</a></li>
+<li class="toc-entry toc-h1"><a href="#expressivity-vs-computational-costs-sampling-and-likelihood-evaluation-challenges">Expressivity vs. computational costs: sampling and likelihood evaluation challenges</a></li>
+<li class="toc-entry toc-h1"><a href="#curse-of-dimensionality-and-implications-for-partition-function-estimation">Curse of dimensionality and implications for partition function estimation</a></li>
+<li class="toc-entry toc-h1"><a href="#tasks-that-do-not-require-explicit-partition-function-evaluation">Tasks that do not require explicit partition function evaluation</a></li>
+<li class="toc-entry toc-h1"><a href="#derivative-based-properties-and-model-composition-via-product-or-mixture-ensembles">Derivative-based properties and model composition via product or mixture ensembles</a></li>
+<li class="toc-entry toc-h1"><a href="#product-of-experts-behavior-and-sampling-considerations">Product-of-experts behavior and sampling considerations</a></li>
+<li class="toc-entry toc-h1"><a href="#restricted-boltzmann-machine-rbm-as-a-discrete-latent-variable-energy-model">Restricted Boltzmann Machine (RBM) as a discrete latent-variable energy model</a></li>
+<li class="toc-entry toc-h1"><a href="#partition-function-in-rbms-and-why-exact-likelihood-training-is-infeasible">Partition function in RBMs and why exact likelihood training is infeasible</a></li>
+<li class="toc-entry toc-h1"><a href="#gradient-of-the-log-likelihood-and-the-contrastive-divergence-monte-carlo-approximation">Gradient of the log-likelihood and the contrastive-divergence Monte Carlo approximation</a></li>
+<li class="toc-entry toc-h1"><a href="#sampling-from-ebms-using-local-proposals-and-markov-chain-monte-carlo">Sampling from EBMs using local proposals and Markov chain Monte Carlo</a></li>
+</ul>
+    </div>
+    <hr>
+    
+    <div id="markdown-content">
+      <div style="display: flex; justify-content: center;">
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/m61KiAMCJ5Q" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen="">
+    </iframe>
+</div>
+
+<h1 id="lecture-overview-and-generative-model-design-space">Lecture overview and generative model design space</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec11/00-00-41-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec11/00-00-41-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec11/00-00-41-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec11/00-00-41.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The lecture introduces <strong>energy-based models (EBMs)</strong> as a family of generative models and situates them within the general design space for generative modeling: choose a <strong>model family</strong> and a <strong>loss function</strong> given IID data samples.<br></p>
+
+<p>Principled objectives like <strong>maximum likelihood</strong> and <strong>Kullback–Leibler (KL) divergence</strong> are appropriate when models provide tractable likelihoods. This motivates architectures that allow exact or approximate density evaluation, such as <strong>autoregressive models</strong> and <strong>normalizing flows</strong>.<br></p>
+
+<p>The central tradeoff is framed clearly:<br></p>
+<ul>
+  <li>Models that permit likelihood evaluation impose <strong>architectural constraints</strong>.<br>
+</li>
+  <li>
+<strong>Likelihood-free</strong> or implicitly defined samplers (for example, <strong>GANs</strong>) relax those constraints but require alternative training objectives and often unstable minimax optimization.<br>
+</li>
+</ul>
+
+<p>This tension motivates exploring <strong>EBMs</strong>, which aim to combine high flexibility in parameterizing distributions with likelihood-informed or likelihood-based training strategies.<br></p>
+
+<hr>
+
+<h1 id="likelihood-based-models-impose-structural-constraints-to-ensure-valid-densities">Likelihood-based models impose structural constraints to ensure valid densities</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec11/00-02-20-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec11/00-02-20-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec11/00-02-20-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec11/00-02-20.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Models that permit direct likelihood evaluation</strong> must satisfy two constraints: <strong>non-negativity</strong> and <strong>normalization</strong>. Enforcing these constraints forces particular architectural designs:<br></p>
+
+<ul>
+  <li>
+<strong>Autoregressive</strong> constructions: use the chain rule to produce normalized conditionals.<br>
+</li>
+  <li>
+<strong>Invertible networks / flows</strong>: produce a tractable change-of-variables Jacobian for exact density evaluation.<br>
+</li>
+  <li>
+<strong>Latent-variable / variational</strong> approaches: use analytic or approximated marginalization.<br>
+</li>
+</ul>
+
+<p>These constraints limit admissible neural architectures because arbitrary networks do not automatically yield valid probability densities.<br></p>
+
+<p>When likelihood evaluation is infeasible, alternative approaches like <strong>GANs</strong> define the model implicitly via a <strong>sampler</strong> and use two-sample tests or discriminator-based objectives to train. However, these <strong>minimax objectives</strong> introduce:<br></p>
+<ul>
+  <li>training instability,<br>
+</li>
+  <li>difficulty detecting convergence,<br>
+</li>
+  <li>challenges for principled evaluation.<br>
+</li>
+</ul>
+
+<p>The lecture emphasizes these practical costs and motivates methods that recover architectural flexibility without abandoning principled training entirely.<br></p>
+
+<hr>
+
+<h1 id="motivation-for-energy-based-models-as-a-flexible-probabilistic-parametrization">Motivation for energy based models as a flexible probabilistic parametrization</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec11/00-04-19-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec11/00-04-19-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec11/00-04-19-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec11/00-04-19.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Energy-based models (EBMs)</strong> lift many architectural restrictions by defining distributions implicitly via an <strong>unnormalized energy or score function</strong>.<br></p>
+
+<ul>
+  <li>EBMs allow essentially <strong>arbitrary neural network architectures</strong> to output a scalar <strong>energy</strong> for any input.<br>
+</li>
+  <li>
+<strong>Normalization</strong> is enforced by dividing the unnormalized density by a <strong>partition function</strong>, enabling very expressive model families.<br>
+</li>
+</ul>
+
+<p>The lecturer highlights connections to <strong>maximum likelihood</strong> and related losses, suggesting EBMs can yield more stable training than adversarial methods while retaining links to likelihood-informed objectives.<br></p>
+
+<p>EBMs are also closely related to <strong>diffusion models</strong>, which have achieved state-of-the-art sampling in continuous domains, and to compositional modeling: EBMs can be <strong>composed or combined</strong> with other model families to capture intersecting concepts.<br></p>
+
+<hr>
+
+<h1 id="probabilistic-models-must-satisfy-non-negativity-and-normalization-constraints">Probabilistic models must satisfy non-negativity and normalization constraints</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec11/00-06-07-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec11/00-06-07-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec11/00-06-07-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec11/00-06-07.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>A valid probability mass or density function must be <strong>non-negative everywhere</strong> and <strong>integrate (or sum) to one</strong>; these two constraints are conceptually distinct in enforcement difficulty.<br></p>
+
+<ul>
+  <li>
+<strong>Non-negativity</strong> is easy to enforce for arbitrary neural networks by applying elementwise transforms such as <strong>squaring</strong>, <strong>exponentiation</strong>, <strong>absolute value</strong>, or similar final-layer operations that guarantee non-negative outputs.<br>
+</li>
+  <li>
+<strong>Normalization</strong> is far more restrictive: it requires the integral or sum over the entire domain to equal a constant independent of parameters. This typically forces special architectures (autoregressive factorization, invertible transforms) or analytic functional choices.<br>
+</li>
+</ul>
+
+<p>The lecture uses an analogy of dividing a cake among outcomes to emphasize that <strong>enforcing a fixed total mass</strong> is the primary challenge motivating alternative formulations like EBMs.<br></p>
+
+<hr>
+
+<h1 id="why-normalization-is-hard-and-how-to-form-normalized-densities-from-unnormalized-functions">Why normalization is hard and how to form normalized densities from unnormalized functions</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec11/00-08-31-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec11/00-08-31-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec11/00-08-31-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec11/00-08-31.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Given an arbitrary parameterized non-negative function <strong>G_theta(x)</strong> produced by a neural network, the total integral (or sum) over x is generally a parameter-dependent scalar and will not equal one by default.<br></p>
+
+<p><strong>Energy-based modeling</strong> embraces this by defining a normalized density:</p>
+<ul>
+  <li>p_theta(x) = G_theta(x) / Z_theta,
+where <strong>Z_theta</strong> is the <strong>partition function</strong> (the integral or sum of G_theta over the domain). This division produces a valid probability distribution for any non-negative G_theta.<br>
+</li>
+</ul>
+
+<p>However, computing <strong>Z_theta</strong> analytically is feasible only for restricted functional forms. EBMs therefore acknowledge that <strong>Z_theta is typically intractable</strong> and must be handled explicitly—either approximated or avoided by algorithmic design. This reparameterization opens the door to highly flexible G_theta choices while making clear the computational bottleneck: the <strong>partition function</strong>.<br></p>
+
+<hr>
+
+<h1 id="partition-function-concept-normalization-by-division-and-consequences">Partition function concept, normalization by division, and consequences</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec11/00-13-23-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec11/00-13-23-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec11/00-13-23-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec11/00-13-23.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Dividing a non-negative unnormalized density by its <strong>partition function</strong> yields a mathematically valid normalized probability model, which is the defining construction of EBMs.<br></p>
+
+<ul>
+  <li>
+<strong>Z_theta</strong> is the integral (continuous case) or sum (discrete case) of the unnormalized function and depends on parameters, so it must be considered during evaluation and learning.<br>
+</li>
+  <li>In simple families (e.g., <strong>Gaussian</strong>, <strong>exponential</strong>) this integral can be computed in closed form, yielding classical normalized distributions.<br>
+</li>
+</ul>
+
+<p>For general neural-network-parameterized unnormalized functions, <strong>Z_theta is intractable</strong> due to the curse of dimensionality and exponential growth in domain size. Therefore, EBMs trade expressivity for the need to either <strong>approximate Z_theta</strong> or develop training and sampling methods that avoid requiring its exact value.<br></p>
+
+<hr>
+
+<h1 id="classical-examples-and-the-exponential-family-as-normalized-quotients">Classical examples and the exponential family as normalized quotients</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec11/00-18-24-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec11/00-18-24-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec11/00-18-24-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec11/00-18-24.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Many familiar distributions fit the <strong>unnormalized-plus-division</strong> pattern:<br></p>
+<ul>
+  <li>
+<strong>Gaussian</strong>: exp(−(x−μ)^2/(2σ^2)) divided by sqrt(2πσ^2).<br>
+</li>
+  <li>
+<strong>Exponential</strong>: exp(−λx) divided by 1/λ.<br>
+</li>
+</ul>
+
+<p>More generally, distributions in the <strong>exponential family</strong> take the form p(x) ∝ exp(θ·T(x)) with a <strong>log-partition function</strong> that normalizes the density; these families are analytically tractable under specific sufficient-statistic choices and capture a wide class of common distributions.<br></p>
+
+<p>The lecture explains that <strong>EBMs generalize this paradigm</strong> by allowing complex neural-network-based energies in the exponent, removing the requirement that normalization be analytically solvable. This extension increases modeling flexibility but transfers the computational burden to approximating or otherwise handling the partition function during learning and inference.<br></p>
+
+<hr>
+
+<h1 id="relations-between-normalized-model-constructions-and-compositional-architectures">Relations between normalized-model constructions and compositional architectures</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec11/00-21-32-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec11/00-21-32-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec11/00-21-32-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec11/00-21-32.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Autoregressive models, latent-variable models, flows, and mixtures</strong> can be interpreted as structured ways to build complex normalized densities from simpler normalized components:<br></p>
+
+<ul>
+  <li>
+<strong>Autoregressive</strong>: the joint is a product of normalized conditionals, so the full joint is normalized by design.<br>
+</li>
+  <li>
+<strong>Latent-variable</strong>: marginalizing over simple normalized conditionals yields normalized marginals.<br>
+</li>
+  <li>
+<strong>Flows</strong>: use invertible transforms with tractable Jacobians to convert between densities.<br>
+</li>
+  <li>
+<strong>Mixtures</strong>: convex combinations of normalized components remain normalized.<br>
+</li>
+</ul>
+
+<p>These constructive approaches guarantee normalization for all parameter settings, but they impose design constraints and may limit flexibility compared to arbitrary unnormalized energies. <strong>EBMs</strong> are contrasted as freeing architecture choices at the cost of making the normalization constant parameter-dependent and generally intractable.<br></p>
+
+<hr>
+
+<h1 id="formal-definition-of-an-energy-based-model-and-choice-of-exponential-parametrization">Formal definition of an energy based model and choice of exponential parametrization</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec11/00-26-01-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec11/00-26-01-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec11/00-26-01-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec11/00-26-01.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>An energy-based model parameterizes a probability density as:</p>
+<ul>
+  <li>
+    <p>p_theta(x) = exp(f_theta(x)) / Z_theta,
+where <strong>f_theta(x)</strong> is an arbitrary scalar-valued function (often a neural network) and <strong>Z_theta</strong> is the partition function.<br></p>
+  </li>
+  <li>The <strong>exponential map</strong> guarantees non-negativity and conveniently models large dynamic ranges in relative probabilities: small changes in f_theta can yield large multiplicative changes in p_theta(x).<br>
+</li>
+  <li>This form generalizes <strong>softmax-style normalization</strong> for finite discrete outputs and recovers classical exponential-family forms when f_theta is simple.<br>
+</li>
+</ul>
+
+<p>The primary practical costs are that evaluating normalized probabilities and drawing samples are difficult because <strong>Z_theta is generally intractable</strong> for high-dimensional x.<br></p>
+
+<hr>
+
+<h1 id="expressivity-vs-computational-costs-sampling-and-likelihood-evaluation-challenges">Expressivity vs. computational costs: sampling and likelihood evaluation challenges</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec11/00-34-35-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec11/00-34-35-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec11/00-34-35-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec11/00-34-35.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>EBMs provide maximal flexibility</strong> in choosing f_theta, enabling arbitrary neural architectures to model data. But this flexibility incurs computational costs:<br></p>
+
+<ul>
+  <li>Evaluating normalized likelihoods requires computing <strong>Z_theta</strong>.<br>
+</li>
+  <li>Sampling from p_theta(x) is typically expensive or intractable by straightforward methods because <strong>Z_theta couples probabilities across the entire domain</strong>.<br>
+</li>
+</ul>
+
+<p>Numerical integration or brute-force summation scales exponentially with dimensionality and is infeasible for images, audio, and other high-dimensional modalities. The lecturer notes that <strong>diffusion models</strong> effectively exploit energy-based parametrizations and approximations to achieve strong sampling performance, illustrating that the flexibility payoff can be realized with careful algorithm design.<br></p>
+
+<p>Overall, EBMs trade architectural freedom for the need to employ sophisticated approximations for inference, sampling, and training.<br></p>
+
+<hr>
+
+<h1 id="curse-of-dimensionality-and-implications-for-partition-function-estimation">Curse of dimensionality and implications for partition function estimation</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec11/00-43-29-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec11/00-43-29-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec11/00-43-29-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec11/00-43-29.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The central computational barrier for EBMs is the <strong>curse of dimensionality</strong>: the number of domain configurations grows exponentially with the number of variables, so exact computation of <strong>Z_theta</strong> or naive numerical approximations are infeasible.<br></p>
+
+<ul>
+  <li>This affects discrete domains (combinatorial explosion of assignments) and continuous domains (volume discretization required to approximate integrals).<br>
+</li>
+  <li>Likelihood-based training and exact sampling become prohibitive for high-dimensional data.<br>
+</li>
+</ul>
+
+<p>Consequently, practical EBM algorithms focus on methods that either <strong>bypass the need to compute Z_theta exactly</strong> (e.g., contrastive objectives, score-based formulations) or <strong>approximate the partition function or its gradients</strong> with Monte Carlo and MCMC techniques. The lecture frames subsequent material as addressing how to learn and sample from EBMs despite this fundamental complexity.<br></p>
+
+<hr>
+
+<h1 id="tasks-that-do-not-require-explicit-partition-function-evaluation">Tasks that do not require explicit partition function evaluation</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec11/00-49-25-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec11/00-49-25-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec11/00-49-25-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec11/00-49-25.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Many practical tasks require only <strong>relative comparisons between model scores</strong> rather than absolute normalized probabilities, so the partition function cancels out in ratios and can be ignored for those tasks.<br></p>
+
+<p>Examples include:<br></p>
+<ul>
+  <li>
+<strong>Ranking</strong><br>
+</li>
+  <li>
+<strong>Anomaly detection</strong><br>
+</li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>
+<strong>Conditional MAP inference</strong> (finding argmax_y p(y</td>
+          <td>x))<br>
+</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>Many discriminative tasks where only relative orderings of likelihoods matter<br>
+</li>
+</ul>
+
+<table>
+  <tbody>
+    <tr>
+      <td>The lecture illustrates <strong>denoising</strong> as a conditional inference problem where the posterior mode argmax_y p(y</td>
+      <td>x) can be found without knowing Z_theta because normalization over y given x is constant across candidate y values. This property makes EBMs useful for a range of applications despite the intractability of Z_theta and motivates sampling and optimization techniques that exploit score comparisons.<br>
+</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr>
+
+<h1 id="derivative-based-properties-and-model-composition-via-product-or-mixture-ensembles">Derivative-based properties and model composition via product or mixture ensembles</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec11/00-54-00-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec11/00-54-00-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec11/00-54-00-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec11/00-54-00.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The <strong>gradient of the log-probability</strong> with respect to parameters often eliminates dependence on the partition function in useful ways, enabling learning algorithms that do not require Z_theta explicitly because derivatives of log p_theta(x) remove additive constants.<br></p>
+
+<p>Energy-based representations also enable flexible ensembling operations:<br></p>
+<ul>
+  <li>
+<strong>Product-of-experts</strong>: multiplying normalized model densities yields an unnormalized product whose <strong>log-energy is the sum</strong> of individual log-densities. This behaves like an <strong>AND</strong> operator—any expert assigning near-zero probability drives the product low—enabling composition that captures intersections of concepts. However, the product requires renormalization with a global partition function, reintroducing computational costs for sampling and likelihood evaluation.<br>
+</li>
+  <li>
+<strong>Mixtures</strong>: convex combinations behave like a <strong>soft OR</strong> and remain normalized by construction, but they do not impose intersection constraints and are easier to work with when component partition functions are known.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="product-of-experts-behavior-and-sampling-considerations">Product-of-experts behavior and sampling considerations</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec11/00-58-30-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec11/00-58-30-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec11/00-58-30-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec11/00-58-30.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The <strong>product-of-experts</strong> approach multiplies individual densities to produce a combined unnormalized density whose energy is the sum of component energies. Key points:<br></p>
+<ul>
+  <li>The combined model emphasizes <strong>intersections of support</strong> across experts (semantic compositionality).<br>
+</li>
+  <li>The global <strong>partition function</strong> for the product must be computed or approximated to normalize the model.<br>
+</li>
+  <li>
+<strong>Sampling</strong> from the product is harder than sampling each component independently because the product couples variables and typically requires specialized MCMC or other approximate samplers.<br>
+</li>
+</ul>
+
+<p>Although sampling is expensive, it is not impossible: practical implementations use approximate inference strategies to make products of experts useful in applications.<br></p>
+
+<hr>
+
+<h1 id="restricted-boltzmann-machine-rbm-as-a-discrete-latent-variable-energy-model">Restricted Boltzmann Machine (RBM) as a discrete latent-variable energy model</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec11/01-02-14-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec11/01-02-14-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec11/01-02-14-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec11/01-02-14.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The <strong>Restricted Boltzmann Machine (RBM)</strong> is a canonical discrete EBM with binary visible variables x and binary hidden variables z, defined by an energy that is a quadratic form comprising visible biases, hidden biases, and pairwise visible–hidden interactions weighted by a matrix W.<br></p>
+
+<ul>
+  <li>The RBM has <strong>no intra-layer interactions</strong> (no visible–visible or hidden–hidden terms), which makes conditional sampling between layers tractable and enables efficient <strong>Gibbs</strong> updates for certain inference steps.<br>
+</li>
+  <li>Historically, RBMs and stacked compositions (Deep Belief Networks) were among the first deep generative models to produce compelling samples and served as unsupervised pretraining for deep supervised networks.<br>
+</li>
+</ul>
+
+<p>Despite their historical importance, RBMs exemplify the <strong>partition function problem</strong>, since computing Z requires summing over exponentially many joint assignments of visible and hidden units.<br></p>
+
+<hr>
+
+<h1 id="partition-function-in-rbms-and-why-exact-likelihood-training-is-infeasible">Partition function in RBMs and why exact likelihood training is infeasible</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec11/01-07-23-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec11/01-07-23-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec11/01-07-23-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec11/01-07-23.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>In an RBM the unnormalized probability is straightforward to evaluate for any configuration via the energy computation, but the partition function requires summing exp(−energy) over all 2^n × 2^m combinations of visible and hidden binary variables.<br></p>
+
+<ul>
+  <li>This exponential summation makes exact computation of normalized probabilities impractical except for very small models, so directly applying maximum likelihood is infeasible at realistic scales.<br>
+</li>
+  <li>Learning therefore relies on approximate methods that either estimate gradients via Monte Carlo sampling or perform specialized approximations that avoid exact evaluation of Z, acknowledging that parameter changes affect both the unnormalized numerator and the partition-function denominator.<br>
+</li>
+</ul>
+
+<p>The lecture frames <strong>contrastive methods</strong> as a practical solution to this challenge.<br></p>
+
+<hr>
+
+<h1 id="gradient-of-the-log-likelihood-and-the-contrastive-divergence-monte-carlo-approximation">Gradient of the log-likelihood and the contrastive-divergence Monte Carlo approximation</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec11/01-14-08-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec11/01-14-08-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec11/01-14-08-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec11/01-14-08.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>The exact gradient of the log-likelihood for an EBM decomposes into two terms:<br></p>
+<ol>
+  <li>The gradient of the energy evaluated at a <strong>data point</strong> (the positive term).<br>
+</li>
+  <li>Minus the <strong>expected gradient of the energy under the model distribution</strong> (the negative term).<br>
+</li>
+</ol>
+
+<p>The second term is an expectation over the model distribution and therefore depends on <strong>Z_theta</strong> implicitly; computing it exactly is intractable but it can be approximated with Monte Carlo by drawing samples from the model.<br></p>
+
+<p><strong>Contrastive Divergence (CD)</strong> approximates this expected term with a small number of samples (often one), yielding a low-bias stochastic estimate of the gradient direction that increases the model’s relative probability of observed data compared to typical model samples. This operationalizes the intuitive objective of making training data more likely than typical negative samples drawn from the current model.<br></p>
+
+<hr>
+
+<h1 id="sampling-from-ebms-using-local-proposals-and-markov-chain-monte-carlo">Sampling from EBMs using local proposals and Markov chain Monte Carlo</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs236-2023/frames/lec11/01-20-50-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs236-2023/frames/lec11/01-20-50-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs236-2023/frames/lec11/01-20-50-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs236-2023/frames/lec11/01-20-50.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Sampling from high-dimensional EBMs typically uses <strong>Markov chain Monte Carlo (MCMC)</strong> methods that perform local proposals followed by accept/reject decisions so samples asymptotically follow the target distribution.<br></p>
+
+<p>A generic MCMC sampling loop looks like this:<br></p>
+<ol>
+  <li>Initialize x (e.g., random or previous state).<br>
+</li>
+  <li>Propose a local perturbation (for example, add noise or make a small move).<br>
+</li>
+  <li>Compare unnormalized probabilities (or energies) of proposed and current states. Uphill (higher-probability) proposals are accepted deterministically; downhill moves are accepted probabilistically according to a <strong>Metropolis–Hastings</strong> acceptance rule based on the ratio of unnormalized densities.<br>
+</li>
+  <li>Repeat steps 2–3 many times to allow exploration and mixing.<br>
+</li>
+</ol>
+
+<p>Occasional acceptance of downhill proposals is essential to avoid trapping in local modes and to permit exploration of the state space. Running the chain for sufficiently many iterations yields samples from the true model in the limit.<br></p>
+
+<p>Practical MCMC for EBMs can be computationally expensive and requires careful proposal design and mixing diagnostics, but it provides a principled mechanism both for sampling and for generating the <strong>negative samples</strong> used in contrastive learning.<br></p>
+
+<hr>
+
+
+    </div>
+  </article>
+
+
+  
+    
+    <br>
+    <hr>
+    <br>
+    <ul class="list-disc pl-8"></ul>
+
+    <!-- Adds related posts to the end of an article -->
+    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
+    <p class="mb-2">Here are some more articles you might like to read next:</p>
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec06/">MIT 6.S184 - Lecture 6 - Diffusion for Protein Generation</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec05/">MIT 6.S184 - Lecture 5 - Diffusion for Robotics</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec04/">MIT 6.S184 - Lecture 4 - Building an Image Generator</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec03/">MIT 6.S184 - Lecture 3 - Training Flow and Diffusion Models</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec02/">MIT 6.S184 - Lecture 2 -  Constructing a Training Target</a>
+  </li>
+
+</div>
+
+      
+    </div>
+
+    <!-- Footer -->    
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        © Copyright 2025 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+
+      </div>
+    </footer>
+
+    <!-- JavaScripts -->
+    <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- Bootsrap & MDB scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    <!-- Masonry & imagesLoaded -->
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
+    
+  <!-- Medium Zoom JS -->
+  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/zoom.js"></script>
+
+  <!-- Bootstrap Table -->
+  <script defer src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+
+  <!-- Load Common JS -->
+  <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
+  <script defer src="/assets/js/common.js?acdb9690d7641b2f8d40529018c71a01"></script>
+  <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    <!-- MathJax -->
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        tags: 'ams'
+      }
+    };
+  </script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KGSMMS9MS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-7KGSMMS9MS');
+  </script>
+    
+
+<!-- Scrolling Progress Bar -->
+<script type="text/javascript">
+  /*
+   * This JavaScript code has been adapted from the article 
+   * https://css-tricks.com/reading-position-indicator/ authored by Pankaj Parashar, 
+   * published on the website https://css-tricks.com on the 7th of May, 2014.
+   * Couple of changes were made to the original code to make it compatible 
+   * with the `al-foio` theme.
+   */
+  const progressBar = $("#progress");
+  /*
+   * We set up the bar after all elements are done loading.
+   * In some cases, if the images in the page are larger than the intended
+   * size they'll have on the page, they'll be resized via CSS to accomodate
+   * the desired size. This mistake, however, breaks the computations as the
+   * scroll size is computed as soon as the elements finish loading.
+   * To account for this, a minimal delay was introduced before computing the
+   * values.
+   */
+  window.onload = function () {
+    setTimeout(progressBarSetup, 50);
+  };
+  /*
+   * We set up the bar according to the browser.
+   * If the browser supports the progress element we use that.
+   * Otherwise, we resize the bar thru CSS styling
+   */
+  function progressBarSetup() {
+    if ("max" in document.createElement("progress")) {
+      initializeProgressElement();
+      $(document).on("scroll", function() {
+        progressBar.attr({ value: getCurrentScrollPosition() });
+      });
+      $(window).on("resize", initializeProgressElement);
+    } else {
+      resizeProgressBar();
+      $(document).on("scroll", resizeProgressBar);
+      $(window).on("resize", resizeProgressBar);
+    }
+  }
+  /*
+   * The vertical scroll position is the same as the number of pixels that
+   * are hidden from view above the scrollable area. Thus, a value > 0 is
+   * how much the user has scrolled from the top
+   */
+  function getCurrentScrollPosition() {
+    return $(window).scrollTop();
+  }
+
+  function initializeProgressElement() {
+    let navbarHeight = $("#navbar").outerHeight(true);
+    $("body").css({ "padding-top": navbarHeight });
+    $("progress-container").css({ "padding-top": navbarHeight });
+    progressBar.css({ top: navbarHeight });
+    progressBar.attr({
+      max: getDistanceToScroll(),
+      value: getCurrentScrollPosition(),
+    });
+  }
+  /*
+   * The offset between the html document height and the browser viewport
+   * height will be greater than zero if vertical scroll is possible.
+   * This is the distance the user can scroll
+   */
+  function getDistanceToScroll() {
+    return $(document).height() - $(window).height();
+  }
+
+  function resizeProgressBar() {
+    progressBar.css({ width: getWidthPercentage() + "%" });
+  }
+  // The scroll ratio equals the percentage to resize the bar
+  function getWidthPercentage() {
+    return (getCurrentScrollPosition() / getDistanceToScroll()) * 100;
+  }
+</script>
+
+    
+  </body>
+</html>

@@ -1,0 +1,1785 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <!-- Head -->
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    <!-- Metadata, OpenGraph and Schema.org -->
+    
+
+    <!-- Standard metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>MIT 6.S184 - Lecture 4 - Building an Image Generator | Tuan-Anh  Bui</title>
+    <meta name="author" content="Tuan-Anh  Bui">
+    <meta name="description" content="AI Summary Lecture">
+    <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
+
+
+    <!-- Bootstrap & MDB -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+    <!-- Bootstrap Table -->
+    <link defer rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+
+    <!-- Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
+
+    
+
+    <!-- Styles -->
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
+    
+    <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+    <link rel="canonical" href="https://tuananhbui89.github.io/blog/2025/mit-6s184-lec04/">
+
+    <!-- Dark Mode -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark">
+    <script src="/assets/js/theme.js?96d6b3e1c3604aca8b6134c7afdd5db6"></script>
+    <script src="/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script>
+    
+
+  </head>
+
+  <!-- Body -->
+  <body class="fixed-top-nav ">
+
+    <!-- Header -->
+    <header>
+
+      <!-- Nav Bar -->
+      <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top">
+        <div class="container">
+          <a class="navbar-brand title font-weight-lighter" href="/"><span class="font-weight-bold">Tuan-Anh </span>Bui</a>
+          <!-- Navbar Toggle -->
+          <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar top-bar"></span>
+            <span class="icon-bar middle-bar"></span>
+            <span class="icon-bar bottom-bar"></span>
+          </button>
+
+          <div class="collapse navbar-collapse text-right" id="navbarNav">
+            <ul class="navbar-nav ml-auto flex-nowrap">
+
+              <!-- About -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/">about</a>
+              </li>
+              
+              <!-- Blog -->
+              <li class="nav-item active">
+                <a class="nav-link" href="/blog/">blog<span class="sr-only">(current)</span></a>
+              </li>
+
+              <!-- Other pages -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/publications/">publications</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/projects/">projects</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/repositories/">repositories</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/teaching/"></a>
+              </li>
+
+              <!-- Toogle theme mode -->
+              <li class="toggle-container">
+                <button id="light-toggle" title="Change theme">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Scrolling Progress Bar -->
+      <progress id="progress" value="0">
+        <div class="progress-container">
+          <span class="progress-bar"></span>
+        </div>
+      </progress>
+    </header>
+
+
+    <!-- Content -->
+    <div class="container mt-5">
+      
+        <!-- _layouts/post.html -->
+<!-- Page/Post style -->
+<style type="text/css">
+  
+</style>
+
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">MIT 6.S184 - Lecture 4 - Building an Image Generator</h1>
+    <p class="post-meta">December 18, 2025</p>
+    <p class="post-tags">
+      <a href="/blog/2025"> <i class="fas fa-calendar fa-sm"></i> 2025 </a>
+        ·  
+        <a href="/blog/tag/genai">
+          <i class="fas fa-hashtag fa-sm"></i> genai</a>  
+          <a href="/blog/tag/llm">
+          <i class="fas fa-hashtag fa-sm"></i> llm</a>  
+          <a href="/blog/tag/tutorial">
+          <i class="fas fa-hashtag fa-sm"></i> tutorial</a>  
+          <a href="/blog/tag/reading">
+          <i class="fas fa-hashtag fa-sm"></i> reading</a>  
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    
+    <div id="table-of-contents">
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#course-introduction-and-scope">Course introduction and scope</a></li>
+<li class="toc-entry toc-h1"><a href="#conditional-versus-unconditional-generation-and-objectives-recap">Conditional versus unconditional generation and objectives recap</a></li>
+<li class="toc-entry toc-h1"><a href="#sampling-dynamics-and-lecture-agenda">Sampling dynamics and lecture agenda</a></li>
+<li class="toc-entry toc-h1"><a href="#guided-generation-notation-and-examples-of-conditioning-variables">Guided generation notation and examples of conditioning variables</a></li>
+<li class="toc-entry toc-h1"><a href="#guided-conditional-flow-matching-objective-fixed-y-and-amortization-over-y">Guided conditional flow matching objective: fixed y and amortization over y</a></li>
+<li class="toc-entry toc-h1"><a href="#training-and-sampling-with-guided-vector-fields">Training and sampling with guided vector fields</a></li>
+<li class="toc-entry toc-h1"><a href="#introduction-to-classifier-free-guidance-and-motivation">Introduction to classifier-free guidance and motivation</a></li>
+<li class="toc-entry toc-h1"><a href="#gaussian-conditional-probability-paths-and-relation-between-vector-fields-and-scores">Gaussian conditional probability paths and relation between vector fields and scores</a></li>
+<li class="toc-entry toc-h1"><a href="#bayes-decomposition-of-the-guided-score-and-identification-of-a-classifier-term">Bayes decomposition of the guided score and identification of a classifier term</a></li>
+<li class="toc-entry toc-h1"><a href="#guidance-scaling-factor-and-constructing-an-amplified-guided-vector-field">Guidance scaling factor and constructing an amplified guided vector field</a></li>
+<li class="toc-entry toc-h1"><a href="#algebraic-rearrangement-to-classifier-free-guidance-and-single-model-training-with-null-token">Algebraic rearrangement to classifier-free guidance and single-model training with null token</a></li>
+<li class="toc-entry toc-h1"><a href="#practical-sampling-with-cfg-and-empirical-mnist-example">Practical sampling with CFG and empirical MNIST example</a></li>
+<li class="toc-entry toc-h1"><a href="#real-world-cfg-examples-and-discussion-of-classifier-identity-and-effects">Real-world CFG examples and discussion of classifier identity and effects</a></li>
+<li class="toc-entry toc-h1"><a href="#image-data-structure-and-why-mlps-are-insufficient-for-high-resolution-images">Image data structure and why MLPs are insufficient for high-resolution images</a></li>
+<li class="toc-entry toc-h1"><a href="#unet-architecture-overview-for-diffusionflow-models">UNet architecture overview for diffusion/flow models</a></li>
+<li class="toc-entry toc-h1"><a href="#residual-layer-internals-and-conditioning-injection-in-unet">Residual layer internals and conditioning injection in UNet</a></li>
+<li class="toc-entry toc-h1"><a href="#diffusion-transformer-patch-based-attention">Diffusion Transformer (patch-based attention)</a></li>
+<li class="toc-entry toc-h1"><a href="#latent-space-modeling-and-the-latent-diffusion-design-pattern">Latent-space modeling and the latent diffusion design pattern</a></li>
+<li class="toc-entry toc-h1"><a href="#stable-diffusion-3-case-study-and-multimodal-conditioning">Stable Diffusion 3 case study and multimodal conditioning</a></li>
+<li class="toc-entry toc-h1"><a href="#course-logistics-and-transition-to-guest-lecture">Course logistics and transition to guest lecture</a></li>
+<li class="toc-entry toc-h1"><a href="#guest-lecture-introduction-reward-fine-tuning-for-flow-and-diffusion-models">Guest lecture introduction: reward fine-tuning for flow and diffusion models</a></li>
+<li class="toc-entry toc-h1"><a href="#fine-tuning-objective-as-kl-regularized-optimization-and-sdeflow-connections">Fine-tuning objective as KL-regularized optimization and SDE/flow connections</a></li>
+<li class="toc-entry toc-h1"><a href="#flow-matching-sde-sampling-equivalence-and-the-role-of-arbitrary-noise-schedules">Flow matching, SDE sampling equivalence, and the role of arbitrary noise schedules</a></li>
+<li class="toc-entry toc-h1"><a href="#stochastic-optimal-control-interpretation-of-fine-tuning-and-necessity-of-memoryless-noise-schedules">Stochastic optimal control interpretation of fine-tuning and necessity of memoryless noise schedules</a></li>
+<li class="toc-entry toc-h1"><a href="#agent-method-for-solving-the-control-problem-and-adjointagent-matching">Agent method for solving the control problem and adjoint/agent matching</a></li>
+</ul>
+    </div>
+    <hr>
+    
+    <div id="markdown-content">
+      <div style="display: flex; justify-content: center;">
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/nfrZ30mnwP0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen="">
+    </iframe>
+</div>
+
+<h1 id="course-introduction-and-scope">Course introduction and scope</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-00-36-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-00-36-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-00-36-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/mit-6.s184/frames/lec04/00-00-36.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment introduces the lecture objectives and places the session in course context.<br></p>
+
+<ul>
+  <li>The lecture transitions from <strong>unconditional</strong> to <strong>conditional generation</strong> tasks, using <strong>image generation</strong> as the running example.<br>
+</li>
+  <li>Prior lectures developed training objectives such as <strong>conditional flow matching</strong> and <strong>denoising score matching</strong>; this session will focus primarily on <strong>flow models</strong> while noting analogous results for <strong>diffusion models</strong>.<br>
+</li>
+  <li>The practical goal is <strong>conditioning generative models</strong> on auxiliary information (e.g., text prompts or labels).<br>
+</li>
+  <li>The instructor stresses that <strong>scaling the parameterization</strong> is required for real-world image synthesis.<br>
+</li>
+  <li>This overview frames a <strong>theory-to-practice agenda</strong> and invites students to interrupt with questions as needed.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="conditional-versus-unconditional-generation-and-objectives-recap">Conditional versus unconditional generation and objectives recap</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-01-41-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-01-41-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-01-41-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/mit-6.s184/frames/lec04/00-01-41.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment defines the <strong>conditional generation</strong> problem and connects it to previously developed objectives.<br></p>
+
+<ul>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>Problem statement: sample from the data distribution conditioned on auxiliary information <strong>y</strong>, i.e., from **p_data(x</td>
+          <td>y)**.<br>
+</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>Reiterated objectives:
+    <ul>
+      <li>
+<strong>Conditional flow matching</strong> for flow-based models.<br>
+</li>
+      <li>
+<strong>Denoising score matching</strong> for diffusion/score-based models.<br>
+</li>
+    </ul>
+  </li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>Technical mechanism (flow view): learn a conditional vector field **u_t^θ(x</td>
+          <td>y)** by regressing it against a conditional target vector field.<br>
+</td>
+        </tr>
+      </tbody>
+    </table>
+    <ul>
+      <li>Integrating the learned field yields an <strong>ODE sampler</strong> that maps an initial noise distribution to the data manifold.<br>
+</li>
+      <li>
+        <table>
+          <tbody>
+            <tr>
+              <td>In the ideal case of perfect learning, this recovers **p_data(x</td>
+              <td>y)** exactly.<br>
+</td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+    </ul>
+  </li>
+  <li>Narrative choice: lecture focuses on <strong>flow models</strong> for clarity, with diffusion equivalents available in the notes.<br>
+</li>
+  <li>Takeaway: conditional objectives extend the unconditional training pipeline by conditioning all path distributions, vector fields, and regression targets on <strong>y</strong>.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="sampling-dynamics-and-lecture-agenda">Sampling dynamics and lecture agenda</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-03-03-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-03-03-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-03-03-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/mit-6.s184/frames/lec04/00-03-03.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment summarizes sampling after training and outlines the lecture agenda.<br></p>
+
+<ul>
+  <li>Sampling after training:
+    <ol>
+      <li>Simulate the learned <strong>ODE</strong> (or the equivalent <strong>SDE</strong> when using scores) from the initial noise time z to t = 1.<br>
+</li>
+      <li>
+        <table>
+          <tbody>
+            <tr>
+              <td>Under perfect learning, samples from this simulation follow **p_data(x</td>
+              <td>y)**.<br>
+</td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+    </ol>
+  </li>
+  <li>Lecture plan:
+    <ol>
+      <li>Extend unconditional generation methods to conditional settings.<br>
+</li>
+      <li>Present <strong>classifier-free guidance</strong> (CFG) for conditional sampling.<br>
+</li>
+      <li>Discuss <strong>architectural choices</strong> for image generation (UNets, diffusion Transformers, latent models).<br>
+</li>
+      <li>Survey modern models (including <strong>Stable Diffusion 3</strong>).<br>
+</li>
+      <li>Introduce a guest lecture on <strong>alignment / reward fine-tuning</strong>.<br>
+</li>
+    </ol>
+  </li>
+  <li>Practical emphasis: moving from low-dimensional examples to <strong>high-resolution</strong> image synthesis requires careful conditioning mechanisms and significant <strong>model scaling</strong>.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="guided-generation-notation-and-examples-of-conditioning-variables">Guided generation notation and examples of conditioning variables</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-04-59-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-04-59-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-04-59-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/mit-6.s184/frames/lec04/00-04-59.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment formalizes terminology for guided generation and introduces the conditioning variable.<br></p>
+
+<ul>
+  <li>Terminology:
+    <ul>
+      <li>Replace <strong>unconditional</strong> with <strong>unguided</strong>.<br>
+</li>
+      <li>Replace <strong>conditional</strong> with <strong>guided</strong>.<br>
+</li>
+    </ul>
+  </li>
+  <li>Conditioning variable:
+    <ul>
+      <li>Denote the conditioning information by <strong>y</strong> (examples: text prompt, class label, MNIST digit label).<br>
+</li>
+      <li>Formally, <strong>guiding</strong> means conditioning on <strong>y</strong>, so marginals, vector fields, and scores become <strong>guided quantities conditioned on y</strong>.<br>
+</li>
+    </ul>
+  </li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>Notational change: prepend “guided” to previously unconditional objects and write the guided target as **p_data(x</td>
+          <td>y)** with corresponding guided vector fields and scores.<br>
+</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>Clarification: <strong>y</strong> may be discrete or continuous depending on the task, and this setup prepares the training and sampling objectives in the guided context.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="guided-conditional-flow-matching-objective-fixed-y-and-amortization-over-y">Guided conditional flow matching objective: fixed y and amortization over y</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-08-09-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-08-09-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-08-09-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/mit-6.s184/frames/lec04/00-08-09.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment constructs the guided conditional flow matching (LCFM) objective and explains amortization across y.<br></p>
+
+<ul>
+  <li>Fixed-y training:
+    <ol>
+      <li>Fix a specific <strong>y</strong>.<br>
+</li>
+      <li>
+        <table>
+          <tbody>
+            <tr>
+              <td>Regress the guided vector field **u_t^θ(x</td>
+              <td>y)** onto the conditional target vector field using expectations over the guided probability path.<br>
+</td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+      <li>
+        <table>
+          <tbody>
+            <tr>
+              <td>Sampling inside the expectation: sample <strong>t ∼ Uniform[0,1]</strong>, sample **z ∼ p_init(z</td>
+              <td>y)**, then sample **x ∼ p_t(x</td>
+              <td>z,y)**, and minimize the squared error between model and target.<br>
+</td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+    </ol>
+  </li>
+  <li>Amortized conditional training:
+    <ul>
+      <li>Let <strong>y</strong> vary and define a single loss that takes expectation over the joint data distribution (z,y).<br>
+</li>
+      <li>Practically this is implemented by a data loader that returns paired (image, prompt) examples.<br>
+</li>
+    </ul>
+  </li>
+  <li>Result: <strong>conditional flow matching</strong> reduces to standard conditional training applied across the support of <strong>y</strong>, enabling a single amortized model to learn all conditionings.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="training-and-sampling-with-guided-vector-fields">Training and sampling with guided vector fields</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-12-30-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-12-30-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-12-30-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/mit-6.s184/frames/lec04/00-12-30.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment describes the practical training and sampling pipeline using the guided objective.<br></p>
+
+<ul>
+  <li>Training:
+    <ul>
+      <li>
+        <table>
+          <tbody>
+            <tr>
+              <td>Minimize the guided conditional flow matching loss across (z,y) pairs to learn **u_t^θ(x</td>
+              <td>y)**.<br>
+</td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+    </ul>
+  </li>
+  <li>Sampling:
+    <ol>
+      <li>Choose a prompt <strong>y</strong>.<br>
+</li>
+      <li>Initialize <strong>x ∼ p_init</strong>.<br>
+</li>
+      <li>Simulate the ODE from <strong>t = 0</strong> to <strong>t = 1</strong> using the trained conditional vector field.<br>
+</li>
+    </ol>
+  </li>
+  <li>SDE parallel: when training scores instead of vector fields, use the equivalent <strong>SDE</strong> formulation (see notes for details).<br>
+</li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>Theoretical guarantee: guided training + accurate numerical simulation recovers samples from **p_data(x</td>
+          <td>y)** in the idealized limit.<br>
+</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>Practical deviation: practitioners often modify sampling (e.g., <strong>classifier-free guidance</strong>) to improve <strong>perceptual quality</strong>, at the cost of deviating from the exact guided sampler.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="introduction-to-classifier-free-guidance-and-motivation">Introduction to classifier-free guidance and motivation</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-15-36-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-15-36-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-15-36-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/mit-6.s184/frames/lec04/00-15-36.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment introduces <strong>classifier-free guidance (CFG)</strong> as a practical sampling modification.<br></p>
+
+<ul>
+  <li>Motivation: trade <strong>sample diversity</strong> for <strong>perceptual quality</strong> and stronger prompt adherence.<br>
+</li>
+  <li>Empirical discovery: scaling the contribution of the conditioning signal often yields samples that appear more faithful to prompts, even though the resulting vector field is no longer the exact guided field.<br>
+</li>
+  <li>Historical note: CFG is widely used in production models (including <strong>Stable Diffusion 3</strong>).<br>
+</li>
+  <li>Analytical setup: the forthcoming derivation is developed for <strong>Gaussian probability paths</strong> to build intuition, though the idea generalizes beyond Gaussians.<br>
+</li>
+  <li>Purpose: relate marginal vector fields and score functions on Gaussian paths to motivate CFG.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="gaussian-conditional-probability-paths-and-relation-between-vector-fields-and-scores">Gaussian conditional probability paths and relation between vector fields and scores</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-17-47-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-17-47-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-17-47-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/mit-6.s184/frames/lec04/00-17-47.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment defines Gaussian conditional probability paths and links vector fields to scores.<br></p>
+
+<ul>
+  <li>Gaussian path definition:
+    <ul>
+      <li>
+        <table>
+          <tbody>
+            <tr>
+              <td>p_t(x</td>
+              <td>z) = Normal(alpha_t x, beta_t^2 I), with smooth monotonic functions <strong>alpha_t</strong> and <strong>beta_t</strong> satisfying endpoint constraints.<br>
+</td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+    </ul>
+  </li>
+  <li>Key algebraic relation:
+    <ul>
+      <li>
+        <table>
+          <tbody>
+            <tr>
+              <td>The guided marginal vector field <em>*u_t^</em>(x</td>
+              <td>y)** can be written in affine form:</td>
+            </tr>
+          </tbody>
+        </table>
+        <ul>
+          <li>
+            <table>
+              <tbody>
+                <tr>
+                  <td>
+<em>*u_t^</em>(x</td>
+                  <td>y) = a_t x + b_t ∇_x log p_t(x</td>
+                  <td>y)**.<br>
+</td>
+                </tr>
+              </tbody>
+            </table>
+          </li>
+        </ul>
+      </li>
+      <li>The coefficients <strong>a_t</strong> and <strong>b_t</strong> have explicit expressions determined by derivatives of <strong>alpha_t</strong> and <strong>beta_t</strong>.<br>
+</li>
+    </ul>
+  </li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>Implication: this relation lets us express guided vector fields using the <strong>score</strong> ∇_x log p_t(x</td>
+          <td>y) and constants set by the Gaussian noise schedule — a foundation for the CFG derivation.<br>
+</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+
+<hr>
+
+<h1 id="bayes-decomposition-of-the-guided-score-and-identification-of-a-classifier-term">Bayes decomposition of the guided score and identification of a classifier term</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-21-09-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-21-09-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-21-09-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/mit-6.s184/frames/lec04/00-21-09.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment decomposes the guided marginal score using Bayes’ rule and identifies the classifier-like term.<br></p>
+
+<ul>
+  <li>Bayes decomposition:
+    <ul>
+      <li>
+        <table>
+          <tbody>
+            <tr>
+              <td>**∇_x log p_t(x</td>
+              <td>y) = ∇_x log p_t(x) + ∇_x log p_t(y</td>
+              <td>x)**.<br>
+</td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+    </ul>
+  </li>
+  <li>Substitution into the vector-field relation yields:
+    <ul>
+      <li>
+        <table>
+          <tbody>
+            <tr>
+              <td>The guided vector field = <strong>unguided vector field</strong> + a term proportional to **∇_x log p_t(y</td>
+              <td>x)**.<br>
+</td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+    </ul>
+  </li>
+  <li>Interpretation:
+    <ul>
+      <li>
+        <table>
+          <tbody>
+            <tr>
+              <td>**∇_x log p_t(y</td>
+              <td>x)** behaves like a <strong>classifier</strong> because it evaluates how likely a given <strong>x</strong> is under each <strong>y</strong> (e.g., class label).<br>
+</td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+      <li>This term therefore carries the conditioning signal and is a natural target for amplification to strengthen adherence to the prompt during sampling.<br>
+</li>
+    </ul>
+  </li>
+</ul>
+
+<hr>
+
+<h1 id="guidance-scaling-factor-and-constructing-an-amplified-guided-vector-field">Guidance scaling factor and constructing an amplified guided vector field</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-25-28-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-25-28-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-25-28-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/mit-6.s184/frames/lec04/00-25-28.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment introduces an explicit guidance scale to amplify the classifier-like term and gives intuition about its effect.<br></p>
+
+<ul>
+  <li>Define a guidance scale <strong>w &gt; 1</strong> that multiplies the classifier-like term in the guided vector field.<br>
+</li>
+  <li>Modified vector field:
+    <ul>
+      <li>
+        <table>
+          <tbody>
+            <tr>
+              <td>**ũ_t = u_t (unguided) + b_t w ∇_x log p_t(y</td>
+              <td>x)**.<br>
+</td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+    </ul>
+  </li>
+  <li>Interpretation:
+    <ul>
+      <li>
+        <table>
+          <tbody>
+            <tr>
+              <td>Scaling the classifier term concentrates sampling mass in regions that score highly under **p_t(y</td>
+              <td>x)<strong>, trading **diversity</strong> for <strong>perceptual fidelity</strong> (similar to <strong>low-temperature sampling</strong>).<br>
+</td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+    </ul>
+  </li>
+  <li>Notes:
+    <ul>
+      <li>More principled classifier-based guidance methods exist, but <strong>CFG</strong> provides a simple and effective practical mechanism controlled by a single multiplicative hyperparameter <strong>w</strong>.<br>
+</li>
+    </ul>
+  </li>
+</ul>
+
+<hr>
+
+<h1 id="algebraic-rearrangement-to-classifier-free-guidance-and-single-model-training-with-null-token">Algebraic rearrangement to classifier-free guidance and single-model training with null token</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-30-57-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-30-57-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-30-57-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/mit-6.s184/frames/lec04/00-30-57.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment algebraically rewrites the CFG-modified vector field and motivates the classifier-free training trick.<br></p>
+
+<ul>
+  <li>Algebraic rearrangement yields the commonly used implementation form:
+    <ul>
+      <li>
+        <table>
+          <tbody>
+            <tr>
+              <td>**ũ_t = (1 + w) u_t(x</td>
+              <td>y) − w u_t(x</td>
+              <td>null)**.<br>
+</td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+    </ul>
+  </li>
+  <li>Classifier-free training recipe:
+    <ul>
+      <li>
+        <table>
+          <tbody>
+            <tr>
+              <td>Train a single model **u_t^θ(x</td>
+              <td>y)** that can accept either a real conditioning <strong>y</strong> or a special <strong>null token</strong>.<br>
+</td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+      <li>During training, randomly drop conditioning with probability <strong>p_drop</strong> so the model learns both guided and unguided behaviors.<br>
+</li>
+    </ul>
+  </li>
+  <li>Inference:
+    <ul>
+      <li>Use the same model twice (conditioned on <strong>y</strong> and on <strong>null</strong>) and combine outputs with scale <strong>w</strong> to implement CFG without an external classifier.<br>
+</li>
+    </ul>
+  </li>
+  <li>Benefit: efficient training and sampling with a single amortized conditional model that matches the algebraic CFG form used in practice.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="practical-sampling-with-cfg-and-empirical-mnist-example">Practical sampling with CFG and empirical MNIST example</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-36-06-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-36-06-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-36-06-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/mit-6.s184/frames/lec04/00-36-06.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment describes the CFG sampling procedure and empirical behavior (MNIST demonstration).<br></p>
+
+<ul>
+  <li>CFG sampling steps:
+    <ol>
+      <li>Train the conditional model with occasional null conditioning.<br>
+</li>
+      <li>Select a prompt <strong>y</strong> (or null for unguided) and choose guidance scale <strong>w</strong>.<br>
+</li>
+      <li>Initialize <strong>x ∼ p_init</strong> and integrate the CFG-modified vector field <strong>ũ_t</strong> from <strong>t = 0</strong> to <strong>t = 1</strong> to produce samples.<br>
+</li>
+    </ol>
+  </li>
+  <li>Empirical observation (MNIST):
+    <ul>
+      <li>Increasing <strong>w</strong> tends to improve <strong>perceptual quality</strong> (clearer digits) while reducing <strong>diversity</strong> across samples.<br>
+</li>
+    </ul>
+  </li>
+  <li>Practical note:
+    <ul>
+      <li>Although <strong>w &gt; 1</strong> deviates from the theoretically exact guided sampler, practitioners prefer CFG for subjectively sharper and more prompt-faithful results, and the null-token trick makes it simple to implement.<br>
+</li>
+    </ul>
+  </li>
+</ul>
+
+<hr>
+
+<h1 id="real-world-cfg-examples-and-discussion-of-classifier-identity-and-effects">Real-world CFG examples and discussion of classifier identity and effects</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-39-19-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-39-19-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-39-19-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/mit-6.s184/frames/lec04/00-39-19.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment shows real-world CFG examples and discusses intuition and open questions.<br></p>
+
+<ul>
+  <li>Empirical examples:
+    <ul>
+      <li>For image prompts (e.g., corgi photos), unguided or exact-guided sampling (<strong>w = 1</strong>) can produce plausible but weakly prompt-aligned images; increasing <strong>w</strong> yields more prompt-faithful and visually pleasing samples.<br>
+</li>
+    </ul>
+  </li>
+  <li>Clarification of the classifier term:
+    <ul>
+      <li>
+        <table>
+          <tbody>
+            <tr>
+              <td>When <strong>y</strong> is a discrete class label, the classifier term is **p(y</td>
+              <td>x)**; in CFG practice the conditional generative model itself typically supplies this term rather than an external classifier.<br>
+</td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+    </ul>
+  </li>
+  <li>Intuition for why boosting helps:
+    <ul>
+      <li>Amplifying the classifier term acts like <strong>truncation</strong> or <strong>low-temperature sampling</strong> by concentrating probability mass into modes favored by the prompt.<br>
+</li>
+    </ul>
+  </li>
+  <li>Open questions:
+    <ul>
+      <li>The precise theoretical justification for CFG and principled tuning of <strong>w</strong> remain active research areas.<br>
+</li>
+    </ul>
+  </li>
+</ul>
+
+<hr>
+
+<h1 id="image-data-structure-and-why-mlps-are-insufficient-for-high-resolution-images">Image data structure and why MLPs are insufficient for high-resolution images</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-42-44-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-42-44-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-42-44-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/mit-6.s184/frames/lec04/00-42-44.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment defines images as tensors and motivates architecture choices for scaling to high-resolution images.<br></p>
+
+<ul>
+  <li>Image representation:
+    <ul>
+      <li>Images are tensors in <strong>R^{C × H × W}</strong>, with common channel conventions like <strong>RGB</strong>.<br>
+</li>
+    </ul>
+  </li>
+  <li>Why naive MLPs fail:
+    <ul>
+      <li>Fully connected MLP parameterizations do not scale to large <strong>H, W</strong> and ignore important <strong>spatial inductive biases</strong>, making them inefficient for images.<br>
+</li>
+    </ul>
+  </li>
+  <li>Architectural desiderata for image generative models:
+    <ul>
+      <li>
+<strong>Parameter efficiency</strong>.<br>
+</li>
+      <li>
+<strong>Spatial inductive bias</strong> to exploit locality and multi-scale structure.<br>
+</li>
+      <li>
+<strong>Flexible conditioning mechanisms</strong> that align prompt embeddings with image features.<br>
+</li>
+    </ul>
+  </li>
+  <li>Practical choices:
+    <ul>
+      <li>
+<strong>Convolutional UNets</strong> and <strong>attention-based diffusion Transformers</strong> are two common, effective architectures that meet these criteria.<br>
+</li>
+    </ul>
+  </li>
+</ul>
+
+<hr>
+
+<h1 id="unet-architecture-overview-for-diffusionflow-models">UNet architecture overview for diffusion/flow models</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-45-31-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-45-31-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-45-31-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/mit-6.s184/frames/lec04/00-45-31.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment gives a high-level description of the UNet architecture used in diffusion and flow models.<br></p>
+
+<ul>
+  <li>UNet topology:
+    <ul>
+      <li>
+<strong>Downsampling encoder path</strong>: increases channels while reducing spatial resolution.<br>
+</li>
+      <li>
+<strong>Mid-level bottleneck</strong>: preserves spatial size while processing coarse features.<br>
+</li>
+      <li>
+<strong>Upsampling decoder path</strong>: restores spatial resolution.<br>
+</li>
+      <li>
+<strong>Skip connections</strong>: pass encoder features directly to corresponding decoder layers for multi-scale fusion.<br>
+</li>
+    </ul>
+  </li>
+  <li>Conditioning and time injection:
+    <ul>
+      <li>
+<strong>Time embeddings</strong> (sinusoidal or Fourier) and <strong>conditioning embeddings</strong> for <strong>y</strong> are injected into residual blocks, typically by projecting embeddings to the channel dimension and <strong>adding them channel-wise</strong> between convolutions.<br>
+</li>
+    </ul>
+  </li>
+  <li>Building blocks:
+    <ul>
+      <li>Residual layers composed of <strong>convolution → normalization → activation</strong> are stacked, with variants differing in normalization type, channel counts, and block counts.<br>
+</li>
+    </ul>
+  </li>
+  <li>Core benefit: the U-shaped topology enables efficient <strong>multi-scale feature processing</strong> essential for high-quality image generation.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="residual-layer-internals-and-conditioning-injection-in-unet">Residual layer internals and conditioning injection in UNet</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-46-13-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-46-13-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-46-13-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/mit-6.s184/frames/lec04/00-46-13.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment describes the internal structure of a UNet residual block and how conditioning is injected.<br></p>
+
+<ul>
+  <li>Residual block structure:
+    <ul>
+      <li>A <strong>residual shortcut</strong> plus two convolutional layers, each with <strong>normalization</strong> and <strong>nonlinear activation</strong>.<br>
+</li>
+    </ul>
+  </li>
+  <li>Conditioning injection:
+    <ul>
+      <li>Map time and conditioning embeddings through an MLP to match the block’s channel dimensionality.<br>
+</li>
+      <li>Add these projected embeddings <strong>channel-wise</strong> to intermediate activations between convolutional layers.<br>
+</li>
+    </ul>
+  </li>
+  <li>Practical points:
+    <ul>
+      <li>Channel-wise addition is computationally efficient and lets the block modulate processing based on <strong>timestep</strong> and <strong>prompt</strong>.<br>
+</li>
+      <li>Stacked residual blocks plus downsampling/upsampling implement the full UNet.<br>
+</li>
+    </ul>
+  </li>
+</ul>
+
+<hr>
+
+<h1 id="diffusion-transformer-patch-based-attention">Diffusion Transformer (patch-based attention)</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-47-05-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-47-05-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-47-05-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/mit-6.s184/frames/lec04/00-47-05.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment presents the diffusion Transformer alternative for image generation.<br></p>
+
+<ul>
+  <li>Key idea: treat the image as a sequence of <strong>patch tokens</strong>, borrowing the Vision Transformer (ViT) paradigm.<br>
+</li>
+  <li>Architecture:
+    <ul>
+      <li>Partition the image into patches, embed each patch to a feature vector, and process the token sequence with <strong>Transformer attention blocks</strong>.<br>
+</li>
+      <li>
+<strong>Positional encodings</strong> provide spatial awareness; <strong>multi-head self-attention</strong> models long-range dependencies and replaces local convolutional receptive fields.<br>
+</li>
+    </ul>
+  </li>
+  <li>Adaptation to diffusion tasks:
+    <ul>
+      <li>Diffusion Transformers predict noise or denoised outputs per patch token and integrate <strong>time</strong> and <strong>conditioning embeddings</strong> into attention blocks.<br>
+</li>
+    </ul>
+  </li>
+  <li>Benefit: attention-based parameterizations scale to model <strong>global structure</strong> and long-range interactions useful for high-fidelity image synthesis.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="latent-space-modeling-and-the-latent-diffusion-design-pattern">Latent-space modeling and the latent diffusion design pattern</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-48-48-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-48-48-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-48-48-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/mit-6.s184/frames/lec04/00-48-48.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment explains the latent-space design pattern used in many modern pipelines.<br></p>
+
+<ul>
+  <li>Latent-space recipe:
+    <ol>
+      <li>Pretrain an <strong>encoder/decoder</strong> (e.g., autoencoder or VAE) that compresses images into a lower-dimensional <strong>latent space</strong>.<br>
+</li>
+      <li>Train the generative <strong>diffusion</strong> or <strong>flow</strong> model in that latent space instead of raw pixels.<br>
+</li>
+      <li>At sampling time, generate latents and decode them to full-resolution images.<br>
+</li>
+    </ol>
+  </li>
+  <li>Rationale:
+    <ul>
+      <li>Latents remove imperceptible high-frequency detail, reduce dimensionality (cheaper computation), and focus the generator on <strong>perceptually relevant structure</strong>.<br>
+</li>
+    </ul>
+  </li>
+  <li>Practical note: <strong>latent diffusion</strong> is widely used; modern pipelines commonly combine pretrained encoders with UNet or Transformer generative backbones operating in latent coordinates.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="stable-diffusion-3-case-study-and-multimodal-conditioning">Stable Diffusion 3 case study and multimodal conditioning</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-50-34-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-50-34-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-50-34-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/mit-6.s184/frames/lec04/00-50-34.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment surveys <strong>Stable Diffusion 3</strong> as an instantiation of the described design patterns.<br></p>
+
+<ul>
+  <li>Key components:
+    <ul>
+      <li>
+<strong>Latent diffusion</strong> backbone operating in compressed image latents.<br>
+</li>
+      <li>Large conditional <strong>UNet</strong> or multimodal diffusion <strong>Transformer</strong> as the expressive generative backbone.<br>
+</li>
+      <li>Pretrained encoders (e.g., <strong>CLIP</strong>, <strong>T5</strong>) to produce robust text embeddings for cross-modal alignment.<br>
+</li>
+      <li>
+<strong>Classifier-free guidance</strong> to steer generation during sampling.<br>
+</li>
+    </ul>
+  </li>
+  <li>Practical integration:
+    <ul>
+      <li>Stable Diffusion 3 parameterizes <strong>u_t</strong> with a highly expressive conditional model trained with conditional flow matching objectives.<br>
+</li>
+      <li>It integrates image-text embeddings (CLIP) and sequence-level language model embeddings inside attention, enabling richer prompt context and high-resolution, prompt-aligned synthesis.<br>
+</li>
+    </ul>
+  </li>
+</ul>
+
+<hr>
+
+<h1 id="course-logistics-and-transition-to-guest-lecture">Course logistics and transition to guest lecture</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-53-17-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-53-17-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-53-17-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/mit-6.s184/frames/lec04/00-53-17.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment covers course logistics and transitions to a guest speaker.<br></p>
+
+<ul>
+  <li>Logistics reminders:
+    <ul>
+      <li>Upcoming lectures and guest talks (robotics, protein design).<br>
+</li>
+      <li>Lab submission deadlines and office hours schedule/location.<br>
+</li>
+    </ul>
+  </li>
+  <li>Transition: introduce the guest presenter (affiliation and research focus) who will discuss <strong>reward fine-tuning</strong> for flow and diffusion models.<br>
+</li>
+  <li>Purpose: close the instructor portion and set expectations for the guest lecture that follows.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="guest-lecture-introduction-reward-fine-tuning-for-flow-and-diffusion-models">Guest lecture introduction: reward fine-tuning for flow and diffusion models</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-57-05-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-57-05-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/mit-6.s184/frames/lec04/00-57-05-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/mit-6.s184/frames/lec04/00-57-05.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment frames the guest lecture on <strong>reward fine-tuning (RF)</strong> for generative diffusion and flow models.<br></p>
+
+<ul>
+  <li>Problem statement:
+    <ul>
+      <li>Given a pretrained base model <strong>p_base</strong> (often conditional, e.g., text-to-image) and a reward model trained from human preferences or other signals, how should we modify the generative model to optimize a reward objective?<br>
+</li>
+    </ul>
+  </li>
+  <li>RF objective:
+    <ul>
+      <li>Modify the pretrained generator so it samples from <strong>p_star ∝ p_base(x) exp(R(x))</strong>, i.e., bias generation toward higher reward while staying close to the base distribution.<br>
+</li>
+    </ul>
+  </li>
+  <li>Connections:
+    <ul>
+      <li>RF relates to <strong>stochastic optimal control</strong> and contrasts with RL-style approaches used for language models (e.g., PPO, DPO).<br>
+</li>
+      <li>Continuous-time structure of diffusion/flow models opens alternative algorithmic opportunities for RF.<br>
+</li>
+    </ul>
+  </li>
+</ul>
+
+<hr>
+
+<h1 id="fine-tuning-objective-as-kl-regularized-optimization-and-sdeflow-connections">Fine-tuning objective as KL-regularized optimization and SDE/flow connections</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/mit-6.s184/frames/lec04/01-01-05-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/mit-6.s184/frames/lec04/01-01-05-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/mit-6.s184/frames/lec04/01-01-05-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/mit-6.s184/frames/lec04/01-01-05.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment connects RF to a KL-regularized optimization and the path-space control perspective.<br></p>
+
+<ul>
+  <li>Optimization viewpoint:
+    <ul>
+      <li>Target distribution <strong>p_star</strong> maximizes expected reward with a penalty for deviating from <strong>p_base</strong>, i.e., a <strong>KL-regularized</strong> objective.<br>
+</li>
+    </ul>
+  </li>
+  <li>Path-space control formulation:
+    <ul>
+      <li>Cast the problem as minimizing expected negative reward plus a control cost proportional to the <strong>KL divergence</strong> between controlled and base path measures.<br>
+</li>
+      <li>The optimal controlled path measure is proportional to the base path measure multiplied by <strong>exp(reward)</strong> (up to normalization).<br>
+</li>
+    </ul>
+  </li>
+  <li>Practical implication:
+    <ul>
+      <li>Implementing this in diffusion/flow frameworks requires choosing compatible <strong>noise schedules</strong> and dynamics so the control problem is tractable.<br>
+</li>
+    </ul>
+  </li>
+</ul>
+
+<hr>
+
+<h1 id="flow-matching-sde-sampling-equivalence-and-the-role-of-arbitrary-noise-schedules">Flow matching, SDE sampling equivalence, and the role of arbitrary noise schedules</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/mit-6.s184/frames/lec04/01-05-14-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/mit-6.s184/frames/lec04/01-05-14-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/mit-6.s184/frames/lec04/01-05-14-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/mit-6.s184/frames/lec04/01-05-14.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment reviews flow matching and its SDE counterpart and connects them to fine-tuning considerations.<br></p>
+
+<ul>
+  <li>Flow matching:
+    <ul>
+      <li>A learned flow vector field yields a generative <strong>ODE</strong> whose marginals match the reference marginals when trained exactly.<br>
+</li>
+    </ul>
+  </li>
+  <li>SDE alternative:
+    <ul>
+      <li>One can sample the same marginals via an <strong>SDE</strong> by combining an arbitrary diffusion coefficient with a score-based corrective drift.<br>
+</li>
+    </ul>
+  </li>
+  <li>Practical implication for RF:
+    <ul>
+      <li>Flow models can be sampled either by ODE solvers or SDE samplers; choosing an arbitrary noise schedule in the SDE can be leveraged during fine-tuning.<br>
+</li>
+      <li>However, the fine-tuning noise schedule must be chosen carefully to maintain equivalence to the desired target distribution — this underpins results about <strong>memoryless noise schedules</strong> required for principled fine-tuning.<br>
+</li>
+    </ul>
+  </li>
+</ul>
+
+<hr>
+
+<h1 id="stochastic-optimal-control-interpretation-of-fine-tuning-and-necessity-of-memoryless-noise-schedules">Stochastic optimal control interpretation of fine-tuning and necessity of memoryless noise schedules</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/mit-6.s184/frames/lec04/01-09-41-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/mit-6.s184/frames/lec04/01-09-41-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/mit-6.s184/frames/lec04/01-09-41-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/mit-6.s184/frames/lec04/01-09-41.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment develops the stochastic optimal control viewpoint for reward fine-tuning and states the memoryless schedule theorem.<br></p>
+
+<ul>
+  <li>Control formulation:
+    <ul>
+      <li>Treat the difference between the fine-tuned drift and the base drift as a <strong>control</strong>, and form an objective trading expected terminal reward against an integrated quadratic control cost along trajectories.<br>
+</li>
+    </ul>
+  </li>
+  <li>Theoretical result:
+    <ul>
+      <li>The optimal controlled path measure equals the base path measure multiplied by the exponential of rewards — but to ensure the final-time marginal equals <strong>p_star</strong> (independent of the initial state), the generative process must satisfy a <strong>memoryless property</strong>.<br>
+</li>
+    </ul>
+  </li>
+  <li>Practical theorem:
+    <ul>
+      <li>Choosing a specific <strong>memoryless noise schedule</strong> (for the Gaussian path parameterization, sigma_t^2 = 2 a_t) makes fine-tuning implementable and targets <strong>p_star</strong> correctly.<br>
+</li>
+    </ul>
+  </li>
+  <li>Empirical note:
+    <ul>
+      <li>Deviating from the memoryless schedule produces biased or suboptimal fine-tuned distributions in practice.<br>
+</li>
+    </ul>
+  </li>
+</ul>
+
+<hr>
+
+<h1 id="agent-method-for-solving-the-control-problem-and-adjointagent-matching">Agent method for solving the control problem and adjoint/agent matching</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/mit-6.s184/frames/lec04/01-15-00-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/mit-6.s184/frames/lec04/01-15-00-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/mit-6.s184/frames/lec04/01-15-00-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/mit-6.s184/frames/lec04/01-15-00.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This segment describes computational methods for solving the stochastic optimal control problem for fine-tuning, focusing on agent-based approaches.<br></p>
+
+<ul>
+  <li>Two equivalent algorithmic views:
+    <ul>
+      <li>Direct <strong>policy-gradient–like</strong> viewpoint: optimize a parametric control network by sampling rollouts and optimizing the expected control objective via backpropagation through time.<br>
+</li>
+      <li>
+<strong>Adjoint / agent-matching regression</strong> viewpoint: regress the control against an adjoint (costate) that satisfies a backward ODE; at optimum the control equals minus the gradient of the value function scaled by sigma^T.<br>
+</li>
+    </ul>
+  </li>
+  <li>Practical considerations:
+    <ul>
+      <li>Adjoint formulations can be implemented via additional ODEs and often reduce variance if designed carefully.<br>
+</li>
+      <li>A modified agent-matching variant that cancels high-variance terms performed best in the authors’ experiments, indicating variance control is critical for practical RF.<br>
+</li>
+    </ul>
+  </li>
+  <li>Takeaway: both rollout-based and adjoint-regression approaches are viable; careful variance reduction and schedule choices are key for successful reward fine-tuning in continuous-time generative models.<br>
+</li>
+</ul>
+
+<hr>
+
+
+    </div>
+  </article>
+
+
+  
+    
+    <br>
+    <hr>
+    <br>
+    <ul class="list-disc pl-8"></ul>
+
+    <!-- Adds related posts to the end of an article -->
+    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
+    <p class="mb-2">Here are some more articles you might like to read next:</p>
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec06/">MIT 6.S184 - Lecture 6 - Diffusion for Protein Generation</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec05/">MIT 6.S184 - Lecture 5 - Diffusion for Robotics</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec03/">MIT 6.S184 - Lecture 3 - Training Flow and Diffusion Models</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec02/">MIT 6.S184 - Lecture 2 -  Constructing a Training Target</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec01/">MIT 6.S184 - Lecture 1 - Generative AI with SDEs</a>
+  </li>
+
+</div>
+
+      
+    </div>
+
+    <!-- Footer -->    
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        © Copyright 2025 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+
+      </div>
+    </footer>
+
+    <!-- JavaScripts -->
+    <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- Bootsrap & MDB scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    <!-- Masonry & imagesLoaded -->
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
+    
+  <!-- Medium Zoom JS -->
+  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/zoom.js"></script>
+
+  <!-- Bootstrap Table -->
+  <script defer src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+
+  <!-- Load Common JS -->
+  <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
+  <script defer src="/assets/js/common.js?acdb9690d7641b2f8d40529018c71a01"></script>
+  <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    <!-- MathJax -->
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        tags: 'ams'
+      }
+    };
+  </script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KGSMMS9MS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-7KGSMMS9MS');
+  </script>
+    
+
+<!-- Scrolling Progress Bar -->
+<script type="text/javascript">
+  /*
+   * This JavaScript code has been adapted from the article 
+   * https://css-tricks.com/reading-position-indicator/ authored by Pankaj Parashar, 
+   * published on the website https://css-tricks.com on the 7th of May, 2014.
+   * Couple of changes were made to the original code to make it compatible 
+   * with the `al-foio` theme.
+   */
+  const progressBar = $("#progress");
+  /*
+   * We set up the bar after all elements are done loading.
+   * In some cases, if the images in the page are larger than the intended
+   * size they'll have on the page, they'll be resized via CSS to accomodate
+   * the desired size. This mistake, however, breaks the computations as the
+   * scroll size is computed as soon as the elements finish loading.
+   * To account for this, a minimal delay was introduced before computing the
+   * values.
+   */
+  window.onload = function () {
+    setTimeout(progressBarSetup, 50);
+  };
+  /*
+   * We set up the bar according to the browser.
+   * If the browser supports the progress element we use that.
+   * Otherwise, we resize the bar thru CSS styling
+   */
+  function progressBarSetup() {
+    if ("max" in document.createElement("progress")) {
+      initializeProgressElement();
+      $(document).on("scroll", function() {
+        progressBar.attr({ value: getCurrentScrollPosition() });
+      });
+      $(window).on("resize", initializeProgressElement);
+    } else {
+      resizeProgressBar();
+      $(document).on("scroll", resizeProgressBar);
+      $(window).on("resize", resizeProgressBar);
+    }
+  }
+  /*
+   * The vertical scroll position is the same as the number of pixels that
+   * are hidden from view above the scrollable area. Thus, a value > 0 is
+   * how much the user has scrolled from the top
+   */
+  function getCurrentScrollPosition() {
+    return $(window).scrollTop();
+  }
+
+  function initializeProgressElement() {
+    let navbarHeight = $("#navbar").outerHeight(true);
+    $("body").css({ "padding-top": navbarHeight });
+    $("progress-container").css({ "padding-top": navbarHeight });
+    progressBar.css({ top: navbarHeight });
+    progressBar.attr({
+      max: getDistanceToScroll(),
+      value: getCurrentScrollPosition(),
+    });
+  }
+  /*
+   * The offset between the html document height and the browser viewport
+   * height will be greater than zero if vertical scroll is possible.
+   * This is the distance the user can scroll
+   */
+  function getDistanceToScroll() {
+    return $(document).height() - $(window).height();
+  }
+
+  function resizeProgressBar() {
+    progressBar.css({ width: getWidthPercentage() + "%" });
+  }
+  // The scroll ratio equals the percentage to resize the bar
+  function getWidthPercentage() {
+    return (getCurrentScrollPosition() / getDistanceToScroll()) * 100;
+  }
+</script>
+
+    
+  </body>
+</html>
