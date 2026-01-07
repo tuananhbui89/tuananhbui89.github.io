@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <!-- Head -->
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    <!-- Metadata, OpenGraph and Schema.org -->
+    
+
+    <!-- Standard metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Stanford CS231N Deep Learning for Computer Vision | Spring 2025 | Lecture 17- Robot Learning | Tuan-Anh  Bui</title>
+    <meta name="author" content="Tuan-Anh  Bui">
+    <meta name="description" content="AI Summary Lecture">
+    <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
+
+
+    <!-- Bootstrap & MDB -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+    <!-- Bootstrap Table -->
+    <link defer rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+
+    <!-- Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
+
+    
+
+    <!-- Styles -->
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
+    
+    <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+    <link rel="canonical" href="https://tuananhbui89.github.io/blog/2025/cs231n-2025-lec17/">
+
+    <!-- Dark Mode -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark">
+    <script src="/assets/js/theme.js?96d6b3e1c3604aca8b6134c7afdd5db6"></script>
+    <script src="/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script>
+    
+
+  </head>
+
+  <!-- Body -->
+  <body class="fixed-top-nav ">
+
+    <!-- Header -->
+    <header>
+
+      <!-- Nav Bar -->
+      <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top">
+        <div class="container">
+          <a class="navbar-brand title font-weight-lighter" href="/"><span class="font-weight-bold">Tuan-Anh </span>Bui</a>
+          <!-- Navbar Toggle -->
+          <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar top-bar"></span>
+            <span class="icon-bar middle-bar"></span>
+            <span class="icon-bar bottom-bar"></span>
+          </button>
+
+          <div class="collapse navbar-collapse text-right" id="navbarNav">
+            <ul class="navbar-nav ml-auto flex-nowrap">
+
+              <!-- About -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/">about</a>
+              </li>
+              
+              <!-- Blog -->
+              <li class="nav-item active">
+                <a class="nav-link" href="/blog/">blog<span class="sr-only">(current)</span></a>
+              </li>
+
+              <!-- Other pages -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/publications/">publications</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/projects/">projects</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/repositories/">repositories</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/teaching/"></a>
+              </li>
+
+              <!-- Toogle theme mode -->
+              <li class="toggle-container">
+                <button id="light-toggle" title="Change theme">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Scrolling Progress Bar -->
+      <progress id="progress" value="0">
+        <div class="progress-container">
+          <span class="progress-bar"></span>
+        </div>
+      </progress>
+    </header>
+
+
+    <!-- Content -->
+    <div class="container mt-5">
+      
+        <!-- _layouts/post.html -->
+<!-- Page/Post style -->
+<style type="text/css">
+  
+</style>
+
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Stanford CS231N Deep Learning for Computer Vision | Spring 2025 | Lecture 17- Robot Learning</h1>
+    <p class="post-meta">December 20, 2025</p>
+    <p class="post-tags">
+      <a href="/blog/2025"> <i class="fas fa-calendar fa-sm"></i> 2025 </a>
+        ·  
+        <a href="/blog/tag/genai">
+          <i class="fas fa-hashtag fa-sm"></i> genai</a>  
+          <a href="/blog/tag/llm">
+          <i class="fas fa-hashtag fa-sm"></i> llm</a>  
+          <a href="/blog/tag/tutorial">
+          <i class="fas fa-hashtag fa-sm"></i> tutorial</a>  
+          <a href="/blog/tag/reading">
+          <i class="fas fa-hashtag fa-sm"></i> reading</a>  
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    
+    <div id="table-of-contents">
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#introduction-to-robot-learning-as-an-interdisciplinary-research-area">Introduction to robot learning as an interdisciplinary research area</a></li>
+<li class="toc-entry toc-h1"><a href="#contrast-between-supervisedself-supervised-learning-and-robot-learning">Contrast between supervised/self-supervised learning and robot learning</a></li>
+<li class="toc-entry toc-h1"><a href="#robot-learning-emphasizes-sequential-actions-that-influence-environment-evolution-and-reward-accumulation">Robot learning emphasizes sequential actions that influence environment evolution and reward accumulation</a></li>
+<li class="toc-entry toc-h1"><a href="#problem-formulation-for-embodied-agents-goals-states-actions-and-rewards">Problem formulation for embodied agents: goals, states, actions, and rewards</a></li>
+<li class="toc-entry toc-h1"><a href="#instantiations-of-robot-learning-across-domains-control-locomotion-games-language-conditioned-agents-manipulation">Instantiations of robot learning across domains (control, locomotion, games, language-conditioned agents, manipulation)</a></li>
+<li class="toc-entry toc-h1"><a href="#reward-specification-requires-careful-design-and-can-be-application-specific">Reward specification requires careful design and can be application specific</a></li>
+<li class="toc-entry toc-h1"><a href="#robot-perception-is-embodied-active-and-situated-and-requires-multisensory-integration">Robot perception is embodied, active, and situated and requires multisensory integration</a></li>
+<li class="toc-entry toc-h1"><a href="#reinforcement-learning-enables-learning-via-trial-and-error-interactions-but-differs-fundamentally-from-supervised-learning">Reinforcement learning enables learning via trial-and-error interactions but differs fundamentally from supervised learning</a></li>
+<li class="toc-entry toc-h1"><a href="#value-based-rl-and-large-scale-policy-learning-demonstrate-emergent-strategies-in-simulated-domains">Value-based RL and large-scale policy learning demonstrate emergent strategies in simulated domains</a></li>
+<li class="toc-entry toc-h1"><a href="#reinforcement-learning-succeeds-in-locomotion-and-faces-challenges-in-manipulation-in-real-world">Reinforcement learning succeeds in locomotion and faces challenges in manipulation in real world</a></li>
+<li class="toc-entry toc-h1"><a href="#model-based-learning-and-planning-use-learned-forward-models-for-predictive-control-and-trajectory-optimization">Model-based learning and planning use learned forward models for predictive control and trajectory optimization</a></li>
+<li class="toc-entry toc-h1"><a href="#state-representations-for-learned-dynamics-range-from-pixels-to-keypoints-to-particle-based-models-and-dictate-model-accuracy-and-control-capabilities">State representations for learned dynamics range from pixels to keypoints to particle-based models and dictate model accuracy and control capabilities</a></li>
+<li class="toc-entry toc-h1"><a href="#task-oriented-learned-dynamics-enable-complex-manipulation-such-as-tool-selection-and-multi-stage-actions-example-robotic-dumpling-making">Task-oriented learned dynamics enable complex manipulation such as tool selection and multi-stage actions (example: robotic dumpling making)</a></li>
+<li class="toc-entry toc-h1"><a href="#learned-models-from-real-data-can-outperform-hand-tuned-physics-simulators-for-contact-rich-deformable-tasks">Learned models from real data can outperform hand-tuned physics simulators for contact-rich deformable tasks</a></li>
+<li class="toc-entry toc-h1"><a href="#imitation-learning-uses-demonstrations-to-train-policies-but-requires-mitigation-of-distributional-shift-and-cascading-errors">Imitation learning uses demonstrations to train policies but requires mitigation of distributional shift and cascading errors</a></li>
+<li class="toc-entry toc-h1"><a href="#implicit-policy-parameterizations-and-generative-models-energy-based-and-diffusion-policies-improve-demonstration-modeling-for-multimodal-behaviors">Implicit policy parameterizations and generative models (energy-based and diffusion policies) improve demonstration modeling for multimodal behaviors</a></li>
+<li class="toc-entry toc-h1"><a href="#robotic-foundation-models-aim-to-pretrain-large-action-conditioned-policies-on-diverse-datasets-and-then-adapt-via-post-training">Robotic foundation models aim to pretrain large action-conditioned policies on diverse datasets and then adapt via post-training</a></li>
+<li class="toc-entry toc-h1"><a href="#open-challenges-include-evaluation-reproducible-benchmarks-sim-to-real-gaps-data-assets-and-efficient-data-collection">Open challenges include evaluation, reproducible benchmarks, sim-to-real gaps, data assets, and efficient data collection</a></li>
+</ul>
+    </div>
+    <hr>
+    
+    <div id="markdown-content">
+      <div style="display: flex; justify-content: center;">
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/XSfmOH_xVSU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen="">
+    </iframe>
+</div>
+
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ 
+    startOnLoad: true,
+    mindmap: {
+      useMaxWidth: false,
+      padding: 20
+    },
+    theme: "default"
+  });
+</script>
+
+<div style="overflow-x: auto;">
+<div class="mermaid"> 
+mindmap
+  Robot Learning = Embodied Sequential Decision‑Making
+    Embodied Formalism
+      Goals · States · Actions · Rewards
+      Sequential loop: S, A, R → S'
+    Perception
+      Embodied · Active · Multisensory
+      Task‑relevant fusion and closed‑loop sensing
+    Learning Paradigms
+      Reinforcement learning: exploration, credit assignment
+      Imitation &amp; generative policies diffusion
+      Foundation models: pretrain → fine‑tune
+    Model‑based Planning
+      Learn forward model → MPC
+      Trajectory optimization · Hierarchical control
+    State Representations
+      Pixels → Keypoints → Particles
+      Fidelity vs tractability tradeoffs
+    Practical Challenges
+      Reward design &amp; alignment
+      Sim‑to‑real, data scale, benchmarks, safety
+</div>
+</div>
+
+<h1 id="introduction-to-robot-learning-as-an-interdisciplinary-research-area">Introduction to robot learning as an interdisciplinary research area</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-00-51-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-00-51-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-00-51-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec17/00-00-51.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Robot learning</strong> is an interdisciplinary field at the intersection of <strong>robotics</strong>, <strong>computer vision</strong>, and <strong>machine learning</strong> that targets expanding robots’ <strong>perception</strong> and <strong>physical interaction</strong> capabilities.<br></p>
+
+<p>It frames research goals around enabling <strong>embodied agents</strong> to:</p>
+<ul>
+  <li>perceive high-dimensional sensory inputs,</li>
+  <li>act in the physical world, and</li>
+  <li>improve behavior via learning.<br>
+</li>
+</ul>
+
+<p>Typical research activities include:</p>
+<ul>
+  <li>developing <strong>perception systems</strong> for noisy, multimodal sensors,</li>
+  <li>designing <strong>control policies</strong> that respect dynamics and constraints, and</li>
+  <li>building <strong>decision-making frameworks</strong> for dynamic, uncertain environments.<br>
+</li>
+</ul>
+
+<p>The area connects academic investigations and industrial efforts aiming to build <strong>general-purpose robots</strong> capable of diverse manipulation and locomotion tasks.<br></p>
+
+<hr>
+
+<h1 id="contrast-between-supervisedself-supervised-learning-and-robot-learning">Contrast between supervised/self-supervised learning and robot learning</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-02-07-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-02-07-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-02-07-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec17/00-02-07.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Supervised learning</strong> maps inputs X to labels Y using labeled datasets and loss minimization.<br></p>
+
+<p><strong>Self-supervised learning</strong> derives structure from unlabeled data via auxiliary objectives such as <strong>autoencoders</strong> or <strong>contrastive losses</strong>.<br></p>
+
+<p><strong>Robot learning</strong> differs fundamentally from these paradigms by incorporating <strong>sequential decision-making</strong> and <strong>physical interactions</strong>:</p>
+<ul>
+  <li>actions executed by the agent change the environment and produce new observations and rewards,</li>
+  <li>the learning target is typically a <strong>policy</strong> or <strong>control strategy</strong> that optimizes <strong>cumulative rewards under dynamics</strong>, not a static input→output mapping.<br>
+</li>
+</ul>
+
+<p>This distinction motivates distinct algorithmic choices and evaluation concerns in robotics versus traditional computer vision.<br></p>
+
+<hr>
+
+<h1 id="robot-learning-emphasizes-sequential-actions-that-influence-environment-evolution-and-reward-accumulation">Robot learning emphasizes sequential actions that influence environment evolution and reward accumulation</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-03-38-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-03-38-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-03-38-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec17/00-03-38.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Robot learning formalizes tasks where an agent chooses actions that produce state transitions and scalar feedback, and the objective is to produce action sequences that <strong>maximize cumulative reward</strong> or <strong>minimize cost</strong>.<br></p>
+
+<p>Key problem components:</p>
+<ul>
+  <li>
+<strong>Goal specifications</strong> (task objectives or instructions),</li>
+  <li>
+<strong>State representations</strong> (what the agent observes and reasons about),</li>
+  <li>
+<strong>Action spaces</strong> (discrete commands vs continuous motor controls), and</li>
+  <li>
+<strong>Reward functions</strong> (how success is quantified).<br>
+</li>
+</ul>
+
+<p>These elements jointly determine the optimization problem the agent must solve.<br>
+Real-world robotics introduces hard <strong>physical constraints</strong>, embodiment effects, and <strong>safety considerations</strong> that make the optimization substantially more difficult than static perception tasks.<br></p>
+
+<p>The field has attracted significant academic and industrial investment aimed at building <strong>physically interactive, general-purpose robots</strong>.<br></p>
+
+<hr>
+
+<h1 id="problem-formulation-for-embodied-agents-goals-states-actions-and-rewards">Problem formulation for embodied agents: goals, states, actions, and rewards</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-06-29-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-06-29-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-06-29-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec17/00-06-29.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>A canonical formalism represents an embodied agent interacting with an environment in a sequential loop:</p>
+<ul>
+  <li>observe <strong>state S_t</strong>,</li>
+  <li>execute <strong>action A_t</strong>,</li>
+  <li>receive <strong>reward R_t</strong>, and</li>
+  <li>transition to <strong>S_{t+1}</strong>.<br>
+</li>
+</ul>
+
+<p>The task objective may be:</p>
+<ul>
+  <li>a <strong>human instruction</strong>,</li>
+  <li>a <strong>scalar reward function</strong>, or</li>
+  <li>a combination of both — and it must be specified to evaluate policy performance.<br>
+</li>
+</ul>
+
+<p>Representations and choices that shape learning:</p>
+<ul>
+  <li>
+<strong>State representations</strong>: raw high-dimensional sensor data (e.g., RGB or RGB‑D frames) or lower-dimensional descriptors,</li>
+  <li>
+<strong>Actions</strong>: discrete commands or continuous motor torques,</li>
+  <li>
+<strong>Reward shaping</strong>: design choices that affect learning behavior and safety.<br>
+</li>
+</ul>
+
+<p>This formalization distinguishes robotics from static perception by making <strong>control</strong>, <strong>dynamics</strong>, and <strong>constraints</strong> core elements of the problem statement.<br></p>
+
+<hr>
+
+<h1 id="instantiations-of-robot-learning-across-domains-control-locomotion-games-language-conditioned-agents-manipulation">Instantiations of robot learning across domains (control, locomotion, games, language-conditioned agents, manipulation)</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-09-14-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-09-14-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-09-14-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec17/00-09-14.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Robot learning maps naturally to diverse instantiations, each sharing sequential decision-making under dynamics but differing in state/action/reward choices:<br></p>
+
+<ul>
+  <li>
+<strong>Classic control (e.g., cart-pole)</strong>: low-dimensional physical state vectors and continuous forces.</li>
+  <li>
+<strong>Locomotion</strong>: joint angles, velocities, and torques with rewards for forward progression and stability.</li>
+  <li>
+<strong>Atari-style and board games</strong>: raw pixels or discrete board states cast into <strong>MDPs</strong> with discrete actions and episodic rewards.</li>
+  <li>
+<strong>Language-conditioned generation / conversational agents</strong>: generated tokens as actions and human evaluations as rewards.</li>
+  <li>
+<strong>Manipulation (e.g., clothes folding)</strong>: multimodal observations and binary or continuous success metrics.<br>
+</li>
+</ul>
+
+<p>Across these domains, the common structure is sequential decision-making under dynamics, while state/action representations and reward definitions vary and shape algorithm selection and evaluation.<br></p>
+
+<hr>
+
+<h1 id="reward-specification-requires-careful-design-and-can-be-application-specific">Reward specification requires careful design and can be application specific</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-11-52-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-11-52-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-11-52-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec17/00-11-52.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Reward design</strong> is task-dependent and can encode preferences, safety constraints, or multi-objective trade-offs.<br></p>
+
+<p>Examples:</p>
+<ul>
+  <li>autonomous driving rewards might prioritize <strong>speed</strong>, <strong>passenger comfort</strong>, or <strong>safety</strong>,</li>
+  <li>cloth-folding rewards might emphasize <strong>compactness</strong> or <strong>smoothness</strong> as judged by human preferences.<br>
+</li>
+</ul>
+
+<p>Practical implications:</p>
+<ul>
+  <li>
+<strong>Reward shaping</strong> and specification directly influence learned behaviors, generalization, and failure modes,</li>
+  <li>ambiguous or underspecified rewards can yield undesired policies.<br>
+</li>
+</ul>
+
+<p>Common remedies:</p>
+<ul>
+  <li>domain-specific <strong>reward engineering</strong>,</li>
+  <li>
+<strong>human-in-the-loop</strong> evaluation and feedback, or</li>
+  <li>
+<strong>inverse methods</strong> (e.g., inverse reinforcement learning) that infer reward structure from demonstrations to better align agent behavior with user intent.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="robot-perception-is-embodied-active-and-situated-and-requires-multisensory-integration">Robot perception is embodied, active, and situated and requires multisensory integration</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-15-30-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-15-30-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-15-30-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec17/00-15-30.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Robot perception</strong> must extract structured, task-relevant information from high-dimensional, noisy, and incomplete sensory streams such as RGB/RGB‑D, tactile, and audio inputs.<br></p>
+
+<p>Constraints and requirements:</p>
+<ul>
+  <li>must operate robustly under occlusion, sensor noise, and dynamic environments,</li>
+  <li>
+<strong>embodiment</strong> implies sensors are attached to the agent and actions immediately affect future observations,</li>
+  <li>
+<strong>active perception</strong>: the agent chooses sensing actions (e.g., perturbation, viewpoint change) to disambiguate states,</li>
+  <li>
+<strong>situatedness</strong>: perception must be tightly coupled to current task goals and local regions rather than producing global, abstract descriptions.<br>
+</li>
+</ul>
+
+<p>Effective systems therefore:</p>
+<ul>
+  <li>fuse complementary modalities,</li>
+  <li>prioritize task-relevant information, and</li>
+  <li>enable closed-loop <strong>perception–action coupling</strong> under uncertainty.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="reinforcement-learning-enables-learning-via-trial-and-error-interactions-but-differs-fundamentally-from-supervised-learning">Reinforcement learning enables learning via trial-and-error interactions but differs fundamentally from supervised learning</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-21-02-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-21-02-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-21-02-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec17/00-21-02.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Reinforcement learning (RL)</strong> uses environment interactions and reward feedback to adjust behavior through exploration and exploitation, typically by maximizing expected discounted cumulative reward.<br></p>
+
+<p>How RL differs from supervised learning:</p>
+<ul>
+  <li>environments can be <strong>stochastic</strong> and <strong>non‑stationary</strong>,</li>
+  <li>rewards are often <strong>delayed</strong>, requiring long-horizon credit assignment,</li>
+  <li>environments or reward functions may be <strong>non-differentiable</strong>, complicating gradient-based optimization,</li>
+  <li>actions influence future data distributions (the agent’s behavior shapes the training data).<br>
+</li>
+</ul>
+
+<p>These differences motivate specialized RL techniques:</p>
+<ul>
+  <li>
+<strong>value estimation</strong> (e.g., Q-functions),</li>
+  <li>
+<strong>policy optimization</strong> algorithms (e.g., PPO, SAC), and</li>
+  <li>
+<strong>sample-efficiency strategies</strong> such as model-based methods, experience replay, and variance reduction.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="value-based-rl-and-large-scale-policy-learning-demonstrate-emergent-strategies-in-simulated-domains">Value-based RL and large-scale policy learning demonstrate emergent strategies in simulated domains</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-28-38-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-28-38-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-28-38-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec17/00-28-38.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Value-based algorithms</strong> learn action-value functions Q(s,a) that estimate discounted expected future returns and enable greedy or stochastic action selection.<br></p>
+
+<p>Deep neural networks (e.g., convolutional networks for pixel inputs) serve as function approximators for Q and policy representations.<br></p>
+
+<p>Empirical milestones:</p>
+<ul>
+  <li>large-scale RL on domains like <strong>Atari</strong> shows agents can discover effective and sometimes novel strategies,</li>
+  <li>
+<strong>AlphaGo/AlphaZero</strong> families demonstrate self-play combined with value and policy networks can exceed human experts in complex games.<br>
+</li>
+</ul>
+
+<p>Takeaway: algorithmic design combined with compute scale and infrastructure can produce emergent, high-performing behaviors in well-defined simulated tasks.<br></p>
+
+<hr>
+
+<h1 id="reinforcement-learning-succeeds-in-locomotion-and-faces-challenges-in-manipulation-in-real-world">Reinforcement learning succeeds in locomotion and faces challenges in manipulation in real world</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-34-55-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-34-55-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-34-55-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec17/00-34-55.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Model-free RL</strong> coupled with <strong>domain randomization</strong> has yielded robust quadruped and humanoid locomotion controllers that transfer from sim to real and handle rough terrain.<br></p>
+
+<p>Why locomotion succeeds more readily:</p>
+<ul>
+  <li>dynamics can be randomized effectively in simulation, and</li>
+  <li>control objectives are often well-structured and periodic.<br>
+</li>
+</ul>
+
+<p>Why manipulation remains challenging:</p>
+<ul>
+  <li>larger <strong>sim-to-real gaps</strong> for contact-rich, deformable, or high-DoF interactions,</li>
+  <li>high <strong>sample complexity</strong> and <strong>safety constraints</strong> limit online real-world exploration, and</li>
+  <li>learned behaviors may be <strong>brittle</strong> or lack interpretability.<br>
+</li>
+</ul>
+
+<p>Mitigation strategies for manipulation:</p>
+<ul>
+  <li>extensive engineering,</li>
+  <li>richer sim-randomization, or</li>
+  <li>
+<strong>model-based</strong> approaches to improve sample efficiency and robustness.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="model-based-learning-and-planning-use-learned-forward-models-for-predictive-control-and-trajectory-optimization">Model-based learning and planning use learned forward models for predictive control and trajectory optimization</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-40-14-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-40-14-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-40-14-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec17/00-40-14.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Model-based approaches</strong> learn a forward model f_theta(s_t, a_t) → s_{t+1} that predicts environment evolution under actions and then solve an inverse planning problem to reach target states by minimizing a trajectory loss in state space.<br></p>
+
+<p>Typical pipeline (numbered):</p>
+<ol>
+  <li>learn or fit a forward model f_theta(s_t, a_t) → s_{t+1},</li>
+  <li>define a trajectory loss that measures deviation from desired states,</li>
+  <li>optimize an action sequence via sampling-based trajectory optimization or gradient-based backpropagation through differentiable dynamics, and</li>
+  <li>execute only the first action in a receding-horizon (MPC) manner to mitigate model errors.<br>
+</li>
+</ol>
+
+<p>Model-based pipelines often:</p>
+<ul>
+  <li>exploit GPU parallelism for large-scale sampling and optimization, and</li>
+  <li>enable interpretable, data-efficient control by leveraging explicit predictions of future states.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="state-representations-for-learned-dynamics-range-from-pixels-to-keypoints-to-particle-based-models-and-dictate-model-accuracy-and-control-capabilities">State representations for learned dynamics range from pixels to keypoints to particle-based models and dictate model accuracy and control capabilities</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-47-59-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-47-59-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-47-59-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec17/00-47-59.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Choice of <strong>state representation</strong> critically affects the fidelity and tractability of learned dynamics:<br></p>
+
+<ul>
+  <li>
+<strong>Pixel-level models</strong> predict image-space changes and enable visual servoing, but are high-dimensional and computationally expensive.</li>
+  <li>
+<strong>Keypoint or low-dimensional descriptors</strong> provide compact, controllable features for object-centric planning.</li>
+  <li>
+<strong>Particle- or particle-fluid-based representations</strong> model high-DoF deformable or granular media, enabling fine-grained predictions for rearrangement tasks.<br>
+</li>
+</ul>
+
+<p>Learned neural dynamics over these representations make inverse planning feasible for complex materials; particle-based learned models have shown reliable performance on granular aggregation and deformable object manipulation by predicting multi-particle state evolution and supporting closed-loop correction.<br></p>
+
+<hr>
+
+<h1 id="task-oriented-learned-dynamics-enable-complex-manipulation-such-as-tool-selection-and-multi-stage-actions-example-robotic-dumpling-making">Task-oriented learned dynamics enable complex manipulation such as tool selection and multi-stage actions (example: robotic dumpling making)</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-53-16-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-53-16-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-53-16-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec17/00-53-16.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Learned forward dynamics over appropriate state representations support <strong>hierarchical decision-making</strong>:</p>
+<ul>
+  <li>a high-level classifier or policy selects discrete options (e.g., tools or sub-tasks), and</li>
+  <li>a low-level controller or planner optimizes continuous motions conditioned on that choice.<br>
+</li>
+</ul>
+
+<p>Empirical patterns:</p>
+<ul>
+  <li>particle-based dynamics trained from real interaction data can predict deformable object evolution under different tools and support inverse planning to sequence tool choices and actions, enabling robust multi-stage manipulation (e.g., dough shaping, dumpling assembly).</li>
+  <li>offline sampling-driven planning can be <strong>distilled</strong> into fast policies for runtime execution.</li>
+  <li>closed-loop robustness is achieved by continuously reoptimizing or reclassifying the task stage based on current observations.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="learned-models-from-real-data-can-outperform-hand-tuned-physics-simulators-for-contact-rich-deformable-tasks">Learned models from real data can outperform hand-tuned physics simulators for contact-rich deformable tasks</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-54-46-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-54-46-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-54-46-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec17/00-54-46.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Directly learned neural dynamics trained on real-world interaction data often produce more accurate open-loop and closed-loop predictions for complex deformable-object tasks than physics-based simulators that require extensive system identification (e.g., MPM implementations).<br></p>
+
+<p>Empirical comparisons show:</p>
+<ul>
+  <li>data-driven learned models can match observed shape evolution and support effective planning without accurate parametric physical models, and</li>
+  <li>this mitigates certain aspects of sim-to-real mismatch.<br>
+</li>
+</ul>
+
+<p>Consequently, practitioners often prefer learning forward predictors from real interactions and using <strong>hybrid pipelines</strong> where planning and policy distillation leverage model predictions for robust control.<br></p>
+
+<hr>
+
+<h1 id="imitation-learning-uses-demonstrations-to-train-policies-but-requires-mitigation-of-distributional-shift-and-cascading-errors">Imitation learning uses demonstrations to train policies but requires mitigation of distributional shift and cascading errors</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-57-12-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-57-12-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec17/00-57-12-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec17/00-57-12.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Imitation learning</strong> (learning from demonstration) trains policies via supervised regression from observations to actions using expert data, with <strong>behavior cloning</strong> as a canonical algorithm that optimizes an action prediction loss.<br></p>
+
+<p>A central challenge is <strong>covariate shift</strong> and cascading errors: small deviations from the expert trajectory lead to out-of-distribution states that amplify mistakes over time and degrade long-horizon performance.<br></p>
+
+<p>Practical remedies:</p>
+<ul>
+  <li>augment demonstrations with corrective data collection,</li>
+  <li>use interactive refinement (e.g., DAgger-style collection),</li>
+  <li>apply inverse reinforcement learning to infer implicit rewards, or</li>
+  <li>combine imitation with reinforcement fine-tuning to recover from errors and improve robustness.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="implicit-policy-parameterizations-and-generative-models-energy-based-and-diffusion-policies-improve-demonstration-modeling-for-multimodal-behaviors">Implicit policy parameterizations and generative models (energy-based and diffusion policies) improve demonstration modeling for multimodal behaviors</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec17/01-01-22-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec17/01-01-22-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec17/01-01-22-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec17/01-01-22.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Implicit policy models</strong> inspired by energy-based models and <strong>diffusion generative models</strong> represent a scoring function or denoising process over action trajectories conditioned on observations.<br></p>
+
+<p>Key benefits:</p>
+<ul>
+  <li>enable <strong>multimodal behavior modeling</strong> and more expressive inference than direct regression,</li>
+  <li>
+<strong>diffusion policy</strong> methods model distributions over action sequences and sample via iterative denoising, capturing diverse valid behaviors in ambiguous tasks, and producing smoother, higher-quality motion trajectories.<br>
+</li>
+</ul>
+
+<p>These generative policy classes have enabled recent real-world manipulation improvements by better matching the multimodal distribution of expert behaviors and supporting stable sampling-based inference.<br></p>
+
+<hr>
+
+<h1 id="robotic-foundation-models-aim-to-pretrain-large-action-conditioned-policies-on-diverse-datasets-and-then-adapt-via-post-training">Robotic foundation models aim to pretrain large action-conditioned policies on diverse datasets and then adapt via post-training</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec17/01-07-04-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec17/01-07-04-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec17/01-07-04-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec17/01-07-04.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Robotic foundation models</strong> generalize the foundation model pattern to embodied action by pretraining large observation→action policies on aggregated multi-robot, multi-task datasets, often leveraging pretrained vision-language backbones to inherit semantic understanding.<br></p>
+
+<p>Typical workflow:</p>
+<ul>
+  <li>pretraining provides broad semantic and perceptual priors,</li>
+  <li>post-training or task-specific fine-tuning on curated robot interaction data improves action-level performance and reliability for target tasks.<br>
+</li>
+</ul>
+
+<p>Evaluation regimes include:</p>
+<ul>
+  <li>
+<strong>zero-shot</strong> use of the base model,</li>
+  <li>in-distribution post-training, and</li>
+  <li>out-of-distribution fine-tuning.<br>
+</li>
+</ul>
+
+<p>Successful systems combine scale of data, representation priors, and specialized adaptation to achieve practical capabilities.<br></p>
+
+<hr>
+
+<h1 id="open-challenges-include-evaluation-reproducible-benchmarks-sim-to-real-gaps-data-assets-and-efficient-data-collection">Open challenges include evaluation, reproducible benchmarks, sim-to-real gaps, data assets, and efficient data collection</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec17/01-14-43-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec17/01-14-43-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec17/01-14-43-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec17/01-14-43.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Quantitative evaluation of robotic systems remains a major bottleneck because real-world testing is expensive, noisy, and sensitive to initial conditions, hardware tolerances, and environmental factors.<br></p>
+
+<p>Consequences and challenges:</p>
+<ul>
+  <li>weak correlations between training losses and real-world task success,</li>
+  <li>simulated evaluation helps but suffers from asset realism limits, procedural generation gaps, and uncertain <strong>sim-to-real</strong> transferability—especially for contact-rich, deformable, or friction-sensitive tasks, and</li>
+  <li>difficulty building large, diverse datasets of action-conditioned interactions and achieving efficient data-collection speeds comparable to humans.<br>
+</li>
+</ul>
+
+<p>Additional needs:</p>
+<ul>
+  <li>robust, safety-aware learning for on-robot trials, and</li>
+  <li>principled metrics and benchmarks to measure generalization and community progress.<br>
+</li>
+</ul>
+
+<hr>
+
+
+    </div>
+  </article>
+
+
+  
+    
+    <br>
+    <hr>
+    <br>
+    <ul class="list-disc pl-8"></ul>
+
+    <!-- Adds related posts to the end of an article -->
+    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
+    <p class="mb-2">Here are some more articles you might like to read next:</p>
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs231n-2025-lec18/">Stanford CS231N Deep Learning for Computer Vision | Spring 2025 | Lecture 18- Human-Centered AI</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs231n-2025-lec16/">Stanford CS231N Deep Learning for Computer Vision | Spring 2025 | Lecture 16- Vision and Language</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs231n-2025-lec15/">Stanford CS231N Deep Learning for Computer Vision | Spring 2025 | Lecture 15- 3D Vision</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs231n-2025-lec14/">Stanford CS231N Deep Learning for Computer Vision| Spring 2025 | Lecture 14- Generative Models 2</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs231n-2025-lec13/">Stanford CS231N Deep Learning for Computer Vision | Spring 2025 | Lecture 13- Generative Models 1</a>
+  </li>
+
+</div>
+
+      
+    </div>
+
+    <!-- Footer -->    
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        © Copyright 2026 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+
+      </div>
+    </footer>
+
+    <!-- JavaScripts -->
+    <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- Bootsrap & MDB scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    <!-- Masonry & imagesLoaded -->
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
+    
+  <!-- Medium Zoom JS -->
+  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/zoom.js"></script>
+
+  <!-- Bootstrap Table -->
+  <script defer src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+
+  <!-- Load Common JS -->
+  <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
+  <script defer src="/assets/js/common.js?acdb9690d7641b2f8d40529018c71a01"></script>
+  <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    <!-- MathJax -->
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        tags: 'ams'
+      }
+    };
+  </script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KGSMMS9MS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-7KGSMMS9MS');
+  </script>
+    
+
+<!-- Scrolling Progress Bar -->
+<script type="text/javascript">
+  /*
+   * This JavaScript code has been adapted from the article 
+   * https://css-tricks.com/reading-position-indicator/ authored by Pankaj Parashar, 
+   * published on the website https://css-tricks.com on the 7th of May, 2014.
+   * Couple of changes were made to the original code to make it compatible 
+   * with the `al-foio` theme.
+   */
+  const progressBar = $("#progress");
+  /*
+   * We set up the bar after all elements are done loading.
+   * In some cases, if the images in the page are larger than the intended
+   * size they'll have on the page, they'll be resized via CSS to accomodate
+   * the desired size. This mistake, however, breaks the computations as the
+   * scroll size is computed as soon as the elements finish loading.
+   * To account for this, a minimal delay was introduced before computing the
+   * values.
+   */
+  window.onload = function () {
+    setTimeout(progressBarSetup, 50);
+  };
+  /*
+   * We set up the bar according to the browser.
+   * If the browser supports the progress element we use that.
+   * Otherwise, we resize the bar thru CSS styling
+   */
+  function progressBarSetup() {
+    if ("max" in document.createElement("progress")) {
+      initializeProgressElement();
+      $(document).on("scroll", function() {
+        progressBar.attr({ value: getCurrentScrollPosition() });
+      });
+      $(window).on("resize", initializeProgressElement);
+    } else {
+      resizeProgressBar();
+      $(document).on("scroll", resizeProgressBar);
+      $(window).on("resize", resizeProgressBar);
+    }
+  }
+  /*
+   * The vertical scroll position is the same as the number of pixels that
+   * are hidden from view above the scrollable area. Thus, a value > 0 is
+   * how much the user has scrolled from the top
+   */
+  function getCurrentScrollPosition() {
+    return $(window).scrollTop();
+  }
+
+  function initializeProgressElement() {
+    let navbarHeight = $("#navbar").outerHeight(true);
+    $("body").css({ "padding-top": navbarHeight });
+    $("progress-container").css({ "padding-top": navbarHeight });
+    progressBar.css({ top: navbarHeight });
+    progressBar.attr({
+      max: getDistanceToScroll(),
+      value: getCurrentScrollPosition(),
+    });
+  }
+  /*
+   * The offset between the html document height and the browser viewport
+   * height will be greater than zero if vertical scroll is possible.
+   * This is the distance the user can scroll
+   */
+  function getDistanceToScroll() {
+    return $(document).height() - $(window).height();
+  }
+
+  function resizeProgressBar() {
+    progressBar.css({ width: getWidthPercentage() + "%" });
+  }
+  // The scroll ratio equals the percentage to resize the bar
+  function getWidthPercentage() {
+    return (getCurrentScrollPosition() / getDistanceToScroll()) * 100;
+  }
+</script>
+
+    
+  </body>
+</html>

@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <!-- Head -->
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    <!-- Metadata, OpenGraph and Schema.org -->
+    
+
+    <!-- Standard metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Stanford CS231N | Spring 2025 | Lecture 4- Neural Networks and Backpropagation | Tuan-Anh  Bui</title>
+    <meta name="author" content="Tuan-Anh  Bui">
+    <meta name="description" content="AI Summary Lecture">
+    <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
+
+
+    <!-- Bootstrap & MDB -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+    <!-- Bootstrap Table -->
+    <link defer rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+
+    <!-- Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
+
+    
+
+    <!-- Styles -->
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
+    
+    <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+    <link rel="canonical" href="https://tuananhbui89.github.io/blog/2025/cs231n-2025-lec04/">
+
+    <!-- Dark Mode -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark">
+    <script src="/assets/js/theme.js?96d6b3e1c3604aca8b6134c7afdd5db6"></script>
+    <script src="/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script>
+    
+
+  </head>
+
+  <!-- Body -->
+  <body class="fixed-top-nav ">
+
+    <!-- Header -->
+    <header>
+
+      <!-- Nav Bar -->
+      <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top">
+        <div class="container">
+          <a class="navbar-brand title font-weight-lighter" href="/"><span class="font-weight-bold">Tuan-Anh </span>Bui</a>
+          <!-- Navbar Toggle -->
+          <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar top-bar"></span>
+            <span class="icon-bar middle-bar"></span>
+            <span class="icon-bar bottom-bar"></span>
+          </button>
+
+          <div class="collapse navbar-collapse text-right" id="navbarNav">
+            <ul class="navbar-nav ml-auto flex-nowrap">
+
+              <!-- About -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/">about</a>
+              </li>
+              
+              <!-- Blog -->
+              <li class="nav-item active">
+                <a class="nav-link" href="/blog/">blog<span class="sr-only">(current)</span></a>
+              </li>
+
+              <!-- Other pages -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/publications/">publications</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/projects/">projects</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/repositories/">repositories</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/teaching/"></a>
+              </li>
+
+              <!-- Toogle theme mode -->
+              <li class="toggle-container">
+                <button id="light-toggle" title="Change theme">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Scrolling Progress Bar -->
+      <progress id="progress" value="0">
+        <div class="progress-container">
+          <span class="progress-bar"></span>
+        </div>
+      </progress>
+    </header>
+
+
+    <!-- Content -->
+    <div class="container mt-5">
+      
+        <!-- _layouts/post.html -->
+<!-- Page/Post style -->
+<style type="text/css">
+  
+</style>
+
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Stanford CS231N | Spring 2025 | Lecture 4- Neural Networks and Backpropagation</h1>
+    <p class="post-meta">December 20, 2025</p>
+    <p class="post-tags">
+      <a href="/blog/2025"> <i class="fas fa-calendar fa-sm"></i> 2025 </a>
+        ·  
+        <a href="/blog/tag/genai">
+          <i class="fas fa-hashtag fa-sm"></i> genai</a>  
+          <a href="/blog/tag/llm">
+          <i class="fas fa-hashtag fa-sm"></i> llm</a>  
+          <a href="/blog/tag/tutorial">
+          <i class="fas fa-hashtag fa-sm"></i> tutorial</a>  
+          <a href="/blog/tag/reading">
+          <i class="fas fa-hashtag fa-sm"></i> reading</a>  
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    
+    <div id="table-of-contents">
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#lecture-scope-neural-networks-and-backpropagation-as-foundational-methods">Lecture scope: neural networks and backpropagation as foundational methods</a></li>
+<li class="toc-entry toc-h1"><a href="#review-of-loss-functions-softmax-hinge-loss-and-scoring">Review of loss functions: softmax, hinge loss, and scoring</a></li>
+<li class="toc-entry toc-h1"><a href="#gradient-based-optimization-gradients-gradient-descent-mini-batches-and-advanced-optimizers">Gradient-based optimization: gradients, gradient descent, mini-batches, and advanced optimizers</a></li>
+<li class="toc-entry toc-h1"><a href="#from-linear-classifiers-to-multi-layer-networks-dimensions-layers-and-hidden-units">From linear classifiers to multi-layer networks: dimensions, layers, and hidden units</a></li>
+<li class="toc-entry toc-h1"><a href="#role-of-nonlinearities-and-activation-functions-in-expressivity">Role of nonlinearities and activation functions in expressivity</a></li>
+<li class="toc-entry toc-h1"><a href="#activation-selection-and-hyperparameter-practice">Activation selection and hyperparameter practice</a></li>
+<li class="toc-entry toc-h1"><a href="#practical-two-layer-network-implementation-and-the-centrality-of-analytic-gradients">Practical two-layer network implementation and the centrality of analytic gradients</a></li>
+<li class="toc-entry toc-h1"><a href="#model-capacity-templates-and-regularization-versus-network-size">Model capacity, templates, and regularization versus network size</a></li>
+<li class="toc-entry toc-h1"><a href="#biological-inspiration-and-limits-of-brain-analogies">Biological inspiration and limits of brain analogies</a></li>
+<li class="toc-entry toc-h1"><a href="#scoring-functions-total-loss-and-the-need-for-derivatives-for-optimization">Scoring functions, total loss and the need for derivatives for optimization</a></li>
+<li class="toc-entry toc-h1"><a href="#computational-graphs-as-the-structural-substrate-for-automatic-differentiation">Computational graphs as the structural substrate for automatic differentiation</a></li>
+<li class="toc-entry toc-h1"><a href="#backpropagation-on-a-scalar-example-f--x--y--z-local-gradients-chain-rule-upstreamdownstream">Backpropagation on a scalar example (f = (x + y) * z): local gradients, chain rule, upstream/downstream</a></li>
+<li class="toc-entry toc-h1"><a href="#purpose-of-gradients-parameter-updates-and-intuitive-interpretation">Purpose of gradients: parameter updates and intuitive interpretation</a></li>
+<li class="toc-entry toc-h1"><a href="#backpropagation-through-a-composite-scalar-function-sigmoid-of-linear-combination-numerical-example">Backpropagation through a composite scalar function (sigmoid of linear combination): numerical example</a></li>
+<li class="toc-entry toc-h1"><a href="#elementary-gate-patterns-and-modular-forwardbackward-apis">Elementary gate patterns and modular forward/backward APIs</a></li>
+<li class="toc-entry toc-h1"><a href="#vector-matrix-and-tensor-backpropagation-jacobians-sparsity-and-memory-considerations">Vector, matrix and tensor backpropagation: Jacobians, sparsity and memory considerations</a></li>
+<li class="toc-entry toc-h1"><a href="#efficient-matrix-multiply-backward-formulas-and-practical-implementation-patterns">Efficient matrix-multiply backward formulas and practical implementation patterns</a></li>
+</ul>
+    </div>
+    <hr>
+    
+    <div id="markdown-content">
+      <div style="display: flex; justify-content: center;">
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/25zD5qJHYsk" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen="">
+    </iframe>
+</div>
+
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ 
+    startOnLoad: true,
+    mindmap: {
+      useMaxWidth: false,
+      padding: 20
+    },
+    theme: "default"
+  });
+</script>
+
+<div style="overflow-x: auto;">
+<div class="mermaid"> 
+mindmap
+  Backprop-driven Neural Learning
+    
+    Loss &amp; Objective
+      Softmax / Hinge
+      Regularization λ·RW
+    
+    Optimization
+      SGD + mini-batches
+      Momentum / Adam · LR schedules
+    
+    Architecture &amp; Activations
+      Layers · hidden units · dims
+      ReLU family vs sigmoid · expressivity
+    
+    Computational Graphs &amp; Efficient Backprop
+      DAG + reverse-mode AD
+      Matrix-backward identities · sparse Jacobians
+    
+    Implementation Practices
+      Modular forward/backward gates
+      Analytic grads · numerical check
+</div>
+</div>
+
+<h1 id="lecture-scope-neural-networks-and-backpropagation-as-foundational-methods">Lecture scope: neural networks and backpropagation as foundational methods</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-00-37-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-00-37-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-00-37-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec04/00-00-37.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>This lecture introduces <strong>neural networks</strong> and <strong>backpropagation</strong> as the core mathematical and algorithmic mechanisms that enable layered models to learn from data by computing <strong>gradients of a loss with respect to parameters</strong>.<br></p>
+
+<ul>
+  <li>
+<strong>Backpropagation</strong> is presented as the general procedure used across modern learning algorithms to propagate error derivatives from outputs back to parameters in multi-layer architectures.<br>
+</li>
+  <li>This propagation enables <strong>gradient-based optimization</strong> via variants of gradient descent.<br>
+</li>
+  <li>Understanding these ideas is framed as essential for subsequent topics and practical model development.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="review-of-loss-functions-softmax-hinge-loss-and-scoring">Review of loss functions: softmax, hinge loss, and scoring</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-03-13-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-03-13-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-03-13-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec04/00-03-13.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Loss functions</strong> convert model scores into scalar objectives to be minimized during training.<br></p>
+
+<ul>
+  <li>Common choices:
+    <ul>
+      <li>
+<strong>Softmax cross-entropy</strong> — normalizes scores into probabilities and optimizes negative log-likelihood; typically used for probabilistic multiclass classification.</li>
+      <li>
+<strong>Hinge (SVM) loss</strong> — enforces margin-based separation without producing probabilities; penalizes cases where the true class score is not larger than competing class scores by at least a margin (often 1). It yields zero loss when the margin constraint is satisfied and increases linearly otherwise.<br>
+</li>
+    </ul>
+  </li>
+  <li>Losses are commonly combined with parameter regularization to form the total objective:
+    <ul>
+      <li>
+<strong>L = data_loss + lambda * regularizer(W)</strong>, where <strong>lambda</strong> scales the regularization penalty.<br>
+</li>
+    </ul>
+  </li>
+  <li>The choice of loss depends on task requirements and empirical performance.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="gradient-based-optimization-gradients-gradient-descent-mini-batches-and-advanced-optimizers">Gradient-based optimization: gradients, gradient descent, mini-batches, and advanced optimizers</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-07-37-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-07-37-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-07-37-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec04/00-07-37.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Model parameters are found by minimizing the loss landscape using gradients <strong>∂L/∂W</strong>.<br></p>
+
+<ol>
+  <li>Compute gradient and update parameters in the negative gradient direction scaled by a <strong>learning rate</strong> (gradient descent): W ← W − η ∂L/∂W.<br>
+</li>
+  <li>For large datasets, computing gradients on the full dataset is often infeasible, so use <strong>stochastic gradient descent (SGD)</strong> with mini-batches (typical sizes: <strong>32, 64, 128, 256</strong>) to approximate the true gradient and update iteratively.<br>
+</li>
+  <li>Practical optimizers extend SGD:
+    <ul>
+      <li>
+<strong>Momentum</strong>, <strong>RMSProp</strong>, <strong>Adam</strong>, and variants accelerate convergence and adapt step sizes.<br>
+</li>
+    </ul>
+  </li>
+  <li>
+<strong>Learning rate scheduling</strong> (decay, step reductions) remains important, although some adaptive optimizers partially encode step-size adaptation internally.<br>
+</li>
+</ol>
+
+<hr>
+
+<h1 id="from-linear-classifiers-to-multi-layer-networks-dimensions-layers-and-hidden-units">From linear classifiers to multi-layer networks: dimensions, layers, and hidden units</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-10-58-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-10-58-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-10-58-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec04/00-10-58.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>A <strong>single-layer linear classifier</strong> computes scores s = <strong>W x</strong> (plus bias), mapping D-dimensional inputs to C outputs — the simplest neural model.<br></p>
+
+<ul>
+  <li>
+<strong>Multi-layer networks</strong> add one or more hidden layers with H units and additional weight matrices (e.g., <strong>W1</strong>, <strong>W2</strong>) so intermediate representations can be learned.<br>
+</li>
+  <li>Maintain <strong>dimensional consistency</strong> across layers (input dimension D, hidden H, output C).<br>
+</li>
+  <li>Adding layers increases representational capacity by enabling successive linear transformations followed by nonlinearities, mapping inputs into spaces where classes can be <strong>linearly separated</strong>.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="role-of-nonlinearities-and-activation-functions-in-expressivity">Role of nonlinearities and activation functions in expressivity</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-16-46-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-16-46-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-16-46-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec04/00-16-46.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Activation functions</strong> insert nonlinearity between linear layers so stacked layers cannot be collapsed into a single linear mapping — this nonlinearity is essential to learn complex, nonlinearly separable functions.<br></p>
+
+<ul>
+  <li>Common activations and tradeoffs:
+    <ul>
+      <li>
+<strong>ReLU</strong> (rectified linear unit, <strong>max(0,x)</strong>): computationally efficient, mitigates vanishing gradients for positive regimes, but can suffer <strong>dead neurons</strong>.</li>
+      <li>
+<strong>Leaky ReLU / ELU</strong>: address zero-region issues by allowing a small gradient when x &lt; 0.</li>
+      <li>
+<strong>Swish</strong> and variants: used in recent architectures with competitive empirical performance.</li>
+      <li>
+<strong>Sigmoid / Tanh</strong>: squash values and can cause <strong>vanishing gradients</strong>, so they are often reserved for final layers or specialized use.<br>
+</li>
+    </ul>
+  </li>
+  <li>Activation choice is a hyperparameter often selected empirically or by following architecture conventions, considering differentiability, zero-centeredness, gradient dynamics, and convergence speed.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="activation-selection-and-hyperparameter-practice">Activation selection and hyperparameter practice</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-23-53-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-23-53-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-23-53-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec04/00-23-53.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Choosing activation functions and other architectural hyperparameters is largely empirical and problem-dependent.<br></p>
+
+<ul>
+  <li>Practitioners typically begin with well-tested defaults (e.g., <strong>ReLU</strong> for CNNs) and explore alternatives when necessary.<br>
+</li>
+  <li>Key desiderata:
+    <ul>
+      <li>Preserve <strong>gradient flow</strong> (avoid vanishing gradients).</li>
+      <li>Suitable <strong>zero-centering</strong>.</li>
+      <li>
+<strong>Computational efficiency</strong> and training stability.<br>
+</li>
+    </ul>
+  </li>
+  <li>Research offers theoretical and empirical guidance, but practical selection often relies on prior work for similar tasks and iterative hyperparameter tuning.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="practical-two-layer-network-implementation-and-the-centrality-of-analytic-gradients">Practical two-layer network implementation and the centrality of analytic gradients</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-27-20-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-27-20-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-27-20-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec04/00-27-20.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Implementing a two-layer neural network in a high-level language typically involves these steps:<br></p>
+
+<ol>
+  <li>Define input/output dimensions and hidden layer size.<br>
+</li>
+  <li>Initialize weight matrices and biases.<br>
+</li>
+  <li>Perform a forward pass to compute intermediate representations, scores, and the loss.<br>
+</li>
+  <li>Compute gradients for an optimization step (backward pass).<br>
+</li>
+  <li>Optionally perform numerical <strong>gradient checking</strong> to validate correctness.<br>
+    <ul>
+      <li>In practice, <strong>analytical gradients</strong> (derived by hand or via automatic differentiation) are used for efficiency and numerical stability.<br>
+</li>
+      <li>The bulk of engineering effort is often in correctly formulating and implementing the <strong>backward pass</strong> to compute <strong>∂L/∂W</strong> for all trainable parameters.<br>
+</li>
+    </ul>
+  </li>
+</ol>
+
+<hr>
+
+<h1 id="model-capacity-templates-and-regularization-versus-network-size">Model capacity, templates, and regularization versus network size</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-31-42-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-31-42-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-31-42-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec04/00-31-42.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Increasing the number of hidden units increases model capacity, enabling the network to learn more complex decision boundaries and part-based templates (e.g., shared object parts across classes).<br></p>
+
+<ul>
+  <li>Excessive capacity can lead to <strong>overfitting</strong>; regularization constrains parameters:
+    <ul>
+      <li>Common techniques: <strong>weight decay</strong>, <strong>dropout</strong>, etc.<br>
+</li>
+    </ul>
+  </li>
+  <li>The regularization coefficient <strong>lambda</strong> scales the penalty on weights:
+    <ul>
+      <li>Too large <strong>lambda</strong> → <strong>underfitting</strong> (overly constrained weights).</li>
+      <li>Too small <strong>lambda</strong> → <strong>overfitting</strong> (memorization).</li>
+    </ul>
+  </li>
+  <li>The trade-off between capacity and regularization is typically tuned empirically.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="biological-inspiration-and-limits-of-brain-analogies">Biological inspiration and limits of brain analogies</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-37-02-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-37-02-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-37-02-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec04/00-37-02.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Artificial neural networks borrow high-level metaphors from biological neurons (inputs aggregated by a cell body and transmitted via axons), but these analogies are loose and should not be overinterpreted.<br></p>
+
+<ul>
+  <li>
+<strong>Computational neurons</strong> implement mathematical functions (weighted sums and activations) for efficiency and simplicity.<br>
+</li>
+  <li>Biological neural dynamics are far more complex; architecture design prioritizes implementation efficiency, scalability, and empirical performance rather than biological fidelity.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="scoring-functions-total-loss-and-the-need-for-derivatives-for-optimization">Scoring functions, total loss and the need for derivatives for optimization</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-40-10-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-40-10-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-40-10-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec04/00-40-10.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>A model maps inputs through weights to produce scores, which are passed to a loss function (e.g., <strong>softmax cross-entropy</strong> or <strong>hinge</strong>) and combined with regularizers to form the total objective <strong>L(W)</strong>.<br></p>
+
+<ul>
+  <li>Optimization requires computing partial derivatives <strong>∂L/∂W</strong> for all parameters.<br>
+</li>
+  <li>Deriving these derivatives algebraically for complex models by hand is error-prone and impractical for large architectures or custom losses, motivating systematic computational frameworks for <strong>automated derivative computation</strong>.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="computational-graphs-as-the-structural-substrate-for-automatic-differentiation">Computational graphs as the structural substrate for automatic differentiation</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-42-35-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-42-35-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-42-35-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec04/00-42-35.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>A <strong>computational graph</strong> represents a model as a directed acyclic graph (DAG) of elementary operations mapping inputs and parameters to the loss output.<br></p>
+
+<ul>
+  <li>Constructing this graph explicitly enables:
+    <ul>
+      <li>Local forward computations at each node.</li>
+      <li>Systematic backward propagation of gradients via the <strong>chain rule</strong>.<br>
+</li>
+    </ul>
+  </li>
+  <li>Each node exposes a local Jacobian (or local gradient rule), receives an upstream gradient from successors, multiplies them to yield downstream gradients for predecessors, and thus implements <strong>reverse-mode automatic differentiation</strong> efficiently and modularly.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="backpropagation-on-a-scalar-example-f--x--y--z-local-gradients-chain-rule-upstreamdownstream">Backpropagation on a scalar example (f = (x + y) * z): local gradients, chain rule, upstream/downstream</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-48-01-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-48-01-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-48-01-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec04/00-48-01.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>For the scalar function <strong>f(x,y,z) = (x + y) * z</strong>, forward evaluation and backpropagation proceed as follows:<br></p>
+
+<ol>
+  <li>Forward pass:
+    <ul>
+      <li>Compute <strong>Q = x + y</strong>.</li>
+      <li>Compute <strong>f = Q * z</strong>.<br>
+</li>
+    </ul>
+  </li>
+  <li>Local derivatives:
+    <ul>
+      <li>∂Q/∂x = 1, ∂Q/∂y = 1.</li>
+      <li>∂f/∂Q = z, ∂f/∂z = Q.<br>
+</li>
+    </ul>
+  </li>
+  <li>Backpropagation:
+    <ul>
+      <li>Start with upstream gradient ∂f/∂f = 1.</li>
+      <li>Multiply the upstream gradient by each node’s local gradient to produce downstream gradients.</li>
+      <li>This modular multiply-and-propagate yields <strong>∂f/∂x</strong>, <strong>∂f/∂y</strong>, and <strong>∂f/∂z</strong> without computing a global closed-form derivative.<br>
+</li>
+    </ul>
+  </li>
+</ol>
+
+<hr>
+
+<h1 id="purpose-of-gradients-parameter-updates-and-intuitive-interpretation">Purpose of gradients: parameter updates and intuitive interpretation</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-53-06-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-53-06-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-53-06-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec04/00-53-06.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Gradients of the loss with respect to parameters indicate sensitivity</strong>: <strong>∂L/∂W</strong> quantifies how a small change in a parameter affects the loss.<br></p>
+
+<ul>
+  <li>Update rule (gradient descent): <strong>W ← W − η ∂L/∂W</strong>, where <strong>η</strong> is the learning rate.<br>
+</li>
+  <li>
+<strong>Backpropagation</strong> efficiently computes these sensitivities for every parameter in a multi-layer network by propagating gradients from the loss to each parameter.<br>
+</li>
+  <li>Intuition: gradients point in the direction in parameter space that increases loss, so negative gradients provide the descent direction for optimization.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="backpropagation-through-a-composite-scalar-function-sigmoid-of-linear-combination-numerical-example">Backpropagation through a composite scalar function (sigmoid of linear combination): numerical example</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-57-23-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-57-23-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec04/00-57-23-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec04/00-57-23.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>A <strong>sigmoid</strong> applied to a linear combination implements <strong>σ(a)</strong> with <strong>a = w0 x0 + w1 x1 + …</strong>.<br></p>
+
+<ul>
+  <li>Forward propagation evaluates linear sums, exponentials, and division to produce the output <strong>σ(a)</strong>.<br>
+</li>
+  <li>Backward propagation uses the convenient local gradient:
+    <ul>
+      <li>
+<strong>σ’(a) = σ(a) (1 − σ(a))</strong>.<br>
+</li>
+    </ul>
+  </li>
+  <li>Backpropagating through a sigmoid requires only the sigmoid value and the upstream gradient, so chaining local gradients yields parameter gradients such as:
+    <ul>
+      <li>
+<strong>∂L/∂w_i = x_i * upstream_grad * σ’(a)</strong>, enabling parameter updates.<br>
+</li>
+    </ul>
+  </li>
+</ul>
+
+<hr>
+
+<h1 id="elementary-gate-patterns-and-modular-forwardbackward-apis">Elementary gate patterns and modular forward/backward APIs</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec04/01-01-53-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec04/01-01-53-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec04/01-01-53-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec04/01-01-53.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Common computation gates exhibit simple, reusable backward rules that make modular automatic differentiation practical:<br></p>
+
+<ul>
+  <li>
+<strong>Add gate</strong>: distributes upstream gradients unchanged to inputs.<br>
+</li>
+  <li>
+<strong>Multiply gate</strong>: swaps variables in the gradient (∂(xy)/∂x = y).<br>
+</li>
+  <li>
+<strong>Copy gate</strong>: duplicates gradients to multiple consumers.<br>
+</li>
+  <li>
+<strong>Max / ReLU gate</strong>: routes gradient only to the winning input (the input that achieved the max).<br>
+</li>
+  <li>These local rules support implementing modular <strong>forward()</strong> and <strong>backward()</strong> APIs for each operator, storing necessary inputs during the forward pass and encapsulating local backward computations — the design pattern used by deep learning libraries.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="vector-matrix-and-tensor-backpropagation-jacobians-sparsity-and-memory-considerations">Vector, matrix and tensor backpropagation: Jacobians, sparsity and memory considerations</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec04/01-09-04-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec04/01-09-04-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec04/01-09-04-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec04/01-09-04.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Extending backpropagation to vectors and tensors generalizes scalar derivatives to Jacobians and higher-order derivative tensors.<br></p>
+
+<ul>
+  <li>When outputs are vectors, local gradients with respect to inputs are matrices whose multiplication with upstream gradient vectors yields downstream gradients with matching input shape.<br>
+</li>
+  <li>Naive Jacobian construction is often infeasible (Jacobian sizes can exceed memory), but many operations are structured so backward rules can be implemented with efficient matrix operations and broadcasting rather than materializing full Jacobians:
+    <ul>
+      <li>For elementwise ops like <strong>ReLU</strong> the Jacobian is diagonal (sparse).</li>
+      <li>For matrix multiply the backward pass can be implemented via other matrix multiplies (avoiding explicit large Jacobians).<br>
+</li>
+    </ul>
+  </li>
+</ul>
+
+<hr>
+
+<h1 id="efficient-matrix-multiply-backward-formulas-and-practical-implementation-patterns">Efficient matrix-multiply backward formulas and practical implementation patterns</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs231n-2025/frames/lec04/01-15-52-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs231n-2025/frames/lec04/01-15-52-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs231n-2025/frames/lec04/01-15-52-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs231n-2025/frames/lec04/01-15-52.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>For <strong>Y = X W</strong> (batch <strong>X</strong> of shape [N, D], <strong>W</strong> of shape [D, M], <strong>Y</strong> of shape [N, M]), the backward pass uses matrix identities:<br></p>
+
+<ul>
+  <li>
+<strong>∂L/∂X = ∂L/∂Y · W^T</strong><br>
+</li>
+  <li>
+    <p><strong>∂L/∂W = X^T · ∂L/∂Y</strong><br></p>
+  </li>
+  <li>These formulas implement the ‘swap’ property of multiplication and avoid forming the full Jacobian of size (N<em>M) × (N</em>D).<br>
+</li>
+  <li>Leveraging these matrix identities enables scalable training with common mini-batch sizes and feature dimensions, and forms the basis for efficient implementations in numerical libraries and deep learning frameworks.<br>
+</li>
+</ul>
+
+<hr>
+
+
+    </div>
+  </article>
+
+
+  
+    
+    <br>
+    <hr>
+    <br>
+    <ul class="list-disc pl-8"></ul>
+
+    <!-- Adds related posts to the end of an article -->
+    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
+    <p class="mb-2">Here are some more articles you might like to read next:</p>
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs231n-2025-lec18/">Stanford CS231N Deep Learning for Computer Vision | Spring 2025 | Lecture 18- Human-Centered AI</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs231n-2025-lec17/">Stanford CS231N Deep Learning for Computer Vision | Spring 2025 | Lecture 17- Robot Learning</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs231n-2025-lec16/">Stanford CS231N Deep Learning for Computer Vision | Spring 2025 | Lecture 16- Vision and Language</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs231n-2025-lec15/">Stanford CS231N Deep Learning for Computer Vision | Spring 2025 | Lecture 15- 3D Vision</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs231n-2025-lec14/">Stanford CS231N Deep Learning for Computer Vision| Spring 2025 | Lecture 14- Generative Models 2</a>
+  </li>
+
+</div>
+
+      
+    </div>
+
+    <!-- Footer -->    
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        © Copyright 2026 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+
+      </div>
+    </footer>
+
+    <!-- JavaScripts -->
+    <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- Bootsrap & MDB scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    <!-- Masonry & imagesLoaded -->
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
+    
+  <!-- Medium Zoom JS -->
+  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/zoom.js"></script>
+
+  <!-- Bootstrap Table -->
+  <script defer src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+
+  <!-- Load Common JS -->
+  <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
+  <script defer src="/assets/js/common.js?acdb9690d7641b2f8d40529018c71a01"></script>
+  <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    <!-- MathJax -->
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        tags: 'ams'
+      }
+    };
+  </script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+  <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KGSMMS9MS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-7KGSMMS9MS');
+  </script>
+    
+
+<!-- Scrolling Progress Bar -->
+<script type="text/javascript">
+  /*
+   * This JavaScript code has been adapted from the article 
+   * https://css-tricks.com/reading-position-indicator/ authored by Pankaj Parashar, 
+   * published on the website https://css-tricks.com on the 7th of May, 2014.
+   * Couple of changes were made to the original code to make it compatible 
+   * with the `al-foio` theme.
+   */
+  const progressBar = $("#progress");
+  /*
+   * We set up the bar after all elements are done loading.
+   * In some cases, if the images in the page are larger than the intended
+   * size they'll have on the page, they'll be resized via CSS to accomodate
+   * the desired size. This mistake, however, breaks the computations as the
+   * scroll size is computed as soon as the elements finish loading.
+   * To account for this, a minimal delay was introduced before computing the
+   * values.
+   */
+  window.onload = function () {
+    setTimeout(progressBarSetup, 50);
+  };
+  /*
+   * We set up the bar according to the browser.
+   * If the browser supports the progress element we use that.
+   * Otherwise, we resize the bar thru CSS styling
+   */
+  function progressBarSetup() {
+    if ("max" in document.createElement("progress")) {
+      initializeProgressElement();
+      $(document).on("scroll", function() {
+        progressBar.attr({ value: getCurrentScrollPosition() });
+      });
+      $(window).on("resize", initializeProgressElement);
+    } else {
+      resizeProgressBar();
+      $(document).on("scroll", resizeProgressBar);
+      $(window).on("resize", resizeProgressBar);
+    }
+  }
+  /*
+   * The vertical scroll position is the same as the number of pixels that
+   * are hidden from view above the scrollable area. Thus, a value > 0 is
+   * how much the user has scrolled from the top
+   */
+  function getCurrentScrollPosition() {
+    return $(window).scrollTop();
+  }
+
+  function initializeProgressElement() {
+    let navbarHeight = $("#navbar").outerHeight(true);
+    $("body").css({ "padding-top": navbarHeight });
+    $("progress-container").css({ "padding-top": navbarHeight });
+    progressBar.css({ top: navbarHeight });
+    progressBar.attr({
+      max: getDistanceToScroll(),
+      value: getCurrentScrollPosition(),
+    });
+  }
+  /*
+   * The offset between the html document height and the browser viewport
+   * height will be greater than zero if vertical scroll is possible.
+   * This is the distance the user can scroll
+   */
+  function getDistanceToScroll() {
+    return $(document).height() - $(window).height();
+  }
+
+  function resizeProgressBar() {
+    progressBar.css({ width: getWidthPercentage() + "%" });
+  }
+  // The scroll ratio equals the percentage to resize the bar
+  function getWidthPercentage() {
+    return (getCurrentScrollPosition() / getDistanceToScroll()) * 100;
+  }
+</script>
+
+    
+  </body>
+</html>

@@ -12,7 +12,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>CS336 Lecture 3 - Architectures, hyperparameters | Tuan-Anh  Bui</title>
     <meta name="author" content="Tuan-Anh  Bui">
-    <meta name="description" content="AI Summary of CS336 Lecture">
+    <meta name="description" content="AI Summary Lecture">
     <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
 
 
@@ -129,7 +129,7 @@
 
   <header class="post-header">
     <h1 class="post-title">CS336 Lecture 3 - Architectures, hyperparameters</h1>
-    <p class="post-meta">December 8, 2025</p>
+    <p class="post-meta">December 7, 2025</p>
     <p class="post-tags">
       <a href="/blog/2025"> <i class="fas fa-calendar fa-sm"></i> 2025 </a>
         ·  
@@ -150,12 +150,33 @@
     
     <div id="table-of-contents">
       <ul id="toc" class="section-nav">
-<li class="toc-entry toc-h1"><a href="#lecture-scope-and-objectives">Lecture scope and objectives</a></li>
-<li class="toc-entry toc-h1"><a href="#canonical-transformer-components-and-modern-variation-points">Canonical transformer components and modern variation points</a></li>
-<li class="toc-entry toc-h1"><a href="#course-implementation-choices-vs-original-transformer">Course implementation choices vs original transformer</a></li>
-<li class="toc-entry toc-h1"><a href="#survey-of-recent-model-evolution-and-convergent-design-trends">Survey of recent model evolution and convergent design trends</a></li>
-<li class="toc-entry toc-h1"><a href="#lecture-structure-architecture-hyperparameters-attention-variants">Lecture structure: architecture, hyperparameters, attention variants</a></li>
-<li class="toc-entry toc-h1"><a href="#pre-norm-versus-post-norm-layer-normalization">Pre-norm versus post-norm layer normalization</a></li>
+<li class="toc-entry toc-h1"><a href="#lecture-overview-and-objectives">Lecture overview and objectives</a></li>
+<li class="toc-entry toc-h1"><a href="#recap-of-the-original-transformer-components">Recap of the original transformer components</a></li>
+<li class="toc-entry toc-h1"><a href="#survey-of-recent-model-releases-reveals-convergent-innovations">Survey of recent model releases reveals convergent innovations</a></li>
+<li class="toc-entry toc-h1"><a href="#lecture-structure-architecture-hyperparameters-stability-and-attention-variants">Lecture structure: architecture, hyperparameters, stability and attention variants</a></li>
+<li class="toc-entry toc-h1"><a href="#pre-norm-prenorm-versus-post-norm-placement-of-layer-normalization">Pre-norm (prenorm) versus post-norm placement of layer normalization</a></li>
+<li class="toc-entry toc-h1"><a href="#double-layer-normalization-variants-front-and-after-as-a-stability-enhancement">Double-layer-normalization variants (front and after) as a stability enhancement</a></li>
+<li class="toc-entry toc-h1"><a href="#layernorm-definition-and-the-adoption-of-rmsnorm-for-efficiency">LayerNorm definition and the adoption of RMSNorm for efficiency</a></li>
+<li class="toc-entry toc-h1"><a href="#removing-bias-terms-in-linear-layers-for-optimization-stability-and-simplicity">Removing bias terms in linear layers for optimization stability and simplicity</a></li>
+<li class="toc-entry toc-h1"><a href="#generalizable-lessons-from-architectural-choices">Generalizable lessons from architectural choices</a></li>
+<li class="toc-entry toc-h1"><a href="#nomenclature-and-benefits-of-gated-linear-units-glus-in-mlps">Nomenclature and benefits of gated linear units (GLUs) in MLPs</a></li>
+<li class="toc-entry toc-h1"><a href="#gating-mechanics-and-sizing-conventions-for-glu-based-mlps">Gating mechanics and sizing conventions for GLU-based MLPs</a></li>
+<li class="toc-entry toc-h1"><a href="#empirical-evidence-favors-glu-variants-but-they-are-not-mandatory">Empirical evidence favors GLU variants but they are not mandatory</a></li>
+<li class="toc-entry toc-h1"><a href="#serial-attention-then-mlp-versus-parallel-layer-ordering">Serial (attention then MLP) versus parallel layer ordering</a></li>
+<li class="toc-entry toc-h1"><a href="#relative-positional-encodings-and-rope-rotary-position-embeddings">Relative positional encodings and RoPE (Rotary Position Embeddings)</a></li>
+<li class="toc-entry toc-h1"><a href="#feed-forward-inner-dimension-dff-rule-of-thumb-and-glu-adjustments">Feed-forward inner dimension (Dff) rule-of-thumb and GLU adjustments</a></li>
+<li class="toc-entry toc-h1"><a href="#attention-head-sizing-and-the-11-per-head-dimension-convention">Attention head sizing and the 1:1 per-head dimension convention</a></li>
+<li class="toc-entry toc-h1"><a href="#aspect-ratio-depth-versus-width-defaults-and-empirical-optima">Aspect ratio (depth versus width) defaults and empirical optima</a></li>
+<li class="toc-entry toc-h1"><a href="#vocabulary-sizing-trends-and-multilingual-tokenizers">Vocabulary sizing trends and multilingual tokenizers</a></li>
+<li class="toc-entry toc-h1"><a href="#dropout-weight-decay-and-the-role-of-regularization-in-pretraining">Dropout, weight decay, and the role of regularization in pretraining</a></li>
+<li class="toc-entry toc-h1"><a href="#consensus-hyperparameter-defaults-as-practical-starting-points">Consensus hyperparameter defaults as practical starting points</a></li>
+<li class="toc-entry toc-h1"><a href="#training-stability-issues-concentrate-around-softmax-operations">Training stability issues concentrate around softmax operations</a></li>
+<li class="toc-entry toc-h1"><a href="#z-loss-as-an-auxiliary-regularizer-for-the-output-softmax">Z-loss as an auxiliary regularizer for the output softmax</a></li>
+<li class="toc-entry toc-h1"><a href="#qk-normalization-layer-norm-on-queries-and-keys-to-tame-attention-softmax-inputs">QK normalization (layer-norm on queries and keys) to tame attention softmax inputs</a></li>
+<li class="toc-entry toc-h1"><a href="#soft-capping-logits-as-an-alternative-clipping-strategy">Soft-capping logits as an alternative clipping strategy</a></li>
+<li class="toc-entry toc-h1"><a href="#inference-arithmetic-intensity-and-the-motivation-for-multi-querygroup-query-attention">Inference arithmetic intensity and the motivation for multi-query/group-query attention</a></li>
+<li class="toc-entry toc-h1"><a href="#kv-cache-mechanics-and-quantitative-impact-on-inference-memory-and-compute">KV cache mechanics and quantitative impact on inference memory and compute</a></li>
+<li class="toc-entry toc-h1"><a href="#sparse-sliding-window-and-hybrid-attention-patterns-for-long-context">Sparse, sliding-window, and hybrid attention patterns for long context</a></li>
 </ul>
     </div>
     <hr>
@@ -166,7 +187,55 @@
     </iframe>
 </div>
 
-<h1 id="lecture-scope-and-objectives">Lecture scope and objectives</h1>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ 
+    startOnLoad: true,
+    mindmap: {
+      useMaxWidth: false,
+      padding: 20
+    },
+    theme: "default"
+  });
+</script>
+
+<div style="overflow-x: auto;">
+<div class="mermaid"> 
+mindmap
+  Empirical design rules for stable, efficient Transformer LMs
+
+    Architecture primitives
+      Identity-preserving residuals
+      Prenorm → double-norm
+      RMSNorm &amp; bias-free linear
+
+    Stability &amp; softmax fixes
+      Softmax as instability locus
+      QK normalization
+      Z-loss / soft-capping
+
+    MLP &amp; activations
+      Gated MLPs SwiGLU/GLU
+      Dff sizing: 4× vs 8/3×
+
+    Attention &amp; positional encodings
+      RoPE relative
+      Serial vs parallel blocks
+      MQA/GQA and sparse long‑context
+
+    Hyperparameter defaults
+      Head split D/H
+      Aspect ratio guidance
+      Vocabulary sizing tradeoffs
+
+    Systems &amp; inference consequences
+      Memory movement &amp; kernel fusion
+      KV cache arithmetic intensity
+      Latency vs expressivity tradeoffs
+</div>
+</div>
+
+<h1 id="lecture-overview-and-objectives">Lecture overview and objectives</h1>
 
 <div class="row mt-3 text-center">
     <div class="col-sm mt-3 mt-md-0">
@@ -174,93 +243,36 @@
 
   <picture>
     
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/00-00-39-480.webp"></source>
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/00-00-39-800.webp"></source>
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/00-00-39-1400.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/00-00-54-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/00-00-54-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/00-00-54-1400.webp"></source>
     
 
     <!-- Fallback to the original file -->
-    <img src="/assets/img/cs336-2025/frames/lec03/00-00-39.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+    <img src="/assets/img/cs336-2025/frames/lec03/00-00-54.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
   </picture>
 
 </figure>
 
     </div>
 </div>
-<p>The lecture presents a systematic examination of <strong>transformer architectures</strong> and <strong>training practices</strong>, emphasizing practical choices over introductory theory.<br></p>
+<p>The lecture introduces architecture and training details for <strong>language models</strong> and frames the session as an <strong>empirical, data-driven</strong> examination of <strong>transformer variants</strong> and <strong>hyperparameter</strong> choices.<br></p>
 
-<p>It frames the investigation as a <strong>data-driven analysis</strong> of many recent <strong>large language model</strong> releases to extract <strong>convergent design patterns</strong> and <strong>stability interventions</strong> that practitioners use when training very large models.<br></p>
+<p>It covers logistics about slides and assignments while positioning the lecture as complementary to hands-on experience by <strong>synthesizing common practices</strong> across many published models.<br></p>
 
-<p>The intended outcome is concrete guidance on which components and <strong>hyperparameters</strong> consistently work well in production-scale <strong>training</strong> and <strong>inference</strong> contexts.<br></p>
-
+<p>Goals and emphasis:<br></p>
 <ul>
-  <li>Covers three major focus areas:
-    <ul>
-      <li>
-<strong>Architecture variants</strong> — how model building blocks are arranged and modified<br>
+  <li>Identify recurring, practically important <strong>architectural</strong> and <strong>optimization</strong> decisions that influence <strong>stability</strong>, <strong>compute efficiency</strong>, and <strong>final model performance</strong>.<br>
 </li>
-      <li>
-<strong>Hyperparameter selection</strong> — which numeric settings matter for stability and performance<br>
-</li>
-      <li>
-<strong>Attention / implementation variants</strong> — inference-oriented choices that affect latency and memory<br>
-</li>
-    </ul>
-  </li>
-</ul>
-
-<p>This framing prioritizes actionable takeaways for practitioners building or reproducing large models.<br></p>
-
-<hr>
-
-<h1 id="canonical-transformer-components-and-modern-variation-points">Canonical transformer components and modern variation points</h1>
-
-<div class="row mt-3 text-center">
-    <div class="col-sm mt-3 mt-md-0">
-        <figure>
-
-  <picture>
-    
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/00-01-46-480.webp"></source>
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/00-01-46-800.webp"></source>
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/00-01-46-1400.webp"></source>
-    
-
-    <!-- Fallback to the original file -->
-    <img src="/assets/img/cs336-2025/frames/lec03/00-01-46.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
-  </picture>
-
-</figure>
-
-    </div>
-</div>
-<p>A <strong>standard transformer</strong> contains several core components: token embeddings (with positional information), <strong>multi-head self-attention</strong>, <strong>layer normalization</strong>, <strong>residual connections</strong>, feed-forward <strong>MLP blocks</strong>, and a final <strong>softmax</strong> output.<br></p>
-
-<p>Modern variants preserve the core <strong>attention + MLP</strong> structure while altering many pieces. Key variation points include:<br></p>
-
-<ul>
-  <li>
-<strong>Layer normalization location/type</strong> — <strong>pre‑norm</strong> vs <strong>post‑norm</strong> and alternatives like <strong>RMSNorm</strong><br>
-</li>
-  <li>
-<strong>Positional encodings</strong> — learned absolute, relative, or methods like <strong>Rotary Positional Embeddings (RoPE)</strong><br>
-</li>
-  <li>
-<strong>MLP internals</strong> — activation and <strong>gating choices</strong> (e.g., GeLU, SwiGlu) and expansion ratios<br>
-</li>
-  <li>
-<strong>Bias usage</strong> — presence or absence of <strong>bias terms</strong> in linear projections<br>
-</li>
-  <li>
-<strong>Sublayer arrangement</strong> — <strong>serial</strong> versus <strong>parallel</strong> arrangements of attention and MLP blocks<br>
+  <li>Use empirical patterns to guide defaults and experimental directions.<br>
 </li>
 </ul>
 
-<p>Understanding these variation points lets you map specific model instantiations onto a common design space and reason about trade-offs in <strong>expressiveness</strong>, <strong>optimization behavior</strong>, and <strong>runtime/memory characteristics</strong> that affect both training and deployment.<br></p>
+<p>This framing guides subsequent sections on <strong>architecture variations</strong>, <strong>hyperparameters</strong>, and <strong>stability tricks</strong>.<br></p>
 
 <hr>
 
-<h1 id="course-implementation-choices-vs-original-transformer">Course implementation choices vs original transformer</h1>
+<h1 id="recap-of-the-original-transformer-components">Recap of the original transformer components</h1>
 
 <div class="row mt-3 text-center">
     <div class="col-sm mt-3 mt-md-0">
@@ -268,43 +280,58 @@
 
   <picture>
     
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/00-03-01-480.webp"></source>
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/00-03-01-800.webp"></source>
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/00-03-01-1400.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/00-02-22-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/00-02-22-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/00-02-22-1400.webp"></source>
     
 
     <!-- Fallback to the original file -->
-    <img src="/assets/img/cs336-2025/frames/lec03/00-03-01.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+    <img src="/assets/img/cs336-2025/frames/lec03/00-02-22.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
   </picture>
 
 </figure>
 
     </div>
 </div>
-<p>Contemporary training codebases typically adopt pragmatic modifications relative to the original Vaswani et al. transformer. These changes are motivated by empirical stability and performance gains at scale.<br></p>
-
-<p>Common engineering choices include:<br></p>
+<p>The <strong>canonical transformer architecture</strong> is composed of several modular components:<br></p>
 
 <ul>
   <li>
-<strong>Pre-layer normalization (pre-norm)</strong> — improves optimization stability and reduces the need for complex warm-ups<br>
+<strong>Input embeddings</strong> augmented with <strong>positional information</strong>.<br>
 </li>
   <li>
-<strong>Rotary Position Embeddings (RoPE)</strong> — supplies relative position information that often extrapolates to longer contexts<br>
+<strong>Multi-head self-attention</strong> for context-dependent mixing.<br>
 </li>
   <li>
-<strong>Gated MLP variants</strong> (e.g., <strong>SwiGlu</strong>) — gated activations that tend to lower loss and speed convergence<br>
+<strong>Residual connections</strong> that preserve identity-like signal paths.<br>
 </li>
   <li>
-<strong>Removal of bias terms</strong> in many linear layers — reduces memory movement and can improve training stability<br>
+<strong>Layer normalization</strong> to control activation scale.<br>
+</li>
+  <li>
+<strong>Feed-forward MLPs</strong> (two-layer position-wise networks).<br>
+</li>
+  <li>A final <strong>softmax output</strong> that produces probabilistic outputs over vocabulary tokens.<br>
 </li>
 </ul>
 
-<p>Taken together, these practices form a de facto <strong>modern transformer</strong> variant encountered in many production implementations. Treating them as canonical in implementation helps align training recipes with current large-scale practice and supports reproducibility.<br></p>
+<p>Operationally, each block:<br></p>
+<ol>
+  <li>Processes a <strong>residual stream</strong>.<br>
+</li>
+  <li>Applies <strong>attention</strong> and a <strong>feed-forward network</strong> with interleaved <strong>normalization</strong> and <strong>residual addition</strong>.<br>
+</li>
+  <li>Emits logits that the <strong>softmax</strong> turns into token probabilities.<br>
+</li>
+</ol>
+
+<p>This componentization creates multiple axes for modification—e.g., <strong>layer-norm placement</strong>, <strong>positional encoding schemes</strong>, <strong>activation functions</strong>, and <strong>linear-layer parameterizations</strong>—each affecting <strong>optimization behavior</strong> and <strong>runtime</strong>.<br></p>
+
+<p>The remainder of the lecture examines these component variants and their empirical consequences.<br></p>
 
 <hr>
 
-<h1 id="survey-of-recent-model-evolution-and-convergent-design-trends">Survey of recent model evolution and convergent design trends</h1>
+<h1 id="survey-of-recent-model-releases-reveals-convergent-innovations">Survey of recent model releases reveals convergent innovations</h1>
 
 <div class="row mt-3 text-center">
     <div class="col-sm mt-3 mt-md-0">
@@ -312,39 +339,34 @@
 
   <picture>
     
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/00-04-09-480.webp"></source>
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/00-04-09-800.webp"></source>
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/00-04-09-1400.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/00-03-45-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/00-03-45-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/00-03-45-1400.webp"></source>
     
 
     <!-- Fallback to the original file -->
-    <img src="/assets/img/cs336-2025/frames/lec03/00-04-09.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+    <img src="/assets/img/cs336-2025/frames/lec03/00-03-45.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
   </picture>
 
 </figure>
 
     </div>
 </div>
-<p>An empirical survey of dense LLM releases (2017–2025) shows many small architectural tweaks, but also a convergent evolution toward a subset of design decisions across independent teams.<br></p>
+<p>A review of dense model releases (2017–2025) reveals many small, frequent architectural tweaks that nonetheless show <strong>convergent evolution</strong> in successful designs.<br></p>
 
-<p>Observed convergences include:<br></p>
-
+<p>Key observations:<br></p>
 <ul>
-  <li>Broad adoption of <strong>Rotary Positional Embeddings (RoPE)</strong> since ~2023<br>
+  <li>Tracking axes such as <strong>positional encodings</strong>, <strong>normalization</strong>, <strong>activation functions</strong>, and <strong>MLP parameterization</strong> yields empirical patterns that inform practical defaults.<br>
 </li>
-  <li>Widespread use of <strong>pre-norm layer normalization</strong> for stability<br>
+  <li>The analysis distinguishes <strong>idiosyncratic experiments</strong> from <strong>consensus choices</strong>, enabling practitioners to adopt stable defaults and target experiments where they matter most.<br>
 </li>
-  <li>Increasing adoption of <strong>gated linear units</strong> for MLPs (e.g., SwiGlu-style blocks)<br>
-</li>
-  <li>A trend toward <strong>removing bias parameters</strong> and substituting <strong>RMSNorm</strong> for LayerNorm in some families<br>
+  <li>A spreadsheet-style comparative analysis underpins the lecture’s recommendations, giving concrete evidence for recurring design decisions.<br>
 </li>
 </ul>
 
-<p>Cataloguing these patterns across many models yields a valuable dataset for extracting robust heuristics and engineering defaults. The survey approach helps practitioners prioritize changes that repeatedly correlate with stable training and strong downstream performance.<br></p>
-
 <hr>
 
-<h1 id="lecture-structure-architecture-hyperparameters-attention-variants">Lecture structure: architecture, hyperparameters, attention variants</h1>
+<h1 id="lecture-structure-architecture-hyperparameters-stability-and-attention-variants">Lecture structure: architecture, hyperparameters, stability and attention variants</h1>
 
 <div class="row mt-3 text-center">
     <div class="col-sm mt-3 mt-md-0">
@@ -352,52 +374,40 @@
 
   <picture>
     
-    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/00-04-56-480.webp"></source>
-    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/00-04-56-800.webp"></source>
-    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/00-04-56-1400.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/00-04-54-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/00-04-54-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/00-04-54-1400.webp"></source>
     
 
     <!-- Fallback to the original file -->
-    <img src="/assets/img/cs336-2025/frames/lec03/00-04-56.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+    <img src="/assets/img/cs336-2025/frames/lec03/00-04-54.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
   </picture>
 
 </figure>
 
     </div>
 </div>
-<p>The material is organized into three major sections that follow the lifecycle from model design through inference optimization:<br></p>
+<p>The lecture is organized into three primary sections to match the practical workflow of model design and training:<br></p>
 
 <ol>
   <li>
-<strong>Architecture variations</strong>
-    <ul>
-      <li>Activations, feed-forward designs, attention mechanisms, and positional encodings<br>
+<strong>Architecture variations</strong> — activations, feed-forwards, attention variants, and positional encodings.<br>
 </li>
-    </ul>
-  </li>
   <li>
-<strong>Hyperparameter selection</strong>
-    <ul>
-      <li>Hidden sizes, MLP expansion ratios, head dimensions, vocabulary sizes, and model aspect ratios<br>
+<strong>Hyperparameter selection</strong> — dimensions, MLP ratios, vocabulary sizes, and related choices.<br>
 </li>
-    </ul>
-  </li>
   <li>
-<strong>Attention / inference variants</strong>
-    <ul>
-      <li>KV caching, multi-query / group-query attention, and long-context strategies<br>
+<strong>Stability interventions</strong> — techniques that facilitate large-scale training and reliable convergence.<br>
 </li>
-    </ul>
-  </li>
 </ol>
 
-<p>This structure separates design concerns by stage (construction → training → inference) and enables targeted discussion of stability and systems interactions at each step.<br></p>
+<p>This roadmap sets expectations for technical depth and empirical emphasis, and signals potential extra coverage of <strong>attention variants</strong> if time permits.<br></p>
 
-<p>The emphasis is practical: highlight empirical evidence for defaults that are robust across multiple model families and scales, while calling out areas where research is still active and choices remain heterogeneous.<br></p>
+<p>The organization mirrors practice: choose an architecture, select hyperparameters, then adopt stability and systems-aware practices for training and inference. Each section builds on empirical findings from prior model releases.<br></p>
 
 <hr>
 
-<h1 id="pre-norm-versus-post-norm-layer-normalization">Pre-norm versus post-norm layer normalization</h1>
+<h1 id="pre-norm-prenorm-versus-post-norm-placement-of-layer-normalization">Pre-norm (prenorm) versus post-norm placement of layer normalization</h1>
 
 <div class="row mt-3 text-center">
     <div class="col-sm mt-3 mt-md-0">
@@ -418,20 +428,900 @@
 
     </div>
 </div>
-<p><strong>Pre-layer normalization (pre-norm)</strong> places normalization before each residual sub-block and is the dominant pattern in modern transformer training.<br></p>
-
-<p>Why it’s preferred:<br></p>
+<p><strong>Layer normalization placement</strong> substantially affects training stability.<br></p>
 
 <ul>
-  <li>Improves <strong>optimization stability</strong>, reducing large loss spikes and extreme gradient norms<br>
+  <li>
+<strong>Prenorm</strong> (normalizing before the sub-block) is empirically far more stable than the original <strong>postnorm</strong> (normalize after residual addition).<br>
 </li>
-  <li>Lessens the need for complex learning-rate warm-up schedules that <strong>post‑norm</strong> variants historically required<br>
+  <li>Benefits of <strong>prenorm</strong>:<br>
+    <ul>
+      <li>Reduces loss spikes and <strong>gradient explosions</strong> during early training.<br>
 </li>
-  <li>Enables easier scaling to many layers and larger parameter counts, which supports training of contemporary LLMs<br>
+      <li>Often enables removal of delicate warm-up schedules.<br>
+</li>
+      <li>Improves gradient propagation across many layers, making deep models easier to optimize.<br>
+</li>
+    </ul>
+  </li>
+  <li>Comparisons across translation and BERT-style training show prenorm enables stable optimization for large models without the careful tuning postnorm requires.<br>
 </li>
 </ul>
 
-<p>Empirical comparisons indicate steadier gradients and fewer divergence incidents with pre-norm versus post-norm in deep stacks. While exceptions exist for specialized architectures or research probes, <strong>pre-norm</strong> should be the default for large transformer training unless a targeted study justifies an alternative.<br></p>
+<p>Consequently, almost all modern large language model implementations adopt <strong>prenorm</strong> or prenorm-derived schemes for robustness.<br></p>
+
+<hr>
+
+<h1 id="double-layer-normalization-variants-front-and-after-as-a-stability-enhancement">Double-layer-normalization variants (front and after) as a stability enhancement</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/00-10-09-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/00-10-09-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/00-10-09-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec03/00-10-09.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Some recent models add <strong>layer normalization both before and after</strong> subcomponents (a <strong>double-norm</strong>) to further improve stability in very large models.<br></p>
+
+<ul>
+  <li>Pattern: place a normalization at the start of the non-residual computation and again after the block output.<br>
+</li>
+  <li>Empirical effects:<br>
+    <ul>
+      <li>Further reduces gradient spikes and improves numerical behavior during long or large-scale runs.<br>
+</li>
+      <li>Retains the identity-like property of residual connections while controlling activation scale both entering and exiting sublayers.<br>
+</li>
+    </ul>
+  </li>
+  <li>Practical note: <strong>double-norm</strong> adoption is increasing where marginal stability gains matter at scale (e.g., state-of-the-art, extremely deep or high-capacity models).<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="layernorm-definition-and-the-adoption-of-rmsnorm-for-efficiency">LayerNorm definition and the adoption of RMSNorm for efficiency</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/00-13-09-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/00-13-09-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/00-13-09-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec03/00-13-09.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Layer normalization</strong> standardizes activations by subtracting the mean and dividing by the standard deviation, then applying learned scale and shift parameters.<br></p>
+
+<p><strong>RMSNorm</strong> is a lighter-weight alternative:<br></p>
+<ul>
+  <li>Removes mean subtraction and the learned bias, scaling only by the <strong>root-mean-square</strong> (RMS).<br>
+</li>
+  <li>Reduces operations and memory traffic compared to full layer norm.<br>
+</li>
+</ul>
+
+<p>Systems and empirical trade-offs:<br></p>
+<ul>
+  <li>Normalization ops are negligible in FLOPs but can dominate runtime due to <strong>memory movement</strong>.<br>
+</li>
+  <li>
+<strong>RMSNorm</strong> reduces parameter loads and runtime overhead while often delivering equivalent model quality.<br>
+</li>
+  <li>Empirical ablations show modest throughput gains and comparable or better final loss with RMSNorm, which is why many modern families (e.g., LLaMA variants, PaLM) converge to RMSNorm.<br>
+</li>
+</ul>
+
+<p>Choice trade: trivial extra computation versus reduced memory movement and simpler GPU kernels.<br></p>
+
+<hr>
+
+<h1 id="removing-bias-terms-in-linear-layers-for-optimization-stability-and-simplicity">Removing bias terms in linear layers for optimization stability and simplicity</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/00-16-37-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/00-16-37-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/00-16-37-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec03/00-16-37.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Many contemporary implementations <strong>omit bias vectors</strong> in linear projections, keeping only pure matrix multiplies to reduce memory movement and simplify numerical behavior.<br></p>
+
+<p>Practical observations:<br></p>
+<ul>
+  <li>Dropping biases often has <strong>no negative effect</strong> on final performance and can improve training stability for very large models.<br>
+</li>
+  <li>Possible rationale: avoids small additive perturbations that interact poorly with high learning rates and normalization dynamics.<br>
+</li>
+  <li>Systems benefits: fewer parameters to fetch/update and better opportunity for <strong>fused kernels</strong>, improving efficiency.<br>
+</li>
+</ul>
+
+<p>Exceptions: biases may still appear in <strong>gated</strong> or specially parameterized layers where they have a functional role.<br></p>
+
+<hr>
+
+<h1 id="generalizable-lessons-from-architectural-choices">Generalizable lessons from architectural choices</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/00-20-07-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/00-20-07-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/00-20-07-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec03/00-20-07.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Several architectural rules generalize across model families and scales:<br></p>
+
+<ul>
+  <li>Prefer <strong>identity-preserving residual connections</strong> to maintain signal flow.<br>
+</li>
+  <li>
+<strong>Normalize activations</strong> to control scale (via <strong>prenorm</strong> or <strong>RMSNorm</strong>).<br>
+</li>
+  <li>Favor <strong>gating mechanisms</strong> in MLPs for additional representational flexibility (e.g., GLUs).<br>
+</li>
+</ul>
+
+<p>Why these rules matter:<br></p>
+<ul>
+  <li>They reduce <strong>optimization fragility</strong> and improve training dynamics as models and datasets scale.<br>
+</li>
+  <li>They interact with system constraints such as <strong>memory movement</strong> and <strong>kernel fusion</strong>.<br>
+</li>
+</ul>
+
+<p>Caveat: these are empirical best practices, not theoretical absolutes—deviations are possible but should be justified experimentally.<br></p>
+
+<hr>
+
+<h1 id="nomenclature-and-benefits-of-gated-linear-units-glus-in-mlps">Nomenclature and benefits of gated linear units (GLUs) in MLPs</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/00-23-54-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/00-23-54-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/00-23-54-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec03/00-23-54.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Gated linear units (GLUs)</strong> augment the standard two-layer MLP by gating the activation entry-wise with an additional linear projection.<br></p>
+
+<ul>
+  <li>Mechanism: multiply the primary nonlinearity by a learned <strong>gate vector</strong>, introducing element-wise multiplicative interactions inside the MLP.<br>
+</li>
+  <li>Benefits:<br>
+    <ul>
+      <li>Increased representational capacity.<br>
+</li>
+      <li>Conditional computation per hidden dimension.<br>
+</li>
+    </ul>
+  </li>
+  <li>Variants include <strong>GeLU+GLU</strong>, <strong>SwiGLU</strong> (swish-based), and similar gated formulations.<br>
+</li>
+  <li>Empirical outcome: GLUs systematically reduce training loss and improve downstream metrics in many ablation studies.<br>
+</li>
+</ul>
+
+<p>Practical convention: when using GLUs, reduce the nominal feed-forward hidden size to preserve parameter budgets—commonly scale the hidden dimension so total parameters remain comparable to non-gated baselines.<br></p>
+
+<hr>
+
+<h1 id="gating-mechanics-and-sizing-conventions-for-glu-based-mlps">Gating mechanics and sizing conventions for GLU-based MLPs</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/00-27-20-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/00-27-20-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/00-27-20-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec03/00-27-20.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>How a GLU-based MLP is computed and how practitioners match parameters:<br></p>
+
+<ol>
+  <li>The input undergoes two linear projections:<br>
+    <ul>
+      <li>One projection produces the <strong>pre-activation</strong> passed through a nonlinearity (e.g., GeLU, Swish).<br>
+</li>
+      <li>The other produces a <strong>gate vector</strong> that modulates the activation element-wise.<br>
+</li>
+    </ul>
+  </li>
+  <li>The gate projection adds parameters and FLOPs, so common practice is to adjust projection sizes to match a non-gated baseline.<br>
+</li>
+</ol>
+
+<p>Parameter-matching convention:<br></p>
+<ul>
+  <li>Starting from a typical 4× up-projection baseline (Dff ≈ 4 × Dmodel), practitioners set the GLU up-projection so the overall parameter count is comparable.<br>
+</li>
+  <li>A widely used convention reduces the up-projection to about <strong>8/3 × Dmodel</strong>, which preserves capacity while capturing gating benefits (roughly an 8/3 factor when starting from a 4× baseline).<br>
+</li>
+</ul>
+
+<p>Implementation note: ensure the overall parameter budget and memory footprint align with infrastructure constraints when adopting GLUs.<br></p>
+
+<hr>
+
+<h1 id="empirical-evidence-favors-glu-variants-but-they-are-not-mandatory">Empirical evidence favors GLU variants but they are not mandatory</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/00-30-23-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/00-30-23-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/00-30-23-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec03/00-30-23.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Empirical evidence for GLUs:<br></p>
+
+<ul>
+  <li>Multiple ablation studies and benchmarks report consistent gains for <strong>GLU-style MLPs</strong> (SwiGLU, GeGLU, etc.) over plain ReLU or GeLU on pretraining loss curves and downstream tasks (e.g., GLUE, SST-2).<br>
+</li>
+  <li>These reported improvements have driven broad adoption across post-2023 model releases.<br>
+</li>
+  <li>Counterpoint: several high-performance models (e.g., early GPT-3 variants, some Falcon and Neotron models) succeed without GLUs, showing gating improves but is not strictly necessary.<br>
+</li>
+</ul>
+
+<p>Practical guidance: treat GLUs as a well-validated improvement to try by default, but evaluate empirical trade-offs given your compute and dataset regime.<br></p>
+
+<hr>
+
+<h1 id="serial-attention-then-mlp-versus-parallel-layer-ordering">Serial (attention then MLP) versus parallel layer ordering</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/00-36-25-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/00-36-25-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/00-36-25-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec03/00-36-25.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Implementation order in transformer blocks—serial vs parallel architectures:<br></p>
+
+<ul>
+  <li>
+<strong>Serial (canonical)</strong>: attention followed by MLP; intermediate representations are consumed sequentially.<br>
+</li>
+  <li>
+<strong>Parallel</strong>: compute attention and MLP outputs in parallel from the same input and merge them into the residual stream.<br>
+</li>
+</ul>
+
+<p>Trade-offs:<br></p>
+<ul>
+  <li>Parallelization enables <strong>kernel fusion</strong> and can better utilize hardware by sharing linear projection computation, potentially improving systems efficiency and reducing per-token latency.<br>
+</li>
+  <li>It changes the computation graph and may alter expressivity compared to serial composition.<br>
+</li>
+  <li>Adoption: explored in models such as GPT-J and PaLM, but most recent models remain serial unless system-level gains justify the change.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="relative-positional-encodings-and-rope-rotary-position-embeddings">Relative positional encodings and RoPE (Rotary Position Embeddings)</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/00-44-10-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/00-44-10-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/00-44-10-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec03/00-44-10.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>RoPE (Rotary Positional Encoding)</strong> encodes position by rotating pairs of vector dimensions by an angle proportional to position.<br></p>
+
+<p>Key points:<br></p>
+<ul>
+  <li>Splits the model’s D-dimensional vectors into 2D blocks and applies 2×2 rotation matrices parameterized by a schedule of angles.<br>
+</li>
+  <li>Inner products between token embeddings depend only on <strong>relative position differences</strong>, not absolute positions, realizing a principled relative-position mechanism.<br>
+</li>
+  <li>Applied to <strong>queries and keys</strong> at the attention layer (not added to base embeddings).<br>
+</li>
+  <li>Empirical benefits: better <strong>context-length extrapolation</strong> behavior and strong performance even at small scales, leading to widespread adoption.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="feed-forward-inner-dimension-dff-rule-of-thumb-and-glu-adjustments">Feed-forward inner dimension (Dff) rule-of-thumb and GLU adjustments</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/00-48-51-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/00-48-51-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/00-48-51-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec03/00-48-51.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Feed-forward dimensionality conventions and practical ranges:<br></p>
+
+<ul>
+  <li>For conventional (non-gated) MLPs, a standard choice is <strong>Dff ≈ 4× Dmodel</strong>, balancing expressiveness and compute.<br>
+</li>
+  <li>For <strong>GLU-style MLPs</strong>, practitioners commonly reduce nominal Dff so parameter counts remain comparable; a widely used convention is <strong>Dff ≈ 8/3 × Dmodel</strong>.<br>
+</li>
+  <li>Large deviations are possible (e.g., T5’s historical 64× up-projection).<br>
+</li>
+  <li>Empirical scaling-law studies show a broad basin of acceptable ratios (roughly <strong>1×–10×</strong>), with modest loss differences, validating the <strong>4× default</strong> as a safe starting point.<br>
+</li>
+</ul>
+
+<p>When changing Dff substantially, consider systems effects (matrix shapes, parallelism) and re-evaluate optimizer and learning-rate schedules.<br></p>
+
+<hr>
+
+<h1 id="attention-head-sizing-and-the-11-per-head-dimension-convention">Attention head sizing and the 1:1 per-head dimension convention</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/00-52-29-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/00-52-29-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/00-52-29-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec03/00-52-29.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Attention head sizing and the common split convention:<br></p>
+
+<ul>
+  <li>Most large models split the model hidden dimension <strong>D</strong> evenly across <strong>H</strong> heads so each head has dimension <strong>D/H</strong>, keeping H*(D/H) = D.<br>
+</li>
+  <li>This 1:1-style convention maintains a stable parameterization and computational profile as head count varies and is widely used (GPT-3, PaLM, LLaMA, etc.).<br>
+</li>
+  <li>Theoretical concerns exist that very small per-head dimensions can reduce expressivity (low-rank attention), but in practice the standard split performs well across a wide range of head counts.<br>
+</li>
+</ul>
+
+<p>Deviations are possible, but any departure from the proportional scheme should be validated empirically for low-rank bottlenecks.<br></p>
+
+<hr>
+
+<h1 id="aspect-ratio-depth-versus-width-defaults-and-empirical-optima">Aspect ratio (depth versus width) defaults and empirical optima</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/00-55-33-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/00-55-33-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/00-55-33-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec03/00-55-33.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Depth versus width trade-offs and aspect ratios:<br></p>
+
+<ul>
+  <li>The trade-off is often summarized by <strong>aspect ratio</strong> metrics (layers vs hidden dimension).<br>
+</li>
+  <li>Empirical studies show a typical optimal band rather than a monotonic preference for deeper or wider networks.<br>
+</li>
+  <li>Practical rule-of-thumb: aim for roughly <strong>128 hidden dimensions per layer</strong> at some operating points, though this depends on target model size and infrastructure parallelism.<br>
+</li>
+  <li>Aspect ratio choices interact with system-parallelism strategies (pipeline, tensor parallelism) and can affect downstream fine-tuning behavior.<br>
+</li>
+</ul>
+
+<p>Recommendation: select aspect ratios that fit hardware constraints and lie within empirically validated basins of good loss; task-dependent experiments may shift the optimum.<br></p>
+
+<hr>
+
+<h1 id="vocabulary-sizing-trends-and-multilingual-tokenizers">Vocabulary sizing trends and multilingual tokenizers</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/00-58-33-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/00-58-33-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/00-58-33-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec03/00-58-33.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Vocabulary size trends and trade-offs:<br></p>
+
+<ul>
+  <li>Vocabulary sizes have trended upward from <strong>30k–50k</strong> (monolingual) toward <strong>100k–250k</strong> for multilingual/production models.<br>
+</li>
+  <li>Larger vocabularies reduce tokenization fragmentation for non-English languages and rare symbols, lowering per-inference token counts and improving user-facing latency and token-cost for multilingual deployments.<br>
+</li>
+  <li>For high-resource languages like English, smaller vocabularies can still be effective, but production models often prioritize larger token sets to reduce tail-mode inefficiencies across many languages.<br>
+</li>
+</ul>
+
+<p>Choosing vocabulary size balances <strong>tokenizer granularity</strong>, <strong>model parameterization</strong>, and <strong>downstream inference cost</strong>, and should reflect deployment linguistic diversity.<br></p>
+
+<hr>
+
+<h1 id="dropout-weight-decay-and-the-role-of-regularization-in-pretraining">Dropout, weight decay, and the role of regularization in pretraining</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/01-01-58-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/01-01-58-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/01-01-58-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec03/01-01-58.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Regularization practice in contemporary pretraining:<br></p>
+
+<ul>
+  <li>
+<strong>Dropout</strong> is less prevalent in modern pretraining because massive corpora mean models typically do not overfit within a single epoch.<br>
+</li>
+  <li>
+<strong>Weight decay</strong> remains commonly used, not primarily as overfitting control but because it interacts with learning-rate schedules and optimization dynamics to yield better final training loss behavior.<br>
+</li>
+</ul>
+
+<p>Empirical notes on weight decay:<br></p>
+<ul>
+  <li>It can slow initial progress at high learning rates but enable stronger convergence during late stages as learning rates decay.<br>
+</li>
+  <li>Treat weight decay as an <strong>optimization-stability and convergence aid</strong> in large-scale pretraining, not exclusively as a regularizer to prevent overfitting.<br>
+</li>
+</ul>
+
+<hr>
+
+<h1 id="consensus-hyperparameter-defaults-as-practical-starting-points">Consensus hyperparameter defaults as practical starting points</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/01-05-19-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/01-05-19-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/01-05-19-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec03/01-05-19.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Low-level hyperparameter defaults that emerged from repeated deployments:<br></p>
+<ul>
+  <li>Hidden sizes and head-dimension splits that match systems and parallelism strategies.<br>
+</li>
+  <li>Dff multipliers: <strong>~4×</strong> for non-gated, <strong>~8/3×</strong> for GLUs.<br>
+</li>
+  <li>Aspect ratios near empirically observed optima.<br>
+</li>
+  <li>Weight decay for stable optimization.<br>
+</li>
+</ul>
+
+<p>Benefits of using community-validated defaults:<br></p>
+<ul>
+  <li>Provides a robust baseline that reduces tuning cost and instability risk.<br>
+</li>
+  <li>Reflects both representational and systems considerations (memory movement, kernel fusion, parallelism).<br>
+</li>
+</ul>
+
+<p>When deviating, isolate single changes and re-evaluate optimizer schedules to avoid confounding effects.<br></p>
+
+<hr>
+
+<h1 id="training-stability-issues-concentrate-around-softmax-operations">Training stability issues concentrate around softmax operations</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/01-09-00-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/01-09-00-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/01-09-00-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec03/01-09-00.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Softmax operations (final softmax and attention softmax) are common loci for numerical instability due to exponentiation and division.<br></p>
+
+<ul>
+  <li>These operations can produce large gradients or NaNs during large-scale training, with empirical traces often showing catastrophic spikes in gradient norms associated with softmax computations.<br>
+</li>
+  <li>Interventions that constrain the magnitude of logits or normalize softmax inputs substantially decrease gradient volatility and improve the reliability of long, large-scale training runs.<br>
+</li>
+</ul>
+
+<p>Addressing softmax-related instability is therefore a central engineering concern when scaling models and datasets.<br></p>
+
+<hr>
+
+<h1 id="z-loss-as-an-auxiliary-regularizer-for-the-output-softmax">Z-loss as an auxiliary regularizer for the output softmax</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/01-12-16-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/01-12-16-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/01-12-16-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec03/01-12-16.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Z-loss</strong> augments cross-entropy with a penalty proportional to <strong>log(Z(x))</strong>, where Z is the softmax normalizer.<br></p>
+
+<ul>
+  <li>Purpose: encourage the partition function to remain close to one and avoid numerically large logits.<br>
+</li>
+  <li>Effect: reducing the magnitude of log(Z) makes exponentiation/division in the softmax better behaved numerically, lowering overflow and extreme conditioning risk.<br>
+</li>
+  <li>Implementation: an auxiliary term with a small coefficient; used in several large-scale models to stabilize the final softmax and improve training robustness.<br>
+</li>
+</ul>
+
+<p>When effective, Z-loss acts like encouraging essentially <strong>unnormalized scores</strong> at the tail end of training to simplify numerical operations.<br></p>
+
+<hr>
+
+<h1 id="qk-normalization-layer-norm-on-queries-and-keys-to-tame-attention-softmax-inputs">QK normalization (layer-norm on queries and keys) to tame attention softmax inputs</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/01-14-48-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/01-14-48-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/01-14-48-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec03/01-14-48.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Applying <strong>normalization to queries and keys (Q/K normalization)</strong> before computing dot-products bounds the magnitude of logits entering the attention softmax.<br></p>
+
+<ul>
+  <li>This prevents extreme values from destabilizing exponentiation and controls per-token and per-head variance.<br>
+</li>
+  <li>Benefits: enables more aggressive learning rates and more consistent gradient norms without altering attention semantics beyond stable scaling.<br>
+</li>
+  <li>Origin and adoption: technique used in large vision and multimodal training and adopted by multiple recent language models to reduce attention-induced training spikes.<br>
+</li>
+</ul>
+
+<p>Because the normalization parameters are learned and kept at inference time, this change improves numerical behavior across training and deployment.<br></p>
+
+<hr>
+
+<h1 id="soft-capping-logits-as-an-alternative-clipping-strategy">Soft-capping logits as an alternative clipping strategy</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/01-17-31-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/01-17-31-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/01-17-31-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec03/01-17-31.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p><strong>Soft-capping</strong> applies a smooth, saturating transform (e.g., scaled tanh) to logits before softmax to prevent extremely large values while preserving differentiability.<br></p>
+
+<ul>
+  <li>The transform maps logits above a chosen <strong>soft cap</strong> into a bounded range so the softmax denominator stays well-conditioned, reducing NaN and overflow risk.<br>
+</li>
+  <li>Empirical note: effects on final perplexity are mixed—soft-capping can improve stability but may harm optimal loss if applied naively.<br>
+</li>
+  <li>Comparison: <strong>QK normalization</strong> often allows more aggressive learning rates with better final outcomes.<br>
+</li>
+</ul>
+
+<p>Recommendation: choose soft-cap thresholds and scaling carefully and validate empirically, since aggressive clipping can impede expressivity.<br></p>
+
+<hr>
+
+<h1 id="inference-arithmetic-intensity-and-the-motivation-for-multi-querygroup-query-attention">Inference arithmetic intensity and the motivation for multi-query/group-query attention</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/01-21-45-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/01-21-45-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/01-21-45-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec03/01-21-45.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Inference generation and KV cache characteristics:<br></p>
+
+<ul>
+  <li>Autoregressive generation uses sequential computation with a persistent <strong>KV cache</strong>, producing unfavorable memory-to-compute ratios compared with batch training because each new token requires accessing and updating past keys/values.<br>
+</li>
+  <li>
+<strong>Arithmetic intensity</strong> (compute per memory access) drops dramatically at inference, increasing sensitivity to memory movement and motivating attention designs that reduce per-step memory traffic.<br>
+</li>
+</ul>
+
+<p>Memory-reducing attention variants:<br></p>
+<ul>
+  <li>
+<strong>Multi-query attention (MQA)</strong>: share keys and values across heads while keeping distinct queries.<br>
+</li>
+  <li>
+<strong>Group-query attention (GQA)</strong>: share K/V at a coarser granularity.<br>
+</li>
+</ul>
+
+<p>These variants trade a small change in attention expressivity for substantial reductions in <strong>KV cache size</strong>, memory movement, and improved latency at long context lengths.<br></p>
+
+<hr>
+
+<h1 id="kv-cache-mechanics-and-quantitative-impact-on-inference-memory-and-compute">KV cache mechanics and quantitative impact on inference memory and compute</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/01-25-34-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/01-25-34-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/01-25-34-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec03/01-25-34.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>During autoregressive generation the model incrementally appends keys and values to a persistent KV cache and computes one new attention row per token, shifting dominant costs:<br></p>
+
+<ul>
+  <li>Training is dominated by matrix-matrix multiplies; cached inference is dominated by many <strong>vector-matrix</strong> and memory-intensive operations.<br>
+</li>
+  <li>The arithmetic intensity for cached inference contains an n/d-like term that can be large for long sequences and moderate model widths, making throughput <strong>memory-bound</strong> rather than compute-bound.<br>
+</li>
+  <li>
+<strong>MQA/GQA</strong> reduce KV cache size, lowering memory accesses and improving arithmetic intensity by amortizing K/V storage across queries.<br>
+</li>
+</ul>
+
+<p>Result: very long context lengths become viable while keeping per-token latency and memory footprint manageable. Implementers should evaluate expressivity trade-offs against inference system gains.<br></p>
+
+<hr>
+
+<h1 id="sparse-sliding-window-and-hybrid-attention-patterns-for-long-context">Sparse, sliding-window, and hybrid attention patterns for long context</h1>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs336-2025/frames/lec03/01-26-56-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs336-2025/frames/lec03/01-26-56-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs336-2025/frames/lec03/01-26-56-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/cs336-2025/frames/lec03/01-26-56.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<p>Structured sparse attention and sliding-window patterns reduce quadratic memory costs by limiting attention to local neighborhoods or predefined sparse connectivities.<br></p>
+
+<p>Design patterns and trade-offs:<br></p>
+<ul>
+  <li>Use <strong>sliding-window</strong> attention for locality and <strong>periodic global/stride-based slots</strong> to propagate long-range information.<br>
+</li>
+  <li>Hybrid designs combine occasional full self-attention layers with multiple sliding-window layers and can omit positional encodings on some layers to enable long-range extrapolation and efficient computation.<br>
+</li>
+  <li>Modern long-context models commonly mix sparse/local attention with strategic full-attention checkpoints to balance systems efficiency and global context propagation.<br>
+</li>
+</ul>
+
+<p>Caveat: designing these patterns requires careful consideration of <strong>task locality</strong>, <strong>layer depth</strong>, and the desired <strong>extrapolation</strong> properties.</p>
 
 <hr>
 
@@ -453,31 +1343,31 @@
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec06/">MIT 6.S184 - Lecture 6 - Diffusion for Protein Generation</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs231n-2025-lec18/">Stanford CS231N Deep Learning for Computer Vision | Spring 2025 | Lecture 18- Human-Centered AI</a>
   </li>
 
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec05/">MIT 6.S184 - Lecture 5 - Diffusion for Robotics</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs231n-2025-lec17/">Stanford CS231N Deep Learning for Computer Vision | Spring 2025 | Lecture 17- Robot Learning</a>
   </li>
 
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec04/">MIT 6.S184 - Lecture 4 - Building an Image Generator</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs231n-2025-lec16/">Stanford CS231N Deep Learning for Computer Vision | Spring 2025 | Lecture 16- Vision and Language</a>
   </li>
 
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec03/">MIT 6.S184 - Lecture 3 - Training Flow and Diffusion Models</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs231n-2025-lec15/">Stanford CS231N Deep Learning for Computer Vision | Spring 2025 | Lecture 15- 3D Vision</a>
   </li>
 
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/mit-6s184-lec02/">MIT 6.S184 - Lecture 2 -  Constructing a Training Target</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs231n-2025-lec14/">Stanford CS231N Deep Learning for Computer Vision| Spring 2025 | Lecture 14- Generative Models 2</a>
   </li>
 
 </div>
@@ -488,7 +1378,7 @@
     <!-- Footer -->    
     <footer class="fixed-bottom">
       <div class="container mt-0">
-        © Copyright 2025 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+        © Copyright 2026 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
 
       </div>
     </footer>
