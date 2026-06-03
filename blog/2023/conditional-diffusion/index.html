@@ -26,7 +26,7 @@
     <!-- Fonts & Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700%7CRoboto+Slab:100,300,400,500,700%7CMaterial+Icons">
 
     <!-- Code Syntax Highlighting -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
@@ -142,6 +142,7 @@
   <article class="post-content">
     
     <div id="table-of-contents">
+      
       <ul id="toc" class="section-nav">
 <li class="toc-entry toc-h2"><a href="#about-the-paper">About the paper</a></li>
 <li class="toc-entry toc-h2"><a href="#understanding-conditional-diffusion-process">Understanding Conditional Diffusion Process</a></li>
@@ -156,6 +157,7 @@
 </li>
 <li class="toc-entry toc-h2"><a href="#references">References</a></li>
 </ul>
+      
     </div>
     <hr>
     
@@ -248,50 +250,50 @@ In the paper, the authors proposed two sampling approaches:</p>
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
     <span class="c1"># create unet and scheduler of the diffusion model
-</span>    <span class="n">model</span><span class="p">,</span> <span class="n">diffusion</span> <span class="o">=</span> <span class="nf">create_model_and_diffusion</span><span class="p">()</span>
+</span>    <span class="n">model</span><span class="p">,</span> <span class="n">diffusion</span> <span class="o">=</span> <span class="n">create_model_and_diffusion</span><span class="p">()</span>
 
     <span class="c1"># load the pretrained unet 
-</span>    <span class="n">model</span><span class="p">.</span><span class="nf">load_state_dict</span><span class="p">()</span>
-    <span class="n">model</span><span class="p">.</span><span class="nf">eval</span><span class="p">()</span>
+</span>    <span class="n">model</span><span class="p">.</span><span class="n">load_state_dict</span><span class="p">()</span>
+    <span class="n">model</span><span class="p">.</span><span class="nb">eval</span><span class="p">()</span>
 
     <span class="c1"># create classifier which is Unet's encoder with linear layer on top
-</span>    <span class="n">classifier</span> <span class="o">=</span> <span class="nf">create_classifier</span><span class="p">()</span>
+</span>    <span class="n">classifier</span> <span class="o">=</span> <span class="n">create_classifier</span><span class="p">()</span>
 
     <span class="c1"># load the pretrained classifier
-</span>    <span class="n">classifier</span><span class="p">.</span><span class="nf">load_state_dict</span><span class="p">()</span>
-    <span class="n">classifier</span><span class="p">.</span><span class="nf">eval</span><span class="p">()</span>
+</span>    <span class="n">classifier</span><span class="p">.</span><span class="n">load_state_dict</span><span class="p">()</span>
+    <span class="n">classifier</span><span class="p">.</span><span class="nb">eval</span><span class="p">()</span>
 
     <span class="c1"># define the gradient of the classifier w.r.t. the input as guidance for sampling 
 </span>    <span class="k">def</span> <span class="nf">cond_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="k">assert</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
-        <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">enable_grad</span><span class="p">():</span>
-            <span class="n">x_in</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="nf">detach</span><span class="p">().</span><span class="nf">requires_grad_</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-            <span class="n">logits</span> <span class="o">=</span> <span class="nf">classifier</span><span class="p">(</span><span class="n">x_in</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
-            <span class="n">log_probs</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="nf">log_softmax</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-            <span class="n">selected</span> <span class="o">=</span> <span class="n">log_probs</span><span class="p">[</span><span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">logits</span><span class="p">)),</span> <span class="n">y</span><span class="p">.</span><span class="nf">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
-            <span class="k">return</span> <span class="n">torch</span><span class="p">.</span><span class="n">autograd</span><span class="p">.</span><span class="nf">grad</span><span class="p">(</span><span class="n">selected</span><span class="p">.</span><span class="nf">sum</span><span class="p">(),</span> <span class="n">x_in</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">args</span><span class="p">.</span><span class="n">classifier_scale</span>   
+        <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="n">enable_grad</span><span class="p">():</span>
+            <span class="n">x_in</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">detach</span><span class="p">().</span><span class="n">requires_grad_</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">logits</span> <span class="o">=</span> <span class="n">classifier</span><span class="p">(</span><span class="n">x_in</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+            <span class="n">log_probs</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="n">log_softmax</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">selected</span> <span class="o">=</span> <span class="n">log_probs</span><span class="p">[</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">logits</span><span class="p">)),</span> <span class="n">y</span><span class="p">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+            <span class="k">return</span> <span class="n">torch</span><span class="p">.</span><span class="n">autograd</span><span class="p">.</span><span class="n">grad</span><span class="p">(</span><span class="n">selected</span><span class="p">.</span><span class="nb">sum</span><span class="p">(),</span> <span class="n">x_in</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">args</span><span class="p">.</span><span class="n">classifier_scale</span>   
     
 
     <span class="k">def</span> <span class="nf">model_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="k">assert</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
-        <span class="k">return</span> <span class="nf">model</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">y</span> <span class="k">if</span> <span class="n">args</span><span class="p">.</span><span class="n">class_cond</span> <span class="k">else</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">y</span> <span class="k">if</span> <span class="n">args</span><span class="p">.</span><span class="n">class_cond</span> <span class="k">else</span> <span class="bp">None</span><span class="p">)</span>
 
     <span class="c1"># main loop 
 </span>    <span class="k">while</span> <span class="n">gothrough_all_images</span><span class="p">:</span>
         <span class="c1"># random target classes
-</span>        <span class="n">classes</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randint</span><span class="p">()</span>
+</span>        <span class="n">classes</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">randint</span><span class="p">()</span>
 
         <span class="c1"># calling sample function with the classifier guidance 
 </span>        <span class="n">sample_fn</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">diffusion</span><span class="p">.</span><span class="n">p_sample_loop</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="p">.</span><span class="n">use_ddim</span> <span class="k">else</span> <span class="n">diffusion</span><span class="p">.</span><span class="n">ddim_sample_loop</span>
         <span class="p">)</span>
-        <span class="n">sample</span> <span class="o">=</span> <span class="nf">sample_fn</span><span class="p">(</span>
+        <span class="n">sample</span> <span class="o">=</span> <span class="n">sample_fn</span><span class="p">(</span>
             <span class="n">model_fn</span><span class="p">,</span>
             <span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">args</span><span class="p">.</span><span class="n">image_size</span><span class="p">,</span> <span class="n">args</span><span class="p">.</span><span class="n">image_size</span><span class="p">),</span>
             <span class="n">clip_denoised</span><span class="o">=</span><span class="n">args</span><span class="p">.</span><span class="n">clip_denoised</span><span class="p">,</span>
             <span class="n">model_kwargs</span><span class="o">=</span><span class="n">model_kwargs</span><span class="p">,</span>
             <span class="n">cond_fn</span><span class="o">=</span><span class="n">cond_fn</span><span class="p">,</span> <span class="c1"># classifier guidance
-</span>            <span class="n">device</span><span class="o">=</span><span class="n">dist_util</span><span class="p">.</span><span class="nf">dev</span><span class="p">(),</span>
+</span>            <span class="n">device</span><span class="o">=</span><span class="n">dist_util</span><span class="p">.</span><span class="n">dev</span><span class="p">(),</span>
         <span class="p">)</span>
 
         <span class="c1"># save the output 
@@ -305,38 +307,38 @@ In the paper, the authors proposed two sampling approaches:</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
 <span class="c1"># one step of the sampling process
-</span><span class="k">def</span> <span class="nf">p_sample</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">clip_denoised</span><span class="p">,</span> <span class="n">denoised_fn</span><span class="p">,</span> <span class="n">cond_fn</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="p">):</span>
+</span><span class="k">def</span> <span class="nf">p_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">clip_denoised</span><span class="p">,</span> <span class="n">denoised_fn</span><span class="p">,</span> <span class="n">cond_fn</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="p">):</span>
 
     <span class="c1"># sample from the unconditional reverse process
 </span>    <span class="c1"># the output includes "mean" and "log_variance" of the Gaussian distribution
 </span>    <span class="c1"># the output also includes "pred_xstart"
-</span>    <span class="n">out</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">p_mean_variance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">clip_denoised</span><span class="p">,</span> <span class="n">denoised_fn</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="p">)</span>
+</span>    <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">p_mean_variance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">clip_denoised</span><span class="p">,</span> <span class="n">denoised_fn</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="p">)</span>
 
     <span class="c1"># Shift the mean by the gradient of the classifier w.r.t. the input
 </span>    <span class="c1"># equation: new_mean = mean + sigma * g 
 </span>    <span class="c1"># where sigma is the standard deviation of the Gaussian distribution, i.e., out["varaince"]
 </span>    <span class="k">if</span> <span class="n">cond_fn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">mean</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">condition_mean</span><span class="p">(</span><span class="n">cond_fn</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="p">)</span>
+        <span class="n">out</span><span class="p">[</span><span class="s">"mean"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">condition_mean</span><span class="p">(</span><span class="n">cond_fn</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="p">)</span>
     
     <span class="c1"># create nonzero mask
 </span>    <span class="n">nonzero_mask</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="p">(</span><span class="n">t</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">).</span><span class="nf">float</span><span class="p">().</span><span class="nf">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="p">([</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
+            <span class="p">(</span><span class="n">t</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">).</span><span class="nb">float</span><span class="p">().</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="p">([</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
         <span class="p">)</span>  <span class="c1"># no noise when t == 0
 </span>
     <span class="c1"># sample from the shifted Gaussian distribution
-</span>    <span class="n">sample</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">mean</span><span class="sh">"</span><span class="p">]</span> <span class="o">+</span> <span class="n">nonzero_mask</span> <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="nf">exp</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">log_variance</span><span class="sh">"</span><span class="p">])</span> <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randn_like</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">mean</span><span class="sh">"</span><span class="p">])</span>
-    <span class="k">return</span> <span class="p">{</span><span class="sh">"</span><span class="s">sample</span><span class="sh">"</span><span class="p">:</span> <span class="n">sample</span><span class="p">,</span> <span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">:</span> <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">]}</span>
+</span>    <span class="n">sample</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s">"mean"</span><span class="p">]</span> <span class="o">+</span> <span class="n">nonzero_mask</span> <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="n">exp</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">out</span><span class="p">[</span><span class="s">"log_variance"</span><span class="p">])</span> <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="n">randn_like</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s">"mean"</span><span class="p">])</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s">"sample"</span><span class="p">:</span> <span class="n">sample</span><span class="p">,</span> <span class="s">"pred_xstart"</span><span class="p">:</span> <span class="n">out</span><span class="p">[</span><span class="s">"pred_xstart"</span><span class="p">]}</span>
 
 <span class="c1"># the progressive sampling loop from T to 0, where the $$x_t$$ will be used to sample $$x_{t-1}$
 </span>
 <span class="k">def</span> <span class="nf">p_sample_loop_progressive</span><span class="p">():</span>
 
-    <span class="bp">...</span>
+    <span class="p">...</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
-        <span class="n">t</span> <span class="o">=</span> <span class="n">th</span><span class="p">.</span><span class="nf">tensor</span><span class="p">([</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
-        <span class="k">with</span> <span class="n">th</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
-            <span class="n">out</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">p_sample</span><span class="p">(</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">th</span><span class="p">.</span><span class="n">tensor</span><span class="p">([</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">th</span><span class="p">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">p_sample</span><span class="p">(</span>
                 <span class="n">model</span><span class="p">,</span>
                 <span class="n">img</span><span class="p">,</span>
                 <span class="n">t</span><span class="p">,</span>
@@ -346,7 +348,7 @@ In the paper, the authors proposed two sampling approaches:</p>
                 <span class="n">model_kwargs</span><span class="o">=</span><span class="n">model_kwargs</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">yield</span> <span class="n">out</span>
-            <span class="n">img</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">sample</span><span class="sh">"</span><span class="p">]</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s">"sample"</span><span class="p">]</span>
 
 </code></pre></div></div>
 
@@ -354,47 +356,47 @@ In the paper, the authors proposed two sampling approaches:</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
 <span class="c1"># one step of the sampling process
-</span><span class="k">def</span> <span class="nf">ddim_sample</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">clip_denoised</span><span class="p">,</span> <span class="n">denoised_fn</span><span class="p">,</span> <span class="n">cond_fn</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="p">,</span> <span class="n">eta</span><span class="p">):</span>
+</span><span class="k">def</span> <span class="nf">ddim_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">clip_denoised</span><span class="p">,</span> <span class="n">denoised_fn</span><span class="p">,</span> <span class="n">cond_fn</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="p">,</span> <span class="n">eta</span><span class="p">):</span>
 
     <span class="c1"># sample from the unconditional reverse process
 </span>    <span class="c1"># the output includes "mean" and "log_variance" of the Gaussian distribution
 </span>    <span class="c1"># the output also includes "pred_xstart"
-</span>    <span class="n">out</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">p_mean_variance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">clip_denoised</span><span class="p">,</span> <span class="n">denoised_fn</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="p">)</span>
+</span>    <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">p_mean_variance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">clip_denoised</span><span class="p">,</span> <span class="n">denoised_fn</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="p">)</span>
 
     <span class="c1"># calculate score 
 </span>    <span class="k">if</span> <span class="n">cond_fn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">condition_score</span><span class="p">(</span><span class="n">cond_fn</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="o">=</span><span class="n">model_kwargs</span><span class="p">)</span>    
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">condition_score</span><span class="p">(</span><span class="n">cond_fn</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="o">=</span><span class="n">model_kwargs</span><span class="p">)</span>    
     
     <span class="c1"># calculate epsilon_t 
-</span>    <span class="n">eps</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_predict_eps_from_xstart</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">])</span>
+</span>    <span class="n">eps</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_predict_eps_from_xstart</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">out</span><span class="p">[</span><span class="s">"pred_xstart"</span><span class="p">])</span>
 
     <span class="c1"># calculate alpha_bar_t and alpha_bar_prev and sigma 
 </span>    <span class="n">sigma</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">eta</span>
-        <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha_bar_prev</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha_bar</span><span class="p">))</span>
-        <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha_bar</span> <span class="o">/</span> <span class="n">alpha_bar_prev</span><span class="p">)</span>
+        <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="n">sqrt</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha_bar_prev</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha_bar</span><span class="p">))</span>
+        <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha_bar</span> <span class="o">/</span> <span class="n">alpha_bar_prev</span><span class="p">)</span>
     <span class="p">)</span>    
 
     <span class="c1"># calculate x_{t-1} as in Algorithm 2
 </span>    <span class="n">mean_pred</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">]</span> <span class="o">*</span> <span class="n">th</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="n">alpha_bar_prev</span><span class="p">)</span>
-        <span class="o">+</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha_bar_prev</span> <span class="o">-</span> <span class="n">sigma</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">eps</span>
+        <span class="n">out</span><span class="p">[</span><span class="s">"pred_xstart"</span><span class="p">]</span> <span class="o">*</span> <span class="n">th</span><span class="p">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">alpha_bar_prev</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">torch</span><span class="p">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha_bar_prev</span> <span class="o">-</span> <span class="n">sigma</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">eps</span>
     <span class="p">)</span>
 
     <span class="c1"># Still random sample from a Gaussian distribution 
 </span>    <span class="c1"># but the mean is calculated as above
-</span>    <span class="n">sample</span> <span class="o">=</span> <span class="n">mean_pred</span> <span class="o">+</span> <span class="n">nonzero_mask</span> <span class="o">*</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randn_like</span><span class="p">(</span><span class="n">mean_pred</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">{</span><span class="sh">"</span><span class="s">sample</span><span class="sh">"</span><span class="p">:</span> <span class="n">sample</span><span class="p">,</span> <span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">:</span> <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">]}</span>    
+</span>    <span class="n">sample</span> <span class="o">=</span> <span class="n">mean_pred</span> <span class="o">+</span> <span class="n">nonzero_mask</span> <span class="o">*</span> <span class="n">sigma</span> <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="n">randn_like</span><span class="p">(</span><span class="n">mean_pred</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s">"sample"</span><span class="p">:</span> <span class="n">sample</span><span class="p">,</span> <span class="s">"pred_xstart"</span><span class="p">:</span> <span class="n">out</span><span class="p">[</span><span class="s">"pred_xstart"</span><span class="p">]}</span>    
 </code></pre></div></div>
 
 <p>The main component of the above code is the unconditional reverse process <code class="language-plaintext highlighter-rouge">p_mean_variance</code> which is defined as follows in the file <code class="language-plaintext highlighter-rouge">gaussian_diffusion.py</code>. It is worth noting that this function not only returns the \(x_{t-1}\) but also the prediction of the initial \(x_0\), i.e., <code class="language-plaintext highlighter-rouge">pred_xstart</code>.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
 <span class="k">def</span> <span class="nf">p_mean_variance</span><span class="p">(</span>
-        <span class="n">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">clip_denoised</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">denoised_fn</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="o">=</span><span class="bp">None</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">clip_denoised</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">denoised_fn</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="o">=</span><span class="bp">None</span>
     <span class="p">):</span>
 
-    <span class="sh">"""</span><span class="s">
+    <span class="s">"""
     Apply the model to get p(x_{t-1} | x_t), as well as a prediction of
     the initial x, x_0.
 
@@ -409,23 +411,23 @@ In the paper, the authors proposed two sampling approaches:</p>
     :param model_kwargs: if not None, a dict of extra keyword arguments to
         pass to the model. This can be used for conditioning.
     :return: a dict with the following keys:
-                - </span><span class="sh">'</span><span class="s">mean</span><span class="sh">'</span><span class="s">: the model mean output.
-                - </span><span class="sh">'</span><span class="s">variance</span><span class="sh">'</span><span class="s">: the model variance output.
-                - </span><span class="sh">'</span><span class="s">log_variance</span><span class="sh">'</span><span class="s">: the log of </span><span class="sh">'</span><span class="s">variance</span><span class="sh">'</span><span class="s">.
-                - </span><span class="sh">'</span><span class="s">pred_xstart</span><span class="sh">'</span><span class="s">: the prediction for x_0.
-    </span><span class="sh">"""</span>
+                - 'mean': the model mean output.
+                - 'variance': the model variance output.
+                - 'log_variance': the log of 'variance'.
+                - 'pred_xstart': the prediction for x_0.
+    """</span>
 
-    <span class="n">model_output</span> <span class="o">=</span> <span class="nf">model</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="nf">_scale_timesteps</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="o">**</span><span class="n">model_kwargs</span><span class="p">)</span>
+    <span class="n">model_output</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">_scale_timesteps</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="o">**</span><span class="n">model_kwargs</span><span class="p">)</span>
 
     <span class="c1"># really long process 
 </span>    <span class="p">...</span> 
 
 
     <span class="k">return</span> <span class="p">{</span>
-        <span class="sh">"</span><span class="s">mean</span><span class="sh">"</span><span class="p">:</span> <span class="n">model_mean</span><span class="p">,</span>
-        <span class="sh">"</span><span class="s">variance</span><span class="sh">"</span><span class="p">:</span> <span class="n">model_variance</span><span class="p">,</span>
-        <span class="sh">"</span><span class="s">log_variance</span><span class="sh">"</span><span class="p">:</span> <span class="n">model_log_variance</span><span class="p">,</span>
-        <span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">:</span> <span class="n">pred_xstart</span><span class="p">,</span>
+        <span class="s">"mean"</span><span class="p">:</span> <span class="n">model_mean</span><span class="p">,</span>
+        <span class="s">"variance"</span><span class="p">:</span> <span class="n">model_variance</span><span class="p">,</span>
+        <span class="s">"log_variance"</span><span class="p">:</span> <span class="n">model_log_variance</span><span class="p">,</span>
+        <span class="s">"pred_xstart"</span><span class="p">:</span> <span class="n">pred_xstart</span><span class="p">,</span>
     <span class="p">}</span>
 </code></pre></div></div>
 
@@ -434,42 +436,42 @@ In the paper, the authors proposed two sampling approaches:</p>
 <p>Another important component of the above code is the <code class="language-plaintext highlighter-rouge">condition_mean()</code> and <code class="language-plaintext highlighter-rouge">condition_score()</code> which are two conditioning functions that are used to condition the diffusion model on the gradient of the classifier w.r.t. the input as described in Algorithm 1 and 2, respectively. They are the main force to shift the output from uncondition to condition.
 The two functions are defined as follows in the file <a href="https://github.com/openai/guided-diffusion/blob/main/guided_diffusion/gaussian_diffusion.p" rel="external nofollow noopener" target="_blank"><code class="language-plaintext highlighter-rouge">gaussian_diffusion.py</code></a>.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">condition_mean</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">cond_fn</span><span class="p">,</span> <span class="n">p_mean_var</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="sh">"""</span><span class="s">
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">condition_mean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cond_fn</span><span class="p">,</span> <span class="n">p_mean_var</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="s">"""
     Compute the mean for the previous step, given a function cond_fn that
     computes the gradient of a conditional log probability with respect to
     x. In particular, cond_fn computes grad(log(p(y|x))), and we want to
     condition on y.
 
     This uses the conditioning strategy from Sohl-Dickstein et al. (2015).
-    </span><span class="sh">"""</span>
-    <span class="n">gradient</span> <span class="o">=</span> <span class="nf">cond_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="nf">_scale_timesteps</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="o">**</span><span class="n">model_kwargs</span><span class="p">)</span>
+    """</span>
+    <span class="n">gradient</span> <span class="o">=</span> <span class="n">cond_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">_scale_timesteps</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="o">**</span><span class="n">model_kwargs</span><span class="p">)</span>
     <span class="n">new_mean</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">p_mean_var</span><span class="p">[</span><span class="sh">"</span><span class="s">mean</span><span class="sh">"</span><span class="p">].</span><span class="nf">float</span><span class="p">()</span> <span class="o">+</span> <span class="n">p_mean_var</span><span class="p">[</span><span class="sh">"</span><span class="s">variance</span><span class="sh">"</span><span class="p">]</span> <span class="o">*</span> <span class="n">gradient</span><span class="p">.</span><span class="nf">float</span><span class="p">()</span>
+        <span class="n">p_mean_var</span><span class="p">[</span><span class="s">"mean"</span><span class="p">].</span><span class="nb">float</span><span class="p">()</span> <span class="o">+</span> <span class="n">p_mean_var</span><span class="p">[</span><span class="s">"variance"</span><span class="p">]</span> <span class="o">*</span> <span class="n">gradient</span><span class="p">.</span><span class="nb">float</span><span class="p">()</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">new_mean</span>
 
-<span class="k">def</span> <span class="nf">condition_score</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">cond_fn</span><span class="p">,</span> <span class="n">p_mean_var</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="sh">"""</span><span class="s">
+<span class="k">def</span> <span class="nf">condition_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cond_fn</span><span class="p">,</span> <span class="n">p_mean_var</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="s">"""
     Compute what the p_mean_variance output would have been, should the
-    model</span><span class="sh">'</span><span class="s">s score function be conditioned by cond_fn.
+    model's score function be conditioned by cond_fn.
 
     See condition_mean() for details on cond_fn.
 
     Unlike condition_mean(), this instead uses the conditioning strategy
     from Song et al (2020).
-    </span><span class="sh">"""</span>
-    <span class="n">alpha_bar</span> <span class="o">=</span> <span class="nf">_extract_into_tensor</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">alphas_cumprod</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">.</span><span class="n">shape</span><span class="p">)</span>
+    """</span>
+    <span class="n">alpha_bar</span> <span class="o">=</span> <span class="n">_extract_into_tensor</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">alphas_cumprod</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">.</span><span class="n">shape</span><span class="p">)</span>
 
-    <span class="n">eps</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_predict_eps_from_xstart</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">p_mean_var</span><span class="p">[</span><span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">])</span>
-    <span class="n">eps</span> <span class="o">=</span> <span class="n">eps</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha_bar</span><span class="p">).</span><span class="nf">sqrt</span><span class="p">()</span> <span class="o">*</span> <span class="nf">cond_fn</span><span class="p">(</span>
-        <span class="n">x</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="nf">_scale_timesteps</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="o">**</span><span class="n">model_kwargs</span>
+    <span class="n">eps</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_predict_eps_from_xstart</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">p_mean_var</span><span class="p">[</span><span class="s">"pred_xstart"</span><span class="p">])</span>
+    <span class="n">eps</span> <span class="o">=</span> <span class="n">eps</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha_bar</span><span class="p">).</span><span class="n">sqrt</span><span class="p">()</span> <span class="o">*</span> <span class="n">cond_fn</span><span class="p">(</span>
+        <span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">_scale_timesteps</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="o">**</span><span class="n">model_kwargs</span>
     <span class="p">)</span>
 
-    <span class="n">out</span> <span class="o">=</span> <span class="n">p_mean_var</span><span class="p">.</span><span class="nf">copy</span><span class="p">()</span>
-    <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">_predict_xstart_from_eps</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">eps</span><span class="p">)</span>
-    <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">mean</span><span class="sh">"</span><span class="p">],</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">q_posterior_mean_variance</span><span class="p">(</span>
-        <span class="n">x_start</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">pred_xstart</span><span class="sh">"</span><span class="p">],</span> <span class="n">x_t</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="n">t</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">p_mean_var</span><span class="p">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">out</span><span class="p">[</span><span class="s">"pred_xstart"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_predict_xstart_from_eps</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">eps</span><span class="p">)</span>
+    <span class="n">out</span><span class="p">[</span><span class="s">"mean"</span><span class="p">],</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">q_posterior_mean_variance</span><span class="p">(</span>
+        <span class="n">x_start</span><span class="o">=</span><span class="n">out</span><span class="p">[</span><span class="s">"pred_xstart"</span><span class="p">],</span> <span class="n">x_t</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="n">t</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">out</span>
 </code></pre></div></div>
@@ -484,22 +486,22 @@ The two functions are defined as follows in the file <a href="https://github.com
 
 <p>Therefore, we can see the following functions in the code:</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">_predict_eps_from_xstart</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x_t</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">pred_xstart</span><span class="p">):</span>
-    <span class="nf">return </span><span class="p">(</span>
-        <span class="nf">_extract_into_tensor</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">sqrt_recip_alphas_cumprod</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">x_t</span><span class="p">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">*</span> <span class="n">x_t</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">_predict_eps_from_xstart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_t</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">pred_xstart</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">_extract_into_tensor</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">sqrt_recip_alphas_cumprod</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">x_t</span><span class="p">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">*</span> <span class="n">x_t</span>
         <span class="o">-</span> <span class="n">pred_xstart</span>
-    <span class="p">)</span> <span class="o">/</span> <span class="nf">_extract_into_tensor</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">sqrt_recipm1_alphas_cumprod</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">x_t</span><span class="p">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="p">)</span> <span class="o">/</span> <span class="n">_extract_into_tensor</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">sqrt_recipm1_alphas_cumprod</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">x_t</span><span class="p">.</span><span class="n">shape</span><span class="p">)</span>
 </code></pre></div></div>
 
 <p>The <code class="language-plaintext highlighter-rouge">_predict_eps_from_xstart</code> function is equivalent to the following equation which allows us to <code class="language-plaintext highlighter-rouge">predict</code> the noise at time \(t\) from the predicted initial image \(\tilde{x}_0\) and the image \(x_t\):</p>
 
 \[\hat{\epsilon}_t = \frac{ 1/\sqrt{\bar{\alpha}_t} x_t - \tilde{x}_0}{\sqrt{1/\bar{\alpha}_t - 1}} = \frac{x_t - \sqrt{\bar{\alpha}_t} \tilde{x}_0}{\sqrt{1 - \bar{\alpha}_t}}\]
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">_predict_xstart_from_eps</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x_t</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">eps</span><span class="p">):</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">_predict_xstart_from_eps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_t</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">eps</span><span class="p">):</span>
     <span class="k">assert</span> <span class="n">x_t</span><span class="p">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">eps</span><span class="p">.</span><span class="n">shape</span>
-    <span class="nf">return </span><span class="p">(</span>
-        <span class="nf">_extract_into_tensor</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">sqrt_recip_alphas_cumprod</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">x_t</span><span class="p">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">*</span> <span class="n">x_t</span>
-        <span class="o">-</span> <span class="nf">_extract_into_tensor</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">sqrt_recipm1_alphas_cumprod</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">x_t</span><span class="p">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">*</span> <span class="n">eps</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">_extract_into_tensor</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">sqrt_recip_alphas_cumprod</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">x_t</span><span class="p">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">*</span> <span class="n">x_t</span>
+        <span class="o">-</span> <span class="n">_extract_into_tensor</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">sqrt_recipm1_alphas_cumprod</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">x_t</span><span class="p">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">*</span> <span class="n">eps</span>
     <span class="p">)</span>
 </code></pre></div></div>
 
@@ -515,64 +517,64 @@ The two functions are defined as follows in the file <a href="https://github.com
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
 <span class="c1"># run loop
-</span><span class="k">def</span> <span class="nf">run_loop</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+</span><span class="k">def</span> <span class="nf">run_loop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">while</span> <span class="n">some_conditions</span><span class="p">:</span>
-        <span class="n">batch</span><span class="p">,</span> <span class="n">cond</span> <span class="o">=</span> <span class="nf">next</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">batch</span><span class="p">,</span> <span class="n">cond</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">data</span><span class="p">)</span>
         <span class="c1"># run one step
-</span>        <span class="n">self</span><span class="p">.</span><span class="nf">forward_backward</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">cond</span><span class="p">)</span>
-        <span class="n">took_step</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">mp_trainer</span><span class="p">.</span><span class="nf">optimize</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">opt</span><span class="p">)</span>
+</span>        <span class="bp">self</span><span class="p">.</span><span class="n">forward_backward</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">cond</span><span class="p">)</span>
+        <span class="n">took_step</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">mp_trainer</span><span class="p">.</span><span class="n">optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">opt</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">took_step</span><span class="p">:</span>
-            <span class="n">self</span><span class="p">.</span><span class="nf">_update_ema</span><span class="p">()</span>
-        <span class="n">self</span><span class="p">.</span><span class="nf">_anneal_lr</span><span class="p">()</span>
-        <span class="n">self</span><span class="p">.</span><span class="nf">log_step</span><span class="p">()</span>
+            <span class="bp">self</span><span class="p">.</span><span class="n">_update_ema</span><span class="p">()</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">_anneal_lr</span><span class="p">()</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">log_step</span><span class="p">()</span>
     <span class="k">return</span> <span class="bp">None</span>
 
 <span class="c1"># forward and backward
-</span><span class="k">def</span> <span class="nf">forward_backward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">cond</span><span class="p">):</span>
-    <span class="n">self</span><span class="p">.</span><span class="n">mp_trainer</span><span class="p">.</span><span class="nf">zero_grad</span><span class="p">()</span>
+</span><span class="k">def</span> <span class="nf">forward_backward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">cond</span><span class="p">):</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">mp_trainer</span><span class="p">.</span><span class="n">zero_grad</span><span class="p">()</span>
 
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">batch</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">self</span><span class="p">.</span><span class="n">microbatch</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">batch</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="p">.</span><span class="n">microbatch</span><span class="p">):</span>
         <span class="n">micro</span><span class="p">,</span> <span class="n">micro_cond</span> <span class="o">=</span> <span class="p">...</span> 
 
         <span class="c1"># sampling time step t and the weights from a schedule sampler (e.g, uniform))
-</span>        <span class="n">t</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">schedule_sampler</span><span class="p">.</span><span class="nf">sample</span><span class="p">(</span><span class="n">micro</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dist_util</span><span class="p">.</span><span class="nf">dev</span><span class="p">())</span>
+</span>        <span class="n">t</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">schedule_sampler</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">micro</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dist_util</span><span class="p">.</span><span class="n">dev</span><span class="p">())</span>
 
-        <span class="n">compute_losses</span> <span class="o">=</span> <span class="n">functools</span><span class="p">.</span><span class="nf">partial</span><span class="p">(</span>
-                <span class="n">self</span><span class="p">.</span><span class="n">diffusion</span><span class="p">.</span><span class="n">training_losses</span><span class="p">,</span>
-                <span class="n">self</span><span class="p">.</span><span class="n">ddp_model</span><span class="p">,</span>
+        <span class="n">compute_losses</span> <span class="o">=</span> <span class="n">functools</span><span class="p">.</span><span class="n">partial</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">.</span><span class="n">diffusion</span><span class="p">.</span><span class="n">training_losses</span><span class="p">,</span>
+                <span class="bp">self</span><span class="p">.</span><span class="n">ddp_model</span><span class="p">,</span>
                 <span class="n">micro</span><span class="p">,</span>
                 <span class="n">t</span><span class="p">,</span>
                 <span class="n">model_kwargs</span><span class="o">=</span><span class="n">micro_cond</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="n">losses</span> <span class="o">=</span> <span class="nf">compute_losses</span><span class="p">()</span>
+        <span class="n">losses</span> <span class="o">=</span> <span class="n">compute_losses</span><span class="p">()</span>
 
-        <span class="n">loss</span> <span class="o">=</span> <span class="p">(</span><span class="n">losses</span><span class="p">[</span><span class="sh">"</span><span class="s">loss</span><span class="sh">"</span><span class="p">]</span> <span class="o">*</span> <span class="n">weights</span><span class="p">).</span><span class="nf">mean</span><span class="p">()</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="p">(</span><span class="n">losses</span><span class="p">[</span><span class="s">"loss"</span><span class="p">]</span> <span class="o">*</span> <span class="n">weights</span><span class="p">).</span><span class="n">mean</span><span class="p">()</span>
 
-        <span class="n">self</span><span class="p">.</span><span class="n">mp_trainer</span><span class="p">.</span><span class="nf">backward</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">mp_trainer</span><span class="p">.</span><span class="n">backward</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
     
     <span class="k">return</span> <span class="bp">None</span>
 
 <span class="c1"># where the diffusion.training_losses is defined as follows in the file gaussian_diffusion.py
 </span>
-<span class="k">def</span> <span class="nf">training_losses</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">x_start</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">training_losses</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">x_start</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">model_kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
 
     <span class="c1"># sample x_t from the unconditional forward process
-</span>    <span class="n">x_t</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">q_sample</span><span class="p">(</span><span class="n">x_start</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="n">noise</span><span class="p">)</span>
+</span>    <span class="n">x_t</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">q_sample</span><span class="p">(</span><span class="n">x_start</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="n">noise</span><span class="p">)</span>
 
     <span class="c1"># consider the MSE loss only 
-</span>    <span class="n">model_output</span> <span class="o">=</span> <span class="nf">model</span><span class="p">(</span><span class="n">x_t</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="nf">_scale_timesteps</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="o">**</span><span class="n">model_kwargs</span><span class="p">)</span>
+</span>    <span class="n">model_output</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x_t</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">_scale_timesteps</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="o">**</span><span class="n">model_kwargs</span><span class="p">)</span>
 
     <span class="c1"># get target from the reverse process
 </span>    <span class="n">target</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="n">ModelMeanType</span><span class="p">.</span><span class="n">PREVIOUS_X</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="nf">q_posterior_mean_variance</span><span class="p">(</span>
+                <span class="n">ModelMeanType</span><span class="p">.</span><span class="n">PREVIOUS_X</span><span class="p">:</span> <span class="bp">self</span><span class="p">.</span><span class="n">q_posterior_mean_variance</span><span class="p">(</span>
                     <span class="n">x_start</span><span class="o">=</span><span class="n">x_start</span><span class="p">,</span> <span class="n">x_t</span><span class="o">=</span><span class="n">x_t</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="n">t</span>
                 <span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
                 <span class="n">ModelMeanType</span><span class="p">.</span><span class="n">START_X</span><span class="p">:</span> <span class="n">x_start</span><span class="p">,</span>
                 <span class="n">ModelMeanType</span><span class="p">.</span><span class="n">EPSILON</span><span class="p">:</span> <span class="n">noise</span><span class="p">,</span>
-            <span class="p">}[</span><span class="n">self</span><span class="p">.</span><span class="n">model_mean_type</span><span class="p">]</span>
+            <span class="p">}[</span><span class="bp">self</span><span class="p">.</span><span class="n">model_mean_type</span><span class="p">]</span>
     
 
-    <span class="n">terms</span><span class="p">[</span><span class="sh">"</span><span class="s">mse</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="nf">mean_flat</span><span class="p">((</span><span class="n">target</span> <span class="o">-</span> <span class="n">model_output</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">terms</span><span class="p">[</span><span class="s">"mse"</span><span class="p">]</span> <span class="o">=</span> <span class="n">mean_flat</span><span class="p">((</span><span class="n">target</span> <span class="o">-</span> <span class="n">model_output</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">terms</span>
 
 </code></pre></div></div>
@@ -584,25 +586,25 @@ The two functions are defined as follows in the file <a href="https://github.com
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
     <span class="c1"># create unet and scheduler of the diffusion model
-</span>    <span class="n">model</span><span class="p">,</span> <span class="n">diffusion</span> <span class="o">=</span> <span class="nf">create_model_and_diffusion</span><span class="p">()</span>
+</span>    <span class="n">model</span><span class="p">,</span> <span class="n">diffusion</span> <span class="o">=</span> <span class="n">create_model_and_diffusion</span><span class="p">()</span>
 
     <span class="c1"># init schedule sampler
 </span>    <span class="k">if</span> <span class="n">args</span><span class="p">.</span><span class="n">noised</span><span class="p">:</span>
-        <span class="n">schedule_sampler</span> <span class="o">=</span> <span class="nf">create_named_schedule_sampler</span><span class="p">(</span>
+        <span class="n">schedule_sampler</span> <span class="o">=</span> <span class="n">create_named_schedule_sampler</span><span class="p">(</span>
             <span class="n">args</span><span class="p">.</span><span class="n">schedule_sampler</span><span class="p">,</span> <span class="n">diffusion</span><span class="p">)</span>
 
     <span class="c1"># create optimizer
-</span>    <span class="n">mp_trainer</span> <span class="o">=</span> <span class="nc">MixedPrecisionTrainer</span><span class="p">(</span>
+</span>    <span class="n">mp_trainer</span> <span class="o">=</span> <span class="n">MixedPrecisionTrainer</span><span class="p">(</span>
         <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">use_fp16</span><span class="o">=</span><span class="n">args</span><span class="p">.</span><span class="n">classifier_use_fp16</span><span class="p">,</span> <span class="n">initial_lg_loss_scale</span><span class="o">=</span><span class="mf">16.0</span><span class="p">)</span>
 
     <span class="c1"># create unet model? repeat from previous step
-</span>    <span class="n">model</span> <span class="o">=</span> <span class="nc">DDP</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">...)</span>
+</span>    <span class="n">model</span> <span class="o">=</span> <span class="n">DDP</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">...)</span>
 
     <span class="c1"># create data loader 
-</span>    <span class="n">data</span> <span class="o">=</span> <span class="nf">load_data</span><span class="p">(...)</span>
+</span>    <span class="n">data</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">(...)</span>
 
     <span class="c1"># create optimizer
-</span>    <span class="n">opt</span> <span class="o">=</span> <span class="nc">AdamW</span><span class="p">(</span><span class="n">mp_trainer</span><span class="p">.</span><span class="n">master_params</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="n">args</span><span class="p">.</span><span class="n">lr</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="n">args</span><span class="p">.</span><span class="n">weight_decay</span><span class="p">)</span>
+</span>    <span class="n">opt</span> <span class="o">=</span> <span class="n">AdamW</span><span class="p">(</span><span class="n">mp_trainer</span><span class="p">.</span><span class="n">master_params</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="n">args</span><span class="p">.</span><span class="n">lr</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="n">args</span><span class="p">.</span><span class="n">weight_decay</span><span class="p">)</span>
 
 
 </code></pre></div></div>

@@ -26,7 +26,7 @@
     <!-- Fonts & Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700%7CRoboto+Slab:100,300,400,500,700%7CMaterial+Icons">
 
     <!-- Code Syntax Highlighting -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
@@ -151,6 +151,7 @@
   <article class="post-content">
     
     <div id="table-of-contents">
+      
       <ul id="toc" class="section-nav">
 <li class="toc-entry toc-h2">
 <a href="#background">Background</a>
@@ -171,6 +172,7 @@
 </ul>
 </li>
 </ul>
+      
     </div>
     <hr>
     
@@ -240,46 +242,46 @@
 
 <h3 id="create-a-python-chatbot-with-ollama">Create a Python Chatbot with Ollama</h3>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">requests</span>
-<span class="kn">from</span> <span class="n">requests.exceptions</span> <span class="kn">import</span> <span class="nb">ConnectionError</span>
-<span class="kn">import</span> <span class="n">json</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">requests.exceptions</span> <span class="kn">import</span> <span class="nb">ConnectionError</span>
+<span class="kn">import</span> <span class="nn">json</span>
 
-<span class="k">def</span> <span class="nf">chat_with_ollama</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="sh">"</span><span class="s">mistral</span><span class="sh">"</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="sh">"</span><span class="s">http://localhost:11434/api/generate</span><span class="sh">"</span>  <span class="c1"># Changed back to default Ollama port
+<span class="k">def</span> <span class="nf">chat_with_ollama</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s">"mistral"</span><span class="p">):</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s">"http://localhost:11434/api/generate"</span>  <span class="c1"># Changed back to default Ollama port
 </span>    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="sh">"</span><span class="s">model</span><span class="sh">"</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span>
-        <span class="sh">"</span><span class="s">prompt</span><span class="sh">"</span><span class="p">:</span> <span class="n">prompt</span>
+        <span class="s">"model"</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span>
+        <span class="s">"prompt"</span><span class="p">:</span> <span class="n">prompt</span>
     <span class="p">}</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">response</span><span class="p">.</span><span class="n">ok</span><span class="p">:</span>
-            <span class="k">return</span> <span class="sa">f</span><span class="sh">"</span><span class="s">Error: API returned status code </span><span class="si">{</span><span class="n">response</span><span class="p">.</span><span class="n">status_code</span><span class="si">}</span><span class="sh">"</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s">"Error: API returned status code </span><span class="si">{</span><span class="n">response</span><span class="p">.</span><span class="n">status_code</span><span class="si">}</span><span class="s">"</span>
 
         <span class="c1"># Handle streaming response
-</span>        <span class="n">full_response</span> <span class="o">=</span> <span class="sh">""</span>
-        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">response</span><span class="p">.</span><span class="nf">iter_lines</span><span class="p">():</span>
+</span>        <span class="n">full_response</span> <span class="o">=</span> <span class="s">""</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">response</span><span class="p">.</span><span class="n">iter_lines</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">line</span><span class="p">:</span>
                 <span class="c1"># Decode the line and parse it as JSON
-</span>                <span class="n">json_response</span> <span class="o">=</span> <span class="n">json</span><span class="p">.</span><span class="nf">loads</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
-                <span class="k">if</span> <span class="sh">"</span><span class="s">response</span><span class="sh">"</span> <span class="ow">in</span> <span class="n">json_response</span><span class="p">:</span>
-                    <span class="n">full_response</span> <span class="o">+=</span> <span class="n">json_response</span><span class="p">[</span><span class="sh">"</span><span class="s">response</span><span class="sh">"</span><span class="p">]</span>
+</span>                <span class="n">json_response</span> <span class="o">=</span> <span class="n">json</span><span class="p">.</span><span class="n">loads</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s">"response"</span> <span class="ow">in</span> <span class="n">json_response</span><span class="p">:</span>
+                    <span class="n">full_response</span> <span class="o">+=</span> <span class="n">json_response</span><span class="p">[</span><span class="s">"response"</span><span class="p">]</span>
                 
         <span class="k">return</span> <span class="n">full_response</span>
     <span class="k">except</span> <span class="nb">ConnectionError</span><span class="p">:</span>
-        <span class="k">return</span> <span class="sh">"</span><span class="s">Error: Cannot connect to Ollama server. Please ensure it</span><span class="sh">'</span><span class="s">s running on port 11434.</span><span class="sh">"</span>
+        <span class="k">return</span> <span class="s">"Error: Cannot connect to Ollama server. Please ensure it's running on port 11434."</span>
     <span class="k">except</span> <span class="n">json</span><span class="p">.</span><span class="n">JSONDecodeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="sh">"</span><span class="s">Error: Invalid JSON response from server. Details: </span><span class="si">{</span><span class="nf">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="sh">"</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s">"Error: Invalid JSON response from server. Details: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s">"</span>
     <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="sh">"</span><span class="s">Error: </span><span class="si">{</span><span class="nf">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="sh">"</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s">"Error: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s">"</span>
 
 <span class="c1"># Chat loop
-</span><span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Chatbot (type </span><span class="sh">'</span><span class="s">exit</span><span class="sh">'</span><span class="s"> to quit):</span><span class="sh">"</span><span class="p">)</span>
+</span><span class="k">print</span><span class="p">(</span><span class="s">"Chatbot (type 'exit' to quit):"</span><span class="p">)</span>
 <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
-    <span class="n">user_input</span> <span class="o">=</span> <span class="nf">input</span><span class="p">(</span><span class="sh">"</span><span class="s">You: </span><span class="sh">"</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">user_input</span><span class="p">.</span><span class="nf">lower</span><span class="p">()</span> <span class="o">==</span> <span class="sh">"</span><span class="s">exit</span><span class="sh">"</span><span class="p">:</span>
+    <span class="n">user_input</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s">"You: "</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">user_input</span><span class="p">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">"exit"</span><span class="p">:</span>
         <span class="k">break</span>
-    <span class="n">response</span> <span class="o">=</span> <span class="nf">chat_with_ollama</span><span class="p">(</span><span class="n">user_input</span><span class="p">)</span>
-    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Bot: </span><span class="si">{</span><span class="n">response</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">chat_with_ollama</span><span class="p">(</span><span class="n">user_input</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"Bot: </span><span class="si">{</span><span class="n">response</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
 </code></pre></div></div>
 
 <p><strong>How it works:</strong></p>
@@ -369,41 +371,41 @@ For example, <strong>Mistral</strong> provides several useful scenarios to show 
 
 <p>In the following example, when presented with the customer inquiry, Mistral AI models correctly categorizes it as “country support”:</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">requests</span>
-<span class="kn">from</span> <span class="n">requests.exceptions</span> <span class="kn">import</span> <span class="nb">ConnectionError</span>
-<span class="kn">import</span> <span class="n">json</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">requests.exceptions</span> <span class="kn">import</span> <span class="nb">ConnectionError</span>
+<span class="kn">import</span> <span class="nn">json</span>
 
-<span class="k">def</span> <span class="nf">chat_with_ollama</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">system_prompt</span><span class="o">=</span><span class="sh">""</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="sh">"</span><span class="s">mistral</span><span class="sh">"</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="sh">"</span><span class="s">http://localhost:11434/api/generate</span><span class="sh">"</span>
+<span class="k">def</span> <span class="nf">chat_with_ollama</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">system_prompt</span><span class="o">=</span><span class="s">""</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s">"mistral"</span><span class="p">):</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s">"http://localhost:11434/api/generate"</span>
     <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="sh">"</span><span class="s">model</span><span class="sh">"</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span>
-        <span class="sh">"</span><span class="s">prompt</span><span class="sh">"</span><span class="p">:</span> <span class="n">prompt</span><span class="p">,</span>
-        <span class="sh">"</span><span class="s">system</span><span class="sh">"</span><span class="p">:</span> <span class="n">system_prompt</span>
+        <span class="s">"model"</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span>
+        <span class="s">"prompt"</span><span class="p">:</span> <span class="n">prompt</span><span class="p">,</span>
+        <span class="s">"system"</span><span class="p">:</span> <span class="n">system_prompt</span>
     <span class="p">}</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">response</span><span class="p">.</span><span class="n">ok</span><span class="p">:</span>
-            <span class="k">return</span> <span class="sa">f</span><span class="sh">"</span><span class="s">Error: API returned status code </span><span class="si">{</span><span class="n">response</span><span class="p">.</span><span class="n">status_code</span><span class="si">}</span><span class="sh">"</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s">"Error: API returned status code </span><span class="si">{</span><span class="n">response</span><span class="p">.</span><span class="n">status_code</span><span class="si">}</span><span class="s">"</span>
 
         <span class="c1"># Handle streaming response
-</span>        <span class="n">full_response</span> <span class="o">=</span> <span class="sh">""</span>
-        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">response</span><span class="p">.</span><span class="nf">iter_lines</span><span class="p">():</span>
+</span>        <span class="n">full_response</span> <span class="o">=</span> <span class="s">""</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">response</span><span class="p">.</span><span class="n">iter_lines</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">line</span><span class="p">:</span>
                 <span class="c1"># Decode the line and parse it as JSON
-</span>                <span class="n">json_response</span> <span class="o">=</span> <span class="n">json</span><span class="p">.</span><span class="nf">loads</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
-                <span class="k">if</span> <span class="sh">"</span><span class="s">response</span><span class="sh">"</span> <span class="ow">in</span> <span class="n">json_response</span><span class="p">:</span>
-                    <span class="n">full_response</span> <span class="o">+=</span> <span class="n">json_response</span><span class="p">[</span><span class="sh">"</span><span class="s">response</span><span class="sh">"</span><span class="p">]</span>
+</span>                <span class="n">json_response</span> <span class="o">=</span> <span class="n">json</span><span class="p">.</span><span class="n">loads</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s">"response"</span> <span class="ow">in</span> <span class="n">json_response</span><span class="p">:</span>
+                    <span class="n">full_response</span> <span class="o">+=</span> <span class="n">json_response</span><span class="p">[</span><span class="s">"response"</span><span class="p">]</span>
                 
         <span class="k">return</span> <span class="n">full_response</span>
     <span class="k">except</span> <span class="nb">ConnectionError</span><span class="p">:</span>
-        <span class="k">return</span> <span class="sh">"</span><span class="s">Error: Cannot connect to Ollama server. Please ensure it</span><span class="sh">'</span><span class="s">s running on port 11434.</span><span class="sh">"</span>
+        <span class="k">return</span> <span class="s">"Error: Cannot connect to Ollama server. Please ensure it's running on port 11434."</span>
     <span class="k">except</span> <span class="n">json</span><span class="p">.</span><span class="n">JSONDecodeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="sh">"</span><span class="s">Error: Invalid JSON response from server. Details: </span><span class="si">{</span><span class="nf">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="sh">"</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s">"Error: Invalid JSON response from server. Details: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s">"</span>
     <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="sh">"</span><span class="s">Error: </span><span class="si">{</span><span class="nf">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="sh">"</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s">"Error: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s">"</span>
 
 <span class="c1"># Initialize system prompt
-</span><span class="n">system_prompt</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">You are a bank customer service bot. Your task is to assess customer intent and categorize customer inquiry after &lt;&lt;&lt;&gt;&gt;&gt; into one of the following predefined categories:
+</span><span class="n">system_prompt</span> <span class="o">=</span> <span class="s">"""You are a bank customer service bot. Your task is to assess customer intent and categorize customer inquiry after &lt;&lt;&lt;&gt;&gt;&gt; into one of the following predefined categories:
 
 card arrival
 change pin
@@ -412,25 +414,25 @@ country support
 cancel transfer
 charge dispute
 
-If the text doesn</span><span class="sh">'</span><span class="s">t fit into any of the above categories, classify it as:
+If the text doesn't fit into any of the above categories, classify it as:
 customer service
 
-You will only respond with the category. Do not include the word </span><span class="sh">"</span><span class="s">Category</span><span class="sh">"</span><span class="s">. Do not provide explanations or notes.</span><span class="sh">"""</span>
+You will only respond with the category. Do not include the word "Category". Do not provide explanations or notes."""</span>
 
 <span class="c1"># Modified chat loop
-</span><span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Chatbot (type </span><span class="sh">'</span><span class="s">exit</span><span class="sh">'</span><span class="s"> to quit):</span><span class="sh">"</span><span class="p">)</span>
-<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">To change system prompt, type </span><span class="sh">'</span><span class="s">change_prompt</span><span class="sh">'"</span><span class="p">)</span>
+</span><span class="k">print</span><span class="p">(</span><span class="s">"Chatbot (type 'exit' to quit):"</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"To change system prompt, type 'change_prompt'"</span><span class="p">)</span>
 <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
-    <span class="n">user_input</span> <span class="o">=</span> <span class="nf">input</span><span class="p">(</span><span class="sh">"</span><span class="s">You: </span><span class="sh">"</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">user_input</span><span class="p">.</span><span class="nf">lower</span><span class="p">()</span> <span class="o">==</span> <span class="sh">"</span><span class="s">exit</span><span class="sh">"</span><span class="p">:</span>
+    <span class="n">user_input</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s">"You: "</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">user_input</span><span class="p">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">"exit"</span><span class="p">:</span>
         <span class="k">break</span>
-    <span class="k">elif</span> <span class="n">user_input</span><span class="p">.</span><span class="nf">lower</span><span class="p">()</span> <span class="o">==</span> <span class="sh">"</span><span class="s">change_prompt</span><span class="sh">"</span><span class="p">:</span>
-        <span class="n">system_prompt</span> <span class="o">=</span> <span class="nf">input</span><span class="p">(</span><span class="sh">"</span><span class="s">Enter new system prompt: </span><span class="sh">"</span><span class="p">)</span>
-        <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">System prompt updated!</span><span class="sh">"</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">user_input</span><span class="p">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">"change_prompt"</span><span class="p">:</span>
+        <span class="n">system_prompt</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s">"Enter new system prompt: "</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">"System prompt updated!"</span><span class="p">)</span>
         <span class="k">continue</span>
     
-    <span class="n">response</span> <span class="o">=</span> <span class="nf">chat_with_ollama</span><span class="p">(</span><span class="n">user_input</span><span class="p">,</span> <span class="n">system_prompt</span><span class="p">)</span>
-    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Bot: </span><span class="si">{</span><span class="n">response</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">chat_with_ollama</span><span class="p">(</span><span class="n">user_input</span><span class="p">,</span> <span class="n">system_prompt</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"Bot: </span><span class="si">{</span><span class="n">response</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
 </code></pre></div></div>
 
 <h4 id="openais-api-format">OpenAI’s API format</h4>
@@ -554,50 +556,50 @@ You will only respond with the category. Do not include the word </span><span cl
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
 <span class="c1"># Load the prompt file
-</span><span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">prompt_file</span><span class="p">,</span> <span class="sh">'</span><span class="s">r</span><span class="sh">'</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="sh">'</span><span class="s">utf-8</span><span class="sh">'</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
-    <span class="n">prompt</span> <span class="o">=</span> <span class="n">infile</span><span class="p">.</span><span class="nf">read</span><span class="p">()</span>
+</span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">prompt_file</span><span class="p">,</span> <span class="s">'r'</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s">'utf-8'</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
+    <span class="n">prompt</span> <span class="o">=</span> <span class="n">infile</span><span class="p">.</span><span class="n">read</span><span class="p">()</span>
 
 <span class="c1"># replace the placeholders in the prompt with the actual values
 </span>
-<span class="n">curr_prompt</span> <span class="o">=</span> <span class="n">prompt</span><span class="p">.</span><span class="nf">replace</span><span class="p">(</span><span class="sh">"</span><span class="s">&lt;&lt;problem&gt;&gt;</span><span class="sh">"</span><span class="p">,</span> <span class="n">question</span><span class="p">)</span>  
+<span class="n">curr_prompt</span> <span class="o">=</span> <span class="n">prompt</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span><span class="s">"&lt;&lt;problem&gt;&gt;"</span><span class="p">,</span> <span class="n">question</span><span class="p">)</span>  
 
-<span class="k">if</span> <span class="sh">'</span><span class="s">&lt;&lt;starter_code&gt;&gt;</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">prompt</span><span class="p">:</span>
-    <span class="n">starter_code</span> <span class="o">=</span> <span class="n">problem</span><span class="p">[</span><span class="sh">'</span><span class="s">starter_code</span><span class="sh">'</span><span class="p">]</span> 
-    <span class="n">curr_prompt</span> <span class="o">=</span> <span class="n">curr_prompt</span><span class="p">.</span><span class="nf">replace</span><span class="p">(</span><span class="sh">"</span><span class="s">&lt;&lt;starter_code&gt;&gt;</span><span class="sh">"</span><span class="p">,</span> <span class="n">starter_code</span><span class="p">)</span>
+<span class="k">if</span> <span class="s">'&lt;&lt;starter_code&gt;&gt;'</span> <span class="ow">in</span> <span class="n">prompt</span><span class="p">:</span>
+    <span class="n">starter_code</span> <span class="o">=</span> <span class="n">problem</span><span class="p">[</span><span class="s">'starter_code'</span><span class="p">]</span> 
+    <span class="n">curr_prompt</span> <span class="o">=</span> <span class="n">curr_prompt</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span><span class="s">"&lt;&lt;starter_code&gt;&gt;"</span><span class="p">,</span> <span class="n">starter_code</span><span class="p">)</span>
     
-<span class="k">if</span> <span class="sh">'</span><span class="s">&lt;&lt;starter_code_task&gt;&gt;</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">prompt</span><span class="p">:</span>
-    <span class="n">starter_code</span> <span class="o">=</span> <span class="n">problem</span><span class="p">[</span><span class="sh">'</span><span class="s">starter_code</span><span class="sh">'</span><span class="p">]</span> 
-    <span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">starter_code</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
-        <span class="n">starter_code_prompt</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="s">Notes:</span><span class="se">\n</span><span class="s">The final python function should begin with: </span><span class="se">\n</span><span class="s">```python</span><span class="se">\n</span><span class="si">{</span><span class="n">starter_code</span><span class="si">}</span><span class="se">\n</span><span class="s">```</span><span class="sh">"</span>
+<span class="k">if</span> <span class="s">'&lt;&lt;starter_code_task&gt;&gt;'</span> <span class="ow">in</span> <span class="n">prompt</span><span class="p">:</span>
+    <span class="n">starter_code</span> <span class="o">=</span> <span class="n">problem</span><span class="p">[</span><span class="s">'starter_code'</span><span class="p">]</span> 
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">starter_code</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+        <span class="n">starter_code_prompt</span> <span class="o">=</span> <span class="sa">f</span><span class="s">"Notes:</span><span class="se">\n</span><span class="s">The final python function should begin with: </span><span class="se">\n</span><span class="s">```python</span><span class="se">\n</span><span class="si">{</span><span class="n">starter_code</span><span class="si">}</span><span class="se">\n</span><span class="s">```"</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">starter_code_prompt</span> <span class="o">=</span> <span class="sh">''</span>
-    <span class="n">curr_prompt</span> <span class="o">=</span> <span class="n">curr_prompt</span><span class="p">.</span><span class="nf">replace</span><span class="p">(</span><span class="sh">"</span><span class="s">&lt;&lt;starter_code_task&gt;&gt;</span><span class="sh">"</span><span class="p">,</span> <span class="n">starter_code_prompt</span><span class="p">)</span>
+        <span class="n">starter_code_prompt</span> <span class="o">=</span> <span class="s">''</span>
+    <span class="n">curr_prompt</span> <span class="o">=</span> <span class="n">curr_prompt</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span><span class="s">"&lt;&lt;starter_code_task&gt;&gt;"</span><span class="p">,</span> <span class="n">starter_code_prompt</span><span class="p">)</span>
 
-<span class="k">if</span> <span class="sh">'</span><span class="s">&lt;&lt;question_guide&gt;&gt;</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">prompt</span><span class="p">:</span>
-    <span class="n">starter_code</span> <span class="o">=</span> <span class="n">problem</span><span class="p">[</span><span class="sh">'</span><span class="s">starter_code</span><span class="sh">'</span><span class="p">]</span> 
-    <span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">starter_code</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
-        <span class="n">question_guide</span> <span class="o">=</span> <span class="sh">'</span><span class="s">use the provided function signature</span><span class="sh">'</span>
+<span class="k">if</span> <span class="s">'&lt;&lt;question_guide&gt;&gt;'</span> <span class="ow">in</span> <span class="n">prompt</span><span class="p">:</span>
+    <span class="n">starter_code</span> <span class="o">=</span> <span class="n">problem</span><span class="p">[</span><span class="s">'starter_code'</span><span class="p">]</span> 
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">starter_code</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+        <span class="n">question_guide</span> <span class="o">=</span> <span class="s">'use the provided function signature'</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">question_guide</span> <span class="o">=</span> <span class="sh">'</span><span class="s">read from and write to standard IO</span><span class="sh">'</span>
-    <span class="n">curr_prompt</span> <span class="o">=</span> <span class="n">curr_prompt</span><span class="p">.</span><span class="nf">replace</span><span class="p">(</span><span class="sh">"</span><span class="s">&lt;&lt;question_guide&gt;&gt;</span><span class="sh">"</span><span class="p">,</span> <span class="n">question_guide</span><span class="p">)</span>    
+        <span class="n">question_guide</span> <span class="o">=</span> <span class="s">'read from and write to standard IO'</span>
+    <span class="n">curr_prompt</span> <span class="o">=</span> <span class="n">curr_prompt</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span><span class="s">"&lt;&lt;question_guide&gt;&gt;"</span><span class="p">,</span> <span class="n">question_guide</span><span class="p">)</span>    
 
-<span class="k">if</span> <span class="sh">'</span><span class="s">&lt;&lt;modules&gt;&gt;</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">curr_prompt</span><span class="p">:</span> 
+<span class="k">if</span> <span class="s">'&lt;&lt;modules&gt;&gt;'</span> <span class="ow">in</span> <span class="n">curr_prompt</span><span class="p">:</span> 
     <span class="k">if</span> <span class="n">problem_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">modules</span><span class="p">:</span> <span class="k">continue</span> 
-    <span class="n">curr_modules</span> <span class="o">=</span> <span class="nf">list</span><span class="p">(</span><span class="n">modules</span><span class="p">[</span><span class="n">problem_id</span><span class="p">])</span>
-    <span class="n">module_seq</span> <span class="o">=</span> <span class="sh">''</span>
+    <span class="n">curr_modules</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">modules</span><span class="p">[</span><span class="n">problem_id</span><span class="p">])</span>
+    <span class="n">module_seq</span> <span class="o">=</span> <span class="s">''</span>
     <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="n">curr_modules</span><span class="p">:</span> 
-        <span class="n">module_seq</span> <span class="o">+=</span> <span class="sh">"</span><span class="se">\n</span><span class="s">```module</span><span class="se">\n</span><span class="sh">"</span> <span class="o">+</span> <span class="n">module</span><span class="p">.</span><span class="nf">strip</span><span class="p">()</span> <span class="o">+</span> <span class="sh">"</span><span class="se">\n</span><span class="s">```</span><span class="se">\n</span><span class="sh">"</span>
-    <span class="n">curr_prompt</span> <span class="o">=</span> <span class="n">curr_prompt</span><span class="p">.</span><span class="nf">replace</span><span class="p">(</span><span class="sh">'</span><span class="s">&lt;&lt;modules&gt;&gt;</span><span class="sh">'</span><span class="p">,</span> <span class="n">module_seq</span><span class="p">)</span>
+        <span class="n">module_seq</span> <span class="o">+=</span> <span class="s">"</span><span class="se">\n</span><span class="s">```module</span><span class="se">\n</span><span class="s">"</span> <span class="o">+</span> <span class="n">module</span><span class="p">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">+</span> <span class="s">"</span><span class="se">\n</span><span class="s">```</span><span class="se">\n</span><span class="s">"</span>
+    <span class="n">curr_prompt</span> <span class="o">=</span> <span class="n">curr_prompt</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span><span class="s">'&lt;&lt;modules&gt;&gt;'</span><span class="p">,</span> <span class="n">module_seq</span><span class="p">)</span>
 
 <span class="c1"># Call the API
 </span>
-<span class="n">response</span> <span class="o">=</span> <span class="n">openai</span><span class="p">.</span><span class="n">ChatCompletion</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">openai</span><span class="p">.</span><span class="n">ChatCompletion</span><span class="p">.</span><span class="n">create</span><span class="p">(</span>
                   <span class="n">model</span><span class="o">=</span><span class="n">model_mapping</span><span class="p">[</span><span class="n">args</span><span class="p">.</span><span class="n">model</span><span class="p">],</span> 
                   <span class="n">messages</span><span class="o">=</span><span class="p">[</span>
-                        <span class="p">{</span><span class="sh">"</span><span class="s">role</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">system</span><span class="sh">"</span><span class="p">,</span> 
-                         <span class="sh">"</span><span class="s">content</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">You are a helpful AI assistant to help developers to solve challenging coding problems.</span><span class="sh">"</span><span class="p">},</span>
-                        <span class="p">{</span><span class="sh">"</span><span class="s">role</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">user</span><span class="sh">"</span><span class="p">,</span> 
-                         <span class="sh">"</span><span class="s">content</span><span class="sh">"</span><span class="p">:</span> <span class="n">curr_prompt</span><span class="p">}</span>
+                        <span class="p">{</span><span class="s">"role"</span><span class="p">:</span> <span class="s">"system"</span><span class="p">,</span> 
+                         <span class="s">"content"</span><span class="p">:</span> <span class="s">"You are a helpful AI assistant to help developers to solve challenging coding problems."</span><span class="p">},</span>
+                        <span class="p">{</span><span class="s">"role"</span><span class="p">:</span> <span class="s">"user"</span><span class="p">,</span> 
+                         <span class="s">"content"</span><span class="p">:</span> <span class="n">curr_prompt</span><span class="p">}</span>
                     <span class="p">],</span>
                   <span class="n">n</span><span class="o">=</span><span class="mi">5</span> <span class="k">if</span> <span class="n">args</span><span class="p">.</span><span class="n">num_gen_samples</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,</span>
 <span class="p">)</span>

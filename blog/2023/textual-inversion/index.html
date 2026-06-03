@@ -26,7 +26,7 @@
     <!-- Fonts & Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700%7CRoboto+Slab:100,300,400,500,700%7CMaterial+Icons">
 
     <!-- Code Syntax Highlighting -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
@@ -144,6 +144,7 @@
   <article class="post-content">
     
     <div id="table-of-contents">
+      
       <ul id="toc" class="section-nav">
 <li class="toc-entry toc-h2"><a href="#about-the-paper">About the paper</a></li>
 <li class="toc-entry toc-h2">
@@ -156,6 +157,7 @@
 </li>
 <li class="toc-entry toc-h2"><a href="#problem-of-textual-inversions-implementation">Problem of Textual Inversion’s implementation</a></li>
 </ul>
+      
     </div>
     <hr>
     
@@ -221,35 +223,35 @@ And then, we can just use the specific token to generate new images. For example
 Some examples of the templates are as follows:</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">imagenet_templates_small</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="sh">"</span><span class="s">a photo of a {}</span><span class="sh">"</span><span class="p">,</span>
-    <span class="sh">"</span><span class="s">a rendering of a {}</span><span class="sh">"</span><span class="p">,</span>
-    <span class="sh">"</span><span class="s">a cropped photo of the {}</span><span class="sh">"</span><span class="p">,</span>
-    <span class="sh">"</span><span class="s">the photo of a {}</span><span class="sh">"</span><span class="p">,</span>
+    <span class="s">"a photo of a {}"</span><span class="p">,</span>
+    <span class="s">"a rendering of a {}"</span><span class="p">,</span>
+    <span class="s">"a cropped photo of the {}"</span><span class="p">,</span>
+    <span class="s">"the photo of a {}"</span><span class="p">,</span>
 <span class="p">]</span>
 
 <span class="n">imagenet_style_templates_small</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="sh">"</span><span class="s">a painting in the style of {}</span><span class="sh">"</span><span class="p">,</span>
-    <span class="sh">"</span><span class="s">a rendering in the style of {}</span><span class="sh">"</span><span class="p">,</span>
-    <span class="sh">"</span><span class="s">a cropped painting in the style of {}</span><span class="sh">"</span><span class="p">,</span>
-    <span class="sh">"</span><span class="s">the painting in the style of {}</span><span class="sh">"</span><span class="p">,</span>
+    <span class="s">"a painting in the style of {}"</span><span class="p">,</span>
+    <span class="s">"a rendering in the style of {}"</span><span class="p">,</span>
+    <span class="s">"a cropped painting in the style of {}"</span><span class="p">,</span>
+    <span class="s">"the painting in the style of {}"</span><span class="p">,</span>
 <span class="p">]</span>
 </code></pre></div></div>
 
 <p>The <code class="language-plaintext highlighter-rouge">placeholder_token</code> will replace the <code class="language-plaintext highlighter-rouge">{}</code> in the templates. For example, if we set <code class="language-plaintext highlighter-rouge">placeholder_token</code> to <code class="language-plaintext highlighter-rouge">cat-toy</code> and <code class="language-plaintext highlighter-rouge">learnable_property</code> to <code class="language-plaintext highlighter-rouge">object</code>, the input prompt will be <code class="language-plaintext highlighter-rouge">a photo of a cat-toy</code>.
 The input prompt then will be tokenized by the tokenizer.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">self</span><span class="p">.</span><span class="n">templates</span> <span class="o">=</span> <span class="n">imagenet_style_templates_small</span> <span class="k">if</span> <span class="n">learnable_property</span> <span class="o">==</span> <span class="sh">"</span><span class="s">style</span><span class="sh">"</span> <span class="k">else</span> <span class="n">imagenet_templates_small</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="bp">self</span><span class="p">.</span><span class="n">templates</span> <span class="o">=</span> <span class="n">imagenet_style_templates_small</span> <span class="k">if</span> <span class="n">learnable_property</span> <span class="o">==</span> <span class="s">"style"</span> <span class="k">else</span> <span class="n">imagenet_templates_small</span>
 
-<span class="n">placeholder_string</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">placeholder_token</span>
+<span class="n">placeholder_string</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">placeholder_token</span>
 
-<span class="n">text</span> <span class="o">=</span> <span class="n">random</span><span class="p">.</span><span class="nf">choice</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">templates</span><span class="p">).</span><span class="nf">format</span><span class="p">(</span><span class="n">placeholder_string</span><span class="p">)</span>
+<span class="n">text</span> <span class="o">=</span> <span class="n">random</span><span class="p">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">templates</span><span class="p">).</span><span class="nb">format</span><span class="p">(</span><span class="n">placeholder_string</span><span class="p">)</span>
 
-<span class="n">example</span><span class="p">[</span><span class="sh">"</span><span class="s">input_ids</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">tokenizer</span><span class="p">(</span>
+<span class="n">example</span><span class="p">[</span><span class="s">"input_ids"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">tokenizer</span><span class="p">(</span>
     <span class="n">text</span><span class="p">,</span>
-    <span class="n">padding</span><span class="o">=</span><span class="sh">"</span><span class="s">max_length</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">padding</span><span class="o">=</span><span class="s">"max_length"</span><span class="p">,</span>
     <span class="n">truncation</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-    <span class="n">max_length</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">tokenizer</span><span class="p">.</span><span class="n">model_max_length</span><span class="p">,</span>
-    <span class="n">return_tensors</span><span class="o">=</span><span class="sh">"</span><span class="s">pt</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">max_length</span><span class="o">=</span><span class="bp">self</span><span class="p">.</span><span class="n">tokenizer</span><span class="p">.</span><span class="n">model_max_length</span><span class="p">,</span>
+    <span class="n">return_tensors</span><span class="o">=</span><span class="s">"pt"</span><span class="p">,</span>
 <span class="p">).</span><span class="n">input_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 </code></pre></div></div>
 
@@ -260,32 +262,32 @@ The input prompt then will be tokenized by the tokenizer.</p>
 <p>The <code class="language-plaintext highlighter-rouge">placeholder_token</code> (i.e., <code class="language-plaintext highlighter-rouge">&lt;cat-toy&gt;</code>) is converted to indexes by the tokenizer <a href="https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizer.convert_tokens_to_ids" rel="external nofollow noopener" target="_blank"><code class="language-plaintext highlighter-rouge">convert_tokens_to_ids</code></a> method. Basically, this method converts the a sequence of tokens (i.e., <code class="language-plaintext highlighter-rouge">&lt;cat-toy&gt;</code>) in a sequence of ids, using the vocabulary.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Convert the initializer_token, placeholder_token to ids
-</span><span class="n">token_ids</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">initializer_token</span><span class="p">,</span> <span class="n">add_special_tokens</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</span><span class="n">token_ids</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">.</span><span class="n">encode</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">initializer_token</span><span class="p">,</span> <span class="n">add_special_tokens</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
 <span class="c1"># Check if initializer_token is a single token or a sequence of tokens
-</span><span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">token_ids</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-    <span class="k">raise</span> <span class="nc">ValueError</span><span class="p">(</span><span class="sh">"</span><span class="s">The initializer token must be a single token.</span><span class="sh">"</span><span class="p">)</span>
+</span><span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">token_ids</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="nb">ValueError</span><span class="p">(</span><span class="s">"The initializer token must be a single token."</span><span class="p">)</span>
 
 <span class="n">initializer_token_id</span> <span class="o">=</span> <span class="n">token_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">placeholder_token_ids</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">.</span><span class="nf">convert_tokens_to_ids</span><span class="p">(</span><span class="n">placeholder_tokens</span><span class="p">)</span>
+<span class="n">placeholder_token_ids</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">.</span><span class="n">convert_tokens_to_ids</span><span class="p">(</span><span class="n">placeholder_tokens</span><span class="p">)</span>
 
 <span class="c1"># Resize the token embeddings as we are adding new special tokens to the tokenizer
-</span><span class="n">text_encoder</span><span class="p">.</span><span class="nf">resize_token_embeddings</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">))</span>
+</span><span class="n">text_encoder</span><span class="p">.</span><span class="n">resize_token_embeddings</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">))</span>
 
 <span class="c1"># Initialise the newly added placeholder token with the embeddings of the initializer token
-</span><span class="n">token_embeds</span> <span class="o">=</span> <span class="n">text_encoder</span><span class="p">.</span><span class="nf">get_input_embeddings</span><span class="p">().</span><span class="n">weight</span><span class="p">.</span><span class="n">data</span>
-<span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
+</span><span class="n">token_embeds</span> <span class="o">=</span> <span class="n">text_encoder</span><span class="p">.</span><span class="n">get_input_embeddings</span><span class="p">().</span><span class="n">weight</span><span class="p">.</span><span class="n">data</span>
+<span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">():</span>
     <span class="k">for</span> <span class="n">token_id</span> <span class="ow">in</span> <span class="n">placeholder_token_ids</span><span class="p">:</span>
-        <span class="n">token_embeds</span><span class="p">[</span><span class="n">token_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">token_embeds</span><span class="p">[</span><span class="n">initializer_token_id</span><span class="p">].</span><span class="nf">clone</span><span class="p">()</span>
+        <span class="n">token_embeds</span><span class="p">[</span><span class="n">token_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">token_embeds</span><span class="p">[</span><span class="n">initializer_token_id</span><span class="p">].</span><span class="n">clone</span><span class="p">()</span>
 </code></pre></div></div>
 
 <p>The <code class="language-plaintext highlighter-rouge">placeholder_token_ids</code> is then used to specify the position in the embedding matrix to be updated (corresponding to our specific token). In the end, the only thing we need to learn is the embedding matrix (actually only several specific rows in the embedding matrix, but the entire embedding matrix is small enough to store/save unlike the unet’ weights where it is much compacted using <a href="https://huggingface.co/blog/lora" rel="external nofollow noopener" target="_blank">LORA</a>). Later, we will learn how to use the learned embedding matrix to generate new images or upload to the hub.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Let's make sure we don't update any embedding weights besides the newly added token
-</span><span class="n">index_no_updates</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">ones</span><span class="p">((</span><span class="nf">len</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">),),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="p">.</span><span class="nb">bool</span><span class="p">)</span>
-<span class="n">index_no_updates</span><span class="p">[</span><span class="nf">min</span><span class="p">(</span><span class="n">placeholder_token_ids</span><span class="p">)</span> <span class="p">:</span> <span class="nf">max</span><span class="p">(</span><span class="n">placeholder_token_ids</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+</span><span class="n">index_no_updates</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">),),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="p">.</span><span class="nb">bool</span><span class="p">)</span>
+<span class="n">index_no_updates</span><span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">placeholder_token_ids</span><span class="p">)</span> <span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">placeholder_token_ids</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
 
-<span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
-    <span class="n">accelerator</span><span class="p">.</span><span class="nf">unwrap_model</span><span class="p">(</span><span class="n">text_encoder</span><span class="p">).</span><span class="nf">get_input_embeddings</span><span class="p">().</span><span class="n">weight</span><span class="p">[</span>
+<span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="n">accelerator</span><span class="p">.</span><span class="n">unwrap_model</span><span class="p">(</span><span class="n">text_encoder</span><span class="p">).</span><span class="n">get_input_embeddings</span><span class="p">().</span><span class="n">weight</span><span class="p">[</span>
         <span class="n">index_no_updates</span>
     <span class="p">]</span> <span class="o">=</span> <span class="n">orig_embeds_params</span><span class="p">[</span><span class="n">index_no_updates</span><span class="p">]</span>
 </code></pre></div></div>
@@ -295,14 +297,14 @@ The input prompt then will be tokenized by the tokenizer.</p>
 <p>In Dreambooth, there is an argument <code class="language-plaintext highlighter-rouge">instance_prompt</code> which is used as a neural prompt to associate with the given images. For example, the default value is <code class="language-plaintext highlighter-rouge">a photo of sks dog</code>, where <code class="language-plaintext highlighter-rouge">sks</code> is the unique identifier to specify the learned concept. The <code class="language-plaintext highlighter-rouge">instance_prompt</code> is then tokenized by the tokenizer and the token ids are used to specify the position in the embedding matrix to be updated (corresponding to the specific token).</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="c1"># In the DreamBoothDataset class
-</span>    <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">encoder_hidden_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="n">example</span><span class="p">[</span><span class="sh">"</span><span class="s">instance_prompt_ids</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">encoder_hidden_states</span>
+</span>    <span class="k">if</span> <span class="bp">self</span><span class="p">.</span><span class="n">encoder_hidden_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">example</span><span class="p">[</span><span class="s">"instance_prompt_ids"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">encoder_hidden_states</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">text_inputs</span> <span class="o">=</span> <span class="nf">tokenize_prompt</span><span class="p">(</span>
-            <span class="n">self</span><span class="p">.</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">instance_prompt</span><span class="p">,</span> <span class="n">tokenizer_max_length</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">tokenizer_max_length</span>
+        <span class="n">text_inputs</span> <span class="o">=</span> <span class="n">tokenize_prompt</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">.</span><span class="n">tokenizer</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">instance_prompt</span><span class="p">,</span> <span class="n">tokenizer_max_length</span><span class="o">=</span><span class="bp">self</span><span class="p">.</span><span class="n">tokenizer_max_length</span>
         <span class="p">)</span>
-        <span class="n">example</span><span class="p">[</span><span class="sh">"</span><span class="s">instance_prompt_ids</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">text_inputs</span><span class="p">.</span><span class="n">input_ids</span>
-        <span class="n">example</span><span class="p">[</span><span class="sh">"</span><span class="s">instance_attention_mask</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">text_inputs</span><span class="p">.</span><span class="n">attention_mask</span>
+        <span class="n">example</span><span class="p">[</span><span class="s">"instance_prompt_ids"</span><span class="p">]</span> <span class="o">=</span> <span class="n">text_inputs</span><span class="p">.</span><span class="n">input_ids</span>
+        <span class="n">example</span><span class="p">[</span><span class="s">"instance_attention_mask"</span><span class="p">]</span> <span class="o">=</span> <span class="n">text_inputs</span><span class="p">.</span><span class="n">attention_mask</span>
 </code></pre></div></div>
 
 <p>So the difference between the two projects is that:</p>
@@ -323,11 +325,11 @@ The input prompt then will be tokenized by the tokenizer.</p>
 <p>The below snippet of code is used to prevent updating the entire embedding matrix rather than the specific token - specified for the <code class="language-plaintext highlighter-rouge">placeholder_token</code> in the training process.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Let's make sure we don't update any embedding weights besides the newly added token
-</span><span class="n">index_no_updates</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">ones</span><span class="p">((</span><span class="nf">len</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">),),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="p">.</span><span class="nb">bool</span><span class="p">)</span>
-<span class="n">index_no_updates</span><span class="p">[</span><span class="nf">min</span><span class="p">(</span><span class="n">placeholder_token_ids</span><span class="p">)</span> <span class="p">:</span> <span class="nf">max</span><span class="p">(</span><span class="n">placeholder_token_ids</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+</span><span class="n">index_no_updates</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">),),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="p">.</span><span class="nb">bool</span><span class="p">)</span>
+<span class="n">index_no_updates</span><span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">placeholder_token_ids</span><span class="p">)</span> <span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">placeholder_token_ids</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
 
-<span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
-    <span class="n">accelerator</span><span class="p">.</span><span class="nf">unwrap_model</span><span class="p">(</span><span class="n">text_encoder</span><span class="p">).</span><span class="nf">get_input_embeddings</span><span class="p">().</span><span class="n">weight</span><span class="p">[</span>
+<span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="n">accelerator</span><span class="p">.</span><span class="n">unwrap_model</span><span class="p">(</span><span class="n">text_encoder</span><span class="p">).</span><span class="n">get_input_embeddings</span><span class="p">().</span><span class="n">weight</span><span class="p">[</span>
         <span class="n">index_no_updates</span>
     <span class="p">]</span> <span class="o">=</span> <span class="n">orig_embeds_params</span><span class="p">[</span><span class="n">index_no_updates</span><span class="p">]</span>
 </code></pre></div></div>

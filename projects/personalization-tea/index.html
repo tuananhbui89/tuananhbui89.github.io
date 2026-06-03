@@ -27,7 +27,7 @@
     <!-- Fonts & Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700%7CRoboto+Slab:100,300,400,500,700%7CMaterial+Icons">
 
     <!-- Code Syntax Highlighting -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
@@ -138,6 +138,7 @@ Tuan-Anh Bui<sup>1</sup>, Trang Vu<sup>1</sup>, Trung Le<sup>1</sup>, Junae Kim<
     <div class="col-sm mt-3 mt-md-0">
         <a href="https://github.com/tuananhbui89/Embedding-Adjustment" class="btn btn-primary" target="_blank" rel="external nofollow noopener">GitHub</a>
         <a href="https://arxiv.org/abs/2506.22685" class="btn btn-secondary" target="_blank" rel="external nofollow noopener">arXiv</a>
+        <a href="https://github.com/tuananhbui89/Embedding-Adjustment/blob/main/images/ICLR-2026-TEA.pptx.png" class="btn btn-success" target="_blank" rel="external nofollow noopener">Poster</a>
     </div>
 </div>
 </div>
@@ -156,7 +157,15 @@ Tuan-Anh Bui<sup>1</sup>, Trang Vu<sup>1</sup>, Trung Le<sup>1</sup>, Junae Kim<
       <li><a href="#embedding-adjustment">Embedding Adjustment</a></li>
     </ul>
   </li>
-  <li><a href="#surprising-impact-of-tea-on-anti-dreambooth">Surprising Impact of TEA on Anti-DreamBooth</a></li>
+  <li>
+<a href="#surprising-impact-of-tea-on-anti-dreambooth">Surprising Impact of TEA on Anti-DreamBooth</a>
+    <ul>
+      <li><a href="#negative-impact-of-generative-personalization">Negative Impact of Generative Personalization</a></li>
+      <li><a href="#anti-dreambooth---when-adversarial-learning-for-good">Anti-DreamBooth - When Adversarial Learning for Good</a></li>
+      <li><a href="#the-underlying-mechanism-of-anti-dreambooth">The underlying mechanism of Anti-DreamBooth</a></li>
+      <li><a href="#tea-on-anti-dreambooth">TEA on Anti-DreamBooth</a></li>
+    </ul>
+  </li>
   <li><a href="#experiments">Experiments</a></li>
   <li><a href="#citation">Citation</a></li>
   <li><a href="#references">References</a></li>
@@ -396,8 +405,107 @@ While the goal is to faithfully preserve the personalized concept and simultaneo
 
 <h2 id="surprising-impact-of-tea-on-anti-dreambooth">Surprising Impact of TEA on Anti-DreamBooth</h2>
 
+<p>Due to the space constraints in the paper, I could not include the complete picture of the following findings that I think are very interesting and worth sharing. So with the flexibility of this blog post, I will share the complete picture of the connection between SCP and Anti-DreamBooth and how TEA can be applied to partially reverse the Anti-DreamBooth effect and restore the protected concept.</p>
+
+<h3 id="negative-impact-of-generative-personalization">Negative Impact of Generative Personalization</h3>
+
+<p>While generative personalization shows a lot of potential impact when a person can obtain a personalized model for their own use with their imagine, just like in a “Dream” when they can generate whatever they want. However, there are also some negative impacts that malicious users (think like your ex or an unknown scammer) who can collect your personal images quite easily on social media platforms like Facebook, Instagram, etc. Then just like you, they can also use the same personalization method to create a personalized model for their own use with your personal images.</p>
+
+<p>Unlike your “Good Dream”, they can bring you “nightmare” by generating images that are not only not what you want, but also harmful to you or your loved ones. Below are the images that I attacks myself with DreamBooth on SDXL-1.0 model, with some tattoos on my face, but I think you understand what possible can go wrong with this.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/2025-personalization-tea/tea/tattoo-1-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/2025-personalization-tea/tea/tattoo-1-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/2025-personalization-tea/tea/tattoo-1-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/2025-personalization-tea/tea/tattoo-1.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/2025-personalization-tea/tea/tattoo-2-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/2025-personalization-tea/tea/tattoo-2-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/2025-personalization-tea/tea/tattoo-2-1400.webp"></source>
+    
+
+    <!-- Fallback to the original file -->
+    <img src="/assets/img/2025-personalization-tea/tea/tattoo-2.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+
+<h3 id="anti-dreambooth---when-adversarial-learning-for-good">Anti-DreamBooth - When Adversarial Learning for Good</h3>
+
+<p>Motivation of Anti-DreamBooth or Anti-Personalization frameworks is to prevent misuse of the generated images by malicious users. It can be done by adding a invisible mask to the user’s images before publishing them to the internet, expecting that malicious attackers cannot use the images to train a personalized model to generate harmful images (e.g., nude images) of the person.</p>
+
+<p>The principle of learning the invisible mask is a min-max game between the defender and the attacker, which is formulated as:</p>
+
+\[\begin{align}
+    \begin{split}
+        \delta^{*(i)} = &amp; \text{argmax}_{\delta^{(i)}} \mathcal{L}_{cond}(\theta^*, x^{(i)} + \delta^{(i)}), \forall i \in \{1,..,N_{db}\},\\
+        \text{s.t.} \quad &amp; \theta^*  = \text{argmin}_{\theta} \sum_{i=1}^{N_{db}} \mathcal{L}_{db}(\theta, x^{(i)} + \delta^{(i)}),\\
+        \text{and} \quad &amp; \Vert \delta^{(i)} \Vert_p \leq \eta \quad \forall i \in \{1,..,N_{db}\},
+    \end{split}
+\end{align}\]
+
+<p>where \(\theta^*\) is the model parameters, \(\mathcal{L}_{cond}\) is the conditional loss function, \(\mathcal{L}_{db}\) is the DreamBooth’s loss function, and \(\eta\) is the constraint on the magnitude of the perturbation.</p>
+
+<p>The conditional loss can be defined via reconstruction and prior losses:</p>
+
+\[\begin{equation}
+    \mathbb{E}_{\mathbf{x}, \mathbf{c}, \mathbf{\epsilon}, \mathbf{\epsilon}^{'},t} \left[ \underbrace{w_t \| \hat{\mathbf{x}}_\theta (\alpha_t \mathbf{x} + \sigma_t \mathbf{\epsilon}, \mathbf{c}) - \mathbf{x}\|_2^2}_{\mathcal{L}_{recon}}  + \lambda \underbrace{ w_{t^{'}} \| \hat{\mathbf{x}}_\theta(\alpha_{t^{'}} \mathbf{x}_\text{pr} + \sigma_{t^{'}} \mathbf{\epsilon}^{'}, \mathbf{c}_\text{pr}) - \mathbf{x}_\text{pr} \|_2^2}_{\mathcal{L}_{prior}} \right]
+\end{equation}\]
+
+<p><strong>A defender vs. attacker game played in two nested steps:</strong></p>
+
+<p>The <strong>inner problem</strong> (<code class="language-plaintext highlighter-rouge">argmin</code>) simulates the attacker: given your perturbed photos, the attacker trains a DreamBooth model as best they can — minimizing the training loss \(\mathcal{L}_{db}\) to learn your face as accurately as possible.</p>
+
+<p>The <strong>outer problem</strong> (<code class="language-plaintext highlighter-rouge">argmax</code>) is the defender’s move: design the perturbation \(\delta^*\) so that even the attacker’s best-trained model \(\theta^*\) suffers a high conditional loss \(\mathcal{L}_{cond}\) — meaning the model <em>fails</em> to generate realistic images of you.</p>
+
+<p>The <strong>constraint</strong> (\(\|\delta^{(i)}\|_p \leq \eta\)) keeps the perturbation imperceptibly small, so your photos still look completely normal to a human viewer.</p>
+
+<p>The conditional loss \(\mathcal{L}_{cond}\) itself has two components that the defender wants to maximize:</p>
+<ul>
+  <li>\(\mathcal{L}_{recon}\): measures how well the attacker’s model can <strong>reconstruct your face</strong> — a high value means it fails.</li>
+  <li>\(\mathcal{L}_{prior}\): measures how well the model preserves <strong>general image generation ability</strong> — included to keep the training realistic and stable.</li>
+</ul>
+
+<p>Together, maximizing both terms ensures the attacker’s fine-tuned model cannot reproduce your likeness, even after doing its best to learn from your photos.</p>
+
+<p>This is the textbook view. But does the adversarial mask actually work by preventing the model from learning the concept — or is there something more nuanced happening underneath?</p>
+
+<h3 id="the-underlying-mechanism-of-anti-dreambooth">The underlying mechanism of Anti-DreamBooth</h3>
+
+<p>While Anti-DreamBooth is empirically effective (as shown in the literature), its underlying mechanism is not as well understood as it may seem. Naively, one might assume the adversarial mask works by maximizing the DreamBooth training loss, thereby preventing the model from learning the protected concept \(V^*\). But is that actually what happens?</p>
+
 <p>We hypothesize that the adversarial learning process of Anti-DreamBooth actually amplifies the dominance of the personalized concept \(V^*\), but with good implications for user privacy, 
-by causing the prompt embedding \(\lfloor p, V^* \rfloor\) to drift even further from its original concept \(\lfloor p, c \rfloor\), resulting to distorted generations of the protected concept \(V^*\).</p>
+by causing the prompt embedding \(\lfloor p, V^* \rfloor\) to drift even further from its original concept \(\lfloor p, c \rfloor\), resulting in distorted generations of the protected concept \(V^*\).</p>
+
+<p>To verify this hypothesis, we conduct a controlled experiment. 
+Given a set of benign personal images \(\{ x_i \}_{i=1}^n\), we apply Anti-DreamBooth to produce masked images \(\{ \hat{x}_i \}_{i=1}^n\). 
+We then train DreamBooth models using mixtures of masked and benign images, with varying proportions \(p \in \{0, 0.2, 1.0\}\), 
+where \(p=0\) corresponds to standard DreamBooth, and \(p=1.0\) uses only masked data. 
+We then analyze the resulting prompt embeddings using the same prompt-embedding analysis described earlier. 
+As shown in the figure below, increasing \(p\) leads to greater embedding drift, 
+evident in the larger norm of \(\| \tau(\lfloor p, V^* \rfloor) - \tau(\lfloor p, c \rfloor) \|\)
+and the lower cosine similarity between \(\tau(\lfloor p, V^* \rfloor)\) and \(\tau(\lfloor p, c \rfloor)\) respectively. 
+This result confirms our hypothesis and provides an interesting perspective on why anti-personalization works.</p>
 
 <div class="row mt-3">
     <div class="col-sm mt-3 mt-md-0 text-center">
@@ -422,11 +530,11 @@ by causing the prompt embedding \(\lfloor p, V^* \rfloor\) to drift even further
     Semantic drift analysis of DreamBooth trained with Anti-DreamBooth adversarial masks.
 </div>
 
-<p>Surprisingly, when we apply TEA to DreamBooth models poisoned by Anti-DreamBooth, we observe a mitigation effect such that 
-the generated images by TEA are less distorted and more aligned with the to-be-protected concept \(V^*\) as shown in Figure below. 
-This surprising result reveals an intriguing false sense of security of Anti-DreamBooth, such that despite adversarial masking,<br>
-the poisoned personalized model still retains traces of the correct/to-be-protected concept \(V^*\), 
-which can be recovered partially with our TEA. To the best of our knowledge, this is the first work to uncover such a counter-intuitive vulnerability of Anti-DreamBooth.</p>
+<h3 id="tea-on-anti-dreambooth">TEA on Anti-DreamBooth</h3>
+
+<p>This finding naturally raises a question: if Anti-DreamBooth’s protection is rooted in amplified semantic drift — the same phenomenon TEA is designed to address — can TEA partially undo it?</p>
+
+<p>Surprisingly, when we apply TEA to DreamBooth models poisoned by Anti-DreamBooth, we observe exactly that: a mitigation effect where the generated images by TEA are less distorted and more aligned with the to-be-protected concept \(V^*\), as shown in the figure below.</p>
 
 <div class="row mt-3">
     <div class="col-sm mt-3 mt-md-0 text-center">
@@ -448,9 +556,13 @@ which can be recovered partially with our TEA. To the best of our knowledge, thi
     </div>
 </div>
 <div class="caption">
-    Effect of applying TEA to models poisoned by Anti-DreamBooth.
-    TEA is able to mitigate the corruption and recover less distorted generations of the protected concept, revealing a surprising weakness in Anti-DreamBooth.
+    <strong>Effect of applying TEA to models poisoned by Anti-DreamBooth.</strong>
+    <em>Column 1 (Benign baseline):</em> DreamBooth trained on <strong>clean images</strong> produces faithful, undistorted generations — <strong>no protection</strong> is applied.
+    <em>Column 2 (Protected baseline):</em> DreamBooth trained on <strong>adversarially masked images</strong> (Anti-DreamBooth) produces severely distorted outputs, confirming the <strong>protection effect</strong>.
+    <em>Columns 3–8 (TEA recovery):</em> Applying TEA with varying \rho to the <em>same</em> poisoned model progressively <strong>mitigates the corruption</strong> and recovers recognizable generations of the protected concept — revealing a <strong>surprising vulnerability</strong> of Anti-DreamBooth.
 </div>
+
+<p>This finding reveals an intriguing false sense of security in Anti-DreamBooth: despite adversarial masking, the poisoned personalized model still retains traces of the correct/to-be-protected concept \(V^*\), which can be partially recovered by TEA. To the best of our knowledge, this is the first work to uncover such a counter-intuitive vulnerability of Anti-DreamBooth.</p>
 
 <h2 id="experiments">Experiments</h2>
 
@@ -613,9 +725,9 @@ which can be recovered partially with our TEA. To the best of our knowledge, thi
 <p>If you find this work useful in your research, please consider citing our paper</p>
 
 <div class="language-bibtex highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">@article</span><span class="p">{</span><span class="nl">bui2025mitigating</span><span class="p">,</span>
-  <span class="na">title</span><span class="p">=</span><span class="s">{Mitigating Semantic Collapse in Generative Personalization with a Surprisingly Simple Test-Time Embedding Adjustment}</span><span class="p">,</span>
+  <span class="na">title</span><span class="p">=</span><span class="s">{Mitigating Semantic Collapse in Generative Personalization with Test-Time Embedding Adjustment}</span><span class="p">,</span>
   <span class="na">author</span><span class="p">=</span><span class="s">{Bui, Anh and Vu, Trang and Le, Trung and Kim, Junae and Abraham, Tamas and Omari, Rollin and Kaur, Amar and Phung, Dinh}</span><span class="p">,</span>
-  <span class="na">journal</span><span class="p">=</span><span class="s">{arXiv preprint arXiv:2506.22685}</span><span class="p">,</span>
+  <span class="na">journal</span><span class="p">=</span><span class="s">{The Fourteenth International Conference on Learning Representations (ICLR) 2026}</span><span class="p">,</span>
   <span class="na">year</span><span class="p">=</span><span class="s">{2025}</span>
 <span class="p">}</span>
 </code></pre></div></div>

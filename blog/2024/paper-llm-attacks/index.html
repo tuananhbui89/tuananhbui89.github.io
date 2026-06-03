@@ -26,7 +26,7 @@
     <!-- Fonts & Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700%7CRoboto+Slab:100,300,400,500,700%7CMaterial+Icons">
 
     <!-- Code Syntax Highlighting -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
@@ -149,6 +149,7 @@
   <article class="post-content">
     
     <div id="table-of-contents">
+      
       <ul id="toc" class="section-nav">
 <li class="toc-entry toc-h2"><a href="#about-the-paper">About the paper</a></li>
 <li class="toc-entry toc-h2"><a href="#method">Method</a></li>
@@ -167,6 +168,7 @@
 </ul>
 </li>
 </ul>
+      
     </div>
     <hr>
     
@@ -362,19 +364,19 @@
 
 <p>Code from the demo in the paper <a href="https://github.com/llm-attacks/llm-attacks/blob/main/demo.ipynb" rel="external nofollow noopener" target="_blank">link</a></p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">plotlosses</span> <span class="o">=</span> <span class="nc">PlotLosses</span><span class="p">()</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">plotlosses</span> <span class="o">=</span> <span class="n">PlotLosses</span><span class="p">()</span>
 
-<span class="n">not_allowed_tokens</span> <span class="o">=</span> <span class="bp">None</span> <span class="k">if</span> <span class="n">allow_non_ascii</span> <span class="k">else</span> <span class="nf">get_nonascii_toks</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">)</span> 
+<span class="n">not_allowed_tokens</span> <span class="o">=</span> <span class="bp">None</span> <span class="k">if</span> <span class="n">allow_non_ascii</span> <span class="k">else</span> <span class="n">get_nonascii_toks</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">)</span> 
 <span class="n">adv_suffix</span> <span class="o">=</span> <span class="n">adv_string_init</span>
 
-<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">num_steps</span><span class="p">):</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_steps</span><span class="p">):</span>
     
     <span class="c1"># Step 1. Encode user prompt (behavior + adv suffix) as tokens and return token ids.
-</span>    <span class="n">input_ids</span> <span class="o">=</span> <span class="n">suffix_manager</span><span class="p">.</span><span class="nf">get_input_ids</span><span class="p">(</span><span class="n">adv_string</span><span class="o">=</span><span class="n">adv_suffix</span><span class="p">)</span>
-    <span class="n">input_ids</span> <span class="o">=</span> <span class="n">input_ids</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</span>    <span class="n">input_ids</span> <span class="o">=</span> <span class="n">suffix_manager</span><span class="p">.</span><span class="n">get_input_ids</span><span class="p">(</span><span class="n">adv_string</span><span class="o">=</span><span class="n">adv_suffix</span><span class="p">)</span>
+    <span class="n">input_ids</span> <span class="o">=</span> <span class="n">input_ids</span><span class="p">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
     
     <span class="c1"># Step 2. Compute Coordinate Gradient
-</span>    <span class="n">coordinate_grad</span> <span class="o">=</span> <span class="nf">token_gradients</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> 
+</span>    <span class="n">coordinate_grad</span> <span class="o">=</span> <span class="n">token_gradients</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> 
                     <span class="n">input_ids</span><span class="p">,</span> 
                     <span class="n">suffix_manager</span><span class="p">.</span><span class="n">_control_slice</span><span class="p">,</span> 
                     <span class="n">suffix_manager</span><span class="p">.</span><span class="n">_target_slice</span><span class="p">,</span> 
@@ -382,13 +384,13 @@
     
     <span class="c1"># Step 3. Sample a batch of new tokens based on the coordinate gradient.
 </span>    <span class="c1"># Notice that we only need the one that minimizes the loss.
-</span>    <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
+</span>    <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">():</span>
         
         <span class="c1"># Step 3.1 Slice the input to locate the adversarial suffix.
-</span>        <span class="n">adv_suffix_tokens</span> <span class="o">=</span> <span class="n">input_ids</span><span class="p">[</span><span class="n">suffix_manager</span><span class="p">.</span><span class="n">_control_slice</span><span class="p">].</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</span>        <span class="n">adv_suffix_tokens</span> <span class="o">=</span> <span class="n">input_ids</span><span class="p">[</span><span class="n">suffix_manager</span><span class="p">.</span><span class="n">_control_slice</span><span class="p">].</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
         
         <span class="c1"># Step 3.2 Randomly sample a batch of replacements.
-</span>        <span class="n">new_adv_suffix_toks</span> <span class="o">=</span> <span class="nf">sample_control</span><span class="p">(</span><span class="n">adv_suffix_tokens</span><span class="p">,</span> 
+</span>        <span class="n">new_adv_suffix_toks</span> <span class="o">=</span> <span class="n">sample_control</span><span class="p">(</span><span class="n">adv_suffix_tokens</span><span class="p">,</span> 
                        <span class="n">coordinate_grad</span><span class="p">,</span> 
                        <span class="n">batch_size</span><span class="p">,</span> 
                        <span class="n">topk</span><span class="o">=</span><span class="n">topk</span><span class="p">,</span> 
@@ -399,13 +401,13 @@
 </span>        <span class="c1"># This step is necessary because tokenizers are not invertible
 </span>        <span class="c1"># so Encode(Decode(tokens)) may produce a different tokenization.
 </span>        <span class="c1"># We ensure the number of token remains to prevent the memory keeps growing and run into OOM.
-</span>        <span class="n">new_adv_suffix</span> <span class="o">=</span> <span class="nf">get_filtered_cands</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">,</span> 
+</span>        <span class="n">new_adv_suffix</span> <span class="o">=</span> <span class="n">get_filtered_cands</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">,</span> 
                                             <span class="n">new_adv_suffix_toks</span><span class="p">,</span> 
                                             <span class="n">filter_cand</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> 
                                             <span class="n">curr_control</span><span class="o">=</span><span class="n">adv_suffix</span><span class="p">)</span>
         
         <span class="c1"># Step 3.4 Compute loss on these candidates and take the argmin.
-</span>        <span class="n">logits</span><span class="p">,</span> <span class="n">ids</span> <span class="o">=</span> <span class="nf">get_logits</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> 
+</span>        <span class="n">logits</span><span class="p">,</span> <span class="n">ids</span> <span class="o">=</span> <span class="n">get_logits</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> 
                                  <span class="n">tokenizer</span><span class="o">=</span><span class="n">tokenizer</span><span class="p">,</span>
                                  <span class="n">input_ids</span><span class="o">=</span><span class="n">input_ids</span><span class="p">,</span>
                                  <span class="n">control_slice</span><span class="o">=</span><span class="n">suffix_manager</span><span class="p">.</span><span class="n">_control_slice</span><span class="p">,</span> 
@@ -413,27 +415,27 @@
                                  <span class="n">return_ids</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
                                  <span class="n">batch_size</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span> <span class="c1"># decrease this number if you run into OOM.
 </span>
-        <span class="n">losses</span> <span class="o">=</span> <span class="nf">target_loss</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">suffix_manager</span><span class="p">.</span><span class="n">_target_slice</span><span class="p">)</span>
+        <span class="n">losses</span> <span class="o">=</span> <span class="n">target_loss</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">suffix_manager</span><span class="p">.</span><span class="n">_target_slice</span><span class="p">)</span>
 
-        <span class="n">best_new_adv_suffix_id</span> <span class="o">=</span> <span class="n">losses</span><span class="p">.</span><span class="nf">argmin</span><span class="p">()</span>
+        <span class="n">best_new_adv_suffix_id</span> <span class="o">=</span> <span class="n">losses</span><span class="p">.</span><span class="n">argmin</span><span class="p">()</span>
         <span class="n">best_new_adv_suffix</span> <span class="o">=</span> <span class="n">new_adv_suffix</span><span class="p">[</span><span class="n">best_new_adv_suffix_id</span><span class="p">]</span>
 
         <span class="n">current_loss</span> <span class="o">=</span> <span class="n">losses</span><span class="p">[</span><span class="n">best_new_adv_suffix_id</span><span class="p">]</span>
 
         <span class="c1"># Update the running adv_suffix with the best candidate
 </span>        <span class="n">adv_suffix</span> <span class="o">=</span> <span class="n">best_new_adv_suffix</span>
-        <span class="n">is_success</span> <span class="o">=</span> <span class="nf">check_for_attack_success</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> 
+        <span class="n">is_success</span> <span class="o">=</span> <span class="n">check_for_attack_success</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> 
                                  <span class="n">tokenizer</span><span class="p">,</span>
-                                 <span class="n">suffix_manager</span><span class="p">.</span><span class="nf">get_input_ids</span><span class="p">(</span><span class="n">adv_string</span><span class="o">=</span><span class="n">adv_suffix</span><span class="p">).</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">),</span> 
+                                 <span class="n">suffix_manager</span><span class="p">.</span><span class="n">get_input_ids</span><span class="p">(</span><span class="n">adv_string</span><span class="o">=</span><span class="n">adv_suffix</span><span class="p">).</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">),</span> 
                                  <span class="n">suffix_manager</span><span class="p">.</span><span class="n">_assistant_role_slice</span><span class="p">,</span> 
                                  <span class="n">test_prefixes</span><span class="p">)</span>
         
 
     <span class="c1"># Create a dynamic plot for the loss.
-</span>    <span class="n">plotlosses</span><span class="p">.</span><span class="nf">update</span><span class="p">({</span><span class="sh">'</span><span class="s">Loss</span><span class="sh">'</span><span class="p">:</span> <span class="n">current_loss</span><span class="p">.</span><span class="nf">detach</span><span class="p">().</span><span class="nf">cpu</span><span class="p">().</span><span class="nf">numpy</span><span class="p">()})</span>
-    <span class="n">plotlosses</span><span class="p">.</span><span class="nf">send</span><span class="p">()</span> 
+</span>    <span class="n">plotlosses</span><span class="p">.</span><span class="n">update</span><span class="p">({</span><span class="s">'Loss'</span><span class="p">:</span> <span class="n">current_loss</span><span class="p">.</span><span class="n">detach</span><span class="p">().</span><span class="n">cpu</span><span class="p">().</span><span class="n">numpy</span><span class="p">()})</span>
+    <span class="n">plotlosses</span><span class="p">.</span><span class="n">send</span><span class="p">()</span> 
     
-    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="se">\n</span><span class="s">Passed:</span><span class="si">{</span><span class="n">is_success</span><span class="si">}</span><span class="se">\n</span><span class="s">Current Suffix:</span><span class="si">{</span><span class="n">best_new_adv_suffix</span><span class="si">}</span><span class="sh">"</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="sh">'</span><span class="se">\r</span><span class="sh">'</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"</span><span class="se">\n</span><span class="s">Passed:</span><span class="si">{</span><span class="n">is_success</span><span class="si">}</span><span class="se">\n</span><span class="s">Current Suffix:</span><span class="si">{</span><span class="n">best_new_adv_suffix</span><span class="si">}</span><span class="s">"</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s">'</span><span class="se">\r</span><span class="s">'</span><span class="p">)</span>
     
     <span class="c1"># Notice that for the purpose of demo we stop immediately if we pass the checker but you are free to
 </span>    <span class="c1"># comment this to keep the optimization running for longer (to get a lower loss). 
@@ -441,15 +443,15 @@
         <span class="k">break</span>
     
     <span class="c1"># (Optional) Clean up the cache.
-</span>    <span class="k">del</span> <span class="n">coordinate_grad</span><span class="p">,</span> <span class="n">adv_suffix_tokens</span> <span class="p">;</span> <span class="n">gc</span><span class="p">.</span><span class="nf">collect</span><span class="p">()</span>
-    <span class="n">torch</span><span class="p">.</span><span class="n">cuda</span><span class="p">.</span><span class="nf">empty_cache</span><span class="p">()</span>
+</span>    <span class="k">del</span> <span class="n">coordinate_grad</span><span class="p">,</span> <span class="n">adv_suffix_tokens</span> <span class="p">;</span> <span class="n">gc</span><span class="p">.</span><span class="n">collect</span><span class="p">()</span>
+    <span class="n">torch</span><span class="p">.</span><span class="n">cuda</span><span class="p">.</span><span class="n">empty_cache</span><span class="p">()</span>
 </code></pre></div></div>
 
 <h3 id="token-gradients">Token gradients</h3>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">token_gradients</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">input_ids</span><span class="p">,</span> <span class="n">input_slice</span><span class="p">,</span> <span class="n">target_slice</span><span class="p">,</span> <span class="n">loss_slice</span><span class="p">):</span>
 
-    <span class="sh">"""</span><span class="s">
+    <span class="s">"""
     Computes gradients of the loss with respect to the coordinates.
     
     Parameters
@@ -469,26 +471,26 @@
     -------
     torch.Tensor
         The gradients of each token in the input_slice with respect to the loss.
-    </span><span class="sh">"""</span>
+    """</span>
 
-    <span class="n">embed_weights</span> <span class="o">=</span> <span class="nf">get_embedding_matrix</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-    <span class="n">one_hot</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">zeros</span><span class="p">(</span>
+    <span class="n">embed_weights</span> <span class="o">=</span> <span class="n">get_embedding_matrix</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">one_hot</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">zeros</span><span class="p">(</span>
         <span class="n">input_ids</span><span class="p">[</span><span class="n">input_slice</span><span class="p">].</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
         <span class="n">embed_weights</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
         <span class="n">device</span><span class="o">=</span><span class="n">model</span><span class="p">.</span><span class="n">device</span><span class="p">,</span>
         <span class="n">dtype</span><span class="o">=</span><span class="n">embed_weights</span><span class="p">.</span><span class="n">dtype</span>
     <span class="p">)</span>
-    <span class="n">one_hot</span><span class="p">.</span><span class="nf">scatter_</span><span class="p">(</span>
+    <span class="n">one_hot</span><span class="p">.</span><span class="n">scatter_</span><span class="p">(</span>
         <span class="mi">1</span><span class="p">,</span> 
-        <span class="n">input_ids</span><span class="p">[</span><span class="n">input_slice</span><span class="p">].</span><span class="nf">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
-        <span class="n">torch</span><span class="p">.</span><span class="nf">ones</span><span class="p">(</span><span class="n">one_hot</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">model</span><span class="p">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">embed_weights</span><span class="p">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">input_ids</span><span class="p">[</span><span class="n">input_slice</span><span class="p">].</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">torch</span><span class="p">.</span><span class="n">ones</span><span class="p">(</span><span class="n">one_hot</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">model</span><span class="p">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">embed_weights</span><span class="p">.</span><span class="n">dtype</span><span class="p">)</span>
     <span class="p">)</span>
-    <span class="n">one_hot</span><span class="p">.</span><span class="nf">requires_grad_</span><span class="p">()</span>
-    <span class="n">input_embeds</span> <span class="o">=</span> <span class="p">(</span><span class="n">one_hot</span> <span class="o">@</span> <span class="n">embed_weights</span><span class="p">).</span><span class="nf">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">one_hot</span><span class="p">.</span><span class="n">requires_grad_</span><span class="p">()</span>
+    <span class="n">input_embeds</span> <span class="o">=</span> <span class="p">(</span><span class="n">one_hot</span> <span class="o">@</span> <span class="n">embed_weights</span><span class="p">).</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
     
     <span class="c1"># now stitch it together with the rest of the embeddings
-</span>    <span class="n">embeds</span> <span class="o">=</span> <span class="nf">get_embeddings</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">input_ids</span><span class="p">.</span><span class="nf">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)).</span><span class="nf">detach</span><span class="p">()</span>
-    <span class="n">full_embeds</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">cat</span><span class="p">(</span>
+</span>    <span class="n">embeds</span> <span class="o">=</span> <span class="n">get_embeddings</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">input_ids</span><span class="p">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)).</span><span class="n">detach</span><span class="p">()</span>
+    <span class="n">full_embeds</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">cat</span><span class="p">(</span>
         <span class="p">[</span>
             <span class="n">embeds</span><span class="p">[:,:</span><span class="n">input_slice</span><span class="p">.</span><span class="n">start</span><span class="p">,:],</span> 
             <span class="n">input_embeds</span><span class="p">,</span> 
@@ -496,13 +498,13 @@
         <span class="p">],</span> 
         <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     
-    <span class="n">logits</span> <span class="o">=</span> <span class="nf">model</span><span class="p">(</span><span class="n">inputs_embeds</span><span class="o">=</span><span class="n">full_embeds</span><span class="p">).</span><span class="n">logits</span>
+    <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">inputs_embeds</span><span class="o">=</span><span class="n">full_embeds</span><span class="p">).</span><span class="n">logits</span>
     <span class="n">targets</span> <span class="o">=</span> <span class="n">input_ids</span><span class="p">[</span><span class="n">target_slice</span><span class="p">]</span>
-    <span class="n">loss</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">CrossEntropyLoss</span><span class="p">()(</span><span class="n">logits</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">loss_slice</span><span class="p">,:],</span> <span class="n">targets</span><span class="p">)</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="n">CrossEntropyLoss</span><span class="p">()(</span><span class="n">logits</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">loss_slice</span><span class="p">,:],</span> <span class="n">targets</span><span class="p">)</span>
     
-    <span class="n">loss</span><span class="p">.</span><span class="nf">backward</span><span class="p">()</span>
+    <span class="n">loss</span><span class="p">.</span><span class="n">backward</span><span class="p">()</span>
     
-    <span class="k">return</span> <span class="n">one_hot</span><span class="p">.</span><span class="n">grad</span><span class="p">.</span><span class="nf">clone</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">one_hot</span><span class="p">.</span><span class="n">grad</span><span class="p">.</span><span class="n">clone</span><span class="p">()</span>
 </code></pre></div></div>
 
     </div>

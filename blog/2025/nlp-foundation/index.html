@@ -26,7 +26,7 @@
     <!-- Fonts & Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700%7CRoboto+Slab:100,300,400,500,700%7CMaterial+Icons">
 
     <!-- Code Syntax Highlighting -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
@@ -149,6 +149,7 @@
   <article class="post-content">
     
     <div id="table-of-contents">
+      
       <ul id="toc" class="section-nav">
 <li class="toc-entry toc-h2">
 <a href="#nlp-foundations">NLP Foundations</a>
@@ -304,6 +305,7 @@
 <li class="toc-entry toc-h2"><a href="#rag">RAG</a></li>
 <li class="toc-entry toc-h2"><a href="#references">References</a></li>
 </ul>
+      
     </div>
     <hr>
     
@@ -1180,16 +1182,16 @@ $$ -->
 
 <p>The criterion prompt for coherence in the paper looked like this:</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">g_eval_criteria</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">g_eval_criteria</span> <span class="o">=</span> <span class="s">"""
 Coherence (1-5) - the collective quality of all sentences. We align this dimension with
-the DUC quality question of structure and coherence whereby </span><span class="sh">"</span><span class="s">the summary should be
+the DUC quality question of structure and coherence whereby "the summary should be
 well-structured and well-organized. The summary should not just be a heap of related information, but should build from sentence to sentence to a coherent body of information about a topic.
-</span><span class="sh">"""</span>
+"""</span>
 </code></pre></div></div>
 
 <p>Which resulted in this final evaluation prompt after evaluation steps were generated from the above criterion</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">g_eval_prompt_template</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">g_eval_prompt_template</span> <span class="o">=</span> <span class="s">"""
 You will be given one summary written for a news article.
 Your task is to rate the summary on one metric.
 Please make sure you read and understand these instructions carefully. Please keep this
@@ -1197,8 +1199,8 @@ document open while reviewing, and refer to it as needed.
 
 Evaluation Criteria:
 Coherence (1-5) - the collective quality of all sentences. We align this dimension with
-the DUC quality question of structure and coherence whereby </span><span class="sh">"</span><span class="s">the summary should be
-well-structured and well-organized. The summary should not just be a heap of related information, but should build from sentence to sentence to a coherent body of information about a topic.</span><span class="sh">"</span><span class="s">
+the DUC quality question of structure and coherence whereby "the summary should be
+well-structured and well-organized. The summary should not just be a heap of related information, but should build from sentence to sentence to a coherent body of information about a topic."
 
 Evaluation Steps:
 1. Read the news article carefully and identify the main topic and key points.
@@ -1215,7 +1217,7 @@ Summary:
 
 Evaluation Form (scores ONLY):
 - Coherence:
-</span><span class="sh">"""</span>
+"""</span>
 </code></pre></div></div>
 
 <p><strong>Judging via the LLM-judge</strong></p>
@@ -1228,12 +1230,12 @@ Evaluation Form (scores ONLY):
 
 <p>By breaking down the judgment process and weighting according to confidence, G-Eval aims to improve consistency, fine-grained discrimination, and robustness compared to naive single-pass LLM scoring.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">deepeval.metrics</span> <span class="kn">import</span> <span class="n">GEval</span>
-<span class="kn">from</span> <span class="n">deepeval.test_case</span> <span class="kn">import</span> <span class="n">LLMTestCaseParams</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">deepeval.metrics</span> <span class="kn">import</span> <span class="n">GEval</span>
+<span class="kn">from</span> <span class="nn">deepeval.test_case</span> <span class="kn">import</span> <span class="n">LLMTestCaseParams</span>
 
-<span class="n">correctness_metric</span> <span class="o">=</span> <span class="nc">GEval</span><span class="p">(</span>
-    <span class="n">name</span><span class="o">=</span><span class="sh">"</span><span class="s">Correctness</span><span class="sh">"</span><span class="p">,</span>
-    <span class="n">criteria</span><span class="o">=</span><span class="sh">"</span><span class="s">Determine whether the actual output is factually correct based on the expected output.</span><span class="sh">"</span><span class="p">,</span>
+<span class="n">correctness_metric</span> <span class="o">=</span> <span class="n">GEval</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s">"Correctness"</span><span class="p">,</span>
+    <span class="n">criteria</span><span class="o">=</span><span class="s">"Determine whether the actual output is factually correct based on the expected output."</span><span class="p">,</span>
     <span class="n">evaluation_params</span><span class="o">=</span><span class="p">[</span><span class="n">LLMTestCaseParams</span><span class="p">.</span><span class="n">ACTUAL_OUTPUT</span><span class="p">,</span> <span class="n">LLMTestCaseParams</span><span class="p">.</span><span class="n">EXPECTED_OUTPUT</span><span class="p">],</span>
 <span class="p">)</span>
 </code></pre></div></div>
@@ -1263,10 +1265,10 @@ The choice of tokenizer significantly impacts the performance of the model and t
 <strong>WordPiece</strong>: A tokenization algorithm similar to BPE that uses a greedy algorithm to iteratively merge the most frequent subword units in a corpus of text. Used in BERT models.</li>
 </ul>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">transformers</span> <span class="kn">import</span> <span class="n">AutoTokenizer</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">AutoTokenizer</span>
 
-<span class="n">tokenizer</span> <span class="o">=</span> <span class="n">AutoTokenizer</span><span class="p">.</span><span class="nf">from_pretrained</span><span class="p">(</span><span class="sh">"</span><span class="s">gpt2</span><span class="sh">"</span><span class="p">)</span>
-<span class="nf">print</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">.</span><span class="nf">tokenize</span><span class="p">(</span><span class="sh">"</span><span class="s">biodegradability</span><span class="sh">"</span><span class="p">))</span>  
+<span class="n">tokenizer</span> <span class="o">=</span> <span class="n">AutoTokenizer</span><span class="p">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s">"gpt2"</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">tokenizer</span><span class="p">.</span><span class="n">tokenize</span><span class="p">(</span><span class="s">"biodegradability"</span><span class="p">))</span>  
 <span class="c1"># ['bio', 'degrad', 'ability']
 </span></code></pre></div></div>
 
@@ -1338,35 +1340,35 @@ The choice of tokenizer significantly impacts the performance of the model and t
 <p>Residual connections and layer normalization stabilize training and help preserve information flow.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">TransformerBlock</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">):</span>
-        <span class="nf">super</span><span class="p">().</span><span class="nf">__init__</span><span class="p">()</span>
-        <span class="n">self</span><span class="p">.</span><span class="n">attention</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">MultiheadAttention</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">)</span>
-        <span class="n">self</span><span class="p">.</span><span class="n">feed_forward</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Sequential</span><span class="p">(</span>
-            <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">,</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">embed_dim</span><span class="p">),</span>
-            <span class="n">nn</span><span class="p">.</span><span class="nc">ReLU</span><span class="p">(),</span>
-            <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">embed_dim</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">().</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">attention</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="n">MultiheadAttention</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">feed_forward</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">nn</span><span class="p">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">,</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">embed_dim</span><span class="p">),</span>
+            <span class="n">nn</span><span class="p">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="p">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">embed_dim</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="n">self</span><span class="p">.</span><span class="n">layer_norm1</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">LayerNorm</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">)</span>
-        <span class="n">self</span><span class="p">.</span><span class="n">layer_norm2</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">LayerNorm</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">layer_norm1</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">layer_norm2</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="n">attn_output</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">attention</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">layer_norm1</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">attn_output</span><span class="p">)</span>
-        <span class="n">ff_output</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">feed_forward</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">layer_norm2</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">ff_output</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">attn_output</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">attention</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">layer_norm1</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">attn_output</span><span class="p">)</span>
+        <span class="n">ff_output</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">feed_forward</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">.</span><span class="n">layer_norm2</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">ff_output</span><span class="p">)</span>
 </code></pre></div></div>
 
 <p><strong>Tokenization</strong>
 Before text can be processed, it must be tokenized into smaller units (tokens) such as words or subwords. These tokens are mapped to embeddings—high-dimensional vectors that capture semantic meaning and provide input to the transformer.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">transformers</span> <span class="kn">import</span> <span class="n">AutoTokenizer</span><span class="p">,</span> <span class="n">AutoModel</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">AutoTokenizer</span><span class="p">,</span> <span class="n">AutoModel</span>
 
-<span class="n">tokenizer</span> <span class="o">=</span> <span class="n">AutoTokenizer</span><span class="p">.</span><span class="nf">from_pretrained</span><span class="p">(</span><span class="sh">"</span><span class="s">bert-base-uncased</span><span class="sh">"</span><span class="p">)</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">AutoModel</span><span class="p">.</span><span class="nf">from_pretrained</span><span class="p">(</span><span class="sh">"</span><span class="s">bert-base-uncased</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">tokenizer</span> <span class="o">=</span> <span class="n">AutoTokenizer</span><span class="p">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s">"bert-base-uncased"</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">AutoModel</span><span class="p">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s">"bert-base-uncased"</span><span class="p">)</span>
 
-<span class="n">text</span> <span class="o">=</span> <span class="sh">"</span><span class="s">Hello, how are you?</span><span class="sh">"</span>
-<span class="n">inputs</span> <span class="o">=</span> <span class="nf">tokenizer</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="sh">"</span><span class="s">pt</span><span class="sh">"</span><span class="p">)</span>
-<span class="n">outputs</span> <span class="o">=</span> <span class="nf">model</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
+<span class="n">text</span> <span class="o">=</span> <span class="s">"Hello, how are you?"</span>
+<span class="n">inputs</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s">"pt"</span><span class="p">)</span>
+<span class="n">outputs</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="o">**</span><span class="n">inputs</span><span class="p">)</span>
 <span class="n">embeddings</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">.</span><span class="n">last_hidden_state</span>
 </code></pre></div></div>
 
@@ -1477,36 +1479,36 @@ Before text can be processed, it must be tokenized into smaller units (tokens) s
 
 <p>In the table, Z is the input sequence (i.e., the query), C is the context sequence that should be attended to. In the self-attention, Z and C are the same.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">torch</span>
-<span class="kn">import</span> <span class="n">torch.nn</span> <span class="k">as</span> <span class="n">nn</span>
-<span class="kn">import</span> <span class="n">torch.nn.functional</span> <span class="k">as</span> <span class="n">F</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="n">nn</span>
+<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="n">F</span>
 
 <span class="k">class</span> <span class="nc">CrossAttention</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
-        <span class="sh">"""</span><span class="s">
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">,</span> <span class="n">num_heads</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+        <span class="s">"""
         Cross-Attention module.
         Args:
             embed_dim (int): Dimension of the input embeddings.
             num_heads (int): Number of attention heads.
             dropout (float): Dropout probability.
-        </span><span class="sh">"""</span>
-        <span class="nf">super</span><span class="p">(</span><span class="n">CrossAttention</span><span class="p">,</span> <span class="n">self</span><span class="p">).</span><span class="nf">__init__</span><span class="p">()</span>
-        <span class="n">self</span><span class="p">.</span><span class="n">embed_dim</span> <span class="o">=</span> <span class="n">embed_dim</span>
-        <span class="n">self</span><span class="p">.</span><span class="n">num_heads</span> <span class="o">=</span> <span class="n">num_heads</span>
-        <span class="n">self</span><span class="p">.</span><span class="n">head_dim</span> <span class="o">=</span> <span class="n">embed_dim</span> <span class="o">//</span> <span class="n">num_heads</span>
-        <span class="k">assert</span> <span class="n">self</span><span class="p">.</span><span class="n">head_dim</span> <span class="o">*</span> <span class="n">num_heads</span> <span class="o">==</span> <span class="n">embed_dim</span><span class="p">,</span> <span class="sh">"</span><span class="s">embed_dim must be divisible by num_heads</span><span class="sh">"</span>
+        """</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CrossAttention</span><span class="p">,</span> <span class="bp">self</span><span class="p">).</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">embed_dim</span> <span class="o">=</span> <span class="n">embed_dim</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">num_heads</span> <span class="o">=</span> <span class="n">num_heads</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">head_dim</span> <span class="o">=</span> <span class="n">embed_dim</span> <span class="o">//</span> <span class="n">num_heads</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="p">.</span><span class="n">head_dim</span> <span class="o">*</span> <span class="n">num_heads</span> <span class="o">==</span> <span class="n">embed_dim</span><span class="p">,</span> <span class="s">"embed_dim must be divisible by num_heads"</span>
         
         <span class="c1"># Query, Key, and Value linear projections
-</span>        <span class="n">self</span><span class="p">.</span><span class="n">query_proj</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">)</span>
-        <span class="n">self</span><span class="p">.</span><span class="n">key_proj</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">)</span>
-        <span class="n">self</span><span class="p">.</span><span class="n">value_proj</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">)</span>
+</span>        <span class="bp">self</span><span class="p">.</span><span class="n">query_proj</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">key_proj</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">value_proj</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">)</span>
         
         <span class="c1"># Output projection
-</span>        <span class="n">self</span><span class="p">.</span><span class="n">out_proj</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">)</span>
-        <span class="n">self</span><span class="p">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Dropout</span><span class="p">(</span><span class="n">dropout</span><span class="p">)</span>
+</span>        <span class="bp">self</span><span class="p">.</span><span class="n">out_proj</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dropout</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="sh">"""</span><span class="s">
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="s">"""
         Forward pass for cross-attention.
         Args:
             query (torch.Tensor): Query tensor of shape (batch_size, query_len, embed_dim).
@@ -1516,30 +1518,30 @@ Before text can be processed, it must be tokenized into smaller units (tokens) s
                                             Used to mask out invalid positions.
         Returns:
             torch.Tensor: Output tensor of shape (batch_size, query_len, embed_dim).
-        </span><span class="sh">"""</span>
-        <span class="n">batch_size</span><span class="p">,</span> <span class="n">query_len</span><span class="p">,</span> <span class="n">embed_dim</span> <span class="o">=</span> <span class="n">query</span><span class="p">.</span><span class="nf">size</span><span class="p">()</span>
-        <span class="n">key_len</span> <span class="o">=</span> <span class="n">key</span><span class="p">.</span><span class="nf">size</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        """</span>
+        <span class="n">batch_size</span><span class="p">,</span> <span class="n">query_len</span><span class="p">,</span> <span class="n">embed_dim</span> <span class="o">=</span> <span class="n">query</span><span class="p">.</span><span class="n">size</span><span class="p">()</span>
+        <span class="n">key_len</span> <span class="o">=</span> <span class="n">key</span><span class="p">.</span><span class="n">size</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="c1"># Project query, key, and value
-</span>        <span class="n">Q</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">query_proj</span><span class="p">(</span><span class="n">query</span><span class="p">).</span><span class="nf">view</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">query_len</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">num_heads</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">head_dim</span><span class="p">).</span><span class="nf">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># (batch_size, num_heads, query_len, head_dim)
-</span>        <span class="n">K</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">key_proj</span><span class="p">(</span><span class="n">key</span><span class="p">).</span><span class="nf">view</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">key_len</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">num_heads</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">head_dim</span><span class="p">).</span><span class="nf">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>        <span class="c1"># (batch_size, num_heads, key_len, head_dim)
-</span>        <span class="n">V</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">value_proj</span><span class="p">(</span><span class="n">value</span><span class="p">).</span><span class="nf">view</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">key_len</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">num_heads</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">head_dim</span><span class="p">).</span><span class="nf">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>    <span class="c1"># (batch_size, num_heads, key_len, head_dim)
+</span>        <span class="n">Q</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">query_proj</span><span class="p">(</span><span class="n">query</span><span class="p">).</span><span class="n">view</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">query_len</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">num_heads</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">head_dim</span><span class="p">).</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># (batch_size, num_heads, query_len, head_dim)
+</span>        <span class="n">K</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">key_proj</span><span class="p">(</span><span class="n">key</span><span class="p">).</span><span class="n">view</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">key_len</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">num_heads</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">head_dim</span><span class="p">).</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>        <span class="c1"># (batch_size, num_heads, key_len, head_dim)
+</span>        <span class="n">V</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">value_proj</span><span class="p">(</span><span class="n">value</span><span class="p">).</span><span class="n">view</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">key_len</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">num_heads</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">head_dim</span><span class="p">).</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>    <span class="c1"># (batch_size, num_heads, key_len, head_dim)
 </span>
         <span class="c1"># Compute scaled dot-product attention
-</span>        <span class="n">scores</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">matmul</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">K</span><span class="p">.</span><span class="nf">transpose</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">head_dim</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span>  <span class="c1"># (batch_size, num_heads, query_len, key_len)
+</span>        <span class="n">scores</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">K</span><span class="p">.</span><span class="n">transpose</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">head_dim</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span>  <span class="c1"># (batch_size, num_heads, query_len, key_len)
 </span>        
         <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">scores</span> <span class="o">=</span> <span class="n">scores</span><span class="p">.</span><span class="nf">masked_fill</span><span class="p">(</span><span class="n">mask</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="nf">float</span><span class="p">(</span><span class="sh">'</span><span class="s">-inf</span><span class="sh">'</span><span class="p">))</span>  <span class="c1"># Apply mask
+            <span class="n">scores</span> <span class="o">=</span> <span class="n">scores</span><span class="p">.</span><span class="n">masked_fill</span><span class="p">(</span><span class="n">mask</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s">'-inf'</span><span class="p">))</span>  <span class="c1"># Apply mask
 </span>        
-        <span class="n">attn_weights</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="nf">softmax</span><span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># (batch_size, num_heads, query_len, key_len)
-</span>        <span class="n">attn_weights</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">dropout</span><span class="p">(</span><span class="n">attn_weights</span><span class="p">)</span>
+        <span class="n">attn_weights</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># (batch_size, num_heads, query_len, key_len)
+</span>        <span class="n">attn_weights</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">dropout</span><span class="p">(</span><span class="n">attn_weights</span><span class="p">)</span>
 
         <span class="c1"># Weighted sum of values
-</span>        <span class="n">attn_output</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">matmul</span><span class="p">(</span><span class="n">attn_weights</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>  <span class="c1"># (batch_size, num_heads, query_len, head_dim)
-</span>        <span class="n">attn_output</span> <span class="o">=</span> <span class="n">attn_output</span><span class="p">.</span><span class="nf">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">).</span><span class="nf">contiguous</span><span class="p">().</span><span class="nf">view</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">query_len</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">)</span>  <span class="c1"># (batch_size, query_len, embed_dim)
+</span>        <span class="n">attn_output</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">attn_weights</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>  <span class="c1"># (batch_size, num_heads, query_len, head_dim)
+</span>        <span class="n">attn_output</span> <span class="o">=</span> <span class="n">attn_output</span><span class="p">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">).</span><span class="n">contiguous</span><span class="p">().</span><span class="n">view</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">query_len</span><span class="p">,</span> <span class="n">embed_dim</span><span class="p">)</span>  <span class="c1"># (batch_size, query_len, embed_dim)
 </span>
         <span class="c1"># Final output projection
-</span>        <span class="n">output</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">out_proj</span><span class="p">(</span><span class="n">attn_output</span><span class="p">)</span>  <span class="c1"># (batch_size, query_len, embed_dim)
+</span>        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">out_proj</span><span class="p">(</span><span class="n">attn_output</span><span class="p">)</span>  <span class="c1"># (batch_size, query_len, embed_dim)
 </span>        <span class="k">return</span> <span class="n">output</span>
 </code></pre></div></div>
 
@@ -1562,14 +1564,14 @@ Without this positional information, the model would lose important context abou
 <p>To address this, transformers use <strong>positional embeddings</strong>, which are added to the token embeddings to provide the model with the positional information. The positional embeddings are learned during training and are added to the token embeddings to provide the model with the positional information.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">PositionalEncoding</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">d_model</span><span class="p">,</span> <span class="n">max_len</span><span class="o">=</span><span class="mi">5000</span><span class="p">):</span>
-        <span class="nf">super</span><span class="p">(</span><span class="n">PositionalEncoding</span><span class="p">,</span> <span class="n">self</span><span class="p">).</span><span class="nf">__init__</span><span class="p">()</span>
-        <span class="n">pe</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">zeros</span><span class="p">(</span><span class="n">max_len</span><span class="p">,</span> <span class="n">d_model</span><span class="p">)</span>
-        <span class="n">position</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_len</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="p">.</span><span class="nb">float</span><span class="p">).</span><span class="nf">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">div_term</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">exp</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">d_model</span><span class="p">,</span> <span class="mi">2</span><span class="p">).</span><span class="nf">float</span><span class="p">()</span> <span class="o">*</span> <span class="o">-</span><span class="p">(</span><span class="n">math</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="mf">10000.0</span><span class="p">)</span> <span class="o">/</span> <span class="n">d_model</span><span class="p">))</span>
-        <span class="n">pe</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sin</span><span class="p">(</span><span class="n">position</span> <span class="o">*</span> <span class="n">div_term</span><span class="p">)</span>
-        <span class="n">pe</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">cos</span><span class="p">(</span><span class="n">position</span> <span class="o">*</span> <span class="n">div_term</span><span class="p">)</span>
-        <span class="n">self</span><span class="p">.</span><span class="n">pe</span> <span class="o">=</span> <span class="n">pe</span><span class="p">.</span><span class="nf">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d_model</span><span class="p">,</span> <span class="n">max_len</span><span class="o">=</span><span class="mi">5000</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PositionalEncoding</span><span class="p">,</span> <span class="bp">self</span><span class="p">).</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="n">pe</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">max_len</span><span class="p">,</span> <span class="n">d_model</span><span class="p">)</span>
+        <span class="n">position</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_len</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="p">.</span><span class="nb">float</span><span class="p">).</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">div_term</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">exp</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">d_model</span><span class="p">,</span> <span class="mi">2</span><span class="p">).</span><span class="nb">float</span><span class="p">()</span> <span class="o">*</span> <span class="o">-</span><span class="p">(</span><span class="n">math</span><span class="p">.</span><span class="n">log</span><span class="p">(</span><span class="mf">10000.0</span><span class="p">)</span> <span class="o">/</span> <span class="n">d_model</span><span class="p">))</span>
+        <span class="n">pe</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">sin</span><span class="p">(</span><span class="n">position</span> <span class="o">*</span> <span class="n">div_term</span><span class="p">)</span>
+        <span class="n">pe</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">cos</span><span class="p">(</span><span class="n">position</span> <span class="o">*</span> <span class="n">div_term</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">pe</span> <span class="o">=</span> <span class="n">pe</span><span class="p">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 </code></pre></div></div>
 
 <p>The positional embeddings are added to the token embeddings to provide the model with the positional information.</p>
@@ -2235,19 +2237,19 @@ A:
 
 <p><strong>Generate Multiple Outputs</strong>: Generate multiple outputs by sampling multiple times from the model using the same prompt. For example:</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">openai</span>
-<span class="n">prompt</span> <span class="o">=</span> <span class="sh">"</span><span class="s">Explain the significance of photosynthesis in plants.</span><span class="sh">"</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">openai</span>
+<span class="n">prompt</span> <span class="o">=</span> <span class="s">"Explain the significance of photosynthesis in plants."</span>
 <span class="n">responses</span> <span class="o">=</span> <span class="p">[]</span>
 
-<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>  <span class="c1"># Generate 10 outputs
-</span>    <span class="n">response</span> <span class="o">=</span> <span class="n">openai</span><span class="p">.</span><span class="n">Completion</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span>
-        <span class="n">engine</span><span class="o">=</span><span class="sh">"</span><span class="s">text-davinci-003</span><span class="sh">"</span><span class="p">,</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>  <span class="c1"># Generate 10 outputs
+</span>    <span class="n">response</span> <span class="o">=</span> <span class="n">openai</span><span class="p">.</span><span class="n">Completion</span><span class="p">.</span><span class="n">create</span><span class="p">(</span>
+        <span class="n">engine</span><span class="o">=</span><span class="s">"text-davinci-003"</span><span class="p">,</span>
         <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
         <span class="n">max_tokens</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span>
         <span class="n">temperature</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
         <span class="n">n</span><span class="o">=</span><span class="mi">1</span>  <span class="c1"># Single output per call
 </span>    <span class="p">)</span>
-    <span class="n">responses</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">response</span><span class="p">.</span><span class="n">choices</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">text</span><span class="p">.</span><span class="nf">strip</span><span class="p">())</span>
+    <span class="n">responses</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">response</span><span class="p">.</span><span class="n">choices</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">text</span><span class="p">.</span><span class="n">strip</span><span class="p">())</span>
 </code></pre></div></div>
 
 <p><strong>Question: How to aggregate and analyze outputs?</strong></p>
@@ -2356,11 +2358,11 @@ Prompt 4: Complete Sections
 <p>Examples (from ToT repos: <a href="https://github.com/princeton-nlp/tree-of-thought-llm/blob/master/src/tot/prompts/text.py" rel="external nofollow noopener" target="_blank">https://github.com/princeton-nlp/tree-of-thought-llm/blob/master/src/tot/prompts/</a>).
 You can also find more examples in this blog post <a href="https://learnprompting.org/docs/advanced/decomposition/tree_of_thoughts" rel="external nofollow noopener" target="_blank">https://learnprompting.org/docs/advanced/decomposition/tree_of_thoughts</a>.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">standard_prompt</span> <span class="o">=</span> <span class="sh">'''</span><span class="s">
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">standard_prompt</span> <span class="o">=</span> <span class="s">'''
 Write a coherent passage of 4 short paragraphs. The end sentence of each paragraph must be: {input}
-</span><span class="sh">'''</span>
+'''</span>
 
-<span class="n">cot_prompt</span> <span class="o">=</span> <span class="sh">'''</span><span class="s">
+<span class="n">cot_prompt</span> <span class="o">=</span> <span class="s">'''
 Write a coherent passage of 4 short paragraphs. The end sentence of each paragraph must be: {input}
 
 Make a plan then write. Your output should be of the following format:
@@ -2370,17 +2372,17 @@ Your plan here.
 
 Passage:
 Your passage here.
-</span><span class="sh">'''</span>
+'''</span>
 
 
-<span class="n">vote_prompt</span> <span class="o">=</span> <span class="sh">'''</span><span class="s">Given an instruction and several choices, decide which choice is most promising. Analyze each choice in detail, then conclude in the last line </span><span class="sh">"</span><span class="s">The best choice is {s}</span><span class="sh">"</span><span class="s">, where s the integer id of the choice.
-</span><span class="sh">'''</span>
+<span class="n">vote_prompt</span> <span class="o">=</span> <span class="s">'''Given an instruction and several choices, decide which choice is most promising. Analyze each choice in detail, then conclude in the last line "The best choice is {s}", where s the integer id of the choice.
+'''</span>
 
-<span class="n">compare_prompt</span> <span class="o">=</span> <span class="sh">'''</span><span class="s">Briefly analyze the coherency of the following two passages. Conclude in the last line </span><span class="sh">"</span><span class="s">The more coherent passage is 1</span><span class="sh">"</span><span class="s">, </span><span class="sh">"</span><span class="s">The more coherent passage is 2</span><span class="sh">"</span><span class="s">, or </span><span class="sh">"</span><span class="s">The two passages are similarly coherent</span><span class="sh">"</span><span class="s">.
-</span><span class="sh">'''</span>
+<span class="n">compare_prompt</span> <span class="o">=</span> <span class="s">'''Briefly analyze the coherency of the following two passages. Conclude in the last line "The more coherent passage is 1", "The more coherent passage is 2", or "The two passages are similarly coherent".
+'''</span>
 
-<span class="n">score_prompt</span> <span class="o">=</span> <span class="sh">'''</span><span class="s">Analyze the following passage, then at the last line conclude </span><span class="sh">"</span><span class="s">Thus the coherency score is {s}</span><span class="sh">"</span><span class="s">, where s is an integer from 1 to 10.
-</span><span class="sh">'''</span>
+<span class="n">score_prompt</span> <span class="o">=</span> <span class="s">'''Analyze the following passage, then at the last line conclude "Thus the coherency score is {s}", where s is an integer from 1 to 10.
+'''</span>
 </code></pre></div></div>
 
 <h3 id="mixture-of-reasoning-experts">Mixture of Reasoning Experts</h3>
@@ -2425,62 +2427,62 @@ Your passage here.
 However, there are some tools that can help you create a prompt, providing you several common templates.
 For example</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">langchain_core.prompts</span> <span class="kn">import</span> <span class="n">PipelinePromptTemplate</span><span class="p">,</span> <span class="n">PromptTemplate</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">langchain_core.prompts</span> <span class="kn">import</span> <span class="n">PipelinePromptTemplate</span><span class="p">,</span> <span class="n">PromptTemplate</span>
 
-<span class="n">full_template</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">{introduction}
+<span class="n">full_template</span> <span class="o">=</span> <span class="s">"""{introduction}
 
 {example}
 
-{start}</span><span class="sh">"""</span>
-<span class="n">full_prompt</span> <span class="o">=</span> <span class="n">PromptTemplate</span><span class="p">.</span><span class="nf">from_template</span><span class="p">(</span><span class="n">full_template</span><span class="p">)</span>
+{start}"""</span>
+<span class="n">full_prompt</span> <span class="o">=</span> <span class="n">PromptTemplate</span><span class="p">.</span><span class="n">from_template</span><span class="p">(</span><span class="n">full_template</span><span class="p">)</span>
 
-<span class="n">introduction_template</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">You are impersonating {person}.</span><span class="sh">"""</span>
-<span class="n">introduction_prompt</span> <span class="o">=</span> <span class="n">PromptTemplate</span><span class="p">.</span><span class="nf">from_template</span><span class="p">(</span><span class="n">introduction_template</span><span class="p">)</span>
+<span class="n">introduction_template</span> <span class="o">=</span> <span class="s">"""You are impersonating {person}."""</span>
+<span class="n">introduction_prompt</span> <span class="o">=</span> <span class="n">PromptTemplate</span><span class="p">.</span><span class="n">from_template</span><span class="p">(</span><span class="n">introduction_template</span><span class="p">)</span>
 
-<span class="n">example_template</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">Here</span><span class="sh">'</span><span class="s">s an example of an interaction:
+<span class="n">example_template</span> <span class="o">=</span> <span class="s">"""Here's an example of an interaction:
 
 Q: {example_q}
-A: {example_a}</span><span class="sh">"""</span>
-<span class="n">example_prompt</span> <span class="o">=</span> <span class="n">PromptTemplate</span><span class="p">.</span><span class="nf">from_template</span><span class="p">(</span><span class="n">example_template</span><span class="p">)</span>
+A: {example_a}"""</span>
+<span class="n">example_prompt</span> <span class="o">=</span> <span class="n">PromptTemplate</span><span class="p">.</span><span class="n">from_template</span><span class="p">(</span><span class="n">example_template</span><span class="p">)</span>
 
-<span class="n">start_template</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">Now, do this for real!
+<span class="n">start_template</span> <span class="o">=</span> <span class="s">"""Now, do this for real!
 
 Q: {input}
-A:</span><span class="sh">"""</span>
-<span class="n">start_prompt</span> <span class="o">=</span> <span class="n">PromptTemplate</span><span class="p">.</span><span class="nf">from_template</span><span class="p">(</span><span class="n">start_template</span><span class="p">)</span>
+A:"""</span>
+<span class="n">start_prompt</span> <span class="o">=</span> <span class="n">PromptTemplate</span><span class="p">.</span><span class="n">from_template</span><span class="p">(</span><span class="n">start_template</span><span class="p">)</span>
 
 <span class="n">input_prompts</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="p">(</span><span class="sh">"</span><span class="s">introduction</span><span class="sh">"</span><span class="p">,</span> <span class="n">introduction_prompt</span><span class="p">),</span>
-    <span class="p">(</span><span class="sh">"</span><span class="s">example</span><span class="sh">"</span><span class="p">,</span> <span class="n">example_prompt</span><span class="p">),</span>
-    <span class="p">(</span><span class="sh">"</span><span class="s">start</span><span class="sh">"</span><span class="p">,</span> <span class="n">start_prompt</span><span class="p">),</span>
+    <span class="p">(</span><span class="s">"introduction"</span><span class="p">,</span> <span class="n">introduction_prompt</span><span class="p">),</span>
+    <span class="p">(</span><span class="s">"example"</span><span class="p">,</span> <span class="n">example_prompt</span><span class="p">),</span>
+    <span class="p">(</span><span class="s">"start"</span><span class="p">,</span> <span class="n">start_prompt</span><span class="p">),</span>
 <span class="p">]</span>
-<span class="n">pipeline_prompt</span> <span class="o">=</span> <span class="nc">PipelinePromptTemplate</span><span class="p">(</span>
+<span class="n">pipeline_prompt</span> <span class="o">=</span> <span class="n">PipelinePromptTemplate</span><span class="p">(</span>
     <span class="n">final_prompt</span><span class="o">=</span><span class="n">full_prompt</span><span class="p">,</span> <span class="n">pipeline_prompts</span><span class="o">=</span><span class="n">input_prompts</span>
 <span class="p">)</span>
 
 <span class="n">pipeline_prompt</span><span class="p">.</span><span class="n">input_variables</span>
 </code></pre></div></div>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">print</span><span class="p">(</span>
-    <span class="n">pipeline_prompt</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span>
-        <span class="n">person</span><span class="o">=</span><span class="sh">"</span><span class="s">Elon Musk</span><span class="sh">"</span><span class="p">,</span>
-        <span class="n">example_q</span><span class="o">=</span><span class="sh">"</span><span class="s">What</span><span class="sh">'</span><span class="s">s your favorite car?</span><span class="sh">"</span><span class="p">,</span>
-        <span class="n">example_a</span><span class="o">=</span><span class="sh">"</span><span class="s">Tesla</span><span class="sh">"</span><span class="p">,</span>
-        <span class="nb">input</span><span class="o">=</span><span class="sh">"</span><span class="s">What</span><span class="sh">'</span><span class="s">s your favorite social media site?</span><span class="sh">"</span><span class="p">,</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">print</span><span class="p">(</span>
+    <span class="n">pipeline_prompt</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span>
+        <span class="n">person</span><span class="o">=</span><span class="s">"Elon Musk"</span><span class="p">,</span>
+        <span class="n">example_q</span><span class="o">=</span><span class="s">"What's your favorite car?"</span><span class="p">,</span>
+        <span class="n">example_a</span><span class="o">=</span><span class="s">"Tesla"</span><span class="p">,</span>
+        <span class="nb">input</span><span class="o">=</span><span class="s">"What's your favorite social media site?"</span><span class="p">,</span>
     <span class="p">)</span>
 <span class="p">)</span>
 </code></pre></div></div>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">You</span> <span class="n">are</span> <span class="n">impersonating</span> <span class="n">Elon</span> <span class="n">Musk</span><span class="p">.</span>
 
-<span class="n">Here</span><span class="sh">'</span><span class="s">s an example of an interaction:
+<span class="n">Here</span><span class="s">'s an example of an interaction:
 
-Q: What</span><span class="sh">'</span><span class="n">s</span> <span class="n">your</span> <span class="n">favorite</span> <span class="n">car</span><span class="err">?</span>
+Q: What'</span><span class="n">s</span> <span class="n">your</span> <span class="n">favorite</span> <span class="n">car</span><span class="err">?</span>
 <span class="n">A</span><span class="p">:</span> <span class="n">Tesla</span>
 
 <span class="n">Now</span><span class="p">,</span> <span class="n">do</span> <span class="n">this</span> <span class="k">for</span> <span class="n">real</span><span class="err">!</span>
 
-<span class="n">Q</span><span class="p">:</span> <span class="n">What</span><span class="sh">'</span><span class="s">s your favorite social media site?
+<span class="n">Q</span><span class="p">:</span> <span class="n">What</span><span class="s">'s your favorite social media site?
 A:
 </span></code></pre></div></div>
 
@@ -2503,11 +2505,11 @@ A:
 
 <p>Example:</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">langchain.prompts</span> <span class="kn">import</span> <span class="n">PromptTemplate</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">langchain.prompts</span> <span class="kn">import</span> <span class="n">PromptTemplate</span>
 
-<span class="n">template</span> <span class="o">=</span> <span class="sh">"</span><span class="s">Translate the following text to French: {text}</span><span class="sh">"</span>
-<span class="n">prompt</span> <span class="o">=</span> <span class="nc">PromptTemplate</span><span class="p">(</span><span class="n">input_variables</span><span class="o">=</span><span class="p">[</span><span class="sh">"</span><span class="s">text</span><span class="sh">"</span><span class="p">],</span> <span class="n">template</span><span class="o">=</span><span class="n">template</span><span class="p">)</span>
-<span class="nf">print</span><span class="p">(</span><span class="n">prompt</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="sh">"</span><span class="s">Hello, how are you?</span><span class="sh">"</span><span class="p">))</span>
+<span class="n">template</span> <span class="o">=</span> <span class="s">"Translate the following text to French: {text}"</span>
+<span class="n">prompt</span> <span class="o">=</span> <span class="n">PromptTemplate</span><span class="p">(</span><span class="n">input_variables</span><span class="o">=</span><span class="p">[</span><span class="s">"text"</span><span class="p">],</span> <span class="n">template</span><span class="o">=</span><span class="n">template</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">prompt</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s">"Hello, how are you?"</span><span class="p">))</span>
 </code></pre></div></div>
 
 <h4 id="chains">Chains</h4>
@@ -2531,15 +2533,15 @@ A:
 
 <p>Example:</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">langchain.chains</span> <span class="kn">import</span> <span class="n">LLMChain</span>
-<span class="kn">from</span> <span class="n">langchain.prompts</span> <span class="kn">import</span> <span class="n">PromptTemplate</span>
-<span class="kn">from</span> <span class="n">langchain.llms</span> <span class="kn">import</span> <span class="n">OpenAI</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">langchain.chains</span> <span class="kn">import</span> <span class="n">LLMChain</span>
+<span class="kn">from</span> <span class="nn">langchain.prompts</span> <span class="kn">import</span> <span class="n">PromptTemplate</span>
+<span class="kn">from</span> <span class="nn">langchain.llms</span> <span class="kn">import</span> <span class="n">OpenAI</span>
 
-<span class="n">llm</span> <span class="o">=</span> <span class="nc">OpenAI</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="sh">"</span><span class="s">gpt-3.5-turbo</span><span class="sh">"</span><span class="p">)</span>
-<span class="n">prompt</span> <span class="o">=</span> <span class="nc">PromptTemplate</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="sh">"</span><span class="s">What is a good name for a company that makes {product}?</span><span class="sh">"</span><span class="p">,</span> <span class="n">input_variables</span><span class="o">=</span><span class="p">[</span><span class="sh">"</span><span class="s">product</span><span class="sh">"</span><span class="p">])</span>
-<span class="n">chain</span> <span class="o">=</span> <span class="nc">LLMChain</span><span class="p">(</span><span class="n">llm</span><span class="o">=</span><span class="n">llm</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">)</span>
+<span class="n">llm</span> <span class="o">=</span> <span class="n">OpenAI</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s">"gpt-3.5-turbo"</span><span class="p">)</span>
+<span class="n">prompt</span> <span class="o">=</span> <span class="n">PromptTemplate</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="s">"What is a good name for a company that makes {product}?"</span><span class="p">,</span> <span class="n">input_variables</span><span class="o">=</span><span class="p">[</span><span class="s">"product"</span><span class="p">])</span>
+<span class="n">chain</span> <span class="o">=</span> <span class="n">LLMChain</span><span class="p">(</span><span class="n">llm</span><span class="o">=</span><span class="n">llm</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">)</span>
 
-<span class="nf">print</span><span class="p">(</span><span class="n">chain</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">product</span><span class="o">=</span><span class="sh">"</span><span class="s">colorful socks</span><span class="sh">"</span><span class="p">))</span>
+<span class="k">print</span><span class="p">(</span><span class="n">chain</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="n">product</span><span class="o">=</span><span class="s">"colorful socks"</span><span class="p">))</span>
 </code></pre></div></div>
 
 <h4 id="memory">Memory</h4>
@@ -2562,11 +2564,11 @@ A:
 <code class="language-plaintext highlighter-rouge">ConversationSummaryMemory</code>: Summarizes past interactions for compact memory.</li>
 </ul>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">langchain.memory</span> <span class="kn">import</span> <span class="n">ConversationBufferMemory</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">langchain.memory</span> <span class="kn">import</span> <span class="n">ConversationBufferMemory</span>
 
-<span class="n">memory</span> <span class="o">=</span> <span class="nc">ConversationBufferMemory</span><span class="p">()</span>
-<span class="n">memory</span><span class="p">.</span><span class="nf">save_context</span><span class="p">({</span><span class="sh">"</span><span class="s">input</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Hello</span><span class="sh">"</span><span class="p">},</span> <span class="p">{</span><span class="sh">"</span><span class="s">output</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Hi there!</span><span class="sh">"</span><span class="p">})</span>
-<span class="nf">print</span><span class="p">(</span><span class="n">memory</span><span class="p">.</span><span class="nf">load_memory_variables</span><span class="p">({}))</span>
+<span class="n">memory</span> <span class="o">=</span> <span class="n">ConversationBufferMemory</span><span class="p">()</span>
+<span class="n">memory</span><span class="p">.</span><span class="n">save_context</span><span class="p">({</span><span class="s">"input"</span><span class="p">:</span> <span class="s">"Hello"</span><span class="p">},</span> <span class="p">{</span><span class="s">"output"</span><span class="p">:</span> <span class="s">"Hi there!"</span><span class="p">})</span>
+<span class="k">print</span><span class="p">(</span><span class="n">memory</span><span class="p">.</span><span class="n">load_memory_variables</span><span class="p">({}))</span>
 </code></pre></div></div>
 
 <h4 id="agents">Agents</h4>
@@ -2589,16 +2591,16 @@ A:
 
 <p>Example:</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">langchain.agents</span> <span class="kn">import</span> <span class="n">initialize_agent</span><span class="p">,</span> <span class="n">Tool</span>
-<span class="kn">from</span> <span class="n">langchain.llms</span> <span class="kn">import</span> <span class="n">OpenAI</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">langchain.agents</span> <span class="kn">import</span> <span class="n">initialize_agent</span><span class="p">,</span> <span class="n">Tool</span>
+<span class="kn">from</span> <span class="nn">langchain.llms</span> <span class="kn">import</span> <span class="n">OpenAI</span>
 
-<span class="n">llm</span> <span class="o">=</span> <span class="nc">OpenAI</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="sh">"</span><span class="s">gpt-3.5-turbo</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">llm</span> <span class="o">=</span> <span class="n">OpenAI</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s">"gpt-3.5-turbo"</span><span class="p">)</span>
 <span class="n">tools</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="nc">Tool</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sh">"</span><span class="s">Calculator</span><span class="sh">"</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nf">eval</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">description</span><span class="o">=</span><span class="sh">"</span><span class="s">Calculates basic arithmetic.</span><span class="sh">"</span><span class="p">),</span>
+    <span class="n">Tool</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">"Calculator"</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">eval</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">description</span><span class="o">=</span><span class="s">"Calculates basic arithmetic."</span><span class="p">),</span>
 <span class="p">]</span>
 
-<span class="n">agent</span> <span class="o">=</span> <span class="nf">initialize_agent</span><span class="p">(</span><span class="n">tools</span><span class="p">,</span> <span class="n">llm</span><span class="p">,</span> <span class="n">agent</span><span class="o">=</span><span class="sh">"</span><span class="s">zero-shot-react-description</span><span class="sh">"</span><span class="p">)</span>
-<span class="nf">print</span><span class="p">(</span><span class="n">agent</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="sh">"</span><span class="s">What is 5 plus 7?</span><span class="sh">"</span><span class="p">))</span>
+<span class="n">agent</span> <span class="o">=</span> <span class="n">initialize_agent</span><span class="p">(</span><span class="n">tools</span><span class="p">,</span> <span class="n">llm</span><span class="p">,</span> <span class="n">agent</span><span class="o">=</span><span class="s">"zero-shot-react-description"</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">agent</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="s">"What is 5 plus 7?"</span><span class="p">))</span>
 </code></pre></div></div>
 
 <h4 id="tools">Tools</h4>
@@ -2635,14 +2637,14 @@ A:
 
 <p><strong>Create tools using the @tool decorator</strong></p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">langchain_core.tools</span> <span class="kn">import</span> <span class="n">tool</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">langchain_core.tools</span> <span class="kn">import</span> <span class="n">tool</span>
 
-<span class="nd">@tool</span>
+<span class="o">@</span><span class="n">tool</span>
 <span class="k">def</span> <span class="nf">multiply</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-   <span class="sh">"""</span><span class="s">Multiply two numbers.</span><span class="sh">"""</span>
+   <span class="s">"""Multiply two numbers."""</span>
    <span class="k">return</span> <span class="n">a</span> <span class="o">*</span> <span class="n">b</span>
 
-<span class="nf">print</span><span class="p">(</span><span class="n">multiply</span><span class="p">.</span><span class="nf">invoke</span><span class="p">({</span><span class="sh">"</span><span class="s">a</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="sh">"</span><span class="s">b</span><span class="sh">"</span><span class="p">:</span> <span class="mi">3</span><span class="p">}))</span>
+<span class="k">print</span><span class="p">(</span><span class="n">multiply</span><span class="p">.</span><span class="n">invoke</span><span class="p">({</span><span class="s">"a"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s">"b"</span><span class="p">:</span> <span class="mi">3</span><span class="p">}))</span>
 </code></pre></div></div>
 
 <p><strong>RunnableConfig</strong></p>
@@ -2651,15 +2653,15 @@ A:
 
 <p>If you need to access the <code class="language-plaintext highlighter-rouge">RunnableConfig</code> object from within a tool. This can be done by using the <code class="language-plaintext highlighter-rouge">RunnableConfig</code> annotation in the tool’s function signature.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">langchain_core.runnables</span> <span class="kn">import</span> <span class="n">RunnableConfig</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">langchain_core.runnables</span> <span class="kn">import</span> <span class="n">RunnableConfig</span>
 
-<span class="nd">@tool</span>
+<span class="o">@</span><span class="n">tool</span>
 <span class="k">async</span> <span class="k">def</span> <span class="nf">some_func</span><span class="p">(...,</span> <span class="n">config</span><span class="p">:</span> <span class="n">RunnableConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">...:</span>
-    <span class="sh">"""</span><span class="s">Tool that does something.</span><span class="sh">"""</span>
+    <span class="s">"""Tool that does something."""</span>
     <span class="c1"># do something with config
-</span>    <span class="bp">...</span>
+</span>    <span class="p">...</span>
 
-<span class="k">await</span> <span class="n">some_func</span><span class="p">.</span><span class="nf">ainvoke</span><span class="p">(...,</span> <span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="sh">"</span><span class="s">configurable</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">value</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">some_value</span><span class="sh">"</span><span class="p">}})</span>
+<span class="k">await</span> <span class="n">some_func</span><span class="p">.</span><span class="n">ainvoke</span><span class="p">(...,</span> <span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s">"configurable"</span><span class="p">:</span> <span class="p">{</span><span class="s">"value"</span><span class="p">:</span> <span class="s">"some_value"</span><span class="p">}})</span>
 </code></pre></div></div>
 
 <p><strong>Search for tools</strong></p>
@@ -2674,19 +2676,19 @@ Some free tools are:</p>
 <a href="https://python.langchain.com/docs/integrations/tools/wikipedia/" rel="external nofollow noopener" target="_blank">Wikipedia</a> that allows you to search Wikipedia and return a summary of the page.</li>
 </ul>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">langchain_community.tools</span> <span class="kn">import</span> <span class="n">WikipediaQueryRun</span>
-<span class="kn">from</span> <span class="n">langchain_community.utilities</span> <span class="kn">import</span> <span class="n">WikipediaAPIWrapper</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">langchain_community.tools</span> <span class="kn">import</span> <span class="n">WikipediaQueryRun</span>
+<span class="kn">from</span> <span class="nn">langchain_community.utilities</span> <span class="kn">import</span> <span class="n">WikipediaAPIWrapper</span>
 
-<span class="n">wikipedia</span> <span class="o">=</span> <span class="nc">WikipediaQueryRun</span><span class="p">(</span><span class="n">api_wrapper</span><span class="o">=</span><span class="nc">WikipediaAPIWrapper</span><span class="p">())</span>
+<span class="n">wikipedia</span> <span class="o">=</span> <span class="n">WikipediaQueryRun</span><span class="p">(</span><span class="n">api_wrapper</span><span class="o">=</span><span class="n">WikipediaAPIWrapper</span><span class="p">())</span>
 
-<span class="nf">print</span><span class="p">(</span><span class="n">wikipedia</span><span class="p">.</span><span class="nf">invoke</span><span class="p">({</span><span class="sh">"</span><span class="s">query</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">LangChain</span><span class="sh">"</span><span class="p">}))</span>
+<span class="k">print</span><span class="p">(</span><span class="n">wikipedia</span><span class="p">.</span><span class="n">invoke</span><span class="p">({</span><span class="s">"query"</span><span class="p">:</span> <span class="s">"LangChain"</span><span class="p">}))</span>
 </code></pre></div></div>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">langchain_community.tools</span> <span class="kn">import</span> <span class="n">DuckDuckGoSearchResults</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">langchain_community.tools</span> <span class="kn">import</span> <span class="n">DuckDuckGoSearchResults</span>
 
-<span class="n">duckduckgo</span> <span class="o">=</span> <span class="nc">DuckDuckGoSearchResults</span><span class="p">()</span>
+<span class="n">duckduckgo</span> <span class="o">=</span> <span class="n">DuckDuckGoSearchResults</span><span class="p">()</span>
 
-<span class="nf">print</span><span class="p">(</span><span class="n">duckduckgo</span><span class="p">.</span><span class="nf">invoke</span><span class="p">({</span><span class="sh">"</span><span class="s">query</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">LangChain</span><span class="sh">"</span><span class="p">}))</span>
+<span class="k">print</span><span class="p">(</span><span class="n">duckduckgo</span><span class="p">.</span><span class="n">invoke</span><span class="p">({</span><span class="s">"query"</span><span class="p">:</span> <span class="s">"LangChain"</span><span class="p">}))</span>
 </code></pre></div></div>
 
 <h3 id="llamaindex">LlamaIndex</h3>
@@ -2702,10 +2704,10 @@ Some free tools are:</p>
 
 <p>In the following snippet, we will fine-tune a Llama 2 model using QLoRA.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">os</span>
-<span class="kn">import</span> <span class="n">torch</span>
-<span class="kn">from</span> <span class="n">datasets</span> <span class="kn">import</span> <span class="n">load_dataset</span>
-<span class="kn">from</span> <span class="n">transformers</span> <span class="kn">import</span> <span class="p">(</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">load_dataset</span>
+<span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">AutoModelForCausalLM</span><span class="p">,</span>
     <span class="n">AutoTokenizer</span><span class="p">,</span>
     <span class="n">BitsAndBytesConfig</span><span class="p">,</span>
@@ -2713,25 +2715,25 @@ Some free tools are:</p>
     <span class="n">pipeline</span><span class="p">,</span>
     <span class="n">logging</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="n">peft</span> <span class="kn">import</span> <span class="n">LoraConfig</span>
-<span class="kn">from</span> <span class="n">trl</span> <span class="kn">import</span> <span class="n">SFTTrainer</span>
+<span class="kn">from</span> <span class="nn">peft</span> <span class="kn">import</span> <span class="n">LoraConfig</span>
+<span class="kn">from</span> <span class="nn">trl</span> <span class="kn">import</span> <span class="n">SFTTrainer</span>
 </code></pre></div></div>
 
 <p>Loading Llama 2 model with 4-bit quantization:</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">compute_dtype</span> <span class="o">=</span> <span class="nf">getattr</span><span class="p">(</span><span class="n">torch</span><span class="p">,</span> <span class="sh">"</span><span class="s">float16</span><span class="sh">"</span><span class="p">)</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">compute_dtype</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">torch</span><span class="p">,</span> <span class="s">"float16"</span><span class="p">)</span>
 
-<span class="n">quant_config</span> <span class="o">=</span> <span class="nc">BitsAndBytesConfig</span><span class="p">(</span>
+<span class="n">quant_config</span> <span class="o">=</span> <span class="n">BitsAndBytesConfig</span><span class="p">(</span>
     <span class="n">load_in_4bit</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-    <span class="n">bnb_4bit_quant_type</span><span class="o">=</span><span class="sh">"</span><span class="s">nf4</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">bnb_4bit_quant_type</span><span class="o">=</span><span class="s">"nf4"</span><span class="p">,</span>
     <span class="n">bnb_4bit_compute_dtype</span><span class="o">=</span><span class="n">compute_dtype</span><span class="p">,</span>
     <span class="n">bnb_4bit_use_double_quant</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="n">model</span> <span class="o">=</span> <span class="n">AutoModelForCausalLM</span><span class="p">.</span><span class="nf">from_pretrained</span><span class="p">(</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">AutoModelForCausalLM</span><span class="p">.</span><span class="n">from_pretrained</span><span class="p">(</span>
     <span class="n">base_model</span><span class="p">,</span>
     <span class="n">quantization_config</span><span class="o">=</span><span class="n">quant_config</span><span class="p">,</span>
-    <span class="n">device_map</span><span class="o">=</span><span class="p">{</span><span class="sh">""</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+    <span class="n">device_map</span><span class="o">=</span><span class="p">{</span><span class="s">""</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
 <span class="p">)</span>
 <span class="n">model</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="n">use_cache</span> <span class="o">=</span> <span class="bp">False</span>
 <span class="n">model</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="n">pretraining_tp</span> <span class="o">=</span> <span class="mi">1</span>
@@ -2739,22 +2741,22 @@ Some free tools are:</p>
 
 <p>Setting up the PEFT LoRA configuration. The <code class="language-plaintext highlighter-rouge">lora_alpha</code> parameter controls the scaling of the LoRA weights, while <code class="language-plaintext highlighter-rouge">r</code> is the rank of the low-rank adaptation matrices. Parameters for LoraConfig can be found in Hugging Face documentation <a href="https://huggingface.co/docs/peft/main/en/conceptual_guides/lora" rel="external nofollow noopener" target="_blank">link</a>.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">peft_params</span> <span class="o">=</span> <span class="nc">LoraConfig</span><span class="p">(</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">peft_params</span> <span class="o">=</span> <span class="n">LoraConfig</span><span class="p">(</span>
     <span class="n">lora_alpha</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
     <span class="n">lora_dropout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
     <span class="n">r</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
-    <span class="n">bias</span><span class="o">=</span><span class="sh">"</span><span class="s">none</span><span class="sh">"</span><span class="p">,</span>
-    <span class="n">task_type</span><span class="o">=</span><span class="sh">"</span><span class="s">CAUSAL_LM</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">bias</span><span class="o">=</span><span class="s">"none"</span><span class="p">,</span>
+    <span class="n">task_type</span><span class="o">=</span><span class="s">"CAUSAL_LM"</span><span class="p">,</span>
 <span class="p">)</span>
 </code></pre></div></div>
 
 <p>Setting up the Trainer</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">trainer</span> <span class="o">=</span> <span class="nc">SFTTrainer</span><span class="p">(</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">trainer</span> <span class="o">=</span> <span class="n">SFTTrainer</span><span class="p">(</span>
     <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
     <span class="n">train_dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
     <span class="n">peft_config</span><span class="o">=</span><span class="n">peft_params</span><span class="p">,</span>
-    <span class="n">dataset_text_field</span><span class="o">=</span><span class="sh">"</span><span class="s">text</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">dataset_text_field</span><span class="o">=</span><span class="s">"text"</span><span class="p">,</span>
     <span class="n">max_seq_length</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
     <span class="n">tokenizer</span><span class="o">=</span><span class="n">tokenizer</span><span class="p">,</span>
     <span class="n">args</span><span class="o">=</span><span class="n">training_params</span><span class="p">,</span>

@@ -26,7 +26,7 @@
     <!-- Fonts & Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700%7CRoboto+Slab:100,300,400,500,700%7CMaterial+Icons">
 
     <!-- Code Syntax Highlighting -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
@@ -149,6 +149,7 @@
   <article class="post-content">
     
     <div id="table-of-contents">
+      
       <ul id="toc" class="section-nav">
 <li class="toc-entry toc-h2"><a href="#about-the-paper">About the paper</a></li>
 <li class="toc-entry toc-h2">
@@ -162,6 +163,7 @@
 </ul>
 </li>
 </ul>
+      
     </div>
     <hr>
     
@@ -189,17 +191,17 @@
 
 <!-- Insert code block -->
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">center_crop</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="p">.</span><span class="n">Tensor</span><span class="p">:</span>
-    <span class="n">image_transforms</span> <span class="o">=</span> <span class="n">transforms</span><span class="p">.</span><span class="nc">Compose</span><span class="p">(</span>
+    <span class="n">image_transforms</span> <span class="o">=</span> <span class="n">transforms</span><span class="p">.</span><span class="n">Compose</span><span class="p">(</span>
         <span class="p">[</span>
-            <span class="n">transforms</span><span class="p">.</span><span class="nc">Resize</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="n">transforms</span><span class="p">.</span><span class="n">InterpolationMode</span><span class="p">.</span><span class="n">BILINEAR</span><span class="p">),</span>
-            <span class="n">transforms</span><span class="p">.</span><span class="nc">CenterCrop</span><span class="p">(</span><span class="n">size</span><span class="p">)</span> <span class="k">if</span> <span class="n">center_crop</span> <span class="k">else</span> <span class="n">transforms</span><span class="p">.</span><span class="nc">RandomCrop</span><span class="p">(</span><span class="n">size</span><span class="p">),</span>
-            <span class="n">transforms</span><span class="p">.</span><span class="nc">ToTensor</span><span class="p">(),</span>
-            <span class="n">transforms</span><span class="p">.</span><span class="nc">Normalize</span><span class="p">([</span><span class="mf">0.5</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">]),</span>
+            <span class="n">transforms</span><span class="p">.</span><span class="n">Resize</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="n">transforms</span><span class="p">.</span><span class="n">InterpolationMode</span><span class="p">.</span><span class="n">BILINEAR</span><span class="p">),</span>
+            <span class="n">transforms</span><span class="p">.</span><span class="n">CenterCrop</span><span class="p">(</span><span class="n">size</span><span class="p">)</span> <span class="k">if</span> <span class="n">center_crop</span> <span class="k">else</span> <span class="n">transforms</span><span class="p">.</span><span class="n">RandomCrop</span><span class="p">(</span><span class="n">size</span><span class="p">),</span>
+            <span class="n">transforms</span><span class="p">.</span><span class="n">ToTensor</span><span class="p">(),</span>
+            <span class="n">transforms</span><span class="p">.</span><span class="n">Normalize</span><span class="p">([</span><span class="mf">0.5</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">]),</span>
         <span class="p">]</span>
     <span class="p">)</span>
 
-    <span class="n">images</span> <span class="o">=</span> <span class="p">[</span><span class="nf">image_transforms</span><span class="p">(</span><span class="n">Image</span><span class="p">.</span><span class="nf">open</span><span class="p">(</span><span class="n">i</span><span class="p">).</span><span class="nf">convert</span><span class="p">(</span><span class="sh">"</span><span class="s">RGB</span><span class="sh">"</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">list</span><span class="p">(</span><span class="nc">Path</span><span class="p">(</span><span class="n">data_dir</span><span class="p">).</span><span class="nf">iterdir</span><span class="p">())]</span>
-    <span class="n">images</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">stack</span><span class="p">(</span><span class="n">images</span><span class="p">)</span>
+    <span class="n">images</span> <span class="o">=</span> <span class="p">[</span><span class="n">image_transforms</span><span class="p">(</span><span class="n">Image</span><span class="p">.</span><span class="nb">open</span><span class="p">(</span><span class="n">i</span><span class="p">).</span><span class="n">convert</span><span class="p">(</span><span class="s">"RGB"</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">data_dir</span><span class="p">).</span><span class="n">iterdir</span><span class="p">())]</span>
+    <span class="n">images</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">stack</span><span class="p">(</span><span class="n">images</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">images</span>
 </code></pre></div></div>
 
@@ -208,29 +210,29 @@
 </li>
 </ul>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
         <span class="n">example</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">instance_image</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">instance_images_tensor</span><span class="p">[</span><span class="n">index</span> <span class="o">%</span> <span class="n">self</span><span class="p">.</span><span class="n">num_instance_images</span><span class="p">]</span>
-        <span class="n">example</span><span class="p">[</span><span class="sh">"</span><span class="s">instance_images</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">instance_image</span>
-        <span class="n">example</span><span class="p">[</span><span class="sh">"</span><span class="s">instance_prompt_ids</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">tokenizer</span><span class="p">(</span>
-            <span class="n">self</span><span class="p">.</span><span class="n">instance_prompt</span><span class="p">,</span>
+        <span class="n">instance_image</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">instance_images_tensor</span><span class="p">[</span><span class="n">index</span> <span class="o">%</span> <span class="bp">self</span><span class="p">.</span><span class="n">num_instance_images</span><span class="p">]</span>
+        <span class="n">example</span><span class="p">[</span><span class="s">"instance_images"</span><span class="p">]</span> <span class="o">=</span> <span class="n">instance_image</span>
+        <span class="n">example</span><span class="p">[</span><span class="s">"instance_prompt_ids"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">tokenizer</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">.</span><span class="n">instance_prompt</span><span class="p">,</span>
             <span class="n">truncation</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-            <span class="n">padding</span><span class="o">=</span><span class="sh">"</span><span class="s">max_length</span><span class="sh">"</span><span class="p">,</span>
-            <span class="n">max_length</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">tokenizer</span><span class="p">.</span><span class="n">model_max_length</span><span class="p">,</span>
-            <span class="n">return_tensors</span><span class="o">=</span><span class="sh">"</span><span class="s">pt</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">padding</span><span class="o">=</span><span class="s">"max_length"</span><span class="p">,</span>
+            <span class="n">max_length</span><span class="o">=</span><span class="bp">self</span><span class="p">.</span><span class="n">tokenizer</span><span class="p">.</span><span class="n">model_max_length</span><span class="p">,</span>
+            <span class="n">return_tensors</span><span class="o">=</span><span class="s">"pt"</span><span class="p">,</span>
         <span class="p">).</span><span class="n">input_ids</span>
 
-        <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">class_data_root</span><span class="p">:</span>
-            <span class="n">class_image</span> <span class="o">=</span> <span class="n">Image</span><span class="p">.</span><span class="nf">open</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">class_images_path</span><span class="p">[</span><span class="n">index</span> <span class="o">%</span> <span class="n">self</span><span class="p">.</span><span class="n">num_class_images</span><span class="p">])</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">class_image</span><span class="p">.</span><span class="n">mode</span> <span class="o">==</span> <span class="sh">"</span><span class="s">RGB</span><span class="sh">"</span><span class="p">:</span>
-                <span class="n">class_image</span> <span class="o">=</span> <span class="n">class_image</span><span class="p">.</span><span class="nf">convert</span><span class="p">(</span><span class="sh">"</span><span class="s">RGB</span><span class="sh">"</span><span class="p">)</span>
-            <span class="n">example</span><span class="p">[</span><span class="sh">"</span><span class="s">class_images</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">image_transforms</span><span class="p">(</span><span class="n">class_image</span><span class="p">)</span>
-            <span class="n">example</span><span class="p">[</span><span class="sh">"</span><span class="s">class_prompt_ids</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">tokenizer</span><span class="p">(</span>
-                <span class="n">self</span><span class="p">.</span><span class="n">class_prompt</span><span class="p">,</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="p">.</span><span class="n">class_data_root</span><span class="p">:</span>
+            <span class="n">class_image</span> <span class="o">=</span> <span class="n">Image</span><span class="p">.</span><span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">class_images_path</span><span class="p">[</span><span class="n">index</span> <span class="o">%</span> <span class="bp">self</span><span class="p">.</span><span class="n">num_class_images</span><span class="p">])</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">class_image</span><span class="p">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s">"RGB"</span><span class="p">:</span>
+                <span class="n">class_image</span> <span class="o">=</span> <span class="n">class_image</span><span class="p">.</span><span class="n">convert</span><span class="p">(</span><span class="s">"RGB"</span><span class="p">)</span>
+            <span class="n">example</span><span class="p">[</span><span class="s">"class_images"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">image_transforms</span><span class="p">(</span><span class="n">class_image</span><span class="p">)</span>
+            <span class="n">example</span><span class="p">[</span><span class="s">"class_prompt_ids"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">tokenizer</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">.</span><span class="n">class_prompt</span><span class="p">,</span>
                 <span class="n">truncation</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                <span class="n">padding</span><span class="o">=</span><span class="sh">"</span><span class="s">max_length</span><span class="sh">"</span><span class="p">,</span>
-                <span class="n">max_length</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">tokenizer</span><span class="p">.</span><span class="n">model_max_length</span><span class="p">,</span>
-                <span class="n">return_tensors</span><span class="o">=</span><span class="sh">"</span><span class="s">pt</span><span class="sh">"</span><span class="p">,</span>
+                <span class="n">padding</span><span class="o">=</span><span class="s">"max_length"</span><span class="p">,</span>
+                <span class="n">max_length</span><span class="o">=</span><span class="bp">self</span><span class="p">.</span><span class="n">tokenizer</span><span class="p">.</span><span class="n">model_max_length</span><span class="p">,</span>
+                <span class="n">return_tensors</span><span class="o">=</span><span class="s">"pt"</span><span class="p">,</span>
             <span class="p">).</span><span class="n">input_ids</span>
 
         <span class="k">return</span> <span class="n">example</span>
@@ -257,11 +259,11 @@
 </ul>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">f</span> <span class="o">=</span> <span class="p">[</span><span class="n">unet</span><span class="p">,</span> <span class="n">text_encoder</span><span class="p">]</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">max_train_steps</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">max_train_steps</span><span class="p">):</span>
         <span class="c1"># Clone the current model to avoid the in-place operation
-</span>        <span class="n">f_sur</span> <span class="o">=</span> <span class="n">copy</span><span class="p">.</span><span class="nf">deepcopy</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+</span>        <span class="n">f_sur</span> <span class="o">=</span> <span class="n">copy</span><span class="p">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
         <span class="c1"># Train the model with the clean data
-</span>        <span class="n">f_sur</span> <span class="o">=</span> <span class="nf">train_one_epoch</span><span class="p">(</span>
+</span>        <span class="n">f_sur</span> <span class="o">=</span> <span class="n">train_one_epoch</span><span class="p">(</span>
             <span class="n">args</span><span class="p">,</span>
             <span class="n">f_sur</span><span class="p">,</span>
             <span class="n">tokenizer</span><span class="p">,</span>
@@ -271,7 +273,7 @@
             <span class="n">args</span><span class="p">.</span><span class="n">max_f_train_steps</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="c1"># Learn the perturbation with the updated model f_sur 
-</span>        <span class="n">perturbed_data</span> <span class="o">=</span> <span class="nf">pgd_attack</span><span class="p">(</span>
+</span>        <span class="n">perturbed_data</span> <span class="o">=</span> <span class="n">pgd_attack</span><span class="p">(</span>
             <span class="n">args</span><span class="p">,</span>
             <span class="n">f_sur</span><span class="p">,</span>
             <span class="n">tokenizer</span><span class="p">,</span>
@@ -283,7 +285,7 @@
             <span class="n">args</span><span class="p">.</span><span class="n">max_adv_train_steps</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="c1"># Restore the model and train with perturbed data 
-</span>        <span class="n">f</span> <span class="o">=</span> <span class="nf">train_one_epoch</span><span class="p">(</span>
+</span>        <span class="n">f</span> <span class="o">=</span> <span class="n">train_one_epoch</span><span class="p">(</span>
             <span class="n">args</span><span class="p">,</span>
             <span class="n">f</span><span class="p">,</span>
             <span class="n">tokenizer</span><span class="p">,</span>
@@ -296,7 +298,7 @@
 
 <p>Inside the <code class="language-plaintext highlighter-rouge">train_one_epoch</code> function, the <code class="language-plaintext highlighter-rouge">DreamBoothDatasetFromTensor</code> class is called to associate the data (i.e., perturbed data) with the corresponding textual prompt.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">train_dataset</span> <span class="o">=</span> <span class="nc">DreamBoothDatasetFromTensor</span><span class="p">(</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">train_dataset</span> <span class="o">=</span> <span class="n">DreamBoothDatasetFromTensor</span><span class="p">(</span>
         <span class="n">data_tensor</span><span class="p">,</span>
         <span class="n">args</span><span class="p">.</span><span class="n">instance_prompt</span><span class="p">,</span>
         <span class="n">tokenizer</span><span class="p">,</span>
@@ -327,34 +329,34 @@
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
-    <span class="n">args</span> <span class="o">=</span> <span class="nf">parse_args</span><span class="p">()</span>
-    <span class="nf">print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parse_args</span><span class="p">()</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
 
-    <span class="n">generator</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nc">Generator</span><span class="p">(</span><span class="sh">"</span><span class="s">cuda</span><span class="sh">"</span><span class="p">).</span><span class="nf">manual_seed</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">generator</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">Generator</span><span class="p">(</span><span class="s">"cuda"</span><span class="p">).</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">seed</span><span class="p">)</span>
 
     <span class="c1"># create output directory
-</span>    <span class="n">prompt_name</span> <span class="o">=</span> <span class="n">args</span><span class="p">.</span><span class="n">prompt_file</span><span class="p">.</span><span class="nf">split</span><span class="p">(</span><span class="sh">"</span><span class="s">/</span><span class="sh">"</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="nf">split</span><span class="p">(</span><span class="sh">"</span><span class="s">.</span><span class="sh">"</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">output_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">args</span><span class="p">.</span><span class="n">output_dir</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="n">args</span><span class="p">.</span><span class="n">concept_name</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="n">prompt_name</span><span class="si">}</span><span class="sh">"</span>
-    <span class="n">os</span><span class="p">.</span><span class="nf">makedirs</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</span>    <span class="n">prompt_name</span> <span class="o">=</span> <span class="n">args</span><span class="p">.</span><span class="n">prompt_file</span><span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="s">"/"</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="n">split</span><span class="p">(</span><span class="s">"."</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">output_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s">"</span><span class="si">{</span><span class="n">args</span><span class="p">.</span><span class="n">output_dir</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="n">args</span><span class="p">.</span><span class="n">concept_name</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="n">prompt_name</span><span class="si">}</span><span class="s">"</span>
+    <span class="n">os</span><span class="p">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
-    <span class="k">assert</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="nf">exists</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">prompt_file</span><span class="p">),</span> <span class="sa">f</span><span class="sh">"</span><span class="s">Prompt file </span><span class="si">{</span><span class="n">args</span><span class="p">.</span><span class="n">prompt_file</span><span class="si">}</span><span class="s"> does not exist</span><span class="sh">"</span>
-    <span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">prompt_file</span><span class="p">,</span> <span class="sh">"</span><span class="s">r</span><span class="sh">"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="n">prompts</span> <span class="o">=</span> <span class="n">f</span><span class="p">.</span><span class="nf">readlines</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">exists</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">prompt_file</span><span class="p">),</span> <span class="sa">f</span><span class="s">"Prompt file </span><span class="si">{</span><span class="n">args</span><span class="p">.</span><span class="n">prompt_file</span><span class="si">}</span><span class="s"> does not exist"</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">prompt_file</span><span class="p">,</span> <span class="s">"r"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">prompts</span> <span class="o">=</span> <span class="n">f</span><span class="p">.</span><span class="n">readlines</span><span class="p">()</span>
 
 
-    <span class="n">pipeline</span> <span class="o">=</span> <span class="n">DiffusionPipeline</span><span class="p">.</span><span class="nf">from_pretrained</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">model_path</span><span class="p">)</span>
-    <span class="n">pipeline</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="sh">"</span><span class="s">cuda</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">pipeline</span> <span class="o">=</span> <span class="n">DiffusionPipeline</span><span class="p">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">model_path</span><span class="p">)</span>
+    <span class="n">pipeline</span><span class="p">.</span><span class="n">to</span><span class="p">(</span><span class="s">"cuda"</span><span class="p">)</span>
 
-    <span class="n">pipeline</span><span class="p">.</span><span class="nf">load_lora_weights</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">lora_path</span><span class="p">,</span> <span class="n">weight_name</span><span class="o">=</span><span class="sh">"</span><span class="s">pytorch_lora_weights.safetensors</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">pipeline</span><span class="p">.</span><span class="n">load_lora_weights</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">lora_path</span><span class="p">,</span> <span class="n">weight_name</span><span class="o">=</span><span class="s">"pytorch_lora_weights.safetensors"</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">prompt</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="n">prompts</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">num_images</span><span class="p">):</span>
-            <span class="nf">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="sh">"</span><span class="s">prompt: </span><span class="sh">"</span><span class="p">,</span> <span class="n">prompt</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">concept_name</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">prompt</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">prompts</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">num_images</span><span class="p">):</span>
+            <span class="k">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="s">"prompt: "</span><span class="p">,</span> <span class="n">prompt</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">concept_name</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">args</span><span class="p">.</span><span class="n">guidance_scale</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="n">image</span> <span class="o">=</span> <span class="nf">pipeline</span><span class="p">(</span><span class="n">prompt</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">concept_name</span><span class="p">),</span> <span class="n">num_inference_steps</span><span class="o">=</span><span class="n">args</span><span class="p">.</span><span class="n">num_inference_steps</span><span class="p">,</span> <span class="n">generator</span><span class="o">=</span><span class="n">generator</span><span class="p">).</span><span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">image</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span><span class="n">prompt</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">concept_name</span><span class="p">),</span> <span class="n">num_inference_steps</span><span class="o">=</span><span class="n">args</span><span class="p">.</span><span class="n">num_inference_steps</span><span class="p">,</span> <span class="n">generator</span><span class="o">=</span><span class="n">generator</span><span class="p">).</span><span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">image</span> <span class="o">=</span> <span class="nf">pipeline</span><span class="p">(</span><span class="n">prompt</span><span class="p">.</span><span class="nf">format</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">concept_name</span><span class="p">),</span> <span class="n">num_inference_steps</span><span class="o">=</span><span class="n">args</span><span class="p">.</span><span class="n">num_inference_steps</span><span class="p">,</span> <span class="n">guidance_scale</span><span class="o">=</span><span class="n">args</span><span class="p">.</span><span class="n">guidance_scale</span><span class="p">,</span> <span class="n">generator</span><span class="o">=</span><span class="n">generator</span><span class="p">).</span><span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">image</span><span class="p">.</span><span class="nf">save</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">output_dir</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s">_</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s">.png</span><span class="sh">"</span><span class="p">)</span>
+                <span class="n">image</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span><span class="n">prompt</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">concept_name</span><span class="p">),</span> <span class="n">num_inference_steps</span><span class="o">=</span><span class="n">args</span><span class="p">.</span><span class="n">num_inference_steps</span><span class="p">,</span> <span class="n">guidance_scale</span><span class="o">=</span><span class="n">args</span><span class="p">.</span><span class="n">guidance_scale</span><span class="p">,</span> <span class="n">generator</span><span class="o">=</span><span class="n">generator</span><span class="p">).</span><span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">image</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="sa">f</span><span class="s">"</span><span class="si">{</span><span class="n">output_dir</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s">_</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s">.png"</span><span class="p">)</span>
 </code></pre></div></div>
 
 <p>The warning message when running the code:</p>
@@ -369,7 +371,7 @@
 <p><strong>Fix the error</strong>: The error is due to the <code class="language-plaintext highlighter-rouge">LoRA weights</code> are not loaded correctly. Fix it by loading the LoRA weights to the specific <code class="language-plaintext highlighter-rouge">unet</code> component.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="c1"># load lora weights but specific to the unet - that works
-</span>    <span class="n">pipeline</span><span class="p">.</span><span class="n">unet</span><span class="p">.</span><span class="nf">load_lora_adapter</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">lora_path</span><span class="p">,</span> <span class="n">weight_name</span><span class="o">=</span><span class="sh">"</span><span class="s">pytorch_lora_weights.safetensors</span><span class="sh">"</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="sh">"</span><span class="s">unet</span><span class="sh">"</span><span class="p">)</span>
+</span>    <span class="n">pipeline</span><span class="p">.</span><span class="n">unet</span><span class="p">.</span><span class="n">load_lora_adapter</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">lora_path</span><span class="p">,</span> <span class="n">weight_name</span><span class="o">=</span><span class="s">"pytorch_lora_weights.safetensors"</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s">"unet"</span><span class="p">)</span>
 </code></pre></div></div>
 
 <h3 id="setting-for-dreambooth-withlora">Setting for Dreambooth withLoRA</h3>
@@ -392,14 +394,14 @@
 <p>In Dreambooth, there is an argument <code class="language-plaintext highlighter-rouge">instance_prompt</code> which is used as a neural prompt to associate with the given images. For example, the default value is <code class="language-plaintext highlighter-rouge">a photo of sks dog</code>, where <code class="language-plaintext highlighter-rouge">sks</code> is the unique identifier to specify the learned concept. The <code class="language-plaintext highlighter-rouge">instance_prompt</code> is then tokenized by the tokenizer and the token ids are used to specify the position in the embedding matrix to be updated (corresponding to the specific token).</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="c1"># In the DreamBoothDataset class
-</span>    <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">encoder_hidden_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="n">example</span><span class="p">[</span><span class="sh">"</span><span class="s">instance_prompt_ids</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">encoder_hidden_states</span>
+</span>    <span class="k">if</span> <span class="bp">self</span><span class="p">.</span><span class="n">encoder_hidden_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">example</span><span class="p">[</span><span class="s">"instance_prompt_ids"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">encoder_hidden_states</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">text_inputs</span> <span class="o">=</span> <span class="nf">tokenize_prompt</span><span class="p">(</span>
-            <span class="n">self</span><span class="p">.</span><span class="n">tokenizer</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">instance_prompt</span><span class="p">,</span> <span class="n">tokenizer_max_length</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">tokenizer_max_length</span>
+        <span class="n">text_inputs</span> <span class="o">=</span> <span class="n">tokenize_prompt</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">.</span><span class="n">tokenizer</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">instance_prompt</span><span class="p">,</span> <span class="n">tokenizer_max_length</span><span class="o">=</span><span class="bp">self</span><span class="p">.</span><span class="n">tokenizer_max_length</span>
         <span class="p">)</span>
-        <span class="n">example</span><span class="p">[</span><span class="sh">"</span><span class="s">instance_prompt_ids</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">text_inputs</span><span class="p">.</span><span class="n">input_ids</span>
-        <span class="n">example</span><span class="p">[</span><span class="sh">"</span><span class="s">instance_attention_mask</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">text_inputs</span><span class="p">.</span><span class="n">attention_mask</span>
+        <span class="n">example</span><span class="p">[</span><span class="s">"instance_prompt_ids"</span><span class="p">]</span> <span class="o">=</span> <span class="n">text_inputs</span><span class="p">.</span><span class="n">input_ids</span>
+        <span class="n">example</span><span class="p">[</span><span class="s">"instance_attention_mask"</span><span class="p">]</span> <span class="o">=</span> <span class="n">text_inputs</span><span class="p">.</span><span class="n">attention_mask</span>
 </code></pre></div></div>
 
 <p>So the difference between the two projects is that:</p>
@@ -430,79 +432,79 @@
 </ul>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="c1"># Create a copy of data and set requires_grad to True
-</span>    <span class="n">perturbed_images</span> <span class="o">=</span> <span class="n">data_tensor</span><span class="p">.</span><span class="nf">detach</span><span class="p">().</span><span class="nf">clone</span><span class="p">()</span>
-    <span class="n">perturbed_images</span><span class="p">.</span><span class="nf">requires_grad_</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+</span>    <span class="n">perturbed_images</span> <span class="o">=</span> <span class="n">data_tensor</span><span class="p">.</span><span class="n">detach</span><span class="p">().</span><span class="n">clone</span><span class="p">()</span>
+    <span class="n">perturbed_images</span><span class="p">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
 
     <span class="c1"># Repeat the input_ids to match the batch size
-</span>    <span class="n">input_ids</span> <span class="o">=</span> <span class="nf">tokenizer</span><span class="p">(</span>
+</span>    <span class="n">input_ids</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">(</span>
         <span class="n">args</span><span class="p">.</span><span class="n">instance_prompt</span><span class="p">,</span>
         <span class="n">truncation</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-        <span class="n">padding</span><span class="o">=</span><span class="sh">"</span><span class="s">max_length</span><span class="sh">"</span><span class="p">,</span>
+        <span class="n">padding</span><span class="o">=</span><span class="s">"max_length"</span><span class="p">,</span>
         <span class="n">max_length</span><span class="o">=</span><span class="n">tokenizer</span><span class="p">.</span><span class="n">model_max_length</span><span class="p">,</span>
-        <span class="n">return_tensors</span><span class="o">=</span><span class="sh">"</span><span class="s">pt</span><span class="sh">"</span><span class="p">,</span>
-    <span class="p">).</span><span class="n">input_ids</span><span class="p">.</span><span class="nf">repeat</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">data_tensor</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">return_tensors</span><span class="o">=</span><span class="s">"pt"</span><span class="p">,</span>
+    <span class="p">).</span><span class="n">input_ids</span><span class="p">.</span><span class="n">repeat</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_tensor</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
 
     <span class="c1"># Loop over the number of steps
-</span>    <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">num_steps</span><span class="p">):</span>
+</span>    <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_steps</span><span class="p">):</span>
 
         <span class="c1"># Reset requires_grad to True because it was set to False in the last step
 </span>        <span class="n">perturbed_images</span><span class="p">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="bp">True</span>
-        <span class="n">latents</span> <span class="o">=</span> <span class="n">vae</span><span class="p">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">perturbed_images</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">weight_dtype</span><span class="p">)).</span><span class="n">latent_dist</span><span class="p">.</span><span class="nf">sample</span><span class="p">()</span>
+        <span class="n">latents</span> <span class="o">=</span> <span class="n">vae</span><span class="p">.</span><span class="n">encode</span><span class="p">(</span><span class="n">perturbed_images</span><span class="p">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">weight_dtype</span><span class="p">)).</span><span class="n">latent_dist</span><span class="p">.</span><span class="n">sample</span><span class="p">()</span>
         <span class="n">latents</span> <span class="o">=</span> <span class="n">latents</span> <span class="o">*</span> <span class="n">vae</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="n">scaling_factor</span>
 
         <span class="c1"># Sample noise that we'll add to the latents
-</span>        <span class="n">noise</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randn_like</span><span class="p">(</span><span class="n">latents</span><span class="p">)</span>
+</span>        <span class="n">noise</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">randn_like</span><span class="p">(</span><span class="n">latents</span><span class="p">)</span>
         <span class="n">bsz</span> <span class="o">=</span> <span class="n">latents</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="c1"># Sample a random timestep for each image
-</span>        <span class="n">timesteps</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">noise_scheduler</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="n">num_train_timesteps</span><span class="p">,</span> <span class="p">(</span><span class="n">bsz</span><span class="p">,),</span> <span class="n">device</span><span class="o">=</span><span class="n">latents</span><span class="p">.</span><span class="n">device</span><span class="p">)</span>
-        <span class="n">timesteps</span> <span class="o">=</span> <span class="n">timesteps</span><span class="p">.</span><span class="nf">long</span><span class="p">()</span>
+</span>        <span class="n">timesteps</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">noise_scheduler</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="n">num_train_timesteps</span><span class="p">,</span> <span class="p">(</span><span class="n">bsz</span><span class="p">,),</span> <span class="n">device</span><span class="o">=</span><span class="n">latents</span><span class="p">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">timesteps</span> <span class="o">=</span> <span class="n">timesteps</span><span class="p">.</span><span class="nb">long</span><span class="p">()</span>
         <span class="c1"># Add noise to the latents according to the noise magnitude at each timestep
 </span>        <span class="c1"># (this is the forward diffusion process)
-</span>        <span class="n">noisy_latents</span> <span class="o">=</span> <span class="n">noise_scheduler</span><span class="p">.</span><span class="nf">add_noise</span><span class="p">(</span><span class="n">latents</span><span class="p">,</span> <span class="n">noise</span><span class="p">,</span> <span class="n">timesteps</span><span class="p">)</span>
+</span>        <span class="n">noisy_latents</span> <span class="o">=</span> <span class="n">noise_scheduler</span><span class="p">.</span><span class="n">add_noise</span><span class="p">(</span><span class="n">latents</span><span class="p">,</span> <span class="n">noise</span><span class="p">,</span> <span class="n">timesteps</span><span class="p">)</span>
 
         <span class="c1"># Get the text embedding for conditioning
-</span>        <span class="n">encoder_hidden_states</span> <span class="o">=</span> <span class="nf">text_encoder</span><span class="p">(</span><span class="n">input_ids</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="n">device</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+</span>        <span class="n">encoder_hidden_states</span> <span class="o">=</span> <span class="n">text_encoder</span><span class="p">(</span><span class="n">input_ids</span><span class="p">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="c1"># Predict the noise residual
-</span>        <span class="n">model_pred</span> <span class="o">=</span> <span class="nf">unet</span><span class="p">(</span><span class="n">noisy_latents</span><span class="p">,</span> <span class="n">timesteps</span><span class="p">,</span> <span class="n">encoder_hidden_states</span><span class="p">).</span><span class="n">sample</span>
+</span>        <span class="n">model_pred</span> <span class="o">=</span> <span class="n">unet</span><span class="p">(</span><span class="n">noisy_latents</span><span class="p">,</span> <span class="n">timesteps</span><span class="p">,</span> <span class="n">encoder_hidden_states</span><span class="p">).</span><span class="n">sample</span>
 
         <span class="c1"># Get the target for loss depending on the prediction type
-</span>        <span class="k">if</span> <span class="n">noise_scheduler</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="n">prediction_type</span> <span class="o">==</span> <span class="sh">"</span><span class="s">epsilon</span><span class="sh">"</span><span class="p">:</span>
+</span>        <span class="k">if</span> <span class="n">noise_scheduler</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="n">prediction_type</span> <span class="o">==</span> <span class="s">"epsilon"</span><span class="p">:</span>
             <span class="n">target</span> <span class="o">=</span> <span class="n">noise</span>
-        <span class="k">elif</span> <span class="n">noise_scheduler</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="n">prediction_type</span> <span class="o">==</span> <span class="sh">"</span><span class="s">v_prediction</span><span class="sh">"</span><span class="p">:</span>
-            <span class="n">target</span> <span class="o">=</span> <span class="n">noise_scheduler</span><span class="p">.</span><span class="nf">get_velocity</span><span class="p">(</span><span class="n">latents</span><span class="p">,</span> <span class="n">noise</span><span class="p">,</span> <span class="n">timesteps</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">noise_scheduler</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="n">prediction_type</span> <span class="o">==</span> <span class="s">"v_prediction"</span><span class="p">:</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="n">noise_scheduler</span><span class="p">.</span><span class="n">get_velocity</span><span class="p">(</span><span class="n">latents</span><span class="p">,</span> <span class="n">noise</span><span class="p">,</span> <span class="n">timesteps</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="nc">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Unknown prediction type </span><span class="si">{</span><span class="n">noise_scheduler</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="n">prediction_type</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="nb">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s">"Unknown prediction type </span><span class="si">{</span><span class="n">noise_scheduler</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="n">prediction_type</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
 
-        <span class="n">unet</span><span class="p">.</span><span class="nf">zero_grad</span><span class="p">()</span>
-        <span class="n">text_encoder</span><span class="p">.</span><span class="nf">zero_grad</span><span class="p">()</span>
-        <span class="n">loss</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="nf">mse_loss</span><span class="p">(</span><span class="n">model_pred</span><span class="p">.</span><span class="nf">float</span><span class="p">(),</span> <span class="n">target</span><span class="p">.</span><span class="nf">float</span><span class="p">(),</span> <span class="n">reduction</span><span class="o">=</span><span class="sh">"</span><span class="s">mean</span><span class="sh">"</span><span class="p">)</span>
+        <span class="n">unet</span><span class="p">.</span><span class="n">zero_grad</span><span class="p">()</span>
+        <span class="n">text_encoder</span><span class="p">.</span><span class="n">zero_grad</span><span class="p">()</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="n">mse_loss</span><span class="p">(</span><span class="n">model_pred</span><span class="p">.</span><span class="nb">float</span><span class="p">(),</span> <span class="n">target</span><span class="p">.</span><span class="nb">float</span><span class="p">(),</span> <span class="n">reduction</span><span class="o">=</span><span class="s">"mean"</span><span class="p">)</span>
 
         <span class="c1"># target-shift loss
 </span>        <span class="k">if</span> <span class="n">target_tensor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">xtm1_pred</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">cat</span><span class="p">(</span>
+            <span class="n">xtm1_pred</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">cat</span><span class="p">(</span>
                 <span class="p">[</span>
-                    <span class="n">noise_scheduler</span><span class="p">.</span><span class="nf">step</span><span class="p">(</span>
+                    <span class="n">noise_scheduler</span><span class="p">.</span><span class="n">step</span><span class="p">(</span>
                         <span class="n">model_pred</span><span class="p">[</span><span class="n">idx</span> <span class="p">:</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
                         <span class="n">timesteps</span><span class="p">[</span><span class="n">idx</span> <span class="p">:</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
                         <span class="n">noisy_latents</span><span class="p">[</span><span class="n">idx</span> <span class="p">:</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
                     <span class="p">).</span><span class="n">prev_sample</span>
-                    <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">model_pred</span><span class="p">))</span>
+                    <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">model_pred</span><span class="p">))</span>
                 <span class="p">]</span>
             <span class="p">)</span>
-            <span class="n">xtm1_target</span> <span class="o">=</span> <span class="n">noise_scheduler</span><span class="p">.</span><span class="nf">add_noise</span><span class="p">(</span><span class="n">target_tensor</span><span class="p">,</span> <span class="n">noise</span><span class="p">,</span> <span class="n">timesteps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span> <span class="o">-</span> <span class="n">F</span><span class="p">.</span><span class="nf">mse_loss</span><span class="p">(</span><span class="n">xtm1_pred</span><span class="p">,</span> <span class="n">xtm1_target</span><span class="p">)</span>
+            <span class="n">xtm1_target</span> <span class="o">=</span> <span class="n">noise_scheduler</span><span class="p">.</span><span class="n">add_noise</span><span class="p">(</span><span class="n">target_tensor</span><span class="p">,</span> <span class="n">noise</span><span class="p">,</span> <span class="n">timesteps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span> <span class="o">-</span> <span class="n">F</span><span class="p">.</span><span class="n">mse_loss</span><span class="p">(</span><span class="n">xtm1_pred</span><span class="p">,</span> <span class="n">xtm1_target</span><span class="p">)</span>
 
-        <span class="n">loss</span><span class="p">.</span><span class="nf">backward</span><span class="p">()</span>
+        <span class="n">loss</span><span class="p">.</span><span class="n">backward</span><span class="p">()</span>
 
         <span class="n">alpha</span> <span class="o">=</span> <span class="n">args</span><span class="p">.</span><span class="n">pgd_alpha</span>
         <span class="n">eps</span> <span class="o">=</span> <span class="n">args</span><span class="p">.</span><span class="n">pgd_eps</span>
 
         <span class="c1"># Project to valid range
-</span>        <span class="n">adv_images</span> <span class="o">=</span> <span class="n">perturbed_images</span> <span class="o">+</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">perturbed_images</span><span class="p">.</span><span class="n">grad</span><span class="p">.</span><span class="nf">sign</span><span class="p">()</span>
-        <span class="n">eta</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">clamp</span><span class="p">(</span><span class="n">adv_images</span> <span class="o">-</span> <span class="n">original_images</span><span class="p">,</span> <span class="nb">min</span><span class="o">=-</span><span class="n">eps</span><span class="p">,</span> <span class="nb">max</span><span class="o">=+</span><span class="n">eps</span><span class="p">)</span>
-        <span class="n">perturbed_images</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">clamp</span><span class="p">(</span><span class="n">original_images</span> <span class="o">+</span> <span class="n">eta</span><span class="p">,</span> <span class="nb">min</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="o">=+</span><span class="mi">1</span><span class="p">).</span><span class="nf">detach_</span><span class="p">()</span>
-        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">PGD loss - step </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s">, loss: </span><span class="si">{</span><span class="n">loss</span><span class="p">.</span><span class="nf">detach</span><span class="p">().</span><span class="nf">item</span><span class="p">()</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</span>        <span class="n">adv_images</span> <span class="o">=</span> <span class="n">perturbed_images</span> <span class="o">+</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">perturbed_images</span><span class="p">.</span><span class="n">grad</span><span class="p">.</span><span class="n">sign</span><span class="p">()</span>
+        <span class="n">eta</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">clamp</span><span class="p">(</span><span class="n">adv_images</span> <span class="o">-</span> <span class="n">original_images</span><span class="p">,</span> <span class="nb">min</span><span class="o">=-</span><span class="n">eps</span><span class="p">,</span> <span class="nb">max</span><span class="o">=+</span><span class="n">eps</span><span class="p">)</span>
+        <span class="n">perturbed_images</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">clamp</span><span class="p">(</span><span class="n">original_images</span> <span class="o">+</span> <span class="n">eta</span><span class="p">,</span> <span class="nb">min</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="o">=+</span><span class="mi">1</span><span class="p">).</span><span class="n">detach_</span><span class="p">()</span>
+        <span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"PGD loss - step </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s">, loss: </span><span class="si">{</span><span class="n">loss</span><span class="p">.</span><span class="n">detach</span><span class="p">().</span><span class="n">item</span><span class="p">()</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">perturbed_images</span>
 </code></pre></div></div>
 

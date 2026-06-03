@@ -26,7 +26,7 @@
     <!-- Fonts & Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700%7CRoboto+Slab:100,300,400,500,700%7CMaterial+Icons">
 
     <!-- Code Syntax Highlighting -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
@@ -144,6 +144,7 @@
   <article class="post-content">
     
     <div id="table-of-contents">
+      
       <ul id="toc" class="section-nav">
 <li class="toc-entry toc-h2"><a href="#about-the-paper">About the paper</a></li>
 <li class="toc-entry toc-h2">
@@ -155,6 +156,7 @@
 <li class="toc-entry toc-h2"><a href="#how-to-implement">How to implement</a></li>
 <li class="toc-entry toc-h2"><a href="#something-to-note">Something to note</a></li>
 </ul>
+      
     </div>
     <hr>
     
@@ -267,62 +269,62 @@ Therefore, the loss function can be rewritten as follows:</p>
   <span class="c1"># choose parameters to train based on train_method, 
 </span>  <span class="c1"># e.g., 'noxattn', 'selfattn', 'xattn', 'full'
 </span>  <span class="n">parameters</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">model</span><span class="p">.</span><span class="n">model</span><span class="p">.</span><span class="n">diffusion_model</span><span class="p">.</span><span class="nf">named_parameters</span><span class="p">():</span>
+  <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">model</span><span class="p">.</span><span class="n">model</span><span class="p">.</span><span class="n">diffusion_model</span><span class="p">.</span><span class="n">named_parameters</span><span class="p">():</span>
     <span class="c1"># train all layers except x-attns and time_embed layers
-</span>    <span class="k">if</span> <span class="n">train_method</span> <span class="o">==</span> <span class="sh">'</span><span class="s">noxattn</span><span class="sh">'</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">name</span><span class="p">.</span><span class="nf">startswith</span><span class="p">(</span><span class="sh">'</span><span class="s">out.</span><span class="sh">'</span><span class="p">)</span> <span class="ow">or</span> <span class="sh">'</span><span class="s">attn2</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">name</span> <span class="ow">or</span> <span class="sh">'</span><span class="s">time_embed</span><span class="sh">'</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+</span>    <span class="k">if</span> <span class="n">train_method</span> <span class="o">==</span> <span class="s">'noxattn'</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">name</span><span class="p">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">'out.'</span><span class="p">)</span> <span class="ow">or</span> <span class="s">'attn2'</span> <span class="ow">in</span> <span class="n">name</span> <span class="ow">or</span> <span class="s">'time_embed'</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
         <span class="k">pass</span>
       <span class="k">else</span><span class="p">:</span>
-        <span class="nf">print</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-        <span class="n">parameters</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">parameters</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
     <span class="c1"># and so on for other train_methods
 </span>  
   <span class="c1"># set model to train mode
-</span>  <span class="n">model</span><span class="p">.</span><span class="nf">train</span><span class="p">()</span>
+</span>  <span class="n">model</span><span class="p">.</span><span class="n">train</span><span class="p">()</span>
 
   <span class="c1"># create a lambda function for cleaner use of sampling code (only denoising till time step t)
-</span>  <span class="n">quick_sample_till_t</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">conditioning</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">start_code</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nf">sample_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">sampler</span><span class="p">,</span> <span class="n">conditioning</span><span class="p">,</span> <span class="n">image_size</span><span class="p">,</span> <span class="n">image_size</span><span class="p">,</span> <span class="n">ddim_steps</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">ddim_eta</span><span class="p">,</span> <span class="n">start_code</span><span class="o">=</span><span class="n">start_code</span><span class="p">,</span> <span class="n">till_T</span><span class="o">=</span><span class="n">t</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</span>  <span class="n">quick_sample_till_t</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">conditioning</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">start_code</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="n">sample_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">sampler</span><span class="p">,</span> <span class="n">conditioning</span><span class="p">,</span> <span class="n">image_size</span><span class="p">,</span> <span class="n">image_size</span><span class="p">,</span> <span class="n">ddim_steps</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">ddim_eta</span><span class="p">,</span> <span class="n">start_code</span><span class="o">=</span><span class="n">start_code</span><span class="p">,</span> <span class="n">till_T</span><span class="o">=</span><span class="n">t</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
 
   <span class="c1"># set optimizer to learn only the parameters that we want
-</span>  <span class="n">opt</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">optim</span><span class="p">.</span><span class="nc">Adam</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="n">lr</span><span class="p">)</span>
+</span>  <span class="n">opt</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">optim</span><span class="p">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="n">lr</span><span class="p">)</span>
 
   <span class="c1"># train loop
-</span>  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">():</span>
+</span>  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">():</span>
     <span class="c1"># sample concept from the list of concepts
-</span>    <span class="n">word</span> <span class="o">=</span> <span class="n">random</span><span class="p">.</span><span class="nf">sample</span><span class="p">(</span><span class="n">words</span><span class="p">,</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+</span>    <span class="n">word</span> <span class="o">=</span> <span class="n">random</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">words</span><span class="p">,</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="c1"># get text embeddings for unconditional and conditional prompts
 </span>    <span class="c1"># What are the differences between positive and negative prompts?
-</span>    <span class="n">emb_0</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">get_learned_conditioning</span><span class="p">([</span><span class="sh">''</span><span class="p">])</span> <span class="c1"># unconditional
-</span>    <span class="n">emb_p</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">get_learned_conditioning</span><span class="p">([</span><span class="n">word</span><span class="p">])</span> <span class="c1"># positive
-</span>    <span class="n">emb_n</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">get_learned_conditioning</span><span class="p">([</span><span class="sa">f</span><span class="sh">'</span><span class="si">{</span><span class="n">word</span><span class="si">}</span><span class="sh">'</span><span class="p">])</span> <span class="c1"># negative
+</span>    <span class="n">emb_0</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">get_learned_conditioning</span><span class="p">([</span><span class="s">''</span><span class="p">])</span> <span class="c1"># unconditional
+</span>    <span class="n">emb_p</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">get_learned_conditioning</span><span class="p">([</span><span class="n">word</span><span class="p">])</span> <span class="c1"># positive
+</span>    <span class="n">emb_n</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">get_learned_conditioning</span><span class="p">([</span><span class="sa">f</span><span class="s">'</span><span class="si">{</span><span class="n">word</span><span class="si">}</span><span class="s">'</span><span class="p">])</span> <span class="c1"># negative
 </span>
     <span class="c1"># clear gradients 
-</span>    <span class="n">opt</span><span class="p">.</span><span class="nf">zero_grad</span><span class="p">()</span>
+</span>    <span class="n">opt</span><span class="p">.</span><span class="n">zero_grad</span><span class="p">()</span>
 
     <span class="c1"># get the time embedding with DDIM approach
-</span>    <span class="n">t_enc_ddpm</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randint</span><span class="p">()</span>
+</span>    <span class="n">t_enc_ddpm</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">randint</span><span class="p">()</span>
 
-    <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
+    <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">():</span>
       <span class="c1"># generate an image with the concept from ESD model
-</span>      <span class="n">z</span> <span class="o">=</span> <span class="nf">quick_sample_till_t</span><span class="p">(</span><span class="n">emb_p</span><span class="p">,</span> <span class="n">start_guidance</span><span class="p">,</span> <span class="n">start_code</span><span class="p">,</span> <span class="nf">int</span><span class="p">(</span><span class="n">t_enc</span><span class="p">))</span>
+</span>      <span class="n">z</span> <span class="o">=</span> <span class="n">quick_sample_till_t</span><span class="p">(</span><span class="n">emb_p</span><span class="p">,</span> <span class="n">start_guidance</span><span class="p">,</span> <span class="n">start_code</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">t_enc</span><span class="p">))</span>
       <span class="c1"># get conditional and unconditional scores from frozen model at time step t and image z generated above
-</span>      <span class="n">e_0</span> <span class="o">=</span> <span class="n">model_orig</span><span class="p">.</span><span class="nf">apply_model</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">t_enc_ddpm</span><span class="p">,</span> <span class="n">emb_0</span><span class="p">)</span>
-      <span class="n">e_p</span> <span class="o">=</span> <span class="n">model_orig</span><span class="p">.</span><span class="nf">apply_model</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">t_enc_ddpm</span><span class="p">,</span> <span class="n">emb_p</span><span class="p">)</span>
+</span>      <span class="n">e_0</span> <span class="o">=</span> <span class="n">model_orig</span><span class="p">.</span><span class="n">apply_model</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">t_enc_ddpm</span><span class="p">,</span> <span class="n">emb_0</span><span class="p">)</span>
+      <span class="n">e_p</span> <span class="o">=</span> <span class="n">model_orig</span><span class="p">.</span><span class="n">apply_model</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">t_enc_ddpm</span><span class="p">,</span> <span class="n">emb_p</span><span class="p">)</span>
 
     <span class="c1"># get negative scores from the ESD model
-</span>    <span class="n">e_n</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">apply_model</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">t_enc_ddpm</span><span class="p">,</span> <span class="n">emb_d</span><span class="p">)</span>
+</span>    <span class="n">e_n</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">apply_model</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">t_enc_ddpm</span><span class="p">,</span> <span class="n">emb_d</span><span class="p">)</span>
 
     <span class="c1"># Stop gradient of the unconditional and positive scores
-</span>    <span class="n">e_0</span> <span class="o">=</span> <span class="n">e_0</span><span class="p">.</span><span class="nf">detach</span><span class="p">()</span>
-    <span class="n">e_p</span> <span class="o">=</span> <span class="n">e_p</span><span class="p">.</span><span class="nf">detach</span><span class="p">()</span>
+</span>    <span class="n">e_0</span> <span class="o">=</span> <span class="n">e_0</span><span class="p">.</span><span class="n">detach</span><span class="p">()</span>
+    <span class="n">e_p</span> <span class="o">=</span> <span class="n">e_p</span><span class="p">.</span><span class="n">detach</span><span class="p">()</span>
 
     <span class="c1"># compute the loss function 
 </span>    <span class="n">loss</span> <span class="o">=</span> <span class="p">(</span><span class="n">e_n</span> <span class="o">-</span> <span class="n">e_0</span> <span class="o">+</span> <span class="n">negative_guidance</span> <span class="o">*</span> <span class="p">(</span><span class="n">e_p</span> <span class="o">-</span> <span class="n">e_0</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span>
 
     <span class="c1"># update the model to erase the concept
-</span>    <span class="n">loss</span><span class="p">.</span><span class="nf">backward</span><span class="p">()</span>
-    <span class="n">opt</span><span class="p">.</span><span class="nf">step</span><span class="p">()</span>
+</span>    <span class="n">loss</span><span class="p">.</span><span class="n">backward</span><span class="p">()</span>
+    <span class="n">opt</span><span class="p">.</span><span class="n">step</span><span class="p">()</span>
 
 </code></pre></div></div>
 

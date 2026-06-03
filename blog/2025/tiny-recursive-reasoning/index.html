@@ -27,7 +27,7 @@
     <!-- Fonts & Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700%7CRoboto+Slab:100,300,400,500,700%7CMaterial+Icons">
 
     <!-- Code Syntax Highlighting -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
@@ -148,6 +148,7 @@
   <article class="post-content">
     
     <div id="table-of-contents">
+      
       <ul id="toc" class="section-nav">
 <li class="toc-entry toc-h2"><a href="#about-the-paper">About the paper</a></li>
 <li class="toc-entry toc-h2">
@@ -180,6 +181,7 @@
 </li>
 <li class="toc-entry toc-h2"><a href="#references">References</a></li>
 </ul>
+      
     </div>
     <hr>
     
@@ -302,15 +304,15 @@ where \(r\) is the reward for taking action \(a\) in state \(s\), \(\gamma\) is 
 
 <p>In the implementation, the Q-value is the output of the <code class="language-plaintext highlighter-rouge">q_head</code> of the model.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">self</span><span class="p">.</span><span class="n">q_head</span> <span class="o">=</span> <span class="nc">CastedLinear</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="n">hidden_size</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="c1"># 2 actions: halt and continue
-</span><span class="n">q_logits</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">q_head</span><span class="p">(</span><span class="n">z_H</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span> <span class="c1"># Using the first token of the high-level state as the state representation
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="bp">self</span><span class="p">.</span><span class="n">q_head</span> <span class="o">=</span> <span class="n">CastedLinear</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="n">hidden_size</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="c1"># 2 actions: halt and continue
+</span><span class="n">q_logits</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">q_head</span><span class="p">(</span><span class="n">z_H</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span> <span class="c1"># Using the first token of the high-level state as the state representation
 </span><span class="n">q_halt_logits</span> <span class="o">=</span> <span class="n">q_logits</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="c1"># Q(state, halt)
 </span><span class="n">q_continue_logits</span> <span class="o">=</span> <span class="n">q_logits</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="c1"># Q(state, continue)
 </span></code></pre></div></div>
 
 <p>The <strong>halting logic</strong> is implemented as follows:</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="n">no_ACT_continue</span><span class="p">:</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="bp">self</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="n">no_ACT_continue</span><span class="p">:</span>
     <span class="n">halted</span> <span class="o">=</span> <span class="p">(</span><span class="n">q_halt_logits</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="c1"># Halt if Q(halt) is positive
 </span><span class="k">else</span><span class="p">:</span>
     <span class="n">halted</span> <span class="o">=</span> <span class="p">(</span><span class="n">q_halt_logits</span> <span class="o">&gt;</span> <span class="n">q_continue_logits</span><span class="p">)</span> <span class="c1"># Halt if Q(halt) is greater than Q(continue)
@@ -320,10 +322,10 @@ where \(r\) is the reward for taking action \(a\) in state \(s\), \(\gamma\) is 
 
 <p>The Q-learning loss is defined in the <code class="language-plaintext highlighter-rouge">ACTLossHead</code> class as below:</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">q_halt_loss</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="nf">binary_cross_entropy_with_logits</span><span class="p">(</span>
-    <span class="n">outputs</span><span class="p">[</span><span class="sh">"</span><span class="s">q_halt_logits</span><span class="sh">"</span><span class="p">],</span>        <span class="c1"># Predicted: should we halt?
-</span>    <span class="n">seq_is_correct</span><span class="p">.</span><span class="nf">to</span><span class="p">(...),</span>          <span class="c1"># Target: 1 if sequence is correct, 0 otherwise
-</span>    <span class="n">reduction</span><span class="o">=</span><span class="sh">"</span><span class="s">sum</span><span class="sh">"</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">q_halt_loss</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="n">binary_cross_entropy_with_logits</span><span class="p">(</span>
+    <span class="n">outputs</span><span class="p">[</span><span class="s">"q_halt_logits"</span><span class="p">],</span>        <span class="c1"># Predicted: should we halt?
+</span>    <span class="n">seq_is_correct</span><span class="p">.</span><span class="n">to</span><span class="p">(...),</span>          <span class="c1"># Target: 1 if sequence is correct, 0 otherwise
+</span>    <span class="n">reduction</span><span class="o">=</span><span class="s">"sum"</span>
 <span class="p">)</span>
 </code></pre></div></div>
 
@@ -332,11 +334,11 @@ As noted, <code class="language-plaintext highlighter-rouge">seq_is_correct</cod
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Token-level correctness
 </span><span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">labels</span> <span class="o">!=</span> <span class="n">IGNORE_LABEL_ID</span><span class="p">)</span>  <span class="c1"># Valid positions
-</span><span class="n">is_correct</span> <span class="o">=</span> <span class="n">mask</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">argmax</span><span class="p">(</span><span class="n">outputs</span><span class="p">[</span><span class="sh">"</span><span class="s">logits</span><span class="sh">"</span><span class="p">],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">labels</span><span class="p">)</span>
+</span><span class="n">is_correct</span> <span class="o">=</span> <span class="n">mask</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">outputs</span><span class="p">[</span><span class="s">"logits"</span><span class="p">],</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">labels</span><span class="p">)</span>
 
 <span class="c1"># Sequence-level correctness (ALL tokens must be correct)
-</span><span class="n">loss_counts</span> <span class="o">=</span> <span class="n">mask</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># Number of valid tokens per sequence
-</span><span class="n">seq_is_correct</span> <span class="o">=</span> <span class="n">is_correct</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">loss_counts</span>  <span class="c1"># Boolean: all tokens correct?
+</span><span class="n">loss_counts</span> <span class="o">=</span> <span class="n">mask</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># Number of valid tokens per sequence
+</span><span class="n">seq_is_correct</span> <span class="o">=</span> <span class="n">is_correct</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">loss_counts</span>  <span class="c1"># Boolean: all tokens correct?
 </span></code></pre></div></div>
 
 <p><strong>Continue Loss</strong></p>
@@ -344,17 +346,17 @@ As noted, <code class="language-plaintext highlighter-rouge">seq_is_correct</cod
 <p>In addition, the authors also proposed to use the <strong>Q-Continue Loss</strong> (bootstrapped Q-values) (The question <code class="language-plaintext highlighter-rouge">Should we continue?</code> instead of <code class="language-plaintext highlighter-rouge">Should we halt?</code>).
 However, as noted by the authors, while the <code class="language-plaintext highlighter-rouge">Q-continue</code> loss fits Q-learning, but seems totally unnecessary as the <code class="language-plaintext highlighter-rouge">Q-halt</code> loss is enough to learn the halting policy.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="sh">"</span><span class="s">target_q_continue</span><span class="sh">"</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">:</span>
-    <span class="n">q_continue_loss</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="nf">binary_cross_entropy_with_logits</span><span class="p">(</span>
-        <span class="n">outputs</span><span class="p">[</span><span class="sh">"</span><span class="s">q_continue_logits</span><span class="sh">"</span><span class="p">],</span>  <span class="c1"># Predicted: should we continue?
-</span>        <span class="n">outputs</span><span class="p">[</span><span class="sh">"</span><span class="s">target_q_continue</span><span class="sh">"</span><span class="p">],</span>  <span class="c1"># Target: bootstrapped Q-value from next state
-</span>        <span class="n">reduction</span><span class="o">=</span><span class="sh">"</span><span class="s">sum</span><span class="sh">"</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="s">"target_q_continue"</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">:</span>
+    <span class="n">q_continue_loss</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="n">binary_cross_entropy_with_logits</span><span class="p">(</span>
+        <span class="n">outputs</span><span class="p">[</span><span class="s">"q_continue_logits"</span><span class="p">],</span>  <span class="c1"># Predicted: should we continue?
+</span>        <span class="n">outputs</span><span class="p">[</span><span class="s">"target_q_continue"</span><span class="p">],</span>  <span class="c1"># Target: bootstrapped Q-value from next state
+</span>        <span class="n">reduction</span><span class="o">=</span><span class="s">"sum"</span>
     <span class="p">)</span>
 </code></pre></div></div>
 
 <p>where <code class="language-plaintext highlighter-rouge">target_q_continue</code> is the bootstrapped Q-value from the next state.</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">target_q_continue</span> <span class="o">=</span> <span class="nf">sigmoid</span><span class="p">(</span><span class="nf">max</span><span class="p">(</span><span class="n">next_q_halt</span><span class="p">,</span> <span class="n">next_q_continue</span><span class="p">))</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">target_q_continue</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">next_q_halt</span><span class="p">,</span> <span class="n">next_q_continue</span><span class="p">))</span>
 </code></pre></div></div>
 
 <p><strong>Total loss</strong></p>
@@ -373,9 +375,9 @@ This forces the model to learn basic language understanding before adapting to t
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Q head special init
 # Init Q to (almost) zero for faster learning during bootstrapping
-</span><span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
-    <span class="n">self</span><span class="p">.</span><span class="n">q_head</span><span class="p">.</span><span class="n">weight</span><span class="p">.</span><span class="nf">zero_</span><span class="p">()</span>
-    <span class="n">self</span><span class="p">.</span><span class="n">q_head</span><span class="p">.</span><span class="n">bias</span><span class="p">.</span><span class="nf">fill_</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span>  <span class="c1"># type: ignore
+</span><span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">q_head</span><span class="p">.</span><span class="n">weight</span><span class="p">.</span><span class="n">zero_</span><span class="p">()</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">q_head</span><span class="p">.</span><span class="n">bias</span><span class="p">.</span><span class="n">fill_</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span>  <span class="c1"># type: ignore
 </span></code></pre></div></div>
 
 <p><strong>Phase 2: Learning to halt</strong></p>
@@ -386,7 +388,7 @@ resulting in the model learning to halt early.</p>
 <p><strong>Phase 3: Exploration Refinement</strong></p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Force trying different step counts
-</span><span class="n">min_halt_steps</span> <span class="o">=</span> <span class="nf">random_int</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">halt_max_steps</span><span class="p">)</span> <span class="k">with</span> <span class="n">probability</span> <span class="n">ε</span>
+</span><span class="n">min_halt_steps</span> <span class="o">=</span> <span class="n">random_int</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">halt_max_steps</span><span class="p">)</span> <span class="k">with</span> <span class="n">probability</span> <span class="n">ε</span>
 </code></pre></div></div>
 
 <p>The model <strong>exploration</strong> prevents the model always halts at the same step, thus leading to overfitting. This helps to discover optimal reasoning depth for different problems.</p>
