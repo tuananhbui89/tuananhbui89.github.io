@@ -150,7 +150,7 @@
 <a href="#unsupervised-learning">Unsupervised learning</a>
 <ul>
 <li class="toc-entry toc-h4"><a href="#self-supervised-learning">Self-supervised learning</a></li>
-<li class="toc-entry toc-h4"><a href="#clustering">Clustering</a></li>
+<li class="toc-entry toc-h4"><a href="#clustering-in-representation-space">Clustering in representation space</a></li>
 </ul>
 </li>
 <li class="toc-entry toc-h3"><a href="#semi-supervised-learning">Semi-supervised learning</a></li>
@@ -184,7 +184,14 @@
 <li class="toc-entry toc-h3"><a href="#fisher-information">Fisher information</a></li>
 <li class="toc-entry toc-h3"><a href="#hessian-matrix">Hessian matrix</a></li>
 <li class="toc-entry toc-h3"><a href="#stochastic-gradient-descent">Stochastic gradient descent</a></li>
-<li class="toc-entry toc-h3"><a href="#adam-rmsprop-adagrad">Adam, RMSProp, AdaGrad</a></li>
+<li class="toc-entry toc-h3">
+<a href="#adam-rmsprop-adagrad">Adam, RMSProp, AdaGrad</a>
+<ul>
+<li class="toc-entry toc-h4"><a href="#adagrad">AdaGrad</a></li>
+<li class="toc-entry toc-h4"><a href="#rmsprop">RMSProp</a></li>
+<li class="toc-entry toc-h4"><a href="#adam">Adam</a></li>
+</ul>
+</li>
 <li class="toc-entry toc-h3"><a href="#bayesian-optimization">Bayesian Optimization</a></li>
 </ul>
 </li>
@@ -243,6 +250,7 @@
 </li>
 </ul>
 </li>
+<li class="toc-entry toc-h2"><a href="#references">References</a></li>
 </ul>
       
     </div>
@@ -338,66 +346,629 @@ It can be learned using Expectation-Maximization (EM) algorithm, including the E
 
 <p><strong>Kernel Density Estimation</strong> (KDE) uses a kernel function to estimate the probability density function of the data.</p>
 
-\[p(x) = \frac{1}{Nh} \sum_{i=1}^{N} K \left( \frac{x - x_i}{h} \right)\]
+\[p(x) = \frac{1}{Nh^d} \sum_{i=1}^{N} K \left( \frac{x - x_i}{h} \right)\]
 
-<p>where \(K\) is the kernel function and \(h\) is the bandwidth to control the smoothness of the estimated density. Common kernel functions include Gaussian, Epanechnikov, and Uniform kernels.</p>
+<p>where \(K\) is the kernel function, \(h\) is the bandwidth to control the smoothness of the estimated density, and \(d\) is the input dimension. For one-dimensional data, this reduces to \(\frac{1}{Nh}\). Common kernel functions include Gaussian, Epanechnikov, and Uniform kernels.</p>
 
 <h4 id="self-supervised-learning">Self-supervised learning</h4>
 
-<h4 id="clustering">Clustering</h4>
+<p>Self-supervised learning is technically supervised learning in disguise: we create the labels from the data itself. This is why it is such a powerful idea. You do not need humans to annotate every image/text/audio clip, but you still train with a supervised-style objective.</p>
+
+<p>Examples:</p>
+
+<ul>
+  <li>Predict the next token in language modeling.</li>
+  <li>Mask some image patches and reconstruct them, as in <a href="https://arxiv.org/abs/2111.06377" rel="external nofollow noopener" target="_blank">Masked Autoencoders</a>.</li>
+  <li>Create two augmented views of the same image and pull their representations together, as in <a href="https://arxiv.org/abs/2002.05709" rel="external nofollow noopener" target="_blank">SimCLR</a>.</li>
+  <li>Predict missing words, masked regions, future frames, or whether two chunks come from the same sample.</li>
+</ul>
+
+<p>The general recipe is:</p>
+
+\[x \rightarrow (x_a, x_b) \rightarrow z_a = f_{\theta}(x_a), \quad z_b = f_{\theta}(x_b)\]
+
+<p>Then train the model so that related views are close and unrelated views are far away. A common contrastive loss is InfoNCE:</p>
+
+\[\mathcal{L}_i = - \log \frac{\exp(\mathrm{sim}(z_i, z_i^+) / \tau)}
+{\sum_{j=1}^{B} \exp(\mathrm{sim}(z_i, z_j) / \tau)}\]
+
+<p>where \(z_i^+\) is the positive example for \(z_i\), \(B\) is the batch size, \(\mathrm{sim}\) is usually cosine similarity, and \(\tau\) is the temperature.</p>
+
+<p>💡 Intuition: self-supervised learning is about designing a “pretext task” that forces the model to learn useful structure. If the pretext task is too easy, the representation is weak. If it is too unrelated to the downstream task, the model learns the wrong thing very confidently, which is always a little rude :D</p>
+
+<h4 id="clustering-in-representation-space">Clustering in representation space</h4>
+
+<p>Clustering can also be used as a self-supervised signal. Instead of assigning ground-truth labels, we assign pseudo-labels from cluster IDs:</p>
+
+\[c_i = \underset{k}{\mathrm{argmin}} \ \| f_{\theta}(x_i) - \mu_k \|^2\]
+
+<p>Then the model is trained to predict those cluster assignments. This is a useful trick when we believe the data has semantic groups, but we do not have labels yet.</p>
+
+<p>Important caveat: clusters are not automatically “classes”. K-means might group images by background color, camera style, or lighting instead of the actual object. This is one of the classic places where ML looks smart and then quietly optimizes the wrong shortcut.</p>
 
 <h3 id="semi-supervised-learning">Semi-supervised learning</h3>
 
+<p>Semi-supervised learning sits between supervised and unsupervised learning. We have a small labeled dataset and a usually much larger unlabeled dataset:</p>
+
+\[\mathcal{D}_L = \{(x_i, y_i)\}_{i=1}^{N_L}, \quad
+\mathcal{D}_U = \{x_i\}_{i=1}^{N_U}, \quad N_U \gg N_L\]
+
+<p>The goal is to use unlabeled data to improve the model beyond what the labeled data alone can do.</p>
+
+<p>Common approaches:</p>
+
+<ul>
+  <li>
+<strong>Self-training / pseudo-labeling</strong>: train on labeled data, predict labels for unlabeled data, then add high-confidence predictions back into training.</li>
+  <li>
+<strong>Consistency regularization</strong>: different augmentations of the same input should produce similar predictions.</li>
+  <li>
+<strong>Graph-based label propagation</strong>: build a similarity graph and propagate labels to nearby unlabeled samples.</li>
+  <li>
+<strong>Entropy minimization</strong>: encourage confident predictions on unlabeled samples.</li>
+</ul>
+
+<p>The simplest pseudo-label objective:</p>
+
+\[\mathcal{L}(\theta) =
+\frac{1}{N_L} \sum_{(x,y) \in \mathcal{D}_L} \ell(f_{\theta}(x), y)
++ \lambda \frac{1}{N_U} \sum_{x \in \mathcal{D}_U} \ell(f_{\theta}(x), \hat{y})\]
+
+<p>where \(\hat{y} = \underset{k}{\mathrm{argmax}} \ f_{\theta}(x)_k\) is the pseudo-label.</p>
+
+<p>⚠️ Important thing that people forget: pseudo-labeling can amplify early mistakes. If the model is confidently wrong, it will create bad labels and then learn from its own bad labels. So confidence thresholds, strong augmentation, and validation checks matter a lot.</p>
+
 <h3 id="reinforcement-learning">Reinforcement learning</h3>
+
+<p>Reinforcement learning (RL) is about learning by interacting with an environment. Instead of a fixed dataset of input-output pairs, the agent takes actions, receives rewards, and changes the future data it will see.</p>
+
+<p>The common formulation is a Markov Decision Process (MDP):</p>
+
+\[\mathcal{M} = (\mathcal{S}, \mathcal{A}, P, R, \gamma)\]
+
+<p>where:</p>
+
+<ul>
+  <li>\(\mathcal{S}\) is the state space.</li>
+  <li>\(\mathcal{A}\) is the action space.</li>
+  <li>\(P(s' \mid s,a)\) is the transition probability.</li>
+  <li>\(R(s,a,s')\) is the reward.</li>
+  <li>\(\gamma \in [0,1)\) is the discount factor.</li>
+</ul>
+
+<p>A policy \(\pi(a \mid s)\) tells the agent what action to take. The objective is to maximize expected discounted return:</p>
+
+\[J(\pi) = \mathbb{E}_{\pi}\left[\sum_{t=0}^{\infty} \gamma^t r_t \right]\]
+
+<p>The value function estimates how good a state is:</p>
+
+\[V^{\pi}(s) = \mathbb{E}_{\pi}\left[\sum_{t=0}^{\infty} \gamma^t r_t \mid s_0=s \right]\]
+
+<p>and the action-value function estimates how good it is to take action \(a\) in state \(s\):</p>
+
+\[Q^{\pi}(s,a) = \mathbb{E}_{\pi}\left[\sum_{t=0}^{\infty} \gamma^t r_t \mid s_0=s, a_0=a \right]\]
+
+<p>The Bellman equation is the core recursion:</p>
+
+\[V^{\pi}(s) =
+\sum_a \pi(a \mid s) \sum_{s'} P(s' \mid s,a)
+\left[R(s,a,s') + \gamma V^{\pi}(s')\right]\]
+
+<p>RL is powerful but also tricky because the data is not i.i.d., exploration matters, rewards can be sparse, and a poorly specified reward can produce weird behavior. The classic reference is Sutton and Barto’s <a href="http://incompleteideas.net/book/the-book-2nd.html" rel="external nofollow noopener" target="_blank">Reinforcement Learning: An Introduction</a>.</p>
 
 <h2 id="machine-learning-settings">Machine Learning Settings</h2>
 
 <h3 id="representation-learning">Representation learning</h3>
 
+<p>Representation learning is the problem of learning useful features automatically instead of hand-designing them.</p>
+
+<p>Given raw input \(x\), we learn an encoder:</p>
+
+\[z = f_{\theta}(x)\]
+
+<p>where \(z\) should preserve the information needed for downstream tasks while removing irrelevant nuisance factors.</p>
+
+<p>Examples:</p>
+
+<ul>
+  <li>In vision: learn features for edges, shapes, textures, objects, layouts.</li>
+  <li>In NLP: learn token/sentence/document embeddings.</li>
+  <li>In speech: learn acoustic representations that are robust to speaker and noise.</li>
+</ul>
+
+<p>Good representations often have these properties:</p>
+
+<ul>
+  <li>
+<strong>Invariance</strong>: irrelevant changes should not move the representation too much. Example: a cat is still a cat after small crop/color changes.</li>
+  <li>
+<strong>Disentanglement</strong>: different factors of variation are separated. Example: identity vs pose vs lighting.</li>
+  <li>
+<strong>Transferability</strong>: a representation learned for one task is useful for another.</li>
+  <li>
+<strong>Compactness</strong>: unnecessary information is compressed away.</li>
+</ul>
+
+<p>Personal note: representation learning is probably the most important idea behind modern deep learning. Most “model intelligence” is really “the model learned a useful internal coordinate system”.</p>
+
 <h3 id="continual-learning">Continual learning</h3>
+
+<p>Continual learning studies how a model can learn a sequence of tasks without forgetting old ones.</p>
+
+<p>Suppose tasks arrive over time:</p>
+
+\[\mathcal{T}_1, \mathcal{T}_2, \ldots, \mathcal{T}_m\]
+
+<p>After training on \(\mathcal{T}_m\), we still want good performance on earlier tasks \(\mathcal{T}_1, \ldots, \mathcal{T}_{m-1}\).</p>
+
+<p>The main problem is <strong>catastrophic forgetting</strong>: gradient updates for a new task overwrite parameters that were important for old tasks.</p>
+
+<p>Common strategies:</p>
+
+<ul>
+  <li>
+<strong>Replay</strong>: keep some old data or generate old-like data and mix it with new data.</li>
+  <li>
+<strong>Regularization</strong>: penalize changes to parameters important for previous tasks, e.g., Elastic Weight Consolidation (EWC).</li>
+  <li>
+<strong>Dynamic architectures</strong>: add new modules/experts for new tasks.</li>
+  <li>
+<strong>Prompt/adapters</strong>: in modern foundation models, keep the base model mostly fixed and learn small task-specific components.</li>
+</ul>
+
+<p>A simplified EWC-style objective:</p>
+
+\[\mathcal{L}_{new}(\theta) + \frac{\lambda}{2} \sum_i F_i(\theta_i - \theta_i^*)^2\]
+
+<p>where \(\theta^*\) are parameters after previous tasks and \(F_i\) estimates how important parameter \(i\) was.</p>
+
+<p>The tradeoff is stability vs plasticity:</p>
+
+<ul>
+  <li>Stability: do not forget old knowledge.</li>
+  <li>Plasticity: still learn new knowledge.</li>
+</ul>
+
+<p>This is one of those problems that sounds easy until you actually try it :D</p>
 
 <h3 id="meta-learning">Meta-learning</h3>
 
+<p>Meta-learning means “learning to learn”. Instead of training on one task, we train over a distribution of tasks so the model can adapt quickly to a new task.</p>
+
+<p>Let tasks be sampled from \(p(\mathcal{T})\). Each task has a small support/train set and a query/test set:</p>
+
+\[\mathcal{D}_{\mathcal{T}}^{train}, \quad \mathcal{D}_{\mathcal{T}}^{test}\]
+
+<p>In optimization-based meta-learning, such as <a href="https://arxiv.org/abs/1703.03400" rel="external nofollow noopener" target="_blank">MAML</a>, the model learns an initialization \(\theta\) that can adapt with a few gradient steps:</p>
+
+\[\theta'_{\mathcal{T}} = \theta - \alpha \nabla_{\theta}
+\mathcal{L}_{\mathcal{T}}^{train}(\theta)\]
+
+<p>Then the meta-objective optimizes the post-adaptation performance:</p>
+
+\[\min_{\theta} \sum_{\mathcal{T} \sim p(\mathcal{T})}
+\mathcal{L}_{\mathcal{T}}^{test}(\theta'_{\mathcal{T}})\]
+
+<p>Types of meta-learning:</p>
+
+<ul>
+  <li>
+<strong>Metric-based</strong>: learn an embedding where nearest-neighbor classification works well.</li>
+  <li>
+<strong>Optimization-based</strong>: learn parameters that are easy to fine-tune.</li>
+  <li>
+<strong>Model-based</strong>: use memory or recurrence to adapt quickly.</li>
+</ul>
+
+<p>Meta-learning is useful for few-shot learning, personalization, robotics, and any setup where we need fast adaptation from little data.</p>
+
 <h3 id="transfer-learning">Transfer learning</h3>
+
+<p>Transfer learning uses knowledge learned from one task/domain to improve another task/domain.</p>
+
+<p>The common deep learning recipe:</p>
+
+<ol>
+  <li>Pretrain a model on a large source dataset/task.</li>
+  <li>Reuse the encoder/backbone on a target task.</li>
+  <li>Fine-tune all or part of the model on target data.</li>
+</ol>
+
+<p>Mathematically:</p>
+
+\[z = f_{\theta}^{source}(x), \quad \hat{y} = g_{\phi}(z)\]
+
+<p>Then adapt \(\theta\) and/or \(\phi\) on the target dataset.</p>
+
+<p>Examples:</p>
+
+<ul>
+  <li>ImageNet-pretrained CNN/ViT transferred to medical imaging.</li>
+  <li>Language model pretrained on web text transferred to summarization or classification.</li>
+  <li>Speech model pretrained on large audio transferred to speaker/emotion recognition.</li>
+</ul>
+
+<p>When it works well, transfer learning reduces data requirements. When it works badly, we get <strong>negative transfer</strong>, where source knowledge hurts target performance.</p>
+
+<p>💡 Practical rule: transfer works best when the low-level structure is shared. Natural images to natural images? Usually good. Natural images to medical scans? Maybe. Dogs to financial time series? Please do not make the poor model suffer.</p>
 
 <h3 id="multi-task-learning">Multi-task learning</h3>
 
+<p>Multi-task learning trains one model on multiple tasks at the same time, usually with a shared backbone and task-specific heads:</p>
+
+\[z = f_{\theta}(x), \quad \hat{y}^{(t)} = g_{\phi_t}(z)\]
+
+<p>The objective is a weighted sum of task losses:</p>
+
+\[\mathcal{L}(\theta, \{\phi_t\}) =
+\sum_{t=1}^{T} \lambda_t \mathcal{L}_t(\theta, \phi_t)\]
+
+<p>Examples:</p>
+
+<ul>
+  <li>A vision model predicts class, bounding box, depth, and segmentation mask.</li>
+  <li>An NLP model performs sentiment classification, NER, and entailment.</li>
+  <li>A recommender system predicts clicks, watch time, likes, and churn.</li>
+</ul>
+
+<p>Why it can help:</p>
+
+<ul>
+  <li>Shared representation acts as regularization.</li>
+  <li>Related tasks provide extra supervision.</li>
+  <li>The model may learn features that a single task would not reveal.</li>
+</ul>
+
+<p>Why it can fail:</p>
+
+<ul>
+  <li>Tasks may compete, causing negative transfer.</li>
+  <li>Loss scales can be very different.</li>
+  <li>One easy task can dominate the shared representation.</li>
+</ul>
+
+<p>This is why task weighting is not just an implementation detail. It can decide whether multi-task learning is elegant or chaos wearing a lab coat.</p>
+
 <h3 id="domain-adaptation">Domain adaptation</h3>
+
+<p>Domain adaptation is transfer learning where the task is usually the same, but the data distribution changes between source and target domains.</p>
+
+<p>Examples:</p>
+
+<ul>
+  <li>Train on synthetic images, test on real images.</li>
+  <li>Train on sunny driving scenes, test on rainy/night scenes.</li>
+  <li>Train a medical model in one hospital, deploy in another hospital.</li>
+</ul>
+
+<p>Let source and target distributions be:</p>
+
+\[P_S(X,Y), \quad P_T(X,Y)\]
+
+<p>The goal is to learn a model with low target risk:</p>
+
+\[R_T(f) = \mathbb{E}_{(x,y) \sim P_T}
+\left[\ell(f(x), y)\right]\]
+
+<p>even when most labels come from \(P_S\).</p>
 
 <h4 id="unsupervised-domain-adaptation">Unsupervised domain adaptation</h4>
 
-<p>Given a set of \(N \leq 1\) source domains \(\{ \mathcal{D}_{S_i} \}_{i=1}^{N}\) each of which is a collection of data-label pairs of domain \(S_i\), i.e., \(\mathcal{D}_{S_i} = \{ (x_{j}, y_{j}) \}_{j=1}^{N_{S_i}}\), \(y_i \in [K] := \{1, 2, \ldots, K\}\), (the set of classes \(K\) is the same for all domains), and one unlabeled target domain \(\mathcal{D}_T=\{x_j\}_{j=1}^{N_T}\), the goal of unsupervised domain adaptation is to learn a classifier \(f_{\theta}\) that can generalize well to the target domain \(\mathcal{D}_T\).</p>
+<p>Given a set of \(M \geq 1\) source domains \(\{ \mathcal{D}_{S_m} \}_{m=1}^{M}\), each source domain is a collection of labeled examples:</p>
+
+\[\mathcal{D}_{S_m} = \{(x_j^{(m)}, y_j^{(m)})\}_{j=1}^{N_{S_m}},
+\quad y_j^{(m)} \in [K] := \{1,2,\ldots,K\}\]
+
+<p>and one unlabeled target domain:</p>
+
+\[\mathcal{D}_T = \{x_j^T\}_{j=1}^{N_T}\]
+
+<p>The goal of unsupervised domain adaptation is to learn a classifier \(f_{\theta}\) that generalizes well to the target domain \(\mathcal{D}_T\), even though target labels are not available during training.</p>
 
 <p>Example:</p>
 
 <ul>
   <li>Source domain: Images of faces from different countries, each country can be considered as a domain with different geographic features.</li>
-  <li>Target domain: Images of faces from a specific country that does not have the same geographic features as the source domains and no labels. It can be a rare race or ethnicity.</li>
+  <li>Target domain: Images from a demographic group or capture condition that is not well represented in the labeled source domains.</li>
+</ul>
+
+<p>Common methods:</p>
+
+<ul>
+  <li>
+<strong>Feature alignment</strong>: make source and target representations statistically similar.</li>
+  <li>
+<strong>Adversarial domain adaptation</strong>: train a domain classifier to distinguish source vs target, while the encoder tries to fool it. <a href="https://arxiv.org/abs/1505.07818" rel="external nofollow noopener" target="_blank">DANN</a> is the classic example.</li>
+  <li>
+<strong>Pseudo-labeling</strong>: generate labels for target samples and retrain.</li>
+  <li>
+<strong>Image-to-image translation</strong>: translate source style to target style or vice versa.</li>
 </ul>
 
 <h4 id="supervised-domain-adaptation">Supervised domain adaptation</h4>
 
-<p>The setting is similar to unsupervised domain adaptation, but the target domain has labels.</p>
+<p>The setting is similar to unsupervised domain adaptation, but the target domain has labels:</p>
+
+\[\mathcal{D}_T = \{(x_j^T, y_j^T)\}_{j=1}^{N_T}\]
+
+<p>Usually \(N_T\) is much smaller than the source dataset, so the question becomes: how do we use source data without overwhelming the target signal?</p>
+
+<p>Simple strategies:</p>
+
+<ul>
+  <li>Pretrain on source, fine-tune on target.</li>
+  <li>Mix source and target data with higher weight on target samples.</li>
+  <li>Learn domain-specific BatchNorm/adapters.</li>
+  <li>Use source data only for representation learning, then train the final classifier on target labels.</li>
+</ul>
 
 <h4 id="challenges">Challenges</h4>
 
+<ul>
+  <li>
+<strong>Covariate shift</strong>: \(P_S(X) \neq P_T(X)\) but \(P(Y \mid X)\) is assumed similar.</li>
+  <li>
+<strong>Label shift</strong>: \(P_S(Y) \neq P_T(Y)\), e.g., class imbalance changes.</li>
+  <li>
+<strong>Concept shift</strong>: \(P_S(Y \mid X) \neq P_T(Y \mid X)\). This is the hard one because the meaning of features changes.</li>
+  <li>
+<strong>Negative transfer</strong>: adaptation makes target performance worse.</li>
+  <li>
+<strong>Target leakage</strong>: accidentally using target labels or validation choices in a way that makes evaluation too optimistic.</li>
+  <li>
+<strong>Pseudo-label confirmation bias</strong>: wrong target pseudo-labels reinforce themselves.</li>
+</ul>
+
 <h3 id="domain-generalization">Domain generalization</h3>
+
+<p>Domain generalization is harder than domain adaptation because we do not get target-domain data during training.</p>
+
+<p>Training:</p>
+
+\[\{ \mathcal{D}_{S_1}, \mathcal{D}_{S_2}, \ldots, \mathcal{D}_{S_M} \}\]
+
+<p>Testing:</p>
+
+\[\mathcal{D}_{T}, \quad T \notin \{S_1,\ldots,S_M\}\]
+
+<p>The goal is to learn features that survive across domains:</p>
+
+\[f_{\theta}: X \rightarrow Y\]
+
+<p>such that target risk is low for an unseen domain. A good survey is <a href="https://arxiv.org/abs/2103.03097" rel="external nofollow noopener" target="_blank">Generalizing to Unseen Domains</a>.</p>
+
+<p>Common approaches:</p>
+
+<ul>
+  <li>
+<strong>Domain-invariant representation learning</strong>: learn features shared by all source domains.</li>
+  <li>
+<strong>Data augmentation</strong>: create synthetic domain shifts during training.</li>
+  <li>
+<strong>Meta-learning</strong>: simulate train/test domain splits inside training.</li>
+  <li>
+<strong>Invariant risk minimization (IRM)-style ideas</strong>: encourage predictors that stay stable across environments.</li>
+  <li>
+<strong>Ensembling</strong>: combine models with different biases.</li>
+</ul>
+
+<p>Important caveat: domain generalization is extremely evaluation-sensitive. If the validation domain is too similar to the test domain, performance may look better than it really is.</p>
 
 <h2 id="optimization">Optimization</h2>
 
 <h3 id="gradient-descent">Gradient descent</h3>
 
+<p>Gradient descent is the basic algorithm for minimizing a differentiable objective.</p>
+
+<p>Given a loss function \(\mathcal{L}(\theta)\), we update parameters in the opposite direction of the gradient:</p>
+
+\[\theta_{t+1} = \theta_t - \eta \nabla_{\theta}\mathcal{L}(\theta_t)\]
+
+<p>where \(\eta\) is the learning rate.</p>
+
+<p>Intuition:</p>
+
+<ul>
+  <li>The gradient points in the direction where the loss increases fastest.</li>
+  <li>We go in the negative gradient direction to reduce the loss.</li>
+  <li>The learning rate controls step size.</li>
+</ul>
+
+<p>If \(\eta\) is too small, training is slow. If \(\eta\) is too large, the optimization can bounce around or diverge. This is why learning-rate schedules matter so much in practice.</p>
+
 <h3 id="newtons-method">Newton’s method</h3>
+
+<p>Newton’s method uses second-order information, meaning it looks at curvature through the Hessian matrix:</p>
+
+\[\theta_{t+1} = \theta_t - H^{-1} \nabla_{\theta}\mathcal{L}(\theta_t)\]
+
+<p>where:</p>
+
+\[H = \nabla_{\theta}^{2}\mathcal{L}(\theta)\]
+
+<p>For a quadratic function, Newton’s method can reach the optimum in one step. Very cool mathematically, but in deep learning it is usually too expensive because:</p>
+
+<ul>
+  <li>The Hessian can be huge.</li>
+  <li>Inverting the Hessian is expensive.</li>
+  <li>The Hessian may be indefinite, so the Newton direction is not always a descent direction.</li>
+</ul>
+
+<p>Still, the idea is important because many optimizers approximate second-order behavior.</p>
 
 <h3 id="fisher-information">Fisher information</h3>
 
+<p>The Fisher information measures how sensitive a probability model is to changes in its parameters.</p>
+
+<p>For a distribution \(p_{\theta}(x)\):</p>
+
+\[F(\theta) =
+\mathbb{E}_{x \sim p_{\theta}}
+\left[
+\nabla_{\theta}\log p_{\theta}(x)
+\nabla_{\theta}\log p_{\theta}(x)^T
+\right]\]
+
+<p>Why it matters:</p>
+
+<ul>
+  <li>It appears in maximum likelihood estimation.</li>
+  <li>It defines the natural gradient direction.</li>
+  <li>It is used in continual learning methods such as EWC to estimate parameter importance.</li>
+  <li>It connects optimization and information geometry.</li>
+</ul>
+
+<p>Natural gradient updates use \(F^{-1}\) instead of ordinary Euclidean geometry:</p>
+
+\[\theta_{t+1} = \theta_t - \eta F^{-1}\nabla_{\theta}\mathcal{L}(\theta_t)\]
+
+<p>The intuition is: do not take the biggest step in parameter space; take a good step in distribution space.</p>
+
 <h3 id="hessian-matrix">Hessian matrix</h3>
+
+<p>The Hessian matrix contains second derivatives:</p>
+
+\[H_{ij} = \frac{\partial^2 \mathcal{L}}{\partial \theta_i \partial \theta_j}\]
+
+<p>It describes local curvature:</p>
+
+<ul>
+  <li>Positive eigenvalues: locally convex direction.</li>
+  <li>Negative eigenvalues: locally concave direction.</li>
+  <li>Large eigenvalues: sharp curvature.</li>
+  <li>Small eigenvalues: flat direction.</li>
+</ul>
+
+<p>Near a point \(\theta\), the loss can be approximated by a second-order Taylor expansion:</p>
+
+\[\mathcal{L}(\theta + \Delta)
+\approx
+\mathcal{L}(\theta)
++ \nabla \mathcal{L}(\theta)^T \Delta
++ \frac{1}{2}\Delta^T H \Delta\]
+
+<p>This is the mathematical root of many ideas: Newton’s method, curvature-aware optimization, sharpness, flat minima, Laplace approximation, and uncertainty estimation.</p>
 
 <h3 id="stochastic-gradient-descent">Stochastic gradient descent</h3>
 
+<p>Full-batch gradient descent computes the gradient over the entire dataset:</p>
+
+\[\nabla_{\theta}\mathcal{L}(\theta)
+=
+\frac{1}{N} \sum_{i=1}^{N}
+\nabla_{\theta}\ell_i(\theta)\]
+
+<p>Stochastic gradient descent (SGD) estimates it using a mini-batch \(\mathcal{B}\):</p>
+
+\[g_t =
+\frac{1}{|\mathcal{B}|}
+\sum_{i \in \mathcal{B}}
+\nabla_{\theta}\ell_i(\theta_t)\]
+
+\[\theta_{t+1} = \theta_t - \eta g_t\]
+
+<p>Why SGD works well:</p>
+
+<ul>
+  <li>Mini-batches are much cheaper than full batches.</li>
+  <li>Gradient noise can help escape sharp or poor local regions.</li>
+  <li>It scales to massive datasets.</li>
+</ul>
+
+<p>Momentum improves SGD by smoothing updates:</p>
+
+\[v_t = \beta v_{t-1} + g_t\]
+
+\[\theta_{t+1} = \theta_t - \eta v_t\]
+
+<p>The mental model: SGD is like walking downhill while being pushed around by noisy wind. Annoying, but sometimes that noise saves you from a bad valley.</p>
+
 <h3 id="adam-rmsprop-adagrad">Adam, RMSProp, AdaGrad</h3>
 
+<p>These optimizers adapt the learning rate per parameter.</p>
+
+<h4 id="adagrad">AdaGrad</h4>
+
+<p>AdaGrad accumulates squared gradients:</p>
+
+\[r_t = r_{t-1} + g_t \odot g_t\]
+
+\[\theta_{t+1}
+=
+\theta_t - \frac{\eta}{\sqrt{r_t}+\epsilon} \odot g_t\]
+
+<p>It is useful for sparse features because rarely updated parameters get relatively larger steps. The downside is that \(r_t\) only grows, so the effective learning rate can become too small.</p>
+
+<h4 id="rmsprop">RMSProp</h4>
+
+<p>RMSProp fixes AdaGrad’s aggressive decay by using an exponential moving average:</p>
+
+\[r_t = \beta r_{t-1} + (1-\beta) g_t \odot g_t\]
+
+\[\theta_{t+1}
+=
+\theta_t - \frac{\eta}{\sqrt{r_t}+\epsilon} \odot g_t\]
+
+<h4 id="adam">Adam</h4>
+
+<p>Adam combines momentum and RMSProp-style adaptive scaling. It keeps first and second moment estimates:</p>
+
+\[m_t = \beta_1 m_{t-1} + (1-\beta_1)g_t\]
+
+\[v_t = \beta_2 v_{t-1} + (1-\beta_2)g_t^2\]
+
+<p>Bias correction:</p>
+
+\[\hat{m}_t = \frac{m_t}{1-\beta_1^t}, \quad
+\hat{v}_t = \frac{v_t}{1-\beta_2^t}\]
+
+<p>Update:</p>
+
+\[\theta_{t+1}
+=
+\theta_t - \eta \frac{\hat{m}_t}{\sqrt{\hat{v}_t}+\epsilon}\]
+
+<p>Adam is often the default because it is stable and forgiving. SGD with momentum can still generalize better in some vision setups, but Adam/AdamW is extremely common in transformers. The original Adam paper is <a href="https://arxiv.org/abs/1412.6980" rel="external nofollow noopener" target="_blank">Kingma and Ba, 2014</a>.</p>
+
 <h3 id="bayesian-optimization">Bayesian Optimization</h3>
+
+<p>Bayesian optimization is used when evaluating the objective is expensive, noisy, or derivative-free. Hyperparameter tuning is the classic ML example.</p>
+
+<p>Instead of trying random settings blindly, Bayesian optimization builds a surrogate model of the objective:</p>
+
+\[f(x) \sim \mathcal{GP}(m(x), k(x,x'))\]
+
+<p>where \(x\) is a hyperparameter configuration and \(f(x)\) might be validation accuracy or validation loss.</p>
+
+<p>The algorithm:</p>
+
+<ol>
+  <li>Try a few configurations.</li>
+  <li>Fit/update a probabilistic surrogate model.</li>
+  <li>Use an acquisition function to choose the next configuration.</li>
+  <li>Evaluate it.</li>
+  <li>Repeat.</li>
+</ol>
+
+<p>Common acquisition functions:</p>
+
+<ul>
+  <li>
+<strong>Expected improvement (EI)</strong>: sample where improvement over the current best is expected.</li>
+  <li>
+<strong>Upper confidence bound (UCB)</strong>: sample where the optimistic estimate is high.</li>
+  <li>
+<strong>Probability of improvement (PI)</strong>: sample where improvement is likely.</li>
+</ul>
+
+<p>The exploration-exploitation tradeoff is very explicit here:</p>
+
+<ul>
+  <li>Explore uncertain regions.</li>
+  <li>Exploit regions likely to be good.</li>
+</ul>
+
+<p>Bayesian optimization is great when each experiment is expensive, but less useful when cheap random/grid search is already enough. See <a href="https://arxiv.org/abs/1206.2944" rel="external nofollow noopener" target="_blank">Snoek et al.</a> and <a href="https://arxiv.org/abs/1807.02811" rel="external nofollow noopener" target="_blank">Frazier’s tutorial</a> for deeper reading.</p>
 
 <h2 id="bias-variance">Bias-Variance</h2>
 
@@ -415,7 +986,7 @@ It can be learned using Expectation-Maximization (EM) algorithm, including the E
   <li>Example: A deep neural network memorizing training data instead of generalizing.</li>
 </ul>
 
-<p>It is a worth noting that bias or variance is measured on the validation set, not the training set.</p>
+<p>It is worth noting that bias and variance are theoretical quantities over possible training sets and the true data-generating distribution. In practice, we approximate this idea using validation/test performance, not training performance.</p>
 
 \[\text{Bias} = \mathbb{E}[\hat{f}(x)] - f(x)\]
 
@@ -530,6 +1101,56 @@ It can be learned using Expectation-Maximization (EM) algorithm, including the E
 
 <h3 id="xgboost">XGBoost</h3>
 
+<p>XGBoost stands for Extreme Gradient Boosting. It is an efficient and regularized implementation of gradient boosted decision trees, introduced in <a href="https://arxiv.org/abs/1603.02754" rel="external nofollow noopener" target="_blank">XGBoost: A Scalable Tree Boosting System</a>.</p>
+
+<p>The model is an additive ensemble of trees:</p>
+
+\[\hat{y}_i = \sum_{t=1}^{T} f_t(x_i), \quad f_t \in \mathcal{F}\]
+
+<p>where each \(f_t\) is a decision tree.</p>
+
+<p>At each boosting step, XGBoost adds a new tree to reduce the objective:</p>
+
+\[\mathcal{L}^{(t)} =
+\sum_{i=1}^{N}
+\ell(y_i, \hat{y}_i^{(t-1)} + f_t(x_i))
++ \Omega(f_t)\]
+
+<p>The regularization term penalizes tree complexity:</p>
+
+\[\Omega(f) = \gamma T + \frac{1}{2}\lambda \sum_{j=1}^{T} w_j^2\]
+
+<p>where \(T\) is the number of leaves and \(w_j\) is the score of leaf \(j\).</p>
+
+<p>Why XGBoost is strong:</p>
+
+<ul>
+  <li>Uses first-order and second-order gradients.</li>
+  <li>Has explicit regularization.</li>
+  <li>Handles sparse features well.</li>
+  <li>Supports shrinkage/learning rate, column subsampling, and row subsampling.</li>
+  <li>Is highly optimized for speed and memory.</li>
+</ul>
+
+<p>Parameters people tune a lot:</p>
+
+<ul>
+  <li>
+<code class="language-plaintext highlighter-rouge">n_estimators</code>: number of trees.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">max_depth</code>: depth of each tree.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">learning_rate</code>: shrinkage factor.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">subsample</code>: fraction of rows used per tree.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">colsample_bytree</code>: fraction of features used per tree.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">lambda</code> and <code class="language-plaintext highlighter-rouge">alpha</code>: L2 and L1 regularization.</li>
+</ul>
+
+<p>Practical note: XGBoost is still extremely competitive for tabular data. Deep learning wins many image/text/audio tasks, but for structured tables, boosted trees are often still the “please do not overcomplicate this” baseline.</p>
+
 <h2 id="k-nearest-neighbors-knn">K-Nearest Neighbors (KNN)</h2>
 
 <p>1️⃣ Choose a value for K (number of neighbors).
@@ -593,7 +1214,9 @@ The nice thing about the sigmoid function is that it maps any real-valued number
 
 <p>Gradient descent:</p>
 
-\[\nabla_{\theta} \mathcal{L}(\theta) = \frac{1}{N} \sum_{i=1}^{N} (y_i - \hat{y}_i)X_i\]
+\[\nabla_{\theta} \mathcal{L}(\theta) = \frac{1}{N} \sum_{i=1}^{N} (\hat{y}_i - y_i)X_i\]
+
+<p>Then the update is \(\theta \leftarrow \theta - \eta \nabla_{\theta}\mathcal{L}(\theta)\).</p>
 
 <h2 id="bayesian-theorem">Bayesian theorem</h2>
 
@@ -632,14 +1255,21 @@ Bayesian theorem can be used to update our belief based on new evidence (given \
   <li>\(\mathcal{Y}\) is the set of possible class labels.</li>
   <li>\(X\) is the input features.</li>
   <li>\(P(y \mid X)\) is the posterior probability of class label y given the input features X. The posterior probability \(P(y \mid X)\) is calculated using Bayes’ theorem and the assumption of conditional independence, i.e., \(P(y \mid X) = \frac{P(X \mid y)P(y)}{P(X)}\). The denominator \(P(X)\) is constant for all class labels and can be ignored for the purpose of classification.</li>
-  <li>
-    <h2 id="curse-of-dimensionality">Curse of dimensionality</h2>
-  </li>
 </ul>
+
+<p>With the Naive Bayes assumption:</p>
+
+\[P(X \mid y) = \prod_{j=1}^{d} P(x_j \mid y)\]
+
+<p>So classification becomes:</p>
+
+\[\hat{y} = \underset{y \in \mathcal{Y}}{\text{argmax}} \ P(y)\prod_{j=1}^{d}P(x_j \mid y)\]
+
+<h2 id="curse-of-dimensionality">Curse of dimensionality</h2>
 
 <p>The curse of dimensionality refers to the challenges and problems that arise when working with high-dimensional data. As the number of features (dimensions) increases, data becomes sparse, <strong>distances become less meaningful</strong>, and models struggle to generalize well.</p>
 
-<p>And because distance becomes less meaningful, algorithms that rely on distance such as KNN, SVN, or K-means become less effective.</p>
+<p>And because distance becomes less meaningful, algorithms that rely on distance such as KNN, SVM, or K-means become less effective.</p>
 
 <p>And because data becomes sparse (but the true pattern is still in lower dimensions), machine learning models need more data to fill in the space, otherwise they will overfit the data.</p>
 
@@ -657,7 +1287,7 @@ Bayesian theorem can be used to update our belief based on new evidence (given \
 
 \[\mathcal{L}(\theta) + \lambda \sum_{i=1}^{n} \theta_i^2\]
 
-<p>L1 regularization <strong>encourages sparsity</strong> in the model’s weights (some weights will be exactly 0), while L2 regularization **encourages small weights **(no weight will be exactly 0 but very small).</p>
+<p>L1 regularization <strong>encourages sparsity</strong> in the model’s weights (some weights will be exactly 0), while L2 regularization <strong>encourages small weights</strong> (no weight will be exactly 0 but very small).</p>
 
 <p>Because L1 regularization encourages sparsity, it can be used for <strong>feature selection</strong> (eliminate some features that are not important - set their weights to 0). But it can lead to unstable solutions when features are highly correlated/entangled.</p>
 
@@ -681,17 +1311,19 @@ Bayesian theorem can be used to update our belief based on new evidence (given \
 
 <h4 id="batch-normalization">Batch Normalization</h4>
 
-<p>Batch Normalization normalizes activations <strong>across the batch</strong> dimension for each feature.</p>
+<p>Batch Normalization normalizes activations <strong>across the batch</strong> dimension for each feature. The original paper is <a href="https://arxiv.org/abs/1502.03167" rel="external nofollow noopener" target="_blank">Ioffe and Szegedy, 2015</a>.</p>
 
 \[\mu = \frac{1}{m} \sum_{i=1}^{m} x_i\]
 
-\[\sigma = \sqrt{\frac{1}{m} \sum_{i=1}^{m} (x_i - \mu)^2}\]
+\[\sigma^2 = \frac{1}{m} \sum_{i=1}^{m} (x_i - \mu)^2\]
 
-\[\hat{x}_i = \frac{x_i - \mu}{\sigma}\]
+\[\hat{x}_i = \frac{x_i - \mu}{\sqrt{\sigma^2 + \epsilon}}\]
 
-\[x_i = \hat{x}_i \cdot \sigma + \mu\]
+\[y_i = \gamma \hat{x}_i + \beta\]
 
-<p>This transformation ensures stable activations, reducing internal covariate shift.</p>
+<p>where \(\gamma\) and \(\beta\) are learnable scale and shift parameters.</p>
+
+<p>This transformation usually makes optimization more stable. The original motivation was reducing internal covariate shift, although later work also points to smoother optimization geometry as a big reason BatchNorm works well.</p>
 
 <p>However, batch statistics vary across mini-batches, making it problematic for small batch sizes or RNNs.
 Therefore, batch normalization is commonly used in CNNs and Fully Connected Networks (FCNs).
@@ -707,7 +1339,17 @@ Internal Covariate Shift <strong>happens inside a deep network</strong> during t
 
 <h4 id="layer-normalization">Layer Normalization</h4>
 
-<p>Layer Normalization normalizes activations <strong>across features</strong> for each individual data point (sample-wise normalization).</p>
+<p>Layer Normalization normalizes activations <strong>across features</strong> for each individual data point (sample-wise normalization). See <a href="https://arxiv.org/abs/1607.06450" rel="external nofollow noopener" target="_blank">Layer Normalization</a>.</p>
+
+<p>For a vector \(x \in \mathbb{R}^{d}\):</p>
+
+\[\mu = \frac{1}{d}\sum_{j=1}^{d}x_j\]
+
+\[\sigma^2 = \frac{1}{d}\sum_{j=1}^{d}(x_j-\mu)^2\]
+
+\[\hat{x}_j = \frac{x_j-\mu}{\sqrt{\sigma^2+\epsilon}}\]
+
+\[y_j = \gamma_j \hat{x}_j + \beta_j\]
 
 <p>Key Properties:</p>
 
@@ -720,15 +1362,234 @@ Internal Covariate Shift <strong>happens inside a deep network</strong> during t
 
 <h3 id="data-augmentation">Data augmentation</h3>
 
+<p>Data augmentation creates new training examples by applying label-preserving transformations.</p>
+
+<p>For image classification:</p>
+
+<ul>
+  <li>Random crop</li>
+  <li>Horizontal flip</li>
+  <li>Color jitter</li>
+  <li>Rotation</li>
+  <li>Blur</li>
+  <li>Cutout / random erasing</li>
+  <li>MixUp / CutMix</li>
+</ul>
+
+<p>For text:</p>
+
+<ul>
+  <li>Back-translation</li>
+  <li>Token masking</li>
+  <li>Paraphrasing</li>
+  <li>Random deletion/swapping (careful, this can change meaning)</li>
+</ul>
+
+<p>For audio:</p>
+
+<ul>
+  <li>Time shift</li>
+  <li>Noise injection</li>
+  <li>SpecAugment-style time/frequency masking</li>
+</ul>
+
+<p>Mathematically, if \(t \sim \mathcal{T}\) is a random augmentation:</p>
+
+\[x' = t(x), \quad y' = y\]
+
+<p>Then we train on \(\{(x',y)\}\).</p>
+
+<p>Why it helps:</p>
+
+<ul>
+  <li>Increases effective dataset size.</li>
+  <li>Encourages invariance to nuisance factors.</li>
+  <li>Reduces overfitting.</li>
+  <li>Makes the model more robust to real-world variation.</li>
+</ul>
+
+<p>Important caveat: augmentation must preserve the label. Rotating a digit “6” into “9” is not harmless. Flipping medical images can be problematic if left/right anatomy matters. This is one of those details that looks small until it ruins the experiment.</p>
+
 <h3 id="cross-validation">Cross-validation</h3>
+
+<p>Cross-validation estimates generalization by splitting the data into multiple train/validation folds. The common version is \(k\)-fold cross-validation:</p>
+
+<ol>
+  <li>Split the dataset into \(k\) folds.</li>
+  <li>Train on \(k-1\) folds.</li>
+  <li>Validate on the remaining fold.</li>
+  <li>Repeat so each fold is used once as validation.</li>
+  <li>Average the validation metrics.</li>
+</ol>
+
+<p>The estimate is:</p>
+
+\[\mathrm{CV} =
+\frac{1}{k}\sum_{j=1}^{k} \mathrm{Score}_j\]
+
+<p>Common variants:</p>
+
+<ul>
+  <li>
+<strong>Stratified k-fold</strong>: preserves class proportions.</li>
+  <li>
+<strong>Leave-one-out</strong>: \(k=N\); expensive but data-efficient.</li>
+  <li>
+<strong>Group k-fold</strong>: keeps related samples in the same fold to avoid leakage.</li>
+  <li>
+<strong>Time-series split</strong>: respects temporal ordering.</li>
+</ul>
+
+<p>💡 Very important: the test set should not be used for model selection. Use train/validation or cross-validation for choosing hyperparameters, then report final performance once on the test set. Otherwise, the test set slowly becomes training data wearing a disguise.</p>
 
 <h2 id="generalization">Generalization</h2>
 
+<p>Generalization is the ability of a model to perform well on unseen data, not just the training data.</p>
+
+<p>The generalization gap is:</p>
+
+\[\mathrm{Gap} =
+\mathcal{L}_{test}(\theta) - \mathcal{L}_{train}(\theta)\]
+
+<p>Small training loss alone is not enough. Modern deep networks can even fit random labels, which is one reason generalization in deep learning is still theoretically interesting (<a href="https://arxiv.org/abs/1611.03530" rel="external nofollow noopener" target="_blank">Zhang et al., 2016</a>).</p>
+
+<p>Things that usually help generalization:</p>
+
+<ul>
+  <li>More diverse data</li>
+  <li>Better inductive bias</li>
+  <li>Regularization</li>
+  <li>Data augmentation</li>
+  <li>Early stopping</li>
+  <li>Ensembling</li>
+  <li>Pretraining</li>
+  <li>Better validation protocol</li>
+</ul>
+
+<p>Things that hurt generalization:</p>
+
+<ul>
+  <li>Data leakage</li>
+  <li>Overfitting hyperparameters to the validation/test set</li>
+  <li>Spurious correlations</li>
+  <li>Distribution shift</li>
+  <li>Label noise</li>
+  <li>Train/test preprocessing mismatch</li>
+</ul>
+
 <h3 id="out-of-distribution-generalization">Out-of-distribution generalization</h3>
+
+<p>Out-of-distribution (OOD) generalization asks whether a model trained on one distribution can work on another:</p>
+
+\[P_{train}(X,Y) \neq P_{test}(X,Y)\]
+
+<p>Examples:</p>
+
+<ul>
+  <li>Train on hospital A, test on hospital B.</li>
+  <li>Train on clean images, test on corrupted images.</li>
+  <li>Train on one country/language/style, test on another.</li>
+  <li>Train on historical data, test after the world changes.</li>
+</ul>
+
+<p>Types of shift:</p>
+
+<ul>
+  <li>
+<strong>Covariate shift</strong>: \(P(X)\) changes but \(P(Y \mid X)\) is stable.</li>
+  <li>
+<strong>Label shift</strong>: \(P(Y)\) changes.</li>
+  <li>
+<strong>Concept shift</strong>: \(P(Y \mid X)\) changes.</li>
+  <li>
+<strong>Spurious correlation shift</strong>: shortcuts learned during training break at test time.</li>
+</ul>
+
+<p>OOD generalization is hard because empirical risk minimization assumes train and test are sampled from the same distribution:</p>
+
+\[P_{train} = P_{test}\]
+
+<p>When this assumption breaks, validation accuracy can lie to us. A model may look excellent on i.i.d. validation data and then fail in deployment.</p>
+
+<p>Practical tools:</p>
+
+<ul>
+  <li>Evaluate on multiple domains, not one random split.</li>
+  <li>Use group splits if samples are correlated.</li>
+  <li>Stress-test with corruptions/perturbations.</li>
+  <li>Track calibration, not just accuracy.</li>
+  <li>Prefer features that are causally related to the label when possible.</li>
+</ul>
 
 <h3 id="adversarial-generalizationtraining">Adversarial generalization/training</h3>
 
+<p>Adversarial examples are inputs that look almost unchanged to humans but cause a model to make a wrong prediction. The classic paper is <a href="https://arxiv.org/abs/1412.6572" rel="external nofollow noopener" target="_blank">Explaining and Harnessing Adversarial Examples</a>.</p>
+
+<p>For an input \(x\) and label \(y\), FGSM creates an adversarial example:</p>
+
+\[x_{adv} = x + \epsilon \cdot \mathrm{sign}
+\left(
+\nabla_x \mathcal{L}(\theta, x, y)
+\right)\]
+
+<p>The gradient is taken with respect to the <strong>input</strong>, not the model weights. This is the key idea.</p>
+
+<p>Adversarial training solves a robust optimization problem:</p>
+
+\[\min_{\theta}
+\mathbb{E}_{(x,y)\sim \mathcal{D}}
+\left[
+\max_{\|\delta\| \leq \epsilon}
+\mathcal{L}(\theta, x+\delta, y)
+\right]\]
+
+<p>Inner loop: find a perturbation \(\delta\) that makes the model fail.<br>
+Outer loop: update the model so it survives that perturbation.</p>
+
+<p>Why it matters:</p>
+
+<ul>
+  <li>Improves robustness to worst-case perturbations.</li>
+  <li>Reveals that high accuracy does not imply robust understanding.</li>
+  <li>Often creates a tradeoff between clean accuracy and adversarial robustness.</li>
+</ul>
+
+<p>Personal note: adversarial examples are a humbling reminder that neural networks and humans do not always use the same evidence, even when they produce the same label.</p>
+
 <h3 id="sharpness-aware-minimization">Sharpness-aware minimization</h3>
+
+<p>Sharpness-aware minimization (SAM) tries to find parameters that are not only low-loss, but also live in a flat neighborhood of low loss. See <a href="https://arxiv.org/abs/2010.01412" rel="external nofollow noopener" target="_blank">Foret et al., 2020</a>.</p>
+
+<p>Standard training:</p>
+
+\[\min_w \mathcal{L}(w)\]
+
+<p>SAM:</p>
+
+\[\min_w \max_{\|\epsilon\|_2 \leq \rho}
+\mathcal{L}(w+\epsilon)\]
+
+<p>The inner maximization asks: “if I perturb the weights a little, how bad can the loss get?”</p>
+
+<p>The perturbation is often approximated by:</p>
+
+\[\epsilon(w) =
+\rho \frac{\nabla_w \mathcal{L}(w)}
+{\|\nabla_w \mathcal{L}(w)\|_2}\]
+
+<p>Then the model updates using the gradient at the perturbed weights:</p>
+
+\[\nabla_w \mathcal{L}(w+\epsilon(w))\]
+
+<p>Why this can help:</p>
+
+<ul>
+  <li>Sharp minima can be sensitive to small changes.</li>
+  <li>Flat minima often correlate with better generalization.</li>
+  <li>SAM explicitly discourages solutions where the loss increases quickly around the learned weights.</li>
+</ul>
+
+<p>Cost: SAM usually needs two gradient computations per step, so it is slower than ordinary training.</p>
 
 <h2 id="evaluation">Evaluation</h2>
 
@@ -765,11 +1626,145 @@ Internal Covariate Shift <strong>happens inside a deep network</strong> during t
 
 <h4 id="roc-curve">ROC curve</h4>
 
+<p>ROC stands for Receiver Operating Characteristic. It plots:</p>
+
+\[\mathrm{TPR} = \frac{TP}{TP + FN}\]
+
+<p>against:</p>
+
+\[\mathrm{FPR} = \frac{FP}{FP + TN}\]
+
+<p>as we vary the classification threshold.</p>
+
+<p>Where:</p>
+
+<ul>
+  <li>TPR is recall/sensitivity.</li>
+  <li>FPR is the false positive rate.</li>
+</ul>
+
+<p>ROC is useful when we care about ranking positives above negatives across many possible thresholds.</p>
+
+<p>Important caveat: ROC curves can look overly optimistic when the positive class is very rare. In imbalanced settings, precision-recall curves are often more informative.</p>
+
 <h4 id="precision-recall-curve">Precision-recall curve</h4>
+
+<p>Precision:</p>
+
+\[\mathrm{Precision} = \frac{TP}{TP + FP}\]
+
+<p>Recall:</p>
+
+\[\mathrm{Recall} = \frac{TP}{TP + FN}\]
+
+<p>The precision-recall curve shows the tradeoff between precision and recall as the decision threshold changes.</p>
+
+<p>Use it when:</p>
+
+<ul>
+  <li>The positive class is rare.</li>
+  <li>False positives are expensive.</li>
+  <li>You care about the quality of positive predictions.</li>
+</ul>
+
+<p>Example: disease detection, fraud detection, dangerous-content detection, anomaly detection.</p>
 
 <h4 id="f1-score">F1 score</h4>
 
+<p>F1 is the harmonic mean of precision and recall:</p>
+
+\[F1 =
+2 \cdot
+\frac{\mathrm{Precision} \cdot \mathrm{Recall}}
+{\mathrm{Precision} + \mathrm{Recall}}\]
+
+<p>It is high only when both precision and recall are high.</p>
+
+<p>Why harmonic mean? Because it punishes imbalance. If precision is 1.0 but recall is 0.0, F1 is still 0.0.</p>
+
+<p>Use F1 when:</p>
+
+<ul>
+  <li>You need one summary number.</li>
+  <li>Precision and recall are both important.</li>
+  <li>Classes are imbalanced.</li>
+</ul>
+
+<p>Do not use F1 blindly if false positives and false negatives have very different costs. In that case, choose a metric aligned with the real decision cost.</p>
+
 <h4 id="auc">AUC</h4>
+
+<p>AUC means Area Under the Curve.</p>
+
+<p>Common forms:</p>
+
+<ul>
+  <li>
+<strong>ROC-AUC</strong>: area under the ROC curve.</li>
+  <li>
+<strong>PR-AUC / Average Precision</strong>: area-like summary under the precision-recall curve.</li>
+</ul>
+
+<p>ROC-AUC has a nice probabilistic interpretation:</p>
+
+\[\mathrm{AUC}
+=
+P(s(x^+) &gt; s(x^-))\]
+
+<p>where \(x^+\) is a randomly chosen positive sample, \(x^-\) is a randomly chosen negative sample, and \(s(\cdot)\) is the model score.</p>
+
+<p>Interpretation:</p>
+
+<ul>
+  <li>0.5: random ranking.</li>
+  <li>1.0: perfect ranking.</li>
+  <li>Below 0.5: worse than random, probably something is flipped.</li>
+</ul>
+
+<p>Important caveat: AUC measures ranking quality, not calibration. A model can have high AUC but terrible probabilities. If probabilities matter, also check calibration metrics like Brier score or reliability diagrams.</p>
+
+<h2 id="references">References</h2>
+
+<ul>
+  <li>
+<a href="https://scikit-learn.org/stable/user_guide.html" rel="external nofollow noopener" target="_blank">scikit-learn User Guide</a> for practical ML algorithms, cross-validation, metrics, clustering, semi-supervised learning, density estimation, and ensembles.</li>
+  <li>
+<a href="https://hastie.su.domains/ElemStatLearn/" rel="external nofollow noopener" target="_blank">The Elements of Statistical Learning</a> by Hastie, Tibshirani, and Friedman.</li>
+  <li>
+<a href="https://www.deeplearningbook.org/" rel="external nofollow noopener" target="_blank">Deep Learning</a> by Goodfellow, Bengio, and Courville.</li>
+  <li>
+<a href="http://incompleteideas.net/book/the-book-2nd.html" rel="external nofollow noopener" target="_blank">Reinforcement Learning: An Introduction</a> by Sutton and Barto.</li>
+  <li>
+<a href="https://arxiv.org/abs/2002.05709" rel="external nofollow noopener" target="_blank">A Simple Framework for Contrastive Learning of Visual Representations (SimCLR)</a>.</li>
+  <li>
+<a href="https://arxiv.org/abs/2111.06377" rel="external nofollow noopener" target="_blank">Masked Autoencoders Are Scalable Vision Learners</a>.</li>
+  <li>
+<a href="https://jmlr.org/papers/v15/srivastava14a.html" rel="external nofollow noopener" target="_blank">Dropout: A Simple Way to Prevent Neural Networks from Overfitting</a>.</li>
+  <li>
+<a href="https://arxiv.org/abs/1502.03167" rel="external nofollow noopener" target="_blank">Batch Normalization</a> and <a href="https://arxiv.org/abs/1607.06450" rel="external nofollow noopener" target="_blank">Layer Normalization</a>.</li>
+  <li>
+<a href="https://arxiv.org/abs/1412.6980" rel="external nofollow noopener" target="_blank">Adam: A Method for Stochastic Optimization</a>.</li>
+  <li>
+<a href="https://arxiv.org/abs/1603.02754" rel="external nofollow noopener" target="_blank">XGBoost: A Scalable Tree Boosting System</a>.</li>
+  <li>
+<a href="https://arxiv.org/abs/1206.2944" rel="external nofollow noopener" target="_blank">Practical Bayesian Optimization of Machine Learning Algorithms</a> and <a href="https://arxiv.org/abs/1807.02811" rel="external nofollow noopener" target="_blank">A Tutorial on Bayesian Optimization</a>.</li>
+  <li>
+<a href="https://arxiv.org/abs/1505.07818" rel="external nofollow noopener" target="_blank">Domain-Adversarial Training of Neural Networks</a>.</li>
+  <li>
+<a href="https://arxiv.org/abs/2103.03097" rel="external nofollow noopener" target="_blank">Generalizing to Unseen Domains: A Survey on Domain Generalization</a>.</li>
+  <li>
+<a href="https://arxiv.org/abs/1703.03400" rel="external nofollow noopener" target="_blank">Model-Agnostic Meta-Learning for Fast Adaptation of Deep Networks</a>.</li>
+  <li>
+<a href="https://www.cs.cornell.edu/~caruana/mlj97.pdf" rel="external nofollow noopener" target="_blank">Multitask Learning</a> by Rich Caruana.</li>
+  <li>
+<a href="https://arxiv.org/abs/1808.01974" rel="external nofollow noopener" target="_blank">A Survey on Deep Transfer Learning</a>.</li>
+  <li>
+<a href="https://arxiv.org/abs/1611.03530" rel="external nofollow noopener" target="_blank">Understanding deep learning requires rethinking generalization</a>.</li>
+  <li>
+<a href="https://arxiv.org/abs/1412.6572" rel="external nofollow noopener" target="_blank">Explaining and Harnessing Adversarial Examples</a>.</li>
+  <li>
+<a href="https://arxiv.org/abs/2010.01412" rel="external nofollow noopener" target="_blank">Sharpness-Aware Minimization for Efficiently Improving Generalization</a>.</li>
+</ul>
 
     </div>
   </article>
@@ -788,31 +1783,31 @@ Internal Covariate Shift <strong>happens inside a deep network</strong> during t
   
 
   <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/reinforcement-learning-and-abstract-world-models/">Reinforcement Learning and Abstract World Models</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/agent-skills-ai-ml-research-scientists/">Agent Skills for AI/ML Research Scientists</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/ai-agents-series/">The AI Agents Series</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/ai-agents-self-improving-agents/">AI Agents Series | Self Improving Agents - Foundation and Advances</a>
+  </li>
+
+  
+
+  <li class="my-2">
     <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs231n-2025-lec18/">Stanford CS231N Deep Learning for Computer Vision | Spring 2025 | Lecture 18- Human-Centered AI</a>
-  </li>
-
-  
-
-  <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs231n-2025-lec17/">Stanford CS231N Deep Learning for Computer Vision | Spring 2025 | Lecture 17- Robot Learning</a>
-  </li>
-
-  
-
-  <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs231n-2025-lec16/">Stanford CS231N Deep Learning for Computer Vision | Spring 2025 | Lecture 16- Vision and Language</a>
-  </li>
-
-  
-
-  <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs231n-2025-lec15/">Stanford CS231N Deep Learning for Computer Vision | Spring 2025 | Lecture 15- 3D Vision</a>
-  </li>
-
-  
-
-  <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs231n-2025-lec14/">Stanford CS231N Deep Learning for Computer Vision| Spring 2025 | Lecture 14- Generative Models 2</a>
   </li>
 
 </div>

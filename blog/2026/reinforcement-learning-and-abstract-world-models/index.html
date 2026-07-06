@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <!-- Head -->
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    <!-- Metadata, OpenGraph and Schema.org -->
+    
+
+    <!-- Standard metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Reinforcement Learning and Abstract World Models | Tuan-Anh  Bui</title>
+    <meta name="author" content="Tuan-Anh  Bui">
+    <meta name="description" content="A consolidated mathematical note on reinforcement learning, Bellman equations, world models, abstract latent-space world models, JEPA-style prediction, and reward hacking">
+    <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
+
+
+    <!-- Bootstrap & MDB -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+    <!-- Bootstrap Table -->
+    <link defer rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700%7CRoboto+Slab:100,300,400,500,700%7CMaterial+Icons">
+
+    <!-- Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
+
+    
+
+    <!-- Styles -->
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
+    
+    <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+    <link rel="canonical" href="https://tuananhbui89.github.io/blog/2026/reinforcement-learning-and-abstract-world-models/">
+
+    <!-- Dark Mode -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark">
+    <script src="/assets/js/theme.js?96d6b3e1c3604aca8b6134c7afdd5db6"></script>
+    <script src="/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script>
+    
+
+  </head>
+
+  <!-- Body -->
+  <body class="fixed-top-nav ">
+
+    <!-- Header -->
+    <header>
+
+      <!-- Nav Bar -->
+      <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top">
+        <div class="container">
+          <a class="navbar-brand title font-weight-lighter" href="/"><span class="font-weight-bold">Tuan-Anh </span>Bui</a>
+          <!-- Navbar Toggle -->
+          <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar top-bar"></span>
+            <span class="icon-bar middle-bar"></span>
+            <span class="icon-bar bottom-bar"></span>
+          </button>
+
+          <div class="collapse navbar-collapse text-right" id="navbarNav">
+            <ul class="navbar-nav ml-auto flex-nowrap">
+
+              <!-- About -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/">about</a>
+              </li>
+              
+              <!-- Blog -->
+              <li class="nav-item active">
+                <a class="nav-link" href="/blog/">blog<span class="sr-only">(current)</span></a>
+              </li>
+
+              <!-- Other pages -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/publications/">publications</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/projects/">projects</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/teaching/"></a>
+              </li>
+
+              <!-- Toogle theme mode -->
+              <li class="toggle-container">
+                <button id="light-toggle" title="Change theme">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Scrolling Progress Bar -->
+      <progress id="progress" value="0">
+        <div class="progress-container">
+          <span class="progress-bar"></span>
+        </div>
+      </progress>
+    </header>
+
+
+    <!-- Content -->
+    <div class="container mt-5">
+      
+        <!-- _layouts/post.html -->
+<!-- Page/Post style -->
+<style type="text/css">
+  .rl-world-models-note {
+  --rlwm-text: #1d2433;
+  --rlwm-muted: #5b6475;
+  --rlwm-card: #ffffff;
+  --rlwm-border: #dfe3eb;
+  --rlwm-accent: #2e5aac;
+  --rlwm-code: #f3f5f9;
+  color: var(--rlwm-text);
+  line-height: 1.6;
+} .rl-world-models-note h1, .rl-world-models-note h2, .rl-world-models-note h3 {
+  line-height: 1.25;
+} .rl-world-models-note h1 {
+  font-size: 2.25rem;
+  margin-bottom: 0.2rem;
+} .rl-world-models-note h2 {
+  margin-top: 2.5rem;
+  border-bottom: 1px solid var(--rlwm-border);
+  padding-bottom: 0.35rem;
+  color: var(--rlwm-accent);
+} .rl-world-models-note h3 {
+  margin-top: 1.6rem;
+} .rl-world-models-note .subtitle {
+  color: var(--rlwm-muted);
+  font-size: 1.05rem;
+  margin-bottom: 2rem;
+} .rl-world-models-note .card {
+  background: var(--rlwm-card);
+  border: 1px solid var(--rlwm-border);
+  border-radius: 8px;
+  padding: 20px 22px;
+  margin: 18px 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+} .rl-world-models-note .definition {
+  border-left: 5px solid var(--rlwm-accent);
+} .rl-world-models-note code, .rl-world-models-note pre {
+  background: var(--rlwm-code);
+  border-radius: 6px;
+} .rl-world-models-note code {
+  padding: 0.12rem 0.28rem;
+} .rl-world-models-note table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+  background: var(--rlwm-card);
+} .rl-world-models-note th, .rl-world-models-note td {
+  border: 1px solid var(--rlwm-border);
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+} .rl-world-models-note th {
+  background: #f0f3f8;
+} .rl-world-models-note .small, .rl-world-models-note .equation-note {
+  color: var(--rlwm-muted);
+  font-size: 0.92rem;
+} .rl-world-models-note .toc a {
+  color: var(--rlwm-accent);
+  text-decoration: none;
+} .rl-world-models-note .toc a:hover {
+  text-decoration: underline;
+} .rl-world-models-note footer {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rlwm-border);
+  color: var(--rlwm-muted);
+  font-size: 0.92rem;
+}
+
+</style>
+
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Reinforcement Learning and Abstract World Models</h1>
+    <p class="post-meta">July 6, 2026</p>
+    <p class="post-tags">
+      <a href="/blog/2026"> <i class="fas fa-calendar fa-sm"></i> 2026 </a>
+        ·  
+        <a href="/blog/tag/reinforcement-learning">
+          <i class="fas fa-hashtag fa-sm"></i> reinforcement-learning</a>  
+          <a href="/blog/tag/world-models">
+          <i class="fas fa-hashtag fa-sm"></i> world-models</a>  
+          <a href="/blog/tag/tutorial">
+          <i class="fas fa-hashtag fa-sm"></i> tutorial</a>  
+          <a href="/blog/tag/reading">
+          <i class="fas fa-hashtag fa-sm"></i> reading</a>  
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    
+    <div id="table-of-contents">
+      
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1">
+<a href="#reinforcement-learning-and-abstract-world-models">Reinforcement Learning and Abstract World Models</a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#reading-flow">Reading flow</a></li>
+<li class="toc-entry toc-h2"><a href="#1-reinforcement-learning-as-an-mdp">1. Reinforcement Learning as an MDP</a></li>
+<li class="toc-entry toc-h2">
+<a href="#2-bellman-equations">2. Bellman Equations</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#state-value-function">State-value function</a></li>
+<li class="toc-entry toc-h3"><a href="#action-value-function">Action-value function</a></li>
+<li class="toc-entry toc-h3"><a href="#optimal-bellman-equations">Optimal Bellman equations</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#3-world-models">3. World Models</a></li>
+<li class="toc-entry toc-h2">
+<a href="#4-abstract-world-models">4. Abstract World Models</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#latent-transition-and-reward-prediction">Latent transition and reward prediction</a></li>
+<li class="toc-entry toc-h3"><a href="#geometric-priors-invariance-and-equivariance">Geometric priors: invariance and equivariance</a></li>
+<li class="toc-entry toc-h3"><a href="#interpretation-of-the-latent-space">Interpretation of the latent space</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#5-jepa-style-latent-prediction">5. JEPA-style Latent Prediction</a></li>
+<li class="toc-entry toc-h2">
+<a href="#6-reward-hacking">6. Reward Hacking</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#reward-hacking-in-learned-world-models">Reward hacking in learned world models</a></li>
+<li class="toc-entry toc-h3"><a href="#reward-hacking-in-latent-abstract-world-models">Reward hacking in latent abstract world models</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2">
+<a href="#7-comparison-and-unifying-view">7. Comparison and Unifying View</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#unified-mathematical-picture">Unified mathematical picture</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+      
+    </div>
+    <hr>
+    
+    <div id="markdown-content">
+      <div class="rl-world-models-note">
+  <h1>Reinforcement Learning and Abstract World Models</h1>
+  <p class="subtitle">A consolidated mathematical note covering reinforcement learning, Bellman equations, world models, abstract latent-space world models, JEPA-style prediction, and reward hacking.</p>
+
+  <div class="card">
+    <h2 style="margin-top:0">Reading flow</h2>
+    <p>This note moves from ordinary reinforcement learning to learned world models and then to abstract world models. The sequence matters: first we define the real environment as an MDP, then we show how value functions reason about long-term return, then we replace parts of the environment with learned predictors, and finally we move prediction into a structured latent space.</p>
+    <p>The main conceptual turn is that a world model is not only a function that predicts the next observation. In the abstract-world-model view, the useful state of the world may be a compressed representation containing position, velocity, constraints, symmetries, rewards, and other task-relevant variables. The equations below are therefore a pipeline: observe \(s\), encode it into \(z\), predict how \(z\) changes, estimate reward or utility, and choose actions by planning through those imagined futures.</p>
+  </div>
+
+  <section id="rl">
+    <h2>1. Reinforcement Learning as an MDP</h2>
+
+    <div class="card definition">
+      <strong>Definition.</strong> Reinforcement learning studies how an agent should choose actions through interaction with an environment in order to maximize expected cumulative reward.
+    </div>
+
+    <p>An MDP is the minimal mathematical story of an agent acting over time. It separates the world into states, possible actions, how the world changes, what the agent is rewarded for, and how much the future matters. This compact tuple is useful because every later model in this note modifies one of these ingredients.</p>
+
+    <p>The standard mathematical formulation is a Markov Decision Process:</p>
+
+    \[
+    \mathcal{M} = (\mathcal{S}, \mathcal{A}, P, R, \gamma)
+    \]
+
+    <p>Read this equation as a contract between the agent and the environment. The agent can only choose from \(\mathcal{A}\), the environment responds according to \(P\), and success is measured through \(R\). The Markov assumption means that \(s_t\) contains all information needed for predicting the next step; the model does not need the full history once the current state is known.</p>
+
+    <p>where:</p>
+    <ul>
+      <li>\(\mathcal{S}\) is the state space.</li>
+      <li>\(\mathcal{A}\) is the action space.</li>
+      <li>\(P(s' \mid s,a)\) is the transition probability.</li>
+      <li>\(R(s,a,s')\) is the reward function.</li>
+      <li>\(\gamma \in [0,1)\) is the discount factor.</li>
+    </ul>
+
+    <p>At time \(t\), the agent observes \(s_t\), chooses an action from a policy, receives reward, and transitions to the next state:</p>
+
+    \[
+    a_t \sim \pi(a \mid s_t)
+    \]
+
+    <p>The policy \(\pi\) is the agent's behavior rule. The notation \(a_t \sim \pi(a \mid s_t)\) says that the action may be sampled from a probability distribution, so the same state can sometimes lead to different actions. This is important during exploration and in environments where deterministic behavior is too brittle.</p>
+
+    \[
+    s_{t+1} \sim P(\cdot \mid s_t,a_t)
+    \]
+
+    <p>The transition model \(P\) is the environment's response. The dot in \(P(\cdot \mid s_t,a_t)\) means the next state is drawn from the entire distribution over possible next states, not chosen by the agent directly.</p>
+
+    \[
+    r_{t+1} = R(s_t,a_t,s_{t+1})
+    \]
+
+    <p>The reward is observed after the transition because the consequence of an action often depends on where the action actually leads. For example, the same steering action can be good or bad depending on the next position of the vehicle.</p>
+
+    <p>The discounted return is:</p>
+
+    \[
+    G_t = \sum_{k=0}^{\infty} \gamma^k r_{t+k+1}
+    \]
+
+    <p>The return \(G_t\) folds the whole future into one number. The discount \(\gamma\) controls how quickly future rewards fade in importance: when \(\gamma\) is close to 0, the agent behaves myopically; when it is close to 1, the agent is encouraged to plan farther ahead.</p>
+
+    <p>The goal is to find a policy \(\pi\) maximizing expected return:</p>
+
+    \[
+    J(\pi) = \mathbb{E}_{\pi}\left[\sum_{t=0}^{\infty} \gamma^t r_{t+1}\right]
+    \]
+
+    <p>The expectation is needed because trajectories may be random. Randomness can come from the policy, the environment, partial observability, or all three. Optimizing \(J(\pi)\) therefore means choosing behavior that performs well on average over many possible rollouts.</p>
+
+    <p>An optimal policy is:</p>
+
+    \[
+    \pi^* \in \arg\max_{\pi} J(\pi)
+    \]
+
+    <p>The symbol \(\arg\max\) returns the policy that achieves the largest objective value. There can be more than one optimal policy, so \(\pi^*\) is written as a member of the set of maximizers rather than as a unique object.</p>
+  </section>
+
+  <section id="bellman">
+    <h2>2. Bellman Equations</h2>
+
+    <div class="card definition">
+      <strong>Definition.</strong> Bellman equations express the value of a state or state-action pair recursively as immediate reward plus discounted future value.
+    </div>
+
+    <p>Bellman equations are the bridge between the global objective \(J(\pi)\) and step-by-step decision making. Instead of evaluating an entire infinite trajectory at once, they say: estimate what happens now, then add the value of the state you land in. This recursive structure is the backbone of dynamic programming, temporal-difference learning, Q-learning, actor-critic methods, and many planning algorithms.</p>
+
+    <h3>State-value function</h3>
+
+    \[
+    V^{\pi}(s) =
+    \mathbb{E}_{\pi}\left[
+    \sum_{t=0}^{\infty} \gamma^t r_{t+1}
+    \mid s_0=s
+    \right]
+    \]
+
+    <p>The state-value function answers: if the agent starts in state \(s\) and then follows policy \(\pi\), how much discounted reward should it expect? It evaluates states under a fixed behavior rule.</p>
+
+    <p>Bellman expectation equation for \(V^\pi\):</p>
+
+    \[
+    V^{\pi}(s)
+    =
+    \sum_a \pi(a \mid s)
+    \sum_{s'} P(s' \mid s,a)
+    \left[
+    R(s,a,s') + \gamma V^{\pi}(s')
+    \right]
+    \]
+
+    <p>This equation expands \(V^\pi(s)\) by averaging over two sources of uncertainty. First, \(\sum_a \pi(a \mid s)\) averages over the policy's possible actions. Second, \(\sum_{s'} P(s' \mid s,a)\) averages over the environment's possible next states. Inside the brackets, \(R(s,a,s')\) is the immediate payoff and \(\gamma V^\pi(s')\) is the discounted value of continuing from the next state.</p>
+
+    <h3>Action-value function</h3>
+
+    \[
+    Q^{\pi}(s,a) =
+    \mathbb{E}_{\pi}\left[
+    \sum_{t=0}^{\infty} \gamma^t r_{t+1}
+    \mid s_0=s, a_0=a
+    \right]
+    \]
+
+    <p>The action-value function asks a slightly sharper question: if the agent starts in state \(s\), takes action \(a\) first, and only then follows \(\pi\), what return should it expect? This is often more directly useful for control because it lets us compare actions from the same state.</p>
+
+    <p>Bellman expectation equation for \(Q^\pi\):</p>
+
+    \[
+    Q^{\pi}(s,a)
+    =
+    \sum_{s'} P(s' \mid s,a)
+    \left[
+    R(s,a,s') +
+    \gamma \sum_{a'} \pi(a' \mid s') Q^{\pi}(s',a')
+    \right]
+    \]
+
+    <p>The first action is fixed here, so there is no outer sum over actions at state \(s\). After the environment moves to \(s'\), the policy resumes, and \(\sum_{a'} \pi(a' \mid s')Q^\pi(s',a')\) averages over the next action choices.</p>
+
+    <h3>Optimal Bellman equations</h3>
+
+    \[
+    V^*(s) = \max_{\pi} V^{\pi}(s)
+    \]
+
+    \[
+    Q^*(s,a) = \max_{\pi} Q^{\pi}(s,a)
+    \]
+
+    <p>The starred functions describe best-achievable value rather than the value of a particular policy. \(V^*(s)\) is the best long-term return available from state \(s\), while \(Q^*(s,a)\) is the best long-term return after committing to action \(a\) first.</p>
+
+    \[
+    V^*(s)
+    =
+    \max_a
+    \sum_{s'} P(s' \mid s,a)
+    \left[
+    R(s,a,s') + \gamma V^*(s')
+    \right]
+    \]
+
+    <p>The optimal state-value equation replaces policy averaging with a maximization over actions. It says that an optimal agent chooses the action whose expected immediate reward plus future value is largest.</p>
+
+    \[
+    Q^*(s,a)
+    =
+    \sum_{s'} P(s' \mid s,a)
+    \left[
+    R(s,a,s') + \gamma \max_{a'} Q^*(s',a')
+    \right]
+    \]
+
+    <p>The optimal action-value equation has the same idea one step later. After taking \(a\) and arriving in \(s'\), the agent assumes it will choose the best next action \(a'\), hence the \(\max_{a'} Q^*(s',a')\) term.</p>
+
+    <p>The optimal greedy policy can be written as:</p>
+
+    \[
+    \pi^*(s) \in \arg\max_a Q^*(s,a)
+    \]
+
+    <p>This final line turns value estimation into action selection. Once \(Q^*\) is known or approximated, acting optimally means choosing an action with maximal \(Q^*(s,a)\) at the current state.</p>
+  </section>
+
+  <section id="world-models">
+    <h2>3. World Models</h2>
+
+    <div class="card definition">
+      <strong>Definition.</strong> A world model is a learned model of how the environment evolves. It approximates environment dynamics and often rewards, allowing the agent to predict, simulate, plan, or train using imagined trajectories.
+    </div>
+
+    <p>The motivation for a world model is simple: real interaction can be slow, expensive, unsafe, or unavailable. A learned model gives the agent a simulator it can query internally. In standard or generative world models, this simulator often tries to predict future observations, reconstruct sensory data, or model the next state in the same space where the agent observes the world.</p>
+
+    <p>The hat notation below is important. \(P\) and \(R\) are the true environment dynamics and reward. \(\hat{P}_{\theta}\) and \(\hat{R}_{\theta}\) are learned approximations with parameters \(\theta\). The agent does not own reality; it owns a model of reality, and that distinction becomes central when we discuss reward hacking.</p>
+
+    <p>A simple model-based RL formulation replaces the true MDP components with learned approximations:</p>
+
+    \[
+    \hat{\mathcal{M}}_{\theta}
+    =
+    (\mathcal{S}, \mathcal{A}, \hat{P}_{\theta}, \hat{R}_{\theta}, \gamma)
+    \]
+
+    <p>This tuple has the same shape as the original MDP, but two pieces have been learned from data. The state space, action space, and discount are kept fixed, while the transition and reward components are replaced by neural or statistical estimators.</p>
+
+    <p>where:</p>
+
+    \[
+    \hat{P}_{\theta}(s' \mid s,a) \approx P(s' \mid s,a)
+    \]
+
+    \[
+    \hat{R}_{\theta}(s,a,s') \approx R(s,a,s')
+    \]
+
+    <p>The first approximation says the learned model should put probability mass on the same next states that the real environment would produce. The second says the learned reward predictor should score transitions similarly to the true reward function. If either approximation is poor in regions the policy visits, planning inside the learned model can become misleading.</p>
+
+    <p>For stochastic dynamics:</p>
+
+    \[
+    s_{t+1} \sim \hat{P}_{\theta}(\cdot \mid s_t,a_t)
+    \]
+
+    <p>Stochastic dynamics preserve uncertainty. Instead of predicting one future, the model represents a distribution over possible futures. This is useful when the environment has noise, hidden variables, or inherently ambiguous outcomes.</p>
+
+    <p>For deterministic dynamics:</p>
+
+    \[
+    \hat{s}_{t+1} = f_{\theta}(s_t,a_t)
+    \]
+
+    <p>Deterministic dynamics compress the transition model into a function \(f_{\theta}\). Given the current state and action, the model outputs one predicted next state. This is easier to train and use, but it can hide uncertainty that matters for robust planning.</p>
+
+    <p>A common supervised objective for deterministic transition learning is:</p>
+
+    \[
+    \mathcal{L}_{dyn}(\theta)
+    =
+    \sum_t
+    \left\|
+    s_{t+1} - f_{\theta}(s_t,a_t)
+    \right\|^2
+    \]
+
+    <p>The dynamics loss compares the observed next state \(s_{t+1}\) with the model's predicted next state \(f_{\theta}(s_t,a_t)\). Squared error encourages predictions to be close in the chosen state representation. This objective is straightforward when the state is already a meaningful vector, but it can be awkward for raw pixels, graphs, or curved geometric spaces.</p>
+
+    <p>With reward prediction:</p>
+
+    \[
+    \mathcal{L}(\theta)
+    =
+    \sum_t
+    \left\|
+    s_{t+1} - f_{\theta}(s_t,a_t)
+    \right\|^2
+    +
+    \lambda
+    \left(
+    r_{t+1} - \hat{R}_{\theta}(s_t,a_t,s_{t+1})
+    \right)^2
+    \]
+
+    <p>The combined loss trains two abilities at once: predict what happens next and predict how good that transition is. The coefficient \(\lambda\) sets the tradeoff. A larger \(\lambda\) gives reward accuracy more influence; a smaller \(\lambda\) focuses training more heavily on state prediction.</p>
+
+    <p>Planning or policy learning inside the learned model becomes:</p>
+
+    \[
+    \max_{\pi}
+    \mathbb{E}_{\hat{P}_{\theta},\pi}
+    \left[
+    \sum_{t=0}^{\infty}
+    \gamma^t \hat{R}_{\theta}(s_t,a_t,s_{t+1})
+    \right]
+    \]
+
+    <p>This is the model-based control loop. The policy is optimized using imagined trajectories sampled from \(\hat{P}_{\theta}\) and scored by \(\hat{R}_{\theta}\). The benefit is data efficiency: the agent can learn from simulated experience. The risk is model bias: the policy may discover behaviors that look excellent inside \(\hat{\mathcal{M}}_{\theta}\) but fail in the real environment.</p>
+  </section>
+
+  <section id="abstract-world-models">
+    <h2>4. Abstract World Models</h2>
+
+    <div class="card definition">
+      <strong>Precise definition.</strong> An abstract world model is a structured latent dynamical system that compresses observed states into a lower-dimensional latent space, learns dynamics and reward/objective functions in that space, and uses geometric, topological, physical, causal, or symmetry priors to support prediction, simulation, planning, and optimization.
+    </div>
+
+    <p>The article's central point is that abstraction is not just compression for smaller storage. It is compression that tries to keep the variables needed for reasoning. In a bouncing-ball video, for example, millions of pixels may be reduced to position, velocity, gravity, contact events, and constraints. The model deliberately ignores details that do not affect the task, such as exact texture, while preserving structure that determines future behavior.</p>
+
+    <p>This is why abstract world models are often described as latent manifold models. The latent space \(\mathcal{Z}\) is not merely a bag of hidden features. It can be shaped as a vector space, graph, manifold, occupancy grid, simplicial complex, or another structured object, depending on what kinds of relationships the model must preserve.</p>
+
+    <p>The essential shift is from modeling raw state transitions directly:</p>
+
+    \[
+    P(s' \mid s,a)
+    \]
+
+    <p>This is the ordinary environment-level transition. It asks: given observed state \(s\) and action \(a\), what observed state \(s'\) comes next? For high-dimensional observations, this can force the model to track many details that are visually present but irrelevant to decision making.</p>
+
+    <p>to modeling transitions in latent space:</p>
+
+    \[
+    \tau_{\theta}(z' \mid z,a),
+    \qquad
+    z = \varphi_{\theta}(s)
+    \]
+
+    <p>Now the model first encodes the observation into \(z\), then predicts the next latent state \(z'\). The transition \(\tau_{\theta}\) works in the abstract space, so prediction can focus on task-relevant variables rather than raw sensory reconstruction. The encoder \(\varphi_{\theta}\) is therefore not a passive compression function; it decides what the model will be able to reason about.</p>
+
+    <p>For an MDP defined by state space \(\mathcal{S}\), action space \(\mathcal{A}\), reward function \(R\), and transition function \(T\):</p>
+
+    \[
+    R: \mathcal{S} \times \mathcal{A} \to \mathbb{R},
+    \qquad
+    T: \mathcal{S} \times \mathcal{A} \to \mathcal{S}
+    \]
+
+    <p>Here \(R\) maps a state-action pair to a scalar score, while \(T\) maps a state-action pair to the next state. This deterministic notation is a clean way to introduce the abstraction; a stochastic version would replace \(T\) with a transition distribution.</p>
+
+    <p>a self-supervised abstract world model can be defined in a latent space \(\mathcal{Z}\) with learnable components:</p>
+
+    \[
+    \varphi: \mathcal{S} \to \mathcal{Z}
+    \]
+
+    <p>The encoder \(\varphi\) projects observed states into latent states. Its job is to create a representation where important similarities are close, important differences remain distinguishable, and irrelevant variation is suppressed.</p>
+
+    \[
+    \tau: \mathcal{Z} \times \mathcal{A} \to \mathcal{Z}
+    \]
+
+    <p>The transition function \(\tau\) is the learned rule of motion in latent space. If \(z\) contains position and velocity, \(\tau\) should update those variables in a way that respects action effects and physical constraints.</p>
+
+    \[
+    r: \mathcal{Z} \times \mathcal{A} \to \mathbb{R}
+    \]
+
+    <p>The reward model \(r\) scores latent states and actions. It lets the agent plan without decoding every imagined latent state back into an observed state.</p>
+
+    <p>Here:</p>
+    <ul>
+      <li>\(\varphi\) is the encoder mapping observed states into latent states.</li>
+      <li>\(\tau\) is the latent transition function.</li>
+      <li>\(r\) is the latent reward or utility model.</li>
+    </ul>
+
+    <p>A compact formulation is:</p>
+
+    \[
+    \mathcal{W}_{\theta}
+    =
+    (\mathcal{Z}, \varphi_{\theta}, \tau_{\theta}, r_{\theta}, \mathcal{G})
+    \]
+
+    <p>Read \(\mathcal{W}_{\theta}\) as the learned abstract world. It contains the space where reasoning happens, the encoder into that space, the transition model inside that space, the reward model used for evaluation, and the structural assumptions that keep the latent world coherent.</p>
+
+    <p>where \(\mathcal{G}\) denotes structural priors such as geometry, topology, group symmetries, invariances, equivariances, physical constraints, or causal structure. These priors are the difference between arbitrary compression and useful abstraction: they tell the model which transformations should preserve meaning and which changes should alter the predicted future.</p>
+
+    <h3>Latent transition and reward prediction</h3>
+
+    <p>The operational flow has three steps: encode the current observation, advance the latent state using the action, and estimate the reward or utility of that latent transition.</p>
+
+    \[
+    z_t = \varphi_{\theta}(s_t)
+    \]
+
+    <p>This line converts the observed state at time \(t\) into the model's internal state. If the observed state is an image, \(z_t\) might encode object positions, motion, scene layout, or affordances rather than individual pixels.</p>
+
+    \[
+    \hat{z}_{t+1} = \tau_{\theta}(z_t,a_t)
+    \]
+
+    <p>This line performs imagination in latent space. The model asks: if the current abstract state is \(z_t\) and the agent takes action \(a_t\), what abstract state should come next?</p>
+
+    \[
+    \hat{r}_{t+1} = r_{\theta}(z_t,a_t)
+    \]
+
+    <p>This line estimates the immediate value of the action from the latent state. In planning, this predicted reward is what lets the agent compare imagined futures without waiting for real-world feedback.</p>
+
+    <p>If the latent space \(\mathcal{Z}\) has a non-Euclidean geometry, the prediction loss should use an appropriate distance \(d_{\mathcal{Z}}\), such as a geodesic distance on a manifold:</p>
+
+    \[
+    \mathcal{L}_{pred}(\theta)
+    =
+    \sum_t
+    d_{\mathcal{Z}}
+    \left(
+    \tau_{\theta}(z_t,a_t),
+    z_{t+1}
+    \right)^2
+    \]
+
+    <p>The distance function \(d_{\mathcal{Z}}\) is doing important conceptual work. In a flat vector space, squared Euclidean distance may be fine. On a sphere, graph, mesh, or curved manifold, the meaningful distance may follow the structure of the space. A geodesic distance measures how far two latent states are along the manifold, not through empty ambient space.</p>
+
+    <p>where:</p>
+
+    \[
+    z_{t+1} = \varphi_{\theta}(s_{t+1})
+    \]
+
+    <p>The target \(z_{t+1}\) is produced by encoding the actual next observation. Training therefore compares the predicted latent future \(\tau_{\theta}(z_t,a_t)\) with the latent encoding of what really happened.</p>
+
+    <p>The reward-prediction term can be written as:</p>
+
+    \[
+    \mathcal{L}_{reward}(\theta)
+    =
+    \sum_t
+    \left(
+    r_{t+1} - r_{\theta}(z_t,a_t)
+    \right)^2
+    \]
+
+    <p>This loss says that the latent reward model should match observed reward labels. When the reward is sparse or imperfect, this term can be fragile, because the model may learn the proxy signal rather than the intended task objective.</p>
+
+    <p>A general training objective can combine prediction, reward, geometric regularization, and anti-collapse terms:</p>
+
+    \[
+    \mathcal{L}_{world}(\theta)
+    =
+    \mathcal{L}_{pred}
+    +
+    \lambda_1 \mathcal{L}_{reward}
+    +
+    \lambda_2 \mathcal{L}_{geom}
+    +
+    \lambda_3 \mathcal{L}_{collapse}
+    \]
+
+    <p>This combined objective makes the design tradeoffs explicit. \(\mathcal{L}_{pred}\) teaches dynamics, \(\mathcal{L}_{reward}\) teaches scoring, \(\mathcal{L}_{geom}\) enforces structure such as smoothness or symmetry, and \(\mathcal{L}_{collapse}\) prevents the encoder from mapping many distinct observations to the same uninformative latent point.</p>
+
+    <h3>Geometric priors: invariance and equivariance</h3>
+
+    <p>Geometric priors express what should remain stable when the world is transformed. They help the model generalize from fewer examples because it does not have to relearn the same situation under every rotation, translation, viewpoint, or scale.</p>
+
+    <p>Invariance says the representation or learned function should not change under a transformation \(T\):</p>
+
+    \[
+    f(T(z)) = f(z)
+    \]
+
+    <p>For example, if a classifier only needs to know that an object is a ball, rotating the image should not change the answer. The function's output is invariant to the transformation.</p>
+
+    <p>A regularized objective is:</p>
+
+    \[
+    \mathcal{L}_{total}
+    =
+    \mathcal{L}_{data}
+    +
+    \lambda
+    \left\|
+    f(T(z))-f(z)
+    \right\|^2
+    \]
+
+    <p>The regularization term penalizes the model when transformed and untransformed versions produce different outputs. It is a soft constraint: the data loss still matters, but the model is nudged toward respecting the desired invariance.</p>
+
+    <p>Equivariance says a transformation in latent space should correspond to a predictable transformation in output space:</p>
+
+    \[
+    f(T(z)) = T'(f(z))
+    \]
+
+    <p>Equivariance is stronger and often more useful for world modeling. If an object moves two meters to the right in the observed world, its latent representation should move in a corresponding way rather than remain unchanged. The model preserves the structure of the transformation instead of ignoring it.</p>
+
+    <p>A regularized objective is:</p>
+
+    \[
+    \mathcal{L}_{total}
+    =
+    \mathcal{L}_{data}
+    +
+    \lambda
+    \left\|
+    f(T(z))-T'(f(z))
+    \right\|^2
+    \]
+
+    <p>This penalty encourages the learned function to commute with the transformation: transform first and then predict, or predict first and then transform, and the results should agree.</p>
+
+    <h3>Interpretation of the latent space</h3>
+
+    <p>A useful way to read \(\mathcal{Z}\) is through three complementary lenses. The geometry describes the shape of the representation, the variables describe what information lives there, and the activities describe what the agent does there.</p>
+
+    <table>
+      <thead>
+        <tr>
+<th>Lens</th>
+<th>Meaning</th>
+</tr>
+      </thead>
+      <tbody>
+        <tr>
+<td>Geometry</td>
+<td>\(\mathcal{Z}\) may be a vector space, manifold, graph, mesh, hypergraph, simplicial complex, occupancy grid, or other structured space.</td>
+</tr>
+        <tr>
+<td>Variables</td>
+<td>Latent states, rewards, objectives, constraints, physical variables, causal variables, and task-relevant abstractions.</td>
+</tr>
+        <tr>
+<td>Activities</td>
+<td>Prediction, simulation, planning, optimization, reasoning, and control.</td>
+</tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="jepa">
+    <h2>5. JEPA-style Latent Prediction</h2>
+
+    <div class="card definition">
+      <strong>Definition.</strong> A Joint-Embedding Predictive Architecture predicts target representations in latent space rather than reconstructing raw observations such as pixels.
+    </div>
+
+    <p>JEPA fits naturally into abstract world modeling because it trains prediction where the abstraction lives. Instead of asking the model to reproduce every pixel of a target image or video patch, it asks the model to predict the target's embedding. This encourages the encoder to keep information that is stable and predictive while discarding details that are unpredictable or irrelevant.</p>
+
+    <p>The energy-based JEPA objective measures the discrepancy between a predicted target latent representation and the actual target latent representation:</p>
+
+    \[
+    E(x,y,z)
+    =
+    \left\|
+    Pred(s_x,z)-s_y
+    \right\|_2^2
+    \]
+
+    <p>The energy \(E\) is low when the predicted target representation \(Pred(s_x,z)\) is close to the actual target representation \(s_y\). It is high when the prediction misses. Training minimizes this energy, so the model learns representations in which future or missing latent states can be predicted from context.</p>
+
+    <p>where:</p>
+    <ul>
+      <li>\(x\) is the input or context data.</li>
+      <li>\(y\) is the target data.</li>
+      <li>\(z\) is a latent variable.</li>
+      <li>\(s_x\) is the latent representation of the context.</li>
+      <li>\(s_y\) is the latent representation of the target.</li>
+      <li>\(Pred\) is the prediction model in latent space.</li>
+    </ul>
+
+    <p>The target estimate is:</p>
+
+    \[
+    \hat{s}_y = Pred(s_x,z)
+    \]
+
+    <p>This line is the actual prediction step. The context representation \(s_x\), together with latent variable \(z\), is passed through the predictor to produce \(\hat{s}_y\), the model's estimate of the target embedding.</p>
+
+    <p>JEPA-style models are especially relevant to abstract world models because they treat latent space as the primary arena of learning and prediction. The model does not need to reconstruct all details of \(y\); it needs to predict the abstract features that matter for future inference, planning, or control.</p>
+
+    <p>A practical complication is representation collapse. If the encoder maps many inputs to nearly the same embedding, the prediction task becomes artificially easy but useless. This is why JEPA-style systems often need architectural or regularization mechanisms that keep the latent space informative and well spread out.</p>
+  </section>
+
+  <section id="reward-hacking">
+    <h2>6. Reward Hacking</h2>
+
+    <div class="card definition">
+      <strong>Definition.</strong> Reward hacking occurs when an agent achieves high specified reward while failing to achieve the designer's true intended objective.
+    </div>
+
+    <p>Reward hacking is easiest to understand as a gap between measurement and meaning. The reward function is the measurable training signal; the intended utility is what the designer actually wanted. When those two diverge, a capable optimizer can exploit the measurable signal while violating the broader goal.</p>
+
+    <p>Suppose the intended utility is:</p>
+
+    \[
+    U(s,a)
+    \]
+
+    <p>\(U\) represents the real objective we care about. It may be difficult to observe, difficult to write down, or too broad to encode directly.</p>
+
+    <p>but the agent is trained on the specified reward:</p>
+
+    \[
+    R(s,a)
+    \]
+
+    <p>\(R\) is the proxy objective used during training. It may be a hand-designed reward, a learned reward model, a heuristic metric, or a feedback signal from another system.</p>
+
+    <p>The learned policy optimizes:</p>
+
+    \[
+    \pi_R^*
+    =
+    \arg\max_{\pi}
+    \mathbb{E}_{\pi}
+    \left[
+    \sum_{t=0}^{\infty}
+    \gamma^t R(s_t,a_t)
+    \right]
+    \]
+
+    <p>The subscript in \(\pi_R^*\) is a reminder that the policy is optimal for the specified reward \(R\), not necessarily for the intended utility \(U\).</p>
+
+    <p>Reward hacking occurs when this policy has high specified reward but low intended utility:</p>
+
+    \[
+    \mathbb{E}_{\pi_R^*}
+    \left[
+    \sum_{t=0}^{\infty}
+    \gamma^t R(s_t,a_t)
+    \right]
+    \quad \text{is high, but} \quad
+    \mathbb{E}_{\pi_R^*}
+    \left[
+    \sum_{t=0}^{\infty}
+    \gamma^t U(s_t,a_t)
+    \right]
+    \quad \text{is low.}
+    \]
+
+    <p>This pair of inequalities is the failure mode in mathematical form. The training metric says the policy is doing well, while the real objective says it is doing poorly.</p>
+
+    <p>The core mismatch is:</p>
+
+    \[
+    R(s,a) \neq U(s,a)
+    \]
+
+    <p>The equation is short because the problem is conceptual rather than notational. If the reward is not the goal, optimizing the reward more effectively can amplify the mismatch.</p>
+
+    <h3>Reward hacking in learned world models</h3>
+
+    <p>In a learned world model, the problem can arise from an inaccurate reward model, transition model, or both:</p>
+
+    \[
+    \hat{P}_{\theta}(s' \mid s,a) \not\approx P(s' \mid s,a)
+    \]
+
+    \[
+    \hat{R}_{\theta}(s,a,s') \not\approx U(s,a,s')
+    \]
+
+    <p>The transition error means the imagined world does not match the real world. The reward error means the imagined scoring function does not match the intended objective. Either error can create artificial high-reward plans.</p>
+
+    <p>The agent may optimize imagined trajectories:</p>
+
+    \[
+    \pi_{\hat{R}}^*
+    =
+    \arg\max_{\pi}
+    \mathbb{E}_{\hat{P}_{\theta},\pi}
+    \left[
+    \sum_{t=0}^{\infty}
+    \gamma^t \hat{R}_{\theta}(s_t,a_t,s_{t+1})
+    \right]
+    \]
+
+    <p>This objective is evaluated inside the learned model. The policy can become excellent at producing trajectories that \(\hat{P}_{\theta}\) and \(\hat{R}_{\theta}\) approve of, even if those trajectories are unrealistic or undesirable outside the model.</p>
+
+    <p>while those trajectories perform poorly in the real environment:</p>
+
+    \[
+    \mathbb{E}_{P,\pi_{\hat{R}}^*}
+    \left[
+    \sum_{t=0}^{\infty}
+    \gamma^t U(s_t,a_t,s_{t+1})
+    \right]
+    \quad \text{is low.}
+    \]
+
+    <p>The mismatch now has two layers: the policy is optimizing a learned reward inside learned dynamics, but deployment is judged by real dynamics and intended utility.</p>
+
+    <h3>Reward hacking in latent abstract world models</h3>
+
+    <p>In an abstract world model, the agent may exploit the learned latent reward model:</p>
+
+    \[
+    r_{\theta}(z,a)
+    \]
+
+    <p>or the learned latent transition model:</p>
+
+    \[
+    \tau_{\theta}(z' \mid z,a)
+    \]
+
+    <p>In latent space, reward hacking can be subtler. The exploit may not look like a strange raw observation; it may look like a latent state that receives high score because the abstraction omitted a variable that mattered for safety, feasibility, or human intent.</p>
+
+    <p>The latent-space optimization objective is:</p>
+
+    \[
+    \max_{\pi}
+    \mathbb{E}_{\tau_{\theta},\pi}
+    \left[
+    \sum_{t=0}^{\infty}
+    \gamma^t r_{\theta}(z_t,a_t)
+    \right]
+    \]
+
+    <p>This is the same planning idea as before, but all rollouts occur through \(\tau_{\theta}\) and all rewards come from \(r_{\theta}\). The quality of the abstraction now determines whether imagined success corresponds to real success.</p>
+
+    <p>Reward hacking occurs when high latent reward does not correspond to high real-world utility:</p>
+
+    \[
+    r_{\theta}(z,a) \not\approx U(s,a),
+    \qquad
+    z = \varphi_{\theta}(s)
+    \]
+
+    <p>This line states the alignment requirement for abstraction. A latent reward model is useful only if scoring \(z=\varphi_{\theta}(s)\) preserves what matters about the original state \(s\).</p>
+
+    <p>In short:</p>
+
+    \[
+    \boxed{
+    \text{Reward hacking is what happens when an agent optimizes the reward function better than the reward function captures the real goal.}
+    }
+    \]
+  </section>
+
+  <section id="comparison">
+    <h2>7. Comparison and Unifying View</h2>
+
+    <p>The concepts above can be read as successive layers. Reinforcement learning defines the decision problem. Bellman equations define how long-term value decomposes over time. World models learn a simulator for the decision problem. Abstract world models move that simulator into a structured latent space. JEPA-style prediction is one way to train such latent spaces. Reward hacking is the warning that none of these layers guarantee alignment by themselves.</p>
+
+    <table>
+      <thead>
+        <tr>
+<th>Concept</th>
+<th>Mathematical object</th>
+<th>Main purpose</th>
+</tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Reinforcement learning</td>
+          <td>\(\mathcal{M}=(\mathcal{S},\mathcal{A},P,R,\gamma)\)</td>
+          <td>Learn a policy \(\pi\) maximizing expected cumulative reward.</td>
+        </tr>
+        <tr>
+          <td>Bellman equations</td>
+          <td>Recursive equations for \(V^\pi\), \(Q^\pi\), \(V^*\), and \(Q^*\)</td>
+          <td>Decompose long-term value into immediate reward plus discounted future value.</td>
+        </tr>
+        <tr>
+          <td>Standard world model</td>
+          <td>\(\hat{P}_{\theta}(s'\mid s,a),\hat{R}_{\theta}(s,a,s')\)</td>
+          <td>Predict future states and rewards in observed state space.</td>
+        </tr>
+        <tr>
+          <td>Abstract world model</td>
+          <td>\(\mathcal{W}_{\theta}=(\mathcal{Z},\varphi_{\theta},\tau_{\theta},r_{\theta},\mathcal{G})\)</td>
+          <td>Predict, plan, and reason in structured latent space.</td>
+        </tr>
+        <tr>
+          <td>JEPA-style model</td>
+          <td>\(E(x,y,z)=\left\|Pred(s_x,z)-s_y\right\|_2^2\)</td>
+          <td>Predict target latent representations rather than reconstructing raw observations.</td>
+        </tr>
+        <tr>
+          <td>Reward hacking</td>
+          <td>\(R(s,a) \neq U(s,a)\)</td>
+          <td>Failure mode where proxy reward diverges from intended objective.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Unified mathematical picture</h3>
+
+    <p>The full agent can be seen as combining representation, prediction, reward estimation, and policy optimization:</p>
+
+    \[
+    s_t \xrightarrow{\varphi_{\theta}} z_t
+    \]
+
+    <p>First, the observation \(s_t\) is encoded into the latent state \(z_t\). This is the abstraction step.</p>
+
+    \[
+    (z_t,a_t) \xrightarrow{\tau_{\theta}} z_{t+1}
+    \]
+
+    <p>Second, the model predicts how the latent state changes after action \(a_t\). This is the dynamics step.</p>
+
+    \[
+    (z_t,a_t) \xrightarrow{r_{\theta}} \hat{r}_{t+1}
+    \]
+
+    <p>Third, the model estimates the reward or utility associated with that latent transition. This is the evaluation step.</p>
+
+    \[
+    a_t \sim \pi_{\psi}(a \mid z_t)
+    \]
+
+    <p>Finally, the policy chooses actions from the latent state. This is the control step. The policy parameters \(\psi\) may be trained using real rollouts, imagined rollouts, or both.</p>
+
+    <p>The policy objective in latent space is:</p>
+
+    \[
+    J(\psi)
+    =
+    \mathbb{E}_{\tau_{\theta},\pi_{\psi}}
+    \left[
+    \sum_{t=0}^{\infty}
+    \gamma^t r_{\theta}(z_t,a_t)
+    \right]
+    \]
+
+    <p>This objective says: choose a policy that obtains high predicted reward when futures are rolled out through the latent transition model. It is powerful because planning can happen in a smaller, structured space. It is risky because errors in \(\varphi_{\theta}\), \(\tau_{\theta}\), or \(r_{\theta}\) can be optimized by the policy.</p>
+
+    <p>with the important alignment condition:</p>
+
+    \[
+    r_{\theta}(\varphi_{\theta}(s),a) \approx U(s,a)
+    \]
+
+    <p>The alignment condition says the latent reward should preserve the intended utility of the original state-action pair. If the encoder drops a variable that matters to \(U\), then \(r_{\theta}\) may score the abstract state incorrectly.</p>
+
+    <p>and the important dynamics condition:</p>
+
+    \[
+    \tau_{\theta}(\varphi_{\theta}(s),a)
+    \approx
+    \varphi_{\theta}(T(s,a))
+    \]
+
+    <p>The dynamics condition says that predicting after encoding should match encoding after the real transition. In words: the abstract model should commute with the real world dynamics. This is a concise test of whether the latent transition is faithful to the environment.</p>
+
+    <p>Thus, an abstract world model should preserve the task-relevant structure of the world, not merely compress observations:</p>
+
+    \[
+    \boxed{
+    \text{Good abstraction preserves the variables, dynamics, constraints, and rewards needed for reliable planning.}
+    }
+    \]
+  </section>
+
+  <footer>
+    <p><strong>Sources and grounding.</strong> This note consolidates standard reinforcement learning notation with the abstract-world-model formulation from Patrick R. Nicolas, <a href="https://patricknicolas.substack.com/p/mathematics-of-abstract-world-models" rel="external nofollow noopener" target="_blank"><em>Mathematics of Abstract World Models</em></a>, published February 27, 2026. The article frames abstract/latent manifold world models as systems that compress high-dimensional sensory data into lower-dimensional latent manifolds, include temporal dynamics, operate through latent prediction, and define learnable components \(\varphi: \mathcal{S}\to\mathcal{Z}\), \(\tau: \mathcal{Z}\times\mathcal{A}\to\mathcal{Z}\), and \(r: \mathcal{Z}\times\mathcal{A}\to\mathbb{R}\).</p>
+    <p class="small">Generated as a study note. Equations are written in LaTeX and rendered with MathJax.</p>
+  </footer>
+
+</div>
+
+    </div>
+  </article>
+
+
+  
+    
+    <br>
+    <hr>
+    <br>
+    <ul class="list-disc pl-8"></ul>
+
+    <!-- Adds related posts to the end of an article -->
+    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
+    <p class="mb-2">Here are some more articles you might like to read next:</p>
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/agent-skills-ai-ml-research-scientists/">Agent Skills for AI/ML Research Scientists</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/ai-agents-series/">The AI Agents Series</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/ai-agents-self-improving-agents/">AI Agents Series | Self Improving Agents - Foundation and Advances</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs231n-2025-lec18/">Stanford CS231N Deep Learning for Computer Vision | Spring 2025 | Lecture 18- Human-Centered AI</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs231n-2025-lec17/">Stanford CS231N Deep Learning for Computer Vision | Spring 2025 | Lecture 17- Robot Learning</a>
+  </li>
+
+</div>
+
+      
+    </div>
+
+    <!-- Footer -->    
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        © Copyright 2026 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+
+      </div>
+    </footer>
+
+    <!-- JavaScripts -->
+    <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- Bootsrap & MDB scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    <!-- Masonry & imagesLoaded -->
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
+    
+  <!-- Medium Zoom JS -->
+  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/zoom.js"></script>
+
+  <!-- Bootstrap Table -->
+  <script defer src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+
+  <!-- Load Common JS -->
+  <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
+  <script defer src="/assets/js/common.js?acdb9690d7641b2f8d40529018c71a01"></script>
+  <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    <!-- MathJax -->
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        tags: 'ams'
+      }
+    };
+  </script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KGSMMS9MS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-7KGSMMS9MS');
+  </script>
+    
+
+<!-- Scrolling Progress Bar -->
+<script type="text/javascript">
+  /*
+   * This JavaScript code has been adapted from the article 
+   * https://css-tricks.com/reading-position-indicator/ authored by Pankaj Parashar, 
+   * published on the website https://css-tricks.com on the 7th of May, 2014.
+   * Couple of changes were made to the original code to make it compatible 
+   * with the `al-foio` theme.
+   */
+  const progressBar = $("#progress");
+  /*
+   * We set up the bar after all elements are done loading.
+   * In some cases, if the images in the page are larger than the intended
+   * size they'll have on the page, they'll be resized via CSS to accomodate
+   * the desired size. This mistake, however, breaks the computations as the
+   * scroll size is computed as soon as the elements finish loading.
+   * To account for this, a minimal delay was introduced before computing the
+   * values.
+   */
+  window.onload = function () {
+    setTimeout(progressBarSetup, 50);
+  };
+  /*
+   * We set up the bar according to the browser.
+   * If the browser supports the progress element we use that.
+   * Otherwise, we resize the bar thru CSS styling
+   */
+  function progressBarSetup() {
+    if ("max" in document.createElement("progress")) {
+      initializeProgressElement();
+      $(document).on("scroll", function() {
+        progressBar.attr({ value: getCurrentScrollPosition() });
+      });
+      $(window).on("resize", initializeProgressElement);
+    } else {
+      resizeProgressBar();
+      $(document).on("scroll", resizeProgressBar);
+      $(window).on("resize", resizeProgressBar);
+    }
+  }
+  /*
+   * The vertical scroll position is the same as the number of pixels that
+   * are hidden from view above the scrollable area. Thus, a value > 0 is
+   * how much the user has scrolled from the top
+   */
+  function getCurrentScrollPosition() {
+    return $(window).scrollTop();
+  }
+
+  function initializeProgressElement() {
+    let navbarHeight = $("#navbar").outerHeight(true);
+    $("body").css({ "padding-top": navbarHeight });
+    $("progress-container").css({ "padding-top": navbarHeight });
+    progressBar.css({ top: navbarHeight });
+    progressBar.attr({
+      max: getDistanceToScroll(),
+      value: getCurrentScrollPosition(),
+    });
+  }
+  /*
+   * The offset between the html document height and the browser viewport
+   * height will be greater than zero if vertical scroll is possible.
+   * This is the distance the user can scroll
+   */
+  function getDistanceToScroll() {
+    return $(document).height() - $(window).height();
+  }
+
+  function resizeProgressBar() {
+    progressBar.css({ width: getWidthPercentage() + "%" });
+  }
+  // The scroll ratio equals the percentage to resize the bar
+  function getWidthPercentage() {
+    return (getCurrentScrollPosition() / getDistanceToScroll()) * 100;
+  }
+</script>
+
+    
+  </body>
+</html>
