@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <!-- Head -->
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    <!-- Metadata, OpenGraph and Schema.org -->
+    
+
+    <!-- Standard metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>AI Agents 101 | 02. From Prompt Engineering to Agent Systems Engineering | Tuan-Anh  Bui</title>
+    <meta name="author" content="Tuan-Anh  Bui">
+    <meta name="description" content="From Prompt Engineering to Agent Systems Engineering">
+    <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
+
+
+    <!-- Bootstrap & MDB -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+    <!-- Bootstrap Table -->
+    <link defer rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700%7CRoboto+Slab:100,300,400,500,700%7CMaterial+Icons">
+
+    <!-- Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
+
+    
+
+    <!-- Styles -->
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
+    
+    <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+    <link rel="canonical" href="https://tuananhbui89.github.io/blog/2026/ai-agents-101-02-from-prompt-engineering-to-agent-systems-engineering/">
+
+    <!-- Dark Mode -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark">
+    <script src="/assets/js/theme.js?96d6b3e1c3604aca8b6134c7afdd5db6"></script>
+    <script src="/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script>
+    
+
+  </head>
+
+  <!-- Body -->
+  <body class="fixed-top-nav ">
+
+    <!-- Header -->
+    <header>
+
+      <!-- Nav Bar -->
+      <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top">
+        <div class="container">
+          <a class="navbar-brand title font-weight-lighter" href="/"><span class="font-weight-bold">Tuan-Anh </span>Bui</a>
+          <!-- Navbar Toggle -->
+          <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar top-bar"></span>
+            <span class="icon-bar middle-bar"></span>
+            <span class="icon-bar bottom-bar"></span>
+          </button>
+
+          <div class="collapse navbar-collapse text-right" id="navbarNav">
+            <ul class="navbar-nav ml-auto flex-nowrap">
+
+              <!-- About -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/">about</a>
+              </li>
+              
+              <!-- Blog -->
+              <li class="nav-item active">
+                <a class="nav-link" href="/blog/">blog<span class="sr-only">(current)</span></a>
+              </li>
+
+              <!-- Other pages -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/publications/">publications</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/projects/">projects</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/teaching/"></a>
+              </li>
+
+              <!-- Toogle theme mode -->
+              <li class="toggle-container">
+                <button id="light-toggle" title="Change theme">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Scrolling Progress Bar -->
+      <progress id="progress" value="0">
+        <div class="progress-container">
+          <span class="progress-bar"></span>
+        </div>
+      </progress>
+    </header>
+
+
+    <!-- Content -->
+    <div class="container mt-5">
+      
+        <!-- _layouts/post.html -->
+<!-- Page/Post style -->
+<style type="text/css">
+  .agentic-101-post pre {
+  background: #111827;
+  color: #e5edf2;
+  border-radius: 8px;
+  overflow-x: auto;
+  padding: 16px;
+  margin: 18px 0;
+  font-size: 0.95rem;
+} .agentic-101-post code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+} .agentic-101-post :not(pre) > code {
+  background: #e4f1f2;
+  border-radius: 4px;
+  padding: 0.12rem 0.28rem;
+} .agentic-101-post table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 0.96rem;
+} .agentic-101-post th, .agentic-101-post td {
+  border: 1px solid #d8ddd7;
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+} .agentic-101-post th {
+  background: #e4f1f2;
+}
+
+</style>
+
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">AI Agents 101 | 02. From Prompt Engineering to Agent Systems Engineering</h1>
+    <p class="post-meta">June 1, 2026</p>
+    <p class="post-tags">
+      <a href="/blog/2026"> <i class="fas fa-calendar fa-sm"></i> 2026 </a>
+        ·  
+        <a href="/blog/tag/genai">
+          <i class="fas fa-hashtag fa-sm"></i> genai</a>  
+          <a href="/blog/tag/llm">
+          <i class="fas fa-hashtag fa-sm"></i> llm</a>  
+          <a href="/blog/tag/tutorial">
+          <i class="fas fa-hashtag fa-sm"></i> tutorial</a>  
+          <a href="/blog/tag/reading">
+          <i class="fas fa-hashtag fa-sm"></i> reading</a>  
+          <a href="/blog/tag/agents">
+          <i class="fas fa-hashtag fa-sm"></i> agents</a>  
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    
+    <div id="table-of-contents">
+      
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1">
+<a href="#from-prompt-engineering-to-agent-systems-engineering">From Prompt Engineering to Agent Systems Engineering</a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#level-1-fundamentals">Level 1: Fundamentals</a></li>
+<li class="toc-entry toc-h2"><a href="#level-2-concepts">Level 2: Concepts</a></li>
+<li class="toc-entry toc-h2">
+<a href="#level-3-engineering-detail">Level 3: Engineering Detail</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#prompt-engineering">Prompt engineering</a></li>
+<li class="toc-entry toc-h3"><a href="#context-engineering">Context engineering</a></li>
+<li class="toc-entry toc-h3"><a href="#tool-engineering">Tool engineering</a></li>
+<li class="toc-entry toc-h3"><a href="#harness-engineering">Harness engineering</a></li>
+<li class="toc-entry toc-h3"><a href="#loop-engineering">Loop engineering</a></li>
+<li class="toc-entry toc-h3"><a href="#eval-and-observability-engineering">Eval and observability engineering</a></li>
+<li class="toc-entry toc-h3"><a href="#safety-engineering">Safety engineering</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#current-landscape">Current Landscape</a></li>
+<li class="toc-entry toc-h2"><a href="#practical-takeaways">Practical Takeaways</a></li>
+<li class="toc-entry toc-h2"><a href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+      
+    </div>
+    <hr>
+    
+    <div id="markdown-content">
+      <div class="agentic-101-post">
+<h1 id="from-prompt-engineering-to-agent-systems-engineering">From Prompt Engineering to Agent Systems Engineering</h1>
+<p>Prompt engineering is still useful. It is just no longer the main bottleneck.</p>
+<p>The old mental model was: write a better prompt, get a better answer. That still works for single-turn tasks. But when an AI system can inspect a repository, call tools, run tests, read logs, open pull requests, ask other agents for review, persist state, and wake up again on a schedule, the engineering problem changes. You are no longer just shaping a model response. You are designing the environment, harness, and loop that let the model do reliable work.</p>
+<p>The shift is from "what should I ask the model?" to "what system should repeatedly turn goals into verified progress?"</p>
+<h2 id="level-1-fundamentals">Level 1: Fundamentals</h2>
+<p>Prompt engineering means shaping the input so a model is more likely to produce the output you want. OpenAI's prompt engineering guide frames prompts as the way developers ask models to generate text, code, structured JSON, mathematical output, or prose, and it highlights patterns such as examples, clear instructions, and prompt caching for reused context [1].</p>
+<p>That is the right starting point. A model is not a mind reader. If you want a customer-support classifier to return only <code>Hardware</code>, <code>Software</code>, or <code>Other</code>, you should say that. If you want citations, specify the citation format. If you want Markdown, say where Markdown is appropriate. Prompting is the interface between human intent and model behavior.</p>
+<p>But agents add new moving parts. A useful agentic system may have:</p>
+<ul>
+<li>prompts that define the role and task</li>
+<li>context that supplies current facts and project rules</li>
+<li>tools that let the model act</li>
+<li>a harness that runs and constrains one agent execution</li>
+<li>loops that rediscover work, retry, verify, schedule, and persist state</li>
+<li>evaluations that measure behavior</li>
+<li>safety controls that limit damage</li>
+</ul>
+<p>Cobus Greyling's "Loop Engineering" draws a clean distinction between these layers: the harness equips a single run, while the loop repeatedly prompts agents, spawns helpers, persists state, and decides what should happen next [2]. OpenAI's "Harness engineering" article makes the same shift concrete in software engineering: the team's job became designing environments, specifying intent, and building feedback loops so Codex agents could do reliable work [3].</p>
+<p>The beginner mistake is to keep polishing the prompt after the problem has moved somewhere else. If the model lacks the current policy, the fix is context. If it calls the wrong API, the fix is tool design. If it cannot observe the app, the fix is harness engineering. If it needs to check CI every morning, triage failures, assign work, verify changes, and remember what happened last time, the fix is loop engineering.</p>
+<h2 id="level-2-concepts">Level 2: Concepts</h2>
+<p>A helpful mental model is:</p>
+<pre><code class="language-text">prompt engineering = shape one model call
+context engineering = shape what the model can know
+tool engineering = shape what the model can do
+harness engineering = shape one reliable agent run
+loop engineering = shape repeated goal-seeking runs over time
+agent systems engineering = compose all of the above
+</code></pre>
+<p>Prompt engineering answers: What should the model do in this moment?</p>
+<p>Context engineering answers: What information should the model see, in what order, at what level of detail, with what provenance?</p>
+<p>Tool engineering answers: What actions can the model take, and how obvious, typed, constrained, and recoverable are those actions?</p>
+<p>Harness engineering answers: What execution environment makes one run legible, observable, testable, and enforceable?</p>
+<p>Loop engineering answers: What keeps discovering work, assigning it, verifying it, persisting state, and deciding the next action?</p>
+<p>Eval engineering answers: How do we know the system is getting better rather than merely sounding better?</p>
+<p>Safety engineering answers: What should the system refuse, constrain, review, sandbox, or escalate?</p>
+<p>Anthropic's "Building effective agents" gives a useful bridge from single prompts to systems. It describes workflows as systems where LLMs and tools follow predefined code paths, and agents as systems where the LLM dynamically directs its process and tool use [4]. It also recommends starting with the simplest solution possible, because agentic systems often trade latency and cost for better task performance [4].</p>
+<p>That advice matters even more once harnesses and loops enter the picture. A harness is leverage when it makes work verifiable. A loop is leverage when it repeatedly converts state into useful next actions. Both are liabilities when they simply automate confusion.</p>
+<p>The stack is easier to reason about if each layer has a contract:</p>
+<table>
+<thead>
+<tr>
+  <th>Layer</th>
+  <th>Contract</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Prompt</td>
+  <td>express the local task and success criteria</td>
+</tr>
+<tr>
+  <td>Context</td>
+  <td>supply relevant, current, permissioned information</td>
+</tr>
+<tr>
+  <td>Tools</td>
+  <td>expose safe, typed actions with clear consequences</td>
+</tr>
+<tr>
+  <td>Harness</td>
+  <td>make one run observable, isolated, testable, and reviewable</td>
+</tr>
+<tr>
+  <td>Loop</td>
+  <td>decide when to run, what to run, how to verify, and when to stop</td>
+</tr>
+<tr>
+  <td>Evals</td>
+  <td>measure behavior against scenarios, not vibes</td>
+</tr>
+<tr>
+  <td>Safety</td>
+  <td>prevent, detect, and escalate unsafe behavior</td>
+</tr>
+</tbody>
+</table>
+<p>The work of agent systems engineering is turning those contracts into code, docs, tests, runtime boundaries, and feedback loops.</p>
+<h2 id="level-3-engineering-detail">Level 3: Engineering Detail</h2>
+<p>The layers of agent systems engineering show up in different failure modes.</p>
+<table>
+<thead>
+<tr>
+  <th>Layer</th>
+  <th>What You Design</th>
+  <th>Common Failure If Neglected</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Prompt</td>
+  <td>role, instructions, examples, output format</td>
+  <td>vague or inconsistent responses</td>
+</tr>
+<tr>
+  <td>Context</td>
+  <td>retrieved docs, project rules, memory, source ordering</td>
+  <td>stale, irrelevant, or missing facts</td>
+</tr>
+<tr>
+  <td>Tools</td>
+  <td>schemas, names, descriptions, permissions, errors</td>
+  <td>wrong calls, invalid arguments, unsafe actions</td>
+</tr>
+<tr>
+  <td>Harness</td>
+  <td>runtime, isolation, observability, review, app legibility</td>
+  <td>invisible failures or unverifiable work</td>
+</tr>
+<tr>
+  <td>Loop</td>
+  <td>schedule, state, task discovery, maker/checker split, stopping policy</td>
+  <td>endless automation, duplicated work, unattended mistakes</td>
+</tr>
+<tr>
+  <td>Evals</td>
+  <td>datasets, graders, scenarios, metrics</td>
+  <td>no evidence that changes helped</td>
+</tr>
+<tr>
+  <td>Safety</td>
+  <td>guardrails, sandboxing, human review, abuse controls</td>
+  <td>prompt injection, data leaks, excessive agency</td>
+</tr>
+</tbody>
+</table>
+<h3 id="prompt-engineering">Prompt engineering</h3>
+<p>Prompting still matters because it defines intent. Modern prompt guidance for agentic work often includes persistence, tool-use, and planning reminders: continue until the task is actually resolved, use tools instead of guessing, and plan or reflect around tool calls when useful [5].</p>
+<p>But prompts should not carry every responsibility. A giant prompt that includes API docs, policies, examples, product data, safety rules, and workflow state becomes hard to inspect and easy to break. Past a certain scale, the prompt should become a clean interface to a better-engineered context, harness, and loop.</p>
+<p>A good agent prompt should be closer to a control header than a knowledge dump:</p>
+<pre><code class="language-text">role: support operations agent
+goal: resolve the current ticket or escalate with evidence
+success: ticket has a documented resolution, approved action, or escalation reason
+tools: read_ticket, search_policy, stage_refund, add_case_note, escalate_case
+constraints: do not move money; do not email the customer; approval required for refunds
+stop: final answer only after a note, approval request, or escalation has been written
+</code></pre>
+<p>The prompt states intent and boundaries. The system around it supplies the policy, state, tools, traces, and approval mechanism.</p>
+<h3 id="context-engineering">Context engineering</h3>
+<p>Context engineering is the work of deciding what information enters the model's context window. That includes retrieved documents, project instructions, memory, examples, source snippets, prior tool results, and user state.</p>
+<p>OpenAI's harness article gives a practical version of this rule: repository knowledge became the system of record, with a short <code>AGENTS.md</code> acting as a map and deeper documentation living in structured files that agents can discover progressively [3]. The article also warns that a monolithic instruction file can crowd out the task, rot quickly, and become hard to verify [3].</p>
+<p>This is also visible outside one company. A 2026 arXiv paper on context engineering for open-source software agents studied <code>AGENTS.md</code> files across 466 repositories and found that projects use these files to provide project structure, code style, build and test workflows, policies, and other agent-relevant context [6].</p>
+<p>The practical lesson: context is not just "more text." Good context has relevance, order, freshness, provenance, and boundaries. Bad context creates its own failure modes. Too little context makes the model guess. Too much context buries the signal. Stale context teaches the model the wrong world.</p>
+<p>A practical context pipeline looks like this:</p>
+<pre><code class="language-text">task
+  -&gt; classify domain and risk
+  -&gt; load stable instructions
+  -&gt; retrieve task-specific docs
+  -&gt; filter by permission and freshness
+  -&gt; rank by relevance and authority
+  -&gt; summarize only when the raw source is too large
+  -&gt; attach citations, paths, versions, or timestamps
+</code></pre>
+<p>For code agents, this often becomes a repository-local knowledge architecture: a short root instruction file, domain docs, architecture docs, command references, generated schema docs, active plans, completed plans, and quality or security checklists. The key design principle is progressive disclosure: the agent starts with a small map, then loads deeper sources only when needed.</p>
+<h3 id="tool-engineering">Tool engineering</h3>
+<p>Tools turn language into action. OpenAI's tools guide describes platform tools such as function calling, web search, remote MCP servers, skills, shell, computer use, file search, and tool search; the model can decide whether to use configured tools, and advanced workflows can load more tool definitions as needed [7].</p>
+<p>Tool engineering is more than exposing an API. It means designing an "agent-computer interface." Anthropic argues that tool definitions deserve as much prompt-engineering attention as the overall prompt, including examples, edge cases, input requirements, clear boundaries, and parameter names that make the intended use obvious [4].</p>
+<p>Good tools are narrow and boring. A tool called <code>refund_order(order_id, reason, amount_cents)</code> is easier to supervise than a tool called <code>do_customer_action(payload)</code>. A tool that returns structured errors is easier to recover from than a tool that returns a paragraph. A tool that requires approval before money moves is safer than one that hides the consequence behind a friendly function name.</p>
+<p>Design each tool around five fields:</p>
+<table>
+<thead>
+<tr>
+  <th>Field</th>
+  <th>Why It Matters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>name</td>
+  <td>tells the model when to use it</td>
+</tr>
+<tr>
+  <td>description</td>
+  <td>defines consequence and boundary</td>
+</tr>
+<tr>
+  <td>input schema</td>
+  <td>constrains arguments before runtime</td>
+</tr>
+<tr>
+  <td>output schema</td>
+  <td>makes recovery and evaluation possible</td>
+</tr>
+<tr>
+  <td>permission tier</td>
+  <td>decides whether the call can run automatically</td>
+</tr>
+</tbody>
+</table>
+<p>A useful tool output should look more like an event than prose:</p>
+<pre><code class="language-json">{
+  "ok": false,
+  "error_code": "POLICY_NOT_FOUND",
+  "message": "No refund policy matched region=AU and product_type=subscription.",
+  "recoverable": true,
+  "suggested_next_tools": ["search_policy", "escalate_case"]
+}
+</code></pre>
+<p>That shape gives the model something to reason over. It also gives the harness something to trace, test, and evaluate.</p>
+<p>Hugging Face's smolagents work adds another useful angle: not every agent action has to be expressed as a JSON tool call. Code-agent patterns let the model write actions as code, which can improve composability for calculations, loops, and intermediate variables, but they also make sandboxing and execution security more important [8].</p>
+<h3 id="harness-engineering">Harness engineering</h3>
+<p>The harness is the program and environment around one agent run. It gives the agent tools, context, isolation, observability, and a path to verification.</p>
+<p>The Hitchhiker guide puts the same idea in systems language: an agent harness is runtime infrastructure that wraps an LLM into a stateful, goal-directed agent, separating concerns such as reasoning, execution, memory, communication, and observability [15].</p>
+<p>OpenAI's harness engineering case study is useful because it is not hypothetical. The team describes building an internal beta with no manually written code: Codex generated application logic, tests, CI, documentation, observability, and internal tooling; humans steered while agents executed [3]. The important lesson is not "never write code manually." The lesson is that human work moved up a level: making the environment legible and enforceable for the agent.</p>
+<p>In that case study, when Codex struggled, engineers did not simply ask it to try again. They asked what capability was missing and how to make that capability visible and enforceable [3]. Examples included making the app bootable per worktree, wiring browser control into the agent runtime, exposing logs, metrics, and traces, and creating repository-embedded skills so Codex could gather context without humans copying and pasting [3].</p>
+<p>That is harness engineering. It is the difference between:</p>
+<pre><code class="language-text">"fix startup latency"
+</code></pre>
+<p>and:</p>
+<pre><code class="language-text">run isolated app -&gt; measure startup -&gt; inspect traces -&gt; patch code -&gt; rerun workload -&gt; verify threshold
+</code></pre>
+<p>The prompt names the goal. The harness makes the goal observable.</p>
+<p>A good harness captures a run record:</p>
+<pre><code class="language-json">{
+  "run_id": "run_2026_06_17_001",
+  "task": "reduce startup latency below 800ms",
+  "environment": "worktree:feature-startup-latency",
+  "allowed_tools": ["shell", "browser", "logs", "metrics", "apply_patch"],
+  "approval_policy": "ask_before_external_side_effects",
+  "observations": [
+    { "type": "metric", "name": "startup_ms", "value": 1240 },
+    { "type": "trace", "span": "load_user_config", "duration_ms": 620 }
+  ],
+  "verification": {
+    "command": "npm test",
+    "result": "passed",
+    "metric": "startup_ms",
+    "threshold": 800
+  }
+}
+</code></pre>
+<p>That record is not just logging. It is the substrate for review, evals, debugging, retries, and loop state.</p>
+<h3 id="loop-engineering">Loop engineering</h3>
+<p>Loop engineering begins when you stop being the person who manually prompts the agent at every step.</p>
+<p>Greyling defines loop engineering as designing the system that discovers work, hands tasks to agents or sub-agents, verifies results, persists state, and decides the next action on a schedule or until a goal is met [2]. That is one level above the harness. The harness makes a run capable. The loop decides when and why runs happen.</p>
+<p>A useful loop has a few boring parts:</p>
+<ul>
+<li>a heartbeat: a schedule, trigger, queue, or goal condition</li>
+<li>a work finder: CI failure, ticket, bug report, stale doc, metric regression, or inbox item</li>
+<li>a maker/checker split: one agent does the work, another verifies it</li>
+<li>isolation: worktrees, sandboxes, or dedicated sessions so parallel work does not collide</li>
+<li>durable state: what is active, what was tried, what failed, and what needs a human</li>
+<li>stop and escalation rules: what counts as done, blocked, risky, or too expensive</li>
+</ul>
+<p>Greyling emphasizes that unattended loops create real economics and verification problems: frequent cadences and sub-agents multiply cost, and a verifier improves confidence but does not remove the need for human judgment [2]. That is the sober version of loop engineering. It is not "let the agent do everything." It is "replace repetitive prompting with a small control system that still knows when to hand back to you."</p>
+<p>A loop state file can be very small:</p>
+<pre><code class="language-json">{
+  "goal": "keep main branch green",
+  "cadence": "every_30_minutes",
+  "last_run_at": "2026-06-17T08:30:00Z",
+  "active_items": [
+    {
+      "id": "ci-4821",
+      "status": "needs_fix",
+      "evidence": "unit test failure in billing/refunds",
+      "assigned_run": "run_2026_06_17_001",
+      "human_needed": false
+    }
+  ],
+  "stop_rules": {
+    "max_cost_usd_per_day": 20,
+    "max_attempts_per_item": 3,
+    "escalate_on": ["security", "data_loss", "unclear_requirement"]
+  }
+}
+</code></pre>
+<p>Without state, every loop run starts from scratch. With state, the system can avoid duplicate work, remember failed attempts, control spend, and know when to ask for help.</p>
+<h3 id="eval-and-observability-engineering">Eval and observability engineering</h3>
+<p>Once the system has loops and tools, you need traces and evals.</p>
+<p>Tracing records what happened during a run. OpenAI's Agents SDK observability docs say tracing is built into the SDK and can emit structured records of model calls, tool calls, handoffs, guardrails, and custom spans, giving developers an end-to-end record before formalizing evals [9].</p>
+<p>Evals measure whether the system meets expectations. OpenAI's evals guide describes evaluation workflows built from datasets and testing criteria, then shows how those criteria compare model output against expected behavior [10].</p>
+<p>Anthropic's evals guidance makes the agent-specific problem sharper: agents operate over many turns, call tools, modify environment state, and adapt based on intermediate results, so mistakes can propagate and compound [11]. A single-turn output eval is not enough. The evaluation has to measure the model, the harness, the tools, the environment, and the final state they produce together.</p>
+<p>Anthropic uses a useful vocabulary for agent evals [11]:</p>
+<table>
+<thead>
+<tr>
+  <th>Term</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>task</td>
+  <td>one test case with inputs and success criteria</td>
+</tr>
+<tr>
+  <td>trial</td>
+  <td>one attempt at a task; multiple trials reduce noise from non-determinism</td>
+</tr>
+<tr>
+  <td>grader</td>
+  <td>code, model, or human logic that scores some aspect of behavior</td>
+</tr>
+<tr>
+  <td>transcript</td>
+  <td>the trace or trajectory: messages, tool calls, reasoning, intermediate results</td>
+</tr>
+<tr>
+  <td>outcome</td>
+  <td>the final environment state, such as a database row, file, PR, or booking</td>
+</tr>
+<tr>
+  <td>evaluation harness</td>
+  <td>infrastructure that runs tasks, records steps, grades outputs, and aggregates results</td>
+</tr>
+<tr>
+  <td>evaluation suite</td>
+  <td>a collection of tasks targeting a capability or regression area</td>
+</tr>
+</tbody>
+</table>
+<p>This distinction between transcript and outcome matters. A support agent might say "your refund is processed," but the outcome is whether the refund record exists with the right status. A coding agent might write a persuasive summary, but the outcome is whether tests pass, security checks pass, and the intended code path changed.</p>
+<p>For agents, evals should measure the whole behavior, not just the final answer:</p>
+<table>
+<thead>
+<tr>
+  <th>Eval Dimension</th>
+  <th>Example Check</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>source use</td>
+  <td>did the agent cite the current policy rather than memory?</td>
+</tr>
+<tr>
+  <td>tool choice</td>
+  <td>did it call lookup before action?</td>
+</tr>
+<tr>
+  <td>argument quality</td>
+  <td>did schemas, units, IDs, and regions match expectations?</td>
+</tr>
+<tr>
+  <td>approval behavior</td>
+  <td>did it pause before irreversible actions?</td>
+</tr>
+<tr>
+  <td>recovery</td>
+  <td>did it handle a failed tool call without inventing success?</td>
+</tr>
+<tr>
+  <td>stop condition</td>
+  <td>did it stop only after objective verification?</td>
+</tr>
+<tr>
+  <td>cost and latency</td>
+  <td>did it stay under budget and time limits?</td>
+</tr>
+</tbody>
+</table>
+<p>The grader design should match the task. Anthropic groups common graders into code-based, model-based, and human graders: deterministic tests, static analysis, outcome checks, tool-call checks, transcript analysis, rubric-based LLM judges, pairwise comparisons, expert review, spot checks, and A/B tests [11]. Use deterministic graders wherever possible because they are cheap, objective, reproducible, and easy to debug. Use LLM graders when the task is open-ended or subjective. Use human graders to calibrate model graders and validate quality where domain judgment matters.</p>
+<p>That gives a more concrete eval design pattern:</p>
+<pre><code class="language-yaml">task:
+  id: "support-refund-policy-001"
+  input: "Customer asks for a refund on a late subscription renewal."
+  success_criteria:
+    - "Agent verifies identity before taking account action."
+    - "Agent grounds refund decision in current policy."
+    - "Agent stages the refund but does not move money without approval."
+  graders:
+    - type: state_check
+      expect:
+        refund: {status: staged}
+        approval_request: {status: pending}
+    - type: tool_calls
+      required:
+        - {tool: verify_identity}
+        - {tool: search_policy}
+        - {tool: stage_refund}
+      forbidden:
+        - {tool: process_refund}
+    - type: llm_rubric
+      rubric: "Was the explanation clear, empathetic, and grounded in retrieved policy?"
+  tracked_metrics:
+    - n_turns
+    - n_tool_calls
+    - total_tokens
+    - latency_ms
+    - estimated_cost_usd
+</code></pre>
+<p>Anthropic also separates capability evals from regression evals. Capability evals ask "what can this agent do well?" and should include tasks the agent currently struggles with. Regression evals ask "does the agent still handle the tasks it used to handle?" and should stay close to 100% pass rate [11]. As a capability eval saturates, it can graduate into a regression suite.</p>
+<p>Non-determinism needs its own measurement. Anthropic highlights two useful metrics: <code>pass@k</code>, the chance an agent succeeds at least once across <code>k</code> attempts, and <code>pass^k</code>, the chance it succeeds in all <code>k</code> attempts [11]. The first is useful when one working solution is enough. The second is more important for customer-facing agents where users expect consistent behavior every time.</p>
+<p>Good evals are also maintained artifacts, not one-off scripts. Anthropic recommends starting early with 20-50 tasks drawn from real manual checks or failures, writing unambiguous tasks with reference solutions, testing both positive and negative cases, isolating trials in clean environments, preferring outcome grading over brittle path grading, reading transcripts to verify the grader is fair, watching for eval saturation, and treating eval suites like unit tests that product and domain experts help maintain [11].</p>
+<p>A pretty final paragraph can hide a bad trajectory. Loop engineering makes this more urgent. If a loop runs on a schedule, a small bug can repeat. If it spawns sub-agents, a bad assumption can fan out. If it auto-opens pull requests, weak verification becomes noise. Observability and evals are not polish; they are the brakes, dashboard, and regression suite.</p>
+<h3 id="safety-engineering">Safety engineering</h3>
+<p>Safety engineering is what makes the system robust under pressure. Guardrails are one mechanism. OpenAI's current guardrails and human review docs describe input guardrails, output guardrails, tool guardrails, and approval boundaries for sensitive actions [12].</p>
+<p>Security needs its own lens too. The OWASP Top 10 for LLM Applications lists risks such as prompt injection, insecure output handling, sensitive information disclosure, insecure plugin design, excessive agency, and overreliance [13]. These map directly onto agent systems: agents read untrusted content, call tools, pass data across boundaries, and may be trusted too much because their prose sounds confident.</p>
+<p>This is why safety cannot be a paragraph at the end of the prompt. It needs to be built into:</p>
+<ul>
+<li>tool permission tiers</li>
+<li>sandboxed execution</li>
+<li>source isolation for untrusted content</li>
+<li>approval gates for external side effects</li>
+<li>structured logging and audit trails</li>
+<li>evals for unsafe requests and prompt injection</li>
+<li>deployment gates for high-risk workflows</li>
+<li>escalation paths when the model is uncertain</li>
+</ul>
+<p>The hard part is not writing "be safe." The hard part is making unsafe behavior difficult, visible, and reviewable.</p>
+<h2 id="current-landscape">Current Landscape</h2>
+<p>The direction of travel is clear: AI engineering is becoming systems engineering.</p>
+<p>OpenAI's agent tooling emphasizes APIs, built-in tools, orchestration, tracing, and evaluation [14]. Anthropic's production advice emphasizes simple composable patterns, transparency, and careful agent-computer interface design [4]. Anthropic's eval guidance adds an important operational point: agent quality depends on eval harnesses, outcome checks, transcript review, grader calibration, and maintained suites, not just prompt tweaks [11]. Context engineering is becoming visible enough that researchers are studying real-world context files such as <code>AGENTS.md</code> across open-source repositories [6].</p>
+<p>The newer terms sharpen the stack:</p>
+<ul>
+<li>context engineering makes the right knowledge available</li>
+<li>tool engineering makes actions legible and constrained</li>
+<li>harness engineering makes one run observable and enforceable</li>
+<li>loop engineering makes repeated runs discover, act, verify, and persist</li>
+<li>eval and safety engineering keep the system from confusing activity with progress</li>
+</ul>
+<p>The old workflow was:</p>
+<pre><code class="language-text">write prompt -&gt; inspect answer -&gt; write next prompt
+</code></pre>
+<p>The agent-systems workflow is:</p>
+<pre><code class="language-text">encode intent -&gt; expose context -&gt; design tools -&gt; build harness -&gt; run agent -&gt; trace behavior -&gt; evaluate outcome -&gt; persist state -&gt; schedule next loop
+</code></pre>
+<p>The second workflow is slower at first. It is also the path to software you can debug, test, and trust.</p>
+<h2 id="practical-takeaways">Practical Takeaways</h2>
+<p>Start with a prompt, but do not stay there too long. If the same bug repeats, classify it by layer: prompt, context, tool, harness, loop, eval, or safety.</p>
+<p>Keep prompts short enough to inspect. Move durable facts into context sources, actions into tools, and control policy into the harness.</p>
+<p>Design tools as product APIs. Give them typed parameters, clear names, precise descriptions, examples, explicit permissions, structured errors, and approval behavior.</p>
+<p>Design the harness before asking for autonomy. Give the agent a way to inspect the app, run tests, read logs, measure outcomes, and verify its own work.</p>
+<p>Design loops only after the harness can produce trustworthy evidence. A schedule without reliable verification is just automated noise.</p>
+<p>Persist state in boring files or systems. The loop needs to know what it is working on, what it tried, what failed, and what requires a human.</p>
+<p>Build traces before you need them. You cannot debug an agent from the final answer alone.</p>
+<p>Write evals around realistic scenarios, not just isolated outputs. Include failure cases, stale context, tool errors, ambiguous user requests, unsafe requests, and repeated loop execution. Track both capability evals and regression evals, and read transcripts so the numbers do not drift away from reality.</p>
+<p>Keep humans at the judgment points. Loops can discover, assign, attempt, verify, and report. Humans still own taste, risk, priorities, and accountability.</p>
+<p>The core skill is no longer clever wording. It is designing the world the model operates in, and the control system that decides what happens next.</p>
+<h2 id="references">References</h2>
+<p>[1] "Prompt engineering." OpenAI API documentation. <a href="https://developers.openai.com/api/docs/guides/prompt-engineering" target="_blank" rel="noopener noreferrer">https://developers.openai.com/api/docs/guides/prompt-engineering</a>. Published/updated: not listed. Accessed: 2026-07-05. Used for: prompt engineering fundamentals, examples, clear instructions, structured outputs, and prompt caching framing.</p>
+<p>[2] "Loop Engineering." Cobus Greyling. <a href="https://cobusgreyling.substack.com/p/loop-engineering" target="_blank" rel="noopener noreferrer">https://cobusgreyling.substack.com/p/loop-engineering</a>. Published/updated: 2026-06-09. Accessed: 2026-07-05. Used for: loop engineering definition, harness-vs-loop distinction, scheduling, maker/checker split, memory, and loop risks.</p>
+<p>[3] "Harness engineering: leveraging Codex in an agent-first world." OpenAI. <a href="https://openai.com/index/harness-engineering/" target="_blank" rel="noopener noreferrer">https://openai.com/index/harness-engineering/</a>. Published/updated: 2026-02-11. Accessed: 2026-07-05. Used for: harness engineering, agent legibility, repository knowledge, observability, worktrees, constraints, and feedback loops.</p>
+<p>[4] "Building effective agents." Anthropic. <a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener noreferrer">https://www.anthropic.com/engineering/building-effective-agents</a>. Published/updated: 2024-12-19. Accessed: 2026-07-05. Used for: workflow-vs-agent distinction, composable agent patterns, simplicity guidance, and tool-interface design.</p>
+<p>[5] "Prompt guidance." OpenAI API documentation. <a href="https://developers.openai.com/api/docs/guides/prompt-guidance" target="_blank" rel="noopener noreferrer">https://developers.openai.com/api/docs/guides/prompt-guidance</a>. Published/updated: not listed. Accessed: 2026-07-05. Used for: agentic prompting patterns such as persistence, tool use, planning, and stop-condition guidance.</p>
+<p>[6] "Context Engineering for AI Agents in Open-Source Software." Seyedmoein Mohsenimofidi, Matthias Galster, Christoph Treude, and Sebastian Baltes. <a href="https://arxiv.org/abs/2510.21413" target="_blank" rel="noopener noreferrer">https://arxiv.org/abs/2510.21413</a>. Published/updated: 2026-02-05. Accessed: 2026-07-05. Used for: context engineering in real open-source agent configuration files.</p>
+<p>[7] "Using tools." OpenAI API documentation. <a href="https://developers.openai.com/api/docs/guides/tools" target="_blank" rel="noopener noreferrer">https://developers.openai.com/api/docs/guides/tools</a>. Published/updated: not listed. Accessed: 2026-07-05. Used for: current OpenAI tool categories and tool-use behavior.</p>
+<p>[8] "Introducing smolagents, a simple library to build agents." Hugging Face. <a href="https://huggingface.co/blog/smolagents" target="_blank" rel="noopener noreferrer">https://huggingface.co/blog/smolagents</a>. Published/updated: 2024-12-31. Accessed: 2026-07-05. Used for: code-agent framing, agency spectrum, and sandboxing implications for action execution.</p>
+<p>[9] "Integrations and observability." OpenAI API documentation. <a href="https://developers.openai.com/api/docs/guides/agents/integrations-observability" target="_blank" rel="noopener noreferrer">https://developers.openai.com/api/docs/guides/agents/integrations-observability</a>. Published/updated: not listed. Accessed: 2026-07-05. Used for: tracing, structured run records, model calls, tool calls, handoffs, guardrails, custom spans, and workflow observability.</p>
+<p>[10] "Working with evals." OpenAI API documentation. <a href="https://developers.openai.com/api/docs/guides/evals" target="_blank" rel="noopener noreferrer">https://developers.openai.com/api/docs/guides/evals</a>. Published/updated: not listed. Accessed: 2026-07-05. Used for: evaluation workflow, criteria, datasets, and iteration guidance.</p>
+<p>[11] "Demystifying evals for AI agents." Anthropic. <a href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents" target="_blank" rel="noopener noreferrer">https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents</a>. Published/updated: 2026-01-09. Accessed: 2026-07-05. Used for: task/trial/grader/transcript/outcome vocabulary, grader types, capability-vs-regression evals, pass@k and pass^k, eval harness design, transcript review, and eval maintenance.</p>
+<p>[12] "Guardrails and human review." OpenAI API documentation. <a href="https://developers.openai.com/api/docs/guides/agents/guardrails-approvals" target="_blank" rel="noopener noreferrer">https://developers.openai.com/api/docs/guides/agents/guardrails-approvals</a>. Published/updated: not listed. Accessed: 2026-07-05. Used for: input, output, and tool guardrails, approval boundaries, and human review for sensitive actions.</p>
+<p>[13] "OWASP Top 10 for Large Language Model Applications." OWASP Foundation. <a href="https://owasp.org/www-project-top-10-for-large-language-model-applications/" target="_blank" rel="noopener noreferrer">https://owasp.org/www-project-top-10-for-large-language-model-applications/</a>. Published/updated: 2025. Accessed: 2026-07-05. Used for: LLM application security risks including prompt injection, insecure output handling, excessive agency, and overreliance.</p>
+<p>[14] "New tools for building agents." OpenAI. <a href="https://openai.com/index/new-tools-for-building-agents/" target="_blank" rel="noopener noreferrer">https://openai.com/index/new-tools-for-building-agents/</a>. Published/updated: 2025-03-11. Accessed: 2026-07-05. Used for: Responses API, built-in tools, Agents SDK, orchestration, and observability as agent-building blocks.</p>
+<p>[15] "The Hitchhiker's Guide to Agentic AI: From Foundations to Systems." Haggai Roitman. Local source: agent-101/The Hitchhiker’s Guide to Agentic AI/book.tex. Published/updated: 2026. Accessed: 2026-07-05. Used for: agent harness framing as runtime infrastructure and separation of reasoning, execution, memory, communication, and observability concerns.</p>
+</div>
+
+    </div>
+  </article>
+
+
+  
+    
+    <br>
+    <hr>
+    <br>
+    <ul class="list-disc pl-8"></ul>
+
+    <!-- Adds related posts to the end of an article -->
+    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
+    <p class="mb-2">Here are some more articles you might like to read next:</p>
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/reinforcement-learning-and-abstract-world-models/">Reinforcement Learning and Abstract World Models</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/agent-skills-ai-ml-research-scientists/">Agent Skills for AI/ML Research Scientists</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/ai-agents-series/">The AI Agents Series</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/ai-agents-self-improving-agents/">AI Agents Series | Self Improving Agents - Foundation and Advances</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/ai-agents-101-14-standards-and-ecosystem/">AI Agents 101 | 14. Standards and Ecosystem</a>
+  </li>
+
+</div>
+
+      
+    </div>
+
+    <!-- Footer -->    
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        © Copyright 2026 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+
+      </div>
+    </footer>
+
+    <!-- JavaScripts -->
+    <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- Bootsrap & MDB scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    <!-- Masonry & imagesLoaded -->
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
+    
+  <!-- Medium Zoom JS -->
+  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/zoom.js"></script>
+
+  <!-- Bootstrap Table -->
+  <script defer src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+
+  <!-- Load Common JS -->
+  <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
+  <script defer src="/assets/js/common.js?acdb9690d7641b2f8d40529018c71a01"></script>
+  <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    <!-- MathJax -->
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        tags: 'ams'
+      }
+    };
+  </script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KGSMMS9MS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-7KGSMMS9MS');
+  </script>
+    
+
+<!-- Scrolling Progress Bar -->
+<script type="text/javascript">
+  /*
+   * This JavaScript code has been adapted from the article 
+   * https://css-tricks.com/reading-position-indicator/ authored by Pankaj Parashar, 
+   * published on the website https://css-tricks.com on the 7th of May, 2014.
+   * Couple of changes were made to the original code to make it compatible 
+   * with the `al-foio` theme.
+   */
+  const progressBar = $("#progress");
+  /*
+   * We set up the bar after all elements are done loading.
+   * In some cases, if the images in the page are larger than the intended
+   * size they'll have on the page, they'll be resized via CSS to accomodate
+   * the desired size. This mistake, however, breaks the computations as the
+   * scroll size is computed as soon as the elements finish loading.
+   * To account for this, a minimal delay was introduced before computing the
+   * values.
+   */
+  window.onload = function () {
+    setTimeout(progressBarSetup, 50);
+  };
+  /*
+   * We set up the bar according to the browser.
+   * If the browser supports the progress element we use that.
+   * Otherwise, we resize the bar thru CSS styling
+   */
+  function progressBarSetup() {
+    if ("max" in document.createElement("progress")) {
+      initializeProgressElement();
+      $(document).on("scroll", function() {
+        progressBar.attr({ value: getCurrentScrollPosition() });
+      });
+      $(window).on("resize", initializeProgressElement);
+    } else {
+      resizeProgressBar();
+      $(document).on("scroll", resizeProgressBar);
+      $(window).on("resize", resizeProgressBar);
+    }
+  }
+  /*
+   * The vertical scroll position is the same as the number of pixels that
+   * are hidden from view above the scrollable area. Thus, a value > 0 is
+   * how much the user has scrolled from the top
+   */
+  function getCurrentScrollPosition() {
+    return $(window).scrollTop();
+  }
+
+  function initializeProgressElement() {
+    let navbarHeight = $("#navbar").outerHeight(true);
+    $("body").css({ "padding-top": navbarHeight });
+    $("progress-container").css({ "padding-top": navbarHeight });
+    progressBar.css({ top: navbarHeight });
+    progressBar.attr({
+      max: getDistanceToScroll(),
+      value: getCurrentScrollPosition(),
+    });
+  }
+  /*
+   * The offset between the html document height and the browser viewport
+   * height will be greater than zero if vertical scroll is possible.
+   * This is the distance the user can scroll
+   */
+  function getDistanceToScroll() {
+    return $(document).height() - $(window).height();
+  }
+
+  function resizeProgressBar() {
+    progressBar.css({ width: getWidthPercentage() + "%" });
+  }
+  // The scroll ratio equals the percentage to resize the bar
+  function getWidthPercentage() {
+    return (getCurrentScrollPosition() / getDistanceToScroll()) * 100;
+  }
+</script>
+
+    
+  </body>
+</html>

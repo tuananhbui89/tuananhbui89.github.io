@@ -143,6 +143,14 @@
     <div id="table-of-contents">
       
       <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h2"><a href="#ai-agents-101">AI Agents 101</a></li>
+<li class="toc-entry toc-h2"><a href="#deep-dive-topics">Deep-Dive Topics</a></li>
+<li class="toc-entry toc-h2">
+<a href="#good-practices">Good Practices</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#ai-coding-workflow-from-matt-pocock">AI Coding Workflow from Matt Pocock</a></li>
+</ul>
+</li>
 </ul>
       
     </div>
@@ -151,9 +159,87 @@
     <div id="markdown-content">
       <p>This series consolidates my learning journey on AI Agents, mostly my own experiences working with Codex in various projects.</p>
 
+<h2 id="ai-agents-101">AI Agents 101</h2>
+
+<p>This section is my foundation map for AI agents. Most of the first drafts were created with Codex, but I still treat them as my own learning notes rather than finished references. The goal is to build a clear path from the basic idea of an agent to the engineering details that make agents useful in practice.</p>
+
+<p>My contribution to this section is:</p>
+
+<ul>
+  <li>create the first draft of the high-level topics I want to understand</li>
+  <li>define the structure of each topic, starting from a high-level abstraction and then moving into more concrete engineering details</li>
+  <li>review each draft and add references, examples, or resources when I find something relevant later. For example, I recently noticed more discussion around Loop Engineering, so I added it to <a href="/blog/2026/ai-agents-101-02-from-prompt-engineering-to-agent-systems-engineering/">From Prompt Engineering to Agent Systems Engineering</a>
+</li>
+</ul>
+
+<ol>
+  <li><a href="/blog/2026/ai-agents-101-01-why-agents-why-now/">Why Agents, Why Now</a></li>
+  <li><a href="/blog/2026/ai-agents-101-02-from-prompt-engineering-to-agent-systems-engineering/">From Prompt Engineering to Agent Systems Engineering</a></li>
+  <li><a href="/blog/2026/ai-agents-101-03-the-core-agent-model/">The Core Agent Model</a></li>
+  <li><a href="/blog/2026/ai-agents-101-04-agent-loop-and-runtime-design/">Agent Loop and Runtime Design</a></li>
+  <li><a href="/blog/2026/ai-agents-101-05-context-and-memory/">Context and Memory</a></li>
+  <li><a href="/blog/2026/ai-agents-101-06-tools-mcp-skills-and-plugins/">Tools, MCP, Skills, and Plugins</a></li>
+  <li><a href="/blog/2026/ai-agents-101-07-orchestration-patterns/">Orchestration Patterns</a></li>
+  <li><a href="/blog/2026/ai-agents-101-08-data-layer-and-enterprise-integration/">Data Layer and Enterprise Integration</a></li>
+  <li><a href="/blog/2026/ai-agents-101-09-safety-security-and-governance/">Safety, Security, and Governance</a></li>
+  <li><a href="/blog/2026/ai-agents-101-10-evaluation-and-observability/">Evaluation and Observability</a></li>
+  <li><a href="/blog/2026/ai-agents-101-11-production-agent-architecture/">Production Agent Architecture</a></li>
+  <li><a href="/blog/2026/ai-agents-101-12-agentic-ux/">Agentic UX</a></li>
+  <li><a href="/blog/2026/ai-agents-101-13-coding-agents-as-a-case-study/">Coding Agents as a Case Study</a></li>
+  <li><a href="/blog/2026/ai-agents-101-14-standards-and-ecosystem/">Standards and Ecosystem</a></li>
+</ol>
+
+<h2 id="deep-dive-topics">Deep-Dive Topics</h2>
+
+<p>This section is for topics that I personally find more interesting and want to study more deeply with Codex. Compared with AI Agents 101, these posts are less like a broad curriculum and more like focused research notes. I usually spend more time reading papers, checking claims, organizing evidence, and refining the explanation before publishing them here.</p>
+
 <ul>
   <li><a href="/blog/2026/ai-agents-self-improving-agents/">Self-Improving Agents - Foundation and Advances</a></li>
+  <li><a href="">TODO: Deep Research Agents</a></li>
+  <li><a href="">TODO: Memory design in Codex and Claude Code</a></li>
 </ul>
+
+<h2 id="good-practices">Good Practices</h2>
+
+<p>This section collects practical skills, workflows, tutorials, and field notes that have improved how I work with AI coding agents. These notes are not meant to be a polished methodology. They are closer to a personal operating manual: small practices I found useful, mistakes I want to avoid repeating, and workflows I want to keep testing in real projects.</p>
+
+<h3 id="ai-coding-workflow-from-matt-pocock">AI Coding Workflow from Matt Pocock</h3>
+
+<p><a href="https://www.youtube.com/watch?v=-QFHIoCo-Ko&amp;t=1163s" rel="external nofollow noopener" target="_blank">Full Walkthrough: Workflow for AI Coding - Matt Pocock</a> is a practical workshop on turning ambiguous product ideas into agent-ready implementation work. My main takeaway is that AI coding works best when we separate the workflow into stages:</p>
+
+<ol>
+  <li>clarify the product goal,</li>
+  <li>write down the requirements,</li>
+  <li>pressure-test the plan,</li>
+  <li>let the coding agent implement,</li>
+  <li>review and verify the result.</li>
+</ol>
+
+<p>The important artifact is <code class="language-plaintext highlighter-rouge">prd.md</code>, the product requirements document. Before asking an agent to write code, I should first make the goal explicit: what problem are we solving, who is the user, what behavior should change, what constraints matter, and what counts as done? A good <code class="language-plaintext highlighter-rouge">prd.md</code> reduces ambiguity before the agent enters implementation mode. It also gives both human and agent a shared reference point when the work becomes messy.</p>
+
+<p>This is where the <code class="language-plaintext highlighter-rouge">grill-me</code> skill fits. I use it before Codex Plan mode, while the task is still soft and under-specified. Its purpose is not to implement anything yet. Its purpose is to force a shared understanding of the target outcome.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Interview me relentlessly about every aspect of this plan until we reach a shared understanding.
+Walk down each branch of the design tree, resolving dependencies between decisions one by one.
+For each question, provide your recommended answer.
+Ask the questions one at a time.
+If a question can be answered by exploring the codebase, explore the codebase instead.
+</code></pre></div></div>
+
+<p>This skill is useful because many failures in AI-assisted coding are actually planning failures. The agent may implement quickly, but if the goal is vague, it will confidently optimize for the wrong thing. <code class="language-plaintext highlighter-rouge">grill-me</code> slows the process down at the right moment: before code is written, before a plan hardens, and before hidden assumptions become expensive.</p>
+
+<p>The rough workflow I want to practice is:</p>
+
+<ol>
+  <li>start with a rough idea,</li>
+  <li>ask <code class="language-plaintext highlighter-rouge">grill-me</code> to interrogate the goal and assumptions,</li>
+  <li>turn the answers into <code class="language-plaintext highlighter-rouge">prd.md</code>,</li>
+  <li>enter Plan mode and ask Codex to inspect the codebase,</li>
+  <li>let Codex implement against the agreed plan,</li>
+  <li>verify with tests, screenshots, or manual review.</li>
+</ol>
+
+<p>In short: do not use the agent as a faster pair of hands too early. First use it as a thinking partner that helps make the task precise. Once the target is clear, autonomy becomes much more useful.</p>
 
     </div>
   </article>
@@ -190,13 +276,13 @@
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs231n-2025-lec18/">Stanford CS231N Deep Learning for Computer Vision | Spring 2025 | Lecture 18- Human-Centered AI</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/ai-agents-101-14-standards-and-ecosystem/">AI Agents 101 | 14. Standards and Ecosystem</a>
   </li>
 
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/cs231n-2025-lec17/">Stanford CS231N Deep Learning for Computer Vision | Spring 2025 | Lecture 17- Robot Learning</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/ai-agents-101-13-coding-agents-as-a-case-study/">AI Agents 101 | 13. Coding Agents as a Case Study</a>
   </li>
 
 </div>

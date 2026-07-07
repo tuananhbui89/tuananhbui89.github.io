@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <!-- Head -->
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    <!-- Metadata, OpenGraph and Schema.org -->
+    
+
+    <!-- Standard metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>AI Agents 101 | 04. Agent Loop and Runtime Design | Tuan-Anh  Bui</title>
+    <meta name="author" content="Tuan-Anh  Bui">
+    <meta name="description" content="Agent Loop and Runtime Design">
+    <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
+
+
+    <!-- Bootstrap & MDB -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+    <!-- Bootstrap Table -->
+    <link defer rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700%7CRoboto+Slab:100,300,400,500,700%7CMaterial+Icons">
+
+    <!-- Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
+
+    
+
+    <!-- Styles -->
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
+    
+    <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+    <link rel="canonical" href="https://tuananhbui89.github.io/blog/2026/ai-agents-101-04-agent-loop-and-runtime-design/">
+
+    <!-- Dark Mode -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark">
+    <script src="/assets/js/theme.js?96d6b3e1c3604aca8b6134c7afdd5db6"></script>
+    <script src="/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script>
+    
+
+  </head>
+
+  <!-- Body -->
+  <body class="fixed-top-nav ">
+
+    <!-- Header -->
+    <header>
+
+      <!-- Nav Bar -->
+      <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top">
+        <div class="container">
+          <a class="navbar-brand title font-weight-lighter" href="/"><span class="font-weight-bold">Tuan-Anh </span>Bui</a>
+          <!-- Navbar Toggle -->
+          <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar top-bar"></span>
+            <span class="icon-bar middle-bar"></span>
+            <span class="icon-bar bottom-bar"></span>
+          </button>
+
+          <div class="collapse navbar-collapse text-right" id="navbarNav">
+            <ul class="navbar-nav ml-auto flex-nowrap">
+
+              <!-- About -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/">about</a>
+              </li>
+              
+              <!-- Blog -->
+              <li class="nav-item active">
+                <a class="nav-link" href="/blog/">blog<span class="sr-only">(current)</span></a>
+              </li>
+
+              <!-- Other pages -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/publications/">publications</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/projects/">projects</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/teaching/"></a>
+              </li>
+
+              <!-- Toogle theme mode -->
+              <li class="toggle-container">
+                <button id="light-toggle" title="Change theme">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Scrolling Progress Bar -->
+      <progress id="progress" value="0">
+        <div class="progress-container">
+          <span class="progress-bar"></span>
+        </div>
+      </progress>
+    </header>
+
+
+    <!-- Content -->
+    <div class="container mt-5">
+      
+        <!-- _layouts/post.html -->
+<!-- Page/Post style -->
+<style type="text/css">
+  .agentic-101-post pre {
+  background: #111827;
+  color: #e5edf2;
+  border-radius: 8px;
+  overflow-x: auto;
+  padding: 16px;
+  margin: 18px 0;
+  font-size: 0.95rem;
+} .agentic-101-post code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+} .agentic-101-post :not(pre) > code {
+  background: #e4f1f2;
+  border-radius: 4px;
+  padding: 0.12rem 0.28rem;
+} .agentic-101-post table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 0.96rem;
+} .agentic-101-post th, .agentic-101-post td {
+  border: 1px solid #d8ddd7;
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+} .agentic-101-post th {
+  background: #e4f1f2;
+}
+
+</style>
+
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">AI Agents 101 | 04. Agent Loop and Runtime Design</h1>
+    <p class="post-meta">June 1, 2026</p>
+    <p class="post-tags">
+      <a href="/blog/2026"> <i class="fas fa-calendar fa-sm"></i> 2026 </a>
+        ·  
+        <a href="/blog/tag/genai">
+          <i class="fas fa-hashtag fa-sm"></i> genai</a>  
+          <a href="/blog/tag/llm">
+          <i class="fas fa-hashtag fa-sm"></i> llm</a>  
+          <a href="/blog/tag/tutorial">
+          <i class="fas fa-hashtag fa-sm"></i> tutorial</a>  
+          <a href="/blog/tag/reading">
+          <i class="fas fa-hashtag fa-sm"></i> reading</a>  
+          <a href="/blog/tag/agents">
+          <i class="fas fa-hashtag fa-sm"></i> agents</a>  
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    
+    <div id="table-of-contents">
+      
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1">
+<a href="#agent-loop-and-runtime-design">Agent Loop and Runtime Design</a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#level-1-fundamentals">Level 1: Fundamentals</a></li>
+<li class="toc-entry toc-h2">
+<a href="#level-2-concepts">Level 2: Concepts</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#state">State</a></li>
+<li class="toc-entry toc-h3"><a href="#interruptions">Interruptions</a></li>
+<li class="toc-entry toc-h3"><a href="#latency-mode">Latency Mode</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2">
+<a href="#level-3-engineering-detail">Level 3: Engineering Detail</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#loop-skeleton">Loop Skeleton</a></li>
+<li class="toc-entry toc-h3"><a href="#runtime-contracts">Runtime Contracts</a></li>
+<li class="toc-entry toc-h3"><a href="#failure-handling">Failure Handling</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#current-landscape">Current Landscape</a></li>
+<li class="toc-entry toc-h2"><a href="#practical-takeaways">Practical Takeaways</a></li>
+<li class="toc-entry toc-h2"><a href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+      
+    </div>
+    <hr>
+    
+    <div id="markdown-content">
+      <div class="agentic-101-post">
+<h1 id="agent-loop-and-runtime-design">Agent Loop and Runtime Design</h1>
+<p>An agent becomes useful when the model is placed inside a runtime loop.</p>
+<p>The loop is the part of the system that keeps asking: what does the model need to see, what action did it choose, is that action allowed, what happened, should we continue, and what evidence proves we are done?</p>
+<p>This is why agent design is less like writing one prompt and more like building a small operating system around a model. The model proposes. The runtime coordinates.</p>
+<h2 id="level-1-fundamentals">Level 1: Fundamentals</h2>
+<p>The classic ReAct pattern showed why reasoning and acting belong together: the model can interleave a reasoning trace with task-specific actions, use observations from external systems, update its plan, and recover from exceptions [1]. Modern agent runtimes implement the same idea in a more productized form.</p>
+<p>OpenAI's current agent-running docs describe a runner loop that calls the model, inspects the output, executes tool calls, handles handoffs, and returns only when there is a final answer and no more tool work to perform [2]. That loop is the heart of an agent.</p>
+<p>At the simplest level:</p>
+<pre><code class="language-text">goal
+  -&gt; prepare context
+  -&gt; call model
+  -&gt; parse model output
+  -&gt; execute allowed action
+  -&gt; observe result
+  -&gt; update state
+  -&gt; repeat or stop
+</code></pre>
+<p>The runtime is responsible for the parts that should not be left to vibes:</p>
+<ul>
+<li>preserving state across turns</li>
+<li>validating tool calls</li>
+<li>enforcing approvals</li>
+<li>handling timeouts and retries</li>
+<li>streaming progress</li>
+<li>saving resumable state when a run pauses</li>
+<li>stopping when the environment proves the task is complete</li>
+</ul>
+<p>The Hitchhiker guide calls this surrounding infrastructure the agent harness: the layer that turns an LLM from a stateless text generator into a stateful, goal-directed system with tool use, memory retrieval, observability, and error handling [8].</p>
+<h2 id="level-2-concepts">Level 2: Concepts</h2>
+<p>The agent loop has five core moments.</p>
+<table>
+<thead>
+<tr>
+  <th>Moment</th>
+  <th>Runtime Question</th>
+  <th>Common Bug</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Prepare</td>
+  <td>What instructions, state, tools, and context should the model see?</td>
+  <td>prompt stuffed with stale or irrelevant context</td>
+</tr>
+<tr>
+  <td>Decide</td>
+  <td>What did the model ask to do?</td>
+  <td>ambiguous final answer vs action</td>
+</tr>
+<tr>
+  <td>Act</td>
+  <td>Is the action valid, authorized, and executable?</td>
+  <td>tool called with invalid arguments or hidden side effects</td>
+</tr>
+<tr>
+  <td>Observe</td>
+  <td>What happened in the outside world?</td>
+  <td>tool result lost, summarized incorrectly, or not persisted</td>
+</tr>
+<tr>
+  <td>Stop</td>
+  <td>Is the task actually done?</td>
+  <td>model says "done" without objective evidence</td>
+</tr>
+</tbody>
+</table>
+<p>The loop does not need to be complicated, but it does need to be explicit.</p>
+<h3 id="state">State</h3>
+<p>State is the difference between a one-shot response and a run.</p>
+<p>OpenAI lists several continuation strategies: replay-ready history, SDK-backed sessions, managed conversation IDs, and lightweight continuation with a previous response ID [2]. Those are implementation choices. The design choice is deciding what state the runtime owns.</p>
+<p>Useful state often includes:</p>
+<ul>
+<li>conversation history</li>
+<li>current objective and subtasks</li>
+<li>tool results and artifacts</li>
+<li>approval state</li>
+<li>retries and errors</li>
+<li>trace identifiers</li>
+<li>cost and token budget</li>
+</ul>
+<p>OpenAI's result surface exposes final output, replay-ready history, the last agent, response IDs, interruptions, and resumable state [3]. That is a clue: a production loop should return more than text. It should return enough structure for the application to resume, inspect, audit, or recover.</p>
+<h3 id="interruptions">Interruptions</h3>
+<p>Not every run ends in an answer. Some runs should pause.</p>
+<p>Human review is not a decorative feature. OpenAI describes guardrails and human-in-the-loop approvals as controls that can validate input, output, tool behavior, and side-effecting actions [4]. When the agent needs approval, the runtime should save the pending action and return an interruption, not invent a final answer.</p>
+<p>For example:</p>
+<pre><code class="language-json">{
+  "status": "interrupted",
+  "reason": "approval_required",
+  "pending_tool_call": {
+    "name": "send_customer_email",
+    "arguments": {
+      "case_id": "case_123",
+      "template": "refund_denied"
+    }
+  }
+}
+</code></pre>
+<p>That object is not just UI metadata. It is how the system avoids losing the run.</p>
+<h3 id="latency-mode">Latency Mode</h3>
+<p>Runtime design also decides how work reaches the user.</p>
+<p>For conversational tasks, streaming matters because the application can process early tokens while the model continues generating [5]. For long-running tasks, background mode matters because deep research, coding, or multi-step tool work can take minutes, and an asynchronous run can be polled until it reaches a terminal state [6].</p>
+<p>The same agent may need both modes:</p>
+<ul>
+<li>stream visible progress for short interactive steps</li>
+<li>move long work to the background</li>
+<li>resume after approval or connectivity loss</li>
+<li>save artifacts as they appear</li>
+</ul>
+<p>An agent loop that works only for a single synchronous request is usually a prototype, not a product.</p>
+<h2 id="level-3-engineering-detail">Level 3: Engineering Detail</h2>
+<p>A minimal runtime loop can be expressed as a small state machine:</p>
+<pre><code class="language-text">READY
+  -&gt; RUNNING
+  -&gt; WAITING_FOR_TOOL
+  -&gt; WAITING_FOR_APPROVAL
+  -&gt; RUNNING
+  -&gt; COMPLETED | FAILED | CANCELLED
+</code></pre>
+<p>The important move is to persist the state transition, not only the message transcript.</p>
+<h3 id="loop-skeleton">Loop Skeleton</h3>
+<pre><code class="language-python">def run_agent(run_id, user_input):
+    state = load_state(run_id)
+    state.add_user_input(user_input)
+
+    while state.turns &lt; state.max_turns:
+        model_input = build_model_input(state)
+        result = call_model(model_input, tools=state.allowed_tools)
+        state.record_model_result(result)
+
+        if result.final_output:
+            checked = validate_final_output(result.final_output, state)
+            if checked.ok:
+                state.complete(checked.output)
+                return state.to_response()
+            state.add_repair_instruction(checked.error)
+            continue
+
+        for call in result.tool_calls:
+            decision = authorize_tool_call(call, state)
+            if decision.requires_approval:
+                state.pause_for_approval(call)
+                return state.to_response()
+            if not decision.allowed:
+                state.record_blocked_call(call, decision.reason)
+                continue
+
+            observation = execute_tool(call)
+            state.record_observation(call, observation)
+
+        if state.should_stop_for_budget():
+            state.fail("budget_exceeded")
+            return state.to_response()
+
+    state.fail("max_turns_exceeded")
+    return state.to_response()
+</code></pre>
+<p>This is deliberately boring. Boring is good. The model can be flexible; the runtime should be legible.</p>
+<h3 id="runtime-contracts">Runtime Contracts</h3>
+<table>
+<thead>
+<tr>
+  <th>Contract</th>
+  <th>What It Should Specify</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Input contract</td>
+  <td>message roles, instruction hierarchy, context sources, user identity</td>
+</tr>
+<tr>
+  <td>Tool contract</td>
+  <td>schema, timeout, permission tier, side effects, retry behavior</td>
+</tr>
+<tr>
+  <td>State contract</td>
+  <td>persisted fields, resumability, retention, privacy policy</td>
+</tr>
+<tr>
+  <td>Approval contract</td>
+  <td>who can approve, what is shown, what is resumed</td>
+</tr>
+<tr>
+  <td>Observation contract</td>
+  <td>how tool results become model-visible evidence</td>
+</tr>
+<tr>
+  <td>Stop contract</td>
+  <td>objective completion criteria, max turns, max cost, failure states</td>
+</tr>
+</tbody>
+</table>
+<p>The stop contract is often the weakest part. "The answer sounds good" is not a stop condition. Better stop conditions are:</p>
+<ul>
+<li>tests pass</li>
+<li>file was written</li>
+<li>ticket status changed</li>
+<li>database row exists</li>
+<li>approval request was created</li>
+<li>source evidence is sufficient</li>
+<li>human chose to stop</li>
+</ul>
+<h3 id="failure-handling">Failure Handling</h3>
+<p>Agent runs fail in recurring ways.</p>
+<table>
+<thead>
+<tr>
+  <th>Failure</th>
+  <th>Runtime Response</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>invalid tool arguments</td>
+  <td>ask model to repair arguments or block the call</td>
+</tr>
+<tr>
+  <td>tool timeout</td>
+  <td>retry with backoff, try alternate tool, or pause</td>
+</tr>
+<tr>
+  <td>stale context</td>
+  <td>refresh source, prefer fresh tool result over memory</td>
+</tr>
+<tr>
+  <td>looping</td>
+  <td>enforce max turns and detect repeated actions</td>
+</tr>
+<tr>
+  <td>unsafe action</td>
+  <td>require approval or deny tool execution</td>
+</tr>
+<tr>
+  <td>incomplete evidence</td>
+  <td>retrieve more, ask user, or escalate</td>
+</tr>
+<tr>
+  <td>final output fails schema</td>
+  <td>repair through structured validation</td>
+</tr>
+</tbody>
+</table>
+<p>Anthropic's guidance is useful here: add complexity only when it demonstrably improves outcomes, and keep the system transparent enough that developers can inspect what happened [7]. That is especially true for runtime recovery logic. Hidden magic is where debugging goes to die.</p>
+<h2 id="current-landscape">Current Landscape</h2>
+<p>Agent runtimes are converging on a shared shape: a model loop, typed tools, explicit state, tracing, guardrails, streaming, and resumability.</p>
+<p>OpenAI's Agents platform surfaces this through runner loops, result objects, state strategies, guardrails, human review, streaming responses, and background mode [2][3][4][5][6]. The details differ by SDK or API, but the runtime problem is the same: coordinate model decisions with tools and state.</p>
+<p>The ReAct paper remains conceptually important because it framed the interleaving of thought, action, and observation [1]. Current systems add engineering layers around that pattern: permissions, approval, persistence, telemetry, and user experience.</p>
+<p>The Hitchhiker guide places the loop in the larger harness layer, alongside context-window management, memory, communication, and observability [8]. That is the right mental model for production: the loop is not just a prompt pattern; it is runtime infrastructure.</p>
+<h2 id="practical-takeaways">Practical Takeaways</h2>
+<p>Design the loop before choosing the framework. Write down the states, transitions, approval points, and stop conditions.</p>
+<p>Return structured run results, not just final text. The application needs history, artifacts, interruptions, trace IDs, and resumable state.</p>
+<p>Treat tools as side-effecting APIs. Validate arguments, set timeouts, capture observations, and attach permission tiers.</p>
+<p>Use streaming for user-visible progress and background mode for long work. Do not force every agent task through one synchronous request.</p>
+<p>Make completion objective. The agent is done when the environment or evaluator proves it is done.</p>
+<p>Keep runtime logic inspectable. When a run fails, the trace should show which instruction, tool call, guardrail, or state transition caused the failure.</p>
+<h2 id="references">References</h2>
+<p>[1] "ReAct: Synergizing Reasoning and Acting in Language Models." Shunyu Yao, Jeffrey Zhao, Dian Yu, Nan Du, Izhak Shafran, Karthik Narasimhan, Yuan Cao. <a href="https://arxiv.org/abs/2210.03629" target="_blank" rel="noopener noreferrer">https://arxiv.org/abs/2210.03629</a>. Published/updated: 2023-03-10. Accessed: 2026-07-06. Used for: interleaved reasoning, acting, observations, exception handling, and the conceptual origin of the modern agent loop.</p>
+<p>[2] "Running agents." OpenAI API documentation. <a href="https://developers.openai.com/api/docs/guides/agents/running-agents" target="_blank" rel="noopener noreferrer">https://developers.openai.com/api/docs/guides/agents/running-agents</a>. Published/updated: not listed. Accessed: 2026-07-06. Used for: runner loop, tool execution, handoffs, continuation strategies, and state management.</p>
+<p>[3] "Results and state." OpenAI API documentation. <a href="https://developers.openai.com/api/docs/guides/agents/results" target="_blank" rel="noopener noreferrer">https://developers.openai.com/api/docs/guides/agents/results</a>. Published/updated: not listed. Accessed: 2026-07-06. Used for: result surfaces, final output, history, response IDs, interruptions, and resumable state.</p>
+<p>[4] "Guardrails and human review." OpenAI API documentation. <a href="https://developers.openai.com/api/docs/guides/agents/guardrails-approvals" target="_blank" rel="noopener noreferrer">https://developers.openai.com/api/docs/guides/agents/guardrails-approvals</a>. Published/updated: not listed. Accessed: 2026-07-06. Used for: input, output, and tool guardrails plus human-in-the-loop approvals.</p>
+<p>[5] "Streaming API responses." OpenAI API documentation. <a href="https://developers.openai.com/api/docs/guides/streaming-responses" target="_blank" rel="noopener noreferrer">https://developers.openai.com/api/docs/guides/streaming-responses</a>. Published/updated: not listed. Accessed: 2026-07-06. Used for: server-sent events, early response processing, and interactive runtime behavior.</p>
+<p>[6] "Background mode." OpenAI API documentation. <a href="https://developers.openai.com/api/docs/guides/background" target="_blank" rel="noopener noreferrer">https://developers.openai.com/api/docs/guides/background</a>. Published/updated: not listed. Accessed: 2026-07-06. Used for: asynchronous long-running tasks, polling, response storage windows, and timeout avoidance.</p>
+<p>[7] "Building effective agents." Anthropic. <a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener noreferrer">https://www.anthropic.com/engineering/building-effective-agents</a>. Published/updated: 2024-12-19. Accessed: 2026-07-06. Used for: start-simple guidance, agent autonomy tradeoffs, ground-truth observations, and stopping conditions.</p>
+<p>[8] "The Hitchhiker's Guide to Agentic AI: From Foundations to Systems." Haggai Roitman. Local source: agent-101/The Hitchhiker’s Guide to Agentic AI/book.tex. Published/updated: 2026. Accessed: 2026-07-06. Used for: agent harness framing, runtime infrastructure, context management, memory, observability, and error handling.</p>
+</div>
+
+    </div>
+  </article>
+
+
+  
+    
+    <br>
+    <hr>
+    <br>
+    <ul class="list-disc pl-8"></ul>
+
+    <!-- Adds related posts to the end of an article -->
+    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
+    <p class="mb-2">Here are some more articles you might like to read next:</p>
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/reinforcement-learning-and-abstract-world-models/">Reinforcement Learning and Abstract World Models</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/agent-skills-ai-ml-research-scientists/">Agent Skills for AI/ML Research Scientists</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/ai-agents-series/">The AI Agents Series</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/ai-agents-self-improving-agents/">AI Agents Series | Self Improving Agents - Foundation and Advances</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/ai-agents-101-14-standards-and-ecosystem/">AI Agents 101 | 14. Standards and Ecosystem</a>
+  </li>
+
+</div>
+
+      
+    </div>
+
+    <!-- Footer -->    
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        © Copyright 2026 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+
+      </div>
+    </footer>
+
+    <!-- JavaScripts -->
+    <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- Bootsrap & MDB scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    <!-- Masonry & imagesLoaded -->
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
+    
+  <!-- Medium Zoom JS -->
+  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/zoom.js"></script>
+
+  <!-- Bootstrap Table -->
+  <script defer src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+
+  <!-- Load Common JS -->
+  <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
+  <script defer src="/assets/js/common.js?acdb9690d7641b2f8d40529018c71a01"></script>
+  <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    <!-- MathJax -->
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        tags: 'ams'
+      }
+    };
+  </script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KGSMMS9MS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-7KGSMMS9MS');
+  </script>
+    
+
+<!-- Scrolling Progress Bar -->
+<script type="text/javascript">
+  /*
+   * This JavaScript code has been adapted from the article 
+   * https://css-tricks.com/reading-position-indicator/ authored by Pankaj Parashar, 
+   * published on the website https://css-tricks.com on the 7th of May, 2014.
+   * Couple of changes were made to the original code to make it compatible 
+   * with the `al-foio` theme.
+   */
+  const progressBar = $("#progress");
+  /*
+   * We set up the bar after all elements are done loading.
+   * In some cases, if the images in the page are larger than the intended
+   * size they'll have on the page, they'll be resized via CSS to accomodate
+   * the desired size. This mistake, however, breaks the computations as the
+   * scroll size is computed as soon as the elements finish loading.
+   * To account for this, a minimal delay was introduced before computing the
+   * values.
+   */
+  window.onload = function () {
+    setTimeout(progressBarSetup, 50);
+  };
+  /*
+   * We set up the bar according to the browser.
+   * If the browser supports the progress element we use that.
+   * Otherwise, we resize the bar thru CSS styling
+   */
+  function progressBarSetup() {
+    if ("max" in document.createElement("progress")) {
+      initializeProgressElement();
+      $(document).on("scroll", function() {
+        progressBar.attr({ value: getCurrentScrollPosition() });
+      });
+      $(window).on("resize", initializeProgressElement);
+    } else {
+      resizeProgressBar();
+      $(document).on("scroll", resizeProgressBar);
+      $(window).on("resize", resizeProgressBar);
+    }
+  }
+  /*
+   * The vertical scroll position is the same as the number of pixels that
+   * are hidden from view above the scrollable area. Thus, a value > 0 is
+   * how much the user has scrolled from the top
+   */
+  function getCurrentScrollPosition() {
+    return $(window).scrollTop();
+  }
+
+  function initializeProgressElement() {
+    let navbarHeight = $("#navbar").outerHeight(true);
+    $("body").css({ "padding-top": navbarHeight });
+    $("progress-container").css({ "padding-top": navbarHeight });
+    progressBar.css({ top: navbarHeight });
+    progressBar.attr({
+      max: getDistanceToScroll(),
+      value: getCurrentScrollPosition(),
+    });
+  }
+  /*
+   * The offset between the html document height and the browser viewport
+   * height will be greater than zero if vertical scroll is possible.
+   * This is the distance the user can scroll
+   */
+  function getDistanceToScroll() {
+    return $(document).height() - $(window).height();
+  }
+
+  function resizeProgressBar() {
+    progressBar.css({ width: getWidthPercentage() + "%" });
+  }
+  // The scroll ratio equals the percentage to resize the bar
+  function getWidthPercentage() {
+    return (getCurrentScrollPosition() / getDistanceToScroll()) * 100;
+  }
+</script>
+
+    
+  </body>
+</html>

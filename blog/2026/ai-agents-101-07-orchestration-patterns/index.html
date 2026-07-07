@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <!-- Head -->
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    <!-- Metadata, OpenGraph and Schema.org -->
+    
+
+    <!-- Standard metadata -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>AI Agents 101 | 07. Orchestration Patterns | Tuan-Anh  Bui</title>
+    <meta name="author" content="Tuan-Anh  Bui">
+    <meta name="description" content="Orchestration Patterns">
+    <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
+
+
+    <!-- Bootstrap & MDB -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+    <!-- Bootstrap Table -->
+    <link defer rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700%7CRoboto+Slab:100,300,400,500,700%7CMaterial+Icons">
+
+    <!-- Code Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
+
+    
+
+    <!-- Styles -->
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
+    
+    <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+    <link rel="canonical" href="https://tuananhbui89.github.io/blog/2026/ai-agents-101-07-orchestration-patterns/">
+
+    <!-- Dark Mode -->
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark">
+    <script src="/assets/js/theme.js?96d6b3e1c3604aca8b6134c7afdd5db6"></script>
+    <script src="/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script>
+    
+
+  </head>
+
+  <!-- Body -->
+  <body class="fixed-top-nav ">
+
+    <!-- Header -->
+    <header>
+
+      <!-- Nav Bar -->
+      <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top">
+        <div class="container">
+          <a class="navbar-brand title font-weight-lighter" href="/"><span class="font-weight-bold">Tuan-Anh </span>Bui</a>
+          <!-- Navbar Toggle -->
+          <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar top-bar"></span>
+            <span class="icon-bar middle-bar"></span>
+            <span class="icon-bar bottom-bar"></span>
+          </button>
+
+          <div class="collapse navbar-collapse text-right" id="navbarNav">
+            <ul class="navbar-nav ml-auto flex-nowrap">
+
+              <!-- About -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/">about</a>
+              </li>
+              
+              <!-- Blog -->
+              <li class="nav-item active">
+                <a class="nav-link" href="/blog/">blog<span class="sr-only">(current)</span></a>
+              </li>
+
+              <!-- Other pages -->
+              <li class="nav-item ">
+                <a class="nav-link" href="/publications/">publications</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/projects/">projects</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/teaching/"></a>
+              </li>
+
+              <!-- Toogle theme mode -->
+              <li class="toggle-container">
+                <button id="light-toggle" title="Change theme">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Scrolling Progress Bar -->
+      <progress id="progress" value="0">
+        <div class="progress-container">
+          <span class="progress-bar"></span>
+        </div>
+      </progress>
+    </header>
+
+
+    <!-- Content -->
+    <div class="container mt-5">
+      
+        <!-- _layouts/post.html -->
+<!-- Page/Post style -->
+<style type="text/css">
+  .agentic-101-post pre {
+  background: #111827;
+  color: #e5edf2;
+  border-radius: 8px;
+  overflow-x: auto;
+  padding: 16px;
+  margin: 18px 0;
+  font-size: 0.95rem;
+} .agentic-101-post code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+} .agentic-101-post :not(pre) > code {
+  background: #e4f1f2;
+  border-radius: 4px;
+  padding: 0.12rem 0.28rem;
+} .agentic-101-post table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 0.96rem;
+} .agentic-101-post th, .agentic-101-post td {
+  border: 1px solid #d8ddd7;
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+} .agentic-101-post th {
+  background: #e4f1f2;
+}
+
+</style>
+
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">AI Agents 101 | 07. Orchestration Patterns</h1>
+    <p class="post-meta">June 1, 2026</p>
+    <p class="post-tags">
+      <a href="/blog/2026"> <i class="fas fa-calendar fa-sm"></i> 2026 </a>
+        ·  
+        <a href="/blog/tag/genai">
+          <i class="fas fa-hashtag fa-sm"></i> genai</a>  
+          <a href="/blog/tag/llm">
+          <i class="fas fa-hashtag fa-sm"></i> llm</a>  
+          <a href="/blog/tag/tutorial">
+          <i class="fas fa-hashtag fa-sm"></i> tutorial</a>  
+          <a href="/blog/tag/reading">
+          <i class="fas fa-hashtag fa-sm"></i> reading</a>  
+          <a href="/blog/tag/agents">
+          <i class="fas fa-hashtag fa-sm"></i> agents</a>  
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    
+    <div id="table-of-contents">
+      
+      <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1">
+<a href="#orchestration-patterns">Orchestration Patterns</a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#level-1-fundamentals">Level 1: Fundamentals</a></li>
+<li class="toc-entry toc-h2">
+<a href="#level-2-concepts">Level 2: Concepts</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#routing">Routing</a></li>
+<li class="toc-entry toc-h3"><a href="#handoffs">Handoffs</a></li>
+<li class="toc-entry toc-h3"><a href="#agents-as-tools">Agents as Tools</a></li>
+<li class="toc-entry toc-h3"><a href="#subagents">Subagents</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2">
+<a href="#level-3-engineering-detail">Level 3: Engineering Detail</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#pattern-selection">Pattern Selection</a></li>
+<li class="toc-entry toc-h3"><a href="#agent-boundary-contract">Agent Boundary Contract</a></li>
+<li class="toc-entry toc-h3"><a href="#merge-rules">Merge Rules</a></li>
+<li class="toc-entry toc-h3"><a href="#a2a-boundary">A2A Boundary</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#current-landscape">Current Landscape</a></li>
+<li class="toc-entry toc-h2"><a href="#practical-takeaways">Practical Takeaways</a></li>
+<li class="toc-entry toc-h2"><a href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+      
+    </div>
+    <hr>
+    
+    <div id="markdown-content">
+      <div class="agentic-101-post">
+<h1 id="orchestration-patterns">Orchestration Patterns</h1>
+<p>Once an agent can use tools, the next question is how work should be divided.</p>
+<p>Should one agent handle the whole task? Should a manager delegate to specialists? Should subtasks run in parallel? Should the user be handed off to a different agent? Should another model critique the answer? Or should the system stay simple and avoid orchestration entirely?</p>
+<p>Orchestration is the design of who does what, in what order, with what state, under what constraints.</p>
+<h2 id="level-1-fundamentals">Level 1: Fundamentals</h2>
+<p>Anthropic's agent guidance makes a useful distinction between workflows and agents. Workflows follow predefined code paths. Agents dynamically choose their path through tools and observations [1]. Most production systems use both: deterministic workflow where the path is known, agentic control where the path is uncertain.</p>
+<p>OpenAI's orchestration docs describe two common multi-agent patterns: handoffs, where a specialist takes over the conversation, and agents-as-tools, where a manager agent calls specialist agents while retaining control [2].</p>
+<p>That difference is small in code but large in product behavior.</p>
+<pre><code class="language-text">handoff:
+  user -&gt; triage agent -&gt; billing agent -&gt; user
+
+agents-as-tools:
+  user -&gt; manager agent -&gt; billing specialist tool -&gt; manager agent -&gt; user
+</code></pre>
+<p>The first changes who owns the next turn. The second keeps one visible owner and uses specialists behind the scenes.</p>
+<p>The Hitchhiker guide connects this to broader multi-agent systems and A2A-style communication: as tasks become larger, specialization, parallelism, fault isolation, and delegation become architectural concerns [5].</p>
+<h2 id="level-2-concepts">Level 2: Concepts</h2>
+<p>Use orchestration when a single agent is becoming too broad, too slow, too unreliable, or too opaque.</p>
+<table>
+<thead>
+<tr>
+  <th>Pattern</th>
+  <th>Best For</th>
+  <th>Watch Out For</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Single agent</td>
+  <td>narrow tasks, early prototypes, predictable tool set</td>
+  <td>prompt bloat and overloaded instructions</td>
+</tr>
+<tr>
+  <td>Prompt chain</td>
+  <td>known sequence of transformations</td>
+  <td>brittle if task path varies</td>
+</tr>
+<tr>
+  <td>Router</td>
+  <td>classifying work into known paths</td>
+  <td>wrong route creates silent failure</td>
+</tr>
+<tr>
+  <td>Parallel workers</td>
+  <td>independent subtasks or multiple perspectives</td>
+  <td>merge conflicts and cost growth</td>
+</tr>
+<tr>
+  <td>Orchestrator-workers</td>
+  <td>dynamic decomposition of complex tasks</td>
+  <td>manager overhead and unclear ownership</td>
+</tr>
+<tr>
+  <td>Evaluator-optimizer</td>
+  <td>iterative improvement with clear criteria</td>
+  <td>endless refinement loops</td>
+</tr>
+<tr>
+  <td>Handoff</td>
+  <td>user should talk to a specialist</td>
+  <td>context transfer and user confusion</td>
+</tr>
+<tr>
+  <td>Agents-as-tools</td>
+  <td>manager needs specialist capability</td>
+  <td>hidden failures behind manager summary</td>
+</tr>
+</tbody>
+</table>
+<p>Anthropic describes parallelization, orchestrator-workers, and evaluator-optimizer workflows as patterns for different task shapes [1]. The key is not to memorize names. The key is matching the pattern to uncertainty.</p>
+<h3 id="routing">Routing</h3>
+<p>Routing works when categories are clear:</p>
+<pre><code class="language-text">refund question -&gt; billing agent
+login problem -&gt; account agent
+bug report -&gt; technical support agent
+legal request -&gt; human escalation
+</code></pre>
+<p>Routing fails when categories overlap or the system hides uncertainty. A good router can say "unclear" and ask a question.</p>
+<h3 id="handoffs">Handoffs</h3>
+<p>Handoffs are useful when the specialist should own the interaction. OpenAI recommends keeping routing legible: give each specialist a narrow job, write concrete handoff descriptions, and split only when a branch truly needs different instructions, tools, or policy [2].</p>
+<p>Handoff state should include:</p>
+<ul>
+<li>user goal</li>
+<li>relevant history</li>
+<li>tool results</li>
+<li>constraints</li>
+<li>pending approvals</li>
+<li>reason for handoff</li>
+<li>what the previous agent already tried</li>
+</ul>
+<p>Do not make the next agent rediscover the whole case.</p>
+<h3 id="agents-as-tools">Agents as Tools</h3>
+<p>Agents-as-tools are useful when the user should experience one coherent agent but the system needs expert subroutines.</p>
+<p>Examples:</p>
+<ul>
+<li>a research manager calls a source-finding agent</li>
+<li>a coding agent calls a test-analysis agent</li>
+<li>a support agent calls a policy specialist</li>
+<li>a planning agent calls a cost-estimation agent</li>
+</ul>
+<p>OpenAI positions this pattern as a manager workflow: the manager agent invokes specialists and synthesizes their outputs [2].</p>
+<h3 id="subagents">Subagents</h3>
+<p>OpenAI Codex docs describe subagents as specialized agents that can be spawned in parallel for work such as exploration, tests, or log analysis, while keeping the main context focused [3]. That is a practical orchestration lesson: specialization can reduce context clutter, not just divide labor.</p>
+<p>The caution is that parallel write-heavy work can conflict. Read-heavy exploration is a safer starting point.</p>
+<h2 id="level-3-engineering-detail">Level 3: Engineering Detail</h2>
+<p>An orchestration design should specify ownership, state transfer, and merge rules.</p>
+<h3 id="pattern-selection">Pattern Selection</h3>
+<pre><code class="language-text">if task is narrow and tool set is small:
+  use one agent
+elif task has known deterministic stages:
+  use workflow / prompt chain
+elif task has known categories:
+  use router
+elif subtasks are independent:
+  use parallel workers
+elif subtasks are unknown until runtime:
+  use orchestrator-workers
+elif quality improves through critique:
+  use evaluator-optimizer
+elif user should speak to specialist:
+  use handoff
+else:
+  keep manager visible and call specialists as tools
+</code></pre>
+<p>The decision should be revisited after evals. Orchestration is justified when it improves reliability, capability, latency, or maintainability enough to pay for added complexity.</p>
+<h3 id="agent-boundary-contract">Agent Boundary Contract</h3>
+<pre><code class="language-yaml">specialist:
+  name: "policy_research_agent"
+  owns_user_turn: false
+  allowed_tools:
+    - search_policy_docs
+    - cite_policy_excerpt
+  input:
+    required:
+      - user_question
+      - policy_domain
+      - known_facts
+  output:
+    schema:
+      answer: string
+      citations: array
+      uncertainty: string
+      escalation_needed: boolean
+  limits:
+    max_turns: 4
+    max_sources: 6
+</code></pre>
+<p>This boundary is what prevents multi-agent systems from becoming a meeting with no agenda.</p>
+<h3 id="merge-rules">Merge Rules</h3>
+<p>Parallel or specialist outputs need merge logic.</p>
+<table>
+<thead>
+<tr>
+  <th>Merge Situation</th>
+  <th>Rule</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>specialists agree</td>
+  <td>summarize with citations</td>
+</tr>
+<tr>
+  <td>specialists conflict</td>
+  <td>surface disagreement and inspect evidence</td>
+</tr>
+<tr>
+  <td>one specialist fails</td>
+  <td>decide whether fallback is acceptable</td>
+</tr>
+<tr>
+  <td>partial result arrives late</td>
+  <td>either ignore by deadline or update asynchronously</td>
+</tr>
+<tr>
+  <td>output lacks evidence</td>
+  <td>mark as unusable, ask for repair</td>
+</tr>
+<tr>
+  <td>action recommendation is risky</td>
+  <td>require human approval</td>
+</tr>
+</tbody>
+</table>
+<p>Without merge rules, the manager model may smooth over contradictions. That is dangerous because orchestration can create false confidence: many agents speaking in chorus can still be wrong.</p>
+<h3 id="a2a-boundary">A2A Boundary</h3>
+<p>A2A, the Agent2Agent protocol, is aimed at agent-to-agent interoperability. Its docs describe it as an open protocol for communication and collaboration between opaque agentic applications, with features such as interoperability, complex workflows, secure collaboration, and extensibility [4].</p>
+<p>In architecture terms:</p>
+<pre><code class="language-text">MCP: agent to tools/data
+A2A: agent to agent/application
+</code></pre>
+<p>Use A2A-style boundaries when the other participant is not just a callable function but another agentic system with its own state, policy, identity, and task lifecycle.</p>
+<h2 id="current-landscape">Current Landscape</h2>
+<p>The field is converging on a few durable orchestration patterns.</p>
+<p>Anthropic's workflow taxonomy is helpful because it starts from task shape rather than framework preference: chain, route, parallelize, orchestrate, evaluate, or let an agent operate dynamically [1].</p>
+<p>OpenAI's handoff and agents-as-tools docs give a concrete product distinction: sometimes the user should move to a specialist, and sometimes the specialist should stay behind the manager [2]. Codex subagents add a practical coding-agent variant: use specialized parallel agents to explore without polluting the main context [3].</p>
+<p>A2A is emerging as a protocol-level answer to cross-agent interoperability [4]. It is not a replacement for MCP. MCP connects agents to tools and resources; A2A connects agentic applications to one another.</p>
+<p>The Hitchhiker guide is useful here as a map from orchestration patterns to multi-agent communication, specialization, fault isolation, and protocol design [5].</p>
+<h2 id="practical-takeaways">Practical Takeaways</h2>
+<p>Start with one agent unless the task shape demands more. Orchestration should solve a concrete failure, not decorate the architecture.</p>
+<p>Use routing for known categories, handoffs for visible specialist ownership, and agents-as-tools when the manager should remain the user's interface.</p>
+<p>Keep specialists narrow. Give them clear tools, schemas, limits, and success criteria.</p>
+<p>Be explicit about state transfer. The next agent needs enough context to help, but not the whole transcript by default.</p>
+<p>Define merge rules before running workers in parallel. Contradictions should be handled, not averaged away.</p>
+<p>Evaluate orchestration as a system. A clever manager is not enough if specialist outputs are ungrounded, late, or impossible to audit.</p>
+<h2 id="references">References</h2>
+<p>[1] "Building effective agents." Anthropic. <a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener noreferrer">https://www.anthropic.com/engineering/building-effective-agents</a>. Published/updated: 2024-12-19. Accessed: 2026-07-06. Used for: workflow-vs-agent distinction, parallelization, orchestrator-workers, evaluator-optimizer, autonomy tradeoffs, and start-simple guidance.</p>
+<p>[2] "Orchestrating multiple agents." OpenAI API documentation. <a href="https://developers.openai.com/api/docs/guides/agents/orchestration" target="_blank" rel="noopener noreferrer">https://developers.openai.com/api/docs/guides/agents/orchestration</a>. Published/updated: not listed. Accessed: 2026-07-06. Used for: handoffs, agents-as-tools, routing descriptions, manager workflows, and specialist design.</p>
+<p>[3] "Subagents." OpenAI Codex documentation. <a href="https://developers.openai.com/codex/concepts/subagents" target="_blank" rel="noopener noreferrer">https://developers.openai.com/codex/concepts/subagents</a>. Published/updated: not listed. Accessed: 2026-07-06. Used for: specialized parallel subagents, context isolation, read-heavy exploration, and cautions about write-heavy parallel work.</p>
+<p>[4] "Agent2Agent Protocol." A2A Protocol documentation. <a href="https://a2a-protocol.org/latest/" target="_blank" rel="noopener noreferrer">https://a2a-protocol.org/latest/</a>. Published/updated: 2026. Accessed: 2026-07-06. Used for: agent-to-agent interoperability, secure collaboration, complex workflows, and the MCP-vs-A2A distinction.</p>
+<p>[5] "The Hitchhiker's Guide to Agentic AI: From Foundations to Systems." Haggai Roitman. Local source: agent-101/The Hitchhiker’s Guide to Agentic AI/book.tex. Published/updated: 2026. Accessed: 2026-07-06. Used for: multi-agent motivation, specialization, coordination, A2A framing, task lifecycle, and orchestration patterns.</p>
+</div>
+
+    </div>
+  </article>
+
+
+  
+    
+    <br>
+    <hr>
+    <br>
+    <ul class="list-disc pl-8"></ul>
+
+    <!-- Adds related posts to the end of an article -->
+    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
+    <p class="mb-2">Here are some more articles you might like to read next:</p>
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/reinforcement-learning-and-abstract-world-models/">Reinforcement Learning and Abstract World Models</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/agent-skills-ai-ml-research-scientists/">Agent Skills for AI/ML Research Scientists</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/ai-agents-series/">The AI Agents Series</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/ai-agents-self-improving-agents/">AI Agents Series | Self Improving Agents - Foundation and Advances</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/ai-agents-101-14-standards-and-ecosystem/">AI Agents 101 | 14. Standards and Ecosystem</a>
+  </li>
+
+</div>
+
+      
+    </div>
+
+    <!-- Footer -->    
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        © Copyright 2026 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+
+      </div>
+    </footer>
+
+    <!-- JavaScripts -->
+    <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- Bootsrap & MDB scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    <!-- Masonry & imagesLoaded -->
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
+    
+  <!-- Medium Zoom JS -->
+  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/zoom.js"></script>
+
+  <!-- Bootstrap Table -->
+  <script defer src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+
+  <!-- Load Common JS -->
+  <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
+  <script defer src="/assets/js/common.js?acdb9690d7641b2f8d40529018c71a01"></script>
+  <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    <!-- MathJax -->
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        tags: 'ams'
+      }
+    };
+  </script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KGSMMS9MS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-7KGSMMS9MS');
+  </script>
+    
+
+<!-- Scrolling Progress Bar -->
+<script type="text/javascript">
+  /*
+   * This JavaScript code has been adapted from the article 
+   * https://css-tricks.com/reading-position-indicator/ authored by Pankaj Parashar, 
+   * published on the website https://css-tricks.com on the 7th of May, 2014.
+   * Couple of changes were made to the original code to make it compatible 
+   * with the `al-foio` theme.
+   */
+  const progressBar = $("#progress");
+  /*
+   * We set up the bar after all elements are done loading.
+   * In some cases, if the images in the page are larger than the intended
+   * size they'll have on the page, they'll be resized via CSS to accomodate
+   * the desired size. This mistake, however, breaks the computations as the
+   * scroll size is computed as soon as the elements finish loading.
+   * To account for this, a minimal delay was introduced before computing the
+   * values.
+   */
+  window.onload = function () {
+    setTimeout(progressBarSetup, 50);
+  };
+  /*
+   * We set up the bar according to the browser.
+   * If the browser supports the progress element we use that.
+   * Otherwise, we resize the bar thru CSS styling
+   */
+  function progressBarSetup() {
+    if ("max" in document.createElement("progress")) {
+      initializeProgressElement();
+      $(document).on("scroll", function() {
+        progressBar.attr({ value: getCurrentScrollPosition() });
+      });
+      $(window).on("resize", initializeProgressElement);
+    } else {
+      resizeProgressBar();
+      $(document).on("scroll", resizeProgressBar);
+      $(window).on("resize", resizeProgressBar);
+    }
+  }
+  /*
+   * The vertical scroll position is the same as the number of pixels that
+   * are hidden from view above the scrollable area. Thus, a value > 0 is
+   * how much the user has scrolled from the top
+   */
+  function getCurrentScrollPosition() {
+    return $(window).scrollTop();
+  }
+
+  function initializeProgressElement() {
+    let navbarHeight = $("#navbar").outerHeight(true);
+    $("body").css({ "padding-top": navbarHeight });
+    $("progress-container").css({ "padding-top": navbarHeight });
+    progressBar.css({ top: navbarHeight });
+    progressBar.attr({
+      max: getDistanceToScroll(),
+      value: getCurrentScrollPosition(),
+    });
+  }
+  /*
+   * The offset between the html document height and the browser viewport
+   * height will be greater than zero if vertical scroll is possible.
+   * This is the distance the user can scroll
+   */
+  function getDistanceToScroll() {
+    return $(document).height() - $(window).height();
+  }
+
+  function resizeProgressBar() {
+    progressBar.css({ width: getWidthPercentage() + "%" });
+  }
+  // The scroll ratio equals the percentage to resize the bar
+  function getWidthPercentage() {
+    return (getCurrentScrollPosition() / getDistanceToScroll()) * 100;
+  }
+</script>
+
+    
+  </body>
+</html>
