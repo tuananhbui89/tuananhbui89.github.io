@@ -144,6 +144,21 @@
   vertical-align: top;
 } .agentic-101-post th {
   background: #e4f1f2;
+} .agentic-101-post figure {
+  margin: 32px 0 38px;
+} .agentic-101-post figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+} .agentic-101-post .illustration {
+  border: 1px solid #d8ddd7;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fbfcfa;
+} .agentic-101-post figcaption {
+  padding: 12px 16px 14px;
+  color: #5f6f7a;
+  line-height: 1.5;
 }
 
 </style>
@@ -186,6 +201,7 @@
 <ul>
 <li class="toc-entry toc-h3"><a href="#mcp">MCP</a></li>
 <li class="toc-entry toc-h3"><a href="#skills">Skills</a></li>
+<li class="toc-entry toc-h3"><a href="#codex-app">Codex App</a></li>
 <li class="toc-entry toc-h3"><a href="#plugins">Plugins</a></li>
 </ul>
 </li>
@@ -214,6 +230,10 @@
 <p>Tools are where an agent stops talking and starts doing.</p>
 <p>A tool might search files, query a database, create a ticket, run tests, send an email, open a browser, call another agent, or load a capability that was not available when the run began. That power is exactly why tool design is one of the highest-leverage parts of agent engineering.</p>
 <p>Bad tools make capable models look clumsy. Good tools make smaller systems surprisingly competent.</p>
+<figure style="margin:32px 0 38px;border:1px solid #d8ddd7;border-radius:12px;overflow:hidden;background:#fbfcfa">
+  <img src="/assets/img/agents-101/illustrations/06-tools-mcp-skills-and-plugins/capability-layers.svg" alt="Four cards distinguish a tool as a callable capability, an MCP server as a standardized provider of tools and resources, a skill as reusable task knowledge, and a plugin as a package that can include skills, MCP servers, apps, and assets." style="display:block;width:100%;height:auto" loading="lazy">
+  <figcaption style="padding:12px 16px 14px;color:#5f6f7a;line-height:1.5">Tools execute; MCP standardizes capability access; skills teach workflows; plugins package capabilities.</figcaption>
+</figure>
 <h2 id="level-1-fundamentals">Level 1: Fundamentals</h2>
 <p>OpenAI's tools docs describe several ways to extend model capability: built-in tools, function calling, remote MCP servers, file search, web search, deferred tool definitions, and custom functions [1]. The important idea is that the model does not need to contain every capability. It can call out to systems that retrieve, compute, inspect, or act.</p>
 <p>MCP, the Model Context Protocol, standardizes one large part of this story. The 2025-06-18 MCP specification describes MCP as an open protocol for integrating LLM applications with external data and tools, using JSON-RPC 2.0 and a host/client/server model [3].</p>
@@ -286,19 +306,37 @@ plugin: packaged extension that can include skills, tools, apps, and MCP servers
 <li>constraints that should apply before tool use</li>
 </ul>
 <p>Claude Code's docs describe related extension ideas such as <code>CLAUDE.md</code>, MCP, skills, hooks, and custom workflows [4]. The ecosystem vocabulary differs, but the architectural role is familiar: package reusable context and capability so the agent can do specialized work more reliably.</p>
+<h3 id="codex-app">Codex App</h3>
+<p>The Codex App is an operating surface for this capability stack, not just another place to type prompts. OpenAI describes it as a command center for managing multiple agents: work runs in separate project threads, changes can be reviewed in the thread, and built-in worktrees let agents work on isolated copies of a repository [7]. That changes the human role from completing one edit with one agent to directing, supervising, and reviewing a set of long-running tasks.</p>
+<p>Skills make that command center extensible. In Codex, a skill bundles instructions, resources, and scripts so the agent can follow a reliable workflow; skills can be explicitly requested or selected for a relevant task. A skill created in the app can also be used in the CLI and IDE extension, and teams can check skills into a repository to share their working conventions [7].</p>
+<p>The app also supports scheduled Automations: instructions with optional skills that run in the background and return their results to a review queue. Treat this as a supervision loop, not unattended authority. A useful automation has a bounded task, low-risk tools, observable outputs, and a clear person or policy that reviews consequential results [7].</p>
+<p>The app's default sandbox reinforces that distinction: agents are limited to the folder or branch where they work and cached web search, and elevated actions such as network access require permission unless a project or team has configured a rule for them [7]. Configuration can reduce repeated friction, but it should follow an explicit review of the command and its scope.</p>
+<figure style="margin:32px 0 38px;border:1px solid #d8ddd7;border-radius:12px;overflow:hidden;background:#fbfcfa">
+  <img src="/assets/img/agents-101/illustrations/06-tools-mcp-skills-and-plugins/codex-app-command-center.svg" alt="A diagram shows project threads flowing into the Codex App command center and then to a review queue. Skills and automations feed the command center from below as reusable workflow guidance and scheduled work." style="display:block;width:100%;height:auto" loading="lazy">
+  <figcaption style="padding:12px 16px 14px;color:#5f6f7a;line-height:1.5">The Codex App makes parallel agent work, reusable skills, scheduled automations, and review part of one operating loop.</figcaption>
+</figure>
 <h3 id="plugins">Plugins</h3>
-<p>Plugins are packaging. They are useful when a capability needs to be installed, versioned, discovered, enabled, or shared.</p>
-<p>A plugin can contain:</p>
+<p>Plugins are packaging. They are useful when a capability needs to be discovered, installed, enabled, versioned, or shared. In the current ChatGPT and Codex product model, the Plugin Directory is the primary place to discover workflow capabilities. A plugin is a workflow package that can include skills, apps, and app templates [8].</p>
+<p>A plugin can bring together:</p>
 <ul>
 <li>one or more skills</li>
-<li>MCP server configuration</li>
-<li>app connectors</li>
-<li>templates</li>
-<li>scripts</li>
-<li>assets</li>
-<li>metadata for discovery</li>
+<li>apps that connect to approved tools, data, or actions</li>
+<li>app templates that an administrator must configure before the underlying app can be used</li>
 </ul>
-<p>The danger is treating plugin installation as trust. A plugin is supply chain. If it gives the agent tools, it can expand what the agent is able to do. If it gives the agent instructions, it can influence how the agent reasons. Installation, permissions, versioning, and provenance matter.</p>
+<p>That structure is deliberately layered. The plugin supplies a coherent workflow; an included app supplies the integration to an external system. Plugin availability is not the same as app permission: workspace and app settings control which roles can use an app, whether it can read or take actions, whether actions require confirmation, and which data can be synced. The connected source system's own permissions still apply [8].</p>
+<p>For an app-backed plugin, a safe rollout is a small operational sequence:</p>
+<ol>
+<li>Review the plugin's skills, included apps, setup requirements, connection requirements, and privacy terms.</li>
+<li>Configure the required app or app template, assign the smallest appropriate role scope, and begin with read-only access when possible.</li>
+<li>Require OAuth or other provider authentication where needed; test with a low-risk prompt before enabling writes.</li>
+<li>Review action controls, approvals, sync boundaries, and source-system access separately from the plugin's installation policy.</li>
+<li>Revisit access and controls after the workflow is in use, especially when the plugin or its dependencies are refreshed [8].</li>
+</ol>
+<p>The danger is treating plugin installation as trust. A plugin is supply chain: it can influence how an agent works through skills and expand what it can reach through apps. Review provenance, dependencies, permissions, version changes, and the real side effects of the underlying apps.</p>
+<figure style="margin:32px 0 38px;border:1px solid #d8ddd7;border-radius:12px;overflow:hidden;background:#fbfcfa">
+  <img src="/assets/img/agents-101/illustrations/06-tools-mcp-skills-and-plugins/plugin-app-permissions.svg" alt="A plugin package contains skills, apps, and app templates. An included app passes through workspace access and action controls before it reaches source-system permissions, showing that a plugin does not grant access by itself." style="display:block;width:100%;height:auto" loading="lazy">
+  <figcaption style="padding:12px 16px 14px;color:#5f6f7a;line-height:1.5">A plugin packages the workflow; workspace policy, app controls, and source-system permissions still govern access.</figcaption>
+</figure>
 <h2 id="level-3-engineering-detail">Level 3: Engineering Detail</h2>
 <p>A good tool is narrow, typed, permissioned, observable, and recoverable.</p>
 <h3 id="tool-schema">Tool Schema</h3>
@@ -363,6 +401,7 @@ plugin: packaged extension that can include skills, tools, apps, and MCP servers
 </tbody>
 </table>
 <p>The model can request a tool call. The runtime decides whether it happens.</p>
+<figure style="margin:32px 0 38px;border:1px solid #d8ddd7;border-radius:12px;overflow:hidden;background:#fbfcfa"><img src="/assets/img/agents-101/illustrations/06-tools-mcp-skills-and-plugins/permission-ladder.svg" alt="A three-level permission ladder moves from automatic logged reads to reviewed staged changes to externally consequential actions requiring approval and audit." style="display:block;width:100%;height:auto" loading="lazy"><figcaption style="padding:12px 16px 14px;color:#5f6f7a;line-height:1.5">Tool permission should rise with the consequence of the action.</figcaption></figure>
 <h3 id="mcp-server-checklist">MCP Server Checklist</h3>
 <p>Before adding an MCP server, ask:</p>
 <ul>
@@ -400,14 +439,16 @@ plugin: packaged extension that can include skills, tools, apps, and MCP servers
 <p>Tool ecosystems are moving toward standardization.</p>
 <p>OpenAI supports built-in tools, function calling, tool search, file search, web search, and remote MCP tools [1]. Its integration docs position MCP-backed capabilities as part of an inspectable agent runtime with tracing [2].</p>
 <p>MCP has become the clearest protocol boundary for agent-to-tool integration [3]. It does not solve every problem. It does not decide whether a tool is safe, whether a user is authorized, or whether a tool result is trustworthy. It does give hosts and tool providers a shared language.</p>
-<p>Skills and plugins are the packaging layer. They matter because agents need more than callable APIs: they need task procedures, examples, local norms, validation habits, and installed capabilities. Claude Code's extension surface is one example of this broader move toward configurable, tool-using coding agents [4].</p>
+<p>Skills and plugins are the workflow and packaging layers. They matter because agents need more than callable APIs: they need task procedures, examples, local norms, validation habits, installed capabilities, and an operating surface for review. The Codex App combines parallel project threads, skills, Automations, and review into that operating layer [7].</p>
+<p>For Codex and ChatGPT workspaces, plugins now package workflow guidance with apps and app templates. This makes discovery easier, but it does not collapse the trust model: workspace policy, each app's controls, and the connected source system still govern access [8].</p>
 <p>The Hitchhiker guide's N-to-M integration framing is a useful mental model: protocols and packaged capabilities reduce repeated glue code, but they increase the importance of trust, discovery, and governance [6].</p>
 <h2 id="practical-takeaways">Practical Takeaways</h2>
 <p>Design tools like APIs, not like shortcuts. Give them strict schemas, clear descriptions, timeout behavior, and explicit side-effect labels.</p>
 <p>Separate data tools from action tools. Reading and writing should not share the same permission model.</p>
 <p>Use MCP when interoperability matters. It is especially valuable when many hosts need access to many external systems.</p>
 <p>Treat skills as workflow knowledge. A skill should teach the agent how to do a task, not just expose another function.</p>
-<p>Treat plugins as supply chain. Version them, review them, restrict permissions, and know what capabilities they add.</p>
+<p>Use the Codex App to supervise parallel work deliberately. Isolate concurrent changes, give agents bounded goals, and review results before consequential follow-on actions.</p>
+<p>Treat plugins as supply chain and as dependency bundles. Review their skills, apps, setup requirements, permissions, action controls, and source-system boundaries; installing a plugin does not grant data access by itself.</p>
 <p>Log every meaningful tool call. Agent debugging depends on knowing what the model requested, what the runtime allowed, and what the world returned.</p>
 <h2 id="references">References</h2>
 <p>[1] "Using tools." OpenAI API documentation. <a href="https://developers.openai.com/api/docs/guides/tools" target="_blank" rel="noopener noreferrer">https://developers.openai.com/api/docs/guides/tools</a>. Published/updated: not listed. Accessed: 2026-07-06. Used for: built-in tools, function calling, file search, web search, tool search, remote MCP, and custom functions.</p>
@@ -416,6 +457,8 @@ plugin: packaged extension that can include skills, tools, apps, and MCP servers
 <p>[4] "Claude Code overview." Anthropic Claude Code documentation. <a href="https://code.claude.com/docs/en/overview" target="_blank" rel="noopener noreferrer">https://code.claude.com/docs/en/overview</a>. Published/updated: not listed. Accessed: 2026-07-06. Used for: coding-agent extension surfaces including MCP, instruction files, skills, hooks, and workflows.</p>
 <p>[5] "Building effective agents." Anthropic. <a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener noreferrer">https://www.anthropic.com/engineering/building-effective-agents</a>. Published/updated: 2024-12-19. Accessed: 2026-07-06. Used for: agent-computer interface framing, tool documentation, and start-simple guidance.</p>
 <p>[6] "The Hitchhiker's Guide to Agentic AI: From Foundations to Systems." Haggai Roitman. Local source: agent-101/The Hitchhiker’s Guide to Agentic AI/book.tex. Published/updated: 2026. Accessed: 2026-07-06. Used for: MCP integration-fragmentation framing, host/client/server roles, transports, and tool capability packaging.</p>
+<p>[7] "Introducing the Codex app." OpenAI. Published: 2026-02-02; updated: 2026-03-04. Accessed: 2026-07-13. <a href="https://openai.com/index/introducing-the-codex-app/" target="_blank" rel="noopener noreferrer">https://openai.com/index/introducing-the-codex-app/</a>. Used for: Codex App multi-agent threads and worktrees, skills, Automations, review queue, and default sandboxing.</p>
+<p>[8] "Plugins in ChatGPT and Codex." OpenAI Help Center. Updated: 2026-07-12. Accessed: 2026-07-13. <a href="https://help.openai.com/en/articles/20001256-plugins-in-chatgpt-and-codex" target="_blank" rel="noopener noreferrer">https://help.openai.com/en/articles/20001256-plugins-in-chatgpt-and-codex</a>. Used for: the Plugin Directory; plugin composition; apps, app templates, installation, role access, action controls, OAuth, source-system permissions, and rollout guidance.</p>
 </div>
 
     </div>

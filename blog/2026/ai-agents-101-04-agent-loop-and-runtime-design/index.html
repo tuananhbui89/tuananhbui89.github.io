@@ -144,6 +144,21 @@
   vertical-align: top;
 } .agentic-101-post th {
   background: #e4f1f2;
+} .agentic-101-post figure {
+  margin: 32px 0 38px;
+} .agentic-101-post figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+} .agentic-101-post .illustration {
+  border: 1px solid #d8ddd7;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fbfcfa;
+} .agentic-101-post figcaption {
+  padding: 12px 16px 14px;
+  color: #5f6f7a;
+  line-height: 1.5;
 }
 
 </style>
@@ -213,6 +228,10 @@
 <p>An agent becomes useful when the model is placed inside a runtime loop.</p>
 <p>The loop is the part of the system that keeps asking: what does the model need to see, what action did it choose, is that action allowed, what happened, should we continue, and what evidence proves we are done?</p>
 <p>This is why agent design is less like writing one prompt and more like building a small operating system around a model. The model proposes. The runtime coordinates.</p>
+<figure style="margin:32px 0 38px;border:1px solid #d8ddd7;border-radius:12px;overflow:hidden;background:#fbfcfa">
+  <img src="/assets/img/agents-101/illustrations/04-agent-loop-and-runtime-design/runtime-control-loop.svg" alt="A runtime loop moves from goal and context to a model proposal, validation, action and observation, and updated state. Guardrails can require approval or stop work, while evidence controls whether the loop continues." style="display:block;width:100%;height:auto" loading="lazy">
+  <figcaption style="padding:12px 16px 14px;color:#5f6f7a;line-height:1.5">The runtime turns model proposals into controlled, observable work.</figcaption>
+</figure>
 <h2 id="level-1-fundamentals">Level 1: Fundamentals</h2>
 <p>The classic ReAct pattern showed why reasoning and acting belong together: the model can interleave a reasoning trace with task-specific actions, use observations from external systems, update its plan, and recover from exceptions [1]. Modern agent runtimes implement the same idea in a more productized form.</p>
 <p>OpenAI's current agent-running docs describe a runner loop that calls the model, inspects the output, executes tool calls, handles handoffs, and returns only when there is a final answer and no more tool work to perform [2]. That loop is the heart of an agent.</p>
@@ -307,6 +326,7 @@
 }
 </code></pre>
 <p>That object is not just UI metadata. It is how the system avoids losing the run.</p>
+<figure style="margin:32px 0 38px;border:1px solid #d8ddd7;border-radius:12px;overflow:hidden;background:#fbfcfa"><img src="/assets/img/agents-101/illustrations/04-agent-loop-and-runtime-design/interruption-control.svg" alt="An interrupted run persists state, trace, and pending work, then explicitly resumes, waits for approval, or stops." style="display:block;width:100%;height:auto" loading="lazy"><figcaption style="padding:12px 16px 14px;color:#5f6f7a;line-height:1.5">Interruptions preserve control when the runtime records enough evidence to decide what happens next.</figcaption></figure>
 <h3 id="latency-mode">Latency Mode</h3>
 <p>Runtime design also decides how work reaches the user.</p>
 <p>For conversational tasks, streaming matters because the application can process early tokens while the model continues generating [5]. For long-running tasks, background mode matters because deep research, coding, or multi-step tool work can take minutes, and an asynchronous run can be polled until it reaches a terminal state [6].</p>

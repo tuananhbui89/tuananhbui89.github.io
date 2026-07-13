@@ -144,6 +144,21 @@
   vertical-align: top;
 } .agentic-101-post th {
   background: #e4f1f2;
+} .agentic-101-post figure {
+  margin: 32px 0 38px;
+} .agentic-101-post figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+} .agentic-101-post .illustration {
+  border: 1px solid #d8ddd7;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fbfcfa;
+} .agentic-101-post figcaption {
+  padding: 12px 16px 14px;
+  color: #5f6f7a;
+  line-height: 1.5;
 }
 
 </style>
@@ -210,6 +225,10 @@
 <p>Prompt engineering is still useful. It is just no longer the main bottleneck.</p>
 <p>The old mental model was: write a better prompt, get a better answer. That still works for single-turn tasks. But when an AI system can inspect a repository, call tools, run tests, read logs, open pull requests, ask other agents for review, persist state, and wake up again on a schedule, the engineering problem changes. You are no longer just shaping a model response. You are designing the environment, harness, and loop that let the model do reliable work.</p>
 <p>The shift is from "what should I ask the model?" to "what system should repeatedly turn goals into verified progress?"</p>
+<figure style="margin:32px 0 38px;border:1px solid #d8ddd7;border-radius:12px;overflow:hidden;background:#fbfcfa">
+  <img src="/assets/img/agents-101/illustrations/02-agent-systems-engineering/engineering-surfaces.svg" alt="Six engineering surfaces expand from prompt to context, tools, harness, loop, and evaluation plus safety. A callout says to fix the surface where the failure occurs instead of repeatedly rewriting the prompt." style="display:block;width:100%;height:auto" loading="lazy">
+  <figcaption style="padding:12px 16px 14px;color:#5f6f7a;line-height:1.5">When an agent fails, repair the engineering surface that failed—not merely the prompt.</figcaption>
+</figure>
 <h2 id="level-1-fundamentals">Level 1: Fundamentals</h2>
 <p>Prompt engineering means shaping the input so a model is more likely to produce the output you want. OpenAI's prompt engineering guide frames prompts as the way developers ask models to generate text, code, structured JSON, mathematical output, or prose, and it highlights patterns such as examples, clear instructions, and prompt caching for reused context [1].</p>
 <p>That is the right starting point. A model is not a mind reader. If you want a customer-support classifier to return only <code>Hardware</code>, <code>Software</code>, or <code>Other</code>, you should say that. If you want citations, specify the citation format. If you want Markdown, say where Markdown is appropriate. Prompting is the interface between human intent and model behavior.</p>
@@ -343,6 +362,10 @@ constraints: do not move money; do not email the customer; approval required for
 stop: final answer only after a note, approval request, or escalation has been written
 </code></pre>
 <p>The prompt states intent and boundaries. The system around it supplies the policy, state, tools, traces, and approval mechanism.</p>
+<figure style="margin:32px 0 38px;border:1px solid #d8ddd7;border-radius:12px;overflow:hidden;background:#fbfcfa">
+  <img src="/assets/img/agents-101/illustrations/02-agent-systems-engineering/prompt-control-header.svg" alt="A concise prompt control header specifies role, goal, success, constraints, and a stop condition before guiding one model turn. Durable facts, tools, and policy remain outside the prompt." style="display:block;width:100%;height:auto" loading="lazy">
+  <figcaption style="padding:12px 16px 14px;color:#5f6f7a;line-height:1.5">A prompt should define inspectable local intent; the surrounding system should carry durable knowledge and controls.</figcaption>
+</figure>
 <h3 id="context-engineering">Context engineering</h3>
 <p>Context engineering is the work of deciding what information enters the model's context window. That includes retrieved documents, project instructions, memory, examples, source snippets, prior tool results, and user state.</p>
 <p>OpenAI's harness article gives a practical version of this rule: repository knowledge became the system of record, with a short <code>AGENTS.md</code> acting as a map and deeper documentation living in structured files that agents can discover progressively [3]. The article also warns that a monolithic instruction file can crowd out the task, rot quickly, and become hard to verify [3].</p>
@@ -359,6 +382,10 @@ stop: final answer only after a note, approval request, or escalation has been w
   -&gt; attach citations, paths, versions, or timestamps
 </code></pre>
 <p>For code agents, this often becomes a repository-local knowledge architecture: a short root instruction file, domain docs, architecture docs, command references, generated schema docs, active plans, completed plans, and quality or security checklists. The key design principle is progressive disclosure: the agent starts with a small map, then loads deeper sources only when needed.</p>
+<figure style="margin:32px 0 38px;border:1px solid #d8ddd7;border-radius:12px;overflow:hidden;background:#fbfcfa">
+  <img src="/assets/img/agents-101/illustrations/02-agent-systems-engineering/context-progressive-disclosure.svg" alt="A root guide points to architecture, command and schema, and policy and task documents. A selection step filters those sources by relevance, authority, freshness, and permission before creating a bounded context working set." style="display:block;width:100%;height:auto" loading="lazy">
+  <figcaption style="padding:12px 16px 14px;color:#5f6f7a;line-height:1.5">Context engineering starts with a map, then selects only the evidence this turn needs.</figcaption>
+</figure>
 <h3 id="tool-engineering">Tool engineering</h3>
 <p>Tools turn language into action. OpenAI's tools guide describes platform tools such as function calling, web search, remote MCP servers, skills, shell, computer use, file search, and tool search; the model can decide whether to use configured tools, and advanced workflows can load more tool definitions as needed [7].</p>
 <p>Tool engineering is more than exposing an API. It means designing an "agent-computer interface." Anthropic argues that tool definitions deserve as much prompt-engineering attention as the overall prompt, including examples, edge cases, input requirements, clear boundaries, and parameter names that make the intended use obvious [4].</p>
@@ -405,6 +432,10 @@ stop: final answer only after a note, approval request, or escalation has been w
 </code></pre>
 <p>That shape gives the model something to reason over. It also gives the harness something to trace, test, and evaluate.</p>
 <p>Hugging Face's smolagents work adds another useful angle: not every agent action has to be expressed as a JSON tool call. Code-agent patterns let the model write actions as code, which can improve composability for calculations, loops, and intermediate variables, but they also make sandboxing and execution security more important [8].</p>
+<figure style="margin:32px 0 38px;border:1px solid #d8ddd7;border-radius:12px;overflow:hidden;background:#fbfcfa">
+  <img src="/assets/img/agents-101/illustrations/02-agent-systems-engineering/tool-contract.svg" alt="A refund_order tool contract names its consequence, defines typed inputs and structured outputs, requires approval, and returns a recoverable POLICY_NOT_FOUND error with safe next steps." style="display:block;width:100%;height:auto" loading="lazy">
+  <figcaption style="padding:12px 16px 14px;color:#5f6f7a;line-height:1.5">A good tool contract makes its action, constraints, and recovery path obvious to both the agent and its runtime.</figcaption>
+</figure>
 <h3 id="harness-engineering">Harness engineering</h3>
 <p>The harness is the program and environment around one agent run. It gives the agent tools, context, isolation, observability, and a path to verification.</p>
 <p>The Hitchhiker guide puts the same idea in systems language: an agent harness is runtime infrastructure that wraps an LLM into a stateful, goal-directed agent, separating concerns such as reasoning, execution, memory, communication, and observability [15].</p>
@@ -437,6 +468,10 @@ stop: final answer only after a note, approval request, or escalation has been w
 }
 </code></pre>
 <p>That record is not just logging. It is the substrate for review, evals, debugging, retries, and loop state.</p>
+<figure style="margin:32px 0 38px;border:1px solid #d8ddd7;border-radius:12px;overflow:hidden;background:#fbfcfa">
+  <img src="/assets/img/agents-101/illustrations/02-agent-systems-engineering/harness-run-evidence.svg" alt="A task enters an isolated agent run with approved tools and observations, then passes through verification and produces a run record containing evidence, result, and approval state." style="display:block;width:100%;height:auto" loading="lazy">
+  <figcaption style="padding:12px 16px 14px;color:#5f6f7a;line-height:1.5">The harness makes a single agent run observable, verifiable, and reviewable.</figcaption>
+</figure>
 <h3 id="loop-engineering">Loop engineering</h3>
 <p>Loop engineering begins when you stop being the person who manually prompts the agent at every step.</p>
 <p>Greyling defines loop engineering as designing the system that discovers work, hands tasks to agents or sub-agents, verifies results, persists state, and decides the next action on a schedule or until a goal is met [2]. That is one level above the harness. The harness makes a run capable. The loop decides when and why runs happen.</p>
@@ -472,6 +507,10 @@ stop: final answer only after a note, approval request, or escalation has been w
 }
 </code></pre>
 <p>Without state, every loop run starts from scratch. With state, the system can avoid duplicate work, remember failed attempts, control spend, and know when to ask for help.</p>
+<figure style="margin:32px 0 38px;border:1px solid #d8ddd7;border-radius:12px;overflow:hidden;background:#fbfcfa">
+  <img src="/assets/img/agents-101/illustrations/02-agent-systems-engineering/loop-control-system.svg" alt="A loop moves from heartbeat to work finder, maker, checker, and durable state. State either sends work back for another attempt or records a stop or escalation decision." style="display:block;width:100%;height:auto" loading="lazy">
+  <figcaption style="padding:12px 16px 14px;color:#5f6f7a;line-height:1.5">A loop is a control system: it repeats work only while state and evidence justify another attempt.</figcaption>
+</figure>
 <h3 id="eval-and-observability-engineering">Eval and observability engineering</h3>
 <p>Once the system has loops and tools, you need traces and evals.</p>
 <p>Tracing records what happened during a run. OpenAI's Agents SDK observability docs say tracing is built into the SDK and can emit structured records of model calls, tool calls, handoffs, guardrails, and custom spans, giving developers an end-to-end record before formalizing evals [9].</p>
@@ -590,6 +629,10 @@ stop: final answer only after a note, approval request, or escalation has been w
 <p>Non-determinism needs its own measurement. Anthropic highlights two useful metrics: <code>pass@k</code>, the chance an agent succeeds at least once across <code>k</code> attempts, and <code>pass^k</code>, the chance it succeeds in all <code>k</code> attempts [11]. The first is useful when one working solution is enough. The second is more important for customer-facing agents where users expect consistent behavior every time.</p>
 <p>Good evals are also maintained artifacts, not one-off scripts. Anthropic recommends starting early with 20-50 tasks drawn from real manual checks or failures, writing unambiguous tasks with reference solutions, testing both positive and negative cases, isolating trials in clean environments, preferring outcome grading over brittle path grading, reading transcripts to verify the grader is fair, watching for eval saturation, and treating eval suites like unit tests that product and domain experts help maintain [11].</p>
 <p>A pretty final paragraph can hide a bad trajectory. Loop engineering makes this more urgent. If a loop runs on a schedule, a small bug can repeat. If it spawns sub-agents, a bad assumption can fan out. If it auto-opens pull requests, weak verification becomes noise. Observability and evals are not polish; they are the brakes, dashboard, and regression suite.</p>
+<figure style="margin:32px 0 38px;border:1px solid #d8ddd7;border-radius:12px;overflow:hidden;background:#fbfcfa">
+  <img src="/assets/img/agents-101/illustrations/02-agent-systems-engineering/evaluation-evidence-stack.svg" alt="An eval task creates an agent run with a trace and external outcome. Deterministic, model, and human graders inspect the evidence, and findings improve future tasks, graders, and agent versions." style="display:block;width:100%;height:auto" loading="lazy">
+  <figcaption style="padding:12px 16px 14px;color:#5f6f7a;line-height:1.5">Agent evaluation follows a scenario through its trace and outcome to evidence-backed improvement.</figcaption>
+</figure>
 <h3 id="safety-engineering">Safety engineering</h3>
 <p>Safety engineering is what makes the system robust under pressure. Guardrails are one mechanism. OpenAI's current guardrails and human review docs describe input guardrails, output guardrails, tool guardrails, and approval boundaries for sensitive actions [12].</p>
 <p>Security needs its own lens too. The OWASP Top 10 for LLM Applications lists risks such as prompt injection, insecure output handling, sensitive information disclosure, insecure plugin design, excessive agency, and overreliance [13]. These map directly onto agent systems: agents read untrusted content, call tools, pass data across boundaries, and may be trusted too much because their prose sounds confident.</p>
@@ -605,6 +648,10 @@ stop: final answer only after a note, approval request, or escalation has been w
 <li>escalation paths when the model is uncertain</li>
 </ul>
 <p>The hard part is not writing "be safe." The hard part is making unsafe behavior difficult, visible, and reviewable.</p>
+<figure style="margin:32px 0 38px;border:1px solid #d8ddd7;border-radius:12px;overflow:hidden;background:#fbfcfa">
+  <img src="/assets/img/agents-101/illustrations/02-agent-systems-engineering/safety-control-gates.svg" alt="Untrusted input is isolated and validated before a permission gate checks tool scope. Sensitive external effects pass through human approval and an audit record." style="display:block;width:100%;height:auto" loading="lazy">
+  <figcaption style="padding:12px 16px 14px;color:#5f6f7a;line-height:1.5">Safety is enforced through control gates at input, tool, approval, and audit boundaries.</figcaption>
+</figure>
 <h2 id="current-landscape">Current Landscape</h2>
 <p>The direction of travel is clear: AI engineering is becoming systems engineering.</p>
 <p>OpenAI's agent tooling emphasizes APIs, built-in tools, orchestration, tracing, and evaluation [14]. Anthropic's production advice emphasizes simple composable patterns, transparency, and careful agent-computer interface design [4]. Anthropic's eval guidance adds an important operational point: agent quality depends on eval harnesses, outcome checks, transcript review, grader calibration, and maintained suites, not just prompt tweaks [11]. Context engineering is becoming visible enough that researchers are studying real-world context files such as <code>AGENTS.md</code> across open-source repositories [6].</p>
