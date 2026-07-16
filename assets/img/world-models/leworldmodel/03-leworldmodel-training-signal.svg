@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 930" role="img" aria-labelledby="svgTitle svgDesc">
+  <title id="svgTitle">LeWorldModel training signal</title>
+  <desc id="svgDesc">An offline trajectory provides a current frame, a recorded action, and the actual next frame. The current and next frames pass through the same trainable encoder to create current and target latents. The recorded action and current latent enter a predictor, which produces a predicted next latent. The predicted and target latents receive a prediction loss, while the encoder latents also receive SIGReg. Both losses jointly update the encoder and predictor. Unexecuted actions are not direct training targets.</desc>
+  <defs>
+    <style>
+      .title { fill: #172033; font: 700 31px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .subtitle { fill: #52606d; font: 400 17px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .section-label { fill: #47606c; font: 800 13px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; letter-spacing: 1.2px; }
+      .node-kicker { fill: #52606d; font: 800 12px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; letter-spacing: 0.9px; }
+      .node-title { fill: #172033; font: 700 19px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .node-copy { fill: #52606d; font: 400 14px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .math { fill: #172033; font: 700 21px Georgia, "Times New Roman", serif; }
+      .small-math { fill: #172033; font: 700 17px Georgia, "Times New Roman", serif; }
+      .connector-label { fill: #47606c; font: 700 13px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .note { fill: #694f1b; font: 600 15px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .solid { fill: none; stroke: #285e61; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrowSolid); }
+      .dotted { fill: none; stroke: #7c3d87; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 7 8; marker-end: url(#arrowDotted); }
+      .shared { fill: none; stroke: #677783; stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 6 7; }
+    </style>
+    <marker id="arrowSolid" markerWidth="11" markerHeight="11" refX="11" refY="5.5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 0 L11 5.5 L0 11 Z" fill="#285e61"/>
+    </marker>
+    <marker id="arrowDotted" markerWidth="11" markerHeight="11" refX="11" refY="5.5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 0 L11 5.5 L0 11 Z" fill="#7c3d87"/>
+    </marker>
+  </defs>
+
+  <g id="background">
+    <rect width="1600" height="930" fill="#fcfbf7"/>
+    <rect x="42" y="152" width="298" height="626" rx="24" fill="#f6fbfc" stroke="#7aa5ad" stroke-width="2" stroke-dasharray="8 8"/>
+  </g>
+
+  <g id="heading">
+    <text x="58" y="68" class="title">LeWorldModel learns from observed transitions</text>
+    <text x="58" y="102" class="subtitle">The action conditions the predictor; the actual next frame supplies the latent target.</text>
+    <text x="64" y="184" class="section-label">ONE LOGGED OFFLINE TRANSITION</text>
+  </g>
+
+  <g id="input-current-frame">
+    <rect x="85" y="224" width="220" height="96" rx="14" fill="#e6f0f7" stroke="#5b88a0" stroke-width="2"/>
+    <text x="108" y="252" class="node-kicker">OBSERVATION</text>
+    <text x="108" y="282" class="node-title">current frame</text>
+    <text x="108" y="306" class="math">oₜ</text>
+  </g>
+
+  <g id="input-recorded-action">
+    <rect x="85" y="409" width="220" height="96" rx="14" fill="#fff0d9" stroke="#bc7a26" stroke-width="2"/>
+    <text x="108" y="437" class="node-kicker">CONTROL LOG</text>
+    <text x="108" y="467" class="node-title">recorded action</text>
+    <text x="108" y="491" class="math">aₜ</text>
+  </g>
+
+  <g id="input-next-frame">
+    <rect x="85" y="594" width="220" height="96" rx="14" fill="#e6f0f7" stroke="#5b88a0" stroke-width="2"/>
+    <text x="108" y="622" class="node-kicker">OBSERVATION</text>
+    <text x="108" y="652" class="node-title">actual next frame</text>
+    <text x="108" y="676" class="math">oₜ₊₁</text>
+  </g>
+
+  <g id="current-encoder">
+    <rect x="430" y="232" width="245" height="80" rx="14" fill="#edf6ee" stroke="#5b9771" stroke-width="2"/>
+    <text x="452" y="260" class="node-kicker">TRAINABLE</text>
+    <text x="452" y="290" class="node-title">encoder eθ</text>
+  </g>
+
+  <g id="target-encoder">
+    <rect x="430" y="602" width="245" height="80" rx="14" fill="#edf6ee" stroke="#5b9771" stroke-width="2"/>
+    <text x="452" y="630" class="node-kicker">SAME TRAINABLE WEIGHTS</text>
+    <text x="452" y="660" class="node-title">encoder eθ</text>
+  </g>
+
+  <g id="current-latent">
+    <rect x="760" y="232" width="190" height="80" rx="40" fill="#e8f6f4" stroke="#258277" stroke-width="2.5"/>
+    <text x="855" y="264" class="node-kicker" text-anchor="middle">CURRENT LATENT</text>
+    <text x="855" y="293" class="math" text-anchor="middle">zₜ</text>
+  </g>
+
+  <g id="target-latent">
+    <rect x="760" y="602" width="190" height="80" rx="40" fill="#e7effa" stroke="#577eaa" stroke-width="2.5"/>
+    <text x="855" y="634" class="node-kicker" text-anchor="middle">TARGET LATENT</text>
+    <text x="855" y="663" class="math" text-anchor="middle">zₜ₊₁</text>
+  </g>
+
+  <g id="predictor">
+    <rect x="1030" y="280" width="245" height="110" rx="16" fill="#eff5f5" stroke="#285e61" stroke-width="2.5"/>
+    <text x="1054" y="310" class="node-kicker">ACTION-CONDITIONED</text>
+    <text x="1054" y="340" class="node-title">predictor fψ</text>
+    <text x="1054" y="366" class="node-copy">state history + action</text>
+  </g>
+
+  <g id="predicted-latent">
+    <rect x="1340" y="290" width="185" height="88" rx="40" fill="#e8f6f4" stroke="#258277" stroke-width="2.5"/>
+    <text x="1432" y="322" class="node-kicker" text-anchor="middle">PREDICTION</text>
+    <text x="1432" y="354" class="math" text-anchor="middle">ẑₜ₊₁</text>
+  </g>
+
+  <g id="prediction-loss">
+    <rect x="1130" y="500" width="300" height="110" rx="18" fill="#fff8e6" stroke="#c88414" stroke-width="4"/>
+    <text x="1280" y="531" class="node-kicker" text-anchor="middle">FOCUS: MATCH PREDICTION TO REALIZED FUTURE</text>
+    <text x="1280" y="564" class="node-title" text-anchor="middle">prediction loss</text>
+    <text x="1280" y="591" class="small-math" text-anchor="middle">‖ẑₜ₊₁ − zₜ₊₁‖²</text>
+  </g>
+
+  <g id="sigreg">
+    <rect x="760" y="765" width="280" height="92" rx="16" fill="#f7edf8" stroke="#8b4b96" stroke-width="2.5"/>
+    <text x="900" y="795" class="node-kicker" text-anchor="middle">BATCH-LEVEL REGULARIZATION</text>
+    <text x="900" y="826" class="node-title" text-anchor="middle">SIGReg</text>
+    <text x="900" y="847" class="node-copy" text-anchor="middle">keep latents diverse</text>
+  </g>
+
+  <g id="joint-update">
+    <rect x="1210" y="765" width="280" height="92" rx="16" fill="#edf4ef" stroke="#4b7a5b" stroke-width="2.5"/>
+    <text x="1350" y="795" class="node-kicker" text-anchor="middle">OPTIMIZATION STEP</text>
+    <text x="1350" y="826" class="node-title" text-anchor="middle">joint update</text>
+    <text x="1350" y="847" class="node-copy" text-anchor="middle">encoder + predictor</text>
+  </g>
+
+  <g id="counterfactual-note">
+    <rect x="85" y="808" width="530" height="62" rx="12" fill="#fff7df" stroke="#d4ad52" stroke-width="1.5"/>
+    <text x="108" y="846" class="note">Unexecuted actions are not direct training targets.</text>
+  </g>
+
+  <g id="connectors">
+    <path class="solid" d="M305 272 H430"/>
+    <path class="solid" d="M675 272 H760"/>
+    <path class="solid" d="M950 272 H990 V320 H1030"/>
+    <path class="solid" d="M305 457 H985 V350 H1030"/>
+    <path class="solid" d="M305 642 H430"/>
+    <path class="solid" d="M675 642 H760"/>
+    <path class="solid" d="M1275 334 H1340"/>
+    <path class="solid" d="M1432 378 V455 H1280 V500"/>
+    <path class="solid" d="M950 642 H1080 V555 H1130"/>
+    <path class="solid" d="M1280 610 V765"/>
+    <path class="solid" d="M1040 811 H1210"/>
+    <path class="dotted" d="M855 312 V440 H710 V811 H760"/>
+    <path class="dotted" d="M855 682 V724 H900 V765"/>
+    <path class="shared" d="M552 312 V602"/>
+  </g>
+
+  <g id="connector-labels">
+    <text x="978" y="252" class="connector-label">state</text>
+    <text x="748" y="431" class="connector-label">logged action</text>
+    <text x="1370" y="446" class="connector-label">compare</text>
+    <text x="975" y="713" class="connector-label">batch Z</text>
+    <text x="565" y="471" class="connector-label">same θ</text>
+    <text x="1130" y="753" class="connector-label">losses update both modules</text>
+  </g>
+</svg>

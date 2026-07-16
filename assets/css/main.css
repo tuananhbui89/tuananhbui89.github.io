@@ -945,7 +945,76 @@ progress::-moz-progress-bar {
   color: var(--global-hover-text-color);
 }
 
-/* Table of Contents */
+/* Floating Table of Contents for blog posts */
+.floating-toc {
+  position: fixed;
+  top: 4.5rem;
+  right: 1rem;
+  z-index: 1030;
+  width: calc(100vw - 2rem);
+  max-width: 20rem;
+}
+.floating-toc details {
+  overflow: hidden;
+  border: 1px solid var(--global-divider-color);
+  border-radius: 0.5rem;
+  background-color: var(--global-bg-color);
+  box-shadow: 0 0.35rem 1.25rem rgba(0, 0, 0, 0.16);
+}
+.floating-toc summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 0.9rem;
+  color: var(--global-text-color);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  list-style: none;
+}
+.floating-toc summary::-webkit-details-marker {
+  display: none;
+}
+.floating-toc summary::after {
+  margin-left: auto;
+  content: "\f107";
+  font-family: "Font Awesome 6 Free";
+  font-size: 0.75rem;
+  font-weight: 900;
+  transition: transform 0.15s ease;
+}
+.floating-toc details[open] summary {
+  border-bottom: 1px solid var(--global-divider-color);
+}
+.floating-toc details[open] summary::after {
+  transform: rotate(180deg);
+}
+.floating-toc__content {
+  max-height: calc(100vh - 9rem);
+  padding: 0.75rem 1rem 1rem;
+  overflow-y: auto;
+}
+.floating-toc #toc {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+.floating-toc #toc ul {
+  margin: 0.25rem 0;
+  padding-left: 1rem;
+}
+.floating-toc #toc li {
+  margin: 0.2rem 0;
+}
+.floating-toc #toc a {
+  color: var(--global-text-color-light);
+}
+.floating-toc #toc a:hover {
+  color: var(--global-theme-color);
+}
+
+/* Table of Contents sidebar used by non-post pages. */
 nav[data-toggle=toc] {
   top: 5rem;
 }
@@ -972,7 +1041,32 @@ nav[data-toggle=toc] .nav-link.active:hover {
 
 /* small screens */
 @media (max-width: 576px) {
-  /* override stickyness so that the navigation does not follow scrolling */
+  .floating-toc {
+    top: auto;
+    right: max(1rem, env(safe-area-inset-right, 0px));
+    bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+    width: calc(100vw - 2rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
+  }
+  .floating-toc details[open] {
+    max-height: calc(100vh - 2rem);
+    max-height: calc(100dvh - 2rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  }
+  .floating-toc summary {
+    min-height: 44px;
+  }
+  .floating-toc__content {
+    max-height: calc(100vh - 7rem);
+    max-height: calc(100dvh - 7rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    -webkit-overflow-scrolling: touch;
+  }
+  .floating-toc #toc {
+    font-size: 0.875rem;
+  }
+  .floating-toc #toc a {
+    display: block;
+    padding: 0.2rem 0;
+  }
+  /* Override stickiness so that the navigation does not follow scrolling. */
   nav[data-toggle=toc] {
     visibility: hidden;
     height: 0;

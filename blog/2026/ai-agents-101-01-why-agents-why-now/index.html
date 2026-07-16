@@ -189,9 +189,12 @@
 
   <article class="post-content">
     
-    <div id="table-of-contents">
-      
-      <ul id="toc" class="section-nav">
+    <aside id="floating-toc" class="floating-toc" aria-label="Table of contents">
+      <details>
+        <summary><i class="fas fa-list" aria-hidden="true"></i><span>On this page</span></summary>
+        <div class="floating-toc__content">
+          
+          <ul id="toc" class="section-nav">
 <li class="toc-entry toc-h1">
 <a href="#why-agents-why-now">Why Agents, Why Now</a>
 <ul>
@@ -214,9 +217,10 @@
 </ul>
 </li>
 </ul>
-      
-    </div>
-    <hr>
+          
+        </div>
+      </details>
+    </aside>
     
     <div id="markdown-content">
       <div class="agentic-101-post">
@@ -238,11 +242,15 @@
 <p>That does not mean "agent" has one clean industry definition. Anthropic notes that teams use the word for everything from fully autonomous systems to more prescriptive workflows, then draws a practical architectural distinction: workflows are systems where LLMs and tools follow predefined code paths, while agents let the model dynamically direct its process and tool use [2]. If you can draw the path ahead of time, you may need a workflow. If the path depends on what the system discovers, you may need an agent.</p>
 <p>The beginner mistake is to treat autonomy as the product. Autonomy is not the product. Autonomy is the cost you accept when flexibility is more valuable than predictability.</p>
 <h2 id="level-2-concepts">Level 2: Concepts</h2>
-<p>Agents became more practical because several capabilities matured at once.</p>
-<p>First, models became better at reasoning over messy, multi-step tasks. The ReAct paper made the pattern concrete: interleave reasoning traces with actions so a model can update its plan, call external sources or environments, and handle exceptions from observations [3]. Modern agent systems are often variations on this idea, even when the loop is hidden behind an SDK.</p>
+<p>Agents became more practical because four capabilities matured together. None removes the need to evaluate or constrain the system; together, they reduce the cost of building and operating one.</p>
+<p>First, models and their runtimes can now handle more of a messy task loop. The ReAct paper made the pattern concrete: interleave reasoning traces with actions so a model can update its plan, call external sources or environments, and handle exceptions from observations [3]. Production guidance from Anthropic and OpenAI likewise frames reliable tool use, planning, and recovery as enabling capabilities for agents rather than as a better chat interface [2][4].</p>
 <p>Second, tool use became a first-class platform primitive. OpenAI described its March 2025 agent-building release as a set of blocks for useful and reliable agents: the Responses API, built-in tools such as web search, file search, and computer use, an Agents SDK for orchestration, and observability for tracing execution [4]. These are not just convenience features. They are the runtime parts that let a model inspect, decide, act, and be debugged.</p>
 <p>Third, implementation patterns are becoming less mysterious. Hugging Face's smolagents article describes agency as a spectrum: from LLM output that has no impact on program flow, to routing, to tool calls, to multi-step agents where the model controls iteration and continuation [5]. That spectrum is useful because it breaks the false binary between "no agent" and "fully autonomous agent." Most production systems live somewhere in the middle.</p>
 <p>Fourth, integration standards started to matter. Anthropic introduced the Model Context Protocol in November 2024 as an open standard for connecting AI assistants to data systems such as repositories, business tools, and development environments [6]. Google later announced Agent2Agent, a protocol intended to let agents from different vendors or frameworks communicate, exchange information, coordinate actions, advertise capabilities, manage tasks, and return artifacts [7]. The current A2A docs describe it as an open protocol for agent-to-agent interoperability, now under Linux Foundation governance and complementary to MCP's agent-to-tool role [11].</p>
+<figure style="margin:32px 0 38px;border:1px solid #d8ddd7;border-radius:12px;overflow:hidden;background:#fbfcfa">
+  <img src="/assets/img/agents-101/illustrations/01-why-agents-why-now/why-now-convergence.svg" alt="Four capabilities converge on a practical agent system: capable models, tool-ready runtimes, reusable implementation patterns, and connected systems. A note says this does not replace guardrails, evaluation, or approval." style="display:block;width:100%;height:auto" loading="lazy">
+  <figcaption style="padding:12px 16px 14px;color:#5f6f7a;line-height:1.5">Agents became more feasible as capabilities, runtime tools, patterns, and connections matured together—not because autonomy became safe by default.</figcaption>
+</figure>
 <p>The core conceptual shift is this:</p>
 <pre><code class="language-text">old app = user clicks deterministic controls
 chatbot = user asks, model answers
@@ -252,18 +260,10 @@ agent = model helps choose the next step, using tools and state
 <p>That last line is the source of both the value and the danger. Once a model can choose actions, the engineering problem is no longer just "how good is the answer?" It becomes "what actions can happen, under what permissions, with what evidence, and with what rollback path?"</p>
 <h2 id="level-3-engineering-detail">Level 3: Engineering Detail</h2>
 <p>A production-style agent is better understood as a small distributed system than as a fancy prompt.</p>
-<pre><code class="language-text">client or trigger
-  -&gt; task intake and policy checks
-  -&gt; agent runtime
-     -&gt; model call
-     -&gt; context planner
-     -&gt; tool broker
-     -&gt; state store
-     -&gt; trace/log/event stream
-     -&gt; eval and guardrail hooks
-  -&gt; human approval or final action
-  -&gt; artifact, ticket, PR, message, report, or database update
-</code></pre>
+<figure style="margin:32px 0 38px;border:1px solid #d8ddd7;border-radius:12px;overflow:hidden;background:#fbfcfa">
+  <img src="/assets/img/agents-101/illustrations/01-why-agents-why-now/agent-system-boundaries.svg" alt="A task enters an agent runtime containing a model and context selection. The runtime calls controlled tools, which can cause an external effect. A policy and approval gate governs that effect, while state, traces, evaluations, guardrails, and recovery signals feed evidence back to the runtime." style="display:block;width:100%;height:auto" loading="lazy">
+  <figcaption style="padding:12px 16px 14px;color:#5f6f7a;line-height:1.5">A production agent is a controlled system: model-directed work passes through tool boundaries, policy, and evidence before any external effect.</figcaption>
+</figure>
 <p>The model is only one component. The engineering work is deciding which tools exist, how their schemas are shaped, how much context is loaded, where state lives, when actions require approval, which traces are recorded, and how the system knows it is done.</p>
 <h3 id="the-runtime-loop">The runtime loop</h3>
 <p>A minimal agent loop looks like this:</p>
@@ -472,6 +472,7 @@ return final_answer_or_artifact(state)
 <p>OpenAI's agent platform work emphasizes APIs, built-in tools, orchestration, and observability, including the Responses API, web search, file search, computer use, an Agents SDK, and tracing support [4].</p>
 <p>Anthropic's guidance emphasizes simple composable patterns, the workflow-vs-agent distinction, and careful design of the "agent-computer interface" [2]. Its Model Context Protocol addresses another practical bottleneck: connecting AI systems to the data and tools where work actually happens [6].</p>
 <p>Google's agent material emphasizes agents as goal-oriented systems with reasoning, acting, observing, planning, collaboration, and memory, and its A2A announcement points to a world where agents need capability discovery, task management, collaboration messages, artifacts, and long-running task updates across vendors and frameworks [1][7]. The maintained A2A protocol docs make the complementary split sharper: MCP connects agents to tools and context, while A2A connects agents to other agents [11].</p>
+<p>Standards make those connections easier; they do not make an agent correct, permitted, or safe. Permissions, validation, evaluation, and task ownership remain application-level design responsibilities.</p>
 <p>Hugging Face's smolagents work is interesting because it keeps the abstraction small and exposes the mechanics: tools, model, multi-step loop, and code-based actions for cases where programmatic composition is a better action language than JSON [5].</p>
 <p>So "why now" has two answers. The capability answer is that models, tools, and orchestration have become good enough to make agents useful. The engineering answer is that the surrounding system - protocols, observability, evaluation, guardrails, deployment patterns, and governance - is finally becoming part of the default conversation.</p>
 <h2 id="practical-takeaways">Practical Takeaways</h2>
@@ -513,31 +514,31 @@ return final_answer_or_artifact(state)
   
 
   <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/world-models-series/">The World Models Series</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/leworldmodel-a-compact-latent-world-model-and-where-it-breaks/">LeWorldModel: A Compact Latent World Model—and Where It Breaks</a>
+  </li>
+
+  
+
+  <li class="my-2">
     <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/reinforcement-learning-and-abstract-world-models/">Reinforcement Learning and Abstract World Models</a>
   </li>
 
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/agent-skills-ai-ml-research-scientists/">Agent Skills for AI/ML Research Scientists</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/agent-skills-ai-ml-research-scientists/">My Codex Skills as a Research Scientist</a>
   </li>
 
   
 
   <li class="my-2">
     <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/ai-agents-series/">The AI Agents Series</a>
-  </li>
-
-  
-
-  <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/ai-agents-self-improving-agents/">AI Agents Series | Self Improving Agents - Foundation and Advances</a>
-  </li>
-
-  
-
-  <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/ai-agents-101-14-standards-and-ecosystem/">AI Agents 101 | 14. Standards and Ecosystem</a>
   </li>
 
 </div>
@@ -575,7 +576,7 @@ return final_answer_or_artifact(state)
 
   <!-- Load Common JS -->
   <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
-  <script defer src="/assets/js/common.js?acdb9690d7641b2f8d40529018c71a01"></script>
+  <script defer src="/assets/js/common.js?70e5fea0186cc5650ed1f92c8c71c0e2"></script>
   <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
 
     

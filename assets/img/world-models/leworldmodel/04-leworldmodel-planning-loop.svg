@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="svgTitle svgDesc">
+  <title id="svgTitle">LeWorldModel latent planning loop</title>
+  <desc id="svgDesc">A current latent and a goal latent enter an action-sequence search. The search proposes three candidate sequences, which a fixed predictor rolls forward to three terminal latent predictions. Each prediction is compared with the goal latent. The sequence with the best predicted goal match is selected, only its first action is executed, and the next observation starts another planning round.</desc>
+  <defs>
+    <style>
+      .title { fill:#172033; font:700 31px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+      .subtitle { fill:#52606d; font:400 17px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+      .label { fill:#47606c; font:800 13px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; letter-spacing:1.1px; }
+      .node-title { fill:#172033; font:700 20px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+      .node-copy { fill:#52606d; font:400 14px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+      .math { fill:#172033; font:700 21px Georgia,"Times New Roman",serif; }
+      .small { fill:#47606c; font:700 13px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+      .note { fill:#694f1b; font:600 15px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+      .solid { fill:none; stroke:#285e61; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; marker-end:url(#arrowSolid); }
+      .candidate { fill:none; stroke:#5d7280; stroke-width:2.8; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:8 7; marker-end:url(#arrowCandidate); }
+      .choice { fill:none; stroke:#c88414; stroke-width:3.5; stroke-linecap:round; stroke-linejoin:round; marker-end:url(#arrowChoice); }
+      .goalref { fill:none; stroke:#c88414; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:8 7; }
+      .replan { fill:none; stroke:#577eaa; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:9 7; marker-end:url(#arrowReplan); }
+      .join { fill:none; stroke:#285e61; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; }
+    </style>
+    <marker id="arrowSolid" markerWidth="11" markerHeight="11" refX="11" refY="5.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0 L11 5.5 L0 11 Z" fill="#285e61"/></marker>
+    <marker id="arrowCandidate" markerWidth="11" markerHeight="11" refX="11" refY="5.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0 L11 5.5 L0 11 Z" fill="#5d7280"/></marker>
+    <marker id="arrowChoice" markerWidth="11" markerHeight="11" refX="11" refY="5.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0 L11 5.5 L0 11 Z" fill="#c88414"/></marker>
+    <marker id="arrowReplan" markerWidth="11" markerHeight="11" refX="11" refY="5.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0 L11 5.5 L0 11 Z" fill="#577eaa"/></marker>
+  </defs>
+
+  <g id="background"><rect width="1600" height="900" fill="#fcfbf7"/></g>
+  <g id="heading">
+    <text x="60" y="68" class="title">Planning searches action sequences; the model does not choose on its own</text>
+    <text x="60" y="101" class="subtitle">After training, LeWM fixes the encoder and predictor, scores imagined terminal latents against a goal, and replans after acting.</text>
+  </g>
+
+  <g id="current-latent">
+    <rect x="70" y="230" width="220" height="112" rx="18" fill="#e8f6f4" stroke="#258277" stroke-width="2.5"/>
+    <text x="94" y="260" class="label">FROM CURRENT IMAGE</text>
+    <text x="94" y="292" class="node-title">current latent</text>
+    <text x="94" y="322" class="math">zₜ</text>
+  </g>
+  <g id="goal-latent">
+    <rect x="70" y="500" width="220" height="112" rx="18" fill="#e7effa" stroke="#577eaa" stroke-width="2.5"/>
+    <text x="94" y="530" class="label">FROM GOAL IMAGE</text>
+    <text x="94" y="562" class="node-title">goal latent</text>
+    <text x="94" y="592" class="math">z_g</text>
+  </g>
+
+  <g id="action-search">
+    <rect x="370" y="322" width="255" height="152" rx="18" fill="#eff5f5" stroke="#285e61" stroke-width="2.5"/>
+    <text x="497" y="354" class="label" text-anchor="middle">PLANNER</text>
+    <text x="497" y="390" class="node-title" text-anchor="middle">action-sequence</text>
+    <text x="497" y="416" class="node-title" text-anchor="middle">search</text>
+    <text x="497" y="449" class="node-copy" text-anchor="middle">for example, CEM</text>
+  </g>
+
+  <g id="candidate-actions">
+    <rect x="690" y="164" width="250" height="104" rx="16" fill="#f4f7f8" stroke="#5d7280" stroke-width="2"/>
+    <text x="714" y="194" class="label">CANDIDATE A</text><text x="714" y="228" class="node-title">aᴀₜ:ₜ₊ₕ₋₁</text>
+    <rect x="690" y="336" width="250" height="104" rx="16" fill="#fff8e6" stroke="#c88414" stroke-width="3.5"/>
+    <text x="714" y="366" class="label">CANDIDATE B · SELECTED</text><text x="714" y="400" class="node-title">aᴮₜ:ₜ₊ₕ₋₁</text>
+    <rect x="690" y="508" width="250" height="104" rx="16" fill="#f4f7f8" stroke="#5d7280" stroke-width="2"/>
+    <text x="714" y="538" class="label">CANDIDATE C</text><text x="714" y="572" class="node-title">aᶜₜ:ₜ₊ₕ₋₁</text>
+  </g>
+
+  <g id="fixed-predictor">
+    <rect x="1015" y="305" width="225" height="155" rx="18" fill="#edf6ee" stroke="#5b9771" stroke-width="2.8"/>
+    <text x="1127" y="338" class="label" text-anchor="middle">FROZEN AFTER TRAINING</text>
+    <text x="1127" y="376" class="node-title" text-anchor="middle">predictor fψ</text>
+    <text x="1127" y="404" class="node-copy" text-anchor="middle">roll out each candidate</text>
+    <text x="1127" y="430" class="node-copy" text-anchor="middle">from current latent</text>
+  </g>
+
+  <g id="terminal-latents">
+    <rect x="1310" y="164" width="210" height="104" rx="52" fill="#e8f6f4" stroke="#258277" stroke-width="2.5"/>
+    <text x="1415" y="196" class="label" text-anchor="middle">TERMINAL A</text><text x="1415" y="232" class="math" text-anchor="middle">ẑᴬₜ₊ₕ</text>
+    <rect x="1310" y="336" width="210" height="104" rx="52" fill="#fff8e6" stroke="#c88414" stroke-width="3.5"/>
+    <text x="1415" y="368" class="label" text-anchor="middle">TERMINAL B</text><text x="1415" y="404" class="math" text-anchor="middle">ẑᴮₜ₊ₕ</text>
+    <rect x="1310" y="508" width="210" height="104" rx="52" fill="#e8f6f4" stroke="#258277" stroke-width="2.5"/>
+    <text x="1415" y="540" class="label" text-anchor="middle">TERMINAL C</text><text x="1415" y="576" class="math" text-anchor="middle">ẑᶜₜ₊ₕ</text>
+  </g>
+
+  <g id="goal-score">
+    <rect x="1275" y="680" width="275" height="112" rx="18" fill="#fff8e6" stroke="#c88414" stroke-width="3.5"/>
+    <text x="1412" y="711" class="label" text-anchor="middle">GOAL COST</text>
+    <text x="1412" y="745" class="node-title" text-anchor="middle">distance to z_g</text>
+    <text x="1412" y="773" class="node-copy" text-anchor="middle">B has the best predicted match</text>
+  </g>
+  <g id="execute-replan">
+    <rect x="740" y="690" width="350" height="102" rx="18" fill="#edf4ef" stroke="#4b7a5b" stroke-width="2.8"/>
+    <text x="915" y="721" class="label" text-anchor="middle">CONTROL LOOP</text>
+    <text x="915" y="756" class="node-title" text-anchor="middle">execute B’s first action</text>
+    <text x="915" y="780" class="node-copy" text-anchor="middle">observe again, then replan</text>
+  </g>
+
+  <g id="connectors">
+    <path class="solid" d="M290 286 H330 V370 H370"/>
+    <path class="candidate" d="M625 370 H655 V216 H690"/>
+    <path class="candidate" d="M625 398 H690"/>
+    <path class="candidate" d="M625 426 H655 V560 H690"/>
+    <path class="solid" d="M290 286 H970 V350 H1015"/>
+    <path class="candidate" d="M940 216 H980 V330 H1015"/>
+    <path class="candidate" d="M940 388 H1015"/>
+    <path class="candidate" d="M940 560 H980 V435 H1015"/>
+    <path class="solid" d="M1240 350 H1270 V216 H1310"/>
+    <path class="solid" d="M1240 382 H1310"/>
+    <path class="solid" d="M1240 415 H1270 V560 H1310"/>
+    <path class="join" d="M1520 216 H1560 V650"/>
+    <path class="join" d="M1520 388 H1560 V650"/>
+    <path class="join" d="M1520 560 H1560 V650"/>
+    <path class="solid" d="M1560 650 H1412 V680"/>
+    <path class="goalref" d="M290 556 V650 H1180 V736 H1275"/>
+    <path class="choice" d="M1275 736 H1090"/>
+    <path class="replan" d="M740 741 H650 V670 H340 V342 H290"/>
+  </g>
+  <g id="connector-labels">
+    <text x="304" y="268" class="small">state</text>
+    <text x="752" y="145" class="small">propose</text>
+    <text x="955" y="300" class="small">action + state</text>
+    <text x="1280" y="642" class="small">compare</text>
+    <text x="575" y="541" class="small">goal reference</text>
+    <text x="410" y="656" class="small">new observation → encode</text>
+  </g>
+  <g id="note"><rect x="70" y="720" width="540" height="74" rx="13" fill="#fff7df" stroke="#d4ad52" stroke-width="1.5"/><text x="95" y="750" class="note">The model supplies imagined consequences.</text><text x="95" y="777" class="note">The planner supplies the search and goal cost.</text></g>
+</svg>

@@ -10,6 +10,12 @@ $(document).ready(function() {
   });
   $('a').removeClass('waves-effect waves-light');
 
+  // Hide the floating post TOC when a post has no headings to link to.
+  const floatingToc = document.getElementById('floating-toc');
+  if (floatingToc && !floatingToc.querySelector('#toc a')) {
+    floatingToc.hidden = true;
+  }
+
   // bootstrap-toc
   if($('#toc-sidebar').length){
     var navSelector = "#toc-sidebar";
@@ -46,4 +52,3 @@ $(document).ready(function() {
     }
   });
 });
-

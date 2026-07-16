@@ -211,9 +211,12 @@
 
   <article class="post-content">
     
-    <div id="table-of-contents">
-      
-      <ul id="toc" class="section-nav">
+    <aside id="floating-toc" class="floating-toc" aria-label="Table of contents">
+      <details>
+        <summary><i class="fas fa-list" aria-hidden="true"></i><span>On this page</span></summary>
+        <div class="floating-toc__content">
+          
+          <ul id="toc" class="section-nav">
 <li class="toc-entry toc-h1">
 <a href="#reinforcement-learning-and-abstract-world-models">Reinforcement Learning and Abstract World Models</a>
 <ul>
@@ -253,23 +256,24 @@
 </ul>
 </li>
 </ul>
-      
-    </div>
-    <hr>
+          
+        </div>
+      </details>
+    </aside>
     
     <div id="markdown-content">
       <div class="rl-world-models-note">
-  <h1>Reinforcement Learning and Abstract World Models</h1>
+  <h1 id="reinforcement-learning-and-abstract-world-models">Reinforcement Learning and Abstract World Models</h1>
   <p class="subtitle">A consolidated mathematical note covering reinforcement learning, Bellman equations, world models, abstract latent-space world models, JEPA-style prediction, and reward hacking.</p>
 
   <div class="card">
-    <h2 style="margin-top:0">Reading flow</h2>
+    <h2 id="reading-flow" style="margin-top:0">Reading flow</h2>
     <p>This note moves from ordinary reinforcement learning to learned world models and then to abstract world models. The sequence matters: first we define the real environment as an MDP, then we show how value functions reason about long-term return, then we replace parts of the environment with learned predictors, and finally we move prediction into a structured latent space.</p>
     <p>The main conceptual turn is that a world model is not only a function that predicts the next observation. In the abstract-world-model view, the useful state of the world may be a compressed representation containing position, velocity, constraints, symmetries, rewards, and other task-relevant variables. The equations below are therefore a pipeline: observe \(s\), encode it into \(z\), predict how \(z\) changes, estimate reward or utility, and choose actions by planning through those imagined futures.</p>
   </div>
 
   <section id="rl">
-    <h2>1. Reinforcement Learning as an MDP</h2>
+    <h2 id="1-reinforcement-learning-as-an-mdp">1. Reinforcement Learning as an MDP</h2>
 
     <div class="card definition">
       <strong>Definition.</strong> Reinforcement learning studies how an agent should choose actions through interaction with an environment in order to maximize expected cumulative reward.
@@ -340,7 +344,7 @@
   </section>
 
   <section id="bellman">
-    <h2>2. Bellman Equations</h2>
+    <h2 id="2-bellman-equations">2. Bellman Equations</h2>
 
     <div class="card definition">
       <strong>Definition.</strong> Bellman equations express the value of a state or state-action pair recursively as immediate reward plus discounted future value.
@@ -348,7 +352,7 @@
 
     <p>Bellman equations are the bridge between the global objective \(J(\pi)\) and step-by-step decision making. Instead of evaluating an entire infinite trajectory at once, they say: estimate what happens now, then add the value of the state you land in. This recursive structure is the backbone of dynamic programming, temporal-difference learning, Q-learning, actor-critic methods, and many planning algorithms.</p>
 
-    <h3>State-value function</h3>
+    <h3 id="state-value-function">State-value function</h3>
 
     \[
     V^{\pi}(s) =
@@ -374,7 +378,7 @@
 
     <p>This equation expands \(V^\pi(s)\) by averaging over two sources of uncertainty. First, \(\sum_a \pi(a \mid s)\) averages over the policy's possible actions. Second, \(\sum_{s'} P(s' \mid s,a)\) averages over the environment's possible next states. Inside the brackets, \(R(s,a,s')\) is the immediate payoff and \(\gamma V^\pi(s')\) is the discounted value of continuing from the next state.</p>
 
-    <h3>Action-value function</h3>
+    <h3 id="action-value-function">Action-value function</h3>
 
     \[
     Q^{\pi}(s,a) =
@@ -400,7 +404,7 @@
 
     <p>The first action is fixed here, so there is no outer sum over actions at state \(s\). After the environment moves to \(s'\), the policy resumes, and \(\sum_{a'} \pi(a' \mid s')Q^\pi(s',a')\) averages over the next action choices.</p>
 
-    <h3>Optimal Bellman equations</h3>
+    <h3 id="optimal-bellman-equations">Optimal Bellman equations</h3>
 
     \[
     V^*(s) = \max_{\pi} V^{\pi}(s)
@@ -445,7 +449,7 @@
   </section>
 
   <section id="world-models">
-    <h2>3. World Models</h2>
+    <h2 id="3-world-models">3. World Models</h2>
 
     <div class="card definition">
       <strong>Definition.</strong> A world model is a learned model of how the environment evolves. It approximates environment dynamics and often rewards, allowing the agent to predict, simulate, plan, or train using imagined trajectories.
@@ -539,7 +543,7 @@
   </section>
 
   <section id="abstract-world-models">
-    <h2>4. Abstract World Models</h2>
+    <h2 id="4-abstract-world-models">4. Abstract World Models</h2>
 
     <div class="card definition">
       <strong>Precise definition.</strong> An abstract world model is a structured latent dynamical system that compresses observed states into a lower-dimensional latent space, learns dynamics and reward/objective functions in that space, and uses geometric, topological, physical, causal, or symmetry priors to support prediction, simulation, planning, and optimization.
@@ -616,7 +620,7 @@
 
     <p>where \(\mathcal{G}\) denotes structural priors such as geometry, topology, group symmetries, invariances, equivariances, physical constraints, or causal structure. These priors are the difference between arbitrary compression and useful abstraction: they tell the model which transformations should preserve meaning and which changes should alter the predicted future.</p>
 
-    <h3>Latent transition and reward prediction</h3>
+    <h3 id="latent-transition-and-reward-prediction">Latent transition and reward prediction</h3>
 
     <p>The operational flow has three steps: encode the current observation, advance the latent state using the action, and estimate the reward or utility of that latent transition.</p>
 
@@ -690,7 +694,7 @@
 
     <p>This combined objective makes the design tradeoffs explicit. \(\mathcal{L}_{pred}\) teaches dynamics, \(\mathcal{L}_{reward}\) teaches scoring, \(\mathcal{L}_{geom}\) enforces structure such as smoothness or symmetry, and \(\mathcal{L}_{collapse}\) prevents the encoder from mapping many distinct observations to the same uninformative latent point.</p>
 
-    <h3>Geometric priors: invariance and equivariance</h3>
+    <h3 id="geometric-priors-invariance-and-equivariance">Geometric priors: invariance and equivariance</h3>
 
     <p>Geometric priors express what should remain stable when the world is transformed. They help the model generalize from fewer examples because it does not have to relearn the same situation under every rotation, translation, viewpoint, or scale.</p>
 
@@ -740,7 +744,7 @@
 
     <p>This penalty encourages the learned function to commute with the transformation: transform first and then predict, or predict first and then transform, and the results should agree.</p>
 
-    <h3>Interpretation of the latent space</h3>
+    <h3 id="interpretation-of-the-latent-space">Interpretation of the latent space</h3>
 
     <p>A useful way to read \(\mathcal{Z}\) is through three complementary lenses. The geometry describes the shape of the representation, the variables describe what information lives there, and the activities describe what the agent does there.</p>
 
@@ -769,7 +773,7 @@
   </section>
 
   <section id="jepa">
-    <h2>5. JEPA-style Latent Prediction</h2>
+    <h2 id="5-jepa-style-latent-prediction">5. JEPA-style Latent Prediction</h2>
 
     <div class="card definition">
       <strong>Definition.</strong> A Joint-Embedding Predictive Architecture predicts target representations in latent space rather than reconstructing raw observations such as pixels.
@@ -813,7 +817,7 @@
   </section>
 
   <section id="reward-hacking">
-    <h2>6. Reward Hacking</h2>
+    <h2 id="6-reward-hacking">6. Reward Hacking</h2>
 
     <div class="card definition">
       <strong>Definition.</strong> Reward hacking occurs when an agent achieves high specified reward while failing to achieve the designer's true intended objective.
@@ -879,7 +883,7 @@
 
     <p>The equation is short because the problem is conceptual rather than notational. If the reward is not the goal, optimizing the reward more effectively can amplify the mismatch.</p>
 
-    <h3>Reward hacking in learned world models</h3>
+    <h3 id="reward-hacking-in-learned-world-models">Reward hacking in learned world models</h3>
 
     <p>In a learned world model, the problem can arise from an inaccurate reward model, transition model, or both:</p>
 
@@ -921,7 +925,7 @@
 
     <p>The mismatch now has two layers: the policy is optimizing a learned reward inside learned dynamics, but deployment is judged by real dynamics and intended utility.</p>
 
-    <h3>Reward hacking in latent abstract world models</h3>
+    <h3 id="reward-hacking-in-latent-abstract-world-models">Reward hacking in latent abstract world models</h3>
 
     <p>In an abstract world model, the agent may exploit the learned latent reward model:</p>
 
@@ -970,7 +974,7 @@
   </section>
 
   <section id="comparison">
-    <h2>7. Comparison and Unifying View</h2>
+    <h2 id="7-comparison-and-unifying-view">7. Comparison and Unifying View</h2>
 
     <p>The concepts above can be read as successive layers. Reinforcement learning defines the decision problem. Bellman equations define how long-term value decomposes over time. World models learn a simulator for the decision problem. Abstract world models move that simulator into a structured latent space. JEPA-style prediction is one way to train such latent spaces. Reward hacking is the warning that none of these layers guarantee alignment by themselves.</p>
 
@@ -1016,7 +1020,7 @@
       </tbody>
     </table>
 
-    <h3>Unified mathematical picture</h3>
+    <h3 id="unified-mathematical-picture">Unified mathematical picture</h3>
 
     <p>The full agent can be seen as combining representation, prediction, reward estimation, and policy optimization:</p>
 
@@ -1109,7 +1113,19 @@
   
 
   <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/agent-skills-ai-ml-research-scientists/">Agent Skills for AI/ML Research Scientists</a>
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/world-models-series/">The World Models Series</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/leworldmodel-a-compact-latent-world-model-and-where-it-breaks/">LeWorldModel: A Compact Latent World Model—and Where It Breaks</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/agent-skills-ai-ml-research-scientists/">My Codex Skills as a Research Scientist</a>
   </li>
 
   
@@ -1122,18 +1138,6 @@
 
   <li class="my-2">
     <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/ai-agents-self-improving-agents/">AI Agents Series | Self Improving Agents - Foundation and Advances</a>
-  </li>
-
-  
-
-  <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/ai-agents-101-14-standards-and-ecosystem/">AI Agents 101 | 14. Standards and Ecosystem</a>
-  </li>
-
-  
-
-  <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/ai-agents-101-13-coding-agents-as-a-case-study/">AI Agents 101 | 13. Coding Agents as a Case Study</a>
   </li>
 
 </div>
@@ -1171,7 +1175,7 @@
 
   <!-- Load Common JS -->
   <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
-  <script defer src="/assets/js/common.js?acdb9690d7641b2f8d40529018c71a01"></script>
+  <script defer src="/assets/js/common.js?70e5fea0186cc5650ed1f92c8c71c0e2"></script>
   <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
 
     
