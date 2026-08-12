@@ -1,4 +1,197 @@
-<!DOCTYPE html> <html lang="en"> <head> <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title>Dreambooth and Anti-Dreambooth | Tuan-Anh Bui</title> <meta name="author" content="Tuan-Anh Bui"> <meta name="description" content="Protecting personal images from Dreambooth attack"> <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website"> <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous"> <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css"> <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous"> <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous"> <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700%7CRoboto+Slab:100,300,400,500,700%7CMaterial+Icons"> <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light"> <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;"> <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e"> <link rel="canonical" href="https://tuananhbui89.github.io/blog/2023/anti-dreambooth/"> <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark"> <script src="/assets/js/theme.js?96d6b3e1c3604aca8b6134c7afdd5db6"></script> <script src="/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script> </head> <body class="fixed-top-nav "> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/"><span class="font-weight-bold">Tuan-Anh </span>Bui</a> <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse text-right" id="navbarNav"> <ul class="navbar-nav ml-auto flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/">about</a> </li> <li class="nav-item active"> <a class="nav-link" href="/blog/">blog<span class="sr-only">(current)</span></a> </li> <li class="nav-item "> <a class="nav-link" href="/publications/">publications</a> </li> <li class="nav-item "> <a class="nav-link" href="/projects/">projects</a> </li> <li class="nav-item "> <a class="nav-link" href="/teaching/"></a> </li> <li class="toggle-container"> <button id="light-toggle" title="Change theme"> <i class="fas fa-moon"></i> <i class="fas fa-sun"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="container mt-5"> <style type="text/css"> </style> <div class="post"> <header class="post-header"> <h1 class="post-title">Dreambooth and Anti-Dreambooth</h1> <p class="post-meta">August 5, 2023</p> <p class="post-tags"> <a href="/blog/2023"> <i class="fas fa-calendar fa-sm"></i> 2023 </a>   ·   <a href="/blog/tag/reading"> <i class="fas fa-hashtag fa-sm"></i> reading</a>   <a href="/blog/tag/tml"> <i class="fas fa-hashtag fa-sm"></i> tml</a>   <a href="/blog/tag/diffusion"> <i class="fas fa-hashtag fa-sm"></i> diffusion</a>   <a href="/blog/tag/genai"> <i class="fas fa-hashtag fa-sm"></i> genai</a>   </p> </header> <article class="post-content"> <aside id="floating-toc" class="floating-toc" aria-label="Table of contents"> <details> <summary><i class="fas fa-list" aria-hidden="true"></i><span>On this page</span></summary> <div class="floating-toc__content"> <ul id="toc" class="section-nav"> <li class="toc-entry toc-h2"><a href="#about-the-paper">About the paper</a></li> <li class="toc-entry toc-h2"> <a href="#how-to-implement">How to implement</a> <ul> <li class="toc-entry toc-h3"><a href="#how-to-preprocess-the-data">How to preprocess the data</a></li> <li class="toc-entry toc-h3"><a href="#how-to-load-lora-weights">How to load LoRA weights</a></li> <li class="toc-entry toc-h3"><a href="#setting-for-dreambooth-withlora">Setting for Dreambooth withLoRA</a></li> <li class="toc-entry toc-h3"><a href="#difference-in-prompting-process-between-textual-inversion-and-dreambooth-projects">Difference in prompting process between “Textual Inversion” and “Dreambooth” projects</a></li> <li class="toc-entry toc-h3"><a href="#pgd-attack">PGD attack</a></li> </ul> </li> </ul> </div> </details> </aside> <div id="markdown-content"> <h2 id="about-the-paper">About the paper</h2> <ul> <li>Published at ICCV 2023</li> <li>Affiliation: VinAI Research</li> <li>Main idea: Generate invisible perturbation to add to the personal images before uploading to the internet. To prevent adversary from using the uploaded images to train a personalized model (specific to Dreambooth method) to generate harmful images (e.g., nude images) of the person.</li> </ul> <p>I gave a talk about “Exploring Controllability of Conditioned Diffusion Models” covering the “Dreambooth” paper at the event of Postdoc-NeT-AI program. <a href="https://www.dropbox.com/s/299og2x7gx64nko/2023-June-Postdoc-AINet_v3.pdf?dl=0" rel="external nofollow noopener" target="_blank">Slide can be found here</a>. Therefore, in this blog post, I would like to focus on the implementation side of the paper.</p> <h2 id="how-to-implement">How to implement</h2> <h3 id="how-to-preprocess-the-data">How to preprocess the data</h3> <p>It is worth noting that in adversarial examples, the perturbation is added to the post-processed image while in this project the perturbation should be added to the pre-processed image and robust to the pre-processing step. However, in the current implementation, the perturbation is added to the post-processed image.</p> <ul> <li>It first call the <code class="language-plaintext highlighter-rouge">load_data</code> function that read PIL image and apply some transformations (e.g., resize, crop, normalize) and return a tensor (shape = [N, H, W, C], channel last format???). Ref: <a href="https://github.com/VinAIResearch/Anti-DreamBooth/blob/0d1ed6ff4766a876e65753f8c00fad8bf48f37c6/attacks/aspl.py#L360" rel="external nofollow noopener" target="_blank">Line 360</a> </li> </ul> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">center_crop</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="p">.</span><span class="n">Tensor</span><span class="p">:</span>
+<!DOCTYPE html>
+<html lang="en">
+
+  
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    
+    
+
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Dreambooth and Anti-Dreambooth | Tuan-Anh  Bui</title>
+    <meta name="author" content="Tuan-Anh  Bui">
+    <meta name="description" content="Protecting personal images from Dreambooth attack">
+    <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
+
+
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+    
+    <link defer rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700%7CRoboto+Slab:100,300,400,500,700%7CMaterial+Icons">
+
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
+
+    
+
+    
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
+    
+    <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+    <link rel="canonical" href="https://tuananhbui89.github.io/blog/2023/anti-dreambooth/">
+
+    
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark">
+    <script src="/assets/js/theme.js?96d6b3e1c3604aca8b6134c7afdd5db6"></script>
+    <script src="/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script>
+    
+
+  </head>
+
+  
+  <body class="fixed-top-nav ">
+
+    
+    <header>
+
+      
+      <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top">
+        <div class="container">
+          <a class="navbar-brand title font-weight-lighter" href="/"><span class="font-weight-bold">Tuan-Anh </span>Bui</a>
+          
+          <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar top-bar"></span>
+            <span class="icon-bar middle-bar"></span>
+            <span class="icon-bar bottom-bar"></span>
+          </button>
+
+          <div class="collapse navbar-collapse text-right" id="navbarNav">
+            <ul class="navbar-nav ml-auto flex-nowrap">
+
+              
+              <li class="nav-item ">
+                <a class="nav-link" href="/">about</a>
+              </li>
+              
+              
+              <li class="nav-item active">
+                <a class="nav-link" href="/blog/">blog<span class="sr-only">(current)</span></a>
+              </li>
+
+              
+              <li class="nav-item ">
+                <a class="nav-link" href="/publications/">publications</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/projects/">projects</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/teaching/"></a>
+              </li>
+
+              
+              <li class="toggle-container">
+                <button id="light-toggle" title="Change theme">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      
+      <progress id="progress" value="0">
+        <div class="progress-container">
+          <span class="progress-bar"></span>
+        </div>
+      </progress>
+    </header>
+
+
+    
+    <div class="container mt-5">
+      
+        
+
+<style type="text/css">
+  
+</style>
+
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Dreambooth and Anti-Dreambooth</h1>
+    <p class="post-meta">August 5, 2023</p>
+    <p class="post-tags">
+      <a href="/blog/2023"> <i class="fas fa-calendar fa-sm"></i> 2023 </a>
+        ·  
+        <a href="/blog/tag/reading">
+          <i class="fas fa-hashtag fa-sm"></i> reading</a>  
+          <a href="/blog/tag/tml">
+          <i class="fas fa-hashtag fa-sm"></i> tml</a>  
+          <a href="/blog/tag/diffusion">
+          <i class="fas fa-hashtag fa-sm"></i> diffusion</a>  
+          <a href="/blog/tag/genai">
+          <i class="fas fa-hashtag fa-sm"></i> genai</a>  
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    
+    <aside id="floating-toc" class="floating-toc" aria-label="Table of contents">
+      <details>
+        <summary><i class="fas fa-list" aria-hidden="true"></i><span>On this page</span></summary>
+        <div class="floating-toc__content">
+          
+          <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h2"><a href="#about-the-paper">About the paper</a></li>
+<li class="toc-entry toc-h2">
+<a href="#how-to-implement">How to implement</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#how-to-preprocess-the-data">How to preprocess the data</a></li>
+<li class="toc-entry toc-h3"><a href="#how-to-load-lora-weights">How to load LoRA weights</a></li>
+<li class="toc-entry toc-h3"><a href="#setting-for-dreambooth-withlora">Setting for Dreambooth withLoRA</a></li>
+<li class="toc-entry toc-h3"><a href="#difference-in-prompting-process-between-textual-inversion-and-dreambooth-projects">Difference in prompting process between “Textual Inversion” and “Dreambooth” projects</a></li>
+<li class="toc-entry toc-h3"><a href="#pgd-attack">PGD attack</a></li>
+</ul>
+</li>
+</ul>
+          
+        </div>
+      </details>
+    </aside>
+    
+    <div id="markdown-content">
+      <h2 id="about-the-paper">About the paper</h2>
+
+<ul>
+  <li>Published at ICCV 2023</li>
+  <li>Affiliation: VinAI Research</li>
+  <li>Main idea: Generate invisible perturbation to add to the personal images before uploading to the internet. To prevent adversary from using the uploaded images to train a personalized model (specific to Dreambooth method) to generate harmful images (e.g., nude images) of the person.</li>
+</ul>
+
+<p>I gave a talk about “Exploring Controllability of Conditioned Diffusion Models” covering the “Dreambooth” paper at the event of Postdoc-NeT-AI program. <a href="https://www.dropbox.com/s/299og2x7gx64nko/2023-June-Postdoc-AINet_v3.pdf?dl=0" rel="external nofollow noopener" target="_blank">Slide can be found here</a>. Therefore, in this blog post, I would like to focus on the implementation side of the paper.</p>
+
+<h2 id="how-to-implement">How to implement</h2>
+
+<h3 id="how-to-preprocess-the-data">How to preprocess the data</h3>
+
+<p>It is worth noting that in adversarial examples, the perturbation is added to the post-processed image while in this project the perturbation should be added to the pre-processed image and robust to the pre-processing step. However, in the current implementation, the perturbation is added to the post-processed image.</p>
+
+<ul>
+  <li>It first call the <code class="language-plaintext highlighter-rouge">load_data</code> function that read PIL image and apply some transformations (e.g., resize, crop, normalize) and return a tensor (shape = [N, H, W, C], channel last format???). Ref: <a href="https://github.com/VinAIResearch/Anti-DreamBooth/blob/0d1ed6ff4766a876e65753f8c00fad8bf48f37c6/attacks/aspl.py#L360" rel="external nofollow noopener" target="_blank">Line 360</a>
+</li>
+</ul>
+
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">center_crop</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="p">.</span><span class="n">Tensor</span><span class="p">:</span>
     <span class="n">image_transforms</span> <span class="o">=</span> <span class="n">transforms</span><span class="p">.</span><span class="n">Compose</span><span class="p">(</span>
         <span class="p">[</span>
             <span class="n">transforms</span><span class="p">.</span><span class="n">Resize</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="n">transforms</span><span class="p">.</span><span class="n">InterpolationMode</span><span class="p">.</span><span class="n">BILINEAR</span><span class="p">),</span>
@@ -11,7 +204,14 @@
     <span class="n">images</span> <span class="o">=</span> <span class="p">[</span><span class="n">image_transforms</span><span class="p">(</span><span class="n">Image</span><span class="p">.</span><span class="nb">open</span><span class="p">(</span><span class="n">i</span><span class="p">).</span><span class="n">convert</span><span class="p">(</span><span class="s">"RGB"</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">data_dir</span><span class="p">).</span><span class="n">iterdir</span><span class="p">())]</span>
     <span class="n">images</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">stack</span><span class="p">(</span><span class="n">images</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">images</span>
-</code></pre></div></div> <ul> <li>It then call the <code class="language-plaintext highlighter-rouge">DreamBoothDatasetFromTensor</code> class with input argument <code class="language-plaintext highlighter-rouge">instance_images_tensor</code> which is the tensor returned from the <code class="language-plaintext highlighter-rouge">load_data</code> function. In this class, when <code class="language-plaintext highlighter-rouge">__getitem__</code> function is called, the data will be associated with a corresponding textual prompt. There is <strong>no transformation applied</strong> in this class. Ref: <a href="https://github.com/VinAIResearch/Anti-DreamBooth/blob/0d1ed6ff4766a876e65753f8c00fad8bf48f37c6/attacks/aspl.py#L31" rel="external nofollow noopener" target="_blank">Line 31</a> </li> </ul> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+</code></pre></div></div>
+
+<ul>
+  <li>It then call the <code class="language-plaintext highlighter-rouge">DreamBoothDatasetFromTensor</code> class with input argument <code class="language-plaintext highlighter-rouge">instance_images_tensor</code> which is the tensor returned from the <code class="language-plaintext highlighter-rouge">load_data</code> function. In this class, when <code class="language-plaintext highlighter-rouge">__getitem__</code> function is called, the data will be associated with a corresponding textual prompt. There is <strong>no transformation applied</strong> in this class. Ref: <a href="https://github.com/VinAIResearch/Anti-DreamBooth/blob/0d1ed6ff4766a876e65753f8c00fad8bf48f37c6/attacks/aspl.py#L31" rel="external nofollow noopener" target="_blank">Line 31</a>
+</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
         <span class="n">example</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">instance_image</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">instance_images_tensor</span><span class="p">[</span><span class="n">index</span> <span class="o">%</span> <span class="bp">self</span><span class="p">.</span><span class="n">num_instance_images</span><span class="p">]</span>
         <span class="n">example</span><span class="p">[</span><span class="s">"instance_images"</span><span class="p">]</span> <span class="o">=</span> <span class="n">instance_image</span>
@@ -37,14 +237,29 @@
             <span class="p">).</span><span class="n">input_ids</span>
 
         <span class="k">return</span> <span class="n">example</span>
-</code></pre></div></div> <p>The overall pipeline is as the snippet code below:</p> <ul> <li>Load the data from the <code class="language-plaintext highlighter-rouge">instance_data_dir_for_adversarial</code> directory. Output is a tensor of shape [N, H, W, C]? should it be [N, C, H, W]? <div class="language-plaintext highlighter-rouge"> <div class="highlight"><pre class="highlight"><code>  # Load data from the instance data directory 
+</code></pre></div></div>
+
+<p>The overall pipeline is as the snippet code below:</p>
+
+<ul>
+  <li>Load the data from the <code class="language-plaintext highlighter-rouge">instance_data_dir_for_adversarial</code> directory. Output is a tensor of shape [N, H, W, C]? should it be [N, C, H, W]?
+    <div class="language-plaintext highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code>  # Load data from the instance data directory 
   # output: tensor of shape [N, H, W, C]? should it be [N, C, H, W]?
   perturbed_data = load_data(
       args.instance_data_dir_for_adversarial,
       size=args.resolution,
       center_crop=args.center_crop,
   )
-</code></pre></div> </div> </li> <li>Clone the current model to avoid the in-place operation</li> <li>Train the model with the clean data</li> <li>Learn the perturbation with the updated model f_sur. Input is the entire data tensor not just a batch! Output is the new perturbed data tensor.</li> <li>Restore the model and train with perturbed data</li> </ul> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">f</span> <span class="o">=</span> <span class="p">[</span><span class="n">unet</span><span class="p">,</span> <span class="n">text_encoder</span><span class="p">]</span>
+</code></pre></div>    </div>
+  </li>
+  <li>Clone the current model to avoid the in-place operation</li>
+  <li>Train the model with the clean data</li>
+  <li>Learn the perturbation with the updated model f_sur. Input is the entire data tensor not just a batch! Output is the new perturbed data tensor.</li>
+  <li>Restore the model and train with perturbed data</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">f</span> <span class="o">=</span> <span class="p">[</span><span class="n">unet</span><span class="p">,</span> <span class="n">text_encoder</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">max_train_steps</span><span class="p">):</span>
         <span class="c1"># Clone the current model to avoid the in-place operation
 </span>        <span class="n">f_sur</span> <span class="o">=</span> <span class="n">copy</span><span class="p">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
@@ -80,7 +295,11 @@
             <span class="n">perturbed_data</span><span class="p">,</span>
             <span class="n">args</span><span class="p">.</span><span class="n">max_f_train_steps</span><span class="p">,</span>
         <span class="p">)</span>
-</code></pre></div></div> <p>Inside the <code class="language-plaintext highlighter-rouge">train_one_epoch</code> function, the <code class="language-plaintext highlighter-rouge">DreamBoothDatasetFromTensor</code> class is called to associate the data (i.e., perturbed data) with the corresponding textual prompt.</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">train_dataset</span> <span class="o">=</span> <span class="n">DreamBoothDatasetFromTensor</span><span class="p">(</span>
+</code></pre></div></div>
+
+<p>Inside the <code class="language-plaintext highlighter-rouge">train_one_epoch</code> function, the <code class="language-plaintext highlighter-rouge">DreamBoothDatasetFromTensor</code> class is called to associate the data (i.e., perturbed data) with the corresponding textual prompt.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">train_dataset</span> <span class="o">=</span> <span class="n">DreamBoothDatasetFromTensor</span><span class="p">(</span>
         <span class="n">data_tensor</span><span class="p">,</span>
         <span class="n">args</span><span class="p">.</span><span class="n">instance_prompt</span><span class="p">,</span>
         <span class="n">tokenizer</span><span class="p">,</span>
@@ -89,7 +308,27 @@
         <span class="n">args</span><span class="p">.</span><span class="n">resolution</span><span class="p">,</span>
         <span class="n">args</span><span class="p">.</span><span class="n">center_crop</span><span class="p">,</span>
     <span class="p">)</span>
-</code></pre></div></div> <p>At the end, the perturbed image is saved in the <code class="language-plaintext highlighter-rouge">instance_data_dir_for_adversarial</code> directory.</p> <p>Some notes:</p> <ul> <li>In the original Dreambooth project, the data is loaded from the <code class="language-plaintext highlighter-rouge">DataLoader</code> class and is shuffled. However, in the Anti-Dreambooth project, the data is loaded from the <code class="language-plaintext highlighter-rouge">DreamBoothDatasetFromTensor</code> class and is not shuffled. Ref: <a href="https://github.com/huggingface/diffusers/blob/ea1fcc28a458739771f5112767f70d281511d2a2/examples/dreambooth/train_dreambooth.py#L1061" rel="external nofollow noopener" target="_blank">Line 1061</a> </li> <li>The reason for the above modification is that the author want to change on the fly the perturbed data after each epoch, which will be harder in control if using <code class="language-plaintext highlighter-rouge">DataLoader</code> class.</li> </ul> <h3 id="how-to-load-lora-weights">How to load LoRA weights</h3> <p><strong>Update on 06/04/2025</strong>:</p> <p>I followed the instructions in the Dreambooth repo to train and load the LoRA weights. However, I encountered an error that outputs are just similar to the original images/generated by the original model (indicating that the LoRA weights are not loaded correctly).</p> <p>Here is the code snippet</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+</code></pre></div></div>
+
+<p>At the end, the perturbed image is saved in the <code class="language-plaintext highlighter-rouge">instance_data_dir_for_adversarial</code> directory.</p>
+
+<p>Some notes:</p>
+
+<ul>
+  <li>In the original Dreambooth project, the data is loaded from the <code class="language-plaintext highlighter-rouge">DataLoader</code> class and is shuffled. However, in the Anti-Dreambooth project, the data is loaded from the <code class="language-plaintext highlighter-rouge">DreamBoothDatasetFromTensor</code> class and is not shuffled. Ref: <a href="https://github.com/huggingface/diffusers/blob/ea1fcc28a458739771f5112767f70d281511d2a2/examples/dreambooth/train_dreambooth.py#L1061" rel="external nofollow noopener" target="_blank">Line 1061</a>
+</li>
+  <li>The reason for the above modification is that the author want to change on the fly the perturbed data after each epoch, which will be harder in control if using <code class="language-plaintext highlighter-rouge">DataLoader</code> class.</li>
+</ul>
+
+<h3 id="how-to-load-lora-weights">How to load LoRA weights</h3>
+
+<p><strong>Update on 06/04/2025</strong>:</p>
+
+<p>I followed the instructions in the Dreambooth repo to train and load the LoRA weights. However, I encountered an error that outputs are just similar to the original images/generated by the original model (indicating that the LoRA weights are not loaded correctly).</p>
+
+<p>Here is the code snippet</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
     <span class="n">args</span> <span class="o">=</span> <span class="n">parse_args</span><span class="p">()</span>
     <span class="k">print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
@@ -119,12 +358,43 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">image</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span><span class="n">prompt</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">concept_name</span><span class="p">),</span> <span class="n">num_inference_steps</span><span class="o">=</span><span class="n">args</span><span class="p">.</span><span class="n">num_inference_steps</span><span class="p">,</span> <span class="n">guidance_scale</span><span class="o">=</span><span class="n">args</span><span class="p">.</span><span class="n">guidance_scale</span><span class="p">,</span> <span class="n">generator</span><span class="o">=</span><span class="n">generator</span><span class="p">).</span><span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">image</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="sa">f</span><span class="s">"</span><span class="si">{</span><span class="n">output_dir</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s">_</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s">.png"</span><span class="p">)</span>
-</code></pre></div></div> <p>The warning message when running the code:</p> <div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>No LoRA keys associated to CLIPTextModel found with the prefix='text_encoder'. This is safe to ignore if LoRA state dict didn't originally have any CLIPTextModel related params.
-</code></pre></div></div> <p><strong>LoRA Adapters and Component Identifiers</strong>:</p> <p>The <code class="language-plaintext highlighter-rouge">Identifier</code> are just strings (keys) that are used to specify the position in the model to apply the LoRA weights. It helps to tell the model where to apply/inject the LoRA weights.</p> <p><strong>Fix the error</strong>: The error is due to the <code class="language-plaintext highlighter-rouge">LoRA weights</code> are not loaded correctly. Fix it by loading the LoRA weights to the specific <code class="language-plaintext highlighter-rouge">unet</code> component.</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="c1"># load lora weights but specific to the unet - that works
+</code></pre></div></div>
+
+<p>The warning message when running the code:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>No LoRA keys associated to CLIPTextModel found with the prefix='text_encoder'. This is safe to ignore if LoRA state dict didn't originally have any CLIPTextModel related params.
+</code></pre></div></div>
+
+<p><strong>LoRA Adapters and Component Identifiers</strong>:</p>
+
+<p>The <code class="language-plaintext highlighter-rouge">Identifier</code> are just strings (keys) that are used to specify the position in the model to apply the LoRA weights. It helps to tell the model where to apply/inject the LoRA weights.</p>
+
+<p><strong>Fix the error</strong>: The error is due to the <code class="language-plaintext highlighter-rouge">LoRA weights</code> are not loaded correctly. Fix it by loading the LoRA weights to the specific <code class="language-plaintext highlighter-rouge">unet</code> component.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="c1"># load lora weights but specific to the unet - that works
 </span>    <span class="n">pipeline</span><span class="p">.</span><span class="n">unet</span><span class="p">.</span><span class="n">load_lora_adapter</span><span class="p">(</span><span class="n">args</span><span class="p">.</span><span class="n">lora_path</span><span class="p">,</span> <span class="n">weight_name</span><span class="o">=</span><span class="s">"pytorch_lora_weights.safetensors"</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s">"unet"</span><span class="p">)</span>
-</code></pre></div></div> <h3 id="setting-for-dreambooth-withlora">Setting for Dreambooth withLoRA</h3> <p>Reference:</p> <ul> <li>Tips and Discussions by cloneofsimo <a href="https://github.com/cloneofsimo/lora?tab=readme-ov-file#tips-and-discussions" rel="external nofollow noopener" target="_blank">https://github.com/cloneofsimo/lora?tab=readme-ov-file#tips-and-discussions</a> </li> <li>In-depth analysis from brian6091! <a href="https://github.com/cloneofsimo/lora/discussions/37" rel="external nofollow noopener" target="_blank">https://github.com/cloneofsimo/lora/discussions/37</a> </li> </ul> <div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">-</span> initial learning_rate=1e-4 for the UNET, and decreased with a linear schedule
+</code></pre></div></div>
+
+<h3 id="setting-for-dreambooth-withlora">Setting for Dreambooth withLoRA</h3>
+
+<p>Reference:</p>
+
+<ul>
+  <li>Tips and Discussions by cloneofsimo <a href="https://github.com/cloneofsimo/lora?tab=readme-ov-file#tips-and-discussions" rel="external nofollow noopener" target="_blank">https://github.com/cloneofsimo/lora?tab=readme-ov-file#tips-and-discussions</a>
+</li>
+  <li>In-depth analysis from brian6091! <a href="https://github.com/cloneofsimo/lora/discussions/37" rel="external nofollow noopener" target="_blank">https://github.com/cloneofsimo/lora/discussions/37</a>
+</li>
+</ul>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">-</span> initial learning_rate=1e-4 for the UNET, and decreased with a linear schedule
 <span class="p">-</span> initial learning_rate=5e-5 for the text encoder, and decreased with a linear schedule
-</code></pre></div></div> <h3 id="difference-in-prompting-process-between-textual-inversion-and-dreambooth-projects">Difference in prompting process between “Textual Inversion” and “Dreambooth” projects</h3> <p>In Dreambooth, there is an argument <code class="language-plaintext highlighter-rouge">instance_prompt</code> which is used as a neural prompt to associate with the given images. For example, the default value is <code class="language-plaintext highlighter-rouge">a photo of sks dog</code>, where <code class="language-plaintext highlighter-rouge">sks</code> is the unique identifier to specify the learned concept. The <code class="language-plaintext highlighter-rouge">instance_prompt</code> is then tokenized by the tokenizer and the token ids are used to specify the position in the embedding matrix to be updated (corresponding to the specific token).</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="c1"># In the DreamBoothDataset class
+</code></pre></div></div>
+
+<h3 id="difference-in-prompting-process-between-textual-inversion-and-dreambooth-projects">Difference in prompting process between “Textual Inversion” and “Dreambooth” projects</h3>
+
+<p>In Dreambooth, there is an argument <code class="language-plaintext highlighter-rouge">instance_prompt</code> which is used as a neural prompt to associate with the given images. For example, the default value is <code class="language-plaintext highlighter-rouge">a photo of sks dog</code>, where <code class="language-plaintext highlighter-rouge">sks</code> is the unique identifier to specify the learned concept. The <code class="language-plaintext highlighter-rouge">instance_prompt</code> is then tokenized by the tokenizer and the token ids are used to specify the position in the embedding matrix to be updated (corresponding to the specific token).</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="c1"># In the DreamBoothDataset class
 </span>    <span class="k">if</span> <span class="bp">self</span><span class="p">.</span><span class="n">encoder_hidden_states</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">example</span><span class="p">[</span><span class="s">"instance_prompt_ids"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">encoder_hidden_states</span>
     <span class="k">else</span><span class="p">:</span>
@@ -133,7 +403,36 @@
         <span class="p">)</span>
         <span class="n">example</span><span class="p">[</span><span class="s">"instance_prompt_ids"</span><span class="p">]</span> <span class="o">=</span> <span class="n">text_inputs</span><span class="p">.</span><span class="n">input_ids</span>
         <span class="n">example</span><span class="p">[</span><span class="s">"instance_attention_mask"</span><span class="p">]</span> <span class="o">=</span> <span class="n">text_inputs</span><span class="p">.</span><span class="n">attention_mask</span>
-</code></pre></div></div> <p>So the difference between the two projects is that:</p> <ul> <li>In Dreambooth, only one neural prompt is used, while in Textual Inversion, there is a list of neural prompts</li> <li>In Textual Inversion, it is important to specify the <code class="language-plaintext highlighter-rouge">placeholder_token</code> to reuse the same token in other prompts, while in Dreambooth, the identifier (i.e., <code class="language-plaintext highlighter-rouge">sks</code>) is used to specify the position in the embedding matrix to be updated (corresponding to the specific token). In inferencce, a prompt with the same identifier will be used to generate images, for example, <code class="language-plaintext highlighter-rouge">a photo of sks dog in the beach</code>. So to me, the whole prompt in Dreambooth is like a placeholder token in Textual Inversion. However, in this case, how the output looks like if we use a prompt that not contains the whole <code class="language-plaintext highlighter-rouge">instance_prompt</code>? For example, <code class="language-plaintext highlighter-rouge">a sks dog walking on the beach</code>?</li> </ul> <p><strong>Update on 05/04/2025</strong>:</p> <ul> <li>It seems that the <code class="language-plaintext highlighter-rouge">instance_prompt</code> should be in the inference prompt to generate the image with the desired concept, e.g., if the <code class="language-plaintext highlighter-rouge">instance_prompt</code> is <code class="language-plaintext highlighter-rouge">a photo of sks dog</code>, then the inference prompt should be <code class="language-plaintext highlighter-rouge">a photo of sks dog in the beach</code>. Otherwise, the output will not show the desired/learned concept.</li> </ul> <h3 id="pgd-attack">PGD attack</h3> <p>The PGD attack is implemented in the <code class="language-plaintext highlighter-rouge">pgd_attack</code> function. The input is the perturbed data tensor and the output is the new perturbed data tensor.</p> <p>Some notes:</p> <ul> <li>weight type is <code class="language-plaintext highlighter-rouge">torch.bfloat16</code> instead of <code class="language-plaintext highlighter-rouge">torch.float32</code> </li> <li>unet, vae, text_encoder are in <code class="language-plaintext highlighter-rouge">train</code> mode (because they were set in <code class="language-plaintext highlighter-rouge">train_one_epoch</code> function)</li> <li>Learn for the entire data tensor not just a batch</li> <li>The whole process is quite similar to the standard PGD attack without the random initialization.</li> </ul> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="c1"># Create a copy of data and set requires_grad to True
+</code></pre></div></div>
+
+<p>So the difference between the two projects is that:</p>
+
+<ul>
+  <li>In Dreambooth, only one neural prompt is used, while in Textual Inversion, there is a list of neural prompts</li>
+  <li>In Textual Inversion, it is important to specify the <code class="language-plaintext highlighter-rouge">placeholder_token</code> to reuse the same token in other prompts, while in Dreambooth, the identifier (i.e., <code class="language-plaintext highlighter-rouge">sks</code>) is used to specify the position in the embedding matrix to be updated (corresponding to the specific token). In inferencce, a prompt with the same identifier will be used to generate images, for example, <code class="language-plaintext highlighter-rouge">a photo of sks dog in the beach</code>. So to me, the whole prompt in Dreambooth is like a placeholder token in Textual Inversion. However, in this case, how the output looks like if we use a prompt that not contains the whole <code class="language-plaintext highlighter-rouge">instance_prompt</code>? For example, <code class="language-plaintext highlighter-rouge">a sks dog walking on the beach</code>?</li>
+</ul>
+
+<p><strong>Update on 05/04/2025</strong>:</p>
+
+<ul>
+  <li>It seems that the <code class="language-plaintext highlighter-rouge">instance_prompt</code> should be in the inference prompt to generate the image with the desired concept, e.g., if the <code class="language-plaintext highlighter-rouge">instance_prompt</code> is <code class="language-plaintext highlighter-rouge">a photo of sks dog</code>, then the inference prompt should be <code class="language-plaintext highlighter-rouge">a photo of sks dog in the beach</code>. Otherwise, the output will not show the desired/learned concept.</li>
+</ul>
+
+<h3 id="pgd-attack">PGD attack</h3>
+
+<p>The PGD attack is implemented in the <code class="language-plaintext highlighter-rouge">pgd_attack</code> function. The input is the perturbed data tensor and the output is the new perturbed data tensor.</p>
+
+<p>Some notes:</p>
+
+<ul>
+  <li>weight type is <code class="language-plaintext highlighter-rouge">torch.bfloat16</code> instead of <code class="language-plaintext highlighter-rouge">torch.float32</code>
+</li>
+  <li>unet, vae, text_encoder are in <code class="language-plaintext highlighter-rouge">train</code> mode (because they were set in <code class="language-plaintext highlighter-rouge">train_one_epoch</code> function)</li>
+  <li>Learn for the entire data tensor not just a batch</li>
+  <li>The whole process is quite similar to the standard PGD attack without the random initialization.</li>
+</ul>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="c1"># Create a copy of data and set requires_grad to True
 </span>    <span class="n">perturbed_images</span> <span class="o">=</span> <span class="n">data_tensor</span><span class="p">.</span><span class="n">detach</span><span class="p">().</span><span class="n">clone</span><span class="p">()</span>
     <span class="n">perturbed_images</span><span class="p">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
 
@@ -208,4 +507,106 @@
         <span class="n">perturbed_images</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">clamp</span><span class="p">(</span><span class="n">original_images</span> <span class="o">+</span> <span class="n">eta</span><span class="p">,</span> <span class="nb">min</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="o">=+</span><span class="mi">1</span><span class="p">).</span><span class="n">detach_</span><span class="p">()</span>
         <span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"PGD loss - step </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s">, loss: </span><span class="si">{</span><span class="n">loss</span><span class="p">.</span><span class="n">detach</span><span class="p">().</span><span class="n">item</span><span class="p">()</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">perturbed_images</span>
-</code></pre></div></div> </div> </article> <br> <hr> <br> <ul class="list-disc pl-8"></ul> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <li class="my-2"> <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/world-models-series/">The World Models Series</a> </li> <li class="my-2"> <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/leworldmodel-a-compact-latent-world-model-and-where-it-breaks/">LeWorldModel: A Compact Latent World Model—and Where It Breaks</a> </li> <li class="my-2"> <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/reinforcement-learning-and-abstract-world-models/">Reinforcement Learning and Abstract World Models</a> </li> <li class="my-2"> <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/agent-skills-ai-ml-research-scientists/">My Codex Skills as a Research Scientist</a> </li> <li class="my-2"> <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/ai-agents-series/">The AI Agents Series</a> </li> </div> </div> <footer class="fixed-bottom"> <div class="container mt-0"> © Copyright 2026 Tuan-Anh Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>. </div> </footer> <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script> <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script> <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script> <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script> <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script> <script defer src="/assets/js/masonry.js" type="text/javascript"></script> <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script> <script defer src="/assets/js/zoom.js"></script> <script defer src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script> <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script> <script defer src="/assets/js/common.js?70e5fea0186cc5650ed1f92c8c71c0e2"></script> <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script> <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script> <script async src="https://badge.dimensions.ai/badge.js"></script> <script type="text/javascript">window.MathJax={tex:{tags:"ams"}};</script> <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script> <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KGSMMS9MS"></script> <script>function gtag(){window.dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","G-7KGSMMS9MS");</script> <script type="text/javascript">function progressBarSetup(){"max"in document.createElement("progress")?(initializeProgressElement(),$(document).on("scroll",function(){progressBar.attr({value:getCurrentScrollPosition()})}),$(window).on("resize",initializeProgressElement)):(resizeProgressBar(),$(document).on("scroll",resizeProgressBar),$(window).on("resize",resizeProgressBar))}function getCurrentScrollPosition(){return $(window).scrollTop()}function initializeProgressElement(){let e=$("#navbar").outerHeight(!0);$("body").css({"padding-top":e}),$("progress-container").css({"padding-top":e}),progressBar.css({top:e}),progressBar.attr({max:getDistanceToScroll(),value:getCurrentScrollPosition()})}function getDistanceToScroll(){return $(document).height()-$(window).height()}function resizeProgressBar(){progressBar.css({width:getWidthPercentage()+"%"})}function getWidthPercentage(){return getCurrentScrollPosition()/getDistanceToScroll()*100}const progressBar=$("#progress");window.onload=function(){setTimeout(progressBarSetup,50)};</script> </body> </html>
+</code></pre></div></div>
+
+    </div>
+  </article>
+
+
+  
+    
+    <br>
+    <hr>
+    <br>
+    <ul class="list-disc pl-8"></ul>
+
+    
+    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
+    <p class="mb-2">Here are some more articles you might like to read next:</p>
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/world-models-series/">The World Models Series</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/leworldmodel-a-compact-latent-world-model-and-where-it-breaks/">LeWorldModel: A Compact Latent World Model—and Where It Breaks</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/reinforcement-learning-and-abstract-world-models/">Reinforcement Learning and Abstract World Models</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/agent-skills-ai-ml-research-scientists/">My Codex Skills as a Research Scientist</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/ai-agents-series/">The AI Agents Series</a>
+  </li>
+
+</div>
+
+      
+    </div>
+
+        
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        © Copyright 2026 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+
+      </div>
+    </footer>
+
+    
+    
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
+    
+  
+  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/zoom.js"></script>
+
+  
+  <script defer src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+
+  
+  <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
+  <script defer src="/assets/js/common.js?70e5fea0186cc5650ed1f92c8c71c0e2"></script>
+  <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    
+  <script type="text/javascript">window.MathJax={tex:{tags:"ams"}};</script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+
+    
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KGSMMS9MS"></script>
+  <script>function gtag(){window.dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","G-7KGSMMS9MS");</script>
+    
+
+
+<script type="text/javascript">function progressBarSetup(){"max"in document.createElement("progress")?(initializeProgressElement(),$(document).on("scroll",function(){progressBar.attr({value:getCurrentScrollPosition()})}),$(window).on("resize",initializeProgressElement)):(resizeProgressBar(),$(document).on("scroll",resizeProgressBar),$(window).on("resize",resizeProgressBar))}function getCurrentScrollPosition(){return $(window).scrollTop()}function initializeProgressElement(){let e=$("#navbar").outerHeight(!0);$("body").css({"padding-top":e}),$("progress-container").css({"padding-top":e}),progressBar.css({top:e}),progressBar.attr({max:getDistanceToScroll(),value:getCurrentScrollPosition()})}function getDistanceToScroll(){return $(document).height()-$(window).height()}function resizeProgressBar(){progressBar.css({width:getWidthPercentage()+"%"})}function getWidthPercentage(){return getCurrentScrollPosition()/getDistanceToScroll()*100}const progressBar=$("#progress");window.onload=function(){setTimeout(progressBarSetup,50)};</script>
+
+    
+  </body>
+</html>
