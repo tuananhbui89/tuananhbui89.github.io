@@ -1,5 +1,166 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml"/><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en"/><updated>2026-08-13T09:30:23+10:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
-</subtitle><entry><title type="html">The World Models Series</title><link href="https://tuananhbui89.github.io/blog/2026/world-models-series/" rel="alternate" type="text/html" title="The World Models Series"/><published>2026-07-12T00:00:00+10:00</published><updated>2026-07-12T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/2026/world-models-series</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2026/world-models-series/"><![CDATA[<p>This series collects my learning notes on world models. I am using it to connect several threads that I keep running into: reinforcement learning, learned dynamics, latent representations, JEPA-style prediction, planning, uncertainty, and model editing or unlearning.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://tuananhbui89.github.io/feed.xml" rel="self" type="application/atom+xml"/><link href="https://tuananhbui89.github.io/" rel="alternate" type="text/html" hreflang="en"/><updated>2026-08-13T21:14:41+10:00</updated><id>https://tuananhbui89.github.io/feed.xml</id><title type="html">blank</title><subtitle>Researcher in Generative AI and Trustworthy AI
+</subtitle><entry><title type="html">DoubleMe</title><link href="https://tuananhbui89.github.io/blog/2026/agent-skills-doubleme/" rel="alternate" type="text/html" title="DoubleMe"/><published>2026-08-06T00:00:00+10:00</published><updated>2026-08-06T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/2026/agent-skills-doubleme</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2026/agent-skills-doubleme/"><![CDATA[<h1 id="making-my-ai-double">Making My AI Double</h1>
+
+<p>Motivation of this tool comes from my real pain point when working with Codex, for example, when asking for improve a writing, however, I still keep revising pieces of work because the output often doesn’t reflect my writing preferences and style. Or when working with a complex task, I also often need to ask Codex for more clarification before I feel ready to move to the next step.</p>
+
+<p>I wish Codex could remember the small things that make working together easier: how I like an answer structured, how much explanation I need for a particular task, and when it should ask before making a consequential change. I do not want it to guess a fixed “knowledge boundary” or make a personality judgment from a few turns. But when I explicitly give it relevant context, it should help at a level I can follow and turn a vague request into a clear next step.</p>
+
+<p>This is more than an assistant remembering that I like concise answers. I want continual, user-controlled personalization: a slow, self-correcting working profile that updates small hypotheses when I correct it, becomes less wrong about my preferences over time, and remains easy for me to inspect or erase.</p>
+
+<h2 id="the-idea-a-working-profile">The idea: a working profile</h2>
+
+<p>DoubleMe builds a set of contextual hypotheses rather than a complete story about me. It is a professional working profile, not a personality or capability model: it can represent the format I prefer for a report, the explanation depth I ask for, or when I want an agent to ask first. I can explicitly save relevant professional context, but that is not the same as the system inferring what I am capable of.</p>
+
+<p>Research gives me both a reason to build this and a reason to stay humble. <a href="https://aclanthology.org/2024.acl-long.399/">LaMP</a> demonstrates that retrieving relevant profile items can improve personalized outputs across several language tasks. Yet <a href="https://arxiv.org/abs/2502.09597">PrefEval</a> finds that current models struggle to proactively follow preferences over long, multi-session conversations. And <a href="https://aclanthology.org/2025.acl-long.168/">Balepur et al.</a> point out that choosing or rejecting an answer does not necessarily reveal <em>why</em> a particular person preferred it. I do not want a grand personality profile. I want small, contextual hypotheses that I can inspect, contradict, and replace.</p>
+
+<p>For example, it may eventually hold a statement such as:</p>
+
+<blockquote>
+  <p>For long-form technical blog posts, I prefer the main idea first, descriptive H2 sections and a table of contents, direct links to primary sources for factual claims, and enough background to make the argument understandable.</p>
+</blockquote>
+
+<h2 id="from-an-interaction-to-a-preference">From an interaction to a preference</h2>
+
+<p>The learning process is intentionally slow:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>explicit request / correction / approval
+                ↓
+      privacy-safe observation
+                ↓
+   narrow, contextual hypothesis
+                ↓
+    inspectable working profile
+</code></pre></div></div>
+
+<p>One evidence-bearing independent session creates a <strong>candidate</strong>. Two independent sessions make it <strong>emerging</strong>. Three make it <strong>established</strong>. Repeated turns in the same session count only once, and newer contradictory evidence can replace an older default. A direct instruction such as <code class="language-plaintext highlighter-rouge">DoubleMe: remember I prefer detailed reports</code> or <code class="language-plaintext highlighter-rouge">DoubleMe: correct DM-1234ABCD to ...</code> takes effect immediately.</p>
+
+<p>This one–two–three threshold is a deliberately conservative product policy, not a statistical proof. DoubleMe considers only recent evidence-bearing sessions for each preference dimension, so newer feedback can replace a stale default.</p>
+
+<p>This distinction matters: an assistant’s response is not evidence that the user liked it. At most, the response can be reduced to a few coarse, temporary features—such as whether it was short, used bullet points, contained a table, or led with the outcome. A later explicit correction or approval from the user is what turns that information into evidence.</p>
+
+<h2 id="what-doubleme-does-today">What DoubleMe does today</h2>
+
+<p>The current plugin has a deliberately narrow job: it observes explicit, work-relevant signals, turns them into a local and inspectable profile, and lets me show, correct, pin, forget, pause, or export it.</p>
+
+<p>It stops there. DoubleMe does <strong>not</strong> inject a profile into Codex or Ponytail, rewrite future prompts, change permissions, approve actions, or decide that a hypothesis is true. A future authorized consumer could use an established or pinned preference, but learning a preference is not permission to act on it.</p>
+
+<p>This is the model I want the rest of the post to defend: <strong>observe → form a hypothesis → let the user control it → adapt only with separate authorization.</strong></p>
+
+<figure class="illustration">
+  <img src="/assets/img/doubleme/illustrations/doubleme-observation-boundary.svg" alt="Flow diagram showing explicit feedback becoming canonical preference features, a scoped hypothesis, and a local working profile with controls to show, correct, pin, forget, and pause. These steps sit inside a DoubleMe today boundary. A dashed arrow crosses a separate authorization gate to a muted future consumer labeled not active today, showing that the profile does not automatically change Codex or Ponytail." loading="lazy" class="img-fluid rounded z-depth-1"/>
+  <figcaption>DoubleMe learns a local work profile; any future adaptation must cross a separate authorization boundary.</figcaption>
+</figure>
+
+<h2 id="a-small-form-of-ai-observability">A small form of AI observability</h2>
+
+<p>Agent observability usually means tracing model calls, tools, failures, costs, and outcomes. DoubleMe applies the same instinct to the human-agent boundary: make the preference-learning path visible instead of letting an opaque memory system silently change behavior.</p>
+
+<p>It deliberately observes less than a general trace. The relevant unit is not “everything that happened in this conversation,” but a narrow chain: an explicit request, a privacy-safe description of the response format, and later user feedback. That makes each learned preference explainable, contestable, and removable.</p>
+
+<h2 id="codex-hooks-the-observation-points">Codex Hooks: the observation points</h2>
+
+<p><a href="https://learn.chatgpt.com/docs/hooks">Codex Hooks</a> let deterministic scripts run at defined points in the agent lifecycle. They can be bundled in a plugin, and non-managed hooks must be reviewed and trusted through <code class="language-plaintext highlighter-rouge">/hooks</code> before Codex will run them.</p>
+
+<p>DoubleMe uses two lifecycle events:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Hook</th>
+      <th>What DoubleMe uses it for</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">UserPromptSubmit</code></td>
+      <td>Read the pending user prompt and detect explicit, allow-listed work-preference signals or commands.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Stop</code></td>
+      <td>Reduce the immediately preceding answer to coarse presentation features so a later user correction can be interpreted safely.</td>
+    </tr>
+  </tbody>
+</table>
+
+<figure class="illustration">
+  <img src="/assets/img/doubleme/illustrations/doubleme-hook-evidence-boundary.svg" alt="Diagram with three stages: a user prompt reaches the UserPromptSubmit hook, an assistant response reaches the Stop hook, and Stop creates temporary coarse features such as short, bullets, table, and outcome first. The temporary record is labeled not evidence by itself. A later user correction or explicit approval joins it at an evidence card, which supports a scoped hypothesis." loading="lazy" class="img-fluid rounded z-depth-1"/>
+  <figcaption>The <code>Stop</code> hook summarizes presentation, but only later user feedback can turn that summary into preference evidence.</figcaption>
+</figure>
+
+<p>The current plugin configuration is deliberately small:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"hooks"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"UserPromptSubmit"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+      </span><span class="nl">"hooks"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+        </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"command"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"python3 </span><span class="se">\"</span><span class="s2">${PLUGIN_ROOT}/scripts/doubleme.py</span><span class="se">\"</span><span class="s2"> hook"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"timeout"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="w">
+      </span><span class="p">}]</span><span class="w">
+    </span><span class="p">}],</span><span class="w">
+    </span><span class="nl">"Stop"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+      </span><span class="nl">"hooks"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+        </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"command"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"command"</span><span class="p">:</span><span class="w"> </span><span class="s2">"python3 </span><span class="se">\"</span><span class="s2">${PLUGIN_ROOT}/scripts/doubleme.py</span><span class="se">\"</span><span class="s2"> hook"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"timeout"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="w">
+      </span><span class="p">}]</span><span class="w">
+    </span><span class="p">}]</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">UserPromptSubmit</code> receives the user prompt, while <code class="language-plaintext highlighter-rouge">Stop</code> can receive the latest assistant message. The important nuance is that <code class="language-plaintext highlighter-rouge">Stop</code> is a <strong>turn boundary</strong>, not a reliable signal that a task has been completed. DoubleMe uses it only to summarize the response format; it never lets the agent grade its own work.</p>
+
+<p>The Hooks documentation also warns that <code class="language-plaintext highlighter-rouge">transcript_path</code> is not a stable interface. For that reason, DoubleMe does not read transcripts. It stores canonical feature labels in a local SQLite database, hashes session and turn identifiers, and removes temporary pending-turn data after seven days. Short preference statements that I explicitly save through <code class="language-plaintext highlighter-rouge">remember</code> or <code class="language-plaintext highlighter-rouge">correct</code> become profile items; otherwise, it does not retain ordinary raw prompts, assistant responses, tool traces, or hidden reasoning.</p>
+
+<h2 id="a-concrete-example-ponytail-and-doubleme">A concrete example: Ponytail and DoubleMe</h2>
+
+<p><a href="https://github.com/DietrichGebert/ponytail">Ponytail</a> is a useful contrast. It is a coding-workflow plugin that makes a deliberate preference operational: use the smallest correct solution, prefer existing code and the standard library, and avoid speculative abstractions. Its lifecycle hooks load the chosen mode for a session and keep that mode consistent for subagents.</p>
+
+<p>Imagine that I repeatedly give Codex this instruction:</p>
+
+<blockquote>
+  <p>Use Ponytail. Show code first and keep the explanation concise.</p>
+</blockquote>
+
+<p>Here is what happens in the current DoubleMe design:</p>
+
+<ol>
+  <li>At <code class="language-plaintext highlighter-rouge">UserPromptSubmit</code>, DoubleMe recognizes the explicit, allow-listed signals <code class="language-plaintext highlighter-rouge">code-first</code> and <code class="language-plaintext highlighter-rouge">concise</code>. It does not store the sentence itself.</li>
+  <li>Ponytail independently applies its own minimal-change discipline to the coding task.</li>
+  <li>At <code class="language-plaintext highlighter-rouge">Stop</code>, DoubleMe records only coarse features of the answer—for example, that it was short and began with a code block.</li>
+  <li>On a later turn, I might say: “That was still too long; make it concise next time,” or “This format is exactly what I want.” That explicit feedback is matched with the prior turn’s safe features.</li>
+  <li>After the same preference is supported across three independent sessions, <code class="language-plaintext highlighter-rouge">DoubleMe: show</code> can list an established, scoped preference such as “Prefer concise responses” or “Show code before the implementation explanation.”</li>
+</ol>
+
+<p>Ponytail remains independent today. The example shows how a future authorized consumer could use an established or pinned preference; it is not a current DoubleMe integration.</p>
+
+<h2 id="privacy-and-control-are-product-features">Privacy and control are product features</h2>
+
+<p>The most tempting implementation would be to collect every transcript, embed it, and retrieve “memories” later. I think that is the wrong default for a work-preference profile. It is hard to inspect, easy to overlearn from, and creates a much larger privacy surface.</p>
+
+<p>There is another boundary I want to keep: a preference should shape <em>how</em> an answer is delivered, not what the answer claims is true. Research on personalized LLMs has found that personalization can pull factual answers toward a user’s prior history rather than objective truth. A future consumer of DoubleMe should therefore adapt format and collaboration style while keeping factual claims grounded in evidence, not in my profile (<a href="https://aclanthology.org/2026.findings-acl.395/">Sun et al., 2026</a>).</p>
+
+<p>DoubleMe keeps the profile local and narrow. It supports commands to inspect, remember, correct, pin, forget, purge, export, pause, and resume:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DoubleMe: show
+DoubleMe: remember I prefer detailed reports
+DoubleMe: correct DM-1234ABCD to Prefer concise technical summaries
+DoubleMe: pin DM-1234ABCD
+DoubleMe: forget DM-1234ABCD
+DoubleMe: purge DM-1234ABCD
+DoubleMe: pause
+</code></pre></div></div>
+
+<p>The user can correct the system faster than the system can infer. That is intentional. A profile should be revisable, contextual, and useful—not a permanent story the software tells about its user.</p>
+
+<h2 id="what-i-expect-from-this-project">What I expect from this project</h2>
+
+<p>I am curious what an AI could notice about my working habits after we work together every day. But I do not want it to claim that it knows me better than real colleagues. A colleague sees broader context, consequences, and many things I choose not to say; DoubleMe deliberately keeps a much narrower record. Its value today is not intimacy or automatic adaptation. It is a profile that I can see, correct, pause, or delete.</p>
+
+<p>The immediate goal is to make preference learning observable and falsifiable: if the system has a belief about how I prefer to work, I should be able to see why, disagree with it, and remove it. A future authorized consumer should earn the stronger claim—that it reduces repeated corrections about length, structure, explanation depth, autonomy, tests, and citations—rather than receive it by assumption.</p>
+
+<p>To me, an AI double should not be a clone or a secret personality profile. It should be a transparent collaborator that learns the few work preferences I repeatedly give it—and knows exactly where that understanding ends.</p>]]></content><author><name></name></author><category term="genai"/><category term="tutorial"/><category term="llm"/><category term="agents"/><category term="research"/><summary type="html"><![CDATA[A transparent working profile that learns how I prefer to collaborate with Codex]]></summary></entry><entry><title type="html">The World Models Series</title><link href="https://tuananhbui89.github.io/blog/2026/world-models-series/" rel="alternate" type="text/html" title="The World Models Series"/><published>2026-07-12T00:00:00+10:00</published><updated>2026-07-12T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/2026/world-models-series</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2026/world-models-series/"><![CDATA[<p>This series collects my learning notes on world models. I am using it to connect several threads that I keep running into: reinforcement learning, learned dynamics, latent representations, JEPA-style prediction, planning, uncertainty, and model editing or unlearning.</p>
 
 <p>The main question I want to understand is simple to say but hard to answer:</p>
 
@@ -2629,239 +2790,4 @@ Options:
 <p>[6] &quot;AI Risk Management Framework.&quot; National Institute of Standards and Technology. <a href="https://www.nist.gov/itl/ai-risk-management-framework" target="_blank" rel="noopener noreferrer">https://www.nist.gov/itl/ai-risk-management-framework</a>. Published/updated: 2026-04-07. Accessed: 2026-07-06. Used for: AI lifecycle governance across design, development, use, and evaluation.</p>
 <p>[7] &quot;The Hitchhiker's Guide to Agentic AI: From Foundations to Systems.&quot; Haggai Roitman. Local source: agent-101/The Hitchhiker’s Guide to Agentic AI/book.tex. Published/updated: 2026. Accessed: 2026-07-06. Used for: production gap framing, lifecycle, testing, deployment, observability, failure logging, prompt versioning, and iteration.</p>
 <p>[8] &quot;Building effective agents.&quot; Anthropic. <a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener noreferrer">https://www.anthropic.com/engineering/building-effective-agents</a>. Published/updated: 2024-12-19. Accessed: 2026-07-06. Used for: start-simple guidance, inspectable interfaces, and autonomy tradeoffs.</p>
-</div>]]></content><author><name></name></author><category term="genai"/><category term="llm"/><category term="tutorial"/><category term="reading"/><category term="agents"/><summary type="html"><![CDATA[Production Agent Architecture]]></summary></entry><entry><title type="html">AI Agents 101 | 10. Evaluation and Observability</title><link href="https://tuananhbui89.github.io/blog/2026/ai-agents-101-10-evaluation-and-observability/" rel="alternate" type="text/html" title="AI Agents 101 | 10. Evaluation and Observability"/><published>2026-06-01T00:00:00+10:00</published><updated>2026-06-01T00:00:00+10:00</updated><id>https://tuananhbui89.github.io/blog/2026/ai-agents-101-10-evaluation-and-observability</id><content type="html" xml:base="https://tuananhbui89.github.io/blog/2026/ai-agents-101-10-evaluation-and-observability/"><![CDATA[<div class="agentic-101-post">
-<h1 id="evaluation-and-observability">Evaluation and Observability</h1>
-<p>You cannot improve an agent you cannot see.</p>
-<p>Agents are harder to evaluate than single-turn chat because they act over time. They call tools, change state, branch, recover, fail partially, ask for approval, and sometimes reach the right answer for the wrong reason. A final response alone is not enough evidence.</p>
-<p>Evaluation asks whether the agent did the right thing. Observability shows what happened.</p>
-<figure style="margin:32px 0 38px;border:1px solid #d8ddd7;border-radius:12px;overflow:hidden;background:#fbfcfa">
-  <img src="/assets/img/agents-101/illustrations/10-evaluation-and-observability/evaluation-evidence-loop.svg" alt="A run trace records model, tool, guardrail, and handoff activity. It feeds evaluation of output, trajectory, and external outcome, whose findings improve datasets, graders, and the next agent version." style="display:block;width:100%;height:auto" loading="lazy"/>
-  <figcaption style="padding:12px 16px 14px;color:#5f6f7a;line-height:1.5">Trace evidence makes output, trajectory, and outcome evaluation possible.</figcaption>
-</figure>
-<h2 id="level-1-fundamentals">Level 1: Fundamentals</h2>
-<p>OpenAI's agent-evals docs describe the core pieces: traces capture model, tool, guardrail, and handoff activity; graders score outputs or traces; datasets and eval runs make measurement repeatable [1].</p>
-<p>Anthropic's agent-evals guidance makes the same point from another angle: agent evaluations involve tasks, trials, graders, transcripts or traces, outcomes, evaluation harnesses, and suites [3]. It also emphasizes that agent mistakes can propagate because agents use tools across many turns and modify state [3].</p>
-<p>Observability is the runtime side. OpenAI's integration docs describe tracing as an end-to-end record of runs before deeper evaluation [2]. OpenTelemetry defines observability tooling around telemetry data such as traces, metrics, and logs, with vendor-neutral APIs and conventions [5].</p>
-<p>The Hitchhiker guide treats evaluation environments and observability as part of the agent system, not a late testing activity [7].</p>
-<h2 id="level-2-concepts">Level 2: Concepts</h2>
-<p>Agent evaluation has three main targets:</p>
-<table>
-<thead>
-<tr>
-  <th>Target</th>
-  <th>Question</th>
-  <th>Example</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-  <td>Output</td>
-  <td>Did the final answer satisfy the user?</td>
-  <td>correct answer, clear citations, safe wording</td>
-</tr>
-<tr>
-  <td>Trajectory</td>
-  <td>Did the agent take acceptable steps?</td>
-  <td>used allowed tools, did not loop, asked approval</td>
-</tr>
-<tr>
-  <td>Outcome</td>
-  <td>Did the external state become correct?</td>
-  <td>tests pass, ticket updated, booking exists</td>
-</tr>
-</tbody>
-</table>
-<p>Single-turn evals usually focus on output. Agent evals need all three.</p>
-<h3 id="traces">Traces</h3>
-<p>A trace is the story of a run in machine-readable form:</p>
-<ul>
-<li>user input</li>
-<li>model calls</li>
-<li>tool calls</li>
-<li>tool observations</li>
-<li>guardrail decisions</li>
-<li>handoffs</li>
-<li>approvals</li>
-<li>retries</li>
-<li>errors</li>
-<li>final output</li>
-<li>timing and token usage</li>
-</ul>
-<p>Without traces, debugging becomes anecdotal. With traces, failures can be grouped: bad retrieval, wrong tool choice, missing permission, schema failure, hallucinated citation, overlong loop, or weak final synthesis.</p>
-<h3 id="graders">Graders</h3>
-<p>Anthropic divides graders into code-based, model-based, and human categories [3]. Each has a role.</p>
-<table>
-<thead>
-<tr>
-  <th>Grader Type</th>
-  <th>Strength</th>
-  <th>Weakness</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-  <td>Code-based</td>
-  <td>fast, objective, reproducible</td>
-  <td>limited nuance</td>
-</tr>
-<tr>
-  <td>Model-based</td>
-  <td>flexible, scalable for qualitative checks</td>
-  <td>non-deterministic, needs calibration</td>
-</tr>
-<tr>
-  <td>Human</td>
-  <td>expert judgment</td>
-  <td>slow and expensive</td>
-</tr>
-</tbody>
-</table>
-<p>The best suites often combine them. A coding-agent task might run tests, run static analysis, check tool trajectory, and use a rubric for maintainability.</p>
-<h3 id="capability-vs-regression">Capability vs Regression</h3>
-<p>Capability evals ask: can the agent solve hard tasks it currently struggles with?</p>
-<p>Regression evals ask: did we break behavior that used to work?</p>
-<p>Both matter. Capability suites help climb the hill. Regression suites protect the base camp.</p>
-<h3 id="red-teaming">Red Teaming</h3>
-<p>OpenAI's red-teaming guidance frames adversarial testing as a complement to evals, especially for misuse, failure modes, and high-risk interactions [4]. For agents, red teaming should include:</p>
-<ul>
-<li>prompt injection through retrieved documents</li>
-<li>malicious tool outputs</li>
-<li>unsafe plugin behavior</li>
-<li>privacy boundary tests</li>
-<li>approval bypass attempts</li>
-<li>loop/cost abuse</li>
-<li>misleading citations</li>
-</ul>
-<h2 id="level-3-engineering-detail">Level 3: Engineering Detail</h2>
-<p>Start by defining the event schema.</p>
-<h3 id="trace-event">Trace Event</h3>
-<pre><code class="language-json">{
-  &quot;trace_id&quot;: &quot;tr_123&quot;,
-  &quot;run_id&quot;: &quot;run_456&quot;,
-  &quot;span_id&quot;: &quot;span_789&quot;,
-  &quot;event_type&quot;: &quot;tool_call&quot;,
-  &quot;timestamp&quot;: &quot;2026-07-06T10:00:00Z&quot;,
-  &quot;agent&quot;: &quot;support_agent&quot;,
-  &quot;model&quot;: &quot;gpt-5.4&quot;,
-  &quot;tool&quot;: &quot;lookup_order&quot;,
-  &quot;arguments&quot;: {&quot;order_id&quot;: &quot;ord_123&quot;},
-  &quot;permission_decision&quot;: &quot;allowed&quot;,
-  &quot;duration_ms&quot;: 842,
-  &quot;status&quot;: &quot;success&quot;,
-  &quot;tokens&quot;: {&quot;input&quot;: 1800, &quot;output&quot;: 250}
-}
-</code></pre>
-<p>Every event does not need every field, but every run should be reconstructable.</p>
-<h3 id="eval-task">Eval Task</h3>
-<pre><code class="language-yaml">task:
-  id: &quot;refund_policy_edge_case_017&quot;
-  input: &quot;Can I get a refund for a subscription renewed 33 days ago?&quot;
-  environment:
-    customer_id: &quot;cust_123&quot;
-    policy_version: &quot;refund_policy_2026_04&quot;
-  expected:
-    outcome: &quot;escalation_created&quot;
-    must_cite:
-      - &quot;refund_policy_2026_04#late-renewals&quot;
-    must_not:
-      - &quot;promise_refund&quot;
-  graders:
-    - type: &quot;tool_call&quot;
-      required: [&quot;search_policy&quot;, &quot;create_escalation&quot;]
-    - type: &quot;output_schema&quot;
-      schema: &quot;support_answer_v2&quot;
-    - type: &quot;model_rubric&quot;
-      rubric: &quot;clear_boundary_no_false_promise&quot;
-</code></pre>
-<p>The task encodes success as behavior and outcome, not just wording.</p>
-<h3 id="metrics">Metrics</h3>
-<p>Track metrics at multiple levels:</p>
-<table>
-<thead>
-<tr>
-  <th>Metric</th>
-  <th>Why It Matters</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-  <td>task success rate</td>
-  <td>primary capability signal</td>
-</tr>
-<tr>
-  <td>regression pass rate</td>
-  <td>release safety</td>
-</tr>
-<tr>
-  <td>tool error rate</td>
-  <td>integration health</td>
-</tr>
-<tr>
-  <td>approval rate</td>
-  <td>risk and UX load</td>
-</tr>
-<tr>
-  <td>citation support rate</td>
-  <td>grounding quality</td>
-</tr>
-<tr>
-  <td>turns per task</td>
-  <td>loop efficiency</td>
-</tr>
-<tr>
-  <td>latency</td>
-  <td>user experience</td>
-</tr>
-<tr>
-  <td>cost per successful task</td>
-  <td>business viability</td>
-</tr>
-<tr>
-  <td>escalation rate</td>
-  <td>boundary clarity</td>
-</tr>
-<tr>
-  <td>user correction rate</td>
-  <td>field quality signal</td>
-</tr>
-</tbody>
-</table>
-<p>Cost per successful task is often more useful than raw cost. A cheap failed run is not cheap.</p>
-<h3 id="failure-taxonomy">Failure Taxonomy</h3>
-<p>Label failures consistently:</p>
-<pre><code class="language-text">retrieval_missing
-retrieval_wrong_source
-permission_denied
-tool_schema_error
-tool_runtime_error
-unsafe_tool_request
-bad_plan
-loop_limit_exceeded
-approval_missing
-unsupported_claim
-wrong_final_answer
-ui_confusion
-</code></pre>
-<p>This taxonomy turns eval failures into roadmap data.</p>
-<h2 id="current-landscape">Current Landscape</h2>
-<p>Agent evaluation is becoming trace-centered.</p>
-<p>OpenAI's agent-eval docs explicitly connect traces, graders, datasets, and eval runs [1]. Anthropic's evals post emphasizes transcripts, outcomes, harnesses, trial variance, and mixed grader types [3]. That is the current best practice: evaluate the run, not just the reply.</p>
-<p>Observability is also becoming less optional. OpenAI exposes tracing around agent runs and MCP-backed integrations [2]. OpenTelemetry provides the broader vendor-neutral vocabulary for traces, metrics, logs, collectors, APIs, and semantic conventions [5].</p>
-<p>Anthropic's broader agent guidance adds a product-engineering constraint: agents should stay simple and inspectable enough that teams can understand how ground-truth observations shaped the run [6].</p>
-<p>Red teaming sits alongside evals. It is the adversarial pressure test for misuse and boundary failure [4].</p>
-<h2 id="practical-takeaways">Practical Takeaways</h2>
-<p>Instrument the agent before scaling it. You need traces, metrics, logs, and artifacts from the beginning.</p>
-<p>Evaluate outputs, trajectories, and outcomes. A good final answer reached by unsafe steps is still a failure.</p>
-<p>Use mixed graders. Code-based checks, model rubrics, and human review answer different questions.</p>
-<p>Keep capability and regression suites separate. One helps you improve; the other keeps you from breaking what works.</p>
-<p>Label failures consistently. A taxonomy turns messy traces into engineering priorities.</p>
-<p>Red-team the full loop. Attack retrieval, tools, memory, approvals, and UI, not only final text.</p>
-<h2 id="references">References</h2>
-<p>[1] &quot;Evals for AI agents.&quot; OpenAI API documentation. <a href="https://developers.openai.com/api/docs/guides/agent-evals" target="_blank" rel="noopener noreferrer">https://developers.openai.com/api/docs/guides/agent-evals</a>. Published/updated: not listed. Accessed: 2026-07-06. Used for: traces, graders, datasets, eval runs, repeatability, and agent-performance measurement.</p>
-<p>[2] &quot;Integrations and observability.&quot; OpenAI API documentation. <a href="https://developers.openai.com/api/docs/guides/agents/integrations-observability" target="_blank" rel="noopener noreferrer">https://developers.openai.com/api/docs/guides/agents/integrations-observability</a>. Published/updated: not listed. Accessed: 2026-07-06. Used for: tracing, MCP-backed agent capabilities, and inspecting runtime behavior.</p>
-<p>[3] &quot;Demystifying evals for AI agents.&quot; Anthropic. <a href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents" target="_blank" rel="noopener noreferrer">https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents</a>. Published/updated: 2026-01-09. Accessed: 2026-07-06. Used for: tasks, trials, graders, transcripts/traces, outcomes, eval harnesses, eval suites, and capability-vs-regression evaluation.</p>
-<p>[4] &quot;Red teaming.&quot; OpenAI API documentation. <a href="https://developers.openai.com/api/docs/guides/red-teaming" target="_blank" rel="noopener noreferrer">https://developers.openai.com/api/docs/guides/red-teaming</a>. Published/updated: not listed. Accessed: 2026-07-06. Used for: adversarial testing, misuse probing, and security-risk evaluation.</p>
-<p>[5] &quot;What is OpenTelemetry?&quot; OpenTelemetry documentation. <a href="https://opentelemetry.io/docs/what-is-opentelemetry/" target="_blank" rel="noopener noreferrer">https://opentelemetry.io/docs/what-is-opentelemetry/</a>. Published/updated: not listed. Accessed: 2026-07-06. Used for: observability framework, traces, metrics, logs, vendor-neutral telemetry, APIs, collectors, and semantic conventions.</p>
-<p>[6] &quot;Building effective agents.&quot; Anthropic. <a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener noreferrer">https://www.anthropic.com/engineering/building-effective-agents</a>. Published/updated: 2024-12-19. Accessed: 2026-07-06. Used for: agent autonomy, ground-truth observations, and the value of simple inspectable designs.</p>
-<p>[7] &quot;The Hitchhiker's Guide to Agentic AI: From Foundations to Systems.&quot; Haggai Roitman. Local source: agent-101/The Hitchhiker’s Guide to Agentic AI/book.tex. Published/updated: 2026. Accessed: 2026-07-06. Used for: evaluation environments, observability, harness design, failure logging, and production iteration.</p>
-</div>]]></content><author><name></name></author><category term="genai"/><category term="llm"/><category term="tutorial"/><category term="reading"/><category term="agents"/><summary type="html"><![CDATA[Evaluation and Observability]]></summary></entry></feed>
+</div>]]></content><author><name></name></author><category term="genai"/><category term="llm"/><category term="tutorial"/><category term="reading"/><category term="agents"/><summary type="html"><![CDATA[Production Agent Architecture]]></summary></entry></feed>
