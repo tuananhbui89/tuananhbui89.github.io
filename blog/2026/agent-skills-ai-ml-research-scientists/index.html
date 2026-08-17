@@ -157,8 +157,9 @@
 <li class="toc-entry toc-h2"><a href="#ask-me-paper">Ask Me Paper</a></li>
 <li class="toc-entry toc-h2"><a href="#youtube-transcript">YouTube Transcript</a></li>
 <li class="toc-entry toc-h2"><a href="#lazy-reader">Lazy-reader</a></li>
+<li class="toc-entry toc-h2"><a href="#research-blog-writer">Research-blog-writer</a></li>
 <li class="toc-entry toc-h2">
-<a href="#research-blog-writer">Research-blog-writer</a>
+<a href="#blog-knowledge-curator">Blog Knowledge Curator</a>
 <ul>
 <li class="toc-entry toc-h3"><a href="#arxiv-tex-crawler">arxiv-tex-crawler</a></li>
 <li class="toc-entry toc-h3"><a href="#illustrator-planner-and-illustrator-drawer">Illustrator-planner and Illustrator-drawer</a></li>
@@ -216,6 +217,10 @@
     <tr>
       <td><a href="research-blog-writer/SKILL.md"><code class="language-plaintext highlighter-rouge">research-blog-writer</code></a></td>
       <td>Research and draft a new grounded technical blog post from a topic or outline.</td>
+    </tr>
+    <tr>
+      <td><a href="blog-knowledge-curator/SKILL.md"><code class="language-plaintext highlighter-rouge">blog-knowledge-curator</code></a></td>
+      <td>Turn useful discussions and sources into evidence-backed proposals for improving an existing blog.</td>
     </tr>
     <tr>
       <td><a href="arxiv-tex-crawler/SKILL.md"><code class="language-plaintext highlighter-rouge">arxiv-tex-crawler</code></a></td>
@@ -414,6 +419,47 @@ Do not enact the plan until I confirm we have reached a shared understanding.
 </code></pre></div></div>
 
 <p>This is useful for turning a broad topic or one section of an outline into an accurate, extensible technical article rather than a one-off surface-level summary.</p>
+
+<h2 id="blog-knowledge-curator">Blog Knowledge Curator</h2>
+
+<p><strong>Motivation</strong>: <code class="language-plaintext highlighter-rouge">research-blog-writer</code> helps me create a new post. But much of the useful knowledge I find does not deserve a new article. It may be a lesson from a Codex session, a repository implementation detail, a paper, or a practical failure mode that sharpens something I have already written. I want a workflow that can answer a more restrained question: does this material make any existing post better, and if so, where and why?</p>
+
+<p>The important answer is often “no change.” A blog can become less useful when every interesting link becomes another paragraph, example, or post. The skill should preserve the flow and scope of existing writing, distinguish evidence from interpretation, and recommend an addition only when it improves the reader’s understanding or practical ability.</p>
+
+<p><strong>The skill</strong></p>
+
+<p><code class="language-plaintext highlighter-rouge">blog-knowledge-curator</code> treats the full site as the default catalogue, with the AI Agents Series as a specialised scope when I explicitly select it. Given the current discussion and any supplied source, it extracts evidence cards, searches the blog catalogue, then reads the most relevant posts in depth before making one of four recommendations:</p>
+
+<ol>
+  <li>
+<code class="language-plaintext highlighter-rouge">No change</code> when the material overlaps with the existing post, is too narrow, has weak evidence, or does not fit the local flow.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">Enrich existing post</code> when there is a precise, worthwhile location for a focused addition.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">Research queue</code> when the idea is promising but needs stronger evidence, examples, or a clearer thesis.</li>
+  <li>
+<code class="language-plaintext highlighter-rouge">New-post candidate</code> only when there is a genuine reader question, a defined audience, an evidence plan, and no existing post that is the right home.</li>
+</ol>
+
+<p>When one source can help several posts, the skill does not copy the same paragraph everywhere. It gives one post ownership of the main explanation and adapts secondary placements to a distinct role: a foundation post might receive the mental model, a practical post the implementation pattern, and a deep dive the mechanism or comparison.</p>
+
+<p>The catalogue is also designed to grow with the blog. <code class="language-plaintext highlighter-rouge">refresh-catalogue</code> detects changed files, then has Codex read each new or changed post in full and generate a hash-bound semantic record: a faithful summary, precise topics, retrieval cues, and a content role. The hash matters because a manual edit invalidates only that post’s semantic record. The catalogue is considered current only when every post has a current semantic record, rather than merely a title and a list of headings.</p>
+
+<p><strong>Usage</strong></p>
+
+<p>Use the default mode after a useful discussion or while reading an external source:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Use $blog-knowledge-curator to evaluate this discussion and source for my blog.
+</code></pre></div></div>
+
+<p>The result is an editorial proposal, not a silent blog edit. It reports the corpus snapshot, evidence cards, suggested placements, caveats, and the next research or approval step. This makes it safe to use from another Codex workspace: the discussion can happen anywhere, while the skill reads the configured blog corpus separately.</p>
+
+<p>When the blog has changed, refresh the semantic catalogue before relying on it for broad retrieval:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Use $blog-knowledge-curator to semantically refresh my blog catalogue.
+</code></pre></div></div>
+
+<p>This skill is useful when I want my blog to become a maintained learning system rather than a collection of isolated posts. It gives new knowledge a deliberate editorial decision: strengthen an existing explanation, keep it in a research queue, create a genuinely new article, or leave the site unchanged.</p>
 
 <h3 id="arxiv-tex-crawler">arxiv-tex-crawler</h3>
 

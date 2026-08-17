@@ -152,6 +152,7 @@
 <a href="#good-practices">Good Practices</a>
 <ul>
 <li class="toc-entry toc-h3"><a href="#ai-coding-workflow-from-matt-pocock">AI Coding Workflow from Matt Pocock</a></li>
+<li class="toc-entry toc-h3"><a href="#hidden-simplification-in-background-instructions">Hidden Simplification in Background Instructions</a></li>
 </ul>
 </li>
 </ul>
@@ -244,6 +245,48 @@ If a question can be answered by exploring the codebase, explore the codebase in
 </ol>
 
 <p>In short: do not use the agent as a faster pair of hands too early. First use it as a thinking partner that helps make the task precise. Once the target is clear, autonomy becomes much more useful.</p>
+
+<h3 id="hidden-simplification-in-background-instructions">Hidden Simplification in Background Instructions</h3>
+
+<p>An agent does not have one universal definition of “best.” Its behaviour is shaped by the task, the repository, and the instructions that surround it. This becomes risky when a plugin or global instruction runs in the background: it can quietly favour small, cheap, or dependency-free solutions before I have consciously decided that those are the right optimisation targets.</p>
+
+<p>The problem is not that simplicity is bad. The problem is that the trade-off can be hard to observe. A background preference can produce something clean, safe, and mechanically correct while reducing the quality I actually care about. I may have seen the trade-off during the design conversation, but not paid enough attention because the simpler option sounded sensible. Sometimes the gap becomes visible only after I run the finished skill and inspect its output.</p>
+
+<p>I saw this while building a <code class="language-plaintext highlighter-rouge">blog-knowledge-curator</code> skill for this site. Its purpose is to map a Codex discussion, repository, paper, or article to the most relevant existing blog posts. For that to work across a growing site, it needs a catalogue that captures what each post actually argues, explains, and excludes—not merely its title and tags.</p>
+
+<p>I had installed <a href="https://github.com/dietrichgebert/ponytail" rel="external nofollow noopener" target="_blank">Ponytail</a>, whose instructions favour the smallest adequate solution, standard-library tools, and no unnecessary work. That preference is useful in many coding tasks. Here, however, it made a structural catalogue feel sufficient: <code class="language-plaintext highlighter-rouge">refresh-catalogue</code> extracted frontmatter, headings, dates, tags, hidden status, and a body hash. The cache could be built, refreshed incrementally after manual edits, and validated mechanically.</p>
+
+<p>Only after I asked how the refresh step actually worked did I see the missing requirement. The catalogue copied existing metadata; it did not ask Codex to understand the post. A vague title, generic description, or weak headings would still make relevant posts difficult to retrieve. The artifact was correct as a structural index, but incomplete as a semantic catalogue.</p>
+
+<p>The useful mental model is:</p>
+
+<ol>
+  <li>
+<strong>Background optimisation:</strong> an instruction rewards a property such as minimal code, lower cost, or fewer dependencies.</li>
+  <li>
+<strong>Proxy success:</strong> the implementation satisfies an easy-to-check proxy, such as cache freshness or file-change detection.</li>
+  <li>
+<strong>Artifact inspection:</strong> the user checks whether the finished output satisfies the real reader-facing goal.</li>
+  <li>
+<strong>Quality guardrail:</strong> the real goal becomes an explicit requirement that the agent must not silently trade away.</li>
+</ol>
+
+<p>For this skill, the quality guardrail is now concrete: Codex must read every new or changed post in full and generate a hash-bound semantic record containing a faithful summary, precise topics, retrieval cues, and a content role. The catalogue is complete only when every post has a current semantic record. The deterministic cache remains useful, but it is now correctly treated as infrastructure rather than the product itself.</p>
+
+<p>For persistent preferences like this, I want a user-level <code class="language-plaintext highlighter-rouge">AGENTS.md</code> to make the decision visible before implementation:</p>
+
+<div class="language-md highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gu">## Optimisation priority</span>
+
+When quality, coverage, factual accuracy, or retrieval usefulness conflicts with lower
+computation cost, prefer the higher-quality result unless I explicitly request a cheap,
+fast, or minimal approach. Do not replace semantic understanding with structural heuristics
+when the task's success depends on meaning. Surface any material quality trade-off as a
+decision before choosing it.
+</code></pre></div></div>
+
+<p>This should not ban simple solutions. A deterministic index is still the right tool for file discovery, change detection, and reproducibility. The practice is to state the evaluation criterion before implementation, then inspect the first working artifact against it. “Minimal” is an implementation preference; “complete semantic retrieval” is an outcome requirement. When they conflict, the outcome requirement should win unless I say otherwise.</p>
+
+<p>An <code class="language-plaintext highlighter-rouge">AGENTS.md</code> cannot override stronger system or developer instructions. In this case, the global quality preference must be compatible with—or I must disable—the Ponytail instruction. The broader lesson is that the instruction hierarchy, evaluation target, and review point must agree.</p>
 
     </div>
   </article>
