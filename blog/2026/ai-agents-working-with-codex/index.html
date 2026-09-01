@@ -126,7 +126,7 @@
 
   <header class="post-header">
     <h1 class="post-title">AI Agents Series | Working with Codex</h1>
-    <p class="post-meta">June 1, 2026</p>
+    <p class="post-meta">September 1, 2026</p>
     <p class="post-tags">
       <a href="/blog/2026"> <i class="fas fa-calendar fa-sm"></i> 2026 </a>
         ·  
@@ -151,6 +151,7 @@
         <div class="floating-toc__content">
           
           <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h2"><a href="#from-assisted-use-to-supervised-autonomy">From Assisted Use to Supervised Autonomy</a></li>
 <li class="toc-entry toc-h2"><a href="#codexs-plan-mode">Codex’s Plan Mode</a></li>
 <li class="toc-entry toc-h2">
 <a href="#codexs-goal-mode">Codex’s Goal Mode</a>
@@ -159,6 +160,13 @@
 <li class="toc-entry toc-h3"><a href="#goal-vs-a-detailed-prompt">Goal vs. a detailed prompt</a></li>
 <li class="toc-entry toc-h3"><a href="#how-goals-are-designed-in-codex">How Goals are designed in Codex</a></li>
 <li class="toc-entry toc-h3"><a href="#how-to-use-goal-mode-effectively">How to use Goal mode effectively</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2">
+<a href="#codexs-fork-command">Codex’s /fork Command</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#when-to-fork">When to fork</a></li>
+<li class="toc-entry toc-h3"><a href="#a-practical-two-branch-workflow">A practical two-branch workflow</a></li>
 </ul>
 </li>
 <li class="toc-entry toc-h2">
@@ -181,6 +189,74 @@
 <p>This pattern is not new. When automobiles replaced horse-drawn transport, the valuable skills changed with the technology. What feels different today is the speed of the transition. A clear example of the fast pace development can be seen in the change of workflow from prompt engineering to context engineering, harness engineering, agent loops, and increasingly graph-shaped workflows in just less then a year or two. The labels will keep changing, but the underlying demand is stable: we need to understand the system well enough to direct it, constrain it, verify it, and improve how humans and agents work together.</p>
 
 <p>This post is my self-study note when working with Codex. I cover features such as Plan mode, Goal mode, together with real case studies and mistakes from my own work. The goal of this post is to provide understanding which mode fits which kind of task, how to give Codex useful autonomy without losing control, and how to preserve human judgment as the tool evolves.</p>
+
+<h2 id="from-assisted-use-to-supervised-autonomy">From Assisted Use to Supervised Autonomy</h2>
+
+<p><a href="https://claude.ai/code/artifact/bfdfaef9-bc62-4dfe-ba9e-c58a26c9accf" rel="external nofollow noopener" target="_blank">Boris Cherny’s “Steps of AI Adoption”</a> offers a useful maturity model for how an engineer’s relationship with coding agents changes as the surrounding system becomes more capable. The table below adapts that model to Codex. Codex is the primary engineering agent here, not the name of one fixed model. The agent counts are directional measures of organizational throughput, not product concurrency guarantees.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Stage and human role</th>
+      <th>Human owns</th>
+      <th>Codex agents own</th>
+      <th>Technology stack</th>
+      <th>Verification gate</th>
+      <th>Ready to advance when</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+<strong>0. Gated — requester</strong><br><strong>Agents:</strong> 0</td>
+      <td>Approve a bounded pilot; define permitted repositories, data, models, tools, identities, budget, and incident ownership.</td>
+      <td>Nothing inside the development environment yet. General chat output may still be copied into the repository manually.</td>
+      <td>Workspace identity and access controls; managed Codex configuration; sandbox, approval, network, and retention policy; baseline delivery and defect metrics.</td>
+      <td>Approved users and repositories; least-privilege access; sandboxed execution; network denied by default; documented credential revocation and incident response.</td>
+      <td>A sanctioned low-blast-radius pilot can return a reviewable diff without bypassing security or data policy.</td>
+    </tr>
+    <tr>
+      <td>
+<strong>1. Assisted — pair</strong><br><strong>Agents:</strong> about 1</td>
+      <td>Frame the task, answer questions, make architectural decisions, inspect the diff, and approve the final change.</td>
+      <td>Explore the repository, propose a plan, edit narrowly, run targeted checks, explain the result, and report residual risk.</td>
+      <td>Project language and framework; Codex desktop, CLI, IDE, or cloud; Git branch; <code class="language-plaintext highlighter-rouge">AGENTS.md</code>; skills; approved plugins or MCP servers; formatter, linter, type checker, and test runner.</td>
+      <td>Explicit acceptance criteria; clean branch; agent self-checks; targeted tests; human inspection of behavior, evidence, and final diff before commit or push.</td>
+      <td>Repeated tasks have reliable instructions and fast checks, so the human can review evidence instead of supervising every command.</td>
+    </tr>
+    <tr>
+      <td>
+<strong>2. Parallel — orchestrator</strong><br><strong>Agents:</strong> about 5–10</td>
+      <td>Choose outcomes and boundaries; decompose work; assign non-overlapping ownership; resolve product and architecture questions; integrate, merge, and release.</td>
+      <td>Perform bounded exploration, implementation, test analysis, documentation lookup, and review in parallel; return structured evidence and unresolved uncertainty.</td>
+      <td>Everything from Assisted, plus Git worktrees or isolated environments; Codex subagents and custom agents; versioned skills; issue and pull-request workflow; CI, branch protection, code ownership, and concurrency limits.</td>
+      <td>A task contract for every worker; isolated worktree for write-heavy work; agent self-checks; a read-only reviewer that did not author the patch; tests on the combined result after integration; human review of architecture, risk, and the final diff.</td>
+      <td>Organizational context is retrievable, deterministic gates are dependable, and review capacity—not uncertainty about basic correctness—is the main constraint.</td>
+    </tr>
+    <tr>
+      <td>
+<strong>3. Supervised autonomy — manager of managers</strong><br><strong>Agents:</strong> about 10–100</td>
+      <td>Define outcomes, interfaces, policies, risk tiers, budgets, quality targets, and exception rules; decide ambiguous or consequential cases; approve high-impact merges and releases; audit samples.</td>
+      <td>Start from schedules, repository events, CI, or APIs; gather context; delegate; implement; verify; open review-ready changes; retry bounded failures; route exceptions to people.</td>
+      <td>Everything from Parallel, plus scheduled tasks; <code class="language-plaintext highlighter-rouge">codex exec</code>; Codex SDK or app-server integrations; hooks; queues and workers; typed inputs; idempotency and retry control; isolated runners; versioned agent configuration and context; IAM, secrets, and network policy; OpenTelemetry; artifact storage; cost limits, canaries, and rollback.</td>
+      <td>Validate the trigger and pin the baseline, instructions, model, tools, and dependencies; enforce scope and permissions; require deterministic tests, lint, types, security, and policy checks; use an independent review pass; test the combined result; require risk-based human approval; canary, monitor, and retain a machine-readable evidence manifest.</td>
+      <td>Selected closed loops meet quality, latency, cost, and rollback objectives over repeated runs, while exceptions reach an accountable human quickly.</td>
+    </tr>
+    <tr>
+      <td>
+<strong>4. AI-native — steering by intent</strong><br><strong>Agents:</strong> hundreds of independent runs</td>
+      <td>Govern the portfolio of automated work through product outcomes, architecture, policy, budgets, service levels, and risk appetite; retain dual control over irreversible and production boundaries.</td>
+      <td>Operate proven domain workflows continuously, decompose goals, coordinate specialists, verify results, stage changes, and escalate novel or high-risk decisions.</td>
+      <td>An internal agent platform built from versioned workflows, SDK and event integrations, scoped identities, isolated execution, policy-as-code, evaluation services, observability, run-state and artifact stores, staged deployment, automatic rollback, and portfolio cost controls.</td>
+      <td>Dry runs, shadow mode, bounded batches, canaries, quality SLOs, continuous regression evaluation, exception monitoring, automatic rollback, independent audits, and tested kill switches.</td>
+      <td>More valuable workflows can be added without weakening economics, accountability, verification, or blast-radius control.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The target is not maximum code generation. It is <strong>verified, valuable work per unit of human attention</strong>. More agents amplify the quality of the operating loop; they do not replace it. Advancement therefore depends on improving context, verification, review, and control together.</p>
+
+<p>The architectural details behind the table live in <a href="/blog/2026/ai-agents-101-07-orchestration-patterns/">Orchestration Patterns</a>, <a href="/blog/2026/ai-agents-101-10-evaluation-and-observability/">Evaluation and Observability</a>, <a href="/blog/2026/ai-agents-101-11-production-agent-architecture/">Production Agent Architecture</a>, and <a href="/blog/2026/ai-agents-101-13-coding-agents-as-a-case-study/">Coding Agents as a Case Study</a>. Current Codex primitives are documented in OpenAI’s guides to <a href="https://learn.chatgpt.com/docs/agent-configuration/subagents" rel="external nofollow noopener" target="_blank">subagents</a>, <a href="https://learn.chatgpt.com/docs/code-review" rel="external nofollow noopener" target="_blank">code review</a>, <a href="https://learn.chatgpt.com/docs/automations" rel="external nofollow noopener" target="_blank">scheduled tasks</a>, the <a href="https://learn.chatgpt.com/docs/codex-sdk" rel="external nofollow noopener" target="_blank">Codex SDK</a>, and <a href="https://learn.chatgpt.com/docs/agent-approvals-security" rel="external nofollow noopener" target="_blank">agent security and observability</a>.</p>
 
 <h2 id="codexs-plan-mode">Codex’s Plan Mode</h2>
 
@@ -400,6 +476,96 @@ reconstructions, blocked claims, and remaining uncertainty.
 <p>My practical workflow is to draft the Goal before activating it. I first explain the task in plain language and ask Codex to turn it into a candidate <code class="language-plaintext highlighter-rouge">/goal</code>. I then review the proposed outcome, evidence, constraints, and blocked condition. This small review is important because Goal mode amplifies whatever completion criterion I provide—good or bad.</p>
 
 <p>Finally, I distinguish progress from completion. A faster benchmark that still misses the threshold is progress, not success. Passing the target while breaking correctness is also not success. When exact evidence is unavailable, the Goal should require an honest partial result rather than a confident completion claim. The Goal gives Codex persistence; the evidence gives that persistence direction.</p>
+
+<h2 id="codexs-fork-command">Codex’s <code class="language-plaintext highlighter-rouge">/fork</code> Command</h2>
+
+<p>Sources:</p>
+
+<ul>
+  <li><a href="https://learn.chatgpt.com/docs/developer-commands?surface=cli" rel="external nofollow noopener" target="_blank">Codex developer commands</a></li>
+  <li><a href="https://learn.chatgpt.com/docs/reference/slash-commands" rel="external nofollow noopener" target="_blank">Codex slash commands</a></li>
+  <li><a href="https://learn.chatgpt.com/docs/environments/git-worktrees" rel="external nofollow noopener" target="_blank">Git worktrees in Codex</a></li>
+</ul>
+
+<p>Some problems reach a decision point where I do not yet want to choose one path. Suppose thread A has reached checkpoint A1 and I want to explore two competing approaches, B and C, while preserving all the context accumulated so far. This is what <code class="language-plaintext highlighter-rouge">/fork</code> is for.</p>
+
+<p>According to the official Codex documentation, <code class="language-plaintext highlighter-rouge">/fork</code> clones the current chat into a new chat with a fresh ID and leaves the original transcript untouched. The fork inherits the conversation history available at that checkpoint, but from then on it is independent. New messages and discoveries in B do not automatically appear in C or flow back into A.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>A: problem framing and investigation
+└── A1: shared checkpoint
+    ├── B: explore approach B
+    └── C: explore approach C
+</code></pre></div></div>
+
+<p>This is different from asking Codex to spawn subagents. Subagents are best for bounded work delegated by a parent agent, which waits for their results and synthesizes them. Forks are ordinary, user-navigable chats. I can keep talking directly to B and C for as many turns as needed, give them different follow-up instructions, pause one branch, or abandon it without disturbing the other. For sustained human-guided exploration, <code class="language-plaintext highlighter-rouge">/fork</code> is usually the more natural abstraction.</p>
+
+<h3 id="when-to-fork">When to fork</h3>
+
+<p>I use <code class="language-plaintext highlighter-rouge">/fork</code> when the history is valuable and the future should diverge. Typical cases include:</p>
+
+<ul>
+  <li>comparing two architectures from the same requirements and repository analysis;</li>
+  <li>testing a conservative fix against a larger redesign;</li>
+  <li>keeping one branch focused on implementation and another on falsifying its assumptions;</li>
+  <li>exploring different interpretations of a paper, bug, or product requirement;</li>
+  <li>or preserving a known-good checkpoint before a risky investigation.</li>
+</ul>
+
+<p>I do not use <code class="language-plaintext highlighter-rouge">/fork</code> merely to ask a quick side question. <code class="language-plaintext highlighter-rouge">/side</code> is better for a temporary detour that should return to the parent chat. <code class="language-plaintext highlighter-rouge">/new</code> is better when prior context would be irrelevant or bias the next task. <code class="language-plaintext highlighter-rouge">/resume</code> continues the same saved chat rather than creating an independent future.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Need</th>
+      <th>Better choice</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Start without the current conversation history</td>
+      <td><code class="language-plaintext highlighter-rouge">/new</code></td>
+    </tr>
+    <tr>
+      <td>Make a short, disposable detour</td>
+      <td><code class="language-plaintext highlighter-rouge">/side</code></td>
+    </tr>
+    <tr>
+      <td>Continue the same saved conversation</td>
+      <td><code class="language-plaintext highlighter-rouge">/resume</code></td>
+    </tr>
+    <tr>
+      <td>Delegate bounded parallel work and collect the results in a parent</td>
+      <td>Subagents</td>
+    </tr>
+    <tr>
+      <td>Explore a long-lived alternative from the current state</td>
+      <td><code class="language-plaintext highlighter-rouge">/fork</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="a-practical-two-branch-workflow">A practical two-branch workflow</h3>
+
+<p>The ChatGPT desktop app provides the most UI-friendly version of this workflow because each fork remains available as a normal chat in the sidebar. At checkpoint A1, I use this sequence:</p>
+
+<ol>
+  <li>
+<strong>Make the checkpoint durable.</strong> Finish the current turn and ask Codex to summarize the decisions, evidence, constraints, unresolved questions, and working-tree state. If code has already changed, I commit or otherwise record the baseline so both branches start from a state I can identify later. I create both forks before continuing A, because the UI command forks the chat’s current state.</li>
+  <li>
+<strong>Create branch B.</strong> Run <code class="language-plaintext highlighter-rouge">/fork</code>, choose a local chat or worktree, and give the new chat a descriptive name such as <code class="language-plaintext highlighter-rouge">B — minimal fix</code>. State its hypothesis, scope, and success criteria in the first message.</li>
+  <li>
+<strong>Create branch C from A1, not from B.</strong> Return to the original A chat, run <code class="language-plaintext highlighter-rouge">/fork</code> again, and name it something like <code class="language-plaintext highlighter-rouge">C — redesign</code>. This ensures B and C inherit the same history rather than one inheriting the other’s early conclusions.</li>
+  <li>
+<strong>Explore independently.</strong> Continue both chats from the sidebar. Ask each branch to record assumptions, evidence, changed files, tests, and remaining uncertainty so the eventual comparison is based on artifacts rather than persuasive prose.</li>
+  <li>
+<strong>Reconcile explicitly.</strong> Ask each branch for a compact handoff, then compare their diffs and evidence in A or in a new decision chat. Forked conversations do not merge themselves.</li>
+</ol>
+
+<p>The most important practical choice is file isolation. A local-chat fork separates conversation state, but two local chats can still point at the same working directory. That is safe for read-only research, but risky when B and C edit code concurrently. For write-heavy branches, I choose a separate Git worktree for each fork. Codex worktrees let independent chats work on the same project without modifying the same checkout, so their changes can be tested and reviewed separately before I decide what to keep.</p>
+
+<p>In the CLI, typing <code class="language-plaintext highlighter-rouge">/fork</code> forks the current chat and moves the current terminal UI into the new chat. To fork a saved session, <code class="language-plaintext highlighter-rouge">codex fork</code> opens the session picker, while <code class="language-plaintext highlighter-rouge">codex fork &lt;SESSION_ID&gt;</code> selects a specific session. If I want B and C running at the same time in terminals, I open two terminals and fork the same A session into each one, again using separate worktrees when both branches will write files.</p>
+
+<p>The core principle is simple: <strong>fork conversation context at a meaningful decision point, and fork the filesystem when the implementations may conflict.</strong> A good checkpoint makes the branches comparable; explicit names and success criteria keep them distinct; isolated worktrees keep parallel experimentation safe.</p>
 
 <h2 id="good-practices">Good Practices</h2>
 

@@ -169,6 +169,7 @@
 <ul>
 <li class="toc-entry toc-h3"><a href="#trace-event">Trace Event</a></li>
 <li class="toc-entry toc-h3"><a href="#eval-task">Eval Task</a></li>
+<li class="toc-entry toc-h3"><a href="#verification-evidence-contract">Verification Evidence Contract</a></li>
 <li class="toc-entry toc-h3"><a href="#metrics">Metrics</a></li>
 <li class="toc-entry toc-h3"><a href="#failure-taxonomy">Failure Taxonomy</a></li>
 </ul>
@@ -330,6 +331,41 @@
       rubric: "clear_boundary_no_false_promise"
 </code></pre>
 <p>The task encodes success as behavior and outcome, not just wording.</p>
+<h3 id="verification-evidence-contract">Verification Evidence Contract</h3>
+<p>At multi-agent scale, a plausible summary such as “all workers finished successfully” is not evidence that the combined change is correct. Every accepted change should carry a machine-readable evidence manifest that connects the task contract to the exact baseline, authoring context, checks, review findings, and remaining risk.</p>
+<pre><code class="language-yaml">change:
+  task_id: "checkout_redirect_042"
+  baseline_commit: "4f21c9a"
+  acceptance_criteria_version: "checkout_prd_v3"
+  context_versions:
+    instructions: "AGENTS.md@4f21c9a"
+    skill: "fix-and-verify@2.1.0"
+    model: "approved-codex-profile"
+  author_agent: "implementation_worker_03"
+  workspace: "worktree/checkout_redirect_042"
+  files_changed:
+    - "src/auth/redirect.ts"
+    - "src/auth/redirect.test.ts"
+  self_checks:
+    - command: "pnpm test src/auth/redirect.test.ts"
+      status: "passed"
+  independent_review:
+    reviewer: "read_only_review_agent_01"
+    findings: []
+  combined_result_checks:
+    - command: "pnpm test"
+      status: "passed"
+  policy_checks:
+    scope: "passed"
+    dependencies: "unchanged"
+    secrets: "passed"
+  residual_risk: "low"
+  human_approval:
+    required: true
+    status: "approved"
+</code></pre>
+<p>The authoring agent's self-checks are useful, but they are not independent proof. A separate reviewer can identify inconsistencies and missing tests, yet model review is still probabilistic. Deterministic checks, policy enforcement, and tests against the combined result must remain outside the authoring loop. Human review should then concentrate on architecture, product intent, exceptions, and risk that the automated evidence cannot settle.</p>
+<p>The operating principle is concise: <strong>agents make the change; independent systems produce the proof</strong>. As described in the Codex <a href="/blog/2026/ai-agents-working-with-codex/#from-assisted-use-to-supervised-autonomy">adoption ladder</a>, greater autonomy is justified only when this evidence remains trustworthy without continuous supervision.</p>
 <h3 id="metrics">Metrics</h3>
 <p>Track metrics at multiple levels:</p>
 <table>
@@ -439,6 +475,12 @@ ui_confusion
   
 
   <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/ai-agents-working-with-codex/">AI Agents Series | Working with Codex</a>
+  </li>
+
+  
+
+  <li class="my-2">
     <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/agent-skills-doubleme/">DoubleMe</a>
   </li>
 
@@ -458,12 +500,6 @@ ui_confusion
 
   <li class="my-2">
     <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/reinforcement-learning-and-abstract-world-models/">Reinforcement Learning and Abstract World Models</a>
-  </li>
-
-  
-
-  <li class="my-2">
-    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/agent-skills-ai-ml-research-scientists/">My Codex Skills as a Research Scientist</a>
   </li>
 
 </div>
