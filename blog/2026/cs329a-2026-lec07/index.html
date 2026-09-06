@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    
+    
+
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Stanford CS329A Self-Improving AI Agents | Part 7 | Self-Improvement and Deep Research Agents | Tuan-Anh  Bui</title>
+    <meta name="author" content="Tuan-Anh  Bui">
+    <meta name="description" content="Lecture notes for Stanford CS329A Self-Improving AI Agents | Part 7 | Self-Improvement and Deep Research Agents">
+    <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
+
+
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+    
+    <link defer rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700%7CRoboto+Slab:100,300,400,500,700%7CMaterial+Icons">
+
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
+
+    
+
+    
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
+    
+    <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+    <link rel="canonical" href="https://tuananhbui89.github.io/blog/2026/cs329a-2026-lec07/">
+
+    
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark">
+    <script src="/assets/js/theme.js?96d6b3e1c3604aca8b6134c7afdd5db6"></script>
+    <script src="/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script>
+    
+
+  </head>
+
+  
+  <body class="fixed-top-nav ">
+
+    
+    <header>
+
+      
+      <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top">
+        <div class="container">
+          <a class="navbar-brand title font-weight-lighter" href="/"><span class="font-weight-bold">Tuan-Anh </span>Bui</a>
+          
+          <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar top-bar"></span>
+            <span class="icon-bar middle-bar"></span>
+            <span class="icon-bar bottom-bar"></span>
+          </button>
+
+          <div class="collapse navbar-collapse text-right" id="navbarNav">
+            <ul class="navbar-nav ml-auto flex-nowrap">
+
+              
+              <li class="nav-item ">
+                <a class="nav-link" href="/">about</a>
+              </li>
+              
+              
+              <li class="nav-item active">
+                <a class="nav-link" href="/blog/">blog<span class="sr-only">(current)</span></a>
+              </li>
+
+              
+              <li class="nav-item ">
+                <a class="nav-link" href="/publications/">publications</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/projects/">projects</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/teaching/"></a>
+              </li>
+
+              
+              <li class="toggle-container">
+                <button id="light-toggle" title="Change theme">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      
+      <progress id="progress" value="0">
+        <div class="progress-container">
+          <span class="progress-bar"></span>
+        </div>
+      </progress>
+    </header>
+
+
+    
+    <div class="container mt-5">
+      
+        
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Stanford CS329A Self-Improving AI Agents | Part 7 | Self-Improvement and Deep Research Agents</h1>
+    <p class="post-meta">September 6, 2026</p>
+    <p class="post-tags">
+      <a href="/blog/2026"> <i class="fas fa-calendar fa-sm"></i> 2026 </a>
+        ·  
+        <a href="/blog/tag/genai">
+          <i class="fas fa-hashtag fa-sm"></i> genai</a>  
+          <a href="/blog/tag/llm">
+          <i class="fas fa-hashtag fa-sm"></i> llm</a>  
+          <a href="/blog/tag/tutorial">
+          <i class="fas fa-hashtag fa-sm"></i> tutorial</a>  
+          <a href="/blog/tag/reading">
+          <i class="fas fa-hashtag fa-sm"></i> reading</a>  
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    
+    <aside id="floating-toc" class="floating-toc" aria-label="Table of contents">
+      <details>
+        <summary><i class="fas fa-list" aria-hidden="true"></i><span>On this page</span></summary>
+        <div class="floating-toc__content">
+          
+          <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#search-based-improvement-requires-both-broad-exploration-and-reliable-selection">Search-based improvement requires both broad exploration and reliable selection.</a></li>
+<li class="toc-entry toc-h1"><a href="#alphacode-transformed-code-completion-into-end-to-end-competitive-programming-problem-solving">AlphaCode transformed code completion into end-to-end competitive-programming problem solving.</a></li>
+<li class="toc-entry toc-h1"><a href="#the-original-alphacode-trained-a-specialized-code-generator-and-fine-tuned-it-to-favor-meaningful-token-patterns">The original AlphaCode trained a specialized code generator and fine-tuned it to favor meaningful token patterns.</a></li>
+<li class="toc-entry toc-h1"><a href="#alphacode-searched-one-million-generated-programs-through-execution-filtering-and-behavioral-clustering">AlphaCode searched one million generated programs through execution filtering and behavioral clustering.</a></li>
+<li class="toc-entry toc-h1"><a href="#alphacodes-contest-performance-exposed-both-distribution-shift-and-candidate-selection-bottlenecks">AlphaCode’s contest performance exposed both distribution-shift and candidate-selection bottlenecks.</a></li>
+<li class="toc-entry toc-h1"><a href="#passk-measures-raw-coverage-while-10k-measures-coverage-constrained-by-a-realistic-selection-budget">Pass@k measures raw coverage, while 10@k measures coverage constrained by a realistic selection budget.</a></li>
+<li class="toc-entry toc-h1"><a href="#brute-force-sampling-helps-only-while-it-discovers-genuinely-new-solutions-and-remains-impractical-for-difficult-problems">Brute-force sampling helps only while it discovers genuinely new solutions and remains impractical for difficult problems.</a></li>
+<li class="toc-entry toc-h1"><a href="#alphacode-2-combined-a-fine-tuned-gemini-pro-family-higher-quality-data-and-a-learned-correctness-scorer">AlphaCode 2 combined a fine-tuned Gemini Pro family, higher-quality data, and a learned correctness scorer.</a></li>
+<li class="toc-entry toc-h1"><a href="#alphacode-2s-execute-cluster-rerank-pipeline-matched-alphacode-with-far-fewer-samples-and-nearly-doubled-its-maximum-solve-rate">AlphaCode 2’s execute-cluster-rerank pipeline matched AlphaCode with far fewer samples and nearly doubled its maximum solve rate.</a></li>
+<li class="toc-entry toc-h1"><a href="#feedback-guided-refinement-and-train-time-learning-can-exchange-massive-parallel-search-for-more-intelligent-sequential-work">Feedback-guided refinement and train-time learning can exchange massive parallel search for more intelligent sequential work.</a></li>
+<li class="toc-entry toc-h1"><a href="#a-useful-scoring-model-needs-independent-but-in-distribution-data-and-alphacode-2-remains-costly-and-code-specific-despite-strong-results">A useful scoring model needs independent but in-distribution data, and AlphaCode 2 remains costly and code-specific despite strong results.</a></li>
+<li class="toc-entry toc-h1"><a href="#search-compute-should-be-allocated-according-to-task-difficulty-rather-than-uniformly-across-all-problems">Search compute should be allocated according to task difficulty rather than uniformly across all problems.</a></li>
+<li class="toc-entry toc-h1"><a href="#embedding-reasoning-into-the-solver-requires-rationales-decomposition-intermediate-checks-and-backtracking">Embedding reasoning into the solver requires rationales, decomposition, intermediate checks, and backtracking.</a></li>
+<li class="toc-entry toc-h1"><a href="#search-o1-targets-knowledge-gaps-that-appear-as-uncertainty-during-long-form-reasoning">Search-o1 targets knowledge gaps that appear as uncertainty during long-form reasoning.</a></li>
+<li class="toc-entry toc-h1"><a href="#search-o1-interleaves-query-generation-with-reasoning-and-extracts-only-the-relevant-evidence-from-retrieved-documents">Search-o1 interleaves query generation with reasoning and extracts only the relevant evidence from retrieved documents.</a></li>
+<li class="toc-entry toc-h1"><a href="#search-o1-extends-agentic-rag-with-document-level-reasoning-but-assumes-reliable-state-and-context-management">Search-o1 extends Agentic RAG with document-level reasoning but assumes reliable state and context management.</a></li>
+<li class="toc-entry toc-h1"><a href="#evidence-extraction-lets-search-o1-benefit-from-more-documents-on-scientific-and-multi-hop-tasks-subject-to-retrieval-and-domain-quality-limits">Evidence extraction lets Search-o1 benefit from more documents on scientific and multi-hop tasks, subject to retrieval and domain-quality limits.</a></li>
+<li class="toc-entry toc-h1"><a href="#prompted-search-reinforcement-learned-search-and-calibrated-confidence-are-complementary-routes-to-more-reliable-agents">Prompted search, reinforcement-learned search, and calibrated confidence are complementary routes to more reliable agents.</a></li>
+</ul>
+          
+        </div>
+      </details>
+    </aside>
+    
+    <div id="markdown-content">
+      <div style="display: flex; justify-content: center;">
+  <iframe width="560" height="315" src="https://www.youtube.com/embed/Uni9dqyuuDM" title="YouTube video player" frameborder="0" allowfullscreen=""></iframe>
+</div>
+
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ startOnLoad: true, mindmap: { useMaxWidth: false, padding: 20 } });
+</script>
+
+<div style="overflow-x: auto;"><div class="mermaid">
+mindmap
+  root((Search for Self-Improving Agents))
+    Search principle
+      Explore the model output space
+      Select and refine useful candidates
+      Balance parallel diversity and sequential repair
+    AlphaCode
+      Train a specialized code generator
+      Sample one million programs
+      Execute filter and behaviorally cluster
+      Pass at k versus constrained ten at k
+    AlphaCode 2
+      Fine tune a Gemini Pro model family
+      Diversify generators by data and settings
+      Rerank clusters with a learned scorer
+      Match AlphaCode with far fewer samples
+    Adaptive reasoning
+      Route compute by task difficulty
+      Train on rationales and algorithm hints
+      Decompose validate and backtrack
+      Use feedback and RL to reduce search cost
+    Search-o1
+      Detect uncertainty during reasoning
+      Generate iterative retrieval queries
+      Extract relevant evidence from documents
+      Maintain state across multiple search turns
+    Evidence and reliability
+      More refined documents improve pass at one
+      Multi-hop tasks benefit from focused context
+      Search-R1 learns search behavior with RL
+      Confidence remains poorly calibrated
+</div></div>
+
+<h1 id="search-based-improvement-requires-both-broad-exploration-and-reliable-selection">Search-based improvement requires both broad exploration and reliable selection.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-00-38-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-00-38-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-00-38-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec07/00-00-38.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p><strong>Central idea.</strong> A capable model may assign some probability to a correct solution without producing it on the first attempt. Search improves the system only when it combines two functions:<br>1. <strong>Explore</strong> the model’s output space through diverse samples or queries.<br>2. <strong>Select and refine</strong> the candidates that are actually useful.<br>The lecture develops this pattern first for AlphaCode-style program search and then for Search-o1-style deep research.</p>
+
+<p><a href="https://www.youtube.com/watch?v=Uni9dqyuuDM&amp;t=5s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="alphacode-transformed-code-completion-into-end-to-end-competitive-programming-problem-solving">AlphaCode transformed code completion into end-to-end competitive-programming problem solving.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-02-30-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-02-30-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-02-30-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec07/00-02-30.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p><strong>Why the task is harder.</strong> AlphaCode is not merely an autocomplete system. Given a competitive-programming prompt, it must infer the intended computation, select a solution strategy, and implement the entire program under a formal input-output contract.<br>The lecture presents its roughly mid-field Codeforces performance across ten contests as an early demonstration that AI code systems could generalize beyond narrow completions to longer, end-to-end problems.</p>
+
+<p><a href="https://www.youtube.com/watch?v=Uni9dqyuuDM&amp;t=71s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="the-original-alphacode-trained-a-specialized-code-generator-and-fine-tuned-it-to-favor-meaningful-token-patterns">The original AlphaCode trained a specialized code generator and fine-tuned it to favor meaningful token patterns.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-05-14-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-05-14-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-05-14-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec07/00-05-14.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p><strong>Generator training.</strong> AlphaCode learned from two complementary sources: broad GitHub code for programming syntax and idioms, and CodeContests for the structure of competitive-programming problems and solutions.<br>During fine-tuning, <strong>GOLD-style weighting</strong> emphasizes high-likelihood tokens and downweights low-likelihood ones, with the goal of concentrating probability on more meaningful program patterns. The lecture also notes value conditioning and prediction as mechanisms for shaping which programs the generator prefers.</p>
+
+<p><a href="https://www.youtube.com/watch?v=Uni9dqyuuDM&amp;t=230s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="alphacode-searched-one-million-generated-programs-through-execution-filtering-and-behavioral-clustering">AlphaCode searched one million generated programs through execution filtering and behavioral clustering.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-07-57-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-07-57-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-07-57-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec07/00-07-57.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p><strong>Massive-search pipeline.</strong> AlphaCode:<br>1. Samples <strong>one million</strong> programs per problem, half Python and half C++, with high-temperature and randomized prompt metadata.<br>2. Removes programs that fail the examples supplied in the problem.<br>3. Uses a learned test-input generator to create additional probes.<br>4. Clusters programs that look different syntactically but behave equivalently on those probes.<br>5. Selects a diverse subset for evaluation.<br>Clustering is essential because Codeforces permits only a small number of submissions; sending many variants of the same algorithm wastes that budget.</p>
+
+<p><a href="https://www.youtube.com/watch?v=Uni9dqyuuDM&amp;t=398s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="alphacodes-contest-performance-exposed-both-distribution-shift-and-candidate-selection-bottlenecks">AlphaCode’s contest performance exposed both distribution-shift and candidate-selection bottlenecks.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-11-39-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-11-39-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-11-39-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec07/00-11-39.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p><strong>Observed performance and variance.</strong> The lecture reports an approximately <strong>54th-percentile</strong> aggregate result over ten Codeforces contests. More important than the exact table entry is why performance varied:<br>- Some contests were closer to the training distribution than others.<br>- Search coverage and final selection are different capabilities.<br>- A correct program can exist among the samples while the selection stage chooses several nearly correct alternatives.<br>This makes candidate ranking a first-class bottleneck rather than an implementation detail.</p>
+
+<p><a href="https://www.youtube.com/watch?v=Uni9dqyuuDM&amp;t=557s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="passk-measures-raw-coverage-while-10k-measures-coverage-constrained-by-a-realistic-selection-budget">Pass@k measures raw coverage, while 10@k measures coverage constrained by a realistic selection budget.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-16-41-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-16-41-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-16-41-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec07/00-16-41.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p><strong>Two evaluation questions.</strong> <code class="language-plaintext highlighter-rouge">pass@k</code> asks whether the correct program appears anywhere among <code class="language-plaintext highlighter-rouge">k</code> attempts. <code class="language-plaintext highlighter-rouge">10@k</code> asks whether a system can find ten good submissions inside that same pool.<br>The reported trends are consistent:<br>- A 41B model has a better scaling slope than a 9B model.<br>- Increasing the sampling budget from thousands toward one million improves solve rate.<br>- Adding clustering improves the constrained ten-submission result by preserving diversity.<br>At the high end, the lecture contrasts pass@k above roughly 40% with 10@k around 30%, quantifying the cost of imperfect selection.</p>
+
+<p><a href="https://www.youtube.com/watch?v=Uni9dqyuuDM&amp;t=841s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="brute-force-sampling-helps-only-while-it-discovers-genuinely-new-solutions-and-remains-impractical-for-difficult-problems">Brute-force sampling helps only while it discovers genuinely new solutions and remains impractical for difficult problems.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-21-59-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-21-59-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-21-59-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec07/00-21-59.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p><strong>Limits of brute force.</strong> More samples are valuable only when they increase <strong>solution diversity</strong>. If ten times more generations reproduce the same approaches, coverage will not improve.<br>Other limitations were structural:<br>- Language-model loss is a weak proxy for program correctness because many different programs can solve a task.<br>- Dynamic-programming and constructive problems remained difficult.<br>- One million samples per task is expensive and slow.<br>- Under a time limit, candidates must be ranked as they arrive.<br>- Hard tasks often require multi-step correction rather than a single, one-shot program.<br>Training-data similarity checks nevertheless suggested that successful outputs contained novel code rather than simply copying stored solutions.</p>
+
+<p><a href="https://www.youtube.com/watch?v=Uni9dqyuuDM&amp;t=1161s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="alphacode-2-combined-a-fine-tuned-gemini-pro-family-higher-quality-data-and-a-learned-correctness-scorer">AlphaCode 2 combined a fine-tuned Gemini Pro family, higher-quality data, and a learned correctness scorer.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-26-39-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-26-39-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-26-39-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec07/00-26-39.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p><strong>Three upgrades over AlphaCode.</strong> AlphaCode 2 changes the search stack rather than merely increasing its budget:<br>1. <strong>Stronger base model:</strong> fine-tune Gemini Pro rather than pretrain a code model from scratch.<br>2. <strong>Diverse generator family:</strong> vary data partitions, tags, difficulty levels, and hyperparameters so parallel samples explore different modes.<br>3. <strong>Learned ranking:</strong> train a reward-like scorer on high-quality, human-vetted comparisons to estimate correctness between 0 and 1.<br>CodeContests V2 supplies improved open training problems, while the separate scoring data teaches which candidates should be preferred.</p>
+
+<p><a href="https://www.youtube.com/watch?v=Uni9dqyuuDM&amp;t=1478s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="alphacode-2s-execute-cluster-rerank-pipeline-matched-alphacode-with-far-fewer-samples-and-nearly-doubled-its-maximum-solve-rate">AlphaCode 2’s execute-cluster-rerank pipeline matched AlphaCode with far fewer samples and nearly doubled its maximum solve rate.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-30-04-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-30-04-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-30-04-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec07/00-30-04.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p><strong>AlphaCode 2 search funnel.</strong> Samples are generated only in C++ across a family of tuned models. Compilation and public-test execution remove about <strong>95%</strong> of candidates. The remaining pool is behaviorally clustered; the largest ten clusters preserve broad approaches, and the scorer chooses the most promising program inside each cluster.<br>This more capable system reaches the original AlphaCode solve rate with roughly <strong>100 rather than one million samples</strong>. At a one-million budget, the lecture reports about <strong>43% versus 25%</strong> solve rate, attributing the gain to a stronger generator, broader diversity, and learned selection.</p>
+
+<p><a href="https://www.youtube.com/watch?v=Uni9dqyuuDM&amp;t=1721s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="feedback-guided-refinement-and-train-time-learning-can-exchange-massive-parallel-search-for-more-intelligent-sequential-work">Feedback-guided refinement and train-time learning can exchange massive parallel search for more intelligent sequential work.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-33-40-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-33-40-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-33-40-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec07/00-33-40.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p><strong>Reducing search cost.</strong> Two complementary levers can replace some brute-force sampling:<br>- <strong>Sequential self-refinement:</strong> execute a candidate, collect feedback, and repair it. This spends more steps on fewer trajectories and is only as good as the feedback source.<br>- <strong>Train-time improvement:</strong> use reinforcement learning or successful search traces to make the base solver more capable, reducing later test-time demand.<br>AlphaCode 2 is therefore usefully viewed as a system of specialized roles: several models explore and another model scores. Distillation could eventually compress this system into a stronger single reasoning model.</p>
+
+<p><a href="https://www.youtube.com/watch?v=Uni9dqyuuDM&amp;t=1887s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="a-useful-scoring-model-needs-independent-but-in-distribution-data-and-alphacode-2-remains-costly-and-code-specific-despite-strong-results">A useful scoring model needs independent but in-distribution data, and AlphaCode 2 remains costly and code-specific despite strong results.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-37-39-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-37-39-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-37-39-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec07/00-37-39.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p><strong>Scorer design and remaining costs.</strong> Reward-model data should be close enough to the task to teach meaningful preferences but separate from held-out contest problems. Mixing data across stages may also be necessary to limit catastrophic forgetting.<br>The lecture reports AlphaCode 2 at roughly the <strong>85th percentile</strong>, between Codeforces Expert and Candidate Master. That is a large one-year improvement, but it does not erase the drawbacks: the system is specialized, experimentation is expensive, and most generated programs never compile or pass the basic tests.</p>
+
+<p><a href="https://www.youtube.com/watch?v=Uni9dqyuuDM&amp;t=2154s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="search-compute-should-be-allocated-according-to-task-difficulty-rather-than-uniformly-across-all-problems">Search compute should be allocated according to task difficulty rather than uniformly across all problems.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-41-00-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-41-00-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-41-00-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec07/00-41-00.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p><strong>Adaptive test-time compute.</strong> A practical controller can first estimate task difficulty, then choose a solver and budget:<br>- <strong>Easy:</strong> use a smaller or specialized model and stop after few samples.<br>- <strong>Medium:</strong> expand the parallel search or add one refinement cycle.<br>- <strong>Hard:</strong> route to stronger models, deeper search, and explicit feedback.<br>This separates two benefits that are often conflated: parallel sampling increases diversity, while sequential refinement tries to repair what the model already produced.</p>
+
+<p><a href="https://www.youtube.com/watch?v=Uni9dqyuuDM&amp;t=2365s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="embedding-reasoning-into-the-solver-requires-rationales-decomposition-intermediate-checks-and-backtracking">Embedding reasoning into the solver requires rationales, decomposition, intermediate checks, and backtracking.</h1>
+
+<p><em>No substantive slide was displayed during this discussion segment, so the note is presented without a representative frame.</em></p>
+
+<p><strong>From one-shot code to reasoning search.</strong> Training examples can expose the intended algorithm, intermediate plan, and rationale rather than only the final program. STaR-style data generation starts from a known answer and asks the model to reconstruct a valid reasoning path.<br>At inference time, complex tasks suggest a <strong>tree search</strong>: propose a step, check it, branch into continuations, and backtrack after failure. Decomposition helps when tasks share recurring solution patterns. When the needed pattern is truly out of distribution, however, automated checks may be insufficient and a human-in-the-loop scientific workflow remains appropriate.</p>
+
+<p><a href="https://www.youtube.com/watch?v=Uni9dqyuuDM&amp;t=2555s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="search-o1-targets-knowledge-gaps-that-appear-as-uncertainty-during-long-form-reasoning">Search-o1 targets knowledge gaps that appear as uncertainty during long-form reasoning.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-48-09-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-48-09-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-48-09-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec07/00-48-09.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p><strong>Why reasoning needs iterative retrieval.</strong> A long reasoning chain may expose several independent knowledge gaps. If the model guesses at the first unfamiliar entity, that uncertainty contaminates every downstream step.<br>A single RAG call is adequate for a simple lookup such as current weather, but not for a multi-part scientific problem. Each stage can require a different source, and inserting long documents without analysis can overwhelm the context. Search-o1 treats uncertainty as a trigger for another retrieval action rather than something the model must reason through unaided.</p>
+
+<p><a href="https://www.youtube.com/watch?v=Uni9dqyuuDM&amp;t=2793s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="search-o1-interleaves-query-generation-with-reasoning-and-extracts-only-the-relevant-evidence-from-retrieved-documents">Search-o1 interleaves query generation with reasoning and extracts only the relevant evidence from retrieved documents.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-52-23-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-52-23-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-52-23-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec07/00-52-23.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p><strong>Search-o1 loop.</strong> During one reasoning session, the model repeatedly:<br>1. Detects an unresolved entity or fact.<br>2. Generates a targeted search/tool query.<br>3. Retrieves candidate documents.<br>4. Reasons inside each document to isolate relevant evidence.<br>5. Adds only that evidence to its working context and resumes the original chain.<br>The chemistry case illustrates the difference: unsupported guessing fails, dumping many documents still yields an incorrect count, but focused extraction integrates the missing structural fact and supports the intended answer.</p>
+
+<p><a href="https://www.youtube.com/watch?v=Uni9dqyuuDM&amp;t=2986s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="search-o1-extends-agentic-rag-with-document-level-reasoning-but-assumes-reliable-state-and-context-management">Search-o1 extends Agentic RAG with document-level reasoning but assumes reliable state and context management.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-57-11-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-57-11-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec07/00-57-11-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec07/00-57-11.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p><strong>Agentic RAG versus Search-o1.</strong> Both systems can invoke retrieval in the middle of reasoning. Agentic RAG generally returns the documents directly. Search-o1 first converts them into concise, query-specific notes—closer to how a researcher reads references and records only useful evidence.<br>That extra stage reduces noise, but the architecture must retain the current goal, earlier reasoning, and retrieved evidence in a state or memory buffer. Its benefit also depends on context-window quality: a model that cannot reason reliably over its accumulated context will still lose coherence.</p>
+
+<p><a href="https://www.youtube.com/watch?v=Uni9dqyuuDM&amp;t=3300s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="evidence-extraction-lets-search-o1-benefit-from-more-documents-on-scientific-and-multi-hop-tasks-subject-to-retrieval-and-domain-quality-limits">Evidence extraction lets Search-o1 benefit from more documents on scientific and multi-hop tasks, subject to retrieval and domain-quality limits.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec07/01-03-23-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec07/01-03-23-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec07/01-03-23-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec07/01-03-23.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p><strong>Empirical pattern.</strong> More raw context does not automatically help: direct reasoning and ordinary RAG can saturate as document count rises. Search-o1 instead improves because it filters every source before integration, enabling parallel information gathering without an equally large reasoning burden.<br>Reported results are strong on GPQA scientific questions and multi-hop benchmarks including HotpotQA, 2Wiki, MuSiQue, and Bamboogle. Interpret them carefully:<br>- Comparisons are to sampled domain experts on a specific benchmark, not to human expertise in general.<br>- Chemistry appears to retain more headroom than some other domains.<br>- Retrieval precision and recall are upstream assumptions.<br>- Mathematical and chemical notation may be damaged during extraction.<br>The mechanism’s clearest benefit is reduced uncertainty through repeated, evidence-focused searches.</p>
+
+<p><a href="https://www.youtube.com/watch?v=Uni9dqyuuDM&amp;t=3563s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="prompted-search-reinforcement-learned-search-and-calibrated-confidence-are-complementary-routes-to-more-reliable-agents">Prompted search, reinforcement-learned search, and calibrated confidence are complementary routes to more reliable agents.</h1>
+
+<p><em>No substantive slide was displayed during this closing discussion.</em></p>
+
+<p><strong>Toward learned and calibrated search.</strong> Search-o1 orchestrates retrieval through prompting; Search-R1 aims to teach when and how to search through reinforcement learning. These approaches can coexist with explicit tool loops and later distillation.<br>Confidence cannot be read directly from a raw sum of output-token log probabilities. Even after more meaningful averaging or geometric aggregation, models are often <strong>overconfident</strong>—the lecture gives the intuition of behavior that is only about 50% correct while expressing roughly 80% confidence. Second-pass estimators and RL/RLHF calibration may reduce this mismatch, but confidently wrong answers remain common. Reliable agents therefore need external verification in addition to self-reported certainty.</p>
+
+<p><a href="https://www.youtube.com/watch?v=Uni9dqyuuDM&amp;t=4044s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+    </div>
+  </article>
+
+
+  
+    
+    <br>
+    <hr>
+    <br>
+    <ul class="list-disc pl-8"></ul>
+
+    
+    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
+    <p class="mb-2">Here are some more articles you might like to read next:</p>
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/cs329a-2026-lec09/">Stanford CS329A Self-Improving AI Agents | Part 9 | Future Research Areas</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/cs329a-2026-lec08/">Stanford CS329A Self-Improving AI Agents | Part 8 | Agentic Evaluations and Long Horizon Tasks</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/cs329a-2026-lec06/">Stanford CS329A Self-Improving AI Agents | Part 6 | Train Time Scaling/Scaling RL</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/cs329a-2026-lec05/">Stanford CS329A Self-Improving AI Agents | Part 5 | Planning and Multi-Step Reasoning</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/cs329a-2026-lec04/">Stanford CS329A Self-Improving AI Agents | Part 4 | Learning from Feedback with Tools/Code</a>
+  </li>
+
+</div>
+
+      
+    </div>
+
+        
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        © Copyright 2026 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+
+      </div>
+    </footer>
+
+    
+    
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
+    
+  
+  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/zoom.js"></script>
+
+  
+  <script defer src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+
+  
+  <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
+  <script defer src="/assets/js/common.js?70e5fea0186cc5650ed1f92c8c71c0e2"></script>
+  <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    
+  <script type="text/javascript">window.MathJax={tex:{tags:"ams"}};</script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+
+    
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KGSMMS9MS"></script>
+  <script>function gtag(){window.dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","G-7KGSMMS9MS");</script>
+    
+
+
+<script type="text/javascript">function progressBarSetup(){"max"in document.createElement("progress")?(initializeProgressElement(),$(document).on("scroll",function(){progressBar.attr({value:getCurrentScrollPosition()})}),$(window).on("resize",initializeProgressElement)):(resizeProgressBar(),$(document).on("scroll",resizeProgressBar),$(window).on("resize",resizeProgressBar))}function getCurrentScrollPosition(){return $(window).scrollTop()}function initializeProgressElement(){let e=$("#navbar").outerHeight(!0);$("body").css({"padding-top":e}),$("progress-container").css({"padding-top":e}),progressBar.css({top:e}),progressBar.attr({max:getDistanceToScroll(),value:getCurrentScrollPosition()})}function getDistanceToScroll(){return $(document).height()-$(window).height()}function resizeProgressBar(){progressBar.css({width:getWidthPercentage()+"%"})}function getWidthPercentage(){return getCurrentScrollPosition()/getDistanceToScroll()*100}const progressBar=$("#progress");window.onload=function(){setTimeout(progressBarSetup,50)};</script>
+
+    
+  </body>
+</html>

@@ -1,0 +1,44 @@
+% Requires: \usepackage{booktabs,tabularx,makecell}
+
+\begin{table*}[t]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.10}
+
+\caption{\textbf{Ablations on release stability and regression control on WebArena.}}
+\label{tab:ablation}
+
+\begin{tabularx}{\textwidth}{@{}
+p{0.26\textwidth}
+*{7}{>{\centering\arraybackslash}X}
+@{}}
+\toprule
+\textbf{Setting} &
+\makecell{\textbf{Final}\\\textbf{Test}\\\textbf{metric}} &
+\makecell{\textbf{Final}\\\textbf{Train}\\\textbf{pass}} &
+\makecell{\textbf{Total}\\F$\rightarrow$P} &
+\makecell{\textbf{Total}\\P$\rightarrow$F} &
+\makecell{\textbf{P$\rightarrow$F}\\\textbf{rate}} &
+\makecell{\textbf{Gate}\\\textbf{reject}\\\textbf{rate}} &
+\makecell{\textbf{Bad}\\\textbf{release}\\\textbf{count}} \\
+\midrule
+AgentDevel (full) &
+34.2 & 78.5 & 214 & 18 & 3.1\% & 42\% & 0 \\
+w/o flip gate &
+35.0 & 81.0 & 230 & 95 & 14.8\% & N/A & 4 \\
+w/o executable diagnosis &
+31.8 & 74.0 & 150 & 22 & 3.9\% & 63\% & 0 \\
+critic not blind (critic sees blueprint) &
+32.5 & 83.5 & 205 & 40 & 6.7\% & 58\% & 0 \\
+\bottomrule
+\end{tabularx}
+
+\vspace{2pt}
+\footnotesize
+\textbf{Notes.}
+All settings start from the same initial blueprint $b_0$ with the same data split and budget.
+F$\rightarrow$P and P$\rightarrow$F are computed on $D_{\text{train}}$ by comparing each promoted release to its evaluated RC (use a single consistent protocol).
+\emph{Bad release count} is the number of promoted updates whose regressions exceed a preset threshold.
+For \texttt{w/o flip gate}, reject rate is N/A by design.
+\end{table*}

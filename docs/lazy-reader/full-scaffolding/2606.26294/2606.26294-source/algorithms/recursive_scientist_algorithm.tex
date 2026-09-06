@@ -1,0 +1,62 @@
+\makeatletter
+\ifpaper@twocolumn
+  \begin{algorithm*}[t]
+\else
+  \begin{algorithm}[t]
+\fi
+\DontPrintSemicolon
+\LinesNumbered
+\SetAlgoLined
+\SetNlSty{textbf}{\scriptsize}{}
+\SetAlgoNlRelativeSize{-1}
+\footnotesize
+\KwIn{Seed workspace $a_0$; roles $\mathcal R$; validation budget $B$; evaluator slots $1{:}M$}
+\KwIn{Anchor sets $\mathrm{GT}[m]$; checkpoints $\mathcal C$; caps $(\bar B_{\rm exp},\bar B_{\rm train},\bar B_{\rm val})$; best-belief level $\epsilon$}
+\KwOut{Archive $\mathcal T_B$ and selected endpoint agent $a^\star$}
+\BlankLine
+\textbf{Initialize the frozen-epoch archive.}\;
+$\mathcal T \leftarrow \{a_0\}$; $N \leftarrow 0$; $j[m]\leftarrow 1$ for all slots $m$\;
+$E[m]\leftarrow \func{Freeze}(\func{Incumbent}(m))$ for all slots $m$\;
+$\func{TrainEval}(a_0,\mathcal R,E,\bar B_{\rm train})$\tcp*{lineage evidence only}
+\BlankLine
+\textbf{Run CMP-guided search between checkpoints.}\;
+\While{$N < B$}{
+  $b \leftarrow \min\{c\in\mathcal C:c>N\}\wedge B$\tcp*{next checkpoint}
+  \While{$N < b$}{
+    \If{$\func{ExpandGate}(\mathcal T,N)$}{
+      $a_p \leftarrow \func{SampleCladeByCMP}(\mathcal T)$\;
+      $a' \leftarrow \func{EditWorkspace}(a_p,\mathcal T,\bar B_{\rm exp})$\;
+      \If{$\func{Valid}(a')$}{
+        $\mathcal T \leftarrow \mathcal T \cup \{a'\}$\;
+        $\func{TrainEval}(a',\mathcal R,E,\bar B_{\rm train})$\tcp*{not search utility}
+      }
+    }
+    $a \leftarrow \func{SampleCladeByCMP}(\mathcal T)$\tcp*{node-level \hgm choice}
+    $(r,d) \leftarrow \func{LeastMeasuredCell}(a,\mathcal R)$\tcp*{role/task balancing}
+    $o \leftarrow \func{ValEval}(a,r,d,E,\bar B_{\rm val})$\;
+    $\func{AddUtilityRecord}(\mathcal T,a,r,d,o,\mathbf j)$; $N \leftarrow N+1$\;
+  }
+\BlankLine
+  \textbf{At checkpoint, replace evaluators only by anchor best-belief.}\;
+  \ForEach{evaluator slot $m$}{
+    $\Gamma_m \leftarrow \{E[m]\}\cup \func{Challengers}(m,\mathcal T)$\;
+    $\mathrm{BB}[e] \leftarrow I_\epsilon^{-1}(1+S_e^{\rm gt},1+F_e^{\rm gt})$ for each $e\in\Gamma_m$\;
+    $e^\star \leftarrow \func{Best}(\Gamma_m,\mathrm{BB};\ \func{tie}=E[m])$\;
+    \If{$e^\star \neq E[m]$}{
+      $j[m]\leftarrow j[m]+1$; $E[m]\leftarrow \func{Freeze}(e^\star)$\;
+      $\func{EraseSlotRecords}(\mathcal T,m)$; $\func{RecomputeCMPStats}(\mathcal T)$\;
+    }
+  }
+}
+\BlankLine
+\textbf{Select the endpoint by best-belief over archive nodes.}\;
+$a^\star \leftarrow \func{BestBeliefNode}(\mathcal T,\epsilon)$\;
+\Return{$(\mathcal T_B,a^\star)$}\;
+\caption{\small Red Queen G\"odel Machine search with anchor-only evaluator replacement.}
+\label{alg:main}
+\ifpaper@twocolumn
+  \end{algorithm*}
+\else
+  \end{algorithm}
+\fi
+\makeatother

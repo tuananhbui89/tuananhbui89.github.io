@@ -1,0 +1,90 @@
++def attempt_error_resolution(git_dir, test_output, test_error, language):
++    """
++    Attempt to automatically diagnose and resolve errors.
++    Returns a tuple of (resolved, message) where resolved indicates if errors were fixed.
++    """
++    safe_log("Attempting automated error diagnosis and resolution...")
++    
++    # Diagnose errors using our enhanced bash tool function
++    diagnosis = diagnose_errors(test_output, test_error, "")
++    
++    if not diagnosis["has_errors"]:
++        return False, "No errors detected to resolve."
++    
++    resolution_messages = []
++    
++    # Try to apply automated fixes for each diagnosed error
++    for error in diagnosis["errors"]:
++        safe_log(f"Processing error: {error['type']} - {error['description']}")
++        
++        # Simple resolution strategies based on error type
++        if error["type"] == "python_module_not_found":
++            # For Python module not found errors, we might install the module
++            match = re.search(r"No module named '([^']+)'", error["description"])
++            if match:
++                module = match.group(1)
++                resolution_messages.append(f"Would attempt to install Python module: {module}")
++                # In practice, we would run: pip install {module}
++                # But we'll skip actual installation to avoid side effects
++        
++        elif error["type"] == "python_syntax_error" and "file" in error:
++            # For syntax errors, we could potentially apply fixes
++            file_path = os.path.join(git_dir, error["file"])
++            if os.path.exists(file_path):
++                resolution_messages.append(f"Would attempt to fix syntax error in {file_path} at line {error.get('line', 'unknown')}")
++                # In practice, we would use the editor tool's apply_fix command
++                # This is just a demonstration of what could be done
++        
++        elif error["type"] == "test_failure":
++            # For test failures, we might suggest reviewing the implementation
++            resolution_messages.append("Would analyze test failures and suggest implementation improvements")
++    
++    if resolution_messages:
++        return True, "Automated resolution attempted:\n" + "\n".join(resolution_messages)
++    else:
++        return False, "No automated resolutions available for detected errors."
++
+class AgenticSystem:
+     def __init__(
+             self,
+@@ -243,6 +293,16 @@ Your task is to make changes to the files in the {self.git_dir} directory to add
+             
+             safe_log(f"Attempt {attempt + 1} test results: {'PASSED' if test_success else 'FAILED'}")
+             
++            # If tests failed, attempt automated error resolution
++            if not test_success:
++                resolved, resolution_message = attempt_error_resolution(
++                    self.git_dir, test_output, test_error, self.language
++                )
++                safe_log(f"Error resolution: {resolution_message}")
++                
++                # Even if we couldn't automatically resolve, we still provide feedback
++                # In a more advanced implementation, we might actually apply fixes here
++            
+             # If this is the first attempt or tests passed and we didn't have a successful attempt yet, update best patch
+             if attempt == 0 or (test_success and (best_patch is None or not best_test_results)):
+                 best_patch = current_patch
+@@ -278,37 +338,31 @@ Please revise your code to fix these issues and try again.
+         # Log final summary
+         safe_log(f"\n{'='*20} FINAL SUMMARY {'='*20}")
+         safe_log(f"Best solution found on attempt: {best_test_results['attempt'] if best_test_results else 'None'}")
+-        safe_log(f"Tests passed: {best_test_results['test_success'] if best_test_results else 'Unknown'}")
++        safe_log(f"Final test result: {'PASSED' if best_test_results and best_test_results['test_success'] else 'FAILED'}")
++        
++        if best_test_results:
++            safe_log(f"Final test output:\n{best_test_results['test_output']}")
++            if best_test_results['test_error']:
++                safe_log(f"Final test errors:\n{best_test_results['test_error']}")
+         
+-        # Save attempt history to a file
+-        history_file = os.path.join(os.path.dirname(self.chat_history_file), 'attempt_history.md')
+-        with open(history_file, 'w') as f:
+-            f.write("# Attempt History\n\n")
+-            for result in self.attempt_history:
+-                f.write(f"## Attempt {result['attempt']}\n")
+-                f.write(f"**Tests Passed**: {result['test_success']}\n")
+-                f.write(f"**LLM Calls Used**: {result['llm_calls']}\n")
+-                f.write(f"**Test Output**:\n```\n{result['test_output']}\n```\n")
+-                f.write(f"**Test Error**:\n```\n{result['test_error']}\n```\n")
+-                f.write(f"**Patch**:\n```\n{result['patch']}\n```\n\n")
++        return bool(best_test_results and best_test_results['test_success'])

@@ -1,0 +1,525 @@
+\subsection{Working-Posterior Consistency}
+\label{app:proofs:role_task_balance}
+Fix an epoch vector \(\boldsymbol{j}\) and a node \(a\). Let
+\[
+\mathcal C_{\boldsymbol{j}}(a)
+=
+\{(r,d): r\in \mathcal{R}_{\mathrm{elig}}(a,\boldsymbol{j}),\ d\in \mathcal{D}_{r,\mathrm{elig}}(a,\boldsymbol{j})\}
+\]
+denote the finite set of eligible role--task cells for node \(a\) during epoch \(\boldsymbol{j}\).
+For a cell \(c=(r,d)\in \mathcal C_{\boldsymbol{j}}(a)\), let \(p_{c,\boldsymbol{j}}(a)\) be the fixed success
+probability of one search evaluation of node \(a\) on role \(r\) and task \(d\)
+under the active evaluation criteria of epoch \(\boldsymbol{j}\). The default role/task-balanced target assigns
+\[
+w_{r,d}
+=
+\frac{1}{|\mathcal{R}_{\mathrm{elig}}(a,\boldsymbol{j})|}\cdot
+\frac{1}{|\mathcal{D}_{r,\mathrm{elig}}(a,\boldsymbol{j})|},
+\]
+with the obvious renormalization for a smaller eligible set. Generally,
+let \(w_c\ge 0\) be weights satisfying
+\[
+\sum_{c\in \mathcal C_{\boldsymbol{j}}(a)} w_c = 1,
+\]
+with \(w_c\ge 0\)~(see \cref{prop:validity}).
+The corresponding epoch-local role--task balanced utility is
+\[
+U_{\boldsymbol{j}}(a)
+=
+\sum_{c\in \mathcal C_{\boldsymbol{j}}(a)} w_c\,p_{c,\boldsymbol{j}}(a).
+\]
+
+\begin{proposition}[Consistency of the \hgm working posterior under balanced role--task sampling]
+\label{prop:balanced-working-posterior}
+Fix an epoch vector \(\boldsymbol{j}\), a node \(a\), and the eligible role--task cell set
+\(\mathcal C_{\boldsymbol{j}}(a)\). Consider the subsequence of search evaluations in which
+node \(a\) is selected during this epoch. After \(n\) such evaluations, let
+\(n_c(n)\) be the number of evaluations assigned to cell \(c\), and let
+\[
+S_a(n)=\sum_{t=1}^{n} O_t
+\]
+be the total number of binary successes recorded for node \(a\).
+
+Assume the within-node scheduler is \(w\)-balanced, that is:
+\[
+\frac{n_c(n)}{n}\longrightarrow w_c
+\qquad\text{for every } c\in \mathcal C_{\boldsymbol{j}}(a).
+\]
+Assume also that, for each cell \(c\), repeated evaluations of \(a\) on \(c\)
+satisfy a cell-wise strong law:
+\[
+\frac{1}{m}\sum_{i=1}^{m} O_{c,i}
+\longrightarrow
+p_{c,\boldsymbol{j}}(a)
+\qquad\text{a.s. as }m\to\infty,
+\]
+where \(O_{c,i}\) is the \(i\)-th outcome observed from cell \(c\). This condition
+holds, for example, when cell-level outcomes are independent Bernoulli trials
+with fixed success probability \(p_{c,\boldsymbol{j}}(a)\), or under any stationary
+martingale-difference model satisfying the strong law.
+
+Define the \hgm-compatible working posterior
+\[
+Q_n(a)
+=
+\operatorname{Beta}\bigl(1+S_a(n),\,1+n-S_a(n)\bigr).
+\]
+Its mean is
+\[
+M_n(a)
+=
+\frac{1+S_a(n)}{2+n}.
+\]
+Then
+\[
+M_n(a)
+\longrightarrow
+U_{\boldsymbol{j}}(a)
+=
+\sum_{c\in \mathcal C_{\boldsymbol{j}}(a)} w_c\,p_{c,\boldsymbol{j}}(a)
+\qquad\text{a.s.}
+\]
+
+Thus the pooled Beta accumulator preserves the correct role--task balanced
+posterior mean target asymptotically. \(Q_n(a)\) is a working posterior used to retain the flat \hgm success/failure interface for Thompson sampling.
+\end{proposition}
+
+\begin{proof}
+Fix the epoch vector \(\boldsymbol{j}\), node \(a\), and eligible cell set
+\(\mathcal C_{\boldsymbol{j}}(a)\). Write \(p_c\) for \(p_{c,\boldsymbol{j}}(a)\).
+Let \(n_c(n)\) be the number of times cell \(c\) is evaluated among the first
+\(n\) search evaluations of node \(a\) in this epoch. Let
+\[
+\widehat p_{c,n}
+=
+\frac{1}{n_c(n)}
+\sum_{i=1}^{n_c(n)} O_{c,i}
+\]
+whenever \(n_c(n)>0\). Cells with \(w_c=0\) contribute a vanishing fraction of evaluations and drop from the limit, so the cell-wise strong law is applied only on the support \(\{c:w_c>0\}\). For each such cell, \(w_c>0\) and \(n_c(n)/n\to w_c\) give \(n_c(n)\to\infty\), and therefore, by the assumed cell-wise strong law,
+\[
+\widehat p_{c,n}
+\longrightarrow
+p_c
+\qquad\text{a.s.}
+\]
+
+The pooled empirical success rate decomposes by cells:
+\[
+\frac{S_a(n)}{n}
+=
+\sum_{c\in \mathcal C_{\boldsymbol{j}}(a)}
+\frac{n_c(n)}{n}\,
+\widehat p_{c,n}.
+\]
+Taking limits and using the finiteness of \(\mathcal C_{\boldsymbol{j}}(a)\),
+\[
+\frac{S_a(n)}{n}
+\longrightarrow
+\sum_{c\in \mathcal C_{\boldsymbol{j}}(a)}
+w_c p_c
+=
+U_{\boldsymbol{j}}(a)
+\qquad\text{a.s.}
+\]
+
+The \hgm working posterior is
+\[
+Q_n(a)
+=
+\operatorname{Beta}\bigl(1+S_a(n),\,1+n-S_a(n)\bigr),
+\]
+with mean
+\[
+M_n(a)
+=
+\frac{1+S_a(n)}{2+n}.
+\]
+Moreover,
+\[
+\left|
+\frac{1+S_a(n)}{2+n}
+-
+\frac{S_a(n)}{n}
+\right|
+=
+\left|
+\frac{n-2S_a(n)}{n(n+2)}
+\right|
+\le
+\frac{1}{n+2}.
+\]
+Hence
+\[
+M_n(a)-\frac{S_a(n)}{n}\longrightarrow 0,
+\]
+and therefore
+\[
+M_n(a)
+\longrightarrow
+U_{\boldsymbol{j}}(a)
+\qquad\text{a.s.}
+\]
+
+On the posterior interpretation: the cell-stratified likelihood
+\(\prod_{c\in\mathcal C_{\boldsymbol{j}}(a)} p_c^{S_c(n)}(1-p_c)^{n_c(n)-S_c(n)}\), with
+\(S_c(n)\) the successes in cell \(c\), is that of a single Bernoulli parameter
+only when all \(p_c\) are equal. So \(Q_n(a)\) is not an exact Bayesian posterior
+for the role--task mixture but a working posterior preserving the flat \hgm
+accumulator \((S_a(n),n-S_a(n))\) while remaining mean-consistent for \(U_{\boldsymbol{j}}(a)\).
+The pooled working posterior is over-dispersed relative to the balanced
+stratified estimator, hence conservative for the lower-bound reading below.
+\end{proof}
+
+
+
+
+\subsection{Epoch-Local Fixed-Utility Validity}
+\label{app:proofs:epoch-local-validity}
+
+
+\noindent\textbf{Slot-local utility criteria.}
+For each evaluator slot \(m\in\{1,\ldots,M\}\), let
+\(\kappa_m^{(j_m)}\) denote the slot-local utility criterion active at epoch index \(j_m\).
+A slot criterion includes all slot-local objects that can affect the distribution of utility evidence
+for records depending on that slot. It does
+not include derived search statistics, which are recomputed from retained utility evidence after
+transitions. Let
+\[
+\boldsymbol{\kappa}^{\boldsymbol{j}}
+=
+\bigl(\kappa_1^{(j_1)},\ldots,\kappa_M^{(j_M)}\bigr)
+\]
+denote the active criterion vector at epoch vector \(\boldsymbol{j}=(j_1,\ldots,j_M)\).
+
+\begin{assumption}[Stationary learned evaluation within an epoch]
+\label{assumption:generative}
+Fix an epoch vector \(\boldsymbol{j}\). For every evaluator-dependent node--role--task cell
+\((a,r,d)\), the following objects are fixed throughout the epoch:
+(i) all slot criteria in \(\boldsymbol{\kappa}^{\boldsymbol{j}}\) that affect the cell;
+(ii) the node workspace used by node \(a\);
+(iii) the artifact-generation, replay, or adversarial-pool sampling protocol for task \(d\); and
+(iv) the final binary scoring rule.
+Equivalently, if \(X\) denotes the object submitted to the binary scorer, then within the epoch
+\[
+X\sim P_{a,r,d}^{\boldsymbol{j}},
+\qquad
+O\sim K_{r,d}^{\boldsymbol{j}}(\cdot\mid X),
+\qquad
+O\in\{0,1\},
+\]
+where the artifact distribution \(P_{a,r,d}^{\boldsymbol{j}}\) and evaluator kernel
+\(K_{r,d}^{\boldsymbol{j}}\) are time-homogeneous during the epoch and are not changed by previous
+search outcomes in that epoch. The deterministic-evaluator case is included by allowing
+\(K_{r,d}^{\boldsymbol{j}}(1\mid x)\in\{0,1\}\).
+\end{assumption}
+
+The assumption asserts only epoch-local stationarity: under independent draws across repeated calls
+the outcomes are Bernoulli with fixed parameter, and without independence the argument below uses
+only the fixed epoch-local conditional mean.
+
+\noindent\textbf{Utility evidence versus cached artifacts.}
+A utility evidence record is distinct from a raw artifact or audit log: artifacts, lineage reports,
+and immutable audit records may be retained across utility transitions, but they contribute to
+node-level or clade-level utility statistics only through criterion-valid records. A replayed or
+re-scored artifact yields a new record for the task actually used, tagged with the current
+criterion.
+
+A utility evidence record is written as
+\[
+z
+=
+\bigl(a(z),r(z),d(z),o(z),\operatorname{dep}(z),\kappa(z),\boldsymbol{j}(z)\bigr),
+\]
+where \(a(z)\) is the node, \(r(z)\) the role, \(d(z)\) the task, and \(o(z)\in\{0,1\}\) the binary
+outcome. The set
+\[
+\operatorname{dep}(z)\subseteq\{1,\ldots,M\}
+\]
+contains every evaluator slot whose criterion affected the record, either through artifact generation,
+task or adversarial-pool sampling, replay distribution, or final binary scoring. The tag \(\kappa(z)\) stores
+the active criterion tags on the dependent slots when the record was generated, and \(\boldsymbol{j}(z)\)
+stores the epoch vector at generation time. Evaluator-independent records have
+\(\operatorname{dep}(z)=\emptyset\).
+
+\begin{definition}[Criterion-valid record]
+\label{def:criterion-valid-record}
+A utility evidence record \(z\) is valid under the active criterion vector
+\(\boldsymbol{\kappa}^{\boldsymbol{j}}\) if
+\[
+\kappa_\ell(z)=\kappa_\ell^{(j_\ell)}
+\qquad
+\text{for every } \ell\in\operatorname{dep}(z).
+\]
+Records with \(\operatorname{dep}(z)=\emptyset\) are valid under every evaluator epoch.
+A tree archive \(\mathcal T\) is criterion-consistent under
+\(\boldsymbol{\kappa}^{\boldsymbol{j}}\) if every retained utility evidence record in
+\(\mathcal T\) is valid under \(\boldsymbol{\kappa}^{\boldsymbol{j}}\).
+\end{definition}
+
+\begin{definition}[Utility transition on slot \(m\)]
+\label{def:utility-transition}
+A utility transition on evaluator slot \(m\) advances \(j_m\to j_m+1\) by replacing
+\[
+\kappa_m^{(j_m)}
+\quad\text{with}\quad
+\kappa_m^{(j_m+1)}.
+\]
+The new criterion is the next frozen evaluator for that slot, together with any fixed replay or
+validation distribution selected before the epoch starts. It must be fixed before new utility evidence
+is collected. The utility transition then filters stale utility evidence by applying
+\(\operatorname{Erase}_m\).
+
+For every node \(a\), let \(\mathcal Z_a\) denote its retained utility evidence records. After the
+transition to epoch vector \(\boldsymbol{j}'\), where \(\boldsymbol{j}'\) differs from \(\boldsymbol{j}\) only in
+coordinate \(m\), define
+\[
+\begin{gathered}
+\operatorname{Erase}_m(\mathcal Z_a)
+=\\
+\left\{
+z\in\mathcal Z_a:
+m\notin\operatorname{dep}(z)
+\ \text{or}\
+\kappa_m(z)=\kappa_m^{(j'_m)}
+\right\}.
+\end{gathered}
+\]
+After applying \(\operatorname{Erase}_m\) to every node, all derived sufficient statistics are recomputed
+from the retained utility evidence records. These derived quantities include node-level success and
+failure counts \(S_a,F_a\), role and task counters \(n_r(a)\) and \(n_d(a)\), clade-level success
+and failure counts, Thompson-sampling statistics, slot-local validation counters, and cached score
+summaries. Raw artifact caches and immutable audit logs may remain in the archive, but they do not
+contribute to these statistics unless they produce new criterion-valid utility evidence records.
+\end{definition}
+
+\begin{proposition}[Selective erasure preserves criterion consistency]
+\label{prop:erasure-stationarity}
+Consider a utility transition on slot \(m\) from epoch vector \(\boldsymbol{j}\) to epoch vector
+\(\boldsymbol{j}'\), where \(\boldsymbol{j}'\) differs from \(\boldsymbol{j}\) only in coordinate \(m\). Suppose the
+archive \(\mathcal T\) is criterion-consistent under
+\(\boldsymbol{\kappa}^{\boldsymbol{j}}\) before the transition. After replacing
+\(\kappa_m^{(j_m)}\) with \(\kappa_m^{(j'_m)}\), applying \(\operatorname{Erase}_m\), and recomputing all
+derived statistics from the retained utility evidence records, the archive is criterion-consistent under
+\(\boldsymbol{\kappa}^{\boldsymbol{j}'}\). Moreover, any subsequent utility evidence record generated during
+the new epoch and tagged with the active dependent criteria is valid under
+\(\boldsymbol{\kappa}^{\boldsymbol{j}'}\).
+\end{proposition}
+
+\begin{proof}
+Let \(z\) be any record retained after \(\operatorname{Erase}_m\) (\cref{def:utility-transition}) and fix
+\(\ell\in\operatorname{dep}(z)\). If \(\ell=m\), retention forces the second clause of
+\(\operatorname{Erase}_m\), so \(\kappa_m(z)=\kappa_m^{(j'_m)}\). If \(\ell\neq m\), the transition leaves
+slot \(\ell\) untouched (\(\kappa_\ell^{(j_\ell)}=\kappa_\ell^{(j'_\ell)}\)), and prior
+criterion-consistency gives \(\kappa_\ell(z)=\kappa_\ell^{(j_\ell)}=\kappa_\ell^{(j'_\ell)}\). Hence
+\(z\) is valid under \(\boldsymbol{\kappa}^{\boldsymbol{j}'}\) (\cref{def:criterion-valid-record}). Since
+all derived statistics are recomputed from exactly the retained records (\cref{def:utility-transition}),
+no stale record enters them, and any record generated afterward is tagged with the active dependent
+criteria and so is valid by definition. The archive thus stays criterion-consistent under
+\(\boldsymbol{\kappa}^{\boldsymbol{j}'}\) until the next transition.
+\end{proof}
+
+\begin{remark}[Transitions on disjoint slots commute]
+\label{rem:erasure-commute}
+For \(m\neq \ell\), \(\operatorname{Erase}_m\) and \(\operatorname{Erase}_\ell\) are pointwise filters on the record set: each removes exactly the records whose dependency set contains its displaced slot, and neither modifies a retained record. Applying both, in either order, removes the union of the two affected record sets and retains the same archive; since the criterion replacements act on distinct coordinates of \(\boldsymbol{\kappa}\) and all derived statistics are recomputed from retained records, the post-transition state does not depend on the order in which checkpoints on disjoint slots are processed.
+\end{remark}
+
+\begin{remark}[Evaluator-dependent validation records, including the adversarial pool, are erased]
+\label{rem:eval-dependent-erase}
+Some slot-local validation records are generated to expose a predecessor evaluator's blind spots, the adversarial pool of \cref{sec:exp-adversarial} among them. Such a record's outcome depends on the evaluator that scored it, so its dependency set contains that slot and \(\operatorname{Erase}_m\) removes it when that evaluator is displaced. These records therefore influence node utility within the epoch that produced them, and never participate in evaluator replacement, which selects on the evaluator-independent anchor \(\mathrm{GT}_m\).
+\end{remark}
+
+We next state the fixed-epoch validity result, an interface theorem: after conditioning on a fixed epoch vector and a criterion-consistent archive, the retained utility evidence and subsequent evaluations in that epoch refer to a fixed binary-outcome problem compatible with the \hgm search.
+
+\begin{proposition}[Epoch-local fixed-criterion validity]
+\label{prop:validity}
+Fix an epoch vector \(\boldsymbol{j}\) and suppose the archive is criterion-consistent under the active
+criterion vector \(\boldsymbol{\kappa}^{\boldsymbol{j}}\). Assume all evaluator-dependent roles satisfy
+\Cref{assumption:generative} under their active frozen criteria, and all evaluator-independent roles
+satisfy the \hgm evaluation conditions in \cref{assumption:hgm}. Then, within this fixed epoch,
+every eligible node--role--task tuple \((a,r,d)\) induces a time-homogeneous binary outcome law
+with fixed success probability
+\[
+p_{r,d,\boldsymbol{j}}(a)
+=
+\Pr_{\boldsymbol{\kappa}^{\boldsymbol{j}}}\!\left(O=1\mid a,r,d\right).
+\]
+Consequently, the epoch defines a fixed-criterion binary-outcome search problem with epoch-local
+utility
+\[
+U_{\boldsymbol{j}}(a)
+=
+\sum_{(r,d)\in\mathcal C_{\boldsymbol{j}}(a)}
+w_{r,d}^{\boldsymbol{j}}\,p_{r,d,\boldsymbol{j}}(a),
+\]
+where \(\mathcal C_{\boldsymbol{j}}(a)\) is the eligible role--task cell set for node \(a\) during the epoch
+and \(w_{r,d}^{\boldsymbol{j}}\ge 0\) are fixed epoch-local target weights, normalized over
+\(\mathcal C_{\boldsymbol{j}}(a)\). Therefore, any \hgm oracle-level theorem whose assumptions are a
+fixed binary-outcome criterion and access to the corresponding exact \cmp oracle applies to the
+corresponding idealized epoch-local oracle problem under \(U_{\boldsymbol{j}}\). The empirical
+Thompson-sampling implementation uses retained binary records as a working estimator of this
+fixed-epoch problem; it is not itself an exact \cmp oracle implementation.
+\end{proposition}
+
+\begin{proof}
+Fix an epoch vector \(\boldsymbol{j}\); the active criterion vector
+\(\boldsymbol{\kappa}^{\boldsymbol{j}}\) is then fixed by definition. We show that every eligible
+node--role--task tuple \((a,r,d)\) has a fixed binary outcome distribution.
+
+If role \(r\) is evaluator-independent, the \hgm evaluation conditions in
+\Cref{assumption:hgm} imply that repeated evaluations of \((a,r,d)\) produce binary outcomes whose
+distribution, and hence whose expected value, does not change with evaluation time or previous
+search events, so there exists a fixed success probability
+\[
+p_{r,d,\boldsymbol{j}}(a)=\Pr(O=1\mid a,r,d).
+\]
+
+If role \(r\) is evaluator-dependent, let \(X\) denote the object submitted to the binary scorer. This
+object may be a freshly generated artifact, a revised artifact produced through a fixed feedback
+pipeline, or an item sampled from a frozen replay or adversarial-pool distribution. By
+\Cref{assumption:generative}, its distribution \(P_{a,r,d}^{\boldsymbol{j}}\) is fixed within the epoch. The
+binary scoring rule is also fixed: conditioned on \(X=x\), the outcome is either deterministic or
+sampled from a fixed evaluator kernel \(K_{r,d}^{\boldsymbol{j}}(\cdot\mid x)\). Hence the marginal
+success probability \(p_{r,d,\boldsymbol{j}}(a)=\Pr_{\boldsymbol{\kappa}^{\boldsymbol{j}}}(O=1\mid a,r,d)=\int K_{r,d}^{\boldsymbol{j}}(1\mid x)\,dP_{a,r,d}^{\boldsymbol{j}}(x)\) is fixed throughout the epoch, with the deterministic case \(K_{r,d}^{\boldsymbol{j}}(1\mid x)\in\{0,1\}\) included.
+
+Thus every eligible tuple \((a,r,d)\) induces binary outcomes with a fixed epoch-local success
+probability. Since the archive is criterion-consistent under
+\(\boldsymbol{\kappa}^{\boldsymbol{j}}\), every retained utility evidence record used by the search
+procedure was generated under criterion tags matching the active criteria on all slots that affected
+that record. By construction, subsequent records generated in the same epoch are tagged
+with the same active dependent criteria.
+
+The epoch-local utility
+\[
+U_{\boldsymbol{j}}(a)
+=
+\sum_{(r,d)\in\mathcal C_{\boldsymbol{j}}(a)}
+w_{r,d}^{\boldsymbol{j}}\,p_{r,d,\boldsymbol{j}}(a)
+\]
+is therefore a fixed function of \(a\) for the duration of the epoch. The \hgm search
+algorithm requires a stream of binary outcomes per evaluated node, aggregated over nodes and
+clades under a fixed utility criterion. This requirement is satisfied within the epoch because every
+search evaluation produces \(O\in\{0,1\}\), and the criterion-consistency invariant ensures that the
+records used for node-level and clade-level statistics are valid under the current epoch criterion.
+
+It follows that, conditional on the fixed epoch vector \(\boldsymbol{j}\), the active criterion vector
+\(\boldsymbol{\kappa}^{\boldsymbol{j}}\), and the criterion-consistent archive, the current epoch defines an
+ordinary fixed-criterion binary-outcome search problem of the \hgm form. Hence \hgm oracle-level
+theorems whose assumptions are satisfied by this idealized fixed-epoch problem apply to it
+under \(U_{\boldsymbol{j}}\).
+\end{proof}
+
+
+
+\subsection{Supporting Results for Controlled Utility Evolution}
+\label{app:controlled_utility_proofs}
+
+
+\noindent\textbf{Ground-truth best-belief replacement.}
+Recall the slot-\(m\) replacement rule and the notation \(\mathcal E_m(c)\), \(S^{\mathrm{gt}}_e\), \(F^{\mathrm{gt}}_e\), and \(BB_\epsilon(e)=I^{-1}_{\epsilon}(1+S^{\mathrm{gt}}_e,\,1+F^{\mathrm{gt}}_e)\) of \cref{app:swap-rule}, where the checkpoint rule selects an element of \(\argmax_{e\in\mathcal E_m(c)}BB_\epsilon(e)\) with ties favoring the incumbent.
+
+\begin{remark}[Anchor-only evaluator replacement]
+\label{prop:anchor-best-belief-replacement}
+The score \(BB_\epsilon(e)=I^{-1}_\epsilon(1+S^{\mathrm{gt}}_e,\,1+F^{\mathrm{gt}}_e)\) depends on the evaluator-independent anchor counts \((S^{\mathrm{gt}}_e,F^{\mathrm{gt}}_e)\) only (\cref{app:swap-rule}); no slot-dependent utility record enters it. The selected next evaluator is therefore a function only of the incumbent, the challenger set, and these anchor counts, and because the incumbent lies in the candidate set with ties broken toward it, no transition occurs unless a challenger strictly maximizes the score. Consequently, on the common anchor evidence at a checkpoint, the promoted evaluator's anchor best-belief is at least the incumbent's: a replacement is never worse than retention at the moment it is made.
+\end{remark}
+
+\begin{proposition}[Best-belief lower-bound trajectory]
+\label{prop:best-belief-lower-bound}
+Fix an epoch and a finite candidate set \(\mathcal A\). For each candidate \(a\in\mathcal A\), let the \hgm working posterior over its epoch-local utility be
+\[
+Q_a=\operatorname{Beta}(1+S_a,\,1+F_a),
+\]
+and define
+\[
+BB_\epsilon(a)=I^{-1}_\epsilon(1+S_a,\,1+F_a).
+\]
+If \(a^\star\in\argmax_{a\in\mathcal A}BB_\epsilon(a)\), then, under the working posterior for \(a^\star\),
+\[
+\Pr\!\left(U(a^\star)\ge BB_\epsilon(a^\star)\mid Q_{a^\star}\right)=1-\epsilon.
+\]
+More generally, for any sequence of \(L\) reported selections \(a^\star_1,\ldots,a^\star_L\), if the corresponding working posteriors are calibrated, then with probability at least \(1-L\epsilon\), every selected candidate's utility simultaneously exceeds its reported best-belief lower bound.
+\end{proposition}
+
+\begin{proof}
+By definition \(BB_\epsilon(a)\) is the \(\epsilon\)-quantile of the Beta working posterior \(Q_a\) (\cref{app:swap-rule}), so \(\Pr_{U\sim Q_a}(U\ge BB_\epsilon(a))=1-\epsilon\) up to equality conventions for continuous distributions; applying this to \(a^\star\) gives the single-selection claim. For the sequence claim, let \(E_\ell\) be the event \(U(a^\star_\ell)<BB_\epsilon(a^\star_\ell)\) under the calibrated working posterior at selection \(\ell\), so \(\Pr(E_\ell)=\epsilon\). By the union bound \(\Pr(\bigcup_{\ell=1}^L E_\ell)\le L\epsilon\), so with probability at least \(1-L\epsilon\) no selected candidate falls below its reported lower bound.
+\end{proof}
+
+\begin{remark}
+\Cref{prop:best-belief-lower-bound} is a calibration statement about the selected lower-bound trajectory. It justifies interpreting an increasing best-belief curve as increasing posterior evidence for better best-belief agents, conditional on the working-posterior assumptions already stated in \cref{prop:balanced-working-posterior}.
+\end{remark}
+
+\noindent\textbf{Piecewise fixed-criterion validity.}
+Let
+\[
+0=\tau_0 < \tau_1 < \cdots < \tau_K \le B
+\]
+be the realized transition times. Transitions occur only at pre-specified checkpoints where some slot changes. Let \(\mathcal{F}_{\tau_k}\) be the sigma-field generated by the archive, retained utility records, immutable audit logs, candidate evaluators, checkpoint statistics, and all random choices made up to \(\tau_k\).
+
+\begin{proposition}[Piecewise fixed-criterion validity]
+\label{prop:piecewise-fixed-validity}
+Assume that: (i) within each epoch, evaluator-dependent roles satisfy the stationary learned-evaluation condition in \cref{assumption:generative}; (ii) evaluator-independent roles use fixed ground-truth criteria; (iii) slot transitions occur only at checkpoint boundaries; (iv) after each transition, the erasure removes records invalid under the new criterion; and (v) all derived search statistics are recomputed from retained records.
+
+Then, conditional on \(\mathcal{F}_{\tau_k}\) and on the criterion vector selected at \(\tau_k\), the interval \([\tau_k,\tau_{k+1})\) is a fixed-criterion binary-outcome search problem. In particular, for every eligible node--role--task tuple \((a,r,d)\) during that interval, there is a fixed epoch-local success probability
+\[
+p_{a,r,d}^{(k)} = \Pr(O=1 \mid a,r,d,\kappa^{(k)}),
+\]
+and the corresponding role--task balanced utility is fixed for the duration of the epoch.
+\end{proposition}
+
+\begin{proof}
+Induct over epochs. Conditioned on \(\mathcal F_{\tau_k}\) and the criterion vector selected at \(\tau_k\), \cref{prop:erasure-stationarity} gives a criterion-consistent archive at the start of \([\tau_k,\tau_{k+1})\): the erasure operator removes every record invalid under the new criterion and derived statistics are recomputed from retained records, so no stale record enters the epoch's statistics. No further transition occurs inside the interval, so \cref{prop:validity} applies and every eligible \((a,r,d)\) has a fixed epoch-local mean \(p_{a,r,d}^{(k)}\), with the role--task balanced utility a fixed weighted average of these means. The inherited tree is part of the conditioned archive at \(\tau_k\) and does not enter the within-epoch outcome process, completing the induction.
+\end{proof}
+
+\begin{remark}
+The result is epoch-local: after conditioning on the checkpoint decision and applying selective erasure, each realized epoch is compatible with the fixed-criterion binary-outcome interface used by the \hgm search~(the multi-epoch scope is delimited in \cref{prop:evaluator-trajectory}).
+\end{remark}
+
+\noindent\textbf{Evaluator anchor lower bound at each checkpoint.}
+The remark above is epoch-local because the \emph{task-agent} criterion changes at every transition. The \emph{evaluator} slot is the exception: its replacement test is scored only on the fixed anchor (\cref{prop:anchor-best-belief-replacement}), so over the whole run the slot is a single fixed-criterion selection sampled at checkpoints, and \cref{prop:best-belief-lower-bound} applies to it. Fixing one slot, write \(U^{\mathrm{gt}}(e)\) for an evaluator's anchor utility (its accuracy on the fixed anchor) and \(L^{(k)}=BB_\epsilon^{\mathrm{gt}}(e^{(k)})=I^{-1}_\epsilon(1+S^{\mathrm{gt}}_{e^{(k)}},\,1+F^{\mathrm{gt}}_{e^{(k)}})\) for the anchor best-belief of the evaluator promoted at its \(k\)-th transition.
+
+\begin{remark}[Evaluator anchor lower bound]
+\label{prop:evaluator-trajectory}
+Fix a slot whose anchor criterion is fixed for the run, with promoted evaluators \(e^{(0)},\dots,e^{(K)}\) and anchor best-belief values \(L^{(k)}=BB_\epsilon^{\mathrm{gt}}(e^{(k)})\) measured at each promotion. If the anchor working posteriors are calibrated, then with probability at least \(1-K\epsilon\) every promoted evaluator's true anchor utility satisfies \(U^{\mathrm{gt}}(e^{(k)})\ge L^{(k)}\) jointly; this is the sequence claim of \cref{prop:best-belief-lower-bound} applied to the \(K\) promoted evaluators on the fixed anchor (\(L=K\)). This is a per-checkpoint lower-bound statement together with the best-belief dominance of \cref{prop:anchor-best-belief-replacement}, not a guarantee that the realized anchor accuracy improves monotonically.
+\end{remark}
+
+\noindent\textbf{Exponential checkpoint overhead.}
+Let \(B\) be the search-evaluation budget. Fix a checkpoint base \(\rho>1\) and minimum scale \(h\ge1\). Consider checkpoint opportunities
+\[
+\mathcal C_B(\rho,h)
+=
+\{\lfloor h\rho^q\rfloor : q=0,1,\ldots,Q\},
+\]
+where \(Q\) is the largest integer such that \(h\rho^Q\le B\).
+
+\begin{proposition}[Linear work under exponential checkpoints]
+\label{prop:linear-work}
+If a checkpoint at time \(c\) may reprocess at most all \(c\) previous slot-dependent records, then the total number of reprocessed records over all checkpoints in \(\mathcal C_B(\rho,h)\) is \(\mathcal{O}(B)\), with constant at most \(\rho/(\rho-1)\).
+\end{proposition}
+
+\begin{proof}
+At checkpoint \(q\), the number of previous records that can be reprocessed is at most
+\[
+\lfloor h\rho^q\rfloor
+\le
+h\rho^q.
+\]
+Summing over all checkpoint opportunities gives
+\[
+h\sum_{q=0}^{Q}\rho^q
+=
+\frac{h(\rho^{Q+1}-1)}{\rho-1}
+\le
+\frac{\rho B}{\rho-1}.
+\]
+For fixed \(\rho>1\), this is
+\[
+\mathcal{O}(B).
+\]
+The common base-two schedule is the special case \(\rho=2\), for which the bound is at most \(2B\).
+\end{proof}
+
+\begin{remark}[Dense uniform checkpointing]
+\label{rem:dense-quadratic}
+Under uniform checkpoints every \(h\) steps, checkpoint \(q\) can reprocess up to \(qh\) previous records, so the total over \(\lfloor B/h\rfloor\) checkpoints is \(\sum_{q=1}^{\lfloor B/h\rfloor} qh = \Theta(B^2/h)\): for fixed \(h\), quadratic in the budget rather than linear.
+\end{remark}
+
+Full replay is therefore compatible with linear exposure under the exponential schedule. Bounded recovery remains the default because it keeps utility transitions auditable and avoids spending unnecessary evaluations on cached artifacts.

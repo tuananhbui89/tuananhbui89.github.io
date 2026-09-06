@@ -1,0 +1,94 @@
+\section{System Architecture}
+\label{sec:arch}
+
+MOSS realizes self-rewriting on a production agentic substrate through five pieces: a main container that runs the substrate's user-facing agent, a control-surface CLI through which the agent (and the user, via the agent) drives evolution, a pluggable external coding-agent CLI invoked per stage to make code edits, a host-resident daemon (the \emph{host-daemon}) that supervises everything else, and ephemeral trial workers used to verify candidates.
+
+\subsection{Substrate}
+\label{subsec:substrate}
+
+For the exposition and case study throughout this paper, MOSS uses OpenClaw~\citep{openclaw-github} as its substrate; the design adapts to other mainstream agentic substrates such as Hermes Agent. OpenClaw is a production-grade agentic system, with a multi-channel gateway, plugin and hook plumbing, session and skill machinery, and persistent user state. The minimal scaffolds where academic self-evolving agents operate are far smaller and simpler; that gap shapes the four design choices below.
+
+\subsection{Control Surface}
+\label{subsec:control-surface}
+
+MOSS exposes its entire evolution lifecycle to the agentic substrate through a single \texttt{moss evo} CLI that the substrate's user-facing agent invokes via its built-in shell tool. Nine subcommands cover the full surface: \texttt{status}, \texttt{batches}, \texttt{batch}, \texttt{start}, \texttt{stop}, \texttt{restart}, \texttt{apply}, \texttt{flag}, and \texttt{catch-up}. The first seven route over HTTP to an evolution-control endpoint group that MOSS injects into the substrate's gateway, where they reach the in-container evolution service; \texttt{flag} and \texttt{catch-up} route over a Unix socket to the host-daemon's auto-scan engine.
+
+The CLI is reachable from inside the substrate's runtime through a single bind-mount of the script into the container at install time. To make the agent aware of the capability, MOSS injects a one-paragraph block into the substrate's system prompt pointing the agent at an on-disk capability document that describes the commands, their use, and the operational rules; the agent reads the document on demand when the user mentions evolution, batches, applying a new version, or expresses dissatisfaction with a turn. Asynchronous notifications from MOSS to the agent flow in the opposite direction through three webhook events: \texttt{evolution-converged} and \texttt{evolution-failed} are fired by the in-container evolution service at loop termination, and \texttt{apply-complete} is fired by the host-daemon after a container swap settles. Each event is POSTed to a webhook endpoint that a small hook-mapping configuration in the substrate translates into a system message delivered on the agent's next turn.
+
+This three-piece interface---CLI in, webhook out, capability document as reference---is the entire contract between MOSS and a substrate. Any substrate that provides five primitives (shell-equivalent tool execution, filesystem read, periodic scheduling, webhook-to-agent delivery, and system-prompt injection) can host MOSS by configuring these pieces, with no changes to MOSS's own code.
+
+\subsection{External Coding Agent}
+\label{subsec:external-coding-agent}
+
+On a substrate this large, MOSS cannot perform code modification through a single inference loop that reads and rewrites the codebase itself---the cross-file invariants and concurrent state interactions exceed what one such loop can carry. MOSS therefore handles evolution scheduling and decision-making through a deterministic state machine inside the main container, and delegates the specific act of editing to an external coding-agent CLI invoked as a host-side subprocess; the CLI runs on the host rather than inside the main container because only the host carries the shell environment, network egress, and scope mounts the editing work needs. Per-stage invocation mechanics are deferred to \S\ref{subsec:stage-pipeline}. Responsibilities split along this seam: MOSS owns stage ordering, verdicts, loop exit, and the swap moment, while the coding-agent CLI owns the act of editing within the scope it is given.
+
+The coding-agent CLI itself is pluggable. MOSS abstracts the integration through a four-method runner interface; the dispatcher, RPC schema, stage logic, and substrate-side gateway are unchanged across providers. Four runners ship in tree---Claude Code~\citep{claude-code}, OpenAI Codex~\citep{openai-codex-cli}, DeepSeek-TUI~\citep{deepseek-tui}, and OpenCode~\citep{opencode}---selected at start time by configuration, with an optional per-spawn override that lets individual roles use different providers within one evolution run. Adding a fifth provider is one new runner file plus a single line in the registry. This decoupling keeps the evolution machinery independent of any specific coding-agent vendor and lets the substrate operator pair MOSS with whichever provider best matches their model-access and cost constraints.
+
+\subsection{Host-Daemon Supervision}
+\label{subsec:host-daemon}
+
+Container lifecycle management cannot live inside the main container: once the candidate converges, the container must be stopped and replaced by a freshly built image, and a process cannot start a new container after exiting itself.
+
+MOSS places that responsibility, and several related ones, in a host-resident asyncio process called the \emph{host-daemon}. It serves a Unix-socket RPC handling four families of operations: coding-agent CLI invocation per stage (\S\ref{subsec:external-coding-agent}), trial-worker container lifecycle, docker build and image management, and the auto-scan engine that scans session JSONLs for under-performing dialogue chunks (\S\ref{subsec:directed}). A swap-supervisor task runs in the same event loop, file-polling the evolution state directory for swap requests written by the gateway's apply handler; on detection, it restarts the substrate container against the candidate image, probes the new container's health, and either commits the swap or rolls back to the last-known-good image (the probe protocol and state-file layout are described in \S\ref{subsec:swap}). After the swap settles, the daemon fires the \texttt{apply-complete} webhook back to the freshly-swapped gateway so the new instance's agent receives a system message announcing what just happened.
+
+\subsection{Topology}
+\label{subsec:topology}
+
+The four preceding choices materialize into the host-side topology in Figure~\ref{fig:topology}.
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[
+  font=\small,
+  >={Stealth[length=2mm]},
+  box/.style={
+    draw, thick, rounded corners=2pt, align=center,
+    inner sep=5pt, minimum height=1.4cm, minimum width=4.0cm
+  },
+  hostbg/.style={
+    draw, dashed, rounded corners=4pt, inner sep=10pt
+  },
+  edgelabel/.style={font=\scriptsize, fill=white, inner sep=1.2pt, align=center}
+]
+
+\node[box, fill=blue!7] (gateway) {%
+  moss-gateway container\\[1pt]
+  {\footnotesize agent + evolution service}\\[1pt]
+  {\footnotesize + bind-mounted \texttt{moss} CLI}
+};
+
+\node[box, fill=orange!14, right=20mm of gateway] (daemon) {%
+  host-daemon\\[1pt]
+  {\footnotesize asyncio RPC server,}\\[1pt]
+  {\footnotesize swap supervisor,}\\[1pt]
+  {\footnotesize auto-scan engine}
+};
+
+\node[box, fill=green!10, below=14mm of daemon, xshift=-2cm] (cli) {%
+  Coding-agent CLI\\[1pt]
+  {\footnotesize spawned per stage}
+};
+
+\node[box, fill=purple!8, below=14mm of daemon, xshift=2cm] (trial) {%
+  Trial workers $\times$\,$N$\\[1pt]
+  {\footnotesize ephemeral, per iteration}
+};
+
+\draw[<->, thick] (gateway.north east) to[bend left=15] node[midway, edgelabel] {HTTP\\(api + hooks)} (daemon.north west);
+\draw[<->, thick] (gateway.south east) to[bend right=15] node[midway, edgelabel] {Unix socket\\(RPC)} (daemon.south west);
+\draw[->, thick]  (daemon) -- (cli) node[midway, left=1mm, edgelabel] {spawn};
+\draw[->, thick]  (daemon) -- (trial) node[midway, right=1mm, edgelabel] {spawn};
+
+\begin{scope}[on background layer]
+\node[hostbg, fit=(daemon)(gateway)(cli)(trial), fill=gray!4] (host) {};
+\end{scope}
+\node[font=\footnotesize, anchor=north west] at ([xshift=4pt,yshift=-4pt]host.north west) {Host machine};
+
+\end{tikzpicture}
+\caption{MOSS host-side topology. The moss-gateway container hosts the user-facing agent, the in-container evolution service, and a bind-mounted \texttt{moss} CLI; the host-daemon (an asyncio process) serves a Unix-socket RPC for coding-agent and trial-worker orchestration, exposes an HTTP path for evolution control via the gateway, supervises swap requests, and runs the auto-scan engine. The coding-agent CLI is spawned per evolution stage; trial workers are launched per iteration as ephemeral containers. The user-state volume (sessions, memory, credentials, agent configs) is mounted into the moss-gateway container from the host filesystem so state survives an in-place swap (not shown).}
+\label{fig:topology}
+\end{figure}
+
+The host-daemon runs permanently on the host and supervises three other host-side entities. The moss-gateway container is the long-running, user-facing substrate instance hosting the chat agent, the in-container evolution service, and the bind-mounted \texttt{moss} CLI; its image tag is bumped on every successful swap. The coding-agent CLI is a subprocess the daemon spawns per evolution stage (\S\ref{sec:evolution}); it lives only for the duration of that stage. The trial workers are short-lived in a different sense: each iteration brings up $N$ containers from the candidate image (\S\ref{subsec:verification}), runs the agent against each batch task autonomously, then tears them down.
+
+User state---sessions, memory, credentials, and agent configs---lives on a user-state volume mounted from the host filesystem into the moss-gateway container. A swap therefore destroys the container but not the volume, and the new image inherits state intact; trial workers run without this mount and with isolated networking.

@@ -1,0 +1,27 @@
+\subsection{One Rule for Replacement and Selection}
+\label{app:controlled_utility_details}
+
+Evaluator slots are frozen within an epoch, challengers are selected by $\epsilon$-best-belief score on anchor evidence, and the promoted evaluator is frozen for the next epoch~(\cref{sec:method:utility}).
+
+\subsubsection{Evaluator replacement rule}
+\label{app:swap-rule}
+
+At checkpoint $c$, fix an evaluator slot $m$. Let $e_m^{(j_m)}$ be the incumbent frozen evaluator and let $\mathcal C_m(c)$ be the challenger evaluators with the required evaluator-independent anchor evidence on $\mathrm{GT}_m$. Define
+\[
+\mathcal E_m(c)
+=
+\{e_m^{(j_m)}\}\cup\mathcal C_m(c).
+\]
+For each candidate $e\in\mathcal E_m(c)$, let $S^{\mathrm{gt}}_e$ and $F^{\mathrm{gt}}_e$ be its successes/failures on the anchor. Compute
+\[
+BB_\epsilon(e)
+=
+I^{-1}_{\epsilon}\!\left(1+S^{\mathrm{gt}}_e,\,1+F^{\mathrm{gt}}_e\right),
+\]
+the same $\epsilon$-best-belief score used for final agent selection~(\cref{sec:method:prelim}). Because $BB_\epsilon(e)$ is the $\epsilon$-quantile of the candidate's Beta posterior over anchor outcomes, it is a conservative estimate of the candidate's true accuracy that the candidate exceeds with probability $1-\epsilon$. The selected evaluator is
+\[
+e_m^\star
+\in
+\argmax_{e\in\mathcal E_m(c)} BB_\epsilon(e),
+\]
+with ties favoring the incumbent; if $e_m^\star=e_m^{(j_m)}$, no transition occurs.

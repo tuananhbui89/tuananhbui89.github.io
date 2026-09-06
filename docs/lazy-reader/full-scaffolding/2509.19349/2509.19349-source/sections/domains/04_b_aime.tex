@@ -1,0 +1,33 @@
+\paragraph{Task Description.}
+We evaluate \ouralgo on AIME 2024 \citep{AIME2024} mathematical reasoning problems, consisting of 30 challenging competition-level questions requiring sophisticated problem-solving strategies \citep{hu2024automated}.
+The task involves evolving agent scaffold designs constrained to a maximum of 10 LLM queries per problem for computational efficiency.
+Using \texttt{gpt-4.1-nano} as the base model, we discover scaffold designs for 75 generations, with each candidate evaluated across three independent runs on the complete question set.
+
+\paragraph{\ouralgo's Discovery Dynamics.}
+The evolutionary process systematically explores prompting strategies, ensemble methods, and verification techniques to identify optimal agent architectures.
+\ouralgo discovers scaffold designs that significantly outperform hand-designed baselines, including simple single-query agents and sophisticated majority-voting approaches.
+The search reveals a Pareto frontier between efficiency and performance (\Cref{fig:results_aime}, left), with 7 LLM queries yielding maximum performance while an alternative scaffold achieves comparable results using the full 10-query budget.
+%
+Generalization experiments reveal important insights into the scaffold's robustness.
+Evaluating on 2023 and 2025 AIME problems shows different transfer patterns (\Cref{fig:results_aime}, middle): smaller improvements on 2023 problems suggest potential saturation due to training data contamination, while larger gains on 2025 problems indicate successful generalization to recent, unseen challenges.
+Cross-LLM model transfer experiments validate robustness, with successful adaptation to \texttt{gpt-4.1-mini}, \texttt{gpt-4.1}, and \texttt{o4-mini} demonstrating that discovered architectures capture generalizable strategies rather than model-specific optimizations (\Cref{fig:results_aime}, right).
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.975\textwidth]{figures/f4_results_aime.pdf}
+    \caption{\textbf{\ouralgo for Agent Scaffold Design.} \textit{Left:} \ouralgo discovers a Pareto frontier between performance and LLM query budget. \textit{Middle:} The discovered scaffold generalizes to unseen AIME problems. \textit{Right:} The scaffold improves performance regardless of the underlying LLM.}
+    \label{fig:results_aime}
+    \vspace{-15pt}
+\end{figure}
+
+\paragraph{\ouralgo's Discovered Solution.}
+The evolved agent implements a three-stage architecture leveraging diverse expert personas, critical peer review, and synthesis mechanisms.
+Three specialized experts generate independent solutions using distinct approaches: a meticulous step-by-step reasoner, an intuitive pattern-recognition specialist, and an algorithmic computer science-oriented mathematician, each operating at 0.7 temperature to balance creativity with reliability.
+%
+The second stage introduces critical peer review, where each solution undergoes rigorous scrutiny from a skeptical reviewer at low temperature (0.1).
+The reviewer validates pattern-based reasoning by testing patterns on multiple examples, identifies logical flaws, and provides corrections when necessary, significantly improving solution quality.
+%
+The final synthesis stage employs an editor-in-chief persona operating at zero temperature to analyze all solutions and critiques, identify the most reliable approach, and construct a canonical solution.
+Robust fallback mechanisms resort to majority voting among reviewed solutions, then original solutions, ensuring reliable output when components fail.
+This architecture effectively utilizes 7 LLM calls (3 generation + 3 review + 1 synthesis) within the 10-call constraint.
+The complete discovered agent scaffold can be found in \Cref{appsec:aime_agent}.

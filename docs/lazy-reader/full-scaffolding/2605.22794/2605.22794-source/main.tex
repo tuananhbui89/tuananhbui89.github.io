@@ -1,0 +1,76 @@
+\documentclass{article}
+
+% NeurIPS 2026 — arXiv preprint mode (non-anonymous).
+\usepackage[preprint]{neurips_2026}
+\makeatletter\renewcommand{\@notice}{}\makeatother
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{positioning, arrows.meta, fit, calc, backgrounds, shapes.geometric}
+\usepackage{eso-pic}
+
+
+\title{MOSS: Self-Evolution through Source-Level Rewriting in Autonomous Agent Systems}
+
+
+\author{%
+  Qianshu Cai\textsuperscript{1,\,$\ast$,\,$\triangle$}\enspace
+  Yonggang Zhang\textsuperscript{2,\,$\ast$}\enspace
+  Xianzhang Jia\textsuperscript{2}\enspace
+  Huajiang Zheng\textsuperscript{2} \\
+  \bfseries\rule{0pt}{24pt}%
+  Wei Xue\textsuperscript{2}\enspace
+  Jun Song\textsuperscript{3}\enspace
+  Xinmei Tian\textsuperscript{1,\,$\dagger$}\enspace
+  Yike Guo\textsuperscript{2,\,$\dagger$} \\[6pt]
+  \textsuperscript{1}University of Science and Technology of China \\
+  \textsuperscript{2}Hong Kong Generative AI Research \& Development Center \\
+  \textsuperscript{2}The Hong Kong University of Science and Technology \\
+  \textsuperscript{3}Hong Kong Baptist University
+}
+\begin{document}
+
+\AddToShipoutPictureFG*{%
+  \AtPageUpperLeft{%
+    \put(\LenToUnit{1.5in},-\LenToUnit{0.85in}){%
+      \includegraphics[height=1.2cm]{hkgailogo2.png}%
+    }%
+  }%
+}
+
+\maketitle
+ 
+\renewcommand{\thefootnote}{$\ast$}\footnotetext{Equal contribution.}
+\renewcommand{\thefootnote}{$\dagger$}\footnotetext{Corresponding authors.}
+\renewcommand{\thefootnote}{$\triangle$}\footnotetext{Remote RA at HKGAI and HKUST.}
+\renewcommand{\thefootnote}{\arabic{footnote}}
+
+\begin{abstract}
+Autonomous agentic systems are largely static after deployment: they do not learn from user interactions, and recurring failures persist until the next human-driven update ships a fix. Self-evolving agents have emerged in response, but all confine evolution to text-mutable artifacts---skill files, prompt configurations, memory schemas, workflow graphs---and leave the agent harness untouched. Since routing, hook ordering, state invariants, and dispatch live in code rather than in any text artifact, an entire class of structural failure is physically unreachable from the text layer. We argue that source-level adaptation is a fundamentally more general medium: it is Turing-complete, a strict superset of every text-mutable scope, takes effect deterministically rather than through base-model compliance, and does not erode under long-context drift. We present MOSS, a system that performs self-rewriting at the source level on production agentic substrates. Each evolution is anchored to an automatically curated batch of production-failure evidence and proceeds through a deterministic multi-stage pipeline; code modification is delegated to a pluggable external coding-agent CLI while MOSS retains stage ordering and verdicts. Candidates are verified by replaying the batch against the candidate image in ephemeral trial workers, then promoted via user-consent-gated, in-place container swap with health-probe-gated rollback. On OpenClaw, MOSS lifts a four-task mean grader score from 0.25 to 0.61 in a single cycle without human intervention. GitHub: \url{https://github.com/hkgai-official/Moss}.
+\end{abstract}
+
+
+\input{sections/section-1-introduction}
+\input{sections/section-2-architecture}
+\input{sections/section-3-evolution}
+\input{sections/section-4-case-study}
+\input{sections/section-5-related-work}
+\input{sections/section-6-conclusion}
+
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+
+\end{document}

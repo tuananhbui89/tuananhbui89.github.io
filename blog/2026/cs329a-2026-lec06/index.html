@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    
+    
+
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Stanford CS329A Self-Improving AI Agents | Part 6 | Train Time Scaling/Scaling RL | Tuan-Anh  Bui</title>
+    <meta name="author" content="Tuan-Anh  Bui">
+    <meta name="description" content="Lecture notes for Stanford CS329A Self-Improving AI Agents | Part 6 | Train Time Scaling/Scaling RL">
+    <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
+
+
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+    
+    <link defer rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700%7CRoboto+Slab:100,300,400,500,700%7CMaterial+Icons">
+
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
+
+    
+
+    
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
+    
+    <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+    <link rel="canonical" href="https://tuananhbui89.github.io/blog/2026/cs329a-2026-lec06/">
+
+    
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark">
+    <script src="/assets/js/theme.js?96d6b3e1c3604aca8b6134c7afdd5db6"></script>
+    <script src="/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script>
+    
+
+  </head>
+
+  
+  <body class="fixed-top-nav ">
+
+    
+    <header>
+
+      
+      <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top">
+        <div class="container">
+          <a class="navbar-brand title font-weight-lighter" href="/"><span class="font-weight-bold">Tuan-Anh </span>Bui</a>
+          
+          <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar top-bar"></span>
+            <span class="icon-bar middle-bar"></span>
+            <span class="icon-bar bottom-bar"></span>
+          </button>
+
+          <div class="collapse navbar-collapse text-right" id="navbarNav">
+            <ul class="navbar-nav ml-auto flex-nowrap">
+
+              
+              <li class="nav-item ">
+                <a class="nav-link" href="/">about</a>
+              </li>
+              
+              
+              <li class="nav-item active">
+                <a class="nav-link" href="/blog/">blog<span class="sr-only">(current)</span></a>
+              </li>
+
+              
+              <li class="nav-item ">
+                <a class="nav-link" href="/publications/">publications</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/projects/">projects</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/teaching/"></a>
+              </li>
+
+              
+              <li class="toggle-container">
+                <button id="light-toggle" title="Change theme">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      
+      <progress id="progress" value="0">
+        <div class="progress-container">
+          <span class="progress-bar"></span>
+        </div>
+      </progress>
+    </header>
+
+
+    
+    <div class="container mt-5">
+      
+        
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Stanford CS329A Self-Improving AI Agents | Part 6 | Train Time Scaling/Scaling RL</h1>
+    <p class="post-meta">September 6, 2026</p>
+    <p class="post-tags">
+      <a href="/blog/2026"> <i class="fas fa-calendar fa-sm"></i> 2026 </a>
+        ·  
+        <a href="/blog/tag/genai">
+          <i class="fas fa-hashtag fa-sm"></i> genai</a>  
+          <a href="/blog/tag/llm">
+          <i class="fas fa-hashtag fa-sm"></i> llm</a>  
+          <a href="/blog/tag/tutorial">
+          <i class="fas fa-hashtag fa-sm"></i> tutorial</a>  
+          <a href="/blog/tag/reading">
+          <i class="fas fa-hashtag fa-sm"></i> reading</a>  
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    
+    <aside id="floating-toc" class="floating-toc" aria-label="Table of contents">
+      <details>
+        <summary><i class="fas fa-list" aria-hidden="true"></i><span>On this page</span></summary>
+        <div class="floating-toc__content">
+          
+          <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#train-time-scaling-uses-verified-model-generated-data-to-make-smaller-models-substantially-better-at-reasoning">Train-time scaling uses verified model-generated data to make smaller models substantially better at reasoning.</a></li>
+<li class="toc-entry toc-h1"><a href="#train-time-scaling-closes-a-self-improvement-loop-by-training-on-outputs-found-and-filtered-during-inference">Train-time scaling closes a self-improvement loop by training on outputs found and filtered during inference.</a></li>
+<li class="toc-entry toc-h1"><a href="#reasoning-traces-allocate-computation-to-analysis-decomposition-self-evaluation-correction-and-alternative-approaches">Reasoning traces allocate computation to analysis, decomposition, self-evaluation, correction, and alternative approaches.</a></li>
+<li class="toc-entry toc-h1"><a href="#test-time-and-train-time-scaling-complement-each-other-but-both-require-a-capable-base-model-and-a-trustworthy-success-signal">Test-time and train-time scaling complement each other, but both require a capable base model and a trustworthy success signal.</a></li>
+<li class="toc-entry toc-h1"><a href="#star-bootstraps-explicit-reasoning-data-from-a-small-seed-set-and-a-larger-collection-of-questions-with-known-answers">STaR bootstraps explicit reasoning data from a small seed set and a larger collection of questions with known answers.</a></li>
+<li class="toc-entry toc-h1"><a href="#star-assumes-that-correct-answers-imply-useful-rationales-and-that-the-base-model-can-already-solve-part-of-the-target-distribution">STaR assumes that correct answers imply useful rationales and that the base model can already solve part of the target distribution.</a></li>
+<li class="toc-entry toc-h1"><a href="#vanilla-star-alternates-direct-generation-answer-conditioned-rationalization-and-fine-tuning-over-multiple-outer-iterations">Vanilla STaR alternates direct generation, answer-conditioned rationalization, and fine-tuning over multiple outer iterations.</a></li>
+<li class="toc-entry toc-h1"><a href="#star-can-improve-data-efficiency-but-gains-plateau-and-rationale-quality-remains-difficult-to-measure">STaR can improve data efficiency, but gains plateau and rationale quality remains difficult to measure.</a></li>
+<li class="toc-entry toc-h1"><a href="#star-variants-change-the-verifier-or-reasoning-representation-but-self-improvement-remains-bounded-by-the-base-model">STaR variants change the verifier or reasoning representation, but self-improvement remains bounded by the base model.</a></li>
+<li class="toc-entry toc-h1"><a href="#deepseekmath-first-strengthens-its-mathematical-base-through-code-initialization-and-carefully-curated-web-data">DeepSeekMath first strengthens its mathematical base through code initialization and carefully curated web data.</a></li>
+<li class="toc-entry toc-h1"><a href="#grpo-reduces-ppo-memory-requirements-by-replacing-the-learned-critic-with-standardized-rewards-from-a-sampled-group">GRPO reduces PPO memory requirements by replacing the learned critic with standardized rewards from a sampled group.</a></li>
+<li class="toc-entry toc-h1"><a href="#grpo-requires-reward-variance-and-was-shown-to-improve-output-consistency-rather-than-passk-coverage">GRPO requires reward variance and was shown to improve output consistency rather than pass@K coverage.</a></li>
+<li class="toc-entry toc-h1"><a href="#dapo-stabilizes-large-scale-reasoning-rl-by-preventing-exploration-from-collapsing-under-symmetric-ppo-clipping">DAPO stabilizes large-scale reasoning RL by preventing exploration from collapsing under symmetric PPO clipping.</a></li>
+<li class="toc-entry toc-h1"><a href="#dapo-dynamic-sampling-retains-only-question-groups-whose-mixed-outcomes-provide-a-usable-gradient">DAPO dynamic sampling retains only question groups whose mixed outcomes provide a usable gradient.</a></li>
+<li class="toc-entry toc-h1"><a href="#token-level-loss-and-soft-overlength-penalties-keep-long-reasoning-trajectories-from-destabilizing-dapo-training">Token-level loss and soft overlength penalties keep long reasoning trajectories from destabilizing DAPO training.</a></li>
+<li class="toc-entry toc-h1"><a href="#star-grpo-and-dapo-occupy-different-points-on-the-tradeoff-between-data-availability-infrastructure-complexity-and-task-difficulty">STaR, GRPO, and DAPO occupy different points on the tradeoff between data availability, infrastructure complexity, and task difficulty.</a></li>
+<li class="toc-entry toc-h1"><a href="#current-train-time-scaling-is-limited-by-base-capability-reward-quality-and-weak-methods-for-learning-from-failures">Current train-time scaling is limited by base capability, reward quality, and weak methods for learning from failures.</a></li>
+<li class="toc-entry toc-h1"><a href="#reinforcement-learning-improves-exploration-within-learned-knowledge-while-data-sufficiency-and-verifier-coverage-remain-separate-challenges">Reinforcement learning improves exploration within learned knowledge, while data sufficiency and verifier coverage remain separate challenges.</a></li>
+</ul>
+          
+        </div>
+      </details>
+    </aside>
+    
+    <div id="markdown-content">
+      <div style="display: flex; justify-content: center;">
+  <iframe width="560" height="315" src="https://www.youtube.com/embed/yVnmHSAy3ck" title="YouTube video player" frameborder="0" allowfullscreen=""></iframe>
+</div>
+
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ startOnLoad: true, mindmap: { useMaxWidth: false, padding: 20 } });
+</script>
+
+<div style="overflow-x: auto;"><div class="mermaid">
+mindmap
+  root((Train-Time Scaling and Scaling RL))
+    Self-improvement loop
+      Sample verify fine-tune repeat
+      Train compute raises pass at one
+      Verifiability supplies the signal
+    STaR rationalization
+      Bootstrap from a small rationale set
+      Keep successes and hint failures
+      Limited by rationale and base quality
+    DeepSeekMath foundations
+      Start from a code-trained model
+      Curate broad mathematical web data
+      Prime capability before reinforcement learning
+    GRPO
+      Replace the critic with a group baseline
+      Standardize rewards within each question
+      Reward variance drives learning
+    DAPO stabilization
+      Preserve exploration with asymmetric clipping
+      Keep informative groups through dynamic sampling
+      Control long traces with token-level losses
+    Limits and research
+      Majority improves without broader pass coverage
+      Rewards can saturate or be exploited
+      Learn from failures and combine verifiers
+</div></div>
+
+<h1 id="train-time-scaling-uses-verified-model-generated-data-to-make-smaller-models-substantially-better-at-reasoning">Train-time scaling uses verified model-generated data to make smaller models substantially better at reasoning.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-01-38-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-01-38-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-01-38-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec06/00-01-38.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p><strong>Why train-time scaling matters.</strong> The lecture reports roughly 5% AIME accuracy for the presumed 175B-parameter GPT-3.5, 51.7% for 7B DeepSeekMath, as much as 60% with additional techniques, and 50% for DAPO on Qwen-32B.<br><strong>Interpretation:</strong> parameter count is not the only useful scaling axis; compute spent learning from filtered model outputs can materially improve reasoning.<br><strong>Caveat:</strong> these are attributed, benchmark-specific figures from the lecture rather than controlled claims that apply across models or tasks.</p>
+
+<p><a href="https://www.youtube.com/watch?v=yVnmHSAy3ck&amp;t=5s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="train-time-scaling-closes-a-self-improvement-loop-by-training-on-outputs-found-and-filtered-during-inference">Train-time scaling closes a self-improvement loop by training on outputs found and filtered during inference.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-05-26-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-05-26-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-05-26-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec06/00-05-26.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p>The central loop is <strong>sample → verify and filter → fine-tune → repeat</strong>.<br>- Pretraining supplies broad underlying capability.<br>- Test-time compute searches over multiple traces without changing parameters.<br>- Train-time compute makes successful behavior more likely on the next pass@1 attempt.<br>An o1 AIME plot is described as improving with both training and inference compute. The unresolved systems question is how to divide a finite compute budget between those two axes.</p>
+
+<p><a href="https://www.youtube.com/watch?v=yVnmHSAy3ck&amp;t=193s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="reasoning-traces-allocate-computation-to-analysis-decomposition-self-evaluation-correction-and-alternative-approaches">Reasoning traces allocate computation to analysis, decomposition, self-evaluation, correction, and alternative approaches.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-09-35-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-09-35-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-09-35-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec06/00-09-35.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p><strong>Observed reasoning patterns:</strong> problem analysis, task decomposition, self-evaluation, backtracking, and parallel exploration of alternatives.<br>A batch-script example separates parsing, matrix construction, transposition, and output formatting; a chemistry example replaces an initially chosen pH formula after detecting an error.<br>The lecture reports greater-than-50% human preference win rates over GPT-4o for programming, data analysis, and mathematical calculation, but much smaller gains for writing and editing. Strong external checks appear central to this difference, and visible reasoning text is not itself proof of a reliable internal verifier.</p>
+
+<p><a href="https://www.youtube.com/watch?v=yVnmHSAy3ck&amp;t=460s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="test-time-and-train-time-scaling-complement-each-other-but-both-require-a-capable-base-model-and-a-trustworthy-success-signal">Test-time and train-time scaling complement each other, but both require a capable base model and a trustworthy success signal.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-13-49-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-13-49-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-13-49-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec06/00-13-49.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p><strong>Different roles:</strong> test-time compute searches over what the pretrained model can already express, whereas train-time compute increases the probability that successful behavior appears directly.<br>Both approaches depend on verification, and training additionally needs a nonzero success rate from which to hill-climb. The instructor cautions that a displayed train-versus-test compute curve is only one empirical instantiation, not a universal efficiency law. Fine-tuning harder tasks should not inherently erase easy skills, although malformed repetitive chains can produce overthinking.</p>
+
+<p><a href="https://www.youtube.com/watch?v=yVnmHSAy3ck&amp;t=691s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="star-bootstraps-explicit-reasoning-data-from-a-small-seed-set-and-a-larger-collection-of-questions-with-known-answers">STaR bootstraps explicit reasoning data from a small seed set and a larger collection of questions with known answers.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-18-07-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-18-07-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-18-07-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec06/00-18-07.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p>STaR implements a simple iterative recipe:<br>1. Few-shot prompt with a small rationale seed set.<br>2. Generate a rationale and answer for many training questions.<br>3. Keep directly correct attempts.<br>4. For an incorrect attempt, reveal the answer and request a backward rationalization.<br>5. Train on the resulting question-rationale-answer records without exposing the hint, then repeat.<br>This is best understood as an off-policy-RL-like bootstrap, not a full reinforcement-learning algorithm.</p>
+
+<p><a href="https://www.youtube.com/watch?v=yVnmHSAy3ck&amp;t=968s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="star-assumes-that-correct-answers-imply-useful-rationales-and-that-the-base-model-can-already-solve-part-of-the-target-distribution">STaR assumes that correct answers imply useful rationales and that the base model can already solve part of the target distribution.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-22-39-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-22-39-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-22-39-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec06/00-22-39.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p><strong>Three critical assumptions:</strong> the final answer is a reasonable rationale-quality proxy; answer-conditioned rationalization is valid; and the initial model solves a nonzero subset of the task.<br>If the entire task lies outside the base model’s capability, the loop has no hill-climbing signal. Original STaR does not inspect hinted intermediate steps, so humans or a process reward model would be needed to reject plausible but invalid rationales. The discussion also distinguishes the comparatively mature use of positive examples from the still-open problem of learning reliably from failures.</p>
+
+<p><a href="https://www.youtube.com/watch?v=yVnmHSAy3ck&amp;t=1207s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="vanilla-star-alternates-direct-generation-answer-conditioned-rationalization-and-fine-tuning-over-multiple-outer-iterations">Vanilla STaR alternates direct generation, answer-conditioned rationalization, and fine-tuning over multiple outer iterations.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-26-51-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-26-51-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-26-51-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec06/00-26-51.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p><strong>Concrete training flow:</strong> directly generated correct rationales and answer-hinted rationales for failures form a single fine-tuning set, and the refreshed model repeats the cycle.<br>The reported implementation used roughly 6B-parameter GPT-J, a short warm-up, constant learning rate, several outer iterations, and progressively more inner-loop work. Evaluation covered approximately 9,000 GSM8K examples, CommonsenseQA, and synthetic multi-digit arithmetic.</p>
+
+<p><a href="https://www.youtube.com/watch?v=yVnmHSAy3ck&amp;t=1513s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="star-can-improve-data-efficiency-but-gains-plateau-and-rationale-quality-remains-difficult-to-measure">STaR can improve data efficiency, but gains plateau and rationale quality remains difficult to measure.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-31-11-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-31-11-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-31-11-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec06/00-31-11.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p><strong>Observed benefits:</strong> filtering can produce a smaller, higher-quality training set, and human raters found the CommonsenseQA rationales broadly reasonable. One spoken comparison also cites about 72.5% accuracy using roughly 86% of the data, although its exact baseline is unclear.<br><strong>Limits:</strong> repeated STaR iterations plateau; direct fine-tuning can match rationalization on tasks already within capability; prompt style shapes subsequent rationales; and final-answer filtering can preserve invalid intermediate steps. Rationale validation therefore still needs human review or a process-level evaluator.</p>
+
+<p><a href="https://www.youtube.com/watch?v=yVnmHSAy3ck&amp;t=1710s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="star-variants-change-the-verifier-or-reasoning-representation-but-self-improvement-remains-bounded-by-the-base-model">STaR variants change the verifier or reasoning representation, but self-improvement remains bounded by the base model.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-37-22-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-37-22-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-37-22-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec06/00-37-22.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p>A stronger teacher can always generate traces for a smaller student, but that is <strong>distillation</strong>, whereas STaR asks a model to learn from its own outputs. V-STaR adds a verifier to the generator loop; Quiet-STaR is described as moving reasoning toward an internal representation rather than requiring every step in English.<br>The ceiling remains the starting model: it must be able to rationalize hinted answers, some answers are easier to reverse-engineer than others, and enough solvable examples are required to generalize. These bounds should remain explicit when presenting STaR as self-improvement.</p>
+
+<p><a href="https://www.youtube.com/watch?v=yVnmHSAy3ck&amp;t=2033s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="deepseekmath-first-strengthens-its-mathematical-base-through-code-initialization-and-carefully-curated-web-data">DeepSeekMath first strengthens its mathematical base through code initialization and carefully curated web data.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-42-20-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-42-20-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-42-20-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec06/00-42-20.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p><strong>Capability comes before RL.</strong> DeepSeekMath begins with a code-trained model, curates high-quality mathematical web pages across many domains, performs supervised training, and only then scales reinforcement learning.<br>The lecture reports that targeted Common Crawl and OpenWebMath curation yielded broader coverage and more useful tokens than indiscriminate arXiv training, while code initialization transferred reasoning and tool-use skills. This is a paper-specific empirical finding, but it reinforces the broader lesson that RL cannot manufacture missing domain knowledge from no signal.</p>
+
+<p><a href="https://www.youtube.com/watch?v=yVnmHSAy3ck&amp;t=2453s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="grpo-reduces-ppo-memory-requirements-by-replacing-the-learned-critic-with-standardized-rewards-from-a-sampled-group">GRPO reduces PPO memory requirements by replacing the learned critic with standardized rewards from a sampled group.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-45-45-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-45-45-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-45-45-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec06/00-45-45.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p>For rewards <code class="language-plaintext highlighter-rouge">r_i</code> in group <code class="language-plaintext highlighter-rouge">G</code>, the lecture gives the intuition <code class="language-plaintext highlighter-rouge">A_i ≈ (r_i - mean(r_G)) / std(r_G)</code>.<br>This group-relative comparison removes the learned value model and reduces memory pressure. DeepSeekMath is reported to improve from 46.8% to 51.7% on MATH, becoming an early open 7B model above 50% without a critic.<br>The full GRPO objective is intentionally omitted in the lecture; the standardized-reward expression is an intuition, not sufficient implementation detail.</p>
+
+<p><a href="https://www.youtube.com/watch?v=yVnmHSAy3ck&amp;t=2628s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="grpo-requires-reward-variance-and-was-shown-to-improve-output-consistency-rather-than-passk-coverage">GRPO requires reward variance and was shown to improve output consistency rather than pass@K coverage.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-50-24-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-50-24-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-50-24-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec06/00-50-24.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p><strong>Learning signal:</strong> groups need reward variance; uniformly impossible or trivial questions contribute little or no group-relative gradient. A well-chosen difficulty distribution supplies hill-climbing examples, while KL regularization can help preserve capabilities of the reference policy.<br>The reported gain is in <strong>majority@32</strong>, not <strong>pass@32</strong>: successful behavior becomes more frequent and consistent, but the set of problems solved at least once does not expand. This distinction prevents consistency gains from being mislabeled as new fundamental capability.</p>
+
+<p><a href="https://www.youtube.com/watch?v=yVnmHSAy3ck&amp;t=2864s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="dapo-stabilizes-large-scale-reasoning-rl-by-preventing-exploration-from-collapsing-under-symmetric-ppo-clipping">DAPO stabilizes large-scale reasoning RL by preventing exploration from collapsing under symmetric PPO clipping.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-54-13-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-54-13-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-54-13-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec06/00-54-13.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p>The lecture contrasts a roughly 30% naive-GRPO AIME result on Qwen-32B with a cited DeepSeek result near 47%, then attributes part of the gap to implementation details omitted from basic GRPO.<br><strong>Clip-Higher:</strong> asymmetric probability clipping permits more growth for low-probability actions, preserving entropy and exploration while improving accuracy. Entropy is used here as a diagnostic proxy for how many alternative reasoning trajectories remain accessible.</p>
+
+<p><a href="https://www.youtube.com/watch?v=yVnmHSAy3ck&amp;t=3186s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="dapo-dynamic-sampling-retains-only-question-groups-whose-mixed-outcomes-provide-a-usable-gradient">DAPO dynamic sampling retains only question groups whose mixed outcomes provide a usable gradient.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-56-26-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-56-26-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-56-26-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec06/00-56-26.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p>Dynamic sampling uses the GRPO signal more efficiently:<br>1. Oversample answers for each question.<br>2. Remove all-correct and all-wrong groups.<br>3. Keep groups with <code class="language-plaintext highlighter-rouge">0 &lt; correct_count &lt; group_size</code>.<br>4. Form the update from those informative groups.<br>The stated group size of 64 is illustrative. How much to oversample depends on benchmark difficulty and base-model competence, so it is not a universal hyperparameter.</p>
+
+<p><a href="https://www.youtube.com/watch?v=yVnmHSAy3ck&amp;t=3321s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="token-level-loss-and-soft-overlength-penalties-keep-long-reasoning-trajectories-from-destabilizing-dapo-training">Token-level loss and soft overlength penalties keep long reasoning trajectories from destabilizing DAPO training.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-58-58-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-58-58-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec06/00-58-58-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec06/00-58-58.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p><strong>Length-aware stabilization:</strong> token-level loss avoids treating every full response identically, and a soft overlength penalty reduces the influence of traces that grow until truncation. Increasing context length is an alternative explored by other work.<br>The lecture reports a cumulative Qwen-32B AIME ablation: GRPO 30, overlong filtering 36, asymmetric clipping 38, soft overlong punishment 41, token-level loss 42, and dynamic sampling 50. These are pipeline-specific reported scores, not isolated causal estimates for every component or benchmark.</p>
+
+<p><a href="https://www.youtube.com/watch?v=yVnmHSAy3ck&amp;t=3452s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="star-grpo-and-dapo-occupy-different-points-on-the-tradeoff-between-data-availability-infrastructure-complexity-and-task-difficulty">STaR, GRPO, and DAPO occupy different points on the tradeoff between data availability, infrastructure complexity, and task difficulty.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec06/01-01-48-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec06/01-01-48-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec06/01-01-48-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec06/01-01-48.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p><strong>Method selection:</strong><br>- Use STaR as a lightweight bootstrap when only a small rationale set and known answers are available.<br>- Use GRPO when the base model is already capable and memory-efficient online RL is needed.<br>- Add DAPO-style clipping, sampling, and length controls when long reasoning traces make training unstable.<br>Supervised fine-tuning is often faster with abundant high-quality demonstrations; RL can hill-climb from fewer examples when rewards are strong, but it is harder to implement. All three may improve majority@K, formatting, and coherence without necessarily improving pass@K or out-of-domain capability.</p>
+
+<p><a href="https://www.youtube.com/watch?v=yVnmHSAy3ck&amp;t=3625s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="current-train-time-scaling-is-limited-by-base-capability-reward-quality-and-weak-methods-for-learning-from-failures">Current train-time scaling is limited by base capability, reward quality, and weak methods for learning from failures.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec06/01-05-34-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec06/01-05-34-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec06/01-05-34-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec06/01-05-34.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p>The lecture identifies several open problems:<br>- Why does majority@K improve while pass@K often does not?<br>- Are backtracking and self-correction genuinely learned behaviors or simply more frequent existing patterns?<br>- How can training extract useful information from failures instead of discarding them?<br>- How can RL remain robust to noisy or hackable rewards?<br>- Can verifier ensembles cover a single verifier’s blind spots?<br>- Can STaR rationalization be combined with DAPO stabilization?<br>Math and code are unusually favorable because answers, execution, and unit tests provide external feedback; many domains lack comparable signals.</p>
+
+<p><a href="https://www.youtube.com/watch?v=yVnmHSAy3ck&amp;t=3792s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+<h1 id="reinforcement-learning-improves-exploration-within-learned-knowledge-while-data-sufficiency-and-verifier-coverage-remain-separate-challenges">Reinforcement learning improves exploration within learned knowledge, while data sufficiency and verifier coverage remain separate challenges.</h1>
+
+<div class="row mt-3 text-center"><div class="col-sm mt-3 mt-md-0">
+  <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/cs329a-2026/frames/lec06/01-10-14-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/cs329a-2026/frames/lec06/01-10-14-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/cs329a-2026/frames/lec06/01-10-14-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/cs329a-2026/frames/lec06/01-10-14.jpg" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+</div></div>
+
+<p>The closing Q&amp;A separates three constraints: <strong>knowledge in the base model</strong>, <strong>enough informative examples to hill-climb</strong>, and <strong>verifiers that measure the desired behavior</strong>. Multiple verifiers may improve evaluation coverage, but they do not create missing training knowledge.<br>The instructor gives informal, explicitly uncertain estimates that frontier training has moved from roughly 1% RL toward perhaps 5%, and discusses a Grok-4 claim of 50% RL without a proportional gain. These vendor proportions are unpublished or informal and should not be presented as audited facts.</p>
+
+<p><a href="https://www.youtube.com/watch?v=yVnmHSAy3ck&amp;t=4078s" rel="external nofollow noopener" target="_blank">Watch this section on YouTube</a></p>
+
+<hr>
+
+    </div>
+  </article>
+
+
+  
+    
+    <br>
+    <hr>
+    <br>
+    <ul class="list-disc pl-8"></ul>
+
+    
+    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
+    <p class="mb-2">Here are some more articles you might like to read next:</p>
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/cs329a-2026-lec09/">Stanford CS329A Self-Improving AI Agents | Part 9 | Future Research Areas</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/cs329a-2026-lec08/">Stanford CS329A Self-Improving AI Agents | Part 8 | Agentic Evaluations and Long Horizon Tasks</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/cs329a-2026-lec07/">Stanford CS329A Self-Improving AI Agents | Part 7 | Self-Improvement and Deep Research Agents</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/cs329a-2026-lec05/">Stanford CS329A Self-Improving AI Agents | Part 5 | Planning and Multi-Step Reasoning</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/cs329a-2026-lec04/">Stanford CS329A Self-Improving AI Agents | Part 4 | Learning from Feedback with Tools/Code</a>
+  </li>
+
+</div>
+
+      
+    </div>
+
+        
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        © Copyright 2026 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+
+      </div>
+    </footer>
+
+    
+    
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
+    
+  
+  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/zoom.js"></script>
+
+  
+  <script defer src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+
+  
+  <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
+  <script defer src="/assets/js/common.js?70e5fea0186cc5650ed1f92c8c71c0e2"></script>
+  <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    
+  <script type="text/javascript">window.MathJax={tex:{tags:"ams"}};</script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+
+    
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KGSMMS9MS"></script>
+  <script>function gtag(){window.dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","G-7KGSMMS9MS");</script>
+    
+
+
+<script type="text/javascript">function progressBarSetup(){"max"in document.createElement("progress")?(initializeProgressElement(),$(document).on("scroll",function(){progressBar.attr({value:getCurrentScrollPosition()})}),$(window).on("resize",initializeProgressElement)):(resizeProgressBar(),$(document).on("scroll",resizeProgressBar),$(window).on("resize",resizeProgressBar))}function getCurrentScrollPosition(){return $(window).scrollTop()}function initializeProgressElement(){let e=$("#navbar").outerHeight(!0);$("body").css({"padding-top":e}),$("progress-container").css({"padding-top":e}),progressBar.css({top:e}),progressBar.attr({max:getDistanceToScroll(),value:getCurrentScrollPosition()})}function getDistanceToScroll(){return $(document).height()-$(window).height()}function resizeProgressBar(){progressBar.css({width:getWidthPercentage()+"%"})}function getWidthPercentage(){return getCurrentScrollPosition()/getDistanceToScroll()*100}const progressBar=$("#progress");window.onload=function(){setTimeout(progressBarSetup,50)};</script>
+
+    
+  </body>
+</html>

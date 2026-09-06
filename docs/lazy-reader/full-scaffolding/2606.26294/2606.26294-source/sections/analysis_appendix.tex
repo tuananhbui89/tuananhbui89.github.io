@@ -1,0 +1,29 @@
+\subsection{Where Cost and Progress Come From}
+\label{app:analyses}
+
+We now present how the actual search process evolved in terms of compute allocation and edits.
+
+\subsubsection{Cost decomposition}
+\label{app:analyses:budget}
+
+Every model call is related to workspace expansion, train-time evaluation, or validation evaluation. The overall run cost is dominated by validation: across the three main-experiment runs, validation carries roughly $65$--$69\%$ of blended tokens, expansion $18$--$23\%$, and train-time evaluation (at three train samples per node) $12$--$14\%$~(\cref{fig:analysis-cost}). Allocating more train samples to each meta-agent may allow for more efficient search due to more context, thus its possible that the current share of tokens going to train-time evaluation is too low.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_analysis_cost.pdf}
+\caption{\textbf{Blended-token cost decomposition of the three headline \gptlow (low) runs} into workspace expansion, train-time evaluation, and validation evaluation.}
+\label{fig:analysis-cost}
+\end{figure}
+
+
+\subsubsection{Patch surfaces}
+\label{app:analyses:patches}
+
+We classify every lineage edge's patch by the code surface it modifies. Shared surfaces, the task-agent code and infrastructure used by more than one role, carry $59$--$90\%$ of accepted patches in every \gptlow run~(\cref{fig:analysis-transfer}). For example, the \polyglot run concentrates its improvements on shared and infrastructure surfaces that generalize across roles. We posit this is because the meta-agent realizes that role-specific patches each drive a single utility and generalize less. The \nemotron run is the outlier as it heavily targets the meta-agent's instruction module ($42\%$ of edges), potentially to improve its reliability.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_analysis_transfer.pdf}
+\caption{\textbf{Patch surfaces by run}, classifying each accepted lineage edge by the code surface it modifies (task-agent shared, infrastructure, role-specific, meta-agent module, or notes).}
+\label{fig:analysis-transfer}
+\end{figure}

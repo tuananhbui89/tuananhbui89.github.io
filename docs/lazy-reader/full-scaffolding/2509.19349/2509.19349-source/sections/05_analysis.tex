@@ -1,0 +1,36 @@
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.975\textwidth]{figures/f7_ablations.pdf}
+    \caption{\textbf{\ouralgo Method Ablation Studies on Circle Packing.} \textit{Left:} Weighted parent sampling outperforms random search and hill climbing. \textit{Middle:} Bandit-based LLM ensembling slightly improves the performance over a fixed uniform ensemble distribution. \textit{Right:} Embedding-based rejection sampling with LLM as a novelty judge strongly outperforms no rejection sampling.}
+    \label{fig:ablations}
+    \vspace{-15pt}
+\end{figure}
+
+
+\paragraph{Impact of Parent Selection Strategies.}
+To understand the importance of parent selection, we compare different strategies for choosing which programs to evolve. The \textit{Best-of-N} baseline ignores the evolutionary history, always using the initial program as parent without feedback. In contrast, \textit{Hill Climbing} represents a greedy approach that consistently selects the highest-performing program as the parent for subsequent mutations. Our proposed \textit{Weighted Sampling} strategy balances exploration and exploitation by probabilistically selecting parents based on their fitness and number of offspring.
+
+\textit{Takeaways.} Weighted sampling consistently outperforms both random search and hill climbing across all tasks. Hill climbing shows strong initial performance but plateaus quickly, while weighted sampling maintains steady improvement throughout evolution. Random search demonstrates the poorest convergence, highlighting the importance of leveraging fitness-based parent selection.
+
+\paragraph{Impact of LLM Ensembling and Prioritization.}
+Evolutionary agents can benefit from diverse coding capabilities by leveraging multiple LLMs. We investigate this hypothesis by comparing a \textit{Single LLM} baseline (GPT-5-nano) against ensemble approaches. The \textit{Fixed LLM Ensemble} provides diversity by sampling uniformly from a predetermined set of models, while our \textit{Bandit-Based LLM Ensemble} adaptively learns which models contribute most effectively to fitness improvements, balancing exploration of underutilized models with exploitation of high-performing ones.
+
+\textit{Takeaways.} The bandit-based LLM ensemble significantly outperforms both single LLM and fixed ensemble approaches. While the fixed ensemble shows moderate improvements over single LLM usage, the adaptive bandit strategy achieves the highest performance by dynamically prioritizing more effective models based on their contribution to fitness improvements.
+
+\paragraph{Impact of Code Embedding-Based Rejection Sampling.}
+Similar code variants can waste computational resources without advancing the search frontier. To address this challenge, we examine different novelty filtering mechanisms. The \textit{No Rejection Sampling} baseline accepts any LLM proposal, potentially allowing near-duplicate programs to proliferate. Our \textit{Embedding-Based Rejection Sampling} approach leverages text embeddings to identify and reject proposals with similarity scores exceeding 0.95. We also explore an \textit{Additional LLM-as-a-novelty-judge} variant that supplements embedding-based filtering with explicit LLM assessment of program novelty.
+
+\textit{Takeaways.} Code embedding-based rejection sampling provides substantial performance gains over no rejection sampling by preventing redundant mutations. The additional LLM-as-a-novelty-judge offers marginal improvements, suggesting that embedding similarity is already an effective proxy for novelty assessment without requiring additional computational overhead.
+
+% \paragraph{Costs \& Runtime Analysis.}
+
+% \begin{tcolorbox}[breakable, colback=blue!5!white, colframe=blue!50!gray, title=Thought 1: Fusing Residual addition and ReLU activation]
+% \footnotesize
+% \begin{verbatim}
+% This version fuses the residual addition and ReLU activation into a custom
+% CUDA kernel that uses efficient thread/block indexing. Instead of separately
+% performing an element-wise addition and then a ReLU, the fused kernel maps
+% each tensor element onto a thread using 1D grid indexing, thereby reducing
+% memory accesses and kernel launch overhead.
+% \end{verbatim}
+% \end{tcolorbox}

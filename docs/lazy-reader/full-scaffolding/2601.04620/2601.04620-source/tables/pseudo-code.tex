@@ -1,0 +1,41 @@
+\clearpage
+\onecolumn
+\section{Pseudo-Code of AgentDevel}
+\begin{tcolorbox}[enhanced, breakable, colback=white, colframe=black!60, title=Algorithm 1: AgentDevel (release-engineering improvement)]
+\small
+\begin{longtable}{@{}l@{}}
+
+\textbf{Input:} initial blueprint $b_0$, TrainSet $D_{\text{train}}$, rubric $R$\\
+\textbf{Output:} final promoted blueprint $b_\star$\\[4pt]
+
+$b \leftarrow b_0$ \hfill (current promoted version)\\
+$\pi \leftarrow \varnothing$ \hfill (previous diagnosis script)\\
+$\mathcal{L} \leftarrow \varnothing$ \hfill (symptom taxonomy)\\[4pt]
+
+\textbf{for} $t=0,\dots,T-1$ \textbf{do}\\
+\quad \textbf{Run current agent and collect records}\\
+\quad for each $x\in D_{\text{train}}$:\\
+\quad\quad $(\hat y,\tau)\leftarrow A_b(x)$\\
+\quad\quad $(\tilde p,\ell,d)\leftarrow c(R,\tau)$ \hfill (implementation-blind critic)\\
+\quad\quad $\mathcal{R}\leftarrow \mathcal{R}\cup\{r_t(x)\}$\\
+\quad end\\[2pt]
+
+\quad \textbf{Executable diagnosis}\\
+\quad $\pi \leftarrow \mathrm{GenDiagScript}(\mathcal{R},\pi,\mathcal{L})$\\
+\quad $\mathcal{D}\leftarrow \mathrm{Run}(\pi,\mathcal{R})$\\[2pt]
+
+\quad \textbf{Synthesize RC}\\
+\quad $(b_t^{RC},\mathcal{I}_t)\leftarrow \Phi(b,\mathcal{D})$\\[2pt]
+
+\quad \textbf{Gate RC}\\
+\quad compute $\mathrm{P2F}_t,\mathrm{F2P}_t$\\
+\quad if $G(\mathcal{D},\mathrm{P2F}_t,\mathrm{F2P}_t,\mathcal{I}_t)=1$ then $b\leftarrow b_t^{RC}$\\
+\quad else discard $b_t^{RC}$\\[2pt]
+
+\quad if $\mathrm{Stop}(\mathrm{P2F}_t,\mathrm{F2P}_t)$ then break\\
+\textbf{end for}\\[4pt]
+
+return $b_\star$ \hfill (TestSet used only once at final evaluation)\\
+
+\end{longtable}
+\end{tcolorbox}

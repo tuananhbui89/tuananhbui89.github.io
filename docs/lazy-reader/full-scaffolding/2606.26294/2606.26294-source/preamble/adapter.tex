@@ -1,0 +1,202 @@
+\makeatletter
+
+\def\@paper@title{Untitled}
+\let\@paper@titlerunning\@empty
+\let\@paper@keywords\@empty
+\let\@paper@code\@empty
+\let\@paper@plainauthors\@empty
+\let\@paper@displayauthors\@empty
+\let\@paper@displayaffils\@empty
+\let\@paper@corrdisplay\@empty
+\let\@paper@titlelogo\@empty
+\let\@paper@titlemark\@empty
+\def\paper@titlelogoheight{3.0em}
+\def\paper@abstractfile{sections/abstract}
+\newcounter{paper@affil}
+\let\@neurips@authors\@empty
+\let\@neurips@affils\@empty
+\let\@neurips@corr\@empty
+\let\@mlsys@authors\@empty
+\let\@mlsys@affils\@empty
+\let\@mlsys@corr\@empty
+\newif\if@paper@firstauthor \@paper@firstauthortrue
+\newif\if@paper@firstdisplayauthor \@paper@firstdisplayauthortrue
+\newif\if@paper@hasequal \@paper@hasequalfalse
+\newlength{\paper@titlecardinnerwidth}
+
+\def\paper@titlecardpadding{0.38cm}
+\def\paper@titlecardradius{10pt}
+
+\definecolor{paperBrandCamlsysBlue}{HTML}{102344}
+\definecolor{paperBrandCambridgeRed}{HTML}{EF2E31}
+\definecolor{paperBrandCambridgeGold}{HTML}{FDDD04}
+\definecolor{ThemeGoldBrown}{HTML}{A98426}
+\colorlet{paperTitleBgCamlsys}{paperBrandCamlsysBlue!8!white}
+\colorlet{paperTitleBgCambridgeGold}{paperBrandCambridgeGold!8!white}
+\colorlet{paperTitleBgCambridge}{paperBrandCambridgeRed!3!paperTitleBgCambridgeGold}
+\colorlet{paperTitleBgNeutral}{black!2!white}
+\colorlet{paperTitleBgRQGM}{ThemeGoldBrown!5!white}
+\colorlet{paperTitleFrameRQGM}{ThemeGoldBrown!35!white}
+\colorlet{paperTitleBg}{paperTitleBgCamlsys}
+\colorlet{paperTitleFrame}{paperTitleBg}
+\definecolor{paperTitleFg}{HTML}{1F2328}
+\definecolor{paperTitleMuted}{HTML}{4D5560}
+\def\paper@titlebg@camlsys{camlsys}
+\def\paper@titlebg@cambridge{cambridge}
+\def\paper@titlebg@neutral{neutral}
+\def\paper@titlebg@rqgm{rqgm-muted}
+
+\csdef{paper@sym@equal}{*}
+
+\newcommand{\paperTitle}[1]{\def\@paper@title{#1}}
+\newcommand{\paperKeywords}[1]{\def\@paper@keywords{#1}}
+\newcommand{\paperCode}[1]{\def\@paper@code{#1}}
+\newcommand{\paperAbstractFile}[1]{\def\paper@abstractfile{#1}}
+\newcommand{\paperTitleLogo}[1]{\def\@paper@titlelogo{#1}}
+\newcommand{\paperTitleMark}[1]{\def\@paper@titlemark{#1}}
+\newcommand{\paperTitleLogoHeight}[1]{\def\paper@titlelogoheight{#1}}
+\newcommand{\paperTitleBackground}[1]{\edef\paper@titlebg@choice{#1}\ifx\paper@titlebg@choice\paper@titlebg@camlsys
+    \colorlet{paperTitleBg}{paperTitleBgCamlsys}\colorlet{paperTitleFrame}{paperTitleBgCamlsys}\else
+    \ifx\paper@titlebg@choice\paper@titlebg@cambridge
+      \colorlet{paperTitleBg}{paperTitleBgCambridge}\colorlet{paperTitleFrame}{paperTitleBgCambridge}\else
+      \ifx\paper@titlebg@choice\paper@titlebg@neutral
+        \colorlet{paperTitleBg}{paperTitleBgNeutral}\colorlet{paperTitleFrame}{paperTitleBgNeutral}\else
+        \ifx\paper@titlebg@choice\paper@titlebg@rqgm
+          \colorlet{paperTitleBg}{paperTitleBgRQGM}\colorlet{paperTitleFrame}{paperTitleFrameRQGM}\else
+          \ClassWarning{paper}{Unknown title-card background theme `\paper@titlebg@choice'; keeping current theme}\fi
+      \fi
+    \fi
+  \fi
+}
+\paperTitleBackground{\paper@titlebg}
+\newcommand{\paperTitleRunning}[1]{\def\@paper@titlerunning{#1}\ifpaper@mlsys \mlsystitlerunning{#1}\fi  }
+
+\newcommand{\addAffiliation}[2]{\stepcounter{paper@affil}\csedef{paper@affil@#1}{\thepaper@affil}\ifnum\value{paper@affil}>\@ne \appto\@paper@displayaffils{\quad}\fi
+  \protected@eappto\@paper@displayaffils{\noexpand\textsuperscript{\arabic{paper@affil}}}\appto\@paper@displayaffils{#2}\ifpaper@neurips
+    \ifnum\value{paper@affil}>\@ne \appto\@neurips@affils{\quad}\fi
+    \protected@eappto\@neurips@affils{\noexpand\textsuperscript{\arabic{paper@affil}}}\appto\@neurips@affils{#2}\fi
+  \ifpaper@mlsys
+    \appto\@mlsys@affils{\mlsysaffiliation{#1}{#2}}\fi
+}
+
+\newcommand{\paper@resolvekey}[1]{\ifcsdef{paper@sym@#1}{\ifstrequal{#1}{equal}{\@paper@hasequaltrue}{}\protected@eappto\@paper@syms{\csuse{paper@sym@#1}}}{\ifcsdef{paper@affil@#1}{\ifx\@paper@nums\@empty\else\appto\@paper@nums{,}\fi
+      \protected@eappto\@paper@nums{\csuse{paper@affil@#1}}}{\ClassWarning{paper}{\noexpand\addAuthor: unknown key `#1'}}}}
+\newcommand{\addAuthor}[2]{\ifx\@paper@plainauthors\@empty
+    \appto\@paper@plainauthors{#1}\else
+    \appto\@paper@plainauthors{, #1}\fi
+  \let\@paper@nums\@empty \let\@paper@syms\@empty
+  \forcsvlist{\paper@resolvekey}{#2}\if@paper@firstdisplayauthor\else\appto\@paper@displayauthors{,\space}\fi
+  \appto\@paper@displayauthors{#1}\protected@eappto\@paper@displayauthors{\noexpand\textsuperscript{\@paper@nums\@paper@syms}}\@paper@firstdisplayauthorfalse
+  \ifpaper@neurips
+    \if@paper@firstauthor\else\appto\@neurips@authors{,\space}\fi
+    \appto\@neurips@authors{#1}\protected@eappto\@neurips@authors{\noexpand\textsuperscript{\@paper@nums\@paper@syms}}\@paper@firstauthorfalse
+  \fi
+  \ifpaper@mlsys
+    \appto\@mlsys@authors{\mlsysauthor{#1}{#2}}\fi
+}
+
+\newcommand{\correspondingAuthor}[2]{\appto\@paper@corrdisplay{#1 \texttt{<#2>}}\ifpaper@neurips \appto\@neurips@corr{\thanks{Correspondence to: #1 \texttt{<#2>}}}\fi
+  \ifpaper@mlsys   \appto\@mlsys@corr{\mlsyscorrespondingauthor{#1}{#2}}\fi
+}
+
+\newcommand{\paper@setneuripspdfauthor}{\hypersetup{pdfauthor={\@paper@plainauthors}}}
+\newcommand{\paper@setmlsyspdfauthor}{\hypersetup{pdfauthor={\@paper@plainauthors}}}
+\newcommand{\paper@setpdfmetadata}{\@ifpackageloaded{hyperref}{\hypersetup{pdftitle={\@paper@title}}\ifx\@paper@keywords\@empty\else
+      \hypersetup{pdfkeywords={\@paper@keywords}}\fi
+    \ifpaper@neurips
+      \paper@setneuripspdfauthor
+    \fi
+    \ifpaper@mlsys
+      \paper@setmlsyspdfauthor
+    \fi
+  }{}}
+
+\newcommand{\paper@titleLogoGraphic}{\raisebox{0.27pt}{\includegraphics[height=4.28em,width=\linewidth,keepaspectratio]{branding/red-queen-mark.pdf}}}
+
+\newcommand{\paper@titleLine}{\ifx\@paper@titlelogo\@empty
+    \ifx\@paper@titlemark\@empty
+      {\raggedright\sffamily\bfseries\LARGE\color{paperTitleFg}\@paper@title\par}\else
+      \paper@titleLineWithMark
+    \fi
+  \else
+    \paper@titleLineWithMark
+  \fi
+}
+
+\newcommand{\paper@titleLineWithMark}{\noindent
+  \begin{minipage}[c]{0.12\linewidth}
+    \centering\paper@titleLogoGraphic
+  \end{minipage}\hspace{0.02\linewidth}\begin{minipage}[c]{0.85\linewidth}
+    {\raggedright\sffamily\bfseries\fontsize{15.5}{18.5}\selectfont\color{paperTitleFg}\@paper@title\par}\end{minipage}\par
+}
+
+\newcommand{\paper@identityBlock}{\ifx\@paper@displayauthors\@empty\else
+    {\raggedright\sffamily\bfseries\footnotesize\color{paperTitleFg}\@paper@displayauthors\par}\fi
+  \ifx\@paper@displayaffils\@empty\else
+    \vspace{0.06cm}{\raggedright\footnotesize\color{paperTitleMuted}\@paper@displayaffils
+      \if@paper@hasequal \quad \textsuperscript{*}Equal contribution.\fi\par}\fi
+}
+
+\newcommand{\paper@metadataText}{\ifx\@paper@keywords\@empty\else
+    {\bfseries Keywords:} \@paper@keywords
+  \fi
+  \ifx\@paper@code\@empty\else
+    \ifx\@paper@keywords\@empty\else\quad\fi
+    {\bfseries Code:} \@paper@code
+  \fi
+}
+
+\newcommand{\paper@metadataLogoRow}{\noindent
+  \begin{minipage}[c]{0.6\linewidth}
+    {\scriptsize\raggedright\color{paperTitleMuted}\paper@metadataText}\end{minipage}\hfill
+  \begin{minipage}[c]{0.4\linewidth}
+    \raggedleft\paperLogoStrip
+  \end{minipage}\par
+}
+
+\newcommand{\paper@titlecardLogoOverlay}{}
+
+\newcommand{\paper@titlecard}{\begingroup
+    \setlength{\paper@titlecardinnerwidth}{\dimexpr\linewidth-\paper@titlecardpadding-\paper@titlecardpadding\relax}\noindent
+    \begin{tikzpicture}
+      \node[
+        fill=paperTitleBg,
+        draw=paperTitleFrame,
+        line width=0.6pt,
+        rounded corners=\paper@titlecardradius,
+        inner sep=\paper@titlecardpadding,
+        outer sep=0pt,
+        text width=\paper@titlecardinnerwidth,
+        align=justify
+      ] (paperTitleCardNode) {\begin{minipage}{\paper@titlecardinnerwidth}
+          \setlength{\parindent}{0pt}\setlength{\parskip}{0pt}\paper@titleLine
+          \vspace{0.12cm}\paper@identityBlock
+          \vspace{0.14cm}{\normalsize\color{paperTitleFg}{\sffamily\bfseries Abstract.}\space\input{sections/abstract}\par}\vspace{0.14cm}\paper@metadataLogoRow
+        \end{minipage}};\paper@titlecardLogoOverlay
+    \end{tikzpicture}\par\vspace{0.12cm}\endgroup
+}
+
+\newcommand{\paper@setmlsysrunninghead}{\ifx\@paper@titlerunning\@empty
+    \gdef\@mlsystitlerunning{\@paper@title}\else
+    \gdef\@mlsystitlerunning{\@paper@titlerunning}\fi
+  \chead{\small\bf\@mlsystitlerunning}\thispagestyle{empty}}
+
+\newcommand{\paper@mlsysNotice}{{\let\thefootnote\relax\footnotetext{\hspace*{-\footnotesep}\Notice@String}}}
+
+\newcommand{\makepapertitle}{\paper@setpdfmetadata
+  \ifpaper@neurips
+    \par
+    \begingroup
+      \thispagestyle{empty}\paper@titlecard
+      \@notice
+    \endgroup
+  \fi
+  \ifpaper@mlsys
+    \paper@setmlsysrunninghead
+    \twocolumn[\paper@titlecard
+      \vskip 0.18in
+    ]\paper@mlsysNotice
+  \fi
+}
+
+\makeatother

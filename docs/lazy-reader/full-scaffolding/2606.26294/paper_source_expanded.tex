@@ -1,0 +1,2724 @@
+
+
+\PassOptionsToPackage{numbers,sort&compress}{natbib}
+\providecommand\FormatOverride{neurips}
+\providecommand\LogosOverride{camlsys-cambridge}
+\providecommand\TitleBgOverride{camlsys}
+\IfFileExists{preamble/format.tex}{}{}
+\IfFileExists{neurips_2026.sty}{}{}
+\IfFileExists{main.bbl}{}{}
+\documentclass{paper}
+
+
+\makeatletter
+
+\RequirePackage{etoolbox}   
+\RequirePackage{iftex}
+\ifPDFTeX
+  \RequirePackage[utf8]{inputenc}
+  \RequirePackage[T1]{fontenc}
+  \RequirePackage{tgtermes}
+  \RequirePackage[matchlowercase]{tgheros}
+  \RequirePackage[matchlowercase]{tgcursor}
+\else
+  \RequirePackage{fontspec}
+  \defaultfontfeatures{Ligatures=TeX}
+  \setmainfont[
+    BoldFont=texgyretermes-bold.otf,
+    ItalicFont=texgyretermes-italic.otf,
+    BoldItalicFont=texgyretermes-bolditalic.otf
+  ]{texgyretermes-regular.otf}
+  \setsansfont[
+    BoldFont=texgyreheros-bold.otf,
+    ItalicFont=texgyreheros-italic.otf,
+    BoldItalicFont=texgyreheros-bolditalic.otf,
+    Scale=MatchLowercase
+  ]{texgyreheros-regular.otf}
+  \setmonofont[
+    BoldFont=texgyrecursor-bold.otf,
+    ItalicFont=texgyrecursor-italic.otf,
+    BoldItalicFont=texgyrecursor-bolditalic.otf,
+    Scale=MatchLowercase
+  ]{texgyrecursor-regular.otf}
+\fi
+
+\PassOptionsToPackage{table}{xcolor}
+\RequirePackage{graphicx}
+\RequirePackage{booktabs}        \RequirePackage{amsmath}
+\RequirePackage{amssymb}
+\RequirePackage{amsfonts}
+\RequirePackage{amsthm}
+\RequirePackage{mathtools}
+\RequirePackage{microtype}
+\ifPDFTeX
+  \microtypesetup{activate={true,nocompatibility},final,expansion=true,protrusion=true,factor=1100,stretch=20,shrink=20}
+  \DisableLigatures{encoding=T1,family=tt*}
+\else
+  \microtypesetup{activate={true,nocompatibility},final,expansion=false,protrusion=true,factor=1100}
+\fi
+\frenchspacing
+\RequirePackage{xcolor}
+\RequirePackage{nicefrac}
+\RequirePackage{xspace}
+\RequirePackage{xparse}
+\RequirePackage{url}
+\RequirePackage{float}
+\RequirePackage{wrapfig}
+\RequirePackage{placeins}
+\RequirePackage{enumitem}
+\RequirePackage{tabularx}
+\RequirePackage{multirow}
+\RequirePackage{colortbl}
+\RequirePackage{listings}
+\RequirePackage{fvextra}  \RequirePackage{stmaryrd}
+\RequirePackage{newtxmath}  \RequirePackage{bm}
+\def\fontsubfuzz{.6pt}
+\RequirePackage{caption}
+\RequirePackage[skins,breakable,theorems]{tcolorbox}
+\RequirePackage{siunitx}\sisetup{round-mode=places, round-precision=2}
+\RequirePackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,calc,fit,backgrounds}
+\RequirePackage{subcaption}      \RequirePackage{etoc}            \ifpaper@mlsys
+  \let\algorithm\relax
+  \let\endalgorithm\relax
+  \let\listofalgorithms\relax
+  \expandafter\let\csname algorithm*\endcsname\relax
+  \expandafter\let\csname endalgorithm*\endcsname\relax
+\fi
+\RequirePackage[ruled,vlined]{algorithm2e}
+
+\RequirePackage[toc, title]{appendix}
+
+\@ifpackageloaded{hyperref}{}{\RequirePackage{hyperref}}
+\definecolor{paperlink}{rgb}{0.10,0.20,0.55}
+\hypersetup{colorlinks=true, linkcolor=paperlink, citecolor=paperlink, urlcolor=paperlink, breaklinks=true}
+\RequirePackage[capitalise, nameinlink]{cleveref}
+
+\makeatother
+
+
+\makeatletter
+
+\graphicspath{{figures/}{figures/plots/}{figures/diagrams/}{figures/tikz/}{branding/}}
+
+\newenvironment{widefigure}[1][tbp]
+  {\ifpaper@twocolumn \@nameuse{figure*}[#1]\else \@nameuse{figure}[#1]\fi}
+  {\ifpaper@twocolumn \@nameuse{endfigure*}\else \@nameuse{endfigure}\fi}
+\newenvironment{widetable}[1][tbp]
+  {\ifpaper@twocolumn \@nameuse{table*}[#1]\else \@nameuse{table}[#1]\fi}
+  {\ifpaper@twocolumn \@nameuse{endtable*}\else \@nameuse{endtable}\fi}
+
+\newcommand{\eg}{e.g.,\xspace}
+\newcommand{\ie}{i.e.,\xspace}
+\newcommand{\etal}{et~al.\xspace}
+\newcommand{\dashes}{---\xspace}
+
+\newcommand{\todo}[1]{{\normalfont\color{red}\,[TODO: #1]\,}}
+\newcommand{\note}[2]{{\normalfont\color{blue}\,[#1: #2]}}
+
+
+
+\newcommand{\figleft}{{\em (Left)}}
+\newcommand{\figcenter}{{\em (Center)}}
+\newcommand{\figright}{{\em (Right)}}
+\newcommand{\figtop}{{\em (Top)}}
+\newcommand{\figbottom}{{\em (Bottom)}}
+\newcommand{\captiona}{{\em (a)}}
+\newcommand{\captionb}{{\em (b)}}
+\newcommand{\captionc}{{\em (c)}}
+\newcommand{\captiond}{{\em (d)}}
+
+\newcommand{\newterm}[1]{{\bf #1}}
+
+
+\def\figref#1{figure~\ref{#1}}
+\def\Figref#1{Figure~\ref{#1}}
+\def\twofigref#1#2{figures \ref{#1} and \ref{#2}}
+\def\quadfigref#1#2#3#4{figures \ref{#1}, \ref{#2}, \ref{#3} and \ref{#4}}
+\def\secref#1{section~\ref{#1}}
+\def\Secref#1{Section~\ref{#1}}
+\def\twosecrefs#1#2{sections \ref{#1} and \ref{#2}}
+\def\secrefs#1#2#3{sections \ref{#1}, \ref{#2} and \ref{#3}}
+\def\eqref#1{equation~\ref{#1}}
+\def\Eqref#1{Equation~\ref{#1}}
+\def\plaineqref#1{\ref{#1}}
+\def\chapref#1{chapter~\ref{#1}}
+\def\Chapref#1{Chapter~\ref{#1}}
+\def\rangechapref#1#2{chapters\ref{#1}--\ref{#2}}
+\def\algref#1{algorithm~\ref{#1}}
+\def\Algref#1{Algorithm~\ref{#1}}
+\def\twoalgref#1#2{algorithms \ref{#1} and \ref{#2}}
+\def\Twoalgref#1#2{Algorithms \ref{#1} and \ref{#2}}
+\def\partref#1{part~\ref{#1}}
+\def\Partref#1{Part~\ref{#1}}
+\def\twopartref#1#2{parts \ref{#1} and \ref{#2}}
+
+\def\ceil#1{\lceil #1 \rceil}
+\def\floor#1{\lfloor #1 \rfloor}
+\def\1{\bm{1}}
+\newcommand{\train}{\mathcal{D}}
+\newcommand{\valid}{\mathcal{D_{\mathrm{valid}}}}
+\newcommand{\test}{\mathcal{D_{\mathrm{test}}}}
+
+\def\eps{{\epsilon}}
+
+
+\def\reta{{\textnormal{$\eta$}}}
+\def\ra{{\textnormal{a}}}
+\def\rb{{\textnormal{b}}}
+\def\rc{{\textnormal{c}}}
+\def\rd{{\textnormal{d}}}
+\def\re{{\textnormal{e}}}
+\def\rf{{\textnormal{f}}}
+\def\rg{{\textnormal{g}}}
+\def\rh{{\textnormal{h}}}
+\def\ri{{\textnormal{i}}}
+\def\rj{{\textnormal{j}}}
+\def\rk{{\textnormal{k}}}
+\def\rl{{\textnormal{l}}}
+\def\rn{{\textnormal{n}}}
+\def\ro{{\textnormal{o}}}
+\def\rp{{\textnormal{p}}}
+\def\rq{{\textnormal{q}}}
+\def\rr{{\textnormal{r}}}
+\def\rs{{\textnormal{s}}}
+\def\rt{{\textnormal{t}}}
+\def\ru{{\textnormal{u}}}
+\def\rv{{\textnormal{v}}}
+\def\rw{{\textnormal{w}}}
+\def\rx{{\textnormal{x}}}
+\def\ry{{\textnormal{y}}}
+\def\rz{{\textnormal{z}}}
+
+\def\rvepsilon{{\mathbf{\epsilon}}}
+\def\rvtheta{{\mathbf{\theta}}}
+\def\rva{{\mathbf{a}}}
+\def\rvb{{\mathbf{b}}}
+\def\rvc{{\mathbf{c}}}
+\def\rvd{{\mathbf{d}}}
+\def\rve{{\mathbf{e}}}
+\def\rvf{{\mathbf{f}}}
+\def\rvg{{\mathbf{g}}}
+\def\rvh{{\mathbf{h}}}
+\def\rvu{{\mathbf{i}}}
+\def\rvj{{\mathbf{j}}}
+\def\rvk{{\mathbf{k}}}
+\def\rvl{{\mathbf{l}}}
+\def\rvm{{\mathbf{m}}}
+\def\rvn{{\mathbf{n}}}
+\def\rvo{{\mathbf{o}}}
+\def\rvp{{\mathbf{p}}}
+\def\rvq{{\mathbf{q}}}
+\def\rvr{{\mathbf{r}}}
+\def\rvs{{\mathbf{s}}}
+\def\rvt{{\mathbf{t}}}
+\def\rvu{{\mathbf{u}}}
+\def\rvv{{\mathbf{v}}}
+\def\rvw{{\mathbf{w}}}
+\def\rvx{{\mathbf{x}}}
+\def\rvy{{\mathbf{y}}}
+\def\rvz{{\mathbf{z}}}
+
+\def\erva{{\textnormal{a}}}
+\def\ervb{{\textnormal{b}}}
+\def\ervc{{\textnormal{c}}}
+\def\ervd{{\textnormal{d}}}
+\def\erve{{\textnormal{e}}}
+\def\ervf{{\textnormal{f}}}
+\def\ervg{{\textnormal{g}}}
+\def\ervh{{\textnormal{h}}}
+\def\ervi{{\textnormal{i}}}
+\def\ervj{{\textnormal{j}}}
+\def\ervk{{\textnormal{k}}}
+\def\ervl{{\textnormal{l}}}
+\def\ervm{{\textnormal{m}}}
+\def\ervn{{\textnormal{n}}}
+\def\ervo{{\textnormal{o}}}
+\def\ervp{{\textnormal{p}}}
+\def\ervq{{\textnormal{q}}}
+\def\ervr{{\textnormal{r}}}
+\def\ervs{{\textnormal{s}}}
+\def\ervt{{\textnormal{t}}}
+\def\ervu{{\textnormal{u}}}
+\def\ervv{{\textnormal{v}}}
+\def\ervw{{\textnormal{w}}}
+\def\ervx{{\textnormal{x}}}
+\def\ervy{{\textnormal{y}}}
+\def\ervz{{\textnormal{z}}}
+
+\def\rmA{{\mathbf{A}}}
+\def\rmB{{\mathbf{B}}}
+\def\rmC{{\mathbf{C}}}
+\def\rmD{{\mathbf{D}}}
+\def\rmE{{\mathbf{E}}}
+\def\rmF{{\mathbf{F}}}
+\def\rmG{{\mathbf{G}}}
+\def\rmH{{\mathbf{H}}}
+\def\rmI{{\mathbf{I}}}
+\def\rmJ{{\mathbf{J}}}
+\def\rmK{{\mathbf{K}}}
+\def\rmL{{\mathbf{L}}}
+\def\rmM{{\mathbf{M}}}
+\def\rmN{{\mathbf{N}}}
+\def\rmO{{\mathbf{O}}}
+\def\rmP{{\mathbf{P}}}
+\def\rmQ{{\mathbf{Q}}}
+\def\rmR{{\mathbf{R}}}
+\def\rmS{{\mathbf{S}}}
+\def\rmT{{\mathbf{T}}}
+\def\rmU{{\mathbf{U}}}
+\def\rmV{{\mathbf{V}}}
+\def\rmW{{\mathbf{W}}}
+\def\rmX{{\mathbf{X}}}
+\def\rmY{{\mathbf{Y}}}
+\def\rmZ{{\mathbf{Z}}}
+
+\def\ermA{{\textnormal{A}}}
+\def\ermB{{\textnormal{B}}}
+\def\ermC{{\textnormal{C}}}
+\def\ermD{{\textnormal{D}}}
+\def\ermE{{\textnormal{E}}}
+\def\ermF{{\textnormal{F}}}
+\def\ermG{{\textnormal{G}}}
+\def\ermH{{\textnormal{H}}}
+\def\ermI{{\textnormal{I}}}
+\def\ermJ{{\textnormal{J}}}
+\def\ermK{{\textnormal{K}}}
+\def\ermL{{\textnormal{L}}}
+\def\ermM{{\textnormal{M}}}
+\def\ermN{{\textnormal{N}}}
+\def\ermO{{\textnormal{O}}}
+\def\ermP{{\textnormal{P}}}
+\def\ermQ{{\textnormal{Q}}}
+\def\ermR{{\textnormal{R}}}
+\def\ermS{{\textnormal{S}}}
+\def\ermT{{\textnormal{T}}}
+\def\ermU{{\textnormal{U}}}
+\def\ermV{{\textnormal{V}}}
+\def\ermW{{\textnormal{W}}}
+\def\ermX{{\textnormal{X}}}
+\def\ermY{{\textnormal{Y}}}
+\def\ermZ{{\textnormal{Z}}}
+
+\def\vzero{{\bm{0}}}
+\def\vone{{\bm{1}}}
+\def\vmu{{\bm{\mu}}}
+\def\vtheta{{\bm{\theta}}}
+\def\va{{\bm{a}}}
+\def\vb{{\bm{b}}}
+\def\vc{{\bm{c}}}
+\def\vd{{\bm{d}}}
+\def\ve{{\bm{e}}}
+\def\vf{{\bm{f}}}
+\def\vg{{\bm{g}}}
+\def\vh{{\bm{h}}}
+\def\vi{{\bm{i}}}
+\def\vj{{\bm{j}}}
+\def\vk{{\bm{k}}}
+\def\vl{{\bm{l}}}
+\def\vm{{\bm{m}}}
+\def\vn{{\bm{n}}}
+\def\vo{{\bm{o}}}
+\def\vp{{\bm{p}}}
+\def\vq{{\bm{q}}}
+\def\vr{{\bm{r}}}
+\def\vs{{\bm{s}}}
+\def\vt{{\bm{t}}}
+\def\vu{{\bm{u}}}
+\def\vv{{\bm{v}}}
+\def\vw{{\bm{w}}}
+\def\vx{{\bm{x}}}
+\def\vy{{\bm{y}}}
+\def\vz{{\bm{z}}}
+
+\def\evalpha{{\alpha}}
+\def\evbeta{{\beta}}
+\def\evepsilon{{\epsilon}}
+\def\evlambda{{\lambda}}
+\def\evomega{{\omega}}
+\def\evmu{{\mu}}
+\def\evpsi{{\psi}}
+\def\evsigma{{\sigma}}
+\def\evtheta{{\theta}}
+\def\eva{{a}}
+\def\evb{{b}}
+\def\evc{{c}}
+\def\evd{{d}}
+\def\eve{{e}}
+\def\evf{{f}}
+\def\evg{{g}}
+\def\evh{{h}}
+\def\evi{{i}}
+\def\evj{{j}}
+\def\evk{{k}}
+\def\evl{{l}}
+\def\evm{{m}}
+\def\evn{{n}}
+\def\evo{{o}}
+\def\evp{{p}}
+\def\evq{{q}}
+\def\evr{{r}}
+\def\evs{{s}}
+\def\evt{{t}}
+\def\evu{{u}}
+\def\evv{{v}}
+\def\evw{{w}}
+\def\evx{{x}}
+\def\evy{{y}}
+\def\evz{{z}}
+
+\def\mA{{\bm{A}}}
+\def\mB{{\bm{B}}}
+\def\mC{{\bm{C}}}
+\def\mD{{\bm{D}}}
+\def\mE{{\bm{E}}}
+\def\mF{{\bm{F}}}
+\def\mG{{\bm{G}}}
+\def\mH{{\bm{H}}}
+\def\mI{{\bm{I}}}
+\def\mJ{{\bm{J}}}
+\def\mK{{\bm{K}}}
+\def\mL{{\bm{L}}}
+\def\mM{{\bm{M}}}
+\def\mN{{\bm{N}}}
+\def\mO{{\bm{O}}}
+\def\mP{{\bm{P}}}
+\def\mQ{{\bm{Q}}}
+\def\mR{{\bm{R}}}
+\def\mS{{\bm{S}}}
+\def\mT{{\bm{T}}}
+\def\mU{{\bm{U}}}
+\def\mV{{\bm{V}}}
+\def\mW{{\bm{W}}}
+\def\mX{{\bm{X}}}
+\def\mY{{\bm{Y}}}
+\def\mZ{{\bm{Z}}}
+\def\mBeta{{\bm{\beta}}}
+\def\mPhi{{\bm{\Phi}}}
+\def\mLambda{{\bm{\Lambda}}}
+\def\mSigma{{\bm{\Sigma}}}
+
+\DeclareMathAlphabet{\mathsfit}{\encodingdefault}{\sfdefault}{m}{sl}
+\SetMathAlphabet{\mathsfit}{bold}{\encodingdefault}{\sfdefault}{bx}{n}
+\newcommand{\tens}[1]{\bm{\mathsfit{#1}}}
+\def\tA{{\tens{A}}}
+\def\tB{{\tens{B}}}
+\def\tC{{\tens{C}}}
+\def\tD{{\tens{D}}}
+\def\tE{{\tens{E}}}
+\def\tF{{\tens{F}}}
+\def\tG{{\tens{G}}}
+\def\tH{{\tens{H}}}
+\def\tI{{\tens{I}}}
+\def\tJ{{\tens{J}}}
+\def\tK{{\tens{K}}}
+\def\tL{{\tens{L}}}
+\def\tM{{\tens{M}}}
+\def\tN{{\tens{N}}}
+\def\tO{{\tens{O}}}
+\def\tP{{\tens{P}}}
+\def\tQ{{\tens{Q}}}
+\def\tR{{\tens{R}}}
+\def\tS{{\tens{S}}}
+\def\tT{{\tens{T}}}
+\def\tU{{\tens{U}}}
+\def\tV{{\tens{V}}}
+\def\tW{{\tens{W}}}
+\def\tX{{\tens{X}}}
+\def\tY{{\tens{Y}}}
+\def\tZ{{\tens{Z}}}
+
+
+\def\gA{{\mathcal{A}}}
+\def\gB{{\mathcal{B}}}
+\def\gC{{\mathcal{C}}}
+\def\gD{{\mathcal{D}}}
+\def\gE{{\mathcal{E}}}
+\def\gF{{\mathcal{F}}}
+\def\gG{{\mathcal{G}}}
+\def\gH{{\mathcal{H}}}
+\def\gI{{\mathcal{I}}}
+\def\gJ{{\mathcal{J}}}
+\def\gK{{\mathcal{K}}}
+\def\gL{{\mathcal{L}}}
+\def\gM{{\mathcal{M}}}
+\def\gN{{\mathcal{N}}}
+\def\gO{{\mathcal{O}}}
+\def\gP{{\mathcal{P}}}
+\def\gQ{{\mathcal{Q}}}
+\def\gR{{\mathcal{R}}}
+\def\gS{{\mathcal{S}}}
+\def\gT{{\mathcal{T}}}
+\def\gU{{\mathcal{U}}}
+\def\gV{{\mathcal{V}}}
+\def\gW{{\mathcal{W}}}
+\def\gX{{\mathcal{X}}}
+\def\gY{{\mathcal{Y}}}
+\def\gZ{{\mathcal{Z}}}
+
+\def\sA{{\mathbb{A}}}
+\def\sB{{\mathbb{B}}}
+\def\sC{{\mathbb{C}}}
+\def\sD{{\mathbb{D}}}
+\def\sF{{\mathbb{F}}}
+\def\sG{{\mathbb{G}}}
+\def\sH{{\mathbb{H}}}
+\def\sI{{\mathbb{I}}}
+\def\sJ{{\mathbb{J}}}
+\def\sK{{\mathbb{K}}}
+\def\sL{{\mathbb{L}}}
+\def\sM{{\mathbb{M}}}
+\def\sN{{\mathbb{N}}}
+\def\sO{{\mathbb{O}}}
+\def\sP{{\mathbb{P}}}
+\def\sQ{{\mathbb{Q}}}
+\def\sR{{\mathbb{R}}}
+\def\sS{{\mathbb{S}}}
+\def\sT{{\mathbb{T}}}
+\def\sU{{\mathbb{U}}}
+\def\sV{{\mathbb{V}}}
+\def\sW{{\mathbb{W}}}
+\def\sX{{\mathbb{X}}}
+\def\sY{{\mathbb{Y}}}
+\def\sZ{{\mathbb{Z}}}
+
+\def\emLambda{{\Lambda}}
+\def\emA{{A}}
+\def\emB{{B}}
+\def\emC{{C}}
+\def\emD{{D}}
+\def\emE{{E}}
+\def\emF{{F}}
+\def\emG{{G}}
+\def\emH{{H}}
+\def\emI{{I}}
+\def\emJ{{J}}
+\def\emK{{K}}
+\def\emL{{L}}
+\def\emM{{M}}
+\def\emN{{N}}
+\def\emO{{O}}
+\def\emP{{P}}
+\def\emQ{{Q}}
+\def\emR{{R}}
+\def\emS{{S}}
+\def\emT{{T}}
+\def\emU{{U}}
+\def\emV{{V}}
+\def\emW{{W}}
+\def\emX{{X}}
+\def\emY{{Y}}
+\def\emZ{{Z}}
+\def\emSigma{{\Sigma}}
+
+\newcommand{\etens}[1]{\mathsfit{#1}}
+\def\etLambda{{\etens{\Lambda}}}
+\def\etA{{\etens{A}}}
+\def\etB{{\etens{B}}}
+\def\etC{{\etens{C}}}
+\def\etD{{\etens{D}}}
+\def\etE{{\etens{E}}}
+\def\etF{{\etens{F}}}
+\def\etG{{\etens{G}}}
+\def\etH{{\etens{H}}}
+\def\etI{{\etens{I}}}
+\def\etJ{{\etens{J}}}
+\def\etK{{\etens{K}}}
+\def\etL{{\etens{L}}}
+\def\etM{{\etens{M}}}
+\def\etN{{\etens{N}}}
+\def\etO{{\etens{O}}}
+\def\etP{{\etens{P}}}
+\def\etQ{{\etens{Q}}}
+\def\etR{{\etens{R}}}
+\def\etS{{\etens{S}}}
+\def\etT{{\etens{T}}}
+\def\etU{{\etens{U}}}
+\def\etV{{\etens{V}}}
+\def\etW{{\etens{W}}}
+\def\etX{{\etens{X}}}
+\def\etY{{\etens{Y}}}
+\def\etZ{{\etens{Z}}}
+
+\newcommand{\pdata}{p_{\rm{data}}}
+\newcommand{\ptrain}{\hat{p}_{\rm{data}}}
+\newcommand{\Ptrain}{\hat{P}_{\rm{data}}}
+\newcommand{\pmodel}{p_{\rm{model}}}
+\newcommand{\Pmodel}{P_{\rm{model}}}
+\newcommand{\ptildemodel}{\tilde{p}_{\rm{model}}}
+\newcommand{\pencode}{p_{\rm{encoder}}}
+\newcommand{\pdecode}{p_{\rm{decoder}}}
+\newcommand{\precons}{p_{\rm{reconstruct}}}
+
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Ls}{\mathcal{L}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\emp}{\tilde{p}}
+\newcommand{\lr}{\alpha}
+\newcommand{\reg}{\lambda}
+\newcommand{\rect}{\mathrm{rectifier}}
+\newcommand{\softmax}{\mathrm{softmax}}
+\newcommand{\sigmoid}{\sigma}
+\newcommand{\softplus}{\zeta}
+\newcommand{\KL}{D_{\mathrm{KL}}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\standarderror}{\mathrm{SE}}
+\newcommand{\Cov}{\mathrm{Cov}}
+\newcommand{\normlzero}{L^0}
+\newcommand{\normlone}{L^1}
+\newcommand{\normltwo}{L^2}
+\newcommand{\normlp}{L^p}
+\newcommand{\normmax}{L^\infty}
+
+\newcommand{\parents}{Pa} 
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\DeclareMathOperator{\sign}{sign}
+\DeclareMathOperator{\Tr}{Tr}
+\let\ab\allowbreak
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{assumption}{Assumption}
+\newtheorem{proposition}{Proposition}
+\newtheorem{remark}{Remark}
+\crefname{theorem}{Thm.}{Thms.}
+\Crefname{theorem}{Theorem}{Theorems}
+\crefname{lemma}{Lem.}{Lems.}
+\Crefname{lemma}{Lemma}{Lemmas}
+\crefname{corollary}{Cor.}{Cors.}
+\Crefname{corollary}{Corollary}{Corollaries}
+\crefname{definition}{Def.}{Defs.}
+\Crefname{definition}{Definition}{Definitions}
+\crefname{assumption}{Asm.}{Asms.}
+\Crefname{assumption}{Assumption}{Assumptions}
+\crefname{proposition}{Prop.}{Props.}
+\Crefname{proposition}{Proposition}{Propositions}
+\crefname{remark}{Rem.}{Rems.}
+\Crefname{remark}{Remark}{Remarks}
+\crefname{section}{Sec.}{Secs.}
+\Crefname{section}{Section}{Sections}
+\crefname{subsection}{Sec.}{Secs.}
+\Crefname{subsection}{Section}{Sections}
+\crefname{subsubsection}{Sec.}{Secs.}
+\Crefname{subsubsection}{Section}{Sections}
+\crefname{appendix}{App.}{Apps.}
+\Crefname{appendix}{Appendix}{Appendices}
+\crefname{figure}{Fig.}{Figs.}
+\Crefname{figure}{Figure}{Figures}
+\crefname{table}{Tab.}{Tabs.}
+\Crefname{table}{Table}{Tables}
+\crefname{equation}{Eq.}{Eqs.}
+\Crefname{equation}{Equation}{Equations}
+\crefname{lstlisting}{Lst.}{Lsts.}
+\Crefname{lstlisting}{Listing}{Listings}
+\definecolor{ThemeOrange}{HTML}{FFA532}      \definecolor{ThemeGoldBrown}{HTML}{A98426}
+\definecolor{ThemeNavy}{HTML}{0E2344}        \definecolor{ThemeBlue}{HTML}{0073CA}
+\definecolor{ThemePurple}{HTML}{8A05B7}
+\definecolor{ThemeGray}{HTML}{7f7f7f}        \definecolor{ThemeTeal}{HTML}{0B7285}        \definecolor{ThemeAmberText}{HTML}{C77400}   
+
+\definecolor{BoxFormalBg}{HTML}{F4F6F9}
+\definecolor{BoxFormalFrame}{HTML}{8A9BB5}
+\definecolor{BoxDefBg}{HTML}{EFF5FB}
+\definecolor{BoxDefFrame}{HTML}{7FAED4}
+\definecolor{BoxWarmBg}{HTML}{FDF6ED}
+\definecolor{BoxWarmFrame}{HTML}{C4A24D}
+
+
+\newcommand{\introtakeawaybox}[2][]{\begin{tcolorbox}[colback=ThemeGoldBrown!5,
+      colframe=ThemeGoldBrown!35,
+      boxrule=0.6pt,
+      arc=3pt,
+      left=5pt, right=5pt, top=2.5pt, bottom=2.5pt,
+      fontupper={\small}
+  ]
+    \if\relax\detokenize{#1}\relax\textbf{Contributions:} #2\else\textbf{Contributions #1:} #2\fi\end{tcolorbox}\vspace*{-0.1cm}
+}
+
+\newcommand{\takeawaybox}[2][]{\begin{tcolorbox}[
+       colback=ThemeGoldBrown!5,
+    colframe=ThemeGoldBrown!35,
+    boxrule=0.6pt,
+    arc=3pt,
+    left=6pt, right=6pt, top=3.5pt, bottom=3.5pt,
+    fontupper={\small}
+  ]
+    \IfNoValueTF{#1}{\textbf{Takeaway:} #2}{\textbf{#1} #2}\end{tcolorbox}\vspace*{-0.1cm}
+}
+
+\newcommand{\theorybox}[2][]{\begin{tcolorbox}[
+       breakable,
+       colback=ThemeNavy!3,
+       colframe=ThemeNavy!35,
+       boxrule=0.6pt,
+       arc=3pt,
+       left=6pt, right=6pt, top=3.5pt, bottom=3.5pt,
+       fontupper={\small}
+  ]
+    \IfNoValueTF{#1}{\textbf{Theory summary:} #2}{\textbf{#1} #2}\end{tcolorbox}\vspace*{-0.1cm}
+}
+
+\newcommand{\empiricaltakeawaybox}[2][]{\begin{tcolorbox}[
+      colback=ThemeGoldBrown!5,
+    colframe=ThemeGoldBrown!35,
+    boxrule=0.6pt,
+    arc=3pt,
+    left=6pt, right=6pt, top=3.5pt, bottom=3.5pt,
+    fontupper={\small}
+  ]
+    \IfNoValueTF{#1}{\textbf{Empirical Takeaway:} #2}{\textbf{Empirical Takeaways #1:} #2}\end{tcolorbox}\vspace*{-0.1cm}
+}
+
+\tcolorboxenvironment{theorem}{
+  enhanced, colback=ThemeNavy!3, colframe=ThemeNavy!35,
+  fonttitle=\bfseries, boxrule=0.6pt, arc=3pt,
+  left=6pt, right=6pt, top=3.5pt, bottom=3.5pt
+}
+\tcolorboxenvironment{assumption}{
+  enhanced, colback=ThemeNavy!3, colframe=ThemeNavy!35,
+  fonttitle=\bfseries, boxrule=0.6pt, arc=3pt,
+  left=6pt, right=6pt, top=3.5pt, bottom=3.5pt
+}
+\tcolorboxenvironment{proposition}{
+  enhanced, breakable, colback=ThemeNavy!3, colframe=ThemeNavy!35,
+  fonttitle=\bfseries, boxrule=0.6pt, arc=3pt,
+  left=6pt, right=6pt, top=3.5pt, bottom=3.5pt
+}
+\tcolorboxenvironment{definition}{
+  enhanced, breakable, colback=ThemeNavy!3, colframe=ThemeNavy!35,
+  fonttitle=\bfseries, boxrule=0.6pt, arc=3pt,
+  left=6pt, right=6pt, top=3.5pt, bottom=3.5pt
+}
+\definecolor{lightwheat}{rgb}{1.0, 0.98, 0.82}
+\definecolor{skyblue}{HTML}{A7C7E7}
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
+\lstdefinestyle{pythonstyle}{
+  language=Python,
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{blue!70!black},
+  commentstyle=\color{green!50!black},
+  stringstyle=\color{red!60!black},
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  framerule=0.4pt,
+  rulecolor=\color{gray!50},
+  backgroundcolor=\color{gray!3},
+  columns=fullflexible,
+  keepspaces=true,
+}
+
+\lstdefinelanguage{RSDiff}{
+  sensitive=false,
+  morecomment=[f][\color{red!60!black}]{-},
+  morecomment=[f][\color{green!45!black}]{+},
+  morecomment=[f][\color{ThemeNavy}]{@@},
+  morecomment=[f][\color{ThemeNavy}]{diff },
+  morecomment=[f][\color{ThemeNavy}]{index },
+}
+\lstdefinestyle{rsdiff}{
+  language=RSDiff,
+  basicstyle=\ttfamily\scriptsize,
+  columns=fullflexible,
+  keepspaces=true,
+  frame=single,
+  framerule=0.4pt,
+  rulecolor=\color{gray!45},
+  backgroundcolor=\color{white},
+  breaklines=true,
+  postbreak=\mbox{\textcolor{gray}{$\hookrightarrow$}\space},
+  xleftmargin=1em,
+  xrightmargin=1em,
+  aboveskip=0.5em,
+  belowskip=0.5em,
+}
+\newtcolorbox{promptbox}[2][]{breakable, enhanced,
+  colback=white, colframe=ThemeNavy!70,
+  boxrule=0.5pt, arc=2pt,
+  left=6pt, right=6pt, top=4pt, bottom=4pt,
+  fonttitle=\bfseries\small, coltitle=white,
+  colbacktitle=ThemeNavy!70,
+  title={#2}, #1
+}
+\DefineVerbatimEnvironment{PromptVerb}{Verbatim}{breaklines=true, fontsize=\scriptsize,
+  breaksymbolleft={\textcolor{gray}{\scriptsize$\hookrightarrow$}}}
+
+\newcommand{\slotnum}[1]{\textcolor{ThemeBlue}{$\mathbf{#1}$}}
+\newcommand{\noslot}{\textcolor{ThemeGray}{$\varnothing$}}
+
+
+
+\newcommand{\ourmethod}{\texttt{RQGM}\xspace}
+\newcommand{\theourmethod}{the \ourmethod}
+\newcommand{\Theourmethod}{The \ourmethod}
+\newcommand{\AI}{\texttt{AI}}
+\newcommand{\hgm}{\texttt{HGM}\xspace}
+\newcommand{\hgmh}{\texttt{HGM-H}\xspace}
+\newcommand{\dgm}{\texttt{DGM}\xspace}
+\newcommand{\dgmh}{\texttt{DGM-H}\xspace}
+\newcommand{\hyperagents}{\texttt{HyperAgents}\xspace}
+\newcommand{\proofautograder}{\texttt{ProofAutoGrader}\xspace}
+\newcommand{\sakana}{\texttt{Sakana}\xspace}
+\newcommand{\imocode}{\texttt{IMO25}\xspace}
+\newcommand{\gptlow}{\texttt{GPT-5.5}\xspace}
+\newcommand{\nemotron}{\texttt{Nemotron} \texttt{3} \texttt{Super}\xspace}
+\newcommand{\nemotronultra}{\texttt{Nemotron} \texttt{3} \texttt{Ultra}\xspace}
+\newcommand{\cmp}{\texttt{CMP}\xspace}
+\newcommand{\apres}{\texttt{APReS}\xspace}
+\newcommand{\polyglot}{\texttt{Polyglot}\xspace}
+\newcommand{\crave}{\texttt{CRAVE}\xspace}
+\newcommand{\imogradbench}{\texttt{IMO-GradingBench}\xspace}
+\newcommand{\swebench}{\texttt{SWE-bench}\xspace}
+\definecolor{RedQueenRed}{HTML}{B01030}
+\newcommand{\redqueencrownedheart}{\raisebox{-0.08em}{\smash{\begin{tikzpicture}[x=0.045em,y=-0.045em,baseline=-0.45ex]
+      \path[fill=RedQueenRed,draw=none]
+        (0,11)
+        .. controls (-7.5,4) and (-12,-0.5) .. (-12,-5)
+        .. controls (-12,-9) and (-8.8,-11) .. (-5.6,-11)
+        .. controls (-2.6,-11) and (-0.8,-9) .. (0,-7)
+        .. controls (0.8,-9) and (2.6,-11) .. (5.6,-11)
+        .. controls (8.8,-11) and (12,-9) .. (12,-5)
+        .. controls (12,-0.5) and (7.5,4) .. (0,11)
+        -- cycle;
+      \path[fill=RedQueenRed,draw=none]
+        (-7,-9) -- (-7,-13.6) -- (-3.4,-10.8) -- (0,-16)
+        -- (3.4,-10.8) -- (7,-13.6) -- (7,-9) -- cycle;
+    \end{tikzpicture}}}}
+
+\newcommand{\redqueenmark}{\begin{tikzpicture}[x=0.18em,y=-0.18em,baseline=-0.5ex]
+    \path[fill=RedQueenRed,draw=RedQueenRed!75!black,line width=0.2pt]
+      (0,11)
+      .. controls (-7.5,4) and (-12,-0.5) .. (-12,-5)
+      .. controls (-12,-9) and (-8.8,-11) .. (-5.6,-11)
+      .. controls (-2.6,-11) and (-0.8,-9) .. (0,-7)
+      .. controls (0.8,-9) and (2.6,-11) .. (5.6,-11)
+      .. controls (8.8,-11) and (12,-9) .. (12,-5)
+      .. controls (12,-0.5) and (7.5,4) .. (0,11)
+      -- cycle;
+    \path[fill=RedQueenRed!85!black,draw=none]
+      (-7,-9) -- (-7,-13.6) -- (-3.4,-10.8) -- (0,-16)
+      -- (3.4,-10.8) -- (7,-13.6) -- (7,-9) -- cycle;
+  \end{tikzpicture}}
+
+\crefname{algocf}{Alg.}{Algs.}
+\Crefname{algocf}{Algorithm}{Algorithms}
+
+\newcommand{\func}[1]{\mathrm{#1}}
+
+\makeatother
+
+
+\makeatletter
+
+\def\@paper@title{Untitled}
+\let\@paper@titlerunning\@empty
+\let\@paper@keywords\@empty
+\let\@paper@code\@empty
+\let\@paper@plainauthors\@empty
+\let\@paper@displayauthors\@empty
+\let\@paper@displayaffils\@empty
+\let\@paper@corrdisplay\@empty
+\let\@paper@titlelogo\@empty
+\let\@paper@titlemark\@empty
+\def\paper@titlelogoheight{3.0em}
+\def\paper@abstractfile{sections/abstract}
+\newcounter{paper@affil}
+\let\@neurips@authors\@empty
+\let\@neurips@affils\@empty
+\let\@neurips@corr\@empty
+\let\@mlsys@authors\@empty
+\let\@mlsys@affils\@empty
+\let\@mlsys@corr\@empty
+\newif\if@paper@firstauthor \@paper@firstauthortrue
+\newif\if@paper@firstdisplayauthor \@paper@firstdisplayauthortrue
+\newif\if@paper@hasequal \@paper@hasequalfalse
+\newlength{\paper@titlecardinnerwidth}
+
+\def\paper@titlecardpadding{0.38cm}
+\def\paper@titlecardradius{10pt}
+
+\definecolor{paperBrandCamlsysBlue}{HTML}{102344}
+\definecolor{paperBrandCambridgeRed}{HTML}{EF2E31}
+\definecolor{paperBrandCambridgeGold}{HTML}{FDDD04}
+\definecolor{ThemeGoldBrown}{HTML}{A98426}
+\colorlet{paperTitleBgCamlsys}{paperBrandCamlsysBlue!8!white}
+\colorlet{paperTitleBgCambridgeGold}{paperBrandCambridgeGold!8!white}
+\colorlet{paperTitleBgCambridge}{paperBrandCambridgeRed!3!paperTitleBgCambridgeGold}
+\colorlet{paperTitleBgNeutral}{black!2!white}
+\colorlet{paperTitleBgRQGM}{ThemeGoldBrown!5!white}
+\colorlet{paperTitleFrameRQGM}{ThemeGoldBrown!35!white}
+\colorlet{paperTitleBg}{paperTitleBgCamlsys}
+\colorlet{paperTitleFrame}{paperTitleBg}
+\definecolor{paperTitleFg}{HTML}{1F2328}
+\definecolor{paperTitleMuted}{HTML}{4D5560}
+\def\paper@titlebg@camlsys{camlsys}
+\def\paper@titlebg@cambridge{cambridge}
+\def\paper@titlebg@neutral{neutral}
+\def\paper@titlebg@rqgm{rqgm-muted}
+
+\csdef{paper@sym@equal}{*}
+
+\newcommand{\paperTitle}[1]{\def\@paper@title{#1}}
+\newcommand{\paperKeywords}[1]{\def\@paper@keywords{#1}}
+\newcommand{\paperCode}[1]{\def\@paper@code{#1}}
+\newcommand{\paperAbstractFile}[1]{\def\paper@abstractfile{#1}}
+\newcommand{\paperTitleLogo}[1]{\def\@paper@titlelogo{#1}}
+\newcommand{\paperTitleMark}[1]{\def\@paper@titlemark{#1}}
+\newcommand{\paperTitleLogoHeight}[1]{\def\paper@titlelogoheight{#1}}
+\newcommand{\paperTitleBackground}[1]{\edef\paper@titlebg@choice{#1}\ifx\paper@titlebg@choice\paper@titlebg@camlsys
+    \colorlet{paperTitleBg}{paperTitleBgCamlsys}\colorlet{paperTitleFrame}{paperTitleBgCamlsys}\else
+    \ifx\paper@titlebg@choice\paper@titlebg@cambridge
+      \colorlet{paperTitleBg}{paperTitleBgCambridge}\colorlet{paperTitleFrame}{paperTitleBgCambridge}\else
+      \ifx\paper@titlebg@choice\paper@titlebg@neutral
+        \colorlet{paperTitleBg}{paperTitleBgNeutral}\colorlet{paperTitleFrame}{paperTitleBgNeutral}\else
+        \ifx\paper@titlebg@choice\paper@titlebg@rqgm
+          \colorlet{paperTitleBg}{paperTitleBgRQGM}\colorlet{paperTitleFrame}{paperTitleFrameRQGM}\else
+          \ClassWarning{paper}{Unknown title-card background theme `\paper@titlebg@choice'; keeping current theme}\fi
+      \fi
+    \fi
+  \fi
+}
+\paperTitleBackground{\paper@titlebg}
+\newcommand{\paperTitleRunning}[1]{\def\@paper@titlerunning{#1}\ifpaper@mlsys \mlsystitlerunning{#1}\fi  }
+
+\newcommand{\addAffiliation}[2]{\stepcounter{paper@affil}\csedef{paper@affil@#1}{\thepaper@affil}\ifnum\value{paper@affil}>\@ne \appto\@paper@displayaffils{\quad}\fi
+  \protected@eappto\@paper@displayaffils{\noexpand\textsuperscript{\arabic{paper@affil}}}\appto\@paper@displayaffils{#2}\ifpaper@neurips
+    \ifnum\value{paper@affil}>\@ne \appto\@neurips@affils{\quad}\fi
+    \protected@eappto\@neurips@affils{\noexpand\textsuperscript{\arabic{paper@affil}}}\appto\@neurips@affils{#2}\fi
+  \ifpaper@mlsys
+    \appto\@mlsys@affils{\mlsysaffiliation{#1}{#2}}\fi
+}
+
+\newcommand{\paper@resolvekey}[1]{\ifcsdef{paper@sym@#1}{\ifstrequal{#1}{equal}{\@paper@hasequaltrue}{}\protected@eappto\@paper@syms{\csuse{paper@sym@#1}}}{\ifcsdef{paper@affil@#1}{\ifx\@paper@nums\@empty\else\appto\@paper@nums{,}\fi
+      \protected@eappto\@paper@nums{\csuse{paper@affil@#1}}}{\ClassWarning{paper}{\noexpand\addAuthor: unknown key `#1'}}}}
+\newcommand{\addAuthor}[2]{\ifx\@paper@plainauthors\@empty
+    \appto\@paper@plainauthors{#1}\else
+    \appto\@paper@plainauthors{, #1}\fi
+  \let\@paper@nums\@empty \let\@paper@syms\@empty
+  \forcsvlist{\paper@resolvekey}{#2}\if@paper@firstdisplayauthor\else\appto\@paper@displayauthors{,\space}\fi
+  \appto\@paper@displayauthors{#1}\protected@eappto\@paper@displayauthors{\noexpand\textsuperscript{\@paper@nums\@paper@syms}}\@paper@firstdisplayauthorfalse
+  \ifpaper@neurips
+    \if@paper@firstauthor\else\appto\@neurips@authors{,\space}\fi
+    \appto\@neurips@authors{#1}\protected@eappto\@neurips@authors{\noexpand\textsuperscript{\@paper@nums\@paper@syms}}\@paper@firstauthorfalse
+  \fi
+  \ifpaper@mlsys
+    \appto\@mlsys@authors{\mlsysauthor{#1}{#2}}\fi
+}
+
+\newcommand{\correspondingAuthor}[2]{\appto\@paper@corrdisplay{#1 \texttt{<#2>}}\ifpaper@neurips \appto\@neurips@corr{\thanks{Correspondence to: #1 \texttt{<#2>}}}\fi
+  \ifpaper@mlsys   \appto\@mlsys@corr{\mlsyscorrespondingauthor{#1}{#2}}\fi
+}
+
+\newcommand{\paper@setneuripspdfauthor}{\hypersetup{pdfauthor={\@paper@plainauthors}}}
+\newcommand{\paper@setmlsyspdfauthor}{\hypersetup{pdfauthor={\@paper@plainauthors}}}
+\newcommand{\paper@setpdfmetadata}{\@ifpackageloaded{hyperref}{\hypersetup{pdftitle={\@paper@title}}\ifx\@paper@keywords\@empty\else
+      \hypersetup{pdfkeywords={\@paper@keywords}}\fi
+    \ifpaper@neurips
+      \paper@setneuripspdfauthor
+    \fi
+    \ifpaper@mlsys
+      \paper@setmlsyspdfauthor
+    \fi
+  }{}}
+
+\newcommand{\paper@titleLogoGraphic}{\raisebox{0.27pt}{\includegraphics[height=4.28em,width=\linewidth,keepaspectratio]{branding/red-queen-mark.pdf}}}
+
+\newcommand{\paper@titleLine}{\ifx\@paper@titlelogo\@empty
+    \ifx\@paper@titlemark\@empty
+      {\raggedright\sffamily\bfseries\LARGE\color{paperTitleFg}\@paper@title\par}\else
+      \paper@titleLineWithMark
+    \fi
+  \else
+    \paper@titleLineWithMark
+  \fi
+}
+
+\newcommand{\paper@titleLineWithMark}{\noindent
+  \begin{minipage}[c]{0.12\linewidth}
+    \centering\paper@titleLogoGraphic
+  \end{minipage}\hspace{0.02\linewidth}\begin{minipage}[c]{0.85\linewidth}
+    {\raggedright\sffamily\bfseries\fontsize{15.5}{18.5}\selectfont\color{paperTitleFg}\@paper@title\par}\end{minipage}\par
+}
+
+\newcommand{\paper@identityBlock}{\ifx\@paper@displayauthors\@empty\else
+    {\raggedright\sffamily\bfseries\footnotesize\color{paperTitleFg}\@paper@displayauthors\par}\fi
+  \ifx\@paper@displayaffils\@empty\else
+    \vspace{0.06cm}{\raggedright\footnotesize\color{paperTitleMuted}\@paper@displayaffils
+      \if@paper@hasequal \quad \textsuperscript{*}Equal contribution.\fi\par}\fi
+}
+
+\newcommand{\paper@metadataText}{\ifx\@paper@keywords\@empty\else
+    {\bfseries Keywords:} \@paper@keywords
+  \fi
+  \ifx\@paper@code\@empty\else
+    \ifx\@paper@keywords\@empty\else\quad\fi
+    {\bfseries Code:} \@paper@code
+  \fi
+}
+
+\newcommand{\paper@metadataLogoRow}{\noindent
+  \begin{minipage}[c]{0.6\linewidth}
+    {\scriptsize\raggedright\color{paperTitleMuted}\paper@metadataText}\end{minipage}\hfill
+  \begin{minipage}[c]{0.4\linewidth}
+    \raggedleft\paperLogoStrip
+  \end{minipage}\par
+}
+
+\newcommand{\paper@titlecardLogoOverlay}{}
+
+\newcommand{\paper@titlecard}{\begingroup
+    \setlength{\paper@titlecardinnerwidth}{\dimexpr\linewidth-\paper@titlecardpadding-\paper@titlecardpadding\relax}\noindent
+    \begin{tikzpicture}
+      \node[
+        fill=paperTitleBg,
+        draw=paperTitleFrame,
+        line width=0.6pt,
+        rounded corners=\paper@titlecardradius,
+        inner sep=\paper@titlecardpadding,
+        outer sep=0pt,
+        text width=\paper@titlecardinnerwidth,
+        align=justify
+      ] (paperTitleCardNode) {\begin{minipage}{\paper@titlecardinnerwidth}
+          \setlength{\parindent}{0pt}\setlength{\parskip}{0pt}\paper@titleLine
+          \vspace{0.12cm}\paper@identityBlock
+          \vspace{0.14cm}{\normalsize\color{paperTitleFg}{\sffamily\bfseries Abstract.}\space
+Self-improving agents are state-of-the-art (SOTA) on agentic coding benchmarks and have recently been extended to general domains. However, their search methods generally assume a stationary evaluation criterion: a fixed verifier, benchmark, or labeled dataset that remains valid as the agent improves. This ignores a central feature of evolution: species do not optimize against a static environment, but adapt as their environments change with them. We aim to bring the same principle to recursive self-improvement, making evaluation part of the improvement loop and opening search to evolving evaluators, adversarial objectives, and dynamic utilities that may surpass static benchmarks.
+We introduce the \textbf{Red Queen G\"odel Machine (\ourmethod)}\footnotemark{}, an evolutionary framework for recursive self-improvement under non-stationary utilities. We make this possible through \emph{controlled utility evolution}: search is organized into epochs with a fixed within-epoch evaluation criterion, while the utility can be updated at epoch boundaries, so self-improvement guarantees hold per epoch as the objective evolves across them. This mechanism is instantiated by \emph{co-evolving} the utility itself, using learned evaluators that improve alongside the task agents they guide. The current preprint provides a preliminary empirical investigation. We begin by showing that even on verifiable coding tasks, \theourmethod improves test pass rate over the prior SOTA by adding a complementary agent-as-a-judge code-review signal. Because the reviewer is queried once while standard coding agents require multi-turn evaluation, this signal is cheaper and \theourmethod uses \textbf{1.35}$\boldsymbol{\times}$--\textbf{1.72}$\boldsymbol{\times}$ fewer tokens. We then turn to scientific paper writing and reviewing, and Olympiad-level proof writing and grading, where \theourmethod improves performance over prior self-improving agents: co-evolved writers reach \textbf{1.78}$\boldsymbol{\times}$--\textbf{1.86}$\boldsymbol{\times}$ higher acceptance rates under a diverse agent-as-a-judge panel, while co-evolved graders reach \textbf{9}$\boldsymbol{\%}$ higher ground-truth accuracy. Because \theourmethod can modify the search objective across epochs, it can also regularize the search process itself. In paper reviewing, the strongest baseline reviewer over-accepts \AI-generated papers at up to \textbf{1.91}$\boldsymbol{\times}$ the human rate. We correct this with \theourmethod by introducing an adversarial objective that discovers reviewers equally stringent on \AI{} and human work. We intend to explore longer search horizons in future updates.
+\par}\vspace{0.14cm}\paper@metadataLogoRow
+        \end{minipage}};\paper@titlecardLogoOverlay
+    \end{tikzpicture}\par\vspace{0.12cm}\endgroup
+}
+
+\newcommand{\paper@setmlsysrunninghead}{\ifx\@paper@titlerunning\@empty
+    \gdef\@mlsystitlerunning{\@paper@title}\else
+    \gdef\@mlsystitlerunning{\@paper@titlerunning}\fi
+  \chead{\small\bf\@mlsystitlerunning}\thispagestyle{empty}}
+
+\newcommand{\paper@mlsysNotice}{{\let\thefootnote\relax\footnotetext{\hspace*{-\footnotesep}\Notice@String}}}
+
+\newcommand{\makepapertitle}{\paper@setpdfmetadata
+  \ifpaper@neurips
+    \par
+    \begingroup
+      \thispagestyle{empty}\paper@titlecard
+      \@notice
+    \endgroup
+  \fi
+  \ifpaper@mlsys
+    \paper@setmlsysrunninghead
+    \twocolumn[\paper@titlecard
+      \vskip 0.18in
+    ]\paper@mlsysNotice
+  \fi
+}
+
+\makeatother
+
+
+\makeatletter
+\newcommand{\paperLogoStrip}{\begingroup
+    \raisebox{-0.5\height}{\includegraphics[height=6.2mm]{branding/camlsys-tight.pdf}}\hspace{0.55em}\raisebox{-0.5\height}{\includegraphics[height=5.5mm]{branding/ucam-tight.png}}\hspace{0.55em}\raisebox{-0.5\height}{\includegraphics[height=6.2mm]{branding/flower-roundel.pdf}}\endgroup
+}
+\newcommand{\logoHeader}{\begin{center}\paperLogoStrip
+  \end{center}\vspace{0.5\baselineskip}}
+\makeatother
+
+
+
+\paperTitle{The Red Queen G\"odel Machine: Co-Evolving Agents and Their Evaluators}
+\paperTitleRunning{The Red Queen Godel Machine}
+\paperKeywords{self-improving agents, learned evaluation, multi-agent systems, automated scientific discovery, controlled utility evolution, co-evolutionary search}
+\paperAbstractFile{sections/abstract}
+\paperTitleBackground{rqgm-muted}
+\paperTitleLogo{branding/red-queen-mark.pdf}
+\paperTitleLogoHeight{4.28em}
+
+\addAffiliation{cambridge}{University of Cambridge}
+\addAffiliation{nvidia}{NVIDIA}
+\addAffiliation{flower}{Flower Labs}
+\addAffiliation{mbzuai}{MBZUAI}
+\addAffiliation{inria}{Inria}
+\addAuthor{Alex Iacob}{cambridge,equal}
+\addAuthor{Andrej Jovanovi\'c}{cambridge,flower,equal}
+\addAuthor{William F. Shen}{cambridge,equal}
+\addAuthor{Daniel Burkhardt}{nvidia}
+\addAuthor{Meghdad Kurmanji}{cambridge}
+\addAuthor{Nurbek Tastan}{mbzuai}
+\addAuthor{Lorenzo Sani}{cambridge,flower}
+\addAuthor{Niccolò Alberto Elia Venanzi}{nvidia}
+\addAuthor{Ambroise Odonnat}{inria}
+\addAuthor{Zeyu Cao}{cambridge}
+\addAuthor{Bill Marino}{cambridge}
+\addAuthor{Xinchi Qiu}{cambridge}
+\addAuthor{Nicholas D. Lane}{cambridge,flower}
+\correspondingAuthor{Alex Iacob}{aai30@cam.ac.uk}
+
+
+\begin{document}
+\makepapertitle
+\footnotetext{Named after Van Valen's Red Queen hypothesis~\citep{van1973new}: species adapt to maintain fitness relative to co-evolving competitors.}
+\etocdepthtag.toc{main}
+
+
+
+\FloatBarrier
+
+
+\section{Introduction}
+\label{sec:intro}
+
+
+Self-improving agents aim to turn local improvements in coding and reasoning into a recursive loop, where each stronger agent can produce better variants of itself. Search methods such as the Darwin and Huxley G\"odel Machines~\citep{zhang2025darwin,wang2025huxley} recently set the open-source state-of-the-art on agentic coding tasks by editing their own code and retaining variants that improve an external utility signal. \hyperagents~\citep{zhang2026hyperagents} then extended this self-improvement beyond coding to task agents in arbitrary domains. Despite this progress, current search methods still depend on stationary evaluation fixed outside the improvement loop, unlike biological evolution, where each species adapts to competitors that evolve in turn. This dependence also constrains self-improvement in three settings: when a target task has no direct benchmark, for example paper writing and proof writing lack one while paper reviewing and proof grading do not~\citep{DBLP:journals/corr/abs-2408-06292,yamada2025ai,luong2025towards}; when evaluation is slow or weakly informative~\citep{levine2018learning,burger2020mobile,NIPS2017_453fadbd}; and when static benchmarks saturate or become vulnerable to reward hacking as agents improve~\citep{DBLP:journals/corr/abs-2603-25681,DBLP:journals/corr/abs-2203-04592}.
+
+Addressing these concerns is a prerequisite for extending self-improvement to open-ended settings like scientific research and writing. We therefore introduce the \textbf{Red Queen G\"odel Machine (\ourmethod)}, an evolutionary framework that treats evaluation as part of the search process. We study this through \emph{co-evolved} learned evaluators, which improve alongside the task agents they guide, defining the search utility. Such an evaluator can supply the search signal when no benchmark exists, add criteria a benchmark cannot capture, like code maintainability, or provide a cheaper evaluation proxy.
+
+The core mechanism enabling this co-evolution is \emph{controlled utility evolution}, which divides search into \emph{evolutionary epochs}. Within an epoch, one evaluator is frozen and grades every task agent, supplying a stationary utility signal; the utility can change only at epoch boundaries. In parallel, the search co-evolves challenger evaluators in a codebase shared with their task agents and scores them against a held-out ground-truth dataset.  At an epoch boundary, a challenger replaces the frozen evaluator only if it statistically outperforms the incumbent on this ground truth; \theourmethod then applies \emph{selective erasure}, discarding only utility records that depended on the replaced evaluator. Because each epoch is therefore a \emph{fixed-criterion search problem}, prior self-improvement guarantees apply directly~(\cref{sec:method,app:proofs}), while the search objective can evolve across epochs, for instance by promoting a stronger evaluator or adding an adversarial-sample regularizer.
+
+
+\begin{figure}[t]\centering\includegraphics[width=\linewidth]{figures/fig1_polyglot_arrows.pdf}
+
+  \caption{\textbf{\ourmethod\ exceeds the prior SOTA \hgmh\ on \polyglot with $1.35\times$--$1.72\times$ fewer search tokens by adding a cheap evolved code reviewer.} \emph{Left:} held-out pass rate vs.\ search cost; arrows give the tokens \ourmethod\ saves to exceed the baseline's rate, and the heart marks the run's best agent. \emph{Right:} best-belief utility during search. At each evaluator replacement (crowned dashed rule), the utility drops as selective erasure discards records scored by the displaced reviewer, then re-climbs under its replacement; shaded bands mark epochs. Full details in \cref{sec:experimental-design,exp_design:reading_results_figures}.}
+    \label{fig:intro-token-efficiency}
+\end{figure}
+
+We provide a preliminary empirical investigation of \theourmethod across three domains following \citet{zhang2026hyperagents}: coding~\citep{gauthier2024polyglot}; paper writing and reviewing~\citep{lu2024ai,zhao2026apres}; and proof writing and grading~\citep{zhang2026hyperagents,luong2025towards}. On verifiable coding tasks, \theourmethod reaches a held-out pass rate of $\textbf{71.7}\boldsymbol{\%}$ against the prior SOTA's $69.9\boldsymbol{\%}$~(\cref{fig:intro-token-efficiency}) by adding an agent-as-a-judge code reviewer. Its quality signal complements test execution, improving the pass rate, while requiring fewer tokens compared to multi-turn coding agent execution. This illustrates a broader advantage of co-evolution: shared expansions can improve multiple utilities at once~(see \cref{fig:analysis-transfer}). We then turn to scientific paper writing and reviewing, and Olympiad-level proof writing and grading, where \theourmethod outperforms prior self-improving agents: co-evolved writers raise the acceptance rate of their papers from the prior SOTA's $21.8\boldsymbol{\%}$ to $\textbf{40.5}\boldsymbol{\%}$~(\cref{tab:paper-writer-cross-reviewer}), while a co-evolved grader exceeds the static baselines with a $\textbf{3}\boldsymbol{\times}$ lower search cost than the prior SOTA~(\cref{fig:prover-grader-results}). We further observe that as evaluators strengthen across epochs, they may impose a curriculum-like effect on the task agents, with each transition re-ranking the archive~(\cref{fig:transition-rerank,fig:tree-paper}). Co-evolution can also regularize evaluators: the strongest baseline reviewer over-accepts \AI-generated papers relative to human ones~\citep{DBLP:conf/nips/PanicksseryBF24}, but \theourmethod's evolutionary epochs let us first gather \AI-generated samples that a frozen evaluator accepts, then replay them as adversarial samples in later epochs, producing a reviewer equally stringent on machine and human work~(\cref{fig:paper-writer-reviewer-results}).
+
+
+\emph{We believe \theourmethod points toward a class of self-improving co-evolving systems in which agents and evaluators recursively bootstrap one another without further human intervention to reach capabilities beyond those of static evaluation . If successful, this could be a meaningful step toward more capable \AI{} systems, at the cost of loosening convergence guarantees compared to static evaluation criteria.}
+\introtakeawaybox{
+ \begin{enumerate}[leftmargin=*]
+ \item \textbf{Recursive Self-Improvement under Non-Stationary Utilities.}
+ \Theourmethod extends self-improving agents beyond fixed external evaluation by treating the utility signal as part of the search process. This allows search objectives to evolve, opening self-improvement to learned non-stationary utilities~(\cref{sec:method}).
+ \item \textbf{Controlled Utility Evolution.}
+ We make non-stationary utilities compatible with prior self-improvement guarantees via \emph{controlled utility evolution}: search runs in fixed-evaluator epochs, and the objective changes only at epoch boundaries. A challenger evaluator is promoted only when it raises an $\epsilon$-best-belief score on ground truth, a lower bound its utility exceeds with probability $1-\epsilon$~(\cref{sec:method,app:proofs}).
+ \item \textbf{Practical Benefits of Co-Evolved Learned Evaluators and Search Interventions.}
+ Empirically, co-evolution adds a cheap learned code-review signal that improves search efficiency even where a verifier exists~(\cref{sec:exp-polyglot}), enables generator search where direct benchmarks are unavailable~(\cref{sec:exp-writer}), and enables debiasing over-lenient evaluators through adversarial objectives~(\cref{sec:exp-adversarial}).
+ \end{enumerate}
+ }
+
+
+\section{Related Work}
+\label{sec:related}
+\noindent\textbf{Self-Improving \AI.}~~The G\"odel Machine~\citep{good1966speculations,schmidhuber2003godel} is a theoretical construct that improves itself through self-modification whenever it can prove a change beneficial, while meta-learning instead optimizes the learning dynamics directly~\citep{kirsch2022eliminating,lu2023arbitrary}. A line of recent systems makes the G\"odel Machine empirical by replacing its intractable proof search with archive search over observed utility: the Darwin-G\"odel Machine (\dgm)~\citep{zhang2025darwin} ranks self-modifying coding agents by benchmark utility, the Huxley-G\"odel Machine (\hgm)~\citep{wang2025huxley} scores a node by the utility of its whole descendant clade rather than its own, and \hyperagents~\citep{zhang2026hyperagents} lifts self-modification beyond coding by giving each archive node a meta-agent/task-agent pair. Related efforts self-modify full code repositories~\citep{xia2025live,zelikman2024self,yin2025godel}, refine prompts~\citep{fernando2023promptbreeder} or reasoning traces~\citep{zelikman2022star}, or self-tune for a specific domain~\citep{shen2026star}, with some restricted to hill-climbing rather than open-ended exploration~\citep{robeyns2025self}. What unites them is a fixed evaluation criterion held outside the loop for the duration of a run, which leaves them open to reward hacking~\citep{skalse2022defining} and to the position, verbosity, and self-preference biases of model-based judges~\citep{zheng2023judging,dubois2024lengthcontrolled,DBLP:conf/nips/PanicksseryBF24}. Updating the criterion over time is one response, but benchmark creation is costly~\citep{DBLP:journals/corr/abs-2603-25681,DBLP:journals/corr/abs-2203-04592} and any change forces the search to restart. We instead co-evolve the evaluator with the agents it scores, extending self-improvement to domains that have no direct benchmark at all.
+
+\noindent\textbf{LLM-as-a-Judge and Automated Scientific Discovery.}~~Our learned evaluators build on the use of LLMs as judges~\citep{zheng2023judging,zhuge2024agent}, benchmarked for their agreement with human preferences~\citep{zhao2026apres}. Automated-discovery pipelines apply such judges at scale, but, like the self-improving systems above, hold their evaluations fixed per run~\citep{lu2024ai,yamada2025ai,gottweis2025coscientist,ghareeb2026robin,novikov2025alphaevolve,romera2024mathematical}; we instead let the judge itself improve as the search proceeds.
+
+\noindent\textbf{Multi-Agent Co-Evolution.}~~Co-evolution against a moving target is a classical idea: fitness sharing~\citep{rosin1997new} and self-modifying policies~\citep{schmidhuber1996multi} co-adapt populations, and self-play pits an agent against stronger versions of itself~\citep{silver2016mastering,silver2018general}. Recent LLM-agent methods carry this to interacting agents but keep the evaluation fixed~\citep{chen2025multi,weng2026group}, and human--\AI{} co-improvement adapts the signal based on feedback~\citep{weston2025ai}. RQGM co-evolves the evaluator automatically, so the target is the learned utility itself.
+
+\noindent\textbf{Open-Endedness.}~~Open-ended search aims to keep generating novel artifacts~\citep{stanley2017open,hughes2024open}, often by maintaining quality-diversity archives~\citep{mouret2015illuminating,ecoffet2019go}, and is increasingly driven by foundation models~\citep{huautomated,lu2024ai,novikov2025alphaevolve} in pursuit of the long-standing goal of a closed self-referential loop~\citep{clune2019ai}. These methods still evaluate against a static objective; co-evolving the objective is the missing piece RQGM supplies.
+
+
+\section{\ourmethod: Co-Evolving Agents and Their Evaluators}
+\label{sec:method}
+
+We introduce the \textbf{Red Queen G\"odel Machine}, dubbed \ourmethod, a recursive self-improvement framework in which learned evaluators improve alongside the agents they score~(\cref{fig:method-overview}). Building on the search method of prior systems~\citep{zhang2025darwin,wang2025huxley,zhang2026hyperagents}, \ourmethod makes four modifications: (i) each archive node is a multi-agent workspace rather than a single agent; (ii) evaluators are themselves learned agentic processes; (iii) the utility functions driving the search may change at designated evolutionary epochs; and (iv) evaluators may be replaced at such points. We review the search method in \cref{sec:method:prelim}, introduce the multi-agent formulation in \cref{sec:method:multiagent,sec:method:hierarchy} and the co-evolutionary mechanisms in \cref{sec:method:generative,sec:method:utility}. \Cref{alg:main} shows the full procedure while \cref{app:proofs} provides theory.
+
+\begin{figure}[htb]
+  \centering
+  \includegraphics[width=\linewidth]{figures/rqgm-main-diagram-v3-corr-epsilon-tnr.pdf}
+  \caption{\textbf{\ourmethod\ searches over a multi-agent workspace tree containing both learnable task agents and evaluators.} At each step, a node is selected by Thompson sampling over clade metaproductivity and either expanded by a meta-agent or evaluated. Evaluators are scored against a ground-truth anchor and task agents by their epoch-local frozen evaluator or a fixed benchmark for evaluator-independent roles. At checkpoints, each frozen slot compares its incumbent against challenger evaluators on a ground-truth anchor; then the $\epsilon$-best-belief evaluator is frozen for the next epoch and the utility records from the displaced evaluator are erased~(\cref{alg:main}).}
+  \label{fig:method-overview}
+  \vspace{-0.2cm}
+\end{figure}
+
+\subsection{Preliminaries: Self-Improvement as Tree Search}
+\label{sec:method:prelim}
+
+Following \citet{wang2025huxley}, we formulate self-improvement as a tree search over a growing archive of agent nodes $\mathcal{T}_t$, initialized with a seed node $\mathcal{T}_0=\{a_0\}$. At every step $t\in\mathbb{N}$, the search either \emph{modifies} a node $a\in\mathcal{T}_t$, adding the edited copy as a child of $a$, or \emph{evaluates} a node on a \emph{task}, recording a binary outcome $o\in\{0,1\}$. These binary outcomes are aggregated into scores counting the number of successes $S_a \in \mathbb{N}$ and failures $F_a \in \mathbb{N}$ the node accumulates over several evaluations. When the allocated search evaluation budget $B \in \mathbb{N}$ is exhausted, the highest-scoring archive node is returned. Because a node's own success rate may poorly predict what its descendants will achieve, we follow the \hgm~\citep{wang2025huxley} and adopt \emph{clade metaproductivity} (\cmp) as the search utility: the success rate pooled over a node's \emph{clade} $C(a)$, defined as the subtree rooted at $a$, with nodes selected for expansion or evaluation by Thompson sampling over these clade-level outcomes. Letting $n_{\mathrm{success}}^{C}(a),\,n_{\mathrm{failure}}^{C}(a)\in\mathbb{N}$ accumulate the successes and failures of all nodes in clade $C(a)$, we define:
+\[
+\widehat{\cmp}(a)
+=
+\frac{n_{\mathrm{success}}^{C}(a)}{n_{\mathrm{success}}^{C}(a)+n_{\mathrm{failure}}^{C}(a)} \in [0,1].
+\]
+The final agent is selected by $\epsilon$-best-belief score $BB_\epsilon(a)=I^{-1}_{\epsilon}\!\left(1+S_a,\,1+F_a\right)\in[0,1]$, where $\epsilon\in(0,1)$ is a confidence level and $I^{-1}_{\epsilon}$ is the inverse regularized incomplete Beta function, i.e., the $\epsilon$-quantile of the Beta posterior over the agent's successes $S_a$ and failures $F_a$, a conservative utility estimate. For a repeatable evaluation criterion, \cmp suffices to approximate the G\"odel Machine~\citep{wang2025huxley}.
+
+\subsection{Search Space}
+\label{sec:method:multiagent}
+
+\noindent\textbf{Multi-agent architecture.}~~To co-evolve agents and evaluators, we formulate each archive node $a$ not as a single agent but as a shared, evolvable workspace populated by $K\in\mathbb{N}$ agentic roles $\mathcal{R}=\{r_1,\ldots,r_K\}$ composed of task agents and evaluators. Every role $r\in\mathcal{R}$ has its own \emph{task pool} $\mathcal{D}_r$, a finite set of tasks on which it is scored, each $d\in\mathcal{D}_r$ contributing a utility signal. A paper-reviewer role, for instance, might serve two such tasks: reviewing human-written and agent-generated papers. Because each task belongs to a single role, a task uniquely identifies its role; following \hyperagents, we therefore call a role's agent a \emph{task agent} wherever the role is unambiguous. Each node is allocated a meta-agent that oversees the workspace and can modify it during the search~\citep{zhang2026hyperagents}. Since the meta-agent and role-agent code are editable, roles may re-use each other's code if the meta-agent deems it useful. Only the scoring and orchestration harness is fixed.
+
+\noindent\textbf{Learned evaluators.}~~Open-ended roles such as paper writing admit no ground-truth signal and require learned evaluators. We call such roles \emph{evaluator-dependent}, in contrast to \emph{evaluator-independent} roles with a fixed benchmark. Each evaluator-dependent role is scored through an \emph{evaluator slot} replaceable during search; its \emph{epoch index} counts replacements. Since the $M\le K$ evaluator-dependent slots are replaced independently, we collect their epoch indices into an \emph{epoch vector} $\boldsymbol{j}=(j_1,\dots,j_M)\in\mathbb{N}^{M}$. Replacing a slot's evaluator advances its entry $\mathbb{N}^{M}\ni\boldsymbol{j}\rightarrow\boldsymbol{j}'\in\mathbb{N}^{M} $~(\cref{sec:method:utility}), so each evaluator evolves with its role while staying epoch-stationary.
+
+\noindent\textbf{Utility definition.}~~Utility aggregates bottom-up through two uniform averages, first over a role's tasks and then over roles, so that the search is equally rewarded for optimizing all roles.\footnotemark{} The base quantity is $p_{r,d,\boldsymbol{j}}(a)\in[0,1]$, node $a$'s expected binary success rate on task $d\in\mathcal{D}_r$ under epoch vector $\boldsymbol{j}$; the $\boldsymbol{j}$ subscript makes this success rate, and hence all utilities built from it, epoch-local. Averaging uniformly over a role's tasks gives the per-role rate $p_{r,\boldsymbol{j}}(a)=\frac{1}{|\mathcal{D}_r|}\sum_{d\in\mathcal{D}_r}p_{r,d,\boldsymbol{j}}(a)\in[0,1]$, and averaging these uniformly over roles gives the agent utility $U_{\boldsymbol{j}}(a) = \frac{1}{|\mathcal{R}|}\sum_{r\in\mathcal{R}}p_{r,\boldsymbol{j}}(a)\in[0,1]$.
+
+\footnotetext{We default to uniform over sample-weighted averaging because some tasks can generate unbounded evaluations.}
+
+\noindent\textbf{Data isolation.}\label{sec:method:train}~~To prevent memorization and improve generalization, \ourmethod separates feedback that \emph{creates} nodes from evidence that \emph{selects} them. For evaluator-independent roles, each node sees only a subset of the training split, with disjoint validation and test splits held out. For evaluator-dependent roles, the task agent generates fresh artifacts that the epoch-local evaluator scores, with separate artifacts used for training and search. In both cases, the training results of each node and its ancestors are shown to the meta-agent to guide self-modification, but never influence search utility. Node selection is driven solely by evaluations on the validation split, preventing overfitting. Final performance is reported on a held-out test split separate from the validation data used for search.
+
+\subsection{Three-Level Sampling Hierarchy}
+\label{sec:method:hierarchy}
+
+Following \citet{wang2025huxley}, a scheduler interleaves \emph{expansion} (adding a new node) with \emph{evaluation} (scoring an existing one) while balancing exploration against exploitation to find a good solution. At each step $t$, given the number of evaluations performed $N_t\in\mathbb{N}$, an expansion exponent $\alpha\in(0,1)$, and the archive size $|\mathcal{T}_t|$, a \emph{UCB-Air} gate~\citep{NIPS200849ae49a2} adds a new node if $N_t^{\alpha} \ge |\mathcal{T}_t|$, evaluates the existing one otherwise. Thus, the size of the archive is $|\mathcal{T}_t|=\mathcal{O}(N_t^{\alpha})$.
+
+The scheduler first selects a node $a^\star$ by Thompson sampling over \cmp: an expansion hands $a^\star$ to its meta-agent to edit into a new child, while an evaluation descends two levels, role then task. Let $\mathcal{R}_{\mathrm{elig}}\subseteq\mathcal{R}$ be the roles eligible at $a^\star$, $\mathcal{D}_{r,\mathrm{elig}}\subseteq\mathcal{D}_r$ the eligible tasks of a role $r$, and $n_r(a),\,n_d(a)\in\mathbb{N}$ the evaluations assigned to role $r$ and task $d$ at node $a$. A task is \emph{eligible} unless its dataset is exhausted under sampling; when sampling with replacement every task stays eligible ($\mathcal{D}_{r,\mathrm{elig}}=\mathcal{D}_r$), and a role is eligible when any task is. At each level the scheduler picks the least-evaluated eligible option: the role $r^\star=\argmin_{r\in\mathcal{R}_{\mathrm{elig}}} n_r(a^\star)$ conditioned on $a^\star$, then the task $d^\star=\argmin_{d\in\mathcal{D}_{r^\star,\mathrm{elig}}} n_d(a^\star)$ conditioned on $(a^\star,r^\star)$. Each evaluation produces a binary outcome accumulated at the node level for Thompson sampling; role- and task-level counters only load balance. \Cref{prop:balanced-working-posterior} shows that, for a fixed evaluator epoch and node, balanced sampling across roles and tasks gives the pooled Beta accumulator a posterior mean converging to the role--task balanced utility $U_{\boldsymbol{j}}(a)$ almost surely.
+
+
+\subsection{Co-Evolving Evaluation}
+\label{sec:method:generative}
+
+We assume learned evaluators are \emph{epoch-local stationary}~(\cref{assumption:generative}): the evaluator, artifact-generation protocol, and binary scoring rule are frozen throughout an epoch. We define a \emph{utility transition}~(\cref{def:utility-transition}) as a procedure that replaces a slot's evaluator and performs \emph{selective erasure}, removing only the utility history attached to the displaced slot while preserving all unrelated information. Selective erasure is also order-independent when multiple transitions trigger at once~(\cref{rem:erasure-commute}).
+\theorybox[Epoch-Local Validity.]{If evaluator-dependent criteria are fixed within each epoch and records invalidated by a displaced evaluator are erased at transitions, then each epoch induces a fixed binary-outcome search problem~(\cref{prop:validity}). Therefore, \theourmethod can directly use \hgm search within an epoch.}
+
+
+
+
+\subsection{Controlled Utility Evolution}
+\label{sec:method:utility}
+While fixed evaluators give each epoch a stationary utility signal, \ourmethod improves them over time by replacing them at epoch boundaries under a principled criterion. More broadly, evaluator replacement is one example of a \emph{utility transition}~(\cref{def:utility-transition}). Since our guarantees require only a fixed within-epoch utility criterion and boundary erasure of dependent records, other non-stationary utilities, such as time-varying benchmarks or adversarial objectives, fit the same structure.
+
+
+\noindent\textbf{Ground-truth best-belief evaluator replacement.}~~At each epoch boundary, every slot compares its incumbent against challengers on a \emph{ground-truth anchor}: a fixed, held-out dataset of objective or human-preference labels for that role. Because this anchor is evaluator-independent, agreement with it gives a replacement criterion consistent across epochs. Candidates are ranked by the same $\epsilon$-best-belief score ($BB_\epsilon$) used for agent selection~(\cref{sec:method:prelim}), and the largest anchor $BB_\epsilon$ is frozen as the next-epoch evaluator, with ties favoring the incumbent to avoid unnecessary erasures. \Cref{prop:piecewise-fixed-validity} establishes the multi-epoch process as a sequence of fixed-criterion searches.
+\theorybox[Anchor Lower Bound.]{The promoted evaluator maximizes $BB_\epsilon$, a lower bound its anchor utility exceeds with probability $1-\epsilon$, so the replacement is likely to outperform the incumbent~(\cref{prop:best-belief-lower-bound,prop:anchor-best-belief-replacement}).}
+
+
+\noindent\textbf{Amortized utility-transition cost.}~~When an evaluator is replaced, records scored by the displaced evaluator are erased and the affected task agents must be re-ranked under the new one. Re-ranking the entire archive immediately would waste budget on nodes the search may never revisit. Instead, \theourmethod re-scores old nodes only when later evaluations return to them. The three-level sampling hierarchy~(\cref{sec:method:hierarchy}) naturally prioritizes under-evaluated nodes, roles, and tasks as search proceeds. Reusing cached agent outputs also lets us re-evaluate nodes without additional task-agent calls.
+
+Erasure preserves epoch-local stationarity: keeping stale utilities or re-scaling them onto the new evaluator would mix evidence from different utility functions and violate the condition required by our guarantees. To control the re-evaluation costs we introduce a checkpoint schedule. With exponentially spaced checkpoints, the number of records exposed to erasure grows only linearly with the evaluation budget, which also enables later, more accurate evaluators to shape the search for longer.
+
+ \theorybox[Bounded Recovery.]{For exponentially spaced checkpoints with ratio $\rho>1$, the cumulative number of prior slot-dependent records exposed to erasure or re-evaluation over a budget of $B$ evaluations is $\mathcal{O}(B)$. This reduces the $\mathcal{O}(B^2)$ cost of allowing a utility transition after every evaluation~(\cref{prop:linear-work,rem:dense-quadratic}).}
+
+
+
+\takeawaybox[Summary of Theoretical Guarantees:]{
+\Cref{prop:validity,prop:anchor-best-belief-replacement,prop:linear-work} together show that \hgm's self-improvement guarantees carry over to the co-evolutionary setting on a per-epoch basis via \emph{controlled utility evolution}. This rests on the three results below: the first secures guarantees \emph{within} each epoch, the second carries improvement \emph{across} epochs, and the third bounds the cost of doing so.
+\begin{enumerate}[leftmargin=*]
+\item \textbf{Epoch-Local Validity.} Each epoch is itself a fixed-criterion search problem~(\cref{prop:validity}), so \hgm's per-epoch convergence guarantees apply directly within every epoch.
+\item \textbf{Anchor-Guided Improvement.} Evaluators are only promoted when they raise the $\epsilon$-best-belief score on a fixed ground-truth anchor~(\cref{prop:anchor-best-belief-replacement}), so evaluators improve \emph{across} epochs, not just within them.
+\item \textbf{Amortized Transitions.} The bookkeeping cost of evaluator replacement is linear in the search budget~(\cref{prop:linear-work}), so co-evolution does not impose asymptotic overhead beyond standard archive search.
+\end{enumerate}
+Informally, \emph{convergence guarantees hold epoch-by-epoch for \theourmethod due to epoch-local stationarity, while controlled utility evolution encourages improvement across epoch boundaries.}
+}
+
+
+\section{Experimental Design}
+\label{sec:experimental-design}
+
+Our experimental design answers the following research questions about \ourmethod:
+\begin{itemize}[noitemsep,topsep=1pt,parsep=2pt,partopsep=0pt,leftmargin=2.5em]
+    \item[\textbf{RQ1}] Can \ourmethod bring benefits for domains where ground-truth verification exists but is expensive?
+    \item[\textbf{RQ2}] Can learned evaluation improve agents in domains with no objective evaluation?
+
+    \item[\textbf{RQ3}] Do evaluator replacements guide the search toward better task agents over time?
+    \item[\textbf{RQ4}] Can co-evolution improve the evaluators themselves?
+ 
+\end{itemize}
+
+
+
+\noindent\textbf{Domains and ground-truth anchors.}~~Each domain pairs a generator role with a learned evaluator role and a \emph{ground-truth anchor} (\cref{fig:domain-utilities}). Paper writing is paired with paper review,  anchored to \apres accept/reject decisions~\citep{zhao2026apres}; we construct a matching writer dataset of \apres titles and abstracts to align train, validation, and test distributions across roles. Proof writing is paired with  proof grading, anchored to \imogradbench human grades~\citep{luong2025towards}, where a proof is accepted only when the epoch's frozen grader awards full credit ($7$ of $7$). Coding uses two anchors: the coding agent is anchored to executable \polyglot tests~\citep{gauthier2024polyglot}, while a co-evolved code reviewer is anchored to \crave~\citep{zhang2025crave}, a dataset of accepted/rejected pull requests, and scores each \polyglot patch at generation time.  Across domains, every role agent is initialized from a minimal template~(\cref{app:prompts}). The long runtime of \swebench~\citep{jimenez2024swebench} precluded its inclusion in this version of our work.
+
+\noindent\textbf{Specialists and generalists.}~~Unlike prior methods, \ourmethod optimizes agents against multiple utility functions simultaneously. This raises the question of which utilities to consider when selecting a best-belief agent. We define a \emph{specialist} as the agent with the highest best-belief on one target utility, and a \emph{generalist} as the agent with the highest average best-belief across active utilities. Reporting both shows whether target-task performance comes from task-specific or joint optimization.
+
+\noindent\textbf{Baselines.}~~Every domain uses a learned baseline, \hgmh, which replaces the \dgm search algorithm of \hyperagents~\citep{zhang2026hyperagents} with the more sample-efficient \hgm, while keeping evaluators frozen.  In each domain, \hgmh uses a fixed external evaluator from prior work. We use the \sakana prompt reviewer~\citep{lu2024ai} for paper  writing, \proofautograder~\citep{luong2025towards} for proof grading, and the \imocode prover~\citep{huang2025winninggoldimo2025}. We additionally evaluate the best published \hyperagents~(\dgmh) patches from \citet{zhang2026hyperagents} for paper reviewing and grading as a proxy for \dgm-level performance, though trained on different foundation models.  \citet{zhang2026hyperagents} did not publish the best \polyglot agent.
+
+
+\noindent\textbf{Principled search interventions.}~~The co-evolutionary framework permits principled modifications of the search objective at epoch boundaries while maintaining epoch-local convergence guarantees. In the paper domain, we exploit this to correct for LLM self-preference bias~(\cref{sec:related}): after the first replacement, papers accepted by the displaced reviewer form an adversarial pool, and the subsequent epoch additionally rewards rejecting these writer-generated papers while maintaining accuracy on the human \apres data. Evaluator replacement itself stays anchored to \apres~(\cref{app:exp-details}). Additional ablations that isolate each part of \ourmethod are reported in \cref{app:nemotron-ablations}. We selected \gptlow (low) for the main text experiments, as it provides a desirable cost-intelligence trade-off~(\cref{app:exp-details}). 
+
+\noindent\textbf{Costs and reporting.}~~We call the agent with the highest $\epsilon$-best-belief score reached during search the \emph{best-belief agent}. This score is comparable across epochs only when it rests on a fixed ground-truth anchor, so a \emph{global} best-belief winner exists only for anchored roles: the learned evaluators and the verifiable coding agent. The paper writer and proof prover have no anchor and admit only \emph{epoch-local} winners, each the best agent under its epoch's frozen evaluator; we select these per epoch and score them post-hoc against fixed external judges~(\cref{tab:paper-writer-cross-reviewer,tab:imo-proof-cross-grader}). Search budgets are matched across runs, so cost differences reflect search dynamics \textbf{rather than unequal allocation}, and we compare runs along three axes: best agent at matched compute, cost to matched quality, and best overall.
+
+Because equal evaluation budgets can hide large compute differences when evaluation costs vary, we report \emph{blended tokens}: input plus output, with output weighted at $5\times$ input cost~\citep{openai2026pricing,anthropic2026pricing}, counting both generation and evaluation calls. Following \citet{wang2025huxley}, a best-belief agent's cost is the budget consumed when it first attains its highest $\epsilon$-best-belief score, \textbf{not when the epoch or run finishes}. Uncertainty is reported with $95\%$ central Beta (Jeffreys) intervals; further details are in \cref{app:exp-details}.
+
+\subsection{Visualization Guide}
+\label{exp_design:reading_results_figures}
+All result figures~(\cref{fig:intro-token-efficiency,fig:prover-grader-results,fig:paper-writer-reviewer-results}) share one scheme, comparing several \emph{arms}: search configurations, such as the \ourmethod generalist, specialist, and \hgmh baseline. Each figure pairs a \emph{ground-truth panel}, which scores arms against the fixed anchor and so permits direct comparison, with a \emph{search-trajectory panel} tracking best-belief utility as search consumes tokens. A \emph{circle} marks a task agent (writer, prover, or coder) and a \emph{down-triangle} a learned evaluator (reviewer or grader), color identifying the arm. The \emph{crowned heart} marks the single global best-belief winner shown in the ground-truth panel.
+
+The search-trajectory panel instead plots each task agent's best-belief utility against its \emph{own} evaluator, so heights are not comparable across arms; the cross-arm winner is read from the ground-truth panel and tables. Markers along a trajectory are that arm's epoch-local best-belief picks, later scored on held-out test data or fixed evaluators. A \emph{crown on a dashed rule} marks an evaluator replacement, and alternating \emph{shaded bands} the epochs. At each replacement the best-belief may drop, as selective erasure discards records that depended on the displaced evaluator, then re-climbs under the new, typically stricter criterion. A best-belief of $0$ marks the start of an epoch, before any record survives the new evaluator, or an agent that fails a task outright, such as code that does not compile. A trajectory ends where its best-belief agent stops changing, not because search halts (total budget is matched) but because no later agent overtakes it; a faint dotted line shows the continued trajectory. Each panel carries two legends: a main one inside for the searched agents, and a strip above for baselines and paired-role arms. Arrows mark each metric's direction, $\boldsymbol{\uparrow}$ higher-is-better and $\boldsymbol{\downarrow}$ lower-is-better; calibration axes with no preferred direction, such as acceptance rate and rank correlations, carry none.
+
+
+\section{Results}
+\label{sec:experiments}
+
+
+We evaluate \ourmethod, validating that (i) co-evolved learned evaluation improves search even on verifiable coding tasks where ground truth exists, exceeding the \hgmh held-out pass rate at lower search cost~(\cref{sec:exp-polyglot}), and (ii) co-evolution improves generators in domains where no benchmark can score the artifact, yielding stronger paper writers and Olympiad provers~(\cref{sec:exp-writer}). \Cref{sec:analysis} then examines how utility transitions shape the search. We then validate that (iii) co-evolution improves the evaluators themselves, strengthening the grader and correcting the paper reviewer's over-leniency toward \AI-generated text~(\cref{sec:exp-adversarial}). Finally, we provide a targeted ablation showing that lower-cost search-time task-agent calls can preserve paper-domain endpoints when the final scoring model is held fixed~(\cref{sec:reducing_search_costs}). Further details and ablations are in \cref{app:exp-details,app:extended-results}.
+
+
+
+\subsection{Learned evaluation helps even where ground truth exists (RQ1)}
+\label{sec:exp-polyglot}
+
+We now show \ourmethod improves search even in domains where objective ground-truth evaluation exists. In the \polyglot coding domain, we co-evolve a code reviewer alongside the coder. Because \polyglot is built around multi-turn agent editing, this agent-as-a-judge provides a much cheaper and complementary surrogate objective. The meta-agent learns not just whether a patch passes tests, but also whether it is of high quality. \Theourmethod exceeds the \hgmh held-out pass rate for both the specialist and generalist at $1.35\times$--$1.72\times$ lower token cost~(\cref{fig:intro-token-efficiency}). Examining where the meta-agent edits the codebase shows why co-evolving the two roles pays off: in the \polyglot run, $90\%$ of accepted patches modify shared task-agent functionality or infrastructure used by both the coder and the reviewer, rather than role-specific code~(\cref{fig:analysis-transfer}). A single such edit therefore improves both roles, suggesting co-evolution enriches the search rather than splitting effort across competing objectives.
+
+\takeawaybox[RQ1:]{\ourmethod is a general framework for enriching the utility signals available to a search: even where ground truth exists, co-evolving a learned evaluator supplies a complementary objective that improves search efficiency, with promise for domains where evaluation is even slower.}
+
+
+\subsection{Learned evaluation improves agents on domains without objective evaluation~(RQ2)}
+\label{sec:exp-writer}
+
+
+
+
+
+
+We now turn to domains with no objective benchmark, where only evaluator-dependent task agents exist. We score the artifacts produced by our paper writer and prover against a broad panel of reviewers and graders from both our work and prior baselines. The task agents and their evaluators interact throughout the search, but in this section we evaluate only the task agents, deferring evaluators to \cref{sec:exp-adversarial}, where objective anchor data permits further analysis.
+
+
+
+\noindent\textbf{Paper writing.}~~Paper quality cannot be evaluated objectively, so we score writer artifacts against a fixed panel of four reviewers from our work and prior baselines~(\cref{tab:paper-writer-cross-reviewer}); the joint search of the writer and its co-evolving reviewer is shown on the right in \cref{fig:paper-writer-reviewer-results}. Our results show that co-evolving the writer with a learned reviewer improves it. At the matched-compute point where \hgmh commits to its writer, our writer already achieves a $1.78\times$ higher reviewer-panel acceptance rate on average, and across the full run it beats \hgmh as evaluated by every reviewer, with a $1.86\times$ higher acceptance rate. This is enabled by a co-evolving reviewer whose objective is regularized to favor reviewers harsher on \AI-generated text~(\cref{sec:exp-adversarial}), giving the writer a stricter signal resilient to reward hacking.
+
+
+
+\begin{table}[htbp]
+\centering
+\caption{\textbf{Co-evolved writers achieve $1.78\times$ higher mean acceptance than \hgmh at matched search cost, and $1.86\times$ for the best-found specialist.} Rows are writer agents; the four \textbf{Reviewers} columns form a fixed panel from our work and prior baselines, each cell giving the percentage of writer-generated papers that reviewer accepts (mean $\pm$ 95\% Jeffreys interval). \textbf{Mean} averages across the panel, with each \ourmethod writer's gain over \hgmh in parentheses. \textbf{\ourmethod adversarial} is the \ourmethod reviewer regularized to be harsher on \AI-written text (\cref{sec:exp-adversarial}). Best per column in \textbf{bold}.}
+\label{tab:paper-writer-cross-reviewer}
+\small
+\setlength{\tabcolsep}{5.0pt}
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular}{lrcccc@{\hskip 10pt}r}
+\toprule
+& & \multicolumn{4}{c}{\textbf{Reviewer Acceptance Rate~(\%,~$\uparrow$)}} & \\
+\cmidrule(lr){3-6}
+\textbf{Writer} & \shortstack[r]{\textbf{Search}\\\textbf{Tokens}} & \shortstack{\textbf{\sakana}\\\textbf{\citep{lu2024ai}}} & \shortstack{\textbf{\dgmh}\\\textbf{\citep{zhang2026hyperagents}}} & \shortstack{\textbf{\hgmh}\\\textbf{\citep{wang2025huxley,zhang2026hyperagents}}} & \shortstack{\textbf{\ourmethod}\\\textbf{adversarial}} & \makebox[6.8em][c]{\textbf{Mean~(\%,~$\uparrow$)}} \\
+\midrule
+\hgmh writer & 42.5M & $1.0$\,{\color{black!55}\scriptsize$\pm 2.2$} & $12.0$\,{\color{black!55}\scriptsize$\pm 6.3$} & $64.0$\,{\color{black!55}\scriptsize$\pm 9.3$} & $10.0$\,{\color{black!55}\scriptsize$\pm 5.9$} & \makebox[6.8em][l]{\makebox[2.5em][r]{$21.8$}\,{\color{black!55}\scriptsize$\pm 4.0$}\,\makebox[2.6em][l]{}} \\
+\addlinespace[2pt]
+\ourmethod writer (generalist) & 44.6M & $2.0$\,{\color{black!55}\scriptsize$\pm 2.9$} & \textbf{43.0}\,{\color{black!55}\scriptsize$\pm 9.6$} & $81.0$\,{\color{black!55}\scriptsize$\pm 7.6$} & $29.0$\,{\color{black!55}\scriptsize$\pm 8.8$} & \makebox[6.8em][l]{\makebox[2.5em][r]{$38.8$}\,{\color{black!55}\scriptsize$\pm 4.8$}\,\makebox[2.6em][l]{\scriptsize($1.78\times$)}} \\
+\addlinespace[2pt]
+\ourmethod writer (specialist) & 221.8M & \textbf{5.0}\,{\color{black!55}\scriptsize$\pm 4.3$} & $40.0$\,{\color{black!55}\scriptsize$\pm 9.5$} & \textbf{86.0}\,{\color{black!55}\scriptsize$\pm 6.8$} & \textbf{31.0}\,{\color{black!55}\scriptsize$\pm 9.0$} & \makebox[6.8em][l]{\makebox[2.5em][r]{\textbf{40.5}}\,{\color{black!55}\scriptsize$\pm 4.8$}\,\makebox[2.6em][l]{\scriptsize($1.86\times$)}} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+
+
+
+\noindent\textbf{Proof writing.}~~The proof domain is substantially harder than paper writing, with improvements emerging only at longer training horizons. As shown in \cref{tab:imo-proof-cross-grader}, \theourmethod generalist performs similarly to \hgmh at matched compute. The divergence appears at longer horizons: \hgmh stagnates, which we posit is because a frozen evaluator eventually ceases to provide an informative signal. The specialist prover that \ourmethod discovers has the best panel-mean score and \texttt{Pass@6} score. As we show in \cref{sec:exp-adversarial}, this is enabled by a co-evolved grader that exceeds \proofautograder and \hgmh, providing evaluations that guide the search toward better solutions than \hgmh can.
+
+
+
+A more nuanced comparison is the \imocode baseline of \citet{huang2025winninggoldimo2025}, a human-engineered verification-and-refinement pipeline that achieved gold-medal performance at IMO 2025. \Theourmethod specialist attains a higher panel-mean score and \texttt{Pass@6} rate, but earns them by finding more near-complete proofs ($6$ of $7$), conceding ground on the stricter \texttt{Pass@7} metric. It still exceeds the best \hgmh prover on \texttt{Pass@7}, and already beats the mean score of the \imocode baseline despite using no hand-engineered Olympiad-specific scaffold. Thus, we posit that closing the remaining \texttt{Pass@7} gap depends on increasing the search budget. Details in \cref{app:extended-results}.
+
+
+
+
+\begin{table}[h]
+\centering
+\caption{\textbf{The co-evolved \ourmethod specialist prover attains the best mean score, while the \hgmh prover and the \ourmethod generalist fall below the baseline.} Rows are prover agents. A fixed panel of three graders from our work and prior baselines scores every prover's proofs, mirroring the reviewer panel of \cref{tab:paper-writer-cross-reviewer}. Because graders report several metrics, we pool each metric across graders, with per-grader results in \cref{tab:proof-per-grader}. \textbf{Score} is the mean grade ($0$--$7$), \textbf{\texttt{Pass@6}} the fraction scoring at least $6$ of $7$, and \textbf{\texttt{Pass@7}} the fraction earning full credit; all report $\pm$ s.e.m. Best per column in \textbf{bold}.}
+\label{tab:imo-proof-cross-grader}
+\small
+\setlength{\tabcolsep}{6.0pt}
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular}{lrccc}
+\toprule
+\textbf{Prover} & \textbf{Search Tokens} & \textbf{Score~($\uparrow$)} & \textbf{\texttt{Pass@6}~($\uparrow$)} & \textbf{\texttt{Pass@7}~($\uparrow$)} \\
+\midrule
+Static \imocode prover & N/A & $4.07$\,{\color{black!55}\scriptsize$\pm 0.42$} & $55.0\%$\,{\color{black!55}\scriptsize$\pm 6.4$} & \textbf{55.0\%}\,{\color{black!55}\scriptsize$\pm 6.4$} \\
+\hgmh prover & 21.5M & $3.73$\,{\color{black!55}\scriptsize$\pm 0.43$} & $51.7\%$\,{\color{black!55}\scriptsize$\pm 6.5$} & $45.0\%$\,{\color{black!55}\scriptsize$\pm 6.4$} \\
+\ourmethod prover (generalist) & 37.9M & $3.73$\,{\color{black!55}\scriptsize$\pm 0.43$} & $51.7\%$\,{\color{black!55}\scriptsize$\pm 6.5$} & $45.0\%$\,{\color{black!55}\scriptsize$\pm 6.4$} \\
+\ourmethod prover (specialist) & 88.0M & \textbf{4.33}\,{\color{black!55}\scriptsize$\pm 0.41$} & \textbf{61.7\%}\,{\color{black!55}\scriptsize$\pm 6.3$} & $48.3\%$\,{\color{black!55}\scriptsize$\pm 6.5$} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\takeawaybox[RQ2:]{Where no objective benchmark exists, co-evolving agents with learned evaluators outperform fixed-evaluator baselines: writers reach markedly higher reviewer-panel acceptance, while provers improve over longer horizons as the co-evolved grader becomes more accurate and the frozen baseline stagnates.}
+
+
+\subsection{Evaluator replacements act as a curriculum on the search (RQ3)}
+\label{sec:analysis}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\linewidth]{figures/fig_transition_rerank.pdf}
+   \caption{\textbf{Evaluator replacements permanently re-rank the archive.} Each curve tracks one replacement, plotting the Spearman $\rho$ between post- and pre-replacement rankings as evaluations accumulate: $\rho = 1$ (dotted) is the unchanged order, $\rho = 0$ an uncorrelated reordering. Across all three tasks $\rho$ settles well below $1$ and never recovers, so the new ordering holds. The no-erasure control (rightmost) stays high ($\rho \geq 0.90$), showing erasure is necessary for utility transitions to guide search.}
+    \label{fig:transition-rerank}
+\end{figure}
+A potential mechanism by which \theourmethod can improve task agents is that a progressively stronger evaluator hardens the population over time, imposing a curriculum-like effect on the task agents. For this to hold, each transition must achieve two outcomes at once: re-rank the search under the new, stricter criterion rather than leave the old ordering in place, while still letting a strong lineage carry forward so the population advances over time rather than restarting on every transition.
+
+\noindent\textbf{Macro view: each replacement re-ranks the archive.}~~If replacements merely sharpened pass-rate estimates without changing which agents the search favors, no curriculum could arise. \Cref{fig:transition-rerank} suggests otherwise. Some ranking structure persists across a transition, reflecting evaluator-independent evidence carried through the change, but the re-ordering is substantial and permanent, plateauing near its post-erasure level rather than recovering toward the old order. Each later evaluator thus appears to enforce a stricter criterion. Selective erasure makes this possible: the no-erasure control, which keeps stale scores, stays pinned to the displaced order and never lets the new criterion re-rank agents.
+
+\begin{figure}[t]
+    \centering\includegraphics[width=\linewidth]{figures/fig_lineage_continuity.pdf}
+    \vspace{-0.2cm}
+\caption{\textbf{Evaluator replacement preserves the best lineage while re-ranking the remainder.} The paper-run archive after an evaluator replacement (radial layout; node color is best-belief utility, size tracks evidence count). The crimson winning lineage survives intact, ending in the crowned-heart winner. Among the top-$8$ nodes, every prior member is re-ranked (rings mark promotions and churn).}
+    \label{fig:tree-paper}
+\end{figure}
+
+\noindent\textbf{Micro view: the curriculum advances a backbone lineage.}~~\Cref{fig:tree-paper} takes a finer view, with the archive concentrating evidence on a few backbone lineages. Each transition pulls lineages the displaced criterion ranked low into contention, so the new bar is met by different candidates rather than the same set re-scored. However, the best lineage stays resilient across the enlarged set, suggesting the curriculum raises the population around a stable backbone rather than scattering it.
+
+\takeawaybox[RQ3:]{Evaluator replacements drive a curriculum-like search: erasure lets each stricter criterion re-rank the archive toward new candidates, while a resilient backbone keeps the population progressing.}
+
+\subsection{Co-evolution improves the evaluators themselves (RQ4)}
+\label{sec:exp-adversarial}
+\begin{figure}[htbp]
+    \centering
+\includegraphics[width=\linewidth]{figures/fig5_prover_grader.pdf}
+\caption{\textbf{The co-evolved \ourmethod\ grader reaches the best \imogradbench\ accuracy at $3\times$ lower search cost than \hgmh.} A ground-truth-anchored slot has one \emph{global} best-belief winner (the crowned heart), while an evaluator-dependent slot admits only \emph{epoch-local} winners, scored post-hoc in the tables. \emph{Left:} \imogradbench\ accuracy of selected graders against grading mean absolute error (MAE); the \ourmethod\ grader's global winner (heart) is the highest-accuracy point, with specialist and generalist coinciding. \emph{Right:} the search trajectory over tokens, showing best-belief utility for the grader (top) and prover (bottom); the grader is scored on its ground-truth anchor, so its heights are comparable and carry the global winner, whereas each prover marker is only that epoch's best-belief winner under its own evaluator. Utility drops at each evaluator replacement (crown; shaded epochs) as erasure discards the displaced records, then re-climbs, and a line ends where its best-belief agent stops improving, not where search halts. For further details see \cref{sec:experimental-design,exp_design:reading_results_figures}.}
+    \label{fig:prover-grader-results}
+\end{figure}
+
+While \theourmethod is not designed to improve evaluators directly, we posit that the same dynamics improving a generator can also benefit its evaluator since a better grasp of how to generate solutions may help the meta-agent discriminate them. Complementary utility signals may likewise prevent stagnation when one role plateaus. Our two learned evaluators, the proof grader and paper reviewer, differ in one crucial respect: their susceptibility to self-preference bias, an LLM judge's tendency to favor \AI-generated text~\citep{DBLP:conf/nips/PanicksseryBF24}. The grader is largely insulated and improves through co-evolution alone; the reviewer is not, needing the adversarial correction that controlled utility evolution makes possible to inform the paper writer search~(\cref{sec:experimental-design,tab:paper-writer-cross-reviewer}).
+
+
+\noindent\textbf{Proof grading.}~~Grading is the more constrained task: the grader is conditioned on a reference solution and its steps, so it judges a proof against a fixed target rather than on surface plausibility. Combined with the mathematical understanding and instruction-following of foundation models~\citep{openai2025imo,openai2025science,zhou2023instruction}, this leaves little room for self-preference bias, making adversarial objectives unnecessary.
+
+As shown in \cref{fig:prover-grader-results}, the co-evolved grader is the strongest judge, outperforming the static baselines and the best \hgmh grader, and it does so at lower search cost. Unlike our other experiments, the specialist and generalist coincide in a single node, which reaches specialist selection before generalist selection. At the specialist point it is $3\times$ more token-efficient than \hgmh; even at the later generalist point, where it costs $1.35\times$ more, it still beats the best grader \hgmh ever finds, as \hgmh never matches it within an equal search budget. Co-evolution thus yields a better grader at lower cost, and lets the grader drive the prover improvements of \cref{tab:imo-proof-cross-grader} without adversarial objectives.
+
+
+
+
+
+\noindent\textbf{Paper review.}~~Paper reviewing is the opposite case. There is no reference answer, so a reviewer judges each paper on its own terms, exposing a known weakness of LLM judges, \emph{self-preference bias}: the tendency to accept \AI-generated text more readily than human-written text~\citep{DBLP:conf/nips/PanicksseryBF24,jiang2025badscientist}. The \apres benchmark compounds this, as its accept/reject balance rewards lenient reviewers, so a reviewer's bias toward \AI-generated text and its raw \apres accuracy pull in the same direction: the \hgmh reviewer scoring writers in \cref{tab:paper-writer-cross-reviewer} accepts \AI-generated papers at $1.42\times$--$1.91\times$ the rate of human ones. The \sakana baseline shows the converse failure: even a real NeurIPS form, held fixed, is too harsh, giving the \hgmh writer it guides a weak signal. We want not an accurate reviewer for its own sake, but one giving the open-ended writer it co-evolves with a strong, hard-to-hack signal that grows harsher over time. This justifies modifying the objective away from raw \apres accuracy.
+
+
+
+\Theourmethod allows us to correct for LLM self-preference bias by exploiting an epoch boundary. After each replacement, the \AI-generated papers the displaced reviewer had accepted form an adversarial pool, and the next epoch additionally rewards evolved reviewers for rejecting them. The search then selects a reviewer that is harsh specifically on \AI-generated text, which costs raw accuracy by construction and leaves our best-found reviewer below the lenient \hgmh. What it gains is calibration: the reviewer accepts \AI-generated and real papers at similar rates while retaining $80\%$ ground-truth accuracy. Had evaluators and generators evolved independently, the writer could have reward-hacked it, so co-evolution yields a \emph{meaningful decision boundary} between human- and \AI-generated text.
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{figures/fig4_writer_reviewer.pdf}
+    \caption{\textbf{The adversarial \ourmethod\ reviewer accepts \AI{} and human papers at similar rates, a calibrated accept/reject boundary that drives the strongest writer~(\cref{tab:paper-writer-cross-reviewer}); \hgmh\ reaches higher raw \apres\ accuracy only by over-accepting \AI-generated papers, which leaves its writer weak.} \emph{Left:} \apres\ accuracy of selected reviewers against acceptance rate; the dashed line marks the dataset's true accept rate. The \ourmethod\ reviewer keeps high accuracy at a low acceptance rate, between the lenient \hgmh\ and the over-harsh \sakana. \emph{Right:} the same run over tokens, writers (top) and reviewers (bottom); at the adversarial-pool replacement the generalist's average best-belief drops as erasure re-ranks the affected utilities, then re-climbs under the harsher criterion.}
+    \label{fig:paper-writer-reviewer-results}
+\end{figure}
+
+\takeawaybox[RQ4:]{The same search dynamics that improve generators also improve evaluators: co-evolution finds a stronger grader at lower cost than fixed-evaluator baselines, and, by introducing an adversarial objective at an epoch boundary, corrects a reviewer's self-preference bias to give the writer a harder-to-hack signal.}
+
+\subsection{Reducing search costs via hybrid-model approaches}
+\label{sec:reducing_search_costs}
+
+Sharing expansions across task and evaluator roles provides part of \theourmethod's efficiency~(\cref{fig:analysis-transfer}), but expansion calls account for only $\approx 20\%$ of total search cost across our domains~(\cref{fig:analysis-cost}). To further reduce costs, we consider a hybrid-model approach: keep the meta-agent as \gptlow (low), but route search-time task-agent calls through the faster and lower-cost \nemotronultra~\citep{nvidia2026nemotron3ultraopen}.
+
+\begin{wrapfigure}{r}{0.50\linewidth}
+\vspace{-0.6\baselineskip}
+\centering
+\includegraphics[width=\linewidth]{figures/fig_nemotron_cost_shift.pdf}
+\caption{\textbf{\nemotronultra task-agent calls approach the \gptlow-only run at $\approx$\textbf{13.0}$\boldsymbol{\times}$ lower search-token cost.} On the held-out \apres split, final \gptlow evaluation shows that the \nemotronultra-discovered harness approaches the performance of our \gptlow-only harness. Since raw tokens are not directly comparable, we report \gptlow-price-equivalent blended tokens based on the best available pricing at the time of writing. Expansion calls are charged the same as in \gptlow-only runs~(\cref{app:domain-protocols}).}
+\label{fig:nemotron-cost-shift}
+\end{wrapfigure}
+
+\noindent\textbf{Price-equivalent accounting.}~~As shown in \cref{fig:nemotron-cost-shift}, replacing \gptlow with \nemotronultra as the task agent reduces search-token costs by $\approx$\textbf{13.0}$\boldsymbol{\times}$ while approaching the \gptlow-only run's accuracy under the same final evaluation. We expect this benefit to be domain-specific, depending on whether the cheaper task agent provides an informative signal. If the task-agent foundation model is insufficiently capable for a domain, for example constructing novel proofs, it may increase search costs because different meta-agent expansions become hard to distinguish in quality.
+\vspace{-0.17cm}
+\takeawaybox[Cost ablation:]{Empirically, the primary cost driver in \theourmethod search is evaluation, not expansion. In paper review, routing search-time task-agent calls through a more efficient foundation model substantially reduces search cost with tolerable final-performance loss; this trade-off remains to be investigated for other domains.}
+\clearpage
+
+
+\relax
+
+
+
+
+
+\section{Conclusion}
+\label{sec:conclusion}
+We introduced the \textbf{Red Queen G\"odel Machine (\ourmethod)}, a framework in which evaluators co-evolve with the agents they score. Our results suggest two broad principles. First, co-evolving the evaluator alongside the generator enables improvement on hard-to-verify tasks such as paper writing and proof writing, where a fixed benchmark cannot score the artifact directly, mirroring co-evolutionary dynamics observed in nature~\citep{van1973new}. Second, co-evolved systems match or exceed fixed-evaluator baselines while often being more token-efficient, which we posit is due to shared expansion costs, more heterogeneous utility signals, and a curriculum-like effect in which a progressively stricter evaluator hardens the population over time. Underlying both is the framework's accommodation of non-stationary utilities: because controlled utility evolution lets the search objective change at epoch boundaries while keeping per-epoch guarantees intact, interventions a fixed objective cannot express, such as the adversarial term that corrects the reviewer's self-preference bias, become available mid-search.
+
+\subsection{Future Research Directions}
+\label{sec:future}
+Our investigation is preliminary, drawn from short search horizons we intend to extend. The framework's premise is that longer co-evolution compounds these effects, extending the curriculum so that each generation of agents faces a stricter and more discerning judge. The limit of this improvement is governed by the anchor. Anchoring every replacement to fixed ground truth keeps evaluators accurate but confines them to the anchor's own decision boundary. Improvement far beyond the benchmark must therefore come from the objectives layered on top of the ground-truth signal, with the anchor serving as a guardrail against drift. The adversarial reviewer is the first such instance: it roughly maintains accuracy on the ground truth while the adversarial term discovers a human--machine decision boundary the benchmark never specified. Richer objectives of this kind are, we believe, the path toward systems that bootstrap their own evaluation beyond the reach of static benchmarks. We identify two limitations with the current framework. First, evaluator quality is only as good as its anchor: a weak or biased anchor could yield uninformative evaluators. Second, our theoretical guarantees are epoch-local, covering improvement only within an epoch. We discuss the limitations of \theourmethod in full in \cref{app:limitations}, and will update this work as we explore these future research directions.
+
+
+
+\section*{Acknowledgments}
+
+This research was supported by the following entities: NVIDIA, The Royal Academy of Engineering via DANTE (a RAEng Chair); the European Research Council, specifically the REDIAL project; SPRIND under the composite learning challenge; Foresight Institute via the AI Safety Grant; Google through a Google Academic Research Award.
+
+
+\FloatBarrier
+\bibliographystyle{unsrtnat}
+\bibliography{bib/references}
+
+\clearpage
+\appendix
+\crefalias{section}{appendix}
+\crefalias{subsection}{appendix}
+\crefalias{subsubsection}{appendix}
+\etocdepthtag.toc{appendix}
+
+\clearpage
+\raggedbottom
+\phantomsection
+\label{sec:appendix}
+\etocdepthtag.toc{main}
+\etocdepthtag.toc{appendix}
+
+\vspace{0.8cm}
+\begingroup
+  \hypersetup{linkcolor=black}
+  \color{black}
+  \etocsettagdepth{main}{none}
+  \etocsettagdepth{appendix}{subsection}
+  \etocsettocstyle{\centering\bfseries {\Large Table of Contents}\par
+    \vspace{0.1\baselineskip}
+    \hrule
+    \vspace{0.4\baselineskip}
+  }{\vspace{0.4\baselineskip}
+    \hrule height 0.4pt
+  }
+  \tableofcontents
+\endgroup
+\vspace{0.8\baselineskip}
+
+\section{Appendix Overview}
+This appendix covers the \ourmethod algorithm~(\cref{app:algo}), experimental details~(\cref{app:exp-details}), experimental results~(\cref{app:extended-results}), how the meta-agent modified the code~(\cref{app:evaluator-evolution}), the theory~(\cref{app:proofs}), and the limitations of our work~(\cref{app:limitations}).
+
+
+\section{The Algorithm in Full}
+\label{app:algo}
+
+\Cref{alg:main} states the full \ourmethod{} procedure of \cref{sec:method}. Lines 1--4 initialize the frozen-epoch archive from the seed workspace $a_0$: every evaluator slot is set to its first epoch, frozen on its incumbent, and the seed is train-evaluated for lineage evidence only. Lines 5--21 run the inherited \cmp-guided search between checkpoints. At each iteration, the expansion gate (line 9) either expands or evaluates: an expansion samples a parent clade by metaproductivity (line 10), edits its workspace into a child (line 11), and admits the valid child to the archive with its own lineage-only train evaluation (lines 12--15); the iteration then samples a node by \cmp (line 17), picks its least-measured role--task cell (line 18), spends one unit of validation budget on that cell under the frozen evaluators (line 19), and records the binary outcome (line 20). Lines 22--31 run only at a checkpoint, the only point an evaluator can change. For each slot, the incumbent and its challengers are scored by the $\epsilon$-best-belief lower bound on evaluator-independent anchor counts (lines 24--25), and the highest is promoted with ties won by the incumbent (line 26); on a real change (line 27), the slot advances its epoch, freezes the new evaluator, erases the displaced slot's records, and recomputes the metaproductivity statistics (lines 28--29). Finally, lines 33--35 return the archive node with the highest $\epsilon$-best-belief score.
+
+
+\makeatletter
+\ifpaper@twocolumn
+  \begin{algorithm*}[t]
+\else
+  \begin{algorithm}[t]
+\fi
+\DontPrintSemicolon
+\LinesNumbered
+\SetAlgoLined
+\SetNlSty{textbf}{\scriptsize}{}
+\SetAlgoNlRelativeSize{-1}
+\footnotesize
+\KwIn{Seed workspace $a_0$; roles $\mathcal R$; validation budget $B$; evaluator slots $1{:}M$}
+\KwIn{Anchor sets $\mathrm{GT}[m]$; checkpoints $\mathcal C$; caps $(\bar B_{\rm exp},\bar B_{\rm train},\bar B_{\rm val})$; best-belief level $\epsilon$}
+\KwOut{Archive $\mathcal T_B$ and selected endpoint agent $a^\star$}
+\BlankLine
+\textbf{Initialize the frozen-epoch archive.}\;
+$\mathcal T \leftarrow \{a_0\}$; $N \leftarrow 0$; $j[m]\leftarrow 1$ for all slots $m$\;
+$E[m]\leftarrow \func{Freeze}(\func{Incumbent}(m))$ for all slots $m$\;
+$\func{TrainEval}(a_0,\mathcal R,E,\bar B_{\rm train})$\tcp*{lineage evidence only}
+\BlankLine
+\textbf{Run CMP-guided search between checkpoints.}\;
+\While{$N < B$}{
+  $b \leftarrow \min\{c\in\mathcal C:c>N\}\wedge B$\tcp*{next checkpoint}
+  \While{$N < b$}{
+    \If{$\func{ExpandGate}(\mathcal T,N)$}{
+      $a_p \leftarrow \func{SampleCladeByCMP}(\mathcal T)$\;
+      $a' \leftarrow \func{EditWorkspace}(a_p,\mathcal T,\bar B_{\rm exp})$\;
+      \If{$\func{Valid}(a')$}{
+        $\mathcal T \leftarrow \mathcal T \cup \{a'\}$\;
+        $\func{TrainEval}(a',\mathcal R,E,\bar B_{\rm train})$\tcp*{not search utility}
+      }
+    }
+    $a \leftarrow \func{SampleCladeByCMP}(\mathcal T)$\tcp*{node-level \hgm choice}
+    $(r,d) \leftarrow \func{LeastMeasuredCell}(a,\mathcal R)$\tcp*{role/task balancing}
+    $o \leftarrow \func{ValEval}(a,r,d,E,\bar B_{\rm val})$\;
+    $\func{AddUtilityRecord}(\mathcal T,a,r,d,o,\mathbf j)$; $N \leftarrow N+1$\;
+  }
+\BlankLine
+  \textbf{At checkpoint, replace evaluators only by anchor best-belief.}\;
+  \ForEach{evaluator slot $m$}{
+    $\Gamma_m \leftarrow \{E[m]\}\cup \func{Challengers}(m,\mathcal T)$\;
+    $\mathrm{BB}[e] \leftarrow I_\epsilon^{-1}(1+S_e^{\rm gt},1+F_e^{\rm gt})$ for each $e\in\Gamma_m$\;
+    $e^\star \leftarrow \func{Best}(\Gamma_m,\mathrm{BB};\ \func{tie}=E[m])$\;
+    \If{$e^\star \neq E[m]$}{
+      $j[m]\leftarrow j[m]+1$; $E[m]\leftarrow \func{Freeze}(e^\star)$\;
+      $\func{EraseSlotRecords}(\mathcal T,m)$; $\func{RecomputeCMPStats}(\mathcal T)$\;
+    }
+  }
+}
+\BlankLine
+\textbf{Select the endpoint by best-belief over archive nodes.}\;
+$a^\star \leftarrow \func{BestBeliefNode}(\mathcal T,\epsilon)$\;
+\Return{$(\mathcal T_B,a^\star)$}\;
+\caption{\small Red Queen G\"odel Machine search with anchor-only evaluator replacement.}
+\label{alg:main}
+\ifpaper@twocolumn
+  \end{algorithm*}
+\else
+  \end{algorithm}
+\fi
+\makeatother
+
+
+\section{Experimental Setup}
+\label{app:exp-details}
+
+\subsection{Domains and Anchor pairs}
+
+\Cref{fig:domain-utilities} shows how each domain pairs a generator role with a learned evaluator role and a \emph{ground-truth anchor}. 
+
+\begin{widefigure}[tb]
+\centering
+
+
+\includegraphics[width=\linewidth]{figures/domain-utilities-diagram-v3-tnr.pdf}
+\caption{\textbf{Each domain separates durable anchor evidence from epoch-local evaluator records.} \emph{Left:} fixed ground-truth anchors (solid lines) survive evaluator replacement, while epoch-frozen evaluator-slot records (dashed lines) are local to epoch $j_m$. \emph{Middle:} only evaluator-independent anchor evidence enters the $\epsilon$-best-belief evaluator replacement gate. \emph{Right:} after replacement, anchors remain valid while records from the displaced evaluator slot are erased before epoch $j_m+1$.}
+\label{fig:domain-utilities}
+
+\end{widefigure}
+
+\subsection{Models and Run Identities}
+\label{app:fm}
+
+Every search run in the main experiments of the paper, held-out evaluation, and panel-scoring call uses \gptlow (low). The cost-reduction ablation of \cref{sec:reducing_search_costs} changes only the search-time task-agent route: the meta-agent remains \gptlow (low), the paper-domain task-agent calls use \nemotronultra during search, and the final endpoint scoring is run with the same \gptlow (low) reviewer as the main paper. \nemotron~\citep{nemotron_super} is used only in the mechanism ablations of \cref{app:nemotron-ablations}. We display the blended token totals: train-time generation and evaluation calls are counted together with search-time utility evaluations~(\cref{sec:method:train}). Overall, there are eight main experiments, one per domain per baseline: coding (\ourmethod{} and \hgmh), paper writing (one \ourmethod{} run yielding the writer, reviewer, and adversarial critic, plus the \hgmh reviewer and the \hgmh writer), and proof (one \ourmethod{} run yielding the prover and grader, plus the \hgmh grader and the \hgmh prover). Every task runs to the same total budget; \hgmh receives the identical exploration budget and typically plateaus earlier. Each agent is read at the point its search reaches its best-belief selection. We allow more powerful models to delegate token processing to cheaper ones. For this paper, we gave \gptlow (low) access to \nemotron; however, we never observed this functionality being used. Similarly, we imposed generous budget caps as a safeguard for expansions and evaluations, which the meta-agent did know about, potentially altering its behavior; however, we never observed an individual node approaching them. Stricter caps may have caused early eval/expansion termination.
+
+\subsection{Search and Scheduling Settings}
+\label{app:hyperparams}
+
+Search runs the \hgm clade metaproductivity search of \cref{app:prelim} with frozen evaluator slots and checkpoint-only replacement; replacement and best-belief selection share the $\epsilon$-best-belief rule of \cref{app:swap-rule} applied to nodes with at least $5$ accumulated evaluations. \Cref{tab:settings-fixed} lists the fixed search configuration and \cref{tab:settings-editable} the meta-agent-editable surface with its initial values. Any hyperparameter not listed is taken from \citet{wang2025huxley}. To determine the search budget, we considered the reported $8{,}000$ evaluation budget used by \citet{wang2025huxley} for a single task, chose an economical middle-ground between doubling the search budget for our two task pairs~($16{,}000$) and using the same budget as a single task, settling on $12{,}288 = 8{,}192 + 4{,}096$. 
+
+\begin{table}[ht]
+\centering
+\caption{\textbf{Fixed search configuration shared by the eight headline runs.} These constants are held fixed across every run and are not exposed to the meta-agent. No search cool-down is used.}
+\label{tab:settings-fixed}
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+Setting & Value \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{Models and budget}}\\
+Base model & \gptlow (low) \\
+Ablation model & \nemotron \\
+Total budget per run & $12{,}288$ evaluations \\
+Train samples per node & $3$ \\
+\addlinespace
+\multicolumn{2}{@{}l}{\textit{Selection and scheduling}}\\
+Best-belief quantile & $\epsilon=0.05$, five-outcome anchor minimum \\
+Checkpoint schedule & power-of-two ($\rho=2$) \\
+UCB-Air expansion exponent & $\alpha=0.6$ (inherited, \citealp{wang2025huxley}) \\
+Expansion gate & expand when $N_t^{\alpha}\geq|\mathcal{T}_t|$ \\
+Exploration--exploitation scheduler & $B/b$ ($b$ = remaining budget) \\
+\addlinespace
+\multicolumn{2}{@{}l}{\textit{Data splits}}\\
+Test sets (\apres / \imogradbench / \crave) & $100$ items each \\
+\polyglot train split & $10$ items \\
+\polyglot validation split & $49$ items \\
+\polyglot test split & $166$ items \\
+\addlinespace
+\multicolumn{2}{@{}l}{\textit{Budget caps}}\\
+Expand cap & \$25, $1{,}200$\,s \\
+Train cap & \$8, $900$\,s \\
+Validation cap & \$25, $1{,}200$\,s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{\textbf{Meta-agent-editable surface and its initial values.} Every setting below is exposed to the meta-agent, which may modify it during search.}
+\label{tab:settings-editable}
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+Setting & Initial value \\
+\midrule
+Output tokens per call & $32{,}768$  \\
+Timeout, run & $86{,}400$\,s \\
+Timeout, eval & $1{,}200$\,s \\
+Timeout, LLM & $300$\,s \\
+Timeout, shell & $120$\,s \\
+Coder tool calls per task & $\leq 16$ \\
+Meta-agent tools & persistent bash ($120$\,s); editor; delegation \\
+Meta-agent tool calls per turn & $\leq 40$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Held-Out Evaluation Protocols}
+\label{app:domain-protocols}
+
+\noindent\textbf{Coding / \polyglot.}~~Generated patches are checked by execution on $166$ held-out tasks. \Cref{tab:raw-counts} carries the counts.
+
+\noindent\textbf{Paper writing / review.}~~Reviewer slots are anchored to \apres conference decisions; the first epoch trains the reviewer on \apres decisions and freezes it as the writer's search-time critic, and replacement itself stays anchored to \apres alone. Reviewer best-belief agents are scored on $100$ held-out \apres papers for accuracy and acceptance~(\cref{tab:raw-counts}); writer best-belief agents are scored on $100$ generated papers per writer by the fixed panel of four reviewers in \cref{tab:paper-writer-cross-reviewer}.
+
+\noindent\textbf{IMO grading / proof writing.}~~Grader slots are anchored to \imogradbench human grades; grader best-belief agents are scored on $100$ held-out items for exact match and normalized mean absolute error. Provers write proofs for $20$ IMO problems each, scored by the fixed panel of three graders, with every per-grader cell in \cref{tab:proof-per-grader}. \texttt{Pass@6} counts proofs scoring at least $6$ of $7$ points; \texttt{Pass@7} requires full credit and is a disclosed trade-off against the static baseline~(\cref{sec:experiments}).
+
+\noindent\textbf{Uncertainty estimation.}~~Uncertainties in the main-text tables pool raw outcomes. For the writer panel~(\cref{tab:paper-writer-cross-reviewer}), each reviewer cell reports the $95\%$ Jeffreys half-width over its $N=100$ paper outcomes, and the Mean column pools all $N=400$ paper $\times$ reviewer outcomes for its own Jeffreys half-width. For the prover panel~(\cref{tab:imo-proof-cross-grader}), each cell pools the $N=60$ raw outcomes ($20$ problems $\times$ $3$ graders): Score ($0$--$7$) is mean $\pm$ s.e.m., and \texttt{Pass@6} / \texttt{Pass@7} are pooled pass rates $\pm$ s.e.m.\ ($\sqrt{\hat p(1-\hat p)/N}$). The writer-panel cells are thus $95\%$ intervals and the prover-panel cells a single standard error (roughly $68\%$ coverage), so their widths are not directly comparable across the two panels.
+
+\noindent\textbf{Cost-reduction ablation.}~~The \nemotronultra ablation~(\cref{sec:reducing_search_costs}) reuses the paper-writing/review protocol of \cref{app:domain-protocols}. The search-time task-agent calls use \nemotronultra, while final \apres reviewer endpoints are scored with \gptlow (low), using the same held-out $N=100$ \apres set. Agent selection uses $\epsilon$-best-belief with $\epsilon=0.05$. Search cost in \cref{fig:nemotron-cost-shift} is reported as \gptlow-price-equivalent blended tokens. We charge expansion to \gptlow and search-time task-agent evaluation calls to \nemotronultra. We use \$$5$/M input and \$$30$/M output tokens for \gptlow~\citep{openai2026pricing}, and \$$0.5$/M input and \$$2.2$/M output tokens for \nemotronultra from \texttt{DeepInfra} pricing~\citep{deepinfra2026pricing}. Similar to the observed cost split of \cref{fig:analysis-cost}, approximately $20\%$ of search cost is expansion and is charged at \gptlow prices, while $80\%$ is repeated task-agent evaluation. The repeated-evaluation calls are input-heavy, so they are accounted for primarily using the conservative input-price ratio $0.5/5=0.10$; the output-price ratio is smaller ($2.2/30=0.073$). Thus a \nemotronultra blended-token total $B$ is converted to roughly $0.20B + 0.80(0.10B)=0.28B$ \gptlow-price-equivalent blended tokens. This gives a $1.87$M \gptlow-price-equivalent cost for the selected \nemotronultra reviewer agent ($B=6.68$M).
+
+\subsection{Initial Agents and Prompts}
+\label{app:prompts}
+
+The initial workspace is identical across all experiments; every task agent began as the minimal template below plus a short per-domain output format. The meta-agent instruction states explicitly that utility is computed on a held-out validation set it never sees and that memorized training answers do not transfer to it, so the visible train feedback of \cref{sec:method:train} informs self-modification without being the selection target. The only engineered prompts in the study belong to the control runs: the frozen \sakana reviewer and \proofautograder. Every evaluator behavior reported beyond these formats (checklists, rubric, acceptance standard) was produced by the search~(\cref{app:evaluator-evolution}).
+
+Every task agent is one LLM call from a shared template with no role-specific code.
+
+\begin{promptbox}{Shared task-agent template (all roles)}
+\begin{PromptVerb}
+You are an agent.
+
+Task input:
+```
+{inputs}
+```
+
+{output_format}
+\end{PromptVerb}
+\end{promptbox}
+
+The per-domain output formats append a short schema to this template. The paper reviewer is provided below as an example; the writer, IMO grader and prover, and code reviewer differ only in the schema they request, and the coder is the one role with tool access in the initial configuration (bash, editor, and model delegation; the initial workspace allows at most $16$ tool calls per task, a budget the search later raised on both winning chains, \cref{tab:chains-polyglot}). An unparseable output counts as a failure.
+
+\begin{promptbox}{Initial output format: paper reviewer (also scores writer outputs and the adversarial pool)}
+\begin{PromptVerb}
+You are reviewing the paper above for a top ML venue. Read it carefully
+and decide whether to Accept or Reject it.
+
+Respond with one JSON block:
+{
+  "Summary": "...", "Strengths": [...], "Weaknesses": [...],
+  "Decision": "Accept" | "Reject"
+}
+For "Decision", use only "Accept" or "Reject".
+\end{PromptVerb}
+\end{promptbox}
+
+
+The self-modification proposer receives the following instruction verbatim; \texttt{\{repo\_path\}}, \texttt{\{iterations\_left\}}, and \texttt{\{eval\_path\}} are filled by the harness.
+
+\begin{promptbox}{The meta-agent instruction (verbatim, all headline runs)}
+\begin{PromptVerb}
+Modify any part of the codebase at `{repo_path}` to improve performance
+on the active evaluation domains. This includes your OWN code -- the
+meta-agent's loop, prompts, tool surface, and the task-agent harness.
+Improving your own self-improvement abilities compounds across future
+generations and may lead to better outcomes in the long run than only
+optimizing the per-domain task agents.
+
+You have {iterations_left} expansions remaining.
+
+Available LLM models for one-shot delegation are listed in
+`{repo_path}lineage/MODEL_CATALOG.md`. Use the `query_model` tool to
+fire a one-shot call to a different model with
+(prompt, id, effort, max_tokens) -- useful for offloading bulk text
+generation or sanity-checking your reasoning against a different model.
+The call has no chat history and no tools; it's tokens in, tokens out.
+
+Live remaining budget for this expansion is prepended to every chat
+turn by the host harness. The host harness/proxy is the only budget
+authority; do not infer spend from local transport-library estimates,
+token estimates, or model-provider defaults. Read the current remaining
+budget before each action, including tool use and one-shot model
+delegation, and scale the number and size of calls to fit it.
+
+Prior generation artifacts are at `{eval_path}`. Each ancestor
+`gen_<id>/` contains:
+  - `<domain>_eval/predictions.csv` -- task-agent outputs paired with
+ground-truth labels on the TRAIN split. The only sample-level outcome
+data you can see directly.
+  - `agent_output/meta_agent_chat_history.md` -- the full transcript of
+that predecessor's reasoning. The highest-signal artifact: what was
+tried, what worked, what failed. Future generations will read YOUR chat
+history, so explain your reasoning clearly.
+  - `agent_output/model_patch.diff` -- the code edit the predecessor's
+meta-agent produced. Absent on `gen_initial/` (no agent edits there).
+  - `metadata.json` -- parent_genid, parent_agent_success, lineage info.
+
+CRITICAL: your utility is computed on a HELD-OUT validation set you
+NEVER see. The train predictions you can read are feedback for study
+only. Do NOT hardcode answers, memorize specific question ids, or
+otherwise overfit to the train samples -- those tricks score perfectly
+on train and 0 on validation, which is what actually drives selection.
+
+Outcomes are binary (1=correct, 0=incorrect) and a node's utility is
+the mean of its validation outcomes per (role, task). The evaluator is
+external -- improving your agents to genuinely produce better outputs
+is the path forward; gaming the parser or breaking the harness scores 0.
+
+Each `<domain>_eval/report.json` lists `question_ids_passed` and
+`question_ids_failed`. A failed qid means either the LLM's output
+couldn't be parsed (counts as outcome=0 by convention) or it parsed but
+predicted the wrong answer; both are visible in `predictions.csv`
+row-by-row.
+\end{PromptVerb}
+\end{promptbox}
+
+The meta-agent's runtime constants are in \cref{tab:settings-editable}; each expansion's lease is announced in a live budget header prepended to every turn, and train and validation calls carry their own leases.
+
+\section{Results and Ablations}
+\label{app:extended-results}
+
+\subsection{Raw Held-Out Counts}
+\label{app:raw-counts}
+
+\begin{table}[H]
+\centering
+\caption{\textbf{Raw held-out counts at selection} behind \cref{sec:exp-polyglot,sec:exp-writer}.}
+\label{tab:raw-counts}
+\small
+\begin{tabular}{l S[table-format=3.0,round-mode=none] S[table-format=2.0,round-mode=none]}
+\toprule
+Reviewer & {Accuracy} & {Accept.} \\
+\midrule
+\hgmh specialist (node 51) & 88 & 45 \\
+\ourmethod specialist (node 49) & 84 & 40 \\
+\ourmethod generalist, pre-repl.\ (node 78) & 84 & 42 \\
+\ourmethod adversarial, post-repl.\ (node 31) & 80 & 32 \\
+\dgmh (published) & 73 & 25 \\
+\sakana prompt & 63 & 13 \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.6em}
+{\itshape Reviewers: $n=100$ held-out \apres papers.}
+
+\vspace{0.9em}
+\begin{tabular}{l S[table-format=3.0,round-mode=none]}
+\toprule
+Best-belief agent & {Passes} \\
+\midrule
+\ourmethod specialist (node 104) & 119 \\
+\ourmethod generalist (node 100) & 119 \\
+\hgmh (node 95) & 116 \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.6em}
+{\itshape Coders: $n=166$ held-out \polyglot tasks, eval-matched protocol.}
+\end{table}
+
+\begin{widetable}[H]
+\centering
+\small
+\setlength{\tabcolsep}{3.2pt}
+\caption{\textbf{Per-grader proof scores behind \cref{tab:imo-proof-cross-grader}.}}
+\label{tab:proof-per-grader}
+\begin{tabular}{l *{9}{S[table-format=2.1,round-mode=none]}}
+\toprule
+& \multicolumn{3}{c}{\proofautograder} & \multicolumn{3}{c}{\hgmh grader (node 45)} & \multicolumn{3}{c}{\ourmethod grader (node 22)} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}
+Prover & {Mean} & {P@6} & {P@7} & {Mean} & {P@6} & {P@7} & {Mean} & {P@6} & {P@7} \\
+\midrule
+Static \imocode prover & 4.05 & 55.0 & 55.0 & 4.10 & 55.0 & 55.0 & 4.05 & 55.0 & 55.0 \\
+\hgmh prover & 3.55 & 50.0 & 45.0 & 3.65 & 50.0 & 45.0 & 4.00 & 55.0 & 45.0 \\
+\ourmethod prover (generalist) & 3.55 & 50.0 & 45.0 & 3.70 & 50.0 & 45.0 & 3.95 & 55.0 & 45.0 \\
+\bfseries \ourmethod prover (specialist) & \bfseries 3.85 & \bfseries 55.0 & \bfseries 40.0 & \bfseries 4.20 & \bfseries 60.0 & \bfseries 45.0 & \bfseries 4.95 & \bfseries 70.0 & \bfseries 60.0 \\
+\bottomrule
+\end{tabular}
+\end{widetable}
+\FloatBarrier
+\subsection{Mechanism Ablations}
+\label{app:nemotron-ablations}
+
+Below, we provide ablations that isolate components of controlled utility evolution, replacement, the adversarial pool, and selective erasure, each turned off in a paper-review run~(\cref{tab:nemotron-runs}). Every mechanism and hyperparameter is held fixed; only the underlying model changes, to \nemotron. Compared to the \gptlow runs, the smaller context window of \nemotron triggers frequent compaction. Furthermore, its replacement decisions partly reflect reliability fixes rather than review logic~(\cref{app:analyses:patches}). 
+
+\noindent\textbf{The fixed critic saturates.}~~With replacement off the writer ends at $75/75$ accepted validation papers, trivially raising acceptance by the frozen critic past the human acceptance rate. 
+
+\noindent\textbf{Replacement alone (adversarial pool off) escapes that plateau.}~~Ending at an anchor result of $52/57$; the writer re-bases after each replacement instead of saturating a moving judge, so replacement suffices for progress while the adversarial pool shapes \emph{which} reviewer is selected~(\cref{sec:exp-adversarial}). 
+
+\noindent\textbf{Without erasure the utility stays stale.}~~Retired-critic rows remain in the official utility; the slot oscillates through an A$\to$B$\to$A return of a displaced critic; evaluator replacements stop triggering as stale evidence accumulates, driving the search to explore the same nodes repeatedly.
+
+\noindent\textbf{Adversarial pool matches replacement-only at search time.}~~The adversarial pool primarily serves to better delineate the decision boundary between human- and \AI-generated text, thus it primarily impacts downstream reviewer evaluations on writer-generated text.
+
+\begin{widetable}[H]
+\centering
+\caption{\textbf{Mechanism ablations on the evaluator-independent anchor.} All runs use a $12{,}288$-evaluation budget. Reviewer anchor accuracy is comparable across runs, while writer acceptance ($\dagger$), scored by each run's own critic, is not. Cells report mean $\pm$ 95\% Jeffreys interval.}
+\label{tab:nemotron-runs}
+\small
+\setlength{\tabcolsep}{4.5pt}
+\begin{tabular}{l c c c c c}
+\toprule
+Run & Repl. & Pool & Erase & Writer val.\ acc.\ (\%)$^{\dagger}$ & Reviewer anchor acc.\ (\%) \\
+\midrule
+Full mechanism & on & on & on & $90.1$\,{\color{black!55}\scriptsize$\pm 3.5$} & $95.0$\,{\color{black!55}\scriptsize$\pm 10.3$} \\
+Replacement only & on & off & on & $89.5$\,{\color{black!55}\scriptsize$\pm 13.7$} & $91.2$\,{\color{black!55}\scriptsize$\pm 7.4$} \\
+No erasure & on & on & off & $90.0$\,{\color{black!55}\scriptsize$\pm 10.7$} & $92.9$\,{\color{black!55}\scriptsize$\pm 10.8$} \\
+\addlinespace
+Fixed critic & off & off & {--} & $100.0$\,{\color{black!55}\scriptsize$\pm 1.7$} & $78.2$\,{\color{black!55}\scriptsize$\pm 4.4$} \\
+\bottomrule
+\end{tabular}
+\end{widetable}
+
+
+\subsection{Where Cost and Progress Come From}
+\label{app:analyses}
+
+We now present how the actual search process evolved in terms of compute allocation and edits.
+
+\subsubsection{Cost decomposition}
+\label{app:analyses:budget}
+
+Every model call is related to workspace expansion, train-time evaluation, or validation evaluation. The overall run cost is dominated by validation: across the three main-experiment runs, validation carries roughly $65$--$69\%$ of blended tokens, expansion $18$--$23\%$, and train-time evaluation (at three train samples per node) $12$--$14\%$~(\cref{fig:analysis-cost}). Allocating more train samples to each meta-agent may allow for more efficient search due to more context, thus its possible that the current share of tokens going to train-time evaluation is too low.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_analysis_cost.pdf}
+\caption{\textbf{Blended-token cost decomposition of the three headline \gptlow (low) runs} into workspace expansion, train-time evaluation, and validation evaluation.}
+\label{fig:analysis-cost}
+\end{figure}
+
+
+\subsubsection{Patch surfaces}
+\label{app:analyses:patches}
+
+We classify every lineage edge's patch by the code surface it modifies. Shared surfaces, the task-agent code and infrastructure used by more than one role, carry $59$--$90\%$ of accepted patches in every \gptlow run~(\cref{fig:analysis-transfer}). For example, the \polyglot run concentrates its improvements on shared and infrastructure surfaces that generalize across roles. We posit this is because the meta-agent realizes that role-specific patches each drive a single utility and generalize less. The \nemotron run is the outlier as it heavily targets the meta-agent's instruction module ($42\%$ of edges), potentially to improve its reliability.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_analysis_transfer.pdf}
+\caption{\textbf{Patch surfaces by run}, classifying each accepted lineage edge by the code surface it modifies (task-agent shared, infrastructure, role-specific, meta-agent module, or notes).}
+\label{fig:analysis-transfer}
+\end{figure}
+
+
+
+\section{What the Co-Evolution Discovered}
+\label{app:evaluator-evolution}
+
+Every evaluator role is a prompt entry in one shared workspace file, so each evaluator's behavioral history reads directly from its lineage. The initial role prompts are minimal~(\cref{app:prompts}); across every role, the search's most common move rewrites a vague one-line instruction into a specific, criterion-bearing rubric, and the rules it produced are quoted below. Because the starting prompts are minimal, a stronger initial prompt would raise every method's scores together without changing the co-evolution comparison, which holds each method to the same starting point.
+
+\subsection{What the Evolved Evaluators Changed}
+\label{app:evaluator-evolution:reviewer}
+
+The adversarial reviewer's lineage rewrites the one-line initial instruction once into a conjunctive acceptance standard, while the pre-replacement generalist carries a two-sided calibration.
+
+\begin{promptbox}{Evolved rule: the adversarial reviewer's conjunctive standard (gen\,4)}
+\begin{PromptVerb}
+... Use a realistic selective-conference standard: accept only if the
+paper has a clear nontrivial contribution, technically sound
+methodology/theory or experiments, adequate positioning against prior
+work, and claims supported by evidence; reject papers with missing
+validation, unclear novelty, serious technical gaps, or overclaiming.
+Do not be swayed by fluent writing alone.
+\end{PromptVerb}
+\end{promptbox}
+
+\begin{promptbox}{Evolved rule: the displaced generalist's two-sided calibration}
+\begin{PromptVerb}
+... Calibrate the decision holistically rather than requiring
+perfection: a paper with a coherent contribution and adequate evidence
+should be accepted despite presentation flaws, while impressive writing
+without substantiated experiments or technical substance should be
+rejected.
+\end{PromptVerb}
+\end{promptbox}
+
+Both wordings appeared early in their lineages; the adversarial pool changed which lineage was selected to reject a greater fraction of \AI-generated papers.
+
+\subsection{The Co-Evolved Grader}
+\label{app:evaluator-evolution:grader}
+
+The grader reached its reported form in exactly two patches, both quoted here; the initial instruction assigns one of four labels with no rubric. The first patch introduces the persona, the two-step milestone procedure, the points mapping, and a strictness rule, and the same patch introduces the prover prompt, so the prover and grader entered the workspace together. A later patch removes the blanket strictness while keeping the milestone procedure and points mapping.
+
+\begin{promptbox}{Evolved rule: the grader's first rewrite (gen\,2)}
+\begin{PromptVerb}
+You are an expert, conservative IMO proof grader. ... First identify
+the key required steps from the guidelines; then check whether the
+student's text actually proves them rigorously, ignoring unsupported
+claims, handwaving, and statements merely resembling the reference.
+
+Use this mapping unless the problem-specific guidelines say otherwise:
+- correct: a complete rigorous solution (7/7).
+- almost: essentially complete with only a minor local gap or
+  arithmetic slip (6/7); do NOT use for missing major lemmas.
+- partial: substantial guideline-listed progress, but not a
+  near-complete proof (1/7).
+- incorrect: no substantial credited progress or a fundamentally
+  flawed argument (0/7).
+
+Be especially strict with advanced geometry/combinatorics solutions
+that invoke large unproved lemmas ...
+\end{PromptVerb}
+\end{promptbox}
+
+\begin{promptbox}{Evolved rule: the co-evolved grader's recalibration (gen\,22)}
+\begin{PromptVerb}
+Calibrate generously but not naively: do not require the student's
+proof to match the reference solution, and do not downgrade merely
+because a standard theorem/lemma is cited tersely, the exposition is
+compressed, or a repairable statement is slightly misphrased. ...
+Downgrade to partial/incorrect only for a genuinely fatal gap, a false
+central claim with no reasonable repair, or failure to prove a
+guideline milestone.
+\end{PromptVerb}
+\end{promptbox}
+
+Its behavior in the cross-grader panel of \cref{tab:imo-proof-cross-grader} follows from these patches.
+
+\subsection{The \polyglot Code Reviewer}
+\label{app:evaluator-evolution:critic}
+
+The code-review slot was replaced three times; the initial instruction asks for a pass/fail verdict on general code quality, and the three incumbents' rules are quoted below. The third branches from an earlier ancestor than the second, so it does not inherit the second's bullets. Across the three replacements, the slot moves toward evidence-bounded review: each incumbent narrows what counts as a failure to defects in the diff itself.
+
+\begin{promptbox}{Evolved rules: the three promoted code reviewers}
+\begin{PromptVerb}
+Node 19 (gen 5): You are a pragmatic senior maintainer reviewing a
+proposed patch. ...
+- PASS when the patch plausibly fixes/adds the intended behavior, is
+  localized, and has no clear correctness, compilation, security, or
+  data-loss defect. ...
+- FAIL only for a concrete blocker: obvious wrong behavior, broken API
+  usage, compile/type errors visible in the diff, missing essential
+  cases, flaky/meaningless tests, ...
+- ... If evidence is balanced, prefer pass.
+
+Node 34 (gen 34, appends): - Review in this order: (1) infer the
+intended user-visible behavior ..., (2) check whether production code
+implements it, (3) look for definite regressions or syntax/type
+errors, (4) only then consider style, test coverage, and
+maintainability. Style concerns without a concrete correctness risk
+should not cause fail. ... FAIL only when you can point to a specific
+scenario that remains broken ...
+
+Node 86 (gen 59, extends the blocker rule): ... Do not invent blockers
+from missing project context; the diff alone must show the defect.
+- PASS broad but coherent mechanical migrations, CI/build-artifact
+  pipeline updates, ... and test-only fixes when they are internally
+  consistent ...
+- For security/credential-looking files, fail only for an actual
+  exposed secret or dangerous permission; ...
+\end{PromptVerb}
+\end{promptbox}
+
+\subsection{Winning Lineages}
+\label{app:lineages}
+
+\begin{widefigure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{figures/fig_tree_utilities.pdf}
+    \caption{\textbf{What each evaluator replacement keeps versus what it re-ranks, in all three headline domains.} Rows are domains (top to bottom: \polyglot, paper, proof); columns are that run's shown evaluator replacements, each drawing the archive as it stood at that replacement (radial layout, node color is best-belief utility and size is evidence count). Among the top-$8$ leaderboard nodes at each replacement, navy rings survived the re-ranking, amber rings are lineages the new criterion promotes into the top-$8$, and gray rings are churned out. Replacements with fewer than $20$ ranked nodes are omitted, as in \cref{fig:transition-rerank}, so the proof run's first replacement is not shown.}
+    \label{fig:lineage-trees}
+\end{widefigure}
+
+We now show full lineages across our runs. Each archive node stores its parent, its cumulative self-modification as a unified diff, and the meta-agent transcript that produced it; \cref{fig:lineage-trees} draws the three archives, \cref{tab:chains-polyglot,tab:chains-paper,tab:chains-proof} list every step, and quoted phrases are from the meta-agents' own summaries. The generalist chain's largest gain is not a prompt change but a code repair, and the same node was later promoted into the code-review slot at the first checkpoint. The adversarial reviewer's standard arrived before any replacement; the adversarial pool selected that lineage at the second epoch~(\cref{app:evaluator-evolution}). 
+
+\begin{widetable}[t]
+\centering
+\caption{\textbf{\polyglot winning chains; both final best-belief agents score $119/166$ held out.}}
+\label{tab:chains-polyglot}
+\small
+\begin{tabular}{@{}r >{\raggedright\arraybackslash}p{0.84\linewidth}@{}}
+\toprule
+{Node} & Modification \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{specialist} (final $119/166$)}\\
+4 & coder tool budget $16{\to}40$; review calibration; catalog-path fix \\
+35 & coder workflow: one tool call at a time, prefer exact algorithms \\
+51 & review balance against blindly passing bad patches \\
+104 & parse retry; label normalization; concrete-blocker review rule \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{generalist} (final $119/166$)}\\
+5 & parse retry; tool budget $16{\to}24$; concrete-blocker review \\
+19 & untracked-artifact and symlink diff hygiene \\
+33 & the same hygiene applied to a second code path \\
+42 & one tool call per turn; preserve existing public APIs \\
+72 & read problem text and tests first; wider artifact filter \\
+78 & final-output reminder; conservative label normalization \\
+93 & dedicated artifact-review format; pass plausible localized fixes \\
+100 & JSON-serialized tool results (transcript-corruption fix) \\
+\bottomrule
+\end{tabular}
+\end{widetable}
+
+\begin{widetable}[t]
+\centering
+\caption{\textbf{Paper-domain winning chains.} The writer chain passes through the reported reviewer (49) and generalist (78); the adversarial reviewer (31) descends separately.}
+\label{tab:chains-paper}
+\small
+\begin{tabular}{@{}r >{\raggedright\arraybackslash}p{0.84\linewidth}@{}}
+\toprule
+{Node} & Modification \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{writer}}\\
+7 & stronger authoring prompt; runtime prompt nudges \\
+11 & parse-repair retry; $8{,}192$-token writer output cap \\
+17 & present raw paper text instead of the input dictionary \\
+37 & remove global LLM monkeypatch \\
+49 & writer returns raw text, not JSON-wrapped continuations \\
+78 & two-sided review calibration; no acceptance-seeking prose \\
+81 & format hygiene in the client; revert import hook that could hang \\
+89 & continue from the exact stopping point; longer word target \\
+150 & liberal unwrapping of writer output (recovers wrapped papers) \\
+154 & \textbf{area-chair review standard}; bounded-evidence writing rules \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{adversarial}}\\
+4 & conjunctive selective-conference review standard \\
+25 & writer-side review treated as a viability gate \\
+31 & self-contained revised paper; $4{,}096$-token output cap \\
+\bottomrule
+\end{tabular}
+\end{widetable}
+
+\begin{widetable}[t]
+\centering
+\caption{\textbf{Proof-domain winning chains.} The grader's calibration reversal at node 22 is the largest single-step utility gain in any winning chain.}
+\label{tab:chains-proof}
+\small
+\begin{tabular}{@{}r >{\raggedright\arraybackslash}p{0.84\linewidth}@{}}
+\toprule
+{Node} & Modification \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{grader}}\\
+2 & conservative rubric-aware grading; first prover prompt \\
+22 & calibration reversal: do not downgrade terse or compressed proofs \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{prover}}\\
+3 & parse retry; lemma-justification and case-coverage prompt \\
+11 & partial-versus-incorrect distinction; hidden-assumption checks \\
+19 & second-pass self-revision with an adversarial checker \\
+66 & disable the inherited self-revision (rollout below) \\
+\bottomrule
+\end{tabular}
+\end{widetable}
+
+Two modifications outside the evaluator prompts were the most consequential. The first is node 19's diff-hygiene repair~(\cref{lst:diff-hygiene}); the artifact filter is the load-bearing line, quoted from its patch.
+
+\begin{lstlisting}[style=rsdiff, caption={Node 19's diff-hygiene repair (\polyglot run): untracked dependency artifacts and unsafe symlinks are filtered out of submitted patches.}, label={lst:diff-hygiene}]
+diff --git a/utils/git_utils.py b/utils/git_utils.py
+@@ def diff_versus_commit(git_dname, commit):
+     dependency_artifact_roots = {
+         "node_modules", ".npm", ".yarn", ".pnpm-store",
+         "target", "build", "dist", "__pycache__", ".pytest_cache",
+     }
+     def should_include_untracked(relpath):
+         parts = relpath.split(os.sep)
+         if parts and parts[0] in dependency_artifact_roots:
+             return False         # skip incidental install artifacts
+         file_path = os.path.abspath(os.path.join(git_dname, relpath))
+         if os.path.islink(file_path):
+             target = os.path.realpath(file_path)
+             # drop symlinks resolving outside the checkout
+             if not target.startswith(os.path.abspath(git_dname)):
+                 return False
+         return True
+\end{lstlisting}
+
+The second is the prover's three-line retraction of its ancestor's self-revision feature (node 66, \cref{lst:prover-retraction}).
+
+\begin{lstlisting}[style=rsdiff, caption={Node 66's retraction (proof run): the inherited self-revision pass is disabled by default and the revision instruction is rewritten to preserve sound drafts, on the recorded grounds that revision ``could degrade a correct/near-correct detailed proof into a weaker black-box citation-based proof.''}, label={lst:prover-retraction}]
+diff --git a/task_agent.py b/task_agent.py
+@@ class TaskAgent(AgentSystem):
+-    IMO_PROOF_REVISION_ENABLED = os.environ.get("HYPERAGENTS_IMO_PROOF_REVISION", "1") != "0"
++    IMO_PROOF_REVISION_ENABLED = os.environ.get("HYPERAGENTS_IMO_PROOF_REVISION", "0") == "1"
+@@ Draft proof:
+-Find any hidden gaps ... If the draft is sound, keep it but make it cleaner.
++Preserve the draft if it is essentially sound; do not replace a detailed proof
++with a shorter answer that relies on an unproved obscure named theorem.
+\end{lstlisting}
+
+
+\section{Theory}
+\label{app:proofs}
+
+
+\subsection{Setting: the \texorpdfstring{\hgm}{HGM} Search Algorithm}
+\label{app:prelim}
+
+\ourmethod builds on the Huxley-G\"odel Machine (\hgm)~\citep{wang2025huxley}, which formalizes self-improvement as tree search guided by clade metaproductivity (\cmp), and \hyperagents~(\dgmh)~\citep{zhang2026hyperagents}, which introduces metacognitive self-modification in editable agent workspaces; we review only the assumptions and theory this paper needs, then state the local operating conditions the proofs use.
+
+\subsubsection{Self-Improvement as Tree Search}
+\label{sec:prelim:tree}
+
+Following \citet{wang2025huxley}, an archive $\mathcal{T}_t$ of agents forms a tree initialized at $\mathcal{T}_0=\{a_0\}$. At each iteration, the policy either modifies an existing agent or evaluates one:
+\[
+\begin{gathered}
+\mathcal{A}_t = \mathcal{M}_t \cup \mathcal{V}_t,\\
+\mathcal{M}_t = \{m_a : a \in \mathcal{T}_t\},
+\qquad
+\mathcal{V}_t = \{v_a : a \in \mathcal{T}_t\}.
+\end{gathered}
+\]
+A modification action $m_a$ produces a child of $a$; an evaluation action $v_a$ tests $a$ on one task and returns a binary outcome $o\in\{0,1\}$. After a fixed external budget $B$, the system returns the highest-scoring agent in the archive:
+\[
+a_{\mathrm{final}}
+=
+\argmax_{a\in\mathcal{T}_B}\operatorname{Score}_\pi(a).
+\]
+The utility $U(a)$ is the expected binary success rate of agent $a$ under the evaluation protocol. \ourmethod preserves this flat \hgm search algorithm while generalizing what a node contains and how its binary outcomes are produced.
+
+\subsubsection{\texorpdfstring{\hgm}{HGM}-Compatible Operating Conditions}
+\label{sec:prelim:assumptions}
+
+These are the local conditions the appendix results need.
+
+\begin{assumption}[\hgm-compatible fixed-criterion search]
+\label{assumption:hgm}
+For the theoretical analysis of a fixed-criterion self-improvement epoch, assume:
+\begin{enumerate}[leftmargin=*,itemsep=0.2em,label=\textbf{C\arabic*.},ref=C\arabic*]
+    \item \label{cond:final} The objective is evaluated through the agent selected from the archive after the search budget is spent; intermediate observations guide search but are not separate rewards.
+    \item \label{cond:stationary} For any fixed node--task pair under the active criterion, repeated evaluations produce time-homogeneous binary outcomes.
+    \item \label{cond:proofs} Any oracle or proof object used by the ideal \hgm theorem is outside the empirical search-evaluation budget.
+    \item \label{cond:budget} The empirical scheduler accounts for expansion and evaluation through the externally fixed budget units used by the run.
+\end{enumerate}
+\end{assumption}
+
+The key condition for \ourmethod is stationarity: \hgm assumes a fixed evaluator, so an early outcome means the same as a late one. \ourmethod preserves the property locally: \cref{sec:method:generative} freezes learned evaluators within an epoch, and \cref{sec:method:utility} permits changes only at checkpoints, followed by selective erasure of records whose meaning depended on the displaced evaluator.
+
+\subsubsection{Clade-Level Metaproductivity}
+\label{sec:prelim:cmp}
+
+\citet{wang2025huxley} show that a node's immediate benchmark performance may not predict long-run self-improvement value: a weak node may produce strong descendants. \hgm replaces the G\"odel Machine's intractable proof search over future modifications with archive search over observed descendant productivity, scoring a node on its \emph{clade}, the subtree $C(\mathcal{T},a)$ of $a$ and its descendants, written $C(a)$ when the tree is clear.
+
+\begin{theorem}[\citet{wang2025huxley}]
+\label{thm:cmp}
+Under \cref{assumption:hgm}, access to the \cmp oracle is sufficient to implement the G\"odel Machine.
+\end{theorem}
+
+In practice, \hgm estimates clade-level metaproductivity by pooling binary outcomes over the clade:
+\[
+\begin{gathered}
+\widehat{\cmp}(a)=\frac{n_{\mathrm{success}}^C(a)}{n_{\mathrm{success}}^C(a)+n_{\mathrm{failure}}^C(a)},\\
+n_{\mathrm{success}}^C(a)=\textstyle\sum_{a'\in C(a)} n_{\mathrm{success}}(a'),\\
+n_{\mathrm{failure}}^C(a)=\textstyle\sum_{a'\in C(a)} n_{\mathrm{failure}}(a').
+\end{gathered}
+\]
+Thompson sampling over the clade-level success and failure counts trades exploration against exploitation, and the UCB-Air gate~\citep{NIPS200849ae49a2} controls tree growth. \ourmethod inherits these mechanisms unchanged; the property the proofs rely on is that the scheduler consumes a flat stream of binary outcomes per node, aggregated over the node's clade. The node representation is the metacognitive workspace of \hyperagents~\citep{zhang2026hyperagents}: each archive node is a shared workspace $w_a$ with $K$ role agents plus a meta-agent that can edit the node's code and coordination, while \hgm search decides which lineage receives expansion and evaluation budget~(\cref{app:fm}).
+
+
+\subsection{One Rule for Replacement and Selection}
+\label{app:controlled_utility_details}
+
+Evaluator slots are frozen within an epoch, challengers are selected by $\epsilon$-best-belief score on anchor evidence, and the promoted evaluator is frozen for the next epoch~(\cref{sec:method:utility}).
+
+\subsubsection{Evaluator replacement rule}
+\label{app:swap-rule}
+
+At checkpoint $c$, fix an evaluator slot $m$. Let $e_m^{(j_m)}$ be the incumbent frozen evaluator and let $\mathcal C_m(c)$ be the challenger evaluators with the required evaluator-independent anchor evidence on $\mathrm{GT}_m$. Define
+\[
+\mathcal E_m(c)
+=
+\{e_m^{(j_m)}\}\cup\mathcal C_m(c).
+\]
+For each candidate $e\in\mathcal E_m(c)$, let $S^{\mathrm{gt}}_e$ and $F^{\mathrm{gt}}_e$ be its successes/failures on the anchor. Compute
+\[
+BB_\epsilon(e)
+=
+I^{-1}_{\epsilon}\!\left(1+S^{\mathrm{gt}}_e,\,1+F^{\mathrm{gt}}_e\right),
+\]
+the same $\epsilon$-best-belief score used for final agent selection~(\cref{sec:method:prelim}). Because $BB_\epsilon(e)$ is the $\epsilon$-quantile of the candidate's Beta posterior over anchor outcomes, it is a conservative estimate of the candidate's true accuracy that the candidate exceeds with probability $1-\epsilon$. The selected evaluator is
+\[
+e_m^\star
+\in
+\argmax_{e\in\mathcal E_m(c)} BB_\epsilon(e),
+\]
+with ties favoring the incumbent; if $e_m^\star=e_m^{(j_m)}$, no transition occurs.
+
+
+
+\subsection{Working-Posterior Consistency}
+\label{app:proofs:role_task_balance}
+Fix an epoch vector \(\boldsymbol{j}\) and a node \(a\). Let
+\[
+\mathcal C_{\boldsymbol{j}}(a)
+=
+\{(r,d): r\in \mathcal{R}_{\mathrm{elig}}(a,\boldsymbol{j}),\ d\in \mathcal{D}_{r,\mathrm{elig}}(a,\boldsymbol{j})\}
+\]
+denote the finite set of eligible role--task cells for node \(a\) during epoch \(\boldsymbol{j}\).
+For a cell \(c=(r,d)\in \mathcal C_{\boldsymbol{j}}(a)\), let \(p_{c,\boldsymbol{j}}(a)\) be the fixed success
+probability of one search evaluation of node \(a\) on role \(r\) and task \(d\)
+under the active evaluation criteria of epoch \(\boldsymbol{j}\). The default role/task-balanced target assigns
+\[
+w_{r,d}
+=
+\frac{1}{|\mathcal{R}_{\mathrm{elig}}(a,\boldsymbol{j})|}\cdot
+\frac{1}{|\mathcal{D}_{r,\mathrm{elig}}(a,\boldsymbol{j})|},
+\]
+with the obvious renormalization for a smaller eligible set. Generally,
+let \(w_c\ge 0\) be weights satisfying
+\[
+\sum_{c\in \mathcal C_{\boldsymbol{j}}(a)} w_c = 1,
+\]
+with \(w_c\ge 0\)~(see \cref{prop:validity}).
+The corresponding epoch-local role--task balanced utility is
+\[
+U_{\boldsymbol{j}}(a)
+=
+\sum_{c\in \mathcal C_{\boldsymbol{j}}(a)} w_c\,p_{c,\boldsymbol{j}}(a).
+\]
+
+\begin{proposition}[Consistency of the \hgm working posterior under balanced role--task sampling]
+\label{prop:balanced-working-posterior}
+Fix an epoch vector \(\boldsymbol{j}\), a node \(a\), and the eligible role--task cell set
+\(\mathcal C_{\boldsymbol{j}}(a)\). Consider the subsequence of search evaluations in which
+node \(a\) is selected during this epoch. After \(n\) such evaluations, let
+\(n_c(n)\) be the number of evaluations assigned to cell \(c\), and let
+\[
+S_a(n)=\sum_{t=1}^{n} O_t
+\]
+be the total number of binary successes recorded for node \(a\).
+
+Assume the within-node scheduler is \(w\)-balanced, that is:
+\[
+\frac{n_c(n)}{n}\longrightarrow w_c
+\qquad\text{for every } c\in \mathcal C_{\boldsymbol{j}}(a).
+\]
+Assume also that, for each cell \(c\), repeated evaluations of \(a\) on \(c\)
+satisfy a cell-wise strong law:
+\[
+\frac{1}{m}\sum_{i=1}^{m} O_{c,i}
+\longrightarrow
+p_{c,\boldsymbol{j}}(a)
+\qquad\text{a.s. as }m\to\infty,
+\]
+where \(O_{c,i}\) is the \(i\)-th outcome observed from cell \(c\). This condition
+holds, for example, when cell-level outcomes are independent Bernoulli trials
+with fixed success probability \(p_{c,\boldsymbol{j}}(a)\), or under any stationary
+martingale-difference model satisfying the strong law.
+
+Define the \hgm-compatible working posterior
+\[
+Q_n(a)
+=
+\operatorname{Beta}\bigl(1+S_a(n),\,1+n-S_a(n)\bigr).
+\]
+Its mean is
+\[
+M_n(a)
+=
+\frac{1+S_a(n)}{2+n}.
+\]
+Then
+\[
+M_n(a)
+\longrightarrow
+U_{\boldsymbol{j}}(a)
+=
+\sum_{c\in \mathcal C_{\boldsymbol{j}}(a)} w_c\,p_{c,\boldsymbol{j}}(a)
+\qquad\text{a.s.}
+\]
+
+Thus the pooled Beta accumulator preserves the correct role--task balanced
+posterior mean target asymptotically. \(Q_n(a)\) is a working posterior used to retain the flat \hgm success/failure interface for Thompson sampling.
+\end{proposition}
+
+\begin{proof}
+Fix the epoch vector \(\boldsymbol{j}\), node \(a\), and eligible cell set
+\(\mathcal C_{\boldsymbol{j}}(a)\). Write \(p_c\) for \(p_{c,\boldsymbol{j}}(a)\).
+Let \(n_c(n)\) be the number of times cell \(c\) is evaluated among the first
+\(n\) search evaluations of node \(a\) in this epoch. Let
+\[
+\widehat p_{c,n}
+=
+\frac{1}{n_c(n)}
+\sum_{i=1}^{n_c(n)} O_{c,i}
+\]
+whenever \(n_c(n)>0\). Cells with \(w_c=0\) contribute a vanishing fraction of evaluations and drop from the limit, so the cell-wise strong law is applied only on the support \(\{c:w_c>0\}\). For each such cell, \(w_c>0\) and \(n_c(n)/n\to w_c\) give \(n_c(n)\to\infty\), and therefore, by the assumed cell-wise strong law,
+\[
+\widehat p_{c,n}
+\longrightarrow
+p_c
+\qquad\text{a.s.}
+\]
+
+The pooled empirical success rate decomposes by cells:
+\[
+\frac{S_a(n)}{n}
+=
+\sum_{c\in \mathcal C_{\boldsymbol{j}}(a)}
+\frac{n_c(n)}{n}\,
+\widehat p_{c,n}.
+\]
+Taking limits and using the finiteness of \(\mathcal C_{\boldsymbol{j}}(a)\),
+\[
+\frac{S_a(n)}{n}
+\longrightarrow
+\sum_{c\in \mathcal C_{\boldsymbol{j}}(a)}
+w_c p_c
+=
+U_{\boldsymbol{j}}(a)
+\qquad\text{a.s.}
+\]
+
+The \hgm working posterior is
+\[
+Q_n(a)
+=
+\operatorname{Beta}\bigl(1+S_a(n),\,1+n-S_a(n)\bigr),
+\]
+with mean
+\[
+M_n(a)
+=
+\frac{1+S_a(n)}{2+n}.
+\]
+Moreover,
+\[
+\left|
+\frac{1+S_a(n)}{2+n}
+-
+\frac{S_a(n)}{n}
+\right|
+=
+\left|
+\frac{n-2S_a(n)}{n(n+2)}
+\right|
+\le
+\frac{1}{n+2}.
+\]
+Hence
+\[
+M_n(a)-\frac{S_a(n)}{n}\longrightarrow 0,
+\]
+and therefore
+\[
+M_n(a)
+\longrightarrow
+U_{\boldsymbol{j}}(a)
+\qquad\text{a.s.}
+\]
+
+On the posterior interpretation: the cell-stratified likelihood
+\(\prod_{c\in\mathcal C_{\boldsymbol{j}}(a)} p_c^{S_c(n)}(1-p_c)^{n_c(n)-S_c(n)}\), with
+\(S_c(n)\) the successes in cell \(c\), is that of a single Bernoulli parameter
+only when all \(p_c\) are equal. So \(Q_n(a)\) is not an exact Bayesian posterior
+for the role--task mixture but a working posterior preserving the flat \hgm
+accumulator \((S_a(n),n-S_a(n))\) while remaining mean-consistent for \(U_{\boldsymbol{j}}(a)\).
+The pooled working posterior is over-dispersed relative to the balanced
+stratified estimator, hence conservative for the lower-bound reading below.
+\end{proof}
+
+
+
+
+\subsection{Epoch-Local Fixed-Utility Validity}
+\label{app:proofs:epoch-local-validity}
+
+
+\noindent\textbf{Slot-local utility criteria.}
+For each evaluator slot \(m\in\{1,\ldots,M\}\), let
+\(\kappa_m^{(j_m)}\) denote the slot-local utility criterion active at epoch index \(j_m\).
+A slot criterion includes all slot-local objects that can affect the distribution of utility evidence
+for records depending on that slot. It does
+not include derived search statistics, which are recomputed from retained utility evidence after
+transitions. Let
+\[
+\boldsymbol{\kappa}^{\boldsymbol{j}}
+=
+\bigl(\kappa_1^{(j_1)},\ldots,\kappa_M^{(j_M)}\bigr)
+\]
+denote the active criterion vector at epoch vector \(\boldsymbol{j}=(j_1,\ldots,j_M)\).
+
+\begin{assumption}[Stationary learned evaluation within an epoch]
+\label{assumption:generative}
+Fix an epoch vector \(\boldsymbol{j}\). For every evaluator-dependent node--role--task cell
+\((a,r,d)\), the following objects are fixed throughout the epoch:
+(i) all slot criteria in \(\boldsymbol{\kappa}^{\boldsymbol{j}}\) that affect the cell;
+(ii) the node workspace used by node \(a\);
+(iii) the artifact-generation, replay, or adversarial-pool sampling protocol for task \(d\); and
+(iv) the final binary scoring rule.
+Equivalently, if \(X\) denotes the object submitted to the binary scorer, then within the epoch
+\[
+X\sim P_{a,r,d}^{\boldsymbol{j}},
+\qquad
+O\sim K_{r,d}^{\boldsymbol{j}}(\cdot\mid X),
+\qquad
+O\in\{0,1\},
+\]
+where the artifact distribution \(P_{a,r,d}^{\boldsymbol{j}}\) and evaluator kernel
+\(K_{r,d}^{\boldsymbol{j}}\) are time-homogeneous during the epoch and are not changed by previous
+search outcomes in that epoch. The deterministic-evaluator case is included by allowing
+\(K_{r,d}^{\boldsymbol{j}}(1\mid x)\in\{0,1\}\).
+\end{assumption}
+
+The assumption asserts only epoch-local stationarity: under independent draws across repeated calls
+the outcomes are Bernoulli with fixed parameter, and without independence the argument below uses
+only the fixed epoch-local conditional mean.
+
+\noindent\textbf{Utility evidence versus cached artifacts.}
+A utility evidence record is distinct from a raw artifact or audit log: artifacts, lineage reports,
+and immutable audit records may be retained across utility transitions, but they contribute to
+node-level or clade-level utility statistics only through criterion-valid records. A replayed or
+re-scored artifact yields a new record for the task actually used, tagged with the current
+criterion.
+
+A utility evidence record is written as
+\[
+z
+=
+\bigl(a(z),r(z),d(z),o(z),\operatorname{dep}(z),\kappa(z),\boldsymbol{j}(z)\bigr),
+\]
+where \(a(z)\) is the node, \(r(z)\) the role, \(d(z)\) the task, and \(o(z)\in\{0,1\}\) the binary
+outcome. The set
+\[
+\operatorname{dep}(z)\subseteq\{1,\ldots,M\}
+\]
+contains every evaluator slot whose criterion affected the record, either through artifact generation,
+task or adversarial-pool sampling, replay distribution, or final binary scoring. The tag \(\kappa(z)\) stores
+the active criterion tags on the dependent slots when the record was generated, and \(\boldsymbol{j}(z)\)
+stores the epoch vector at generation time. Evaluator-independent records have
+\(\operatorname{dep}(z)=\emptyset\).
+
+\begin{definition}[Criterion-valid record]
+\label{def:criterion-valid-record}
+A utility evidence record \(z\) is valid under the active criterion vector
+\(\boldsymbol{\kappa}^{\boldsymbol{j}}\) if
+\[
+\kappa_\ell(z)=\kappa_\ell^{(j_\ell)}
+\qquad
+\text{for every } \ell\in\operatorname{dep}(z).
+\]
+Records with \(\operatorname{dep}(z)=\emptyset\) are valid under every evaluator epoch.
+A tree archive \(\mathcal T\) is criterion-consistent under
+\(\boldsymbol{\kappa}^{\boldsymbol{j}}\) if every retained utility evidence record in
+\(\mathcal T\) is valid under \(\boldsymbol{\kappa}^{\boldsymbol{j}}\).
+\end{definition}
+
+\begin{definition}[Utility transition on slot \(m\)]
+\label{def:utility-transition}
+A utility transition on evaluator slot \(m\) advances \(j_m\to j_m+1\) by replacing
+\[
+\kappa_m^{(j_m)}
+\quad\text{with}\quad
+\kappa_m^{(j_m+1)}.
+\]
+The new criterion is the next frozen evaluator for that slot, together with any fixed replay or
+validation distribution selected before the epoch starts. It must be fixed before new utility evidence
+is collected. The utility transition then filters stale utility evidence by applying
+\(\operatorname{Erase}_m\).
+
+For every node \(a\), let \(\mathcal Z_a\) denote its retained utility evidence records. After the
+transition to epoch vector \(\boldsymbol{j}'\), where \(\boldsymbol{j}'\) differs from \(\boldsymbol{j}\) only in
+coordinate \(m\), define
+\[
+\begin{gathered}
+\operatorname{Erase}_m(\mathcal Z_a)
+=\\
+\left\{
+z\in\mathcal Z_a:
+m\notin\operatorname{dep}(z)
+\ \text{or}\
+\kappa_m(z)=\kappa_m^{(j'_m)}
+\right\}.
+\end{gathered}
+\]
+After applying \(\operatorname{Erase}_m\) to every node, all derived sufficient statistics are recomputed
+from the retained utility evidence records. These derived quantities include node-level success and
+failure counts \(S_a,F_a\), role and task counters \(n_r(a)\) and \(n_d(a)\), clade-level success
+and failure counts, Thompson-sampling statistics, slot-local validation counters, and cached score
+summaries. Raw artifact caches and immutable audit logs may remain in the archive, but they do not
+contribute to these statistics unless they produce new criterion-valid utility evidence records.
+\end{definition}
+
+\begin{proposition}[Selective erasure preserves criterion consistency]
+\label{prop:erasure-stationarity}
+Consider a utility transition on slot \(m\) from epoch vector \(\boldsymbol{j}\) to epoch vector
+\(\boldsymbol{j}'\), where \(\boldsymbol{j}'\) differs from \(\boldsymbol{j}\) only in coordinate \(m\). Suppose the
+archive \(\mathcal T\) is criterion-consistent under
+\(\boldsymbol{\kappa}^{\boldsymbol{j}}\) before the transition. After replacing
+\(\kappa_m^{(j_m)}\) with \(\kappa_m^{(j'_m)}\), applying \(\operatorname{Erase}_m\), and recomputing all
+derived statistics from the retained utility evidence records, the archive is criterion-consistent under
+\(\boldsymbol{\kappa}^{\boldsymbol{j}'}\). Moreover, any subsequent utility evidence record generated during
+the new epoch and tagged with the active dependent criteria is valid under
+\(\boldsymbol{\kappa}^{\boldsymbol{j}'}\).
+\end{proposition}
+
+\begin{proof}
+Let \(z\) be any record retained after \(\operatorname{Erase}_m\) (\cref{def:utility-transition}) and fix
+\(\ell\in\operatorname{dep}(z)\). If \(\ell=m\), retention forces the second clause of
+\(\operatorname{Erase}_m\), so \(\kappa_m(z)=\kappa_m^{(j'_m)}\). If \(\ell\neq m\), the transition leaves
+slot \(\ell\) untouched (\(\kappa_\ell^{(j_\ell)}=\kappa_\ell^{(j'_\ell)}\)), and prior
+criterion-consistency gives \(\kappa_\ell(z)=\kappa_\ell^{(j_\ell)}=\kappa_\ell^{(j'_\ell)}\). Hence
+\(z\) is valid under \(\boldsymbol{\kappa}^{\boldsymbol{j}'}\) (\cref{def:criterion-valid-record}). Since
+all derived statistics are recomputed from exactly the retained records (\cref{def:utility-transition}),
+no stale record enters them, and any record generated afterward is tagged with the active dependent
+criteria and so is valid by definition. The archive thus stays criterion-consistent under
+\(\boldsymbol{\kappa}^{\boldsymbol{j}'}\) until the next transition.
+\end{proof}
+
+\begin{remark}[Transitions on disjoint slots commute]
+\label{rem:erasure-commute}
+For \(m\neq \ell\), \(\operatorname{Erase}_m\) and \(\operatorname{Erase}_\ell\) are pointwise filters on the record set: each removes exactly the records whose dependency set contains its displaced slot, and neither modifies a retained record. Applying both, in either order, removes the union of the two affected record sets and retains the same archive; since the criterion replacements act on distinct coordinates of \(\boldsymbol{\kappa}\) and all derived statistics are recomputed from retained records, the post-transition state does not depend on the order in which checkpoints on disjoint slots are processed.
+\end{remark}
+
+\begin{remark}[Evaluator-dependent validation records, including the adversarial pool, are erased]
+\label{rem:eval-dependent-erase}
+Some slot-local validation records are generated to expose a predecessor evaluator's blind spots, the adversarial pool of \cref{sec:exp-adversarial} among them. Such a record's outcome depends on the evaluator that scored it, so its dependency set contains that slot and \(\operatorname{Erase}_m\) removes it when that evaluator is displaced. These records therefore influence node utility within the epoch that produced them, and never participate in evaluator replacement, which selects on the evaluator-independent anchor \(\mathrm{GT}_m\).
+\end{remark}
+
+We next state the fixed-epoch validity result, an interface theorem: after conditioning on a fixed epoch vector and a criterion-consistent archive, the retained utility evidence and subsequent evaluations in that epoch refer to a fixed binary-outcome problem compatible with the \hgm search.
+
+\begin{proposition}[Epoch-local fixed-criterion validity]
+\label{prop:validity}
+Fix an epoch vector \(\boldsymbol{j}\) and suppose the archive is criterion-consistent under the active
+criterion vector \(\boldsymbol{\kappa}^{\boldsymbol{j}}\). Assume all evaluator-dependent roles satisfy
+\Cref{assumption:generative} under their active frozen criteria, and all evaluator-independent roles
+satisfy the \hgm evaluation conditions in \cref{assumption:hgm}. Then, within this fixed epoch,
+every eligible node--role--task tuple \((a,r,d)\) induces a time-homogeneous binary outcome law
+with fixed success probability
+\[
+p_{r,d,\boldsymbol{j}}(a)
+=
+\Pr_{\boldsymbol{\kappa}^{\boldsymbol{j}}}\!\left(O=1\mid a,r,d\right).
+\]
+Consequently, the epoch defines a fixed-criterion binary-outcome search problem with epoch-local
+utility
+\[
+U_{\boldsymbol{j}}(a)
+=
+\sum_{(r,d)\in\mathcal C_{\boldsymbol{j}}(a)}
+w_{r,d}^{\boldsymbol{j}}\,p_{r,d,\boldsymbol{j}}(a),
+\]
+where \(\mathcal C_{\boldsymbol{j}}(a)\) is the eligible role--task cell set for node \(a\) during the epoch
+and \(w_{r,d}^{\boldsymbol{j}}\ge 0\) are fixed epoch-local target weights, normalized over
+\(\mathcal C_{\boldsymbol{j}}(a)\). Therefore, any \hgm oracle-level theorem whose assumptions are a
+fixed binary-outcome criterion and access to the corresponding exact \cmp oracle applies to the
+corresponding idealized epoch-local oracle problem under \(U_{\boldsymbol{j}}\). The empirical
+Thompson-sampling implementation uses retained binary records as a working estimator of this
+fixed-epoch problem; it is not itself an exact \cmp oracle implementation.
+\end{proposition}
+
+\begin{proof}
+Fix an epoch vector \(\boldsymbol{j}\); the active criterion vector
+\(\boldsymbol{\kappa}^{\boldsymbol{j}}\) is then fixed by definition. We show that every eligible
+node--role--task tuple \((a,r,d)\) has a fixed binary outcome distribution.
+
+If role \(r\) is evaluator-independent, the \hgm evaluation conditions in
+\Cref{assumption:hgm} imply that repeated evaluations of \((a,r,d)\) produce binary outcomes whose
+distribution, and hence whose expected value, does not change with evaluation time or previous
+search events, so there exists a fixed success probability
+\[
+p_{r,d,\boldsymbol{j}}(a)=\Pr(O=1\mid a,r,d).
+\]
+
+If role \(r\) is evaluator-dependent, let \(X\) denote the object submitted to the binary scorer. This
+object may be a freshly generated artifact, a revised artifact produced through a fixed feedback
+pipeline, or an item sampled from a frozen replay or adversarial-pool distribution. By
+\Cref{assumption:generative}, its distribution \(P_{a,r,d}^{\boldsymbol{j}}\) is fixed within the epoch. The
+binary scoring rule is also fixed: conditioned on \(X=x\), the outcome is either deterministic or
+sampled from a fixed evaluator kernel \(K_{r,d}^{\boldsymbol{j}}(\cdot\mid x)\). Hence the marginal
+success probability \(p_{r,d,\boldsymbol{j}}(a)=\Pr_{\boldsymbol{\kappa}^{\boldsymbol{j}}}(O=1\mid a,r,d)=\int K_{r,d}^{\boldsymbol{j}}(1\mid x)\,dP_{a,r,d}^{\boldsymbol{j}}(x)\) is fixed throughout the epoch, with the deterministic case \(K_{r,d}^{\boldsymbol{j}}(1\mid x)\in\{0,1\}\) included.
+
+Thus every eligible tuple \((a,r,d)\) induces binary outcomes with a fixed epoch-local success
+probability. Since the archive is criterion-consistent under
+\(\boldsymbol{\kappa}^{\boldsymbol{j}}\), every retained utility evidence record used by the search
+procedure was generated under criterion tags matching the active criteria on all slots that affected
+that record. By construction, subsequent records generated in the same epoch are tagged
+with the same active dependent criteria.
+
+The epoch-local utility
+\[
+U_{\boldsymbol{j}}(a)
+=
+\sum_{(r,d)\in\mathcal C_{\boldsymbol{j}}(a)}
+w_{r,d}^{\boldsymbol{j}}\,p_{r,d,\boldsymbol{j}}(a)
+\]
+is therefore a fixed function of \(a\) for the duration of the epoch. The \hgm search
+algorithm requires a stream of binary outcomes per evaluated node, aggregated over nodes and
+clades under a fixed utility criterion. This requirement is satisfied within the epoch because every
+search evaluation produces \(O\in\{0,1\}\), and the criterion-consistency invariant ensures that the
+records used for node-level and clade-level statistics are valid under the current epoch criterion.
+
+It follows that, conditional on the fixed epoch vector \(\boldsymbol{j}\), the active criterion vector
+\(\boldsymbol{\kappa}^{\boldsymbol{j}}\), and the criterion-consistent archive, the current epoch defines an
+ordinary fixed-criterion binary-outcome search problem of the \hgm form. Hence \hgm oracle-level
+theorems whose assumptions are satisfied by this idealized fixed-epoch problem apply to it
+under \(U_{\boldsymbol{j}}\).
+\end{proof}
+
+
+
+\subsection{Supporting Results for Controlled Utility Evolution}
+\label{app:controlled_utility_proofs}
+
+
+\noindent\textbf{Ground-truth best-belief replacement.}
+Recall the slot-\(m\) replacement rule and the notation \(\mathcal E_m(c)\), \(S^{\mathrm{gt}}_e\), \(F^{\mathrm{gt}}_e\), and \(BB_\epsilon(e)=I^{-1}_{\epsilon}(1+S^{\mathrm{gt}}_e,\,1+F^{\mathrm{gt}}_e)\) of \cref{app:swap-rule}, where the checkpoint rule selects an element of \(\argmax_{e\in\mathcal E_m(c)}BB_\epsilon(e)\) with ties favoring the incumbent.
+
+\begin{remark}[Anchor-only evaluator replacement]
+\label{prop:anchor-best-belief-replacement}
+The score \(BB_\epsilon(e)=I^{-1}_\epsilon(1+S^{\mathrm{gt}}_e,\,1+F^{\mathrm{gt}}_e)\) depends on the evaluator-independent anchor counts \((S^{\mathrm{gt}}_e,F^{\mathrm{gt}}_e)\) only (\cref{app:swap-rule}); no slot-dependent utility record enters it. The selected next evaluator is therefore a function only of the incumbent, the challenger set, and these anchor counts, and because the incumbent lies in the candidate set with ties broken toward it, no transition occurs unless a challenger strictly maximizes the score. Consequently, on the common anchor evidence at a checkpoint, the promoted evaluator's anchor best-belief is at least the incumbent's: a replacement is never worse than retention at the moment it is made.
+\end{remark}
+
+\begin{proposition}[Best-belief lower-bound trajectory]
+\label{prop:best-belief-lower-bound}
+Fix an epoch and a finite candidate set \(\mathcal A\). For each candidate \(a\in\mathcal A\), let the \hgm working posterior over its epoch-local utility be
+\[
+Q_a=\operatorname{Beta}(1+S_a,\,1+F_a),
+\]
+and define
+\[
+BB_\epsilon(a)=I^{-1}_\epsilon(1+S_a,\,1+F_a).
+\]
+If \(a^\star\in\argmax_{a\in\mathcal A}BB_\epsilon(a)\), then, under the working posterior for \(a^\star\),
+\[
+\Pr\!\left(U(a^\star)\ge BB_\epsilon(a^\star)\mid Q_{a^\star}\right)=1-\epsilon.
+\]
+More generally, for any sequence of \(L\) reported selections \(a^\star_1,\ldots,a^\star_L\), if the corresponding working posteriors are calibrated, then with probability at least \(1-L\epsilon\), every selected candidate's utility simultaneously exceeds its reported best-belief lower bound.
+\end{proposition}
+
+\begin{proof}
+By definition \(BB_\epsilon(a)\) is the \(\epsilon\)-quantile of the Beta working posterior \(Q_a\) (\cref{app:swap-rule}), so \(\Pr_{U\sim Q_a}(U\ge BB_\epsilon(a))=1-\epsilon\) up to equality conventions for continuous distributions; applying this to \(a^\star\) gives the single-selection claim. For the sequence claim, let \(E_\ell\) be the event \(U(a^\star_\ell)<BB_\epsilon(a^\star_\ell)\) under the calibrated working posterior at selection \(\ell\), so \(\Pr(E_\ell)=\epsilon\). By the union bound \(\Pr(\bigcup_{\ell=1}^L E_\ell)\le L\epsilon\), so with probability at least \(1-L\epsilon\) no selected candidate falls below its reported lower bound.
+\end{proof}
+
+\begin{remark}
+\Cref{prop:best-belief-lower-bound} is a calibration statement about the selected lower-bound trajectory. It justifies interpreting an increasing best-belief curve as increasing posterior evidence for better best-belief agents, conditional on the working-posterior assumptions already stated in \cref{prop:balanced-working-posterior}.
+\end{remark}
+
+\noindent\textbf{Piecewise fixed-criterion validity.}
+Let
+\[
+0=\tau_0 < \tau_1 < \cdots < \tau_K \le B
+\]
+be the realized transition times. Transitions occur only at pre-specified checkpoints where some slot changes. Let \(\mathcal{F}_{\tau_k}\) be the sigma-field generated by the archive, retained utility records, immutable audit logs, candidate evaluators, checkpoint statistics, and all random choices made up to \(\tau_k\).
+
+\begin{proposition}[Piecewise fixed-criterion validity]
+\label{prop:piecewise-fixed-validity}
+Assume that: (i) within each epoch, evaluator-dependent roles satisfy the stationary learned-evaluation condition in \cref{assumption:generative}; (ii) evaluator-independent roles use fixed ground-truth criteria; (iii) slot transitions occur only at checkpoint boundaries; (iv) after each transition, the erasure removes records invalid under the new criterion; and (v) all derived search statistics are recomputed from retained records.
+
+Then, conditional on \(\mathcal{F}_{\tau_k}\) and on the criterion vector selected at \(\tau_k\), the interval \([\tau_k,\tau_{k+1})\) is a fixed-criterion binary-outcome search problem. In particular, for every eligible node--role--task tuple \((a,r,d)\) during that interval, there is a fixed epoch-local success probability
+\[
+p_{a,r,d}^{(k)} = \Pr(O=1 \mid a,r,d,\kappa^{(k)}),
+\]
+and the corresponding role--task balanced utility is fixed for the duration of the epoch.
+\end{proposition}
+
+\begin{proof}
+Induct over epochs. Conditioned on \(\mathcal F_{\tau_k}\) and the criterion vector selected at \(\tau_k\), \cref{prop:erasure-stationarity} gives a criterion-consistent archive at the start of \([\tau_k,\tau_{k+1})\): the erasure operator removes every record invalid under the new criterion and derived statistics are recomputed from retained records, so no stale record enters the epoch's statistics. No further transition occurs inside the interval, so \cref{prop:validity} applies and every eligible \((a,r,d)\) has a fixed epoch-local mean \(p_{a,r,d}^{(k)}\), with the role--task balanced utility a fixed weighted average of these means. The inherited tree is part of the conditioned archive at \(\tau_k\) and does not enter the within-epoch outcome process, completing the induction.
+\end{proof}
+
+\begin{remark}
+The result is epoch-local: after conditioning on the checkpoint decision and applying selective erasure, each realized epoch is compatible with the fixed-criterion binary-outcome interface used by the \hgm search~(the multi-epoch scope is delimited in \cref{prop:evaluator-trajectory}).
+\end{remark}
+
+\noindent\textbf{Evaluator anchor lower bound at each checkpoint.}
+The remark above is epoch-local because the \emph{task-agent} criterion changes at every transition. The \emph{evaluator} slot is the exception: its replacement test is scored only on the fixed anchor (\cref{prop:anchor-best-belief-replacement}), so over the whole run the slot is a single fixed-criterion selection sampled at checkpoints, and \cref{prop:best-belief-lower-bound} applies to it. Fixing one slot, write \(U^{\mathrm{gt}}(e)\) for an evaluator's anchor utility (its accuracy on the fixed anchor) and \(L^{(k)}=BB_\epsilon^{\mathrm{gt}}(e^{(k)})=I^{-1}_\epsilon(1+S^{\mathrm{gt}}_{e^{(k)}},\,1+F^{\mathrm{gt}}_{e^{(k)}})\) for the anchor best-belief of the evaluator promoted at its \(k\)-th transition.
+
+\begin{remark}[Evaluator anchor lower bound]
+\label{prop:evaluator-trajectory}
+Fix a slot whose anchor criterion is fixed for the run, with promoted evaluators \(e^{(0)},\dots,e^{(K)}\) and anchor best-belief values \(L^{(k)}=BB_\epsilon^{\mathrm{gt}}(e^{(k)})\) measured at each promotion. If the anchor working posteriors are calibrated, then with probability at least \(1-K\epsilon\) every promoted evaluator's true anchor utility satisfies \(U^{\mathrm{gt}}(e^{(k)})\ge L^{(k)}\) jointly; this is the sequence claim of \cref{prop:best-belief-lower-bound} applied to the \(K\) promoted evaluators on the fixed anchor (\(L=K\)). This is a per-checkpoint lower-bound statement together with the best-belief dominance of \cref{prop:anchor-best-belief-replacement}, not a guarantee that the realized anchor accuracy improves monotonically.
+\end{remark}
+
+\noindent\textbf{Exponential checkpoint overhead.}
+Let \(B\) be the search-evaluation budget. Fix a checkpoint base \(\rho>1\) and minimum scale \(h\ge1\). Consider checkpoint opportunities
+\[
+\mathcal C_B(\rho,h)
+=
+\{\lfloor h\rho^q\rfloor : q=0,1,\ldots,Q\},
+\]
+where \(Q\) is the largest integer such that \(h\rho^Q\le B\).
+
+\begin{proposition}[Linear work under exponential checkpoints]
+\label{prop:linear-work}
+If a checkpoint at time \(c\) may reprocess at most all \(c\) previous slot-dependent records, then the total number of reprocessed records over all checkpoints in \(\mathcal C_B(\rho,h)\) is \(\mathcal{O}(B)\), with constant at most \(\rho/(\rho-1)\).
+\end{proposition}
+
+\begin{proof}
+At checkpoint \(q\), the number of previous records that can be reprocessed is at most
+\[
+\lfloor h\rho^q\rfloor
+\le
+h\rho^q.
+\]
+Summing over all checkpoint opportunities gives
+\[
+h\sum_{q=0}^{Q}\rho^q
+=
+\frac{h(\rho^{Q+1}-1)}{\rho-1}
+\le
+\frac{\rho B}{\rho-1}.
+\]
+For fixed \(\rho>1\), this is
+\[
+\mathcal{O}(B).
+\]
+The common base-two schedule is the special case \(\rho=2\), for which the bound is at most \(2B\).
+\end{proof}
+
+\begin{remark}[Dense uniform checkpointing]
+\label{rem:dense-quadratic}
+Under uniform checkpoints every \(h\) steps, checkpoint \(q\) can reprocess up to \(qh\) previous records, so the total over \(\lfloor B/h\rfloor\) checkpoints is \(\sum_{q=1}^{\lfloor B/h\rfloor} qh = \Theta(B^2/h)\): for fixed \(h\), quadratic in the budget rather than linear.
+\end{remark}
+
+Full replay is therefore compatible with linear exposure under the exponential schedule. Bounded recovery remains the default because it keeps utility transitions auditable and avoids spending unnecessary evaluations on cached artifacts.
+
+
+\section{Limitations}
+\label{app:limitations}
+
+We have not yet explored the complete design space or the trade-offs introduced by \theourmethod, in either the number of experiments, spanning hyperparameter configurations, or their duration, due to computational constraints. Furthermore, our empirical scope remains constrained to specific domains: coding/\polyglot, paper writing/review, and IMO grading/proof writing, each isolated with an \hgmh control. A unified, cross-domain, all-role tree spanning these areas remains untested. Additionally, all of our main experimental results relied exclusively on \gptlow (low).
+
+From a formal perspective, the theoretical guarantees provided for \ourmethod are inherently localized and constrained. The working posterior is mean-consistent only~(\cref{prop:balanced-working-posterior}), and our mathematical guarantees operate strictly at an epoch-local level, bounding neither transition counts, cumulative regret from erased evidence, nor long-term convergence to a globally optimal agent--evaluator pair~(\cref{app:proofs:epoch-local-validity}). Rather than proving absolute convergence, the best-belief curves represent calibrated lower-bound trajectories~(\cref{prop:best-belief-lower-bound}), where each transition discards erased information, and the inherited tree topology may reflect expansion choices optimized for an outdated evaluator. Furthermore, \cref{assumption:generative} cannot strictly hold in real-world deployments due to systemic volatility beyond our control, including provider-side model updates, nondeterministic tools, hardware fluctuations, or unlogged prompt alterations. However, this volatility is a limitation that applies universally to all frameworks operating without full control over the entire software and hardware stack.
+
+Our evaluation metrics and loop boundaries introduce further distinct constraints. The reviewer panel inherently measures cross-reviewer acceptance behavior rather than objective, ground-truth scientific merit, and no human grading of the generated papers or proofs was performed. Because our empirical evidence is drawn entirely from intellectual-artifact domains, these dynamics may not generalize to environments with fundamentally different feedback structures.
+
+Additionally, evolving the evaluation layer introduces the specific risk of anchor weakness, where a weak, noisy, or biased anchor allows evaluators to drift across epochs, particularly since \apres decisions and \imogradbench grades are themselves imperfect. Although this issue can only be truly avoided for fully verifiable domains such as mathematics, we intend to make our mechanism less reliant on good anchor datasets in future versions.  
+
+While our search loop is robust, it is still hand-crafted, limiting the gains of recursive self-improvement to our selected benchmarks and the outputs generated by our task agents (which are molded by our benchmarks as well as the pretraining distribution of the foundation models). Extending the evolvable surface to include the scheduler and replacement rules would necessitate significantly more robust guardrails than the ones analyzed in this work. 
+
+
+\end{document}

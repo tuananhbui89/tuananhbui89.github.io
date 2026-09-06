@@ -1,0 +1,771 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MOSS: Self-Evolution through Source-Level Rewriting in Autonomous Agent Systems</title>
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)'], ['$', '$']],
+        displayMath: [['\\[', '\\]'], ['$$', '$$']]
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <style>
+:root {
+  color-scheme: light;
+  --bg: #f7f7f4;
+  --paper: #ffffff;
+  --ink: #1f2933;
+  --muted: #5f6f7a;
+  --line: #d8ddd7;
+  --accent: #276c77;
+  --accent-soft: #e4f1f2;
+  --code-bg: #111827;
+  --code-ink: #e5edf2;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.65;
+}
+
+main {
+  width: min(100% - 32px, 1220px);
+  margin: 0 auto;
+  padding: 48px 0;
+  display: grid;
+  grid-template-columns: minmax(0, 240px) minmax(0, 920px);
+  gap: 24px;
+  align-items: start;
+}
+
+article {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: clamp(24px, 5vw, 56px);
+  box-shadow: 0 18px 45px rgba(31, 41, 51, 0.08);
+  min-width: 0;
+}
+
+.toc {
+  position: sticky;
+  top: 24px;
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 12px 30px rgba(31, 41, 51, 0.06);
+}
+
+.toc-title {
+  color: #162129;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  margin: 0 0 10px;
+  text-transform: uppercase;
+}
+
+.toc ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.toc li {
+  font-size: 0.92rem;
+  line-height: 1.35;
+  margin: 0;
+}
+
+.toc a {
+  border-radius: 6px;
+  color: var(--muted);
+  display: block;
+  padding: 6px 8px;
+  text-decoration: none;
+}
+
+.toc a:hover,
+.toc a:focus {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.toc-level-3 {
+  padding-left: 12px;
+}
+
+.toc-level-4,
+.toc-level-5,
+.toc-level-6 {
+  padding-left: 24px;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.18;
+  color: #162129;
+  letter-spacing: 0;
+}
+
+h1 {
+  font-size: clamp(2rem, 5vw, 3.8rem);
+  margin: 0 0 24px;
+}
+
+h2 {
+  font-size: 1.45rem;
+  margin-top: 40px;
+  padding-top: 10px;
+}
+
+h3 {
+  font-size: 1.15rem;
+  margin-top: 28px;
+}
+
+article [id] {
+  scroll-margin-top: 24px;
+}
+
+p,
+li {
+  font-size: 1.02rem;
+}
+
+a {
+  color: var(--accent);
+  text-underline-offset: 3px;
+}
+
+blockquote {
+  border-left: 4px solid var(--accent);
+  color: var(--muted);
+  margin: 24px 0;
+  padding: 4px 0 4px 18px;
+}
+
+pre {
+  background: var(--code-bg);
+  color: var(--code-ink);
+  border-radius: 8px;
+  overflow-x: auto;
+  padding: 16px;
+  margin: 18px 0;
+  font-size: 0.95rem;
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
+
+:not(pre) > code {
+  background: var(--accent-soft);
+  border-radius: 4px;
+  padding: 0.12rem 0.28rem;
+}
+
+.math-display {
+  margin: 24px 0;
+  overflow-x: auto;
+  padding: 4px 0;
+}
+
+.math-display math {
+  display: block;
+  margin: 0 auto;
+  width: max-content;
+  max-width: 100%;
+}
+
+.math-inline math {
+  vertical-align: -0.2em;
+}
+
+.math-display mjx-container[display="true"] {
+  margin: 0 auto !important;
+}
+
+.math-inline mjx-container {
+  margin: 0 !important;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 0.96rem;
+}
+
+th,
+td {
+  border: 1px solid var(--line);
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  background: var(--accent-soft);
+}
+
+ol,
+ul {
+  padding-left: 1.4rem;
+}
+
+li {
+  margin: 10px 0;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 36px 0;
+}
+
+@media (max-width: 1020px) {
+  main {
+    width: min(100% - 20px, 920px);
+    padding: 20px 0;
+    display: block;
+  }
+
+  .toc {
+    margin-bottom: 16px;
+    max-height: none;
+    position: static;
+  }
+
+  article {
+    padding: 22px;
+  }
+}
+  </style>
+</head>
+<body>
+  <main>
+    <aside class="toc" aria-label="Table of contents">
+      <p class="toc-title">Contents</p>
+      <nav>
+        <ol>
+        <li class="toc-level-2"><a href="#overview-takeaway">Overview / Takeaway</a></li>
+        <li class="toc-level-2"><a href="#1-introduction">1 Introduction</a></li>
+        <li class="toc-level-2"><a href="#2-system-architecture">2 System Architecture</a></li>
+        <li class="toc-level-3"><a href="#2-1-substrate">2.1 Substrate</a></li>
+        <li class="toc-level-3"><a href="#2-2-control-surface">2.2 Control Surface</a></li>
+        <li class="toc-level-3"><a href="#2-3-external-coding-agent">2.3 External Coding Agent</a></li>
+        <li class="toc-level-3"><a href="#2-4-host-daemon-supervision">2.4 Host-Daemon Supervision</a></li>
+        <li class="toc-level-3"><a href="#2-5-topology">2.5 Topology</a></li>
+        <li class="toc-level-2"><a href="#3-the-evolution-process">3 The Evolution Process</a></li>
+        <li class="toc-level-3"><a href="#3-1-directed-evolution">3.1 Directed Evolution</a></li>
+        <li class="toc-level-3"><a href="#3-2-evolution-loop">3.2 Evolution Loop</a></li>
+        <li class="toc-level-3"><a href="#3-3-stage-pipeline">3.3 Stage Pipeline</a></li>
+        <li class="toc-level-3"><a href="#3-4-runtime-verification">3.4 Runtime Verification</a></li>
+        <li class="toc-level-3"><a href="#3-5-in-place-container-swap">3.5 In-Place Container Swap</a></li>
+        <li class="toc-level-2"><a href="#4-case-study">4 Case Study</a></li>
+        <li class="toc-level-3"><a href="#4-1-setup-tasks-and-baseline">4.1 Setup: Tasks and Baseline</a></li>
+        <li class="toc-level-3"><a href="#4-2-what-moss-does-with-the-batch">4.2 What MOSS Does With the Batch</a></li>
+        <li class="toc-level-3"><a href="#4-3-results-iteration-1-outcome">4.3 Results: Iteration-1 Outcome</a></li>
+        <li class="toc-level-2"><a href="#5-related-work">5 Related Work</a></li>
+        <li class="toc-level-3"><a href="#5-1-agentic-systems">5.1 Agentic Systems</a></li>
+        <li class="toc-level-3"><a href="#5-2-self-evolving-agents">5.2 Self-Evolving Agents</a></li>
+        <li class="toc-level-2"><a href="#6-conclusion">6 Conclusion</a></li>
+        <li class="toc-level-2"><a href="#limitations-and-open-questions">Limitations and Open Questions</a></li>
+        </ol>
+      </nav>
+    </aside>
+    <article>
+<h1 id="moss-self-evolution-through-source-level-rewriting-in-autonomous-agent-systems">MOSS: Self-Evolution through Source-Level Rewriting in Autonomous Agent Systems</h1>
+<p>Source: <a href="https://arxiv.org/abs/2605.22794" target="_blank" rel="noopener noreferrer">arXiv:2605.22794</a>, version 2, accessed 2026-09-01.</p>
+<h2 id="overview-takeaway">Overview / Takeaway</h2>
+<p>MOSS moves self-evolution from prompts, skills, memories, and workflows into the source code of a production agent harness, allowing it to modify routing, hooks, dispatch, state handling, and other behavior unavailable to text-only updates. It combines production-failure batching, a deterministic seven-stage development pipeline, a pluggable coding-agent CLI, containerized replay, user-approved promotion, persistent state, and health-probe rollback. In one OpenClaw case study, a three-file harness patch with 177 insertions and one deletion raises the mean score on four claweval tasks from 0.2526 to 0.6100. That result validates one targeted repair on the same tasks used to drive evolution; it does not establish held-out generalization, superiority to text-only repair, long-term safety, or the paper’s broader claims that source edits are immune to context drift.</p>
+<h2 id="1-introduction">1 Introduction</h2>
+<ol>
+<li><p><strong>Deployed agent systems accumulate failures that their static implementations cannot learn from</strong>
+Application-level agents now serve users through channels such as Slack, Discord, and the web, but recurring failures normally wait for a human-authored release. MOSS targets the gap between abundant production evidence and an agent harness that remains frozen after deployment.</p>
+</li>
+<li><p><strong>Text-mutable evolution cannot reach decisions made by the harness</strong>
+Skills, prompts, memory schemas, and workflow graphs can alter what a model considers, says, or invokes. They cannot directly repair routing, state management, dispatch, hook ordering, mediation, session lifecycle, or cross-skill atomicity when those mechanisms live in source code.</p>
+</li>
+<li><p><strong>Harness complexity makes the unreachable failure class more important</strong>
+Misrouted messages, out-of-order hooks, corrupted state, and concurrent-skill atomicity bugs are structural. The claimed gap should widen as a production scaffold gains plugins, channels, persistence, and orchestration surfaces.</p>
+</li>
+<li><p><strong>MOSS positions source code as a strict representational superset</strong>
+The argument has four parts: a programming-language search space is Turing-complete; it can represent text artifacts as data as well as arbitrary control logic; code paths take effect without asking the model to follow newly added prose; and encoded control flow is not diluted merely because the context grows. This is an expressiveness argument—not evidence that useful source edits are easy to search for, correct, or safe.</p>
+</li>
+<li><p><strong>“Deterministic effect” has a narrower meaning than deterministic agent behavior</strong>
+A routing branch executes as code rather than depending on whether the base model notices an instruction. The surrounding system can still be stochastic because model outputs, external services, concurrency, and production inputs vary; source-level adaptation does not make the whole agent deterministic.</p>
+</li>
+<li><p><strong>The long-context-drift advantage is asserted rather than experimentally tested</strong>
+Code does not compete for attention as an instruction token does, but code can still decay operationally through dependency changes, distribution shift, interaction effects, and accumulating patches. The single-cycle case study contains no weeks-long comparison between code and text fixes.</p>
+</li>
+<li><p><strong>Earlier source-rewriting systems establish feasibility on smaller scaffolds</strong>
+SICA, Darwin Gödel Machine, HyperAgents, and Meta-Harness are explicit predecessors. MOSS distinguishes itself by moving from benchmark-scored minimal scaffolds to an application-level substrate with live state, a large codebase, no universal fitness score, and a deployment boundary.</p>
+</li>
+<li><p><strong>Production evolution is directed by concrete failures rather than open-ended fitness</strong>
+Automatic session scanning and conversational user flags feed a shared failure batch. Every later stage is scoped to that batch, replacing random mutation and global benchmark optimization with localized repair intent.</p>
+</li>
+<li><p><strong>The end-to-end contribution includes deployment, not only code generation</strong>
+MOSS exposes lifecycle commands through the deployed agent, delegates editing to a coding-agent subprocess, builds a candidate image, replays failures in ephemeral workers, notifies the user, pauses for approval, swaps the live container, preserves user state, and rolls back after failed health probes.</p>
+</li>
+<li><p><strong>The reported evidence is a controlled case study, not a broad benchmark suite</strong>
+One OpenClaw evolution cycle over four tasks improves the mean from approximately 0.25 to 0.61. This demonstrates that the machinery can produce and deploy one effective source-level patch, but the experiment has no held-out tasks, competing repair methods, ablation, multiple substrates, or repeated evolution histories.</p>
+</li>
+</ol>
+<p>The paper’s scope comparison makes the claimed substrate boundary explicit:</p>
+<table>
+<thead>
+<tr>
+  <th>Project</th>
+  <th style="text-align:center">Skill</th>
+  <th style="text-align:center">Prompt</th>
+  <th style="text-align:center">Memory</th>
+  <th style="text-align:center">Harness</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Hermes Agent</td>
+  <td style="text-align:center">✓</td>
+  <td style="text-align:center">✗</td>
+  <td style="text-align:center">✓</td>
+  <td style="text-align:center">✗</td>
+</tr>
+<tr>
+  <td>SkillClaw</td>
+  <td style="text-align:center">✓</td>
+  <td style="text-align:center">✗</td>
+  <td style="text-align:center">✗</td>
+  <td style="text-align:center">✗</td>
+</tr>
+<tr>
+  <td>GenericAgent</td>
+  <td style="text-align:center">✓</td>
+  <td style="text-align:center">✗</td>
+  <td style="text-align:center">✓</td>
+  <td style="text-align:center">✗</td>
+</tr>
+<tr>
+  <td>EvoAgentX</td>
+  <td style="text-align:center">✓</td>
+  <td style="text-align:center">✓</td>
+  <td style="text-align:center">✗</td>
+  <td style="text-align:center">✗</td>
+</tr>
+<tr>
+  <td><strong>MOSS</strong></td>
+  <td style="text-align:center"><strong>✓</strong></td>
+  <td style="text-align:center"><strong>✓</strong></td>
+  <td style="text-align:center"><strong>✓</strong></td>
+  <td style="text-align:center"><strong>✓</strong></td>
+</tr>
+</tbody>
+</table>
+<p>This table records declared editable scope, not a controlled quality comparison among the systems.</p>
+<h2 id="2-system-architecture">2 System Architecture</h2>
+<ol>
+<li><strong>Five components separate the live agent, control, editing, supervision, and testing planes</strong>
+The architecture consists of the main substrate container, a lifecycle CLI, a pluggable external coding-agent CLI, a host-resident daemon, and ephemeral trial workers. The separation lets the live container request evolution without owning the privileges required to replace itself.</li>
+</ol>
+<h3 id="2-1-substrate">2.1 Substrate</h3>
+<ol>
+<li><p><strong>OpenClaw is the implemented substrate</strong>
+OpenClaw supplies a multi-channel gateway, plugin and hook plumbing, sessions, skills, and persistent user state. MOSS claims the contract can adapt to systems such as Hermes Agent, but only OpenClaw is demonstrated.</p>
+</li>
+<li><p><strong>The substrate choice creates the paper’s engineering problem</strong>
+Academic self-rewriters typically operate over small scaffolds. OpenClaw has cross-file invariants and concurrent state interactions, so localization, safe testing, and state-preserving deployment matter as much as proposal quality.</p>
+</li>
+</ol>
+<h3 id="2-2-control-surface">2.2 Control Surface</h3>
+<ol>
+<li><p><strong>Nine commands expose the entire evolution lifecycle</strong>
+The <code>moss evo</code> CLI provides <code>status</code>, <code>batches</code>, <code>batch</code>, <code>start</code>, <code>stop</code>, <code>restart</code>, <code>apply</code>, <code>flag</code>, and <code>catch-up</code>. The first seven call injected gateway HTTP endpoints; <code>flag</code> and <code>catch-up</code> use a Unix socket to reach the host-daemon’s scanning engine.</p>
+</li>
+<li><p><strong>One bind mount makes the CLI visible inside the substrate container</strong>
+MOSS mounts the script at installation time instead of baking lifecycle logic into the substrate. This keeps the integration narrow while still letting the user-facing agent invoke evolution through its shell tool.</p>
+</li>
+<li><p><strong>A prompt pointer teaches the agent when to discover the capability</strong>
+A one-paragraph system-prompt block points to an on-disk capability document. The agent reads it on demand when users mention evolution, batches, applying a version, or dissatisfaction, reducing the permanent prompt footprint while still relying on model compliance to initiate some control actions.</p>
+</li>
+<li><p><strong>Three webhooks carry asynchronous state back to conversation</strong>
+<code>evolution-converged</code> and <code>evolution-failed</code> originate from the in-container evolution service; <code>apply-complete</code> comes from the host-daemon after a swap. A hook mapping turns each POST into a system message on the agent’s next turn.</p>
+</li>
+<li><p><strong>Portability requires five substrate primitives</strong>
+A new substrate needs shell-equivalent execution, filesystem read, periodic scheduling, webhook-to-agent delivery, and system-prompt injection. “No changes to MOSS” therefore means configuration against this nontrivial host contract, not zero integration work.</p>
+</li>
+</ol>
+<h3 id="2-3-external-coding-agent">2.3 External Coding Agent</h3>
+<ol>
+<li><p><strong>MOSS owns control flow while a separate coding agent owns edits</strong>
+The in-container deterministic state machine controls stage order, verdicts, termination, and deployment. A host-side coding-agent process receives a stage-specific scope and edits the codebase, because the host holds network egress, shell configuration, and editing mounts.</p>
+</li>
+<li><p><strong>Stage decomposition limits context overload</strong>
+Rather than ask one inference to diagnose, plan, implement, verify, and decide, MOSS spawns the coding-agent CLI separately for each reasoning stage. Different stages read different artifacts and have explicit review boundaries.</p>
+</li>
+<li><p><strong>Four providers ship behind a four-method runner interface</strong>
+The repository includes runners for Claude Code, OpenAI Codex, DeepSeek-TUI, and OpenCode. Providers are selected by configuration, and individual spawns can override the default so different roles use different coding agents.</p>
+</li>
+<li><p><strong>Provider independence is architectural but not empirically evaluated</strong>
+Adding a provider requires one runner file and one registry line, while dispatcher, RPC schema, pipeline, and gateway remain stable. The case study does not identify or compare coding-agent providers, leaving the effect of proposer quality and cost unresolved.</p>
+</li>
+</ol>
+<h3 id="2-4-host-daemon-supervision">2.4 Host-Daemon Supervision</h3>
+<ol>
+<li><p><strong>The live container cannot safely replace itself</strong>
+Stopping the current container destroys the process that would otherwise need to launch its successor. A permanent host-side <code>asyncio</code> daemon therefore owns lifecycle transitions.</p>
+</li>
+<li><p><strong>The daemon centralizes four privileged operation families</strong>
+Its Unix-socket RPC handles coding-agent invocation, trial-worker lifecycle, Docker build and image management, and automatic session scanning. Centralization simplifies orchestration but makes the daemon a high-value security and availability boundary.</p>
+</li>
+<li><p><strong>A polling supervisor mediates promotion requests</strong>
+The gateway atomically writes a swap-request file; the daemon detects it, restarts against the candidate image, probes health, and commits or rolls back. After settlement it sends <code>apply-complete</code> to the freshly started gateway.</p>
+</li>
+</ol>
+<h3 id="2-5-topology">2.5 Topology</h3>
+<ol>
+<li><strong>The topology isolates transient workers from persistent user state</strong>
+The gateway container is long-lived, the coding-agent process lasts one stage, and <span class="math">\(N\)</span> trial containers last one iteration. Sessions, memory, credentials, and agent configuration live in a host-mounted volume inherited by the new gateway image but withheld from trial workers.</li>
+</ol>
+<p>The topology diagram shows which component owns each privilege and communication path:</p>
+<p><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMTAwIiBoZWlnaHQ9IjU0MCIgdmlld0JveD0iMCAwIDExMDAgNTQwIiByb2xlPSJpbWciIGFyaWEtbGFiZWxsZWRieT0idGl0bGUgZGVzYyI+CiAgPHRpdGxlIGlkPSJ0aXRsZSI+TU9TUyBob3N0LXNpZGUgdG9wb2xvZ3k8L3RpdGxlPgogIDxkZXNjIGlkPSJkZXNjIj5HYXRld2F5IGNvbnRhaW5lciBjb25uZWN0cyB0byBhIGhvc3QgZGFlbW9uIG92ZXIgSFRUUCBhbmQgVW5peCBzb2NrZXQuIFRoZSBkYWVtb24gc3Bhd25zIGEgY29kaW5nLWFnZW50IENMSSBhbmQgZXBoZW1lcmFsIHRyaWFsIHdvcmtlcnMuPC9kZXNjPgogIDxkZWZzPjxtYXJrZXIgaWQ9ImEiIHZpZXdCb3g9IjAgMCAxMCAxMCIgcmVmWD0iOSIgcmVmWT0iNSIgbWFya2VyV2lkdGg9IjciIG1hcmtlckhlaWdodD0iNyIgb3JpZW50PSJhdXRvLXN0YXJ0LXJldmVyc2UiPjxwYXRoIGQ9Ik0wIDBMMTAgNUwwIDEweiIgZmlsbD0iIzMzNDE1NSIvPjwvbWFya2VyPjwvZGVmcz4KICA8cmVjdCB4PSIyNSIgeT0iMjUiIHdpZHRoPSIxMDUwIiBoZWlnaHQ9IjQ5MCIgcng9IjIyIiBmaWxsPSIjZjhmYWZjIiBzdHJva2U9IiM5NGEzYjgiIHN0cm9rZS13aWR0aD0iMyIgc3Ryb2tlLWRhc2hhcnJheT0iMTAgOCIvPgogIDx0ZXh0IHg9IjUyIiB5PSI2NSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjMiIGZpbGw9IiMzMzQxNTUiPkhvc3QgbWFjaGluZTwvdGV4dD4KICA8ZyBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzBmMTcyYSI+CiAgICA8cmVjdCB4PSI4MCIgeT0iMTE1IiB3aWR0aD0iMzk1IiBoZWlnaHQ9IjE0NSIgcng9IjEyIiBmaWxsPSIjZWZmNmZmIiBzdHJva2U9IiMyNTYzZWIiIHN0cm9rZS13aWR0aD0iMyIvPgogICAgPHRleHQgeD0iMjc4IiB5PSIxNTgiIGZvbnQtc2l6ZT0iMjYiIGZvbnQtd2VpZ2h0PSI3MDAiPm1vc3MtZ2F0ZXdheSBjb250YWluZXI8L3RleHQ+CiAgICA8dGV4dCB4PSIyNzgiIHk9IjE5NSIgZm9udC1zaXplPSIyMCI+YWdlbnQgKyBldm9sdXRpb24gc2VydmljZTwvdGV4dD48dGV4dCB4PSIyNzgiIHk9IjIyNiIgZm9udC1zaXplPSIyMCI+KyBiaW5kLW1vdW50ZWQgbW9zcyBDTEk8L3RleHQ+CiAgICA8cmVjdCB4PSI2MjUiIHk9Ijk1IiB3aWR0aD0iMzkwIiBoZWlnaHQ9IjE4NSIgcng9IjEyIiBmaWxsPSIjZmZmN2VkIiBzdHJva2U9IiNlYTU4MGMiIHN0cm9rZS13aWR0aD0iMyIvPgogICAgPHRleHQgeD0iODIwIiB5PSIxMzciIGZvbnQtc2l6ZT0iMjYiIGZvbnQtd2VpZ2h0PSI3MDAiPmhvc3QtZGFlbW9uPC90ZXh0PgogICAgPHRleHQgeD0iODIwIiB5PSIxNzQiIGZvbnQtc2l6ZT0iMjAiPmFzeW5jaW8gUlBDIHNlcnZlcjwvdGV4dD48dGV4dCB4PSI4MjAiIHk9IjIwNSIgZm9udC1zaXplPSIyMCI+c3dhcCBzdXBlcnZpc29yPC90ZXh0Pjx0ZXh0IHg9IjgyMCIgeT0iMjM2IiBmb250LXNpemU9IjIwIj5hdXRvLXNjYW4gZW5naW5lPC90ZXh0PgogICAgPHJlY3QgeD0iMjYwIiB5PSIzNjAiIHdpZHRoPSIzMjAiIGhlaWdodD0iMTA1IiByeD0iMTIiIGZpbGw9IiNmMGZkZjQiIHN0cm9rZT0iIzE2YTM0YSIgc3Ryb2tlLXdpZHRoPSIzIi8+CiAgICA8dGV4dCB4PSI0MjAiIHk9IjQwMiIgZm9udC1zaXplPSIyNSIgZm9udC13ZWlnaHQ9IjcwMCI+Q29kaW5nLWFnZW50IENMSTwvdGV4dD48dGV4dCB4PSI0MjAiIHk9IjQzNSIgZm9udC1zaXplPSIxOSI+c3Bhd25lZCBwZXIgc3RhZ2U8L3RleHQ+CiAgICA8cmVjdCB4PSI2ODAiIHk9IjM2MCIgd2lkdGg9IjMyMCIgaGVpZ2h0PSIxMDUiIHJ4PSIxMiIgZmlsbD0iI2ZhZjVmZiIgc3Ryb2tlPSIjOTMzM2VhIiBzdHJva2Utd2lkdGg9IjMiLz4KICAgIDx0ZXh0IHg9Ijg0MCIgeT0iNDAyIiBmb250LXNpemU9IjI1IiBmb250LXdlaWdodD0iNzAwIj5UcmlhbCB3b3JrZXJzIMOXIE48L3RleHQ+PHRleHQgeD0iODQwIiB5PSI0MzUiIGZvbnQtc2l6ZT0iMTkiPmVwaGVtZXJhbCwgcGVyIGl0ZXJhdGlvbjwvdGV4dD4KICA8L2c+CiAgPGcgc3Ryb2tlPSIjMzM0MTU1IiBzdHJva2Utd2lkdGg9IjQiIGZpbGw9Im5vbmUiIG1hcmtlci1zdGFydD0idXJsKCNhKSIgbWFya2VyLWVuZD0idXJsKCNhKSI+PHBhdGggZD0iTTQ3NSAxNTAgQzUzNSA5NSA1NjUgOTUgNjI1IDE0NSIvPjxwYXRoIGQ9Ik00NzUgMjI1IEM1MzUgMjg1IDU2NSAyODUgNjI1IDIzMCIvPjwvZz4KICA8ZyBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNyIgZmlsbD0iIzMzNDE1NSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+PHRleHQgeD0iNTUwIiB5PSIxMDYiPkhUVFAgKEFQSSArIGhvb2tzKTwvdGV4dD48dGV4dCB4PSI1NTAiIHk9IjI4OCI+VW5peCBzb2NrZXQgKFJQQyk8L3RleHQ+PC9nPgogIDxnIHN0cm9rZT0iIzMzNDE1NSIgc3Ryb2tlLXdpZHRoPSI0IiBmaWxsPSJub25lIiBtYXJrZXItZW5kPSJ1cmwoI2EpIj48cGF0aCBkPSJNNzQ1IDI4MEw1NDUgMzYwIi8+PHBhdGggZD0iTTg4MCAyODBMODU1IDM2MCIvPjwvZz4KICA8ZyBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNyIgZmlsbD0iIzMzNDE1NSI+PHRleHQgeD0iNjQwIiB5PSIzMjUiPnNwYXduPC90ZXh0Pjx0ZXh0IHg9Ijg3NSIgeT0iMzI2Ij5zcGF3bjwvdGV4dD48L2c+Cjwvc3ZnPgo=" alt="Figure 1: MOSS host-side topology." /></p>
+<ol start="2">
+<li><p><strong>The candidate tested is the image eligible for promotion</strong>
+Trial workers start from the same candidate image that would replace the gateway. This avoids testing one artifact and deploying another, though live state and real traffic remain absent from trials.</p>
+</li>
+<li><p><strong>Isolation is selective rather than complete</strong>
+Trial containers are network- and mount-isolated from the live main container, while the host-side coding agent deliberately receives editing mounts and network egress. The paper does not specify least-privilege policies, secret access, syscall isolation, or defenses against a malicious generated patch.</p>
+</li>
+</ol>
+<h2 id="3-the-evolution-process">3 The Evolution Process</h2>
+<ol>
+<li><strong>One evolution maps a failure batch to a deployable image</strong>
+The control flow is directed evidence collection, bounded iteration, a seven-stage pipeline, production-equivalent runtime verification, and an in-place swap. Each stage emits artifacts that later stages and users can inspect.</li>
+</ol>
+<h3 id="3-1-directed-evolution">3.1 Directed Evolution</h3>
+<ol>
+<li><p><strong>MOSS rejects global random search for production repair</strong>
+Large codebases make undirected mutation unlikely to land usefully; production quality is task-specific; live traffic makes unanchored changes risky; and users want their observed failure repaired. MOSS therefore optimizes against a concrete evidence batch rather than a global scalar fitness.</p>
+</li>
+<li><p><strong>Automatic catch-up scans session logs incrementally</strong>
+A periodic cron job runs <code>moss evo catch-up</code>, reads each session JSONL from a stored cursor, chunks new content, and applies Task-Evaluate. Only chunks whose keypoints are <code>weak</code> or <code>missing</code> enter the conversation’s open batch.</p>
+</li>
+<li><p><strong>Conversational flags share the same ingestion backend</strong>
+When a user expresses dissatisfaction, the agent invokes <code>moss evo flag</code>, scanning that session from its cursor to end-of-file. Automatic and user-triggered evidence therefore enter the same batch representation.</p>
+</li>
+<li><p><strong>Batches are conversation-local and seal at eight chunks by default</strong>
+MOSS keeps one open batch per conversation. Reaching the configurable default threshold of eight chunks seals it and opens a replacement; <code>moss evo start</code> selects the latest nonempty batch and seals it first if necessary.</p>
+</li>
+<li><p><strong>Automated curation can miss silent failures</strong>
+The same Task-Evaluate mechanism that later judges candidates decides whether automatically scanned dialogue is weak enough to include. False negatives, biased keypoints, or model confidence can prevent important failures from ever reaching evolution; no curation precision or recall study is reported.</p>
+</li>
+</ol>
+<h3 id="3-2-evolution-loop">3.2 Evolution Loop</h3>
+<ol>
+<li><p><strong>The original production transcripts form the baseline</strong>
+Before iteration 1, Task-Evaluate scores captured transcripts against a chosen keypoint set. This baseline keypoint matrix anchors all later comparisons and avoids rerunning an old image, but it can compare historical production conditions with isolated candidate trials.</p>
+</li>
+<li><p><strong>Structured evaluation feeds the next repair attempt</strong>
+If one patch is insufficient, its task-level outcomes and cross-iteration matrix inform subsequent localization and planning rather than restarting blindly. The loop is bounded because success is defined against the batch.</p>
+</li>
+<li><p><strong>Four verdicts separate success, progress, model limits, and architecture limits</strong>
+<code>CONVERGED</code> means the batch is considered fixed; <code>NEED_MORE_WORK</code> continues; <code>FUNDAMENTAL_LIMIT_MODEL</code> attributes the ceiling to the base model; and <code>FUNDAMENTAL_LIMIT_ARCHITECTURE</code> says the current harness cannot resolve it.</p>
+</li>
+<li><p><strong>A plateau guard can force convergence without fixing the batch</strong>
+If no keypoint improves for several iterations, the orchestrator converts further-work into convergence at the current peak. “Converged” can therefore mean successful repair or simply no observed improvement within a configured window.</p>
+</li>
+<li><p><strong>Depth presets jointly scale several budgets</strong>
+<code>light</code>, <code>standard</code>, and <code>deep</code> adjust maximum iterations, per-stage rounds, trials per task, and plateau threshold; <code>standard</code> is the default. The paper does not publish the numerical values, preventing independent cost and stopping-rule reproduction.</p>
+</li>
+</ol>
+<h3 id="3-3-stage-pipeline">3.3 Stage Pipeline</h3>
+<ol>
+<li><p><strong>Seven reasoning stages impose a fixed causal order</strong>
+Locate diagnoses without fixing; Plan identifies root cause, target files, changes, and exclusions; Plan-Review gates architecture and scope; Implement writes one Git commit; Code-Review checks the diff against the plan; Task-Evaluate scores behavior; Verdict decides loop state.</p>
+</li>
+<li><p><strong>Planning and implementation each have bounded repair loops</strong>
+Plan alternates with Plan-Review until approval or a round cap. Implement alternates with Code-Review, and the working tree is hard-reset to the loop’s starting commit between rejected code rounds, preventing rejected edits from leaking into later attempts.</p>
+</li>
+<li><p><strong>Task-Evaluate locks four to seven keypoints per task</strong>
+Each keypoint receives one of four ordinal labels: <code>strong</code>, <code>adequate</code>, <code>weak</code>, or <code>missing</code>. The baseline-chosen keypoint set remains fixed across iterations so later matrices compare the same criteria.</p>
+</li>
+<li><p><strong>Build and Trial are runtime affordances, not counted stages</strong>
+They sit between code review and behavioral evaluation. This explains why an end-to-end trace contains more operations than the numbered seven-stage reasoning pipeline.</p>
+</li>
+</ol>
+<p>The nesting diagram clarifies the four budgets that can terminate or retry work:</p>
+<p><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMTAwIiBoZWlnaHQ9IjYyMCIgdmlld0JveD0iMCAwIDExMDAgNjIwIiByb2xlPSJpbWciIGFyaWEtbGFiZWxsZWRieT0idGl0bGUgZGVzYyI+CiAgPHRpdGxlIGlkPSJ0aXRsZSI+Rm91ciBuZXN0ZWQgbGV2ZWxzIG9mIE1PU1MgZXZvbHV0aW9uPC90aXRsZT48ZGVzYyBpZD0iZGVzYyI+QSBiYXNlbGluZSBzdXJyb3VuZHMgYW4gaXRlcmF0aW9uIGxvb3AsIGEgc2V2ZW4tc3RhZ2UgcGlwZWxpbmUsIGFuZCBpbnRlcm5hbCByZXZpZXcgcmV0cnkgcm91bmRzLjwvZGVzYz4KICA8ZyBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZmlsbD0iIzBmMTcyYSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+CiAgICA8cmVjdCB4PSI1NSIgeT0iMzUiIHdpZHRoPSI5OTAiIGhlaWdodD0iNTUwIiByeD0iMTgiIGZpbGw9IiNlZmY2ZmYiIHN0cm9rZT0iIzI1NjNlYiIgc3Ryb2tlLXdpZHRoPSI0Ii8+CiAgICA8dGV4dCB4PSI1NTAiIHk9IjgyIiBmb250LXNpemU9IjI4IiBmb250LXdlaWdodD0iNzAwIj5MYXllciAwOiBwcmUtbG9vcCBiYXNlbGluZTwvdGV4dD4KICAgIDxyZWN0IHg9Ijk1IiB5PSIxMTIiIHdpZHRoPSI5MTAiIGhlaWdodD0iNDMwIiByeD0iMTYiIGZpbGw9IiNmZmY3ZWQiIHN0cm9rZT0iI2VhNTgwYyIgc3Ryb2tlLXdpZHRoPSI0Ii8+CiAgICA8dGV4dCB4PSI1NTAiIHk9IjE1NyIgZm9udC1zaXplPSIyNyIgZm9udC13ZWlnaHQ9IjcwMCI+TGF5ZXIgMTogaXRlcmF0aW9uIGxvb3A8L3RleHQ+PHRleHQgeD0iNTUwIiB5PSIxOTAiIGZvbnQtc2l6ZT0iMjEiPml0ZXIgMSDihpIgaXRlciAyIOKGkiDigKYg4oaSIGl0ZXIgTjwvdGV4dD4KICAgIDxyZWN0IHg9IjE0MCIgeT0iMjIwIiB3aWR0aD0iODIwIiBoZWlnaHQ9IjI3NSIgcng9IjE0IiBmaWxsPSIjZjBmZGY0IiBzdHJva2U9IiMxNmEzNGEiIHN0cm9rZS13aWR0aD0iNCIvPgogICAgPHRleHQgeD0iNTUwIiB5PSIyNjMiIGZvbnQtc2l6ZT0iMjYiIGZvbnQtd2VpZ2h0PSI3MDAiPkxheWVyIDI6IHNldmVuLXN0YWdlIHBpcGVsaW5lPC90ZXh0PgogICAgPHRleHQgeD0iNTUwIiB5PSIzMDUiIGZvbnQtc2l6ZT0iMjAiPuKRoCBMb2NhdGUg4oaSIOKRoSBQbGFuIOKGkiDikaIgUGxhbi1SZXZpZXcg4oaSIOKRoyBJbXBsZW1lbnQ8L3RleHQ+PHRleHQgeD0iNTUwIiB5PSIzMzkiIGZvbnQtc2l6ZT0iMjAiPuKRpCBDb2RlLVJldmlldyDihpIg4pGlIFRhc2stRXZhbHVhdGUg4oaSIOKRpiBWZXJkaWN0PC90ZXh0PgogICAgPHJlY3QgeD0iMjA1IiB5PSIzNzUiIHdpZHRoPSI2OTAiIGhlaWdodD0iODUiIHJ4PSIxMiIgZmlsbD0iI2ZhZjVmZiIgc3Ryb2tlPSIjOTMzM2VhIiBzdHJva2Utd2lkdGg9IjQiLz4KICAgIDx0ZXh0IHg9IjU1MCIgeT0iNDEwIiBmb250LXNpemU9IjIzIiBmb250LXdlaWdodD0iNzAwIj5MYXllciAzOiBzdGFnZS1pbnRlcm5hbCByZXRyeSByb3VuZDwvdGV4dD48dGV4dCB4PSI1NTAiIHk9IjQ0MCIgZm9udC1zaXplPSIxOSI+cm91bmQgMCDihpIgcm91bmQgMSDihpIg4oCmPC90ZXh0PgogIDwvZz4KPC9zdmc+Cg==" alt="Figure 2: Pre-loop baseline, bounded evolution iterations, the seven-stage pipeline, and review retry rounds." /></p>
+<ol start="5">
+<li><p><strong>Review gates improve auditability but share the same possible model biases</strong>
+Stage boundaries create inspectable plans, diffs, and verdicts. The paper does not specify whether reviewers are independent models, how disagreement is handled, or whether the proposer can influence the judge through artifacts.</p>
+</li>
+<li><p><strong>The qualitative matrix is not a formal non-regression test</strong>
+The verdict synthesizes keypoint labels rather than enforcing exact pass-to-fail constraints over a broad regression suite. Improvements on the selected batch can coexist with regressions on tasks that never entered it.</p>
+</li>
+</ol>
+<h3 id="3-4-runtime-verification">3.4 Runtime Verification</h3>
+<ol>
+<li><p><strong>Code review cannot expose execution-dependent faults</strong>
+Race conditions, hook order, state propagation, routing, and lifecycle failures may be syntactically valid. MOSS therefore tests the built image by executing the agent rather than relying only on code review or unit tests.</p>
+</li>
+<li><p><strong>Ephemeral workers replay every batch task multiple times</strong>
+After Build, the daemon starts <span class="math">\(N\)</span> short-lived containers, runs the candidate autonomously, repeats tasks to expose flakiness, and destroys the workers after the iteration. The exact <span class="math">\(N\)</span> and repetition budget depend on depth but are not published.</p>
+</li>
+<li><p><strong>Production equivalence is limited by deliberate isolation</strong>
+Workers use the deployable image but not the live user-state volume or production traffic. This prevents corruption and leakage while leaving state-dependent, concurrency-dependent, and real-network failures for post-swap health checks—or users—to discover.</p>
+</li>
+<li><p><strong>Candidate evaluation is directly adaptive to the failure batch</strong>
+The same tasks drive localization, planning, trial scoring, and convergence. This is appropriate for incident repair but provides no evidence that the patch preserves unrelated capabilities or generalizes beyond those incidents.</p>
+</li>
+</ol>
+<h3 id="3-5-in-place-container-swap">3.5 In-Place Container Swap</h3>
+<ol>
+<li><p><strong>Single-instance persistent state motivates replacement in place</strong>
+Blue-green or canary deployment would require sticky-session routing or state migration. MOSS instead swaps the image underneath an unchanged host-mounted volume so sessions, memory, credentials, and configuration survive.</p>
+</li>
+<li><p><strong>Convergence pauses at a user-consent gate</strong>
+The system marks the batch ready, emits <code>evolution-converged</code>, and waits for <code>moss evo apply</code>. This separates autonomous proposal from deployment authority, although the case study auto-acknowledges the gate and therefore does not evaluate real user review.</p>
+</li>
+<li><p><strong>The swap protocol is precise and bounded</strong>
+The supervisor polls every two seconds, then opens a 90-second probe window sampled every five seconds. Each sample checks heartbeat freshness of at most <span class="math">\(30\)</span> seconds, container-running status, and two substrate CLI status probes; three consecutive passing samples commit the candidate.</p>
+</li>
+<li><p><strong>Failed probes restore an independently recorded image</strong>
+Rollback reads the last-known-good image from a record separate from the swap request. A stale or malformed request therefore cannot designate its own rollback target and repeatedly trap the system.</p>
+</li>
+<li><p><strong>Health probes establish liveness, not behavioral correctness</strong>
+Heartbeat and CLI checks can verify that the process starts, but not that unrelated conversations remain correct, credentials are safe, or the patch has no subtle regressions. The authors explicitly acknowledge that a trial-passing candidate can fail under live state or traffic.</p>
+</li>
+<li><p><strong>Persistent volumes preserve both useful and risky state</strong>
+Continuity avoids replacing the user’s agent identity, but credentials and memories are mounted into newly generated code. A production threat model should address exfiltration, destructive migrations, schema incompatibility, and rollback after irreversible external side effects.</p>
+</li>
+</ol>
+<h2 id="4-case-study">4 Case Study</h2>
+<ol>
+<li><strong>The experiment is an end-to-end proof of mechanism</strong>
+Four compliance-audit tasks become the failure batch, the pipeline generates a source patch, trial workers verify it, and the host-daemon swaps the image. The same tasks are then scored before and after.</li>
+</ol>
+<h3 id="4-1-setup-tasks-and-baseline">4.1 Setup: Tasks and Baseline</h3>
+<ol>
+<li><p><strong>Two bilingual task pairs test multi-step operational reasoning</strong>
+T141zh and T142 are Chinese and English SLA-compliance audits requiring P1 ticket identification and tiered deadline calculations from a mock configuration service. T137zh and T138 are Chinese and English restock-chain checks spanning scheduler jobs, integration configuration, and inventory.</p>
+</li>
+<li><p><strong>OpenClaw uses DeepSeek V3.2 as the unchanged base model</strong>
+Baseline task means range from 0.2090 to 0.3273 on claweval’s <span class="math">\([0,1]\)</span> scale. The four-task mean is 0.2526, far below the 0.75 pass threshold.</p>
+</li>
+<li><p><strong>Baseline failures are partial and attribution-sensitive</strong>
+SLA responses omit tickets, declare information incomplete, or assign customers to the wrong adjacent ticket. Restock responses fail to connect scheduler, integration, and inventory evidence into complete chains.</p>
+</li>
+<li><p><strong>The external grader is not MOSS’s internal selection signal</strong>
+Claweval supplies a reader-facing numeric witness. The evolution verdict uses the qualitative Task-Evaluate keypoint matrix, so the reported score did not directly determine promotion.</p>
+</li>
+<li><p><strong>The “test set” is identical to the optimization batch</strong>
+The four tasks are both input evidence and post-evolution evaluation. This controlled before/after design isolates whether the system repaired those scenarios, but it cannot measure held-out generalization or regression.</p>
+</li>
+</ol>
+<h3 id="4-2-what-moss-does-with-the-batch">4.2 What MOSS Does With the Batch</h3>
+<ol>
+<li><p><strong>The baseline matrix localizes weak tool sequencing, extraction, and reporting</strong>
+Task-Evaluate locks these behavioral surfaces before candidate development, providing a stable vocabulary for the iteration-1 verdict.</p>
+</li>
+<li><p><strong>Locate finds a harness-level mediator gap</strong>
+The agent frequently chooses a generic execution path rather than semantic tools, but the mediator lacks an annotation branch for that path. When multiple lookups are packed into one shell construct, a second dispatch-synthesis parsing issue merges outputs and loses attribution.</p>
+</li>
+<li><p><strong>Plan proposes a two-surface structural repair</strong>
+One new annotation branch adds an explicit usage hint for multi-entity payloads. A pre-call deny gate blocks the problematic batched-shell pattern and steers the model toward separate, individually parseable calls.</p>
+</li>
+<li><p><strong>The implementation is verifiably source-level</strong>
+One commit changes three OpenClaw harness files with 177 insertions and one deletion: mediator logic and helpers, a before-tool-call hook check, and a mediator test file. The fix changes execution mediation and hook behavior, not a skill, prompt, memory entry, or workflow configuration.</p>
+</li>
+<li><p><strong>Both review gates approve in the first iteration</strong>
+Plan-Review requests no revision; Code-Review approves the commit. The candidate builds, trial workers replay the batch, Task-Evaluate observes broad lift, and Verdict returns convergence.</p>
+</li>
+</ol>
+<p>The executed iteration contains the following source-preserved sequence; Plan-Review and Code-Review are intentionally omitted from the compact figure:</p>
+<p><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMjAwIiBoZWlnaHQ9IjM5MCIgdmlld0JveD0iMCAwIDEyMDAgMzkwIiByb2xlPSJpbWciIGFyaWEtbGFiZWxsZWRieT0idGl0bGUgZGVzYyI+CiAgPHRpdGxlIGlkPSJ0aXRsZSI+TU9TUyBpdGVyYXRpb24tb25lIHRpbWVsaW5lPC90aXRsZT48ZGVzYyBpZD0iZGVzYyI+TG9jYXRlLCBQbGFuLCBJbXBsZW1lbnQsIEJ1aWxkLCBUcmlhbCwgVGFzay1FdmFsdWF0ZSwgYW5kIFZlcmRpY3QgZXhlY3V0ZSBpbiBvcmRlcjsgcmV2aWV3IHN0YWdlcyBhcmUgZWxpZGVkLjwvZGVzYz4KICA8ZGVmcz48bWFya2VyIGlkPSJhIiB2aWV3Qm94PSIwIDAgMTAgMTAiIHJlZlg9IjkiIHJlZlk9IjUiIG1hcmtlcldpZHRoPSI3IiBtYXJrZXJIZWlnaHQ9IjciIG9yaWVudD0iYXV0byI+PHBhdGggZD0iTTAgMEwxMCA1TDAgMTB6IiBmaWxsPSIjMzM0MTU1Ii8+PC9tYXJrZXI+PC9kZWZzPgogIDxnIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMGYxNzJhIj4KICAgIDx0ZXh0IHg9IjYwMCIgeT0iNDUiIGZvbnQtc2l6ZT0iMjgiIGZvbnQtd2VpZ2h0PSI3MDAiPkl0ZXJhdGlvbiAxIChyZXZpZXcgZ2F0ZXMgZWxpZGVkKTwvdGV4dD4KICAgIDxnIGZvbnQtc2l6ZT0iMjAiIGZvbnQtd2VpZ2h0PSI2MDAiPgogICAgICA8cmVjdCB4PSIzNSIgeT0iOTUiIHdpZHRoPSIxOTAiIGhlaWdodD0iNzgiIHJ4PSIxMCIgZmlsbD0iI2VmZjZmZiIgc3Ryb2tlPSIjMjU2M2ViIiBzdHJva2Utd2lkdGg9IjMiLz48dGV4dCB4PSIxMzAiIHk9IjE0MyI+4pGgIExvY2F0ZTwvdGV4dD4KICAgICAgPHJlY3QgeD0iMjY1IiB5PSI5NSIgd2lkdGg9IjE5MCIgaGVpZ2h0PSI3OCIgcng9IjEwIiBmaWxsPSIjZWZmNmZmIiBzdHJva2U9IiMyNTYzZWIiIHN0cm9rZS13aWR0aD0iMyIvPjx0ZXh0IHg9IjM2MCIgeT0iMTQzIj7ikaEgUGxhbjwvdGV4dD4KICAgICAgPHJlY3QgeD0iNDk1IiB5PSI5NSIgd2lkdGg9IjE5MCIgaGVpZ2h0PSI3OCIgcng9IjEwIiBmaWxsPSIjZWZmNmZmIiBzdHJva2U9IiMyNTYzZWIiIHN0cm9rZS13aWR0aD0iMyIvPjx0ZXh0IHg9IjU5MCIgeT0iMTQzIj7ikaMgSW1wbGVtZW50PC90ZXh0PgogICAgICA8cmVjdCB4PSI3MjUiIHk9Ijk1IiB3aWR0aD0iMTkwIiBoZWlnaHQ9Ijc4IiByeD0iMTAiIGZpbGw9IiNmZmY3ZWQiIHN0cm9rZT0iI2VhNTgwYyIgc3Ryb2tlLXdpZHRoPSIzIi8+PHRleHQgeD0iODIwIiB5PSIxNDMiPkJ1aWxkPC90ZXh0PgogICAgICA8cmVjdCB4PSI3MjUiIHk9IjI1NSIgd2lkdGg9IjE5MCIgaGVpZ2h0PSI3OCIgcng9IjEwIiBmaWxsPSIjZmFmNWZmIiBzdHJva2U9IiM5MzMzZWEiIHN0cm9rZS13aWR0aD0iMyIvPjx0ZXh0IHg9IjgyMCIgeT0iMzAzIj5UcmlhbDwvdGV4dD4KICAgICAgPHJlY3QgeD0iNDY1IiB5PSIyNTUiIHdpZHRoPSIyMjAiIGhlaWdodD0iNzgiIHJ4PSIxMCIgZmlsbD0iI2VmZjZmZiIgc3Ryb2tlPSIjMjU2M2ViIiBzdHJva2Utd2lkdGg9IjMiLz48dGV4dCB4PSI1NzUiIHk9IjMwMyI+4pGlIFRhc2stRXZhbHVhdGU8L3RleHQ+CiAgICAgIDxyZWN0IHg9IjIwNSIgeT0iMjU1IiB3aWR0aD0iMjIwIiBoZWlnaHQ9Ijc4IiByeD0iMTAiIGZpbGw9IiNlZmY2ZmYiIHN0cm9rZT0iIzI1NjNlYiIgc3Ryb2tlLXdpZHRoPSIzIi8+PHRleHQgeD0iMzE1IiB5PSIzMDMiPuKRpiBWZXJkaWN0PC90ZXh0PgogICAgPC9nPgogIDwvZz4KICA8ZyBzdHJva2U9IiMzMzQxNTUiIHN0cm9rZS13aWR0aD0iNCIgZmlsbD0ibm9uZSIgbWFya2VyLWVuZD0idXJsKCNhKSI+PHBhdGggZD0iTTIyNSAxMzRMMjY1IDEzNCIvPjxwYXRoIGQ9Ik00NTUgMTM0TDQ5NSAxMzQiLz48cGF0aCBkPSJNNjg1IDEzNEw3MjUgMTM0Ii8+PHBhdGggZD0iTTgyMCAxNzNMODIwIDI1NSIvPjxwYXRoIGQ9Ik03MjUgMjk0TDY4NSAyOTQiLz48cGF0aCBkPSJNNDY1IDI5NEw0MjUgMjk0Ii8+PC9nPgo8L3N2Zz4K" alt="Figure 3: Iteration-1 MOSS trace." /></p>
+<h3 id="4-3-results-iteration-1-outcome">4.3 Results: Iteration-1 Outcome</h3>
+<ol>
+<li><strong>All four task means improve after the swap</strong>
+Each reported value is the mean of three trials, giving 12 baseline and 12 post-swap task executions in total.</li>
+</ol>
+<table>
+<thead>
+<tr>
+  <th>Task</th>
+  <th style="text-align:right">Baseline</th>
+  <th style="text-align:right">Iteration 1</th>
+  <th style="text-align:right">Absolute change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>T141zh_sla_compliance_audit</td>
+  <td style="text-align:right">0.3273</td>
+  <td style="text-align:right">0.5330</td>
+  <td style="text-align:right">+0.2057</td>
+</tr>
+<tr>
+  <td>T142_sla_compliance_audit</td>
+  <td style="text-align:right">0.2527</td>
+  <td style="text-align:right">0.5453</td>
+  <td style="text-align:right">+0.2926</td>
+</tr>
+<tr>
+  <td>T137zh_restock_chain_check</td>
+  <td style="text-align:right">0.2213</td>
+  <td style="text-align:right">0.4567</td>
+  <td style="text-align:right">+0.2354</td>
+</tr>
+<tr>
+  <td>T138_restock_chain_check</td>
+  <td style="text-align:right">0.2090</td>
+  <td style="text-align:right">0.9049</td>
+  <td style="text-align:right">+0.6959</td>
+</tr>
+<tr>
+  <td><strong>Mean</strong></td>
+  <td style="text-align:right"><strong>0.2526</strong></td>
+  <td style="text-align:right"><strong>0.6100</strong></td>
+  <td style="text-align:right"><strong>+0.3574</strong></td>
+</tr>
+</tbody>
+</table>
+<ol start="2">
+<li><p><strong>The mean improves by 0.3574, or approximately 141.5% relative</strong>
+The post-swap score is about 2.41 times the baseline. This is a large within-batch effect, but 0.6100 remains below the grader’s 0.75 pass threshold.</p>
+</li>
+<li><p><strong>T138 supplies most of the aggregate lift</strong>
+Its 0.6959 gain is 48.7% of the sum of the four task-level gains. It reaches 0.9049 and all three trials pass, making it the only task explicitly reported as passing in every trial.</p>
+</li>
+<li><p><strong>The remaining tasks are improved but incompletely solved</strong>
+The SLA pair rises to 0.5330 and 0.5453 because the annotation repair closes the largest coverage defect, while time arithmetic and SLA-tier classification remain difficult. T137zh reaches 0.4567; one of its three trials passes and two remain below threshold.</p>
+</li>
+<li><p><strong>Outputs become more complete and attributable</strong>
+SLA transcripts now provide per-ticket classifications and an aggregate such as two of six P1 tickets violating SLA, affected customers, and mean overrun. Restock transcripts return complete chains rather than disconnected fragments.</p>
+</li>
+<li><p><strong>The unchanged model supports a proximate causal claim, not a definitive one</strong>
+DeepSeek V3.2 and task definitions remain constant while the harness changes, making the patch the most immediate intervention. Yet stochastic trials, lack of paired transcript statistics, and reuse of optimization tasks prevent a strong causal or generalization claim.</p>
+</li>
+<li><p><strong>The deployment-safety story is not exercised under normal conditions</strong>
+The benchmark run auto-acknowledges user consent so the pipeline completes without interaction. No failed health probe, rollback event, preserved-state validation, or production-traffic incident is reported.</p>
+</li>
+<li><p><strong>No competing repair scope is tested</strong>
+The experiment does not ask whether a prompt, skill, tool description, or smaller code edit could have achieved the same improvement. It proves reachability of a harness fix, not that source-level repair was uniquely necessary or superior for this case.</p>
+</li>
+</ol>
+<h2 id="5-related-work">5 Related Work</h2>
+<h3 id="5-1-agentic-systems">5.1 Agentic Systems</h3>
+<ol>
+<li><p><strong>Tool use and reasoning–action loops form the substrate lineage</strong>
+Toolformer and ToolLLM turn models into API callers; ReAct closes calls into an iterative think/act loop. MOSS operates one level above this inner loop by allowing deployed orchestration code itself to change.</p>
+</li>
+<li><p><strong>Multi-agent systems expand coordination without necessarily enabling self-rewrite</strong>
+MetaGPT, AutoGen, ChatDev, and CAMEL demonstrate role specialization inside an inference frame. MOSS instead focuses on persistent application infrastructure and a single system’s post-deployment evolution.</p>
+</li>
+<li><p><strong>Production agents add persistent state and lifecycle obligations</strong>
+Claude assistants and OpenClaw represent multi-channel, multi-user application systems. Their harnesses govern routing, gating, and lifecycle, creating the source-level surface MOSS targets.</p>
+</li>
+</ol>
+<h3 id="5-2-self-evolving-agents">5.2 Self-Evolving Agents</h3>
+<ol>
+<li><p><strong>SICA is an explicit source-editing feasibility predecessor</strong>
+SICA shows that an agent can edit its own implementation and improve SWE-bench performance. MOSS adapts the primitive to a larger deployed substrate and incident-oriented feedback.</p>
+</li>
+<li><p><strong>Darwin Gödel Machine supplies the archive-search contrast</strong>
+Darwin Gödel Machine retains an open-ended archive of variants under benchmark fitness. MOSS uses a bounded, directed canonical loop around a concrete failure batch and an eventual deployment decision.</p>
+</li>
+<li><p><strong>HyperAgents extends editability to the meta-procedure</strong>
+Where HyperAgents makes the improvement procedure itself mutable, MOSS keeps stage ordering and verdict logic deterministic while delegating only stage-specific code work.</p>
+</li>
+<li><p><strong>Meta-Harness motivates trace-rich proposal evidence</strong>
+Its finding that execution traces help more than scores alone aligns with MOSS’s use of production transcripts, qualitative keypoints, and runtime replay.</p>
+</li>
+<li><p><strong>Application-level predecessors remain text-mutable by the paper’s taxonomy</strong>
+Hermes Agent, Capability Evolver, SkillClaw, GenericAgent, and EvoAgentX update combinations of skills, prompts, memories, behavioral genes, SOPs, or workflow graphs. MOSS’s claimed extension is the harness layer, not merely another optimizer for those artifacts.</p>
+</li>
+<li><p><strong>DSPy and GEPA represent prompt-optimization alternatives</strong>
+They compile or search prompts associated with Hermes. A decisive comparison would test these text-level optimizers and MOSS against the same incidents, costs, and held-out regression suite; this paper does not do so.</p>
+</li>
+</ol>
+<h2 id="6-conclusion">6 Conclusion</h2>
+<ol>
+<li><p><strong>MOSS closes an operational loop from incident evidence to deployed source patch</strong>
+The system connects automatic and user-supplied failures, deterministic orchestration, external coding agents, runtime replay, explicit promotion, container replacement, persistent state, and rollback. That systems integration is the paper’s main contribution.</p>
+</li>
+<li><p><strong>The case study confirms that the mutable substrate includes real harness code</strong>
+The successful change modifies mediation, pre-call hooks, and tests across three files. It directly supports the source-level rewriting claim and demonstrates that the running image can be replaced without changing the base model.</p>
+</li>
+<li><p><strong>The empirical claim should remain narrow</strong>
+One four-task, one-iteration, same-batch evaluation shows targeted repair. It does not validate open-ended continual evolution, cross-task generalization, regression freedom, provider independence, or production safety over many swaps.</p>
+</li>
+<li><p><strong>Expressiveness and operational safety pull in opposite directions</strong>
+Source code is more expressive than text-only artifacts precisely because it can change more behavior. The same reach increases the blast radius, so sandboxing, regression evaluation, authorization, provenance, and rollback must become stronger—not optional—as edit scope expands.</p>
+</li>
+</ol>
+<h2 id="limitations-and-open-questions">Limitations and Open Questions</h2>
+<ol>
+<li><p><strong>There is no held-out evaluation</strong>
+The four claweval tasks both drive the repair and measure its success. A separate set of related tasks, unrelated capability tests, and real production incidents is needed to distinguish repair from batch overfitting.</p>
+</li>
+<li><p><strong>The experiment is too small for reliability claims</strong>
+Only one substrate, one base model, one batch, one evolution iteration, four tasks, and three trials per task are reported. There are no confidence intervals, repeated evolution runs, provider comparisons, or longitudinal measurements.</p>
+</li>
+<li><p><strong>No ablation isolates architectural components</strong>
+The contribution of automatic curation, stage decomposition, review loops, runtime replay, depth settings, user consent, health probes, and source scope is not measured independently.</p>
+</li>
+<li><p><strong>Costs and budgets are undisclosed</strong>
+Light, standard, and deep alter iterations, review rounds, and trials, but exact settings are absent. There are no model-call counts, tokens, build times, container costs, wall-clock duration, or human audit time.</p>
+</li>
+<li><p><strong>Generated code creates a substantial supply-chain and privilege risk</strong>
+The coding-agent subprocess has editing mounts and network egress, candidate code later receives user credentials and memory, and the daemon controls Docker. The paper does not document sandboxes, allowlists, signing, static security analysis, dependency review, secret isolation, or manual diff requirements.</p>
+</li>
+<li><p><strong>Rollback cannot undo external side effects</strong>
+Restoring an image can recover process code, but a bad candidate may already have changed remote systems, corrupted persistent state, migrated schemas, or disclosed data. Transactional tools, canaries, state snapshots, and compensating actions remain open.</p>
+</li>
+<li><p><strong>Batch replay does not constitute a regression suite</strong>
+The gate asks whether targeted failures improve, not whether unrelated behaviors remain stable. A canonical harness test suite, risk-weighted invariants, and held-out production replays should accompany batch-specific keypoints.</p>
+</li>
+<li><p><strong>Source-level expressiveness does not imply practical search superiority</strong>
+Turing completeness says what can be represented, not whether an LLM can find a correct edit under finite context and budget. Comparative experiments should match code, prompt, skill, and hybrid scopes on repair rate, regressions, and cost.</p>
+</li>
+<li><p><strong>The auto-scan evaluator may become a self-confirming bottleneck</strong>
+Task-Evaluate chooses evidence, defines baseline keypoints, judges candidates, and informs verdicts. Independent evaluators, user feedback, hard checks, and disagreement handling could reduce correlated blind spots.</p>
+</li>
+<li><p><strong>“Fundamental limit” verdicts need calibration</strong>
+The system distinguishes model and architecture ceilings, but no ground-truth study shows that it can attribute failures correctly. Misclassification could stop a repair prematurely or trigger unnecessary architectural rewriting.</p>
+</li>
+<li><p><strong>Persistent state needs compatibility verification</strong>
+Mounting the same volume preserves continuity only if new code understands the old schema. Migration tests, backward-compatible readers, snapshot restoration, and credential-access policies are not specified.</p>
+</li>
+<li><p><strong>User consent should be studied as an interface, not only a gate</strong>
+Users need intelligible diffs, predicted risks, replay evidence, and rollback expectations. The benchmark bypasses this interaction, so approval quality and automation bias remain unknown.</p>
+</li>
+<li><p><strong>Long-context stability requires longitudinal evidence</strong>
+A direct study should compare functionally equivalent prompt and code fixes as prompts, memories, and patches accumulate over weeks, tracking adherence, unintended interactions, and maintenance burden.</p>
+</li>
+<li><p><strong>Multi-user evidence raises privacy and ownership questions</strong>
+Session JSONLs may contain personal data and credentials, while failure batches and coding-agent prompts move evidence across processes. Consent, retention, redaction, tenant isolation, and deletion semantics are not discussed.</p>
+</li>
+<li><p><strong>The next decisive experiment is a matched repair benchmark</strong>
+Evaluate MOSS, text-only evolution, human maintenance, and hybrid repair on many production-like incidents across multiple substrates. Measure targeted repair, held-out regressions, security violations, deployment failures, cost, latency, and durability across repeated swaps.</p>
+</li>
+</ol>
+    </article>
+  </main>
+</body>
+</html>

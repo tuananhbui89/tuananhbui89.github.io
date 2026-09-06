@@ -1,0 +1,107 @@
+\documentclass{article}
+\usepackage[preprint]{neurips_2025}
+
+\usepackage[utf8]{inputenc} 
+\usepackage[T1]{fontenc}   
+\usepackage[hidelinks]{hyperref}  %
+\usepackage{url}            
+\usepackage{booktabs}       
+\usepackage{amsfonts}     
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{xcolor}       
+\usepackage{xspace}
+\usepackage{fancyvrb} %
+\usepackage{fvextra}
+\usepackage{float}
+
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{xspace}
+\usepackage{enumitem}
+\usepackage[flushleft]{threeparttable}
+\usepackage{makecell}
+\usepackage{multirow}
+\usepackage{xcolor, colortbl}
+\usepackage{subcaption}
+\usepackage{tikz}
+\usepackage{wrapfig}
+\usepackage{textcomp}
+\usepackage{scalerel}  
+\usepackage{tipa}
+\usepackage{pifont}
+\usepackage{multicol}
+\usepackage[most]{tcolorbox}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage[normalem]{ulem}
+\usepackage[noabbrev]{cleveref}
+
+\input{macros}
+
+\title{\livesweagent: Can Software Engineering Agents Self-Evolve on the Fly?}
+
+\author{Chunqiu Steven Xia\;
+  Zhe Wang\;
+  Yan Yang$^\dagger$\;
+  Yuxiang Wei\;
+  Lingming Zhang
+  \\[\medskipamount]
+  \uiuc{University of Illinois Urbana-Champaign}
+  \\[\medskipamount]
+  \small\texttt{\{chunqiu2, zhe36, ywei40, lingming\}@illinois.edu} $^\dagger$\small\texttt{yanyang826@outlook.com}
+}
+
+
+\begin{document}
+
+
+\maketitle
+
+\makeatletter{\renewcommand*{\@makefnmark}{}\footnotetext{$^\dagger$Work done as a research intern at the University of Illinois Urbana-Champaign.}}
+
+
+\frenchspacing
+
+\begin{abstract}
+Large Language Models (LLMs) are reshaping almost all industries, including software engineering. In recent years, a number of LLM agents have been proposed to solve real-world software problems. Such software agents are typically equipped with a suite of coding tools and can autonomously decide the next actions to form complete trajectories to solve end-to-end software tasks. 
+While promising, they typically require dedicated design and may still be suboptimal, since it can be extremely challenging and costly to exhaust the entire agent scaffold design space. 
+Recognizing that software agents are inherently software themselves that can be further refined/modified, researchers have proposed a number of self-improving software agents recently, including the Darwin-Gödel Machine (DGM). Meanwhile, such self-improving agents require costly offline training on specific benchmarks and may not generalize well across different LLMs or benchmarks. 
+In this paper, we propose \livesweagent, the first \emph{live} software agent that can autonomously and continuously evolve itself \emph{on-the-fly} during runtime when solving real-world software problems. More specifically, \livesweagent starts with the most basic agent scaffold with only access to \texttt{bash} tools (e.g., \minisweagent), and autonomously evolves its own scaffold implementation while solving real-world software problems. 
+Our evaluation on the widely studied \swebench Verified benchmark shows that \livesweagent can achieve an impressive solve rate of 77.4\% without test-time scaling, outperforming all existing software agents, including the best proprietary solution. Moreover, \livesweagent outperforms state-of-the-art manually crafted software agents on the recent \swebenchpro benchmark, achieving the best-known solve rate of 45.8\%. More details at: \Github{}~\small{\color{purple}\url{https://github.com/OpenAutoCoder/live-swe-agent}}
+
+
+
+\end{abstract}
+
+\vspace*{-11pt}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1\columnwidth, height=5cm]{figs/sb_results.pdf}\vspace{-5pt}
+    {\scriptsize\slshape {\textsuperscript{*}Customized SWE-agent ~\citep{kimik2thinking}} \quad\textsuperscript{**}JSON-based \texttt{apply\_patch} tool plus dynamic thinking time~\citep{gpt51}}\vspace{-5pt}
+    \caption{\swebench Verified and \swebenchpro results (single attempt w/o test-time scaling)
+    }
+    \label{fig:result}
+\end{figure}
+
+\input{sec/intro}
+\input{sec/approach}
+\input{sec/method}
+\input{sec/results}
+\input{sec/related}
+\input{sec/conclude}
+
+\bibliographystyle{plain}
+\bibliography{reference}
+
+\clearpage
+\newpage
+\appendix
+
+\input{appendix/experimental_settings}
+\input{appendix/tool_analysis}
+\input{appendix/ablation_subset}
+\input{appendix/prompts}
+
+
+\end{document}

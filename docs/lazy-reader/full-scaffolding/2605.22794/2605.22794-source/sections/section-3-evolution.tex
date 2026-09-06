@@ -1,0 +1,93 @@
+\section{The Evolution Process}
+\label{sec:evolution}
+
+This section walks one full evolution of MOSS, from a curated failure batch to a swapped-in stronger agent: a directed goal from real user-session evidence (\S\ref{subsec:directed}), a bounded iteration loop on a baseline (\S\ref{subsec:loop}), the seven-stage pipeline per iteration (\S\ref{subsec:stage-pipeline}), runtime verification on the candidate image (\S\ref{subsec:verification}), and in-place container swap (\S\ref{subsec:swap}).
+
+\subsection{Directed Evolution}
+\label{subsec:directed}
+
+In the academic line, source-level self-evolving systems follow an exploratory paradigm: each candidate is scored against a fixed benchmark, random mutations are then proposed on the basis of those scores, and the better-performing variants are retained for further iteration. This paradigm does not transfer to a production-grade agentic system. The codebase is large enough that random or undirected mutation rarely lands on any useful change; quality on a production agent is task-specific and admits no benchmark-style global fitness signal; under live user traffic any unanchored patch is indistinguishable from a regression; and users themselves expect the specific scenario they encountered to be fixed, not the agent globally retuned. MOSS therefore takes a directed and deterministic approach: each evolution is anchored to a concrete batch of production-failure evidence, and every downstream stage is bound to fixing precisely that batch.
+
+Evidence enters the batch through two CLI-mediated paths that share the same backend. A periodic cron job runs \texttt{moss evo catch-up}, which scans every agent's session JSONLs from a per-session cursor and slices new content into chunks; inline, the Task-Evaluate stage scores each chunk's keypoints and only those tagged \texttt{weak} or \texttt{missing} are appended to that conversation's current open batch. In parallel, when the user expresses dissatisfaction in conversation, the agent invokes \texttt{moss evo flag}, which performs the same scan against a single session from its cursor to EOF and yields chunks the same way. Both paths append to the open batch of the source conversation---one open batch is maintained per conversation, sealed and replaced with a fresh open batch when its chunk count reaches a configurable threshold (default 8). Evolution is triggered by \texttt{moss evo start}; with no argument the latest non-empty batch is selected, and if it is still open it is sealed first.
+
+\subsection{Evolution Loop}
+\label{subsec:loop}
+
+Single-shot patching at this scale is unreliable: localization can miss relevant files, an initial plan can misdiagnose root cause or mis-scope, and a first implementation can regress on adjacent behavior. MOSS therefore iterates. Each iteration's structured evaluation of the patched candidate feeds the next iteration's localization and planning, refining direction rather than retrying from scratch. Because directed evolution has a definable success condition---the batch is fixed---the loop is bounded: it exits when that condition is met or when further work is judged unproductive.
+
+A baseline evaluation runs before iteration 1. The Task-Evaluate stage scores the original transcripts already attached to each batch chunk against a chosen keypoint set, producing a baseline keypoint matrix that anchors every subsequent comparison (\S\ref{subsec:verification}).
+
+After baseline, each iteration runs the seven-stage pipeline (\S\ref{subsec:stage-pipeline}) and ends with one of four verdicts. Three are terminal: the batch is fixed (loop exits to \S\ref{subsec:swap}), the base model has hit its ceiling, or no patch within the current harness can resolve the failure. The fourth---progress was made but more work is needed---continues into the next iteration. A plateau guard backs this up: when no keypoint has improved for several consecutive iterations, the orchestrator forces convergence at the current peak rather than consuming further trials.
+
+An evolution-depth dial---light, standard, or deep---scales the iteration budget. Maximum iteration count, per-stage round budgets, trials per task, and the plateau threshold all shift together. The default is standard; users facing more critical regressions can request deep.
+
+\subsection{Stage Pipeline}
+\label{subsec:stage-pipeline}
+
+One iteration decomposes into seven stages. A single prompt asked to diagnose, plan, implement, verify, and decide overloads context and produces lower-quality output than a sequenced flow. Each stage also reads a different artifact---traces, diagnosis, diff, trial output, cross-iteration matrix---and gate-based quality control requires explicit boundaries: a review between planning and implementation only exists if planning is its own stage. The Task-Evaluate stage stands alone for a further reason: its output is archived and compared across iterations. MOSS executes these stages in sequence by invoking a coding-agent CLI (\S\ref{subsec:external-coding-agent}) once at each stage. Build and Trial (\S\ref{subsec:verification}) are runtime affordances around the Task-Evaluate stage rather than reasoning stages themselves, and so are not counted in the seven.
+
+The seven stages, in order, are:
+
+\begin{enumerate}
+  \item \textbf{Locate} --- reads baseline traces and batch failures and writes a diagnosis without proposing fixes.
+  \item \textbf{Plan} --- identifies root cause and specifies the fix: which files change, what logic is added, what is left alone.
+  \item \textbf{Plan-Review} --- first quality gate; the plan is approved, rejected as architecturally off-target, or rejected as too narrow. The Plan and Plan-Review stages alternate within a multi-round plan-loop until approval or a round-budget cap.
+  \item \textbf{Implement} --- writes the code in the inner substrate repository as a single git commit.
+  \item \textbf{Code-Review} --- second quality gate; the diff is reviewed against the plan and approved or rejected. The Implement and Code-Review stages alternate within a multi-round code-loop, with the working tree hard-reset to the loop's starting commit between rounds.
+  \item \textbf{Task-Evaluate} --- after Build and Trial (\S\ref{subsec:verification}), scores four to seven keypoints per task on a four-level qualitative scale (\texttt{strong} / \texttt{adequate} / \texttt{weak} / \texttt{missing}). The same stage runs once during pre-loop baseline (\S\ref{subsec:loop}); the keypoint set chosen there is locked for the rest of the loop.
+  \item \textbf{Verdict} --- synthesizes all per-task evaluations and the cross-iteration keypoint matrix into one of four verdicts: \texttt{CONVERGED}, \texttt{NEED\_MORE\_WORK}, \texttt{FUNDAMENTAL\_LIMIT\_MODEL}, or \texttt{FUNDAMENTAL\_LIMIT\_ARCHITECTURE}. The orchestrator may downgrade \texttt{NEED\_MORE\_WORK} to \texttt{CONVERGED} if the keypoint matrix shows no improvement across a depth-dependent plateau window.
+\end{enumerate}
+
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[
+  font=\footnotesize,
+  every node/.style={align=center},
+  layer/.style={
+    draw, thick, rounded corners=3pt, inner sep=6pt
+  }
+]
+
+\node[layer, fill=blue!7, text width=12cm] (L0) {%
+  Layer 0: pre-loop baseline
+};
+
+\node[layer, fill=orange!10, text width=12cm, below=4mm of L0] (L1) {%
+  Layer 1: iteration loop\\[1pt]
+  iter\,1 $\rightarrow$ iter\,2 $\rightarrow$ \ldots $\rightarrow$ iter\,$N$\\[6pt]
+  \begin{tikzpicture}[font=\footnotesize, every node/.style={align=center}]
+    \node[layer, fill=green!10, text width=10.6cm] (L2) {%
+      Layer 2: stage pipeline\\[1pt]
+      \textcircled{\footnotesize 1}\,Locate $\rightarrow$ \textcircled{\footnotesize 2}\,Plan $\rightarrow$ \textcircled{\footnotesize 3}\,Plan-Review $\rightarrow$
+      \textcircled{\footnotesize 4}\,Implement $\rightarrow$\\
+      \textcircled{\footnotesize 5}\,Code-Review $\rightarrow$ \textcircled{\footnotesize 6}\,Task-Evaluate $\rightarrow$ \textcircled{\footnotesize 7}\,Verdict\\[6pt]
+      \begin{tikzpicture}[font=\footnotesize, every node/.style={align=center}]
+        \node[layer, fill=purple!10, text width=9.2cm] {%
+          Layer 3: stage-internal retry round\\[1pt]
+          round\,0 $\rightarrow$ round\,1 $\rightarrow$ \ldots
+        };
+      \end{tikzpicture}
+    };
+  \end{tikzpicture}
+};
+
+\end{tikzpicture}
+\caption{The four nested levels of MOSS evolution: a pre-loop baseline (Layer 0), an iteration loop (Layer 1), a fixed-order seven-stage pipeline per iteration (Layer 2), and internal multi-round loops around the two review gates (Layer 3).}
+\label{fig:nesting}
+\end{figure}
+
+\subsection{Runtime Verification}
+\label{subsec:verification}
+
+The Code-Review stage operates at the syntactic and semantic level, so runtime faults pass through it: race conditions, cross-module state interactions, and hook-order-dependent behavior only manifest when the agent runs. Entire classes of application-level failure---channel routing, session lifecycle, cross-module state propagation---surface only under execution. Verification must therefore be runtime, on a production-equivalent environment, and against the same prompts that produced the failure evidence in the first place.
+
+MOSS realizes this through ephemeral trial workers. After Build, the host-daemon spawns $N$ short-lived containers from the candidate image---the same image that would be promoted on convergence---and has the agent autonomously process the batch tasks inside each, repeating every task several trials to expose flakiness. Trial workers are network- and mount-isolated from the live main container and are torn down when the iteration ends. The pre-loop baseline does not require running the agent again: each batch chunk already contains the original transcript captured by auto-scan at evidence time, and the Task-Evaluate stage scores those transcripts directly to lock the keypoint set for the rest of the loop. This keeps verification closer to the deployed setting than gating on unit tests or external benchmarks would.
+
+\subsection{In-Place Container Swap}
+\label{subsec:swap}
+
+Standard deployment patterns do not fit the production setting. The agent is a single-instance system bound to user state---sessions, memory, credentials, and agent configs all live in the user-state volume---so blue-green or canary would demand sticky-session routing or non-trivial state migration. User state must also \emph{survive} the swap so that the user experiences a better agent rather than a replaced one, a constraint minimal-scaffold self-evolving agents do not face. Rollback is mandatory because trial workers run against batch tasks in isolation, without the live container's user state or production traffic, and a candidate that passes trial can still regress live.
+
+Convergence does not automatically promote the candidate. On the \texttt{CONVERGED} verdict, the evolution loop marks the batch as ready to apply and fires an \texttt{evolution-converged} webhook that the gateway routes to the agent as a system message; promotion requires the user to invoke \texttt{moss evo apply}, typically through the agent in conversation. The apply request HTTP-POSTs to the gateway, which atomically writes a swap-request file; the host-daemon's swap-supervisor file-polls that path every two seconds and, on detection, restarts the substrate container against the candidate image. A 90-second probe window follows, sampling every 5 seconds; each probe runs four health checks (heartbeat freshness $\leq 30$\,s, container running, and two substrate-level CLI status probes) and three consecutive passes commit the swap, otherwise the supervisor rolls back. The rollback target is read from an independent last-known-good image record rather than from the swap request itself, so a stale request cannot trap the system in a rollback loop. After either outcome the supervisor fires an \texttt{apply-complete} webhook---carrying success or rolled-back status---to the now-fresh gateway, where the agent receives it as a system message and re-orients to the new state. The user-state volume is mounted into the new container untouched, carrying sessions, memory, credentials, and agent configs across the swap.
+

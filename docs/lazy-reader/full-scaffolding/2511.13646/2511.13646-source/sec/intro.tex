@@ -1,0 +1,56 @@
+
+
+\section{Introduction}
+Large Language Models (\llm{s}) have rapidly progressed from simple code autocompletion~\cite{austin2021program,chen2021codex,li2022competition, xia2022less} to interactive agents capable of navigating repositories, running tests, and submitting patches end‑to‑end~\cite{yang2024sweagent,wang2024openhands,zhang2024autocoderover,xia2024agentless,carbonneaux2025cwm, liu2024large}.
+Early conversational repair systems leveraged environment feedback to iteratively refine candidate fixes~\cite{xia2024automated}, while subsequent agentic frameworks (such as \sweagent~\cite{yang2024sweagent} and \openhands~\cite{wang2024openhands}) augmented LLMs with terminals, editors, and search, enabling multi‑step tool use on complex repositories. At the same time, complementary ``more agentless'' pipelines (e.g., Moatless~\cite{moatless} and \agentless~\cite{xia2024agentless}) argue that much of the perceived complexity in agent scaffold design can be replaced by dedicated prompting and workflow design.
+
+
+
+
+
+Despite this progress, most existing agents have fixed designs and are limited in their static action space, where the scaffold implementation (including tools) is preset even when a task could benefit from more customization. In addition, manually designing an optimal software agent scaffold is extremely challenging and costly due to the infinite design space.
+As a result, more recently, the community has begun to explore self-evolving software agents~\cite{zhang2025darwin,robeyns2025sica,wang2025huxley}, which iteratively modify their own scaffold implementations and empirically validate each change using offline evaluation signals from coding benchmarks.
+However, these approaches add significant additional cost.
+For example, a single run of \dgm on \swebench{} {costs} around \$22,000 according to the original paper~\cite{zhang2025darwin}.
+Furthermore, they rely heavily on offline evolution, where improvements are typically learned on certain benchmarks and then baked into a static agent.
+In this way, the learned agents may become specialized to the given benchmarks and underlying LLMs, and may not generalize well beyond that.
+
+
+To bridge this gap,
+we introduce \livesweagent, the first
+\emph{live}, runtime self-evolving software engineering agent that expands and
+revises its own capabilities \emph{on the fly} while working on a real-world issue.
+Our key insight is that software agents are themselves software systems, and modern LLM-based software agents already possess the intrinsic capability to extend or modify their own implementation at runtime.
+{While our idea of enabling on-the-fly self-evolution applies to all parts of the agent scaffold implementation, as a first step, we focus primarily on tool creation, as it is one of the most essential parts of a software agent.}
+{\tech} starts from a simplistic agent with only bash tool access (e.g., mini-SWE-agent~\cite{yang2024sweagent}).
+During {the} regular issue-solving loop, {the agent} can synthesize, modify, and execute custom tools such as editors, code search utilities, and domain-specific analyzers.
+A lightweight step‑reflection prompt repeatedly asks the agent whether creating or revising a tool would accelerate progress, thereby turning tooling into a first‑class decision alongside ordinary actions like running tests.
+This mechanism leaves the underlying scaffold unchanged, requires no offline training, and is agnostic to the underlying LLM.
+By elevating tool creation to an explicit, iterative decision point, we unlock this hidden \emph{on-the-fly} self-improvement ability.
+
+\livesweagent addresses the limitations of existing research.
+First, with tool creation, the agent action space adapts to the problem at hand, producing task-relevant tools that precisely capture the needs to accomplish the current task.
+Furthermore, by shifting improvement from offline training to online evolution, \livesweagent alleviates tedious scaffold engineering because new abilities emerge from the encountered issues themselves.
+Importantly, tool synthesis is not a one-shot preprocessing action but a continuous iterative process interleaved with problem solving. The agent can refine tools as their understanding of the failure mode evolves.
+Despite its minimal and simplistic design, \livesweagent is generalizable to different agent scaffolds and LLMs, with state-of-the-art open results on software issue solving.
+
+We have evaluated \livesweagent on the widely used \sbv benchmark~\cite{sbv} and the more challenging \swebenchpro~\cite{deng2025swe}. Without any test‑time scaling, \livesweagent achieves \textbf{77.4\%} resolve rate on Verified and \textbf{45.8\%} on Pro, surpassing state-of-the-art open‑source baselines and{ even} the best commercial agent systems.
+Our ablations and tooling analyses reveal that (1) custom tool creation materially improves effectiveness (higher solve rates) with minimal overhead,
+(2) benefits persist across different state-of-the-art \llm backends, with better results on stronger models, demonstrating its promising future as LLMs' capabilities rapidly evolve,
+and (3) synthesized tools include both generic utilities and task-aligned specializations that benefit issue-specific problem-solving.
+
+In summary, we make the following contributions:
+
+\begin{itemize}[leftmargin=*]
+\item \textbf{The first live software agent.}  We present \livesweagent, the first \emph{live} software agent that can autonomously self-evolve its own scaffold implementation on the fly when solving real-world issues,
+without any offline training or extra pipelines.
+\item \textbf{Minimal and general implementation.} Our current implementation adopts a minimal and general design, where the agent starts from a minimal bash-only scaffold (e.g., \minisweagent) and self-improves on the fly by creating general or customized tools. The design is compatible with any existing software agent loop or LLM with negligible overhead, has been publicly available at: {\color{purple}\url{https://github.com/OpenAutoCoder/live-swe-agent}}.
+\item \textbf{State-of-the-art performance.}
+On \sbv and \swebenchpro, \livesweagent reaches 77.4\% and 45.8\% solve rates (without any test-time scaling), respectively, outperforming all existing open-source agents and commercial systems at the time of writing. To our knowledge, our \swebenchpro result is also the best reported to date.
+\item \textbf{Comprehensive analysis.} We include detailed studies of when and why on-the-fly tool creation helps, how it improves efficiency, and how it compares to other designs like fixed-tool agents, workflow-based systems, and offline self-improving methods. Notably, compared to existing self-improving agents, we achieve much better performance (65.0\% solve rate on the \sbv-60 subset vs. \dgm's 53.3\%)
+while being significantly less costly (no offline cost).
+
+\item \textbf{Unified leaderboard.} For software tasks, recent LLMs are often benchmarked using manually engineered, proprietary agent scaffolds, making fair model comparison hard. 
+ \livesweagent offers an open, unified, and powerful scaffold that enables genuinely fair, apples-to-apples comparison for future model releases. We are maintaining a leaderboard of recent models evaluated on real-world software tasks using \livesweagent at: {\color{purple}\url{http://live-swe-agent.github.io}}
+\end{itemize}
+

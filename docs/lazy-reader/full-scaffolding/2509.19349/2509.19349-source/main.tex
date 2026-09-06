@@ -1,0 +1,229 @@
+\PassOptionsToPackage{shortlabels}{enumitem}
+\documentclass[11pt, a4paper]{include/gdm_format}
+\usepackage[authoryear, sort&compress, round]{natbib}
+\usepackage{xcolor}
+\usepackage{subcaption}
+\usepackage{mwe}
+\usepackage{graphicx}
+\usepackage{xr}
+\usepackage{marvosym}
+\usepackage{makecell}
+% \usepackage{minted}
+% \usepackage[finalizecache,cachedir=.]{minted}
+% \usepackage[frozencache,cachedir=.]{minted}
+% https://www.saurabhsinghrajput.com/thoughts/1-sci-minted-arxiv
+
+\usepackage{fvextra}
+
+% Define the background color
+\definecolor{bgcolor}{rgb}{0.95,0.95,0.95}
+
+% other colors
+\definecolor{lblA}{RGB}{33,113,181}
+\definecolor{lblB}{RGB}{230,85,13}
+
+% Configure minted environment
+% \setminted{
+%     bgcolor=bgcolor,       % Set the background color
+%     fontsize=\footnotesize,
+%     breaklines,
+% }
+
+% Optional math commands from https://github.com/goodfeli/dlbook_notation.
+% \input{math_commands.tex}
+\usepackage{tablefootnote}
+\usepackage{pdfpages}
+\usepackage{etoc}
+
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{xurl}
+\usepackage[parfill]{parskip}
+
+% Custom
+\usepackage{amsmath}
+\usepackage{xspace}
+\usepackage{multirow}
+\usepackage{paracol}
+\usepackage{booktabs}
+\usepackage{color}
+\usepackage{colortbl}
+\usepackage{cleveref}
+\usepackage{graphicx}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{subcaption}
+\usepackage{wrapfig}
+\usepackage{sidecap}
+\usepackage{soul}
+\sidecaptionvpos{figure}{t}
+\usepackage{multicol}
+\usepackage{pifont}
+\usepackage[normalem]{ulem}
+\usepackage{listings}
+\usepackage{changes}
+
+
+
+\newcommand{\rob}[1]{\textcolor{orange}{Rob: #1}}
+\newcommand{\edo}[1]{\textcolor[rgb]{0,0.5,0}{Edo: #1}}
+\newcommand{\yuki}[1]{\textcolor{red}{Yuki: #1}}
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+\newcommand{\ouralgo}{\textsc{ShinkaEvolve}\xspace}
+
+\title{\ouralgo: Towards Open-Ended \textit{And} Sample-Efficient Program Evolution}
+
+\correspondingauthor{Robert Tjarko Lange (robert@sakana.ai), Edoardo Cetin (edo@sakana.ai). Robert initiated and led the project; Robert and Edoardo were core code contributors. See \Cref{sec:author_contribution_list} for detailed information on project contributions.}
+
+% TODO ROB: Consider dagger for Edo pointing to paragraph in footnotes
+\author{Robert Tjarko Lange, Yuki Imajuku and Edoardo Cetin\\Sakana AI}
+
+% \affil[1]{Sakana AI}
+% \affil[*]{Equal Contribution}
+% \affil[2]{Stanford University}
+
+
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable}
+\tcbuselibrary{listings}  % only needed if you want to directly use tcolorbox + listings
+\definecolor{lightgreen}{RGB}{235, 255, 235}  % Adjust the RGB values as needed
+
+\lstdefinelanguage{CUDA}{
+    morekeywords={
+        __global__, __device__, __host__, __shared__, __constant__,
+        dim3, gridDim, blockDim, blockIdx, threadIdx, syncthreads
+        % Add more if needed
+    },
+    sensitive=true,
+    morecomment=[l]{//},
+    morecomment=[s]{/*}{*/},
+    morestring=[b]"
+}
+
+%New colors defined below
+% \definecolor{codegreen}{rgb}{0,0.6,0}
+% \definecolor{codegray}{rgb}{0.5,0.5,0.5}
+% \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{RGB}{245,248,250}
+\definecolor{emph}{RGB}{166,88,53}
+\definecolor{nightblue}{RGB}{9,49,105}
+\definecolor{keywords}{RGB}{207,33,46}
+\definecolor{lightpurple}{RGB}{130,81,223}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{keywords},
+    stringstyle=\color{nightblue},
+    basicstyle=\ttfamily\scriptsize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    %numberstyle=\tiny\color{codegray},
+    %numbers=none,                    
+    %numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    frame=shadowbox,
+    emph={AutoTokenizer,AutoModelForSequenceClassification,Explainer},
+    emphstyle={\color{emph}},
+    emph={[2]from_pretrained,compute_table},
+    emphstyle={[2]\color{lightpurple}},
+}
+
+\lstset{style=mystyle}
+\usepackage{CJKutf8}
+\begin{document}
+
+\begin{abstract}
+% Motivation
+\input{sections/00_abstract.tex}
+\end{abstract}
+
+\maketitle
+% \vspace{-0.35cm}
+\setcounter{tocdepth}{2}
+\etocdepthtag.toc{mtchapter}
+\etocsettagdepth{mtchapter}{subsection}
+\etocsettagdepth{mtappendix}{none}
+% \tableofcontents
+% \clearpage
+
+\footnotetext{The Japanese term `shinka' translates to `evolution' or `innovation'. \ouralgo refers to the vision of an open-ended self-refining innovation engine. While \ouralgo might be a bit funny for some Japanese readers, as it sounds like Evolve-Evolve or \begin{CJK}{UTF8}{min}進化ー進化\end{CJK}, similar bilingual repetitive terms appear quite often in Japan.}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.925\textwidth]{figures/f1_conceptual.png}
+    \caption{\textbf{High-level overview of \ouralgo.} \textit{Left:} The \ouralgo framework constructs an archive of evaluated programs, rejection-samples new programs, and evaluates their fitness. \textit{Right:} \ouralgo provides a sample efficient alternative to AlphaEvolve and outperforms its Circle Packing solution.}
+    \label{fig:conceptual}
+    % \vspace{-15pt}
+\end{figure}
+
+\section{Introduction}
+
+\input{sections/01_introduction.tex}
+
+% \newpage
+\section{Related Work}
+
+\input{sections/02_background.tex}
+
+% \newpage
+\section{Method}
+\label{sec:method}
+
+\input{sections/03_method.tex}
+
+\newpage
+\section{Results}
+\label{sec:results}
+
+\input{sections/04_results.tex}
+
+% \newpage
+\section{Ablations \& Analysis} 
+\label{sec:ablations}
+\input{sections/05_analysis.tex}
+
+% \newpage
+\section{Discussion}
+
+\input{sections/06_conclusion.tex}
+
+\newpage
+\section*{Acknowledgments}
+
+We thank David Ha, Takuya Akiba, Taishi Nakamura, Luca Grilloti, Yutaro Yamada, and the rest of the Sakana AI team for helpful discussions throughout the project.
+
+\section*{Author Contribution List}
+\label{sec:author_contribution_list}
+
+\paragraph{Robert Tjarko Lange} Initiated and led the project, designed the core \ouralgo codebase, and implemented as well as collected results for Circle Packing, AIME, and ALE-Bench. Wrote the manuscript.
+\paragraph{Yuki Imajuku} Helped setting up the ALE-Bench infrastructure, advised on the ALE-Bench results and supported writing the manuscript section on ALE-Bench.
+\paragraph{Edoardo Cetin} Was involved in design discussions for \ouralgo and came up as well as implemented the adaptive LLM sampling method and the Hydra configuration. He implemented andcollected results for LLM training and Mixture-of-Experts evolution. Co-wrote the manuscript.
+
+\newpage
+\bibliography{references}
+\bibliographystyle{plainnat}
+
+\clearpage
+\appendix
+
+\etocdepthtag.toc{mtappendix}
+\etocsettagdepth{mtchapter}{none}
+\etocsettagdepth{mtappendix}{subsection}
+\renewcommand{\contentsname}{Appendix}
+\tableofcontents
+
+\newpage
+\input{sections/appendix.tex}
+
+\end{document}

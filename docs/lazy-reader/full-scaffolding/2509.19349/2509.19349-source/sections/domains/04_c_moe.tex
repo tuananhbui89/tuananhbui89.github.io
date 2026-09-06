@@ -1,0 +1,29 @@
+\paragraph{Task Description.} The Mixture-of-Expert (MoE) architecture \citep{moe_sem_1, moe_sem_2, moe_mod_1_2exp, moe_mod_2_switch_1exp} has been a critical advancement, ubiquitous amongst modern open and closed-source flagship models~\citep{moe_gemini15, guo2025deepseek, llama4, moe_qwen3,  moe_gemini25}. The basic idea is simple: replace traditional large feed-forward residual blocks with ensembles of efficient smaller modules (the ``experts'') that can each specialize in distinct problem domains~\citep{moe_mod_2_switch_1exp}. For each MoE layer and token, only the outputs of the top-K experts selected by a router classifier are computed, effectively splitting the computation and making both training and inference cheaper and faster. However, due to the non-differentiability of the top-K expert selection operation, it is critical to provide the router with an auxiliary load balancing loss (LBL), which serves to avoid early collapse toward uneven expert distribution of the token load. We deploy \ouralgo precisely to tackle this open architectural design challenge, which has been one core focus driving recent MoE advancements ~\citep{moe_sem_2, moe_mod_2_switch_1exp, moe_lbl_evo1, moe_lbl_evo2_zloss, moe_lbl_evo3, moe_deepseek_moe, moe_deepseek_demon, moe_similar_olmoe}: Devising an effective load balancing loss to incentivize efficiency and specialization, without hindering the model's expressivity.
+
+\paragraph{\ouralgo's Discovery Dynamics.} We ground the problem of LBL design by pretraining a MoE model with 556M parameters, $N_E=64$ total experts of which only $K=8$ active for any given token. This results in only 82M parameters sparsely activated in each forward pass, excluding the token embeddings. We train this small model on over 2B tokens from fineweb~\citep{fineweb} by minimizing the MoE loss function adding the LBL, weighted by $\lambda=0.01$, to the model's cross-entropy loss (CE). The fitness function of each program then measures a simple objective:  minimize the sum of the final CE together with the model's ``load imbalance'' as measured by the L1 deviation from a uniform distribution of tokens between the MoE experts. Given the cost of pretraining, we run \ouralgo for only 30 iterations.
+%, focusing exclusively on \texttt{gpt-4.1}, \texttt{gemini-2.5-pro}, and \texttt{claude-sonnet-4}.
+We evaluate the generality of \ouralgo's best-performing solutions by training a much larger MoE with 2.7B parameters on slightly under 30B fineweb tokens across three LBL coefficients  $\lambda\in{0.001,0.01, 0.1}$, yielding different levels of regularization. We then compare with the ``global-batch LBL'' used to train some of the most popular open LLMs~\citep{moe_qwen3}, in terms of final perplexity (Figure~\ref{fig:results_moe}, left) and downstream task performance (Figure~\ref{fig:results_moe}, center) as evaluated across seven different benchmarks \citep{moe_bench_1_commonsenseqa, moe_bench_2_hellaswag, moe_bench_3_openbook_qa, moe_bench_4_piqa, moe_bench_5_siqa, moe_bench_6_winogrande, moe_bench_7_arc}. We provide our results below as a function of load imbalance, showing that \ouralgo's new loss achieves a consistent edge across our training configurations, growing larger with the value of the $\lambda$ coefficient.
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.975\textwidth]{figures/f5_results_moe.pdf}
+    \caption{\textbf{\ouralgo for discovering Mixture-of-Experts Load Balancing Loss Functions.} \textit{Left:} Downstream task performance across seven benchmarks. \textit{Middle:} Final perplexity across different missroute fractions. \textit{Right:} Load imbalance gradient as a function of the token allocation.}
+    \label{fig:results_moe}
+    \vspace{-15pt}
+\end{figure}
+\paragraph{\ouralgo's Discovered Solution.} The discovered LBL is a new twist on the established global-batch LBL, which was used for seeding the evolutionary search. \ouralgo complements this popular LBL with a new term, specifically targeted toward regularizing the MoE layers with individual under-specialized experts. Concretely, let $f_{\ell, i}$ and $P_{\ell, i}$ correspond to the selection frequency and the average router probabilities for each expert $i$ located in layer $\ell$. \ouralgo's LBL uses a normalized complement to the entropy in each layer $s(P_\ell)=0.5 + \Bigl(1-\frac{H(P_\ell)}{\log N_E}\Bigr)$ and a minimum usage threshold target $\tau = 0.064/{N_E}$ to compute:
+\begin{equation}
+\label{eq:discovered_lbl_colored}
+\begin{aligned}
+L_{\mathrm{LBL}}
+&=
+\underbrace{%
+\color{lblA} N_E \cdot \frac{1}{L}
+\sum_{\ell=1}^{L}\sum_{i=1}^{N_E} f_{\ell,i}\,P_{\ell,i}
+}_{\text{Global-batch LBL}}+
+\underbrace{%
+\color{lblB} \frac{0.1}{L}\sum_{\ell=1}^{L}
+s(P_\ell)\,\sum_{i=1}^{N_E}\max\!\bigl(0,\tau-f_{\ell,i}\bigr)
+}_{\text{\ouralgo new regularization}} \, .
+\end{aligned}
+\end{equation}
+The effects of \ouralgo's new regularization term can be visualized through its induced gradients acting on the router's token allocation in a simplified two-expert scenario (Figure~\ref{fig:results_moe}, right). Intuitively, this term softly affects the MoE router of any layer, with experts getting allocated a fraction of tokens less than $\tau$. The multiplier $s(P_\ell)$ makes this push stronger when the layer's routing entropy $H(P_\ell)$ is low and the router is concentrating on fewer dominating experts. This closes a potential blind spot of the global-batch LBL: the dot product $f\!\cdot\!P$ can look ``balanced'' even if few experts are barely touched. Thus, \ouralgo's new term can be seen as a safety net that adaptively activates and vanishes once an expert crosses the floor, providing dead experts and avoiding over-regularizing well-balanced layers.

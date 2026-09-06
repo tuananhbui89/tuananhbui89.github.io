@@ -1,0 +1,80 @@
+\section{\ourmethod: Co-Evolving Agents and Their Evaluators}
+\label{sec:method}
+
+We introduce the \textbf{Red Queen G\"odel Machine}, dubbed \ourmethod, a recursive self-improvement framework in which learned evaluators improve alongside the agents they score~(\cref{fig:method-overview}). Building on the search method of prior systems~\citep{zhang2025darwin,wang2025huxley,zhang2026hyperagents}, \ourmethod makes four modifications: (i) each archive node is a multi-agent workspace rather than a single agent; (ii) evaluators are themselves learned agentic processes; (iii) the utility functions driving the search may change at designated evolutionary epochs; and (iv) evaluators may be replaced at such points. We review the search method in \cref{sec:method:prelim}, introduce the multi-agent formulation in \cref{sec:method:multiagent,sec:method:hierarchy} and the co-evolutionary mechanisms in \cref{sec:method:generative,sec:method:utility}. \Cref{alg:main} shows the full procedure while \cref{app:proofs} provides theory.
+
+\begin{figure}[htb]
+  \centering
+  \includegraphics[width=\linewidth]{figures/rqgm-main-diagram-v3-corr-epsilon-tnr.pdf}
+  \caption{\textbf{\ourmethod\ searches over a multi-agent workspace tree containing both learnable task agents and evaluators.} At each step, a node is selected by Thompson sampling over clade metaproductivity and either expanded by a meta-agent or evaluated. Evaluators are scored against a ground-truth anchor and task agents by their epoch-local frozen evaluator or a fixed benchmark for evaluator-independent roles. At checkpoints, each frozen slot compares its incumbent against challenger evaluators on a ground-truth anchor; then the $\epsilon$-best-belief evaluator is frozen for the next epoch and the utility records from the displaced evaluator are erased~(\cref{alg:main}).}
+  \label{fig:method-overview}
+  \vspace{-0.2cm}
+\end{figure}
+
+\subsection{Preliminaries: Self-Improvement as Tree Search}
+\label{sec:method:prelim}
+
+Following \citet{wang2025huxley}, we formulate self-improvement as a tree search over a growing archive of agent nodes $\mathcal{T}_t$, initialized with a seed node $\mathcal{T}_0=\{a_0\}$. At every step $t\in\mathbb{N}$, the search either \emph{modifies} a node $a\in\mathcal{T}_t$, adding the edited copy as a child of $a$, or \emph{evaluates} a node on a \emph{task}, recording a binary outcome $o\in\{0,1\}$. These binary outcomes are aggregated into scores counting the number of successes $S_a \in \mathbb{N}$ and failures $F_a \in \mathbb{N}$ the node accumulates over several evaluations. When the allocated search evaluation budget $B \in \mathbb{N}$ is exhausted, the highest-scoring archive node is returned. Because a node's own success rate may poorly predict what its descendants will achieve, we follow the \hgm~\citep{wang2025huxley} and adopt \emph{clade metaproductivity} (\cmp) as the search utility: the success rate pooled over a node's \emph{clade} $C(a)$, defined as the subtree rooted at $a$, with nodes selected for expansion or evaluation by Thompson sampling over these clade-level outcomes. Letting $n_{\mathrm{success}}^{C}(a),\,n_{\mathrm{failure}}^{C}(a)\in\mathbb{N}$ accumulate the successes and failures of all nodes in clade $C(a)$, we define:
+\[
+\widehat{\cmp}(a)
+=
+\frac{n_{\mathrm{success}}^{C}(a)}{n_{\mathrm{success}}^{C}(a)+n_{\mathrm{failure}}^{C}(a)} \in [0,1].
+\]
+The final agent is selected by $\epsilon$-best-belief score $BB_\epsilon(a)=I^{-1}_{\epsilon}\!\left(1+S_a,\,1+F_a\right)\in[0,1]$, where $\epsilon\in(0,1)$ is a confidence level and $I^{-1}_{\epsilon}$ is the inverse regularized incomplete Beta function, i.e., the $\epsilon$-quantile of the Beta posterior over the agent's successes $S_a$ and failures $F_a$, a conservative utility estimate. For a repeatable evaluation criterion, \cmp suffices to approximate the G\"odel Machine~\citep{wang2025huxley}.
+
+\subsection{Search Space}
+\label{sec:method:multiagent}
+
+\noindent\textbf{Multi-agent architecture.}~~To co-evolve agents and evaluators, we formulate each archive node $a$ not as a single agent but as a shared, evolvable workspace populated by $K\in\mathbb{N}$ agentic roles $\mathcal{R}=\{r_1,\ldots,r_K\}$ composed of task agents and evaluators. Every role $r\in\mathcal{R}$ has its own \emph{task pool} $\mathcal{D}_r$, a finite set of tasks on which it is scored, each $d\in\mathcal{D}_r$ contributing a utility signal. A paper-reviewer role, for instance, might serve two such tasks: reviewing human-written and agent-generated papers. Because each task belongs to a single role, a task uniquely identifies its role; following \hyperagents, we therefore call a role's agent a \emph{task agent} wherever the role is unambiguous. Each node is allocated a meta-agent that oversees the workspace and can modify it during the search~\citep{zhang2026hyperagents}. Since the meta-agent and role-agent code are editable, roles may re-use each other's code if the meta-agent deems it useful. Only the scoring and orchestration harness is fixed.
+
+\noindent\textbf{Learned evaluators.}~~Open-ended roles such as paper writing admit no ground-truth signal and require learned evaluators. We call such roles \emph{evaluator-dependent}, in contrast to \emph{evaluator-independent} roles with a fixed benchmark. Each evaluator-dependent role is scored through an \emph{evaluator slot} replaceable during search; its \emph{epoch index} counts replacements. Since the $M\le K$ evaluator-dependent slots are replaced independently, we collect their epoch indices into an \emph{epoch vector} $\boldsymbol{j}=(j_1,\dots,j_M)\in\mathbb{N}^{M}$. Replacing a slot's evaluator advances its entry $\mathbb{N}^{M}\ni\boldsymbol{j}\rightarrow\boldsymbol{j}'\in\mathbb{N}^{M} $~(\cref{sec:method:utility}), so each evaluator evolves with its role while staying epoch-stationary.
+
+\noindent\textbf{Utility definition.}~~Utility aggregates bottom-up through two uniform averages, first over a role's tasks and then over roles, so that the search is equally rewarded for optimizing all roles.\footnotemark{} The base quantity is $p_{r,d,\boldsymbol{j}}(a)\in[0,1]$, node $a$'s expected binary success rate on task $d\in\mathcal{D}_r$ under epoch vector $\boldsymbol{j}$; the $\boldsymbol{j}$ subscript makes this success rate, and hence all utilities built from it, epoch-local. Averaging uniformly over a role's tasks gives the per-role rate $p_{r,\boldsymbol{j}}(a)=\frac{1}{|\mathcal{D}_r|}\sum_{d\in\mathcal{D}_r}p_{r,d,\boldsymbol{j}}(a)\in[0,1]$, and averaging these uniformly over roles gives the agent utility $U_{\boldsymbol{j}}(a) = \frac{1}{|\mathcal{R}|}\sum_{r\in\mathcal{R}}p_{r,\boldsymbol{j}}(a)\in[0,1]$.
+
+\footnotetext{We default to uniform over sample-weighted averaging because some tasks can generate unbounded evaluations.}
+
+\noindent\textbf{Data isolation.}\label{sec:method:train}~~To prevent memorization and improve generalization, \ourmethod separates feedback that \emph{creates} nodes from evidence that \emph{selects} them. For evaluator-independent roles, each node sees only a subset of the training split, with disjoint validation and test splits held out. For evaluator-dependent roles, the task agent generates fresh artifacts that the epoch-local evaluator scores, with separate artifacts used for training and search. In both cases, the training results of each node and its ancestors are shown to the meta-agent to guide self-modification, but never influence search utility. Node selection is driven solely by evaluations on the validation split, preventing overfitting. Final performance is reported on a held-out test split separate from the validation data used for search.
+
+\subsection{Three-Level Sampling Hierarchy}
+\label{sec:method:hierarchy}
+
+Following \citet{wang2025huxley}, a scheduler interleaves \emph{expansion} (adding a new node) with \emph{evaluation} (scoring an existing one) while balancing exploration against exploitation to find a good solution. At each step $t$, given the number of evaluations performed $N_t\in\mathbb{N}$, an expansion exponent $\alpha\in(0,1)$, and the archive size $|\mathcal{T}_t|$, a \emph{UCB-Air} gate~\citep{NIPS200849ae49a2} adds a new node if $N_t^{\alpha} \ge |\mathcal{T}_t|$, evaluates the existing one otherwise. Thus, the size of the archive is $|\mathcal{T}_t|=\mathcal{O}(N_t^{\alpha})$.
+
+The scheduler first selects a node $a^\star$ by Thompson sampling over \cmp: an expansion hands $a^\star$ to its meta-agent to edit into a new child, while an evaluation descends two levels, role then task. Let $\mathcal{R}_{\mathrm{elig}}\subseteq\mathcal{R}$ be the roles eligible at $a^\star$, $\mathcal{D}_{r,\mathrm{elig}}\subseteq\mathcal{D}_r$ the eligible tasks of a role $r$, and $n_r(a),\,n_d(a)\in\mathbb{N}$ the evaluations assigned to role $r$ and task $d$ at node $a$. A task is \emph{eligible} unless its dataset is exhausted under sampling; when sampling with replacement every task stays eligible ($\mathcal{D}_{r,\mathrm{elig}}=\mathcal{D}_r$), and a role is eligible when any task is. At each level the scheduler picks the least-evaluated eligible option: the role $r^\star=\argmin_{r\in\mathcal{R}_{\mathrm{elig}}} n_r(a^\star)$ conditioned on $a^\star$, then the task $d^\star=\argmin_{d\in\mathcal{D}_{r^\star,\mathrm{elig}}} n_d(a^\star)$ conditioned on $(a^\star,r^\star)$. Each evaluation produces a binary outcome accumulated at the node level for Thompson sampling; role- and task-level counters only load balance. \Cref{prop:balanced-working-posterior} shows that, for a fixed evaluator epoch and node, balanced sampling across roles and tasks gives the pooled Beta accumulator a posterior mean converging to the role--task balanced utility $U_{\boldsymbol{j}}(a)$ almost surely.
+
+
+\subsection{Co-Evolving Evaluation}
+\label{sec:method:generative}
+
+We assume learned evaluators are \emph{epoch-local stationary}~(\cref{assumption:generative}): the evaluator, artifact-generation protocol, and binary scoring rule are frozen throughout an epoch. We define a \emph{utility transition}~(\cref{def:utility-transition}) as a procedure that replaces a slot's evaluator and performs \emph{selective erasure}, removing only the utility history attached to the displaced slot while preserving all unrelated information. Selective erasure is also order-independent when multiple transitions trigger at once~(\cref{rem:erasure-commute}).
+\theorybox[Epoch-Local Validity.]{If evaluator-dependent criteria are fixed within each epoch and records invalidated by a displaced evaluator are erased at transitions, then each epoch induces a fixed binary-outcome search problem~(\cref{prop:validity}). Therefore, \theourmethod can directly use \hgm search within an epoch.}
+
+
+
+
+\subsection{Controlled Utility Evolution}
+\label{sec:method:utility}
+While fixed evaluators give each epoch a stationary utility signal, \ourmethod improves them over time by replacing them at epoch boundaries under a principled criterion. More broadly, evaluator replacement is one example of a \emph{utility transition}~(\cref{def:utility-transition}). Since our guarantees require only a fixed within-epoch utility criterion and boundary erasure of dependent records, other non-stationary utilities, such as time-varying benchmarks or adversarial objectives, fit the same structure.
+
+
+\noindent\textbf{Ground-truth best-belief evaluator replacement.}~~At each epoch boundary, every slot compares its incumbent against challengers on a \emph{ground-truth anchor}: a fixed, held-out dataset of objective or human-preference labels for that role. Because this anchor is evaluator-independent, agreement with it gives a replacement criterion consistent across epochs. Candidates are ranked by the same $\epsilon$-best-belief score ($BB_\epsilon$) used for agent selection~(\cref{sec:method:prelim}), and the largest anchor $BB_\epsilon$ is frozen as the next-epoch evaluator, with ties favoring the incumbent to avoid unnecessary erasures. \Cref{prop:piecewise-fixed-validity} establishes the multi-epoch process as a sequence of fixed-criterion searches.
+\theorybox[Anchor Lower Bound.]{The promoted evaluator maximizes $BB_\epsilon$, a lower bound its anchor utility exceeds with probability $1-\epsilon$, so the replacement is likely to outperform the incumbent~(\cref{prop:best-belief-lower-bound,prop:anchor-best-belief-replacement}).}
+
+
+\noindent\textbf{Amortized utility-transition cost.}~~When an evaluator is replaced, records scored by the displaced evaluator are erased and the affected task agents must be re-ranked under the new one. Re-ranking the entire archive immediately would waste budget on nodes the search may never revisit. Instead, \theourmethod re-scores old nodes only when later evaluations return to them. The three-level sampling hierarchy~(\cref{sec:method:hierarchy}) naturally prioritizes under-evaluated nodes, roles, and tasks as search proceeds. Reusing cached agent outputs also lets us re-evaluate nodes without additional task-agent calls.
+
+Erasure preserves epoch-local stationarity: keeping stale utilities or re-scaling them onto the new evaluator would mix evidence from different utility functions and violate the condition required by our guarantees. To control the re-evaluation costs we introduce a checkpoint schedule. With exponentially spaced checkpoints, the number of records exposed to erasure grows only linearly with the evaluation budget, which also enables later, more accurate evaluators to shape the search for longer.
+
+ \theorybox[Bounded Recovery.]{For exponentially spaced checkpoints with ratio $\rho>1$, the cumulative number of prior slot-dependent records exposed to erasure or re-evaluation over a budget of $B$ evaluations is $\mathcal{O}(B)$. This reduces the $\mathcal{O}(B^2)$ cost of allowing a utility transition after every evaluation~(\cref{prop:linear-work,rem:dense-quadratic}).}
+
+
+
+\takeawaybox[Summary of Theoretical Guarantees:]{
+\Cref{prop:validity,prop:anchor-best-belief-replacement,prop:linear-work} together show that \hgm's self-improvement guarantees carry over to the co-evolutionary setting on a per-epoch basis via \emph{controlled utility evolution}. This rests on the three results below: the first secures guarantees \emph{within} each epoch, the second carries improvement \emph{across} epochs, and the third bounds the cost of doing so.
+\begin{enumerate}[leftmargin=*]
+\item \textbf{Epoch-Local Validity.} Each epoch is itself a fixed-criterion search problem~(\cref{prop:validity}), so \hgm's per-epoch convergence guarantees apply directly within every epoch.
+\item \textbf{Anchor-Guided Improvement.} Evaluators are only promoted when they raise the $\epsilon$-best-belief score on a fixed ground-truth anchor~(\cref{prop:anchor-best-belief-replacement}), so evaluators improve \emph{across} epochs, not just within them.
+\item \textbf{Amortized Transitions.} The bookkeeping cost of evaluator replacement is linear in the search budget~(\cref{prop:linear-work}), so co-evolution does not impose asymptotic overhead beyond standard archive search.
+\end{enumerate}
+Informally, \emph{convergence guarantees hold epoch-by-epoch for \theourmethod due to epoch-local stationarity, while controlled utility evolution encourages improvement across epoch boundaries.}
+}
