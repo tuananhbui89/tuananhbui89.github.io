@@ -25,6 +25,13 @@ if ! command -v node >/dev/null 2>&1; then
 fi
 EXECJS_RUNTIME=Node JEKYLL_ENV=production bundle exec jekyll build
 
+# Lecture Noter keeps its reusable working bundles in the source checkout.
+# They must never be mirrored into the public deployment repository.
+if [[ -e "_site/lecture-notes" ]]; then
+  echo "Refusing to publish: _site/lecture-notes must not exist." >&2
+  exit 1
+fi
+
 # Mirror the generated site and remove pages that no longer exist. Preserve
 # repository metadata and its local ignore rules.
 rsync -av --progress --delete \
