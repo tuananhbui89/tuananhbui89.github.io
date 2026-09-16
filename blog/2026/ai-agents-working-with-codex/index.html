@@ -172,9 +172,11 @@
 <li class="toc-entry toc-h2">
 <a href="#good-practices">Good Practices</a>
 <ul>
+<li class="toc-entry toc-h3"><a href="#keeping-repository-context-useful">Keeping Repository Context Useful</a></li>
 <li class="toc-entry toc-h3"><a href="#ai-coding-workflow-from-matt-pocock">AI Coding Workflow from Matt Pocock</a></li>
 <li class="toc-entry toc-h3"><a href="#hidden-simplification-in-background-instructions">Hidden Simplification in Background Instructions</a></li>
-<li class="toc-entry toc-h3"><a href="#case-study-memory-can-compromise-evaluation-isolation">Case study: memory can compromise evaluation isolation</a></li>
+<li class="toc-entry toc-h3"><a href="#a-lesson-memory-can-compromise-evaluation-isolation">A Lesson: memory can compromise evaluation isolation</a></li>
+<li class="toc-entry toc-h3"><a href="#a-lesson-careful-when-creating-agents-system-prompts-in-a-long-codex-session">A Lesson: Careful when creating Agents’ system prompts in a long Codex session</a></li>
 </ul>
 </li>
 </ul>
@@ -184,9 +186,9 @@
     </aside>
     
     <div id="markdown-content">
-      <p>Software engineers are understandably anxious about coding agents. If an agent can inspect a repository, implement a feature, run tests, and review a patch, which of our current skills will continue to matter? A manager once gave me a useful way to think about this: the greatest risk is not that Codex improves, but that our own skills remain frozen at one snapshot of what the tool can do. Engineers who learn to work with the agent, evaluate its output, and contribute at the layer above its current capability will continue to create value.</p>
+      <p>Recently, software engineers or even applied/research scientists are understandably anxious about coding agents. If an agent can inspect a repository, implement a feature, run tests, and review a patch, which of our current skills will continue to matter? My manager once gave me a useful way to think about this: “the greatest risk is not that Codex improves, but that our own skills remain frozen at one snapshot of what the tool can do”. Engineers who learn to work with the <strong>latest</strong> agent, evaluate its output, and contribute at the layer above its current capability will continue to create value.</p>
 
-<p>This pattern is not new. When automobiles replaced horse-drawn transport, the valuable skills changed with the technology. What feels different today is the speed of the transition. A clear example of the fast pace development can be seen in the change of workflow from prompt engineering to context engineering, harness engineering, agent loops, and increasingly graph-shaped workflows in just less then a year or two. The labels will keep changing, but the underlying demand is stable: we need to understand the system well enough to direct it, constrain it, verify it, and improve how humans and agents work together.</p>
+<p>This pattern is not new. When automobiles replaced horse-drawn transport, the valuable skills changed with the technology. What feels different today is the speed of the transition. A clear example of the fast pace development can be seen in the change of workflow from prompt engineering to context engineering, harness engineering, agent loops, and recently graph engineering in just less then a year or two. The labels will keep changing, but the underlying demand is stable: we need to understand the <strong>latest</strong> system well enough to direct it, constrain it, verify it, and improve how humans and agents work together.</p>
 
 <p>This post is my self-study note when working with Codex. I cover features such as Plan mode, Goal mode, together with real case studies and mistakes from my own work. The goal of this post is to provide understanding which mode fits which kind of task, how to give Codex useful autonomy without losing control, and how to preserve human judgment as the tool evolves.</p>
 
@@ -571,6 +573,27 @@ reconstructions, blocked claims, and remaining uncertainty.
 
 <p>This section collects practical skills, workflows, tutorials, and field notes that have improved how I work with AI coding agents. These notes are not meant to be a polished methodology. They are closer to a personal operating manual: small practices I found useful, mistakes I want to avoid repeating, and workflows I want to keep testing in real projects.</p>
 
+<h3 id="keeping-repository-context-useful">Keeping Repository Context Useful</h3>
+
+<p>Codex explores a repository incrementally. It loads applicable <a href="https://learn.chatgpt.com/docs/agent-configuration/agents-md" rel="external nofollow noopener" target="_blank">AGENTS.md instructions</a>, searches filenames and symbols—often with <code class="language-plaintext highlighter-rouge">rg --files</code> and <code class="language-plaintext highlighter-rouge">rg</code>—then reads relevant files and follows references. Opening a project does not automatically put every file into the model’s context. However, discoverable temporary files, duplicate implementations, and outdated reports can produce distracting matches or encourage incorrect assumptions about the current system.</p>
+
+<p><strong><code class="language-plaintext highlighter-rouge">.gitignore</code> is a useful discovery filter, not an access restriction.</strong> Normal recursive <code class="language-plaintext highlighter-rouge">rg</code> searches and Codex’s default filename search honor ignore rules, but direct reads, explicitly named search targets, and commands such as <code class="language-plaintext highlighter-rouge">find</code> can still reach ignored material. A dot-prefixed folder alone such as <code class="language-plaintext highlighter-rouge">.trash/</code> is insufficient: Codex’s filename search can include hidden entries.</p>
+
+<p>My practical rules are:</p>
+
+<ul>
+  <li>
+<strong>Collect small, active scratch work</strong> in <code class="language-plaintext highlighter-rouge">.scratch/&lt;task&gt;/</code> and add <code class="language-plaintext highlighter-rouge">/.scratch/</code> to <code class="language-plaintext highlighter-rouge">.gitignore</code>. Use <code class="language-plaintext highlighter-rouge">.git/info/exclude</code> for personal exclusions that should not change the shared repository rules.</li>
+  <li>
+<strong>Move bulk and accumulated outputs outside the active repository:</strong> dataset dumps, checkpoints, large logs, downloads, and completed experiment runs. Keep conventional build caches in place when tooling expects them, with appropriate ignore rules.</li>
+  <li>
+<strong>Remove obsolete copies from the working tree once safely preserved</strong> in Git history or an external archive. Mark retained historical documents as superseded and link to their replacement. Preserve useful findings in maintained documentation, tests, and small reproducible examples.</li>
+  <li>
+<strong>Give Codex a concise repository map in <code class="language-plaintext highlighter-rouge">AGENTS.md</code>:</strong> identify authoritative source and test directories, label generated or historical material, and ask it to search the relevant component first. For example: “Skip <code class="language-plaintext highlighter-rouge">.scratch/</code> and <code class="language-plaintext highlighter-rouge">artifacts/</code> during routine exploration unless the task requires them.” Keep this guidance short; it also consumes context.</li>
+</ul>
+
+<p>These practices reduce misleading context. Correctness still needs verification against the current implementation and relevant tests.</p>
+
 <h3 id="ai-coding-workflow-from-matt-pocock">AI Coding Workflow from Matt Pocock</h3>
 
 <p><a href="https://www.youtube.com/watch?v=-QFHIoCo-Ko&amp;t=1163s" rel="external nofollow noopener" target="_blank">Full Walkthrough: Workflow for AI Coding - Matt Pocock</a> is a practical workshop on turning ambiguous product ideas into agent-ready implementation work. My main takeaway is that AI coding works best when we separate the workflow into stages:</p>
@@ -651,7 +674,7 @@ decision before choosing it.
 
 <p>An <code class="language-plaintext highlighter-rouge">AGENTS.md</code> cannot override stronger system or developer instructions. In this case, the global quality preference must be compatible with—or I must disable—the Ponytail instruction. The broader lesson is that the instruction hierarchy, evaluation target, and review point must agree.</p>
 
-<h3 id="case-study-memory-can-compromise-evaluation-isolation">Case study: memory can compromise evaluation isolation</h3>
+<h3 id="a-lesson-memory-can-compromise-evaluation-isolation">A Lesson: memory can compromise evaluation isolation</h3>
 
 <p>One hidden failure mode appeared in my own Codex workflow. I developed a feature in one thread and all tests passed. I then opened a new Codex thread and repeated the test; it passed again. Yet the feature failed after deployment in what appeared to be the same setting.</p>
 
@@ -670,6 +693,14 @@ using it.
 </code></pre></div></div>
 
 <p>This instruction reduces behavioural leakage, but it is not a complete isolation boundary if Codex has already injected a memory summary into the thread. For a strict evaluation, I should also run the evaluator with memories disabled, or in a clean environment that has no prior memory artifacts. The right standard is not merely that two agent threads agree; it is that an independent run, with the relevant deployment configuration, reproduces the result.</p>
+
+<h3 id="a-lesson-careful-when-creating-agents-system-prompts-in-a-long-codex-session">A Lesson: Careful when creating Agents’ system prompts in a long Codex session</h3>
+
+<p>Today I ran into an issue that I only discovered after carefully rereading the code Codex had generated—spread across more than a hundred files after over nine hours of work.</p>
+
+<p>The framework I designed needs multiple agents, and each agent requires a specialized system prompt to handle its specific module. However, when I reviewed the system prompts for each module, I found that the prompts Codex had created contained fairly generic instructions and did not include enough context. As a result, if they were run in a fresh Codex session, the agent would have a hard time understanding the task immediately and would need to spend effort clarifying everything again from the beginning.</p>
+
+<p>My hypothesis is that I implemented this framework after a series of very long conversations with Codex about the design and requirements. In that session, Codex had already absorbed the necessary information to handle a similar problem. So when it wrote system prompts to delegate work to another Codex instance, it gave instructions from its own perspective at that time—when it already understood the context clearly. This led to the generic system prompts it generated.</p>
 
     </div>
   </article>
