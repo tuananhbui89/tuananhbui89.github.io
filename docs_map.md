@@ -1,0 +1,4 @@
+- `/Users/tuananhbui/Personal/Gitpages/al-folio/_posts`: for to-be-published posts. Each post should follow the file name rule, e.g., `YYYY-MM-DD-parent-topics/series-post-name`
+- `/Users/tuananhbui/Personal/Gitpages/al-folio/_drafts`: for not-ready-to-publish posts. Follow the similar file name rule
+- `/Users/tuananhbui/Personal/Gitpages/al-folio/_projects`: for dedicated project.
+- `/Users/tuananhbui/Personal/Gitpages/al-folio/assets`: for assets related to the site. The related materials should be organized with their post/project name, i.e., `agents-101/illustrations/01-why-agents-why-now`

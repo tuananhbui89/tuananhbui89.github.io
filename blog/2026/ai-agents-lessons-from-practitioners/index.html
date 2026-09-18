@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">    
+    
+
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>AI Agents Series | Lessons from Engineers and Scientists | Tuan-Anh  Bui</title>
+    <meta name="author" content="Tuan-Anh  Bui">
+    <meta name="description" content="A growing collection of practical experiences with AI agents, including the failures, workflow changes, and lessons behind the results.">
+    <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
+
+
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+    
+    <link defer rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css">
+
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700%7CRoboto+Slab:100,300,400,500,700%7CMaterial+Icons">
+
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="" id="highlight_theme_light">
+
+    
+
+    
+    
+    <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
+    
+    <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+    <link rel="canonical" href="https://tuananhbui89.github.io/blog/2026/ai-agents-lessons-from-practitioners/">
+
+    
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark">
+    <script src="/assets/js/theme.js?96d6b3e1c3604aca8b6134c7afdd5db6"></script>
+    <script src="/assets/js/dark_mode.js?9b17307bb950ffa2e34be0227f53558f"></script>
+    
+
+  </head>
+
+  
+  <body class="fixed-top-nav ">
+
+    
+    <header>
+
+      
+      <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top">
+        <div class="container">
+          <a class="navbar-brand title font-weight-lighter" href="/"><span class="font-weight-bold">Tuan-Anh </span>Bui</a>
+          
+          <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar top-bar"></span>
+            <span class="icon-bar middle-bar"></span>
+            <span class="icon-bar bottom-bar"></span>
+          </button>
+
+          <div class="collapse navbar-collapse text-right" id="navbarNav">
+            <ul class="navbar-nav ml-auto flex-nowrap">
+
+              
+              <li class="nav-item ">
+                <a class="nav-link" href="/">about</a>
+              </li>
+              
+              
+              <li class="nav-item active">
+                <a class="nav-link" href="/blog/">blog<span class="sr-only">(current)</span></a>
+              </li>
+
+              
+              <li class="nav-item ">
+                <a class="nav-link" href="/publications/">publications</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/projects/">projects</a>
+              </li>
+              <li class="nav-item ">
+                <a class="nav-link" href="/teaching/"></a>
+              </li>
+
+              
+              <li class="toggle-container">
+                <button id="light-toggle" title="Change theme">
+                  <i class="fas fa-moon"></i>
+                  <i class="fas fa-sun"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      
+      <progress id="progress" value="0">
+        <div class="progress-container">
+          <span class="progress-bar"></span>
+        </div>
+      </progress>
+    </header>
+
+
+    
+    <div class="container mt-5">
+      
+        
+
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">AI Agents Series | Lessons from Engineers and Scientists</h1>
+    <p class="post-meta">September 18, 2026</p>
+    <p class="post-tags">
+      <a href="/blog/2026"> <i class="fas fa-calendar fa-sm"></i> 2026 </a>
+        ·  
+        <a href="/blog/tag/genai">
+          <i class="fas fa-hashtag fa-sm"></i> genai</a>  
+          <a href="/blog/tag/llm">
+          <i class="fas fa-hashtag fa-sm"></i> llm</a>  
+          <a href="/blog/tag/agents">
+          <i class="fas fa-hashtag fa-sm"></i> agents</a>  
+          <a href="/blog/tag/engineering">
+          <i class="fas fa-hashtag fa-sm"></i> engineering</a>  
+          <a href="/blog/tag/research">
+          <i class="fas fa-hashtag fa-sm"></i> research</a>  
+          <a href="/blog/tag/reading">
+          <i class="fas fa-hashtag fa-sm"></i> reading</a>  
+          
+
+    </p>
+  </header>
+
+  <article class="post-content">
+    
+    <aside id="floating-toc" class="floating-toc" aria-label="Table of contents">
+      <details>
+        <summary><i class="fas fa-list" aria-hidden="true"></i><span>On this page</span></summary>
+        <div class="floating-toc__content">
+          
+          <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h2"><a href="#collection-index">Collection index</a></li>
+<li class="toc-entry toc-h2"><a href="#1-lauren-tan-building-trust-before-scaling-coding-agents">1. Lauren Tan: building trust before scaling coding agents</a></li>
+<li class="toc-entry toc-h2"><a href="#2-matt-pocock-from-a-shared-idea-to-an-agent-ready-backlog">2. Matt Pocock: from a shared idea to an agent-ready backlog</a></li>
+</ul>
+          
+        </div>
+      </details>
+    </aside>
+    
+    <div id="markdown-content">
+      <p><a href="/blog/2026/ai-agents-series/">Back to the AI Agents Series</a></p>
+
+<p>This is a growing collection of experiences from engineers and scientists working with AI agents. I want to preserve the details that make those experiences useful: what someone was trying to accomplish, where the agent failed, what changed in the workflow, and which lessons might transfer to another project.</p>
+
+<p>Each entry opens with sources, context, and a summary of the key ideas and lessons. Expand the detailed notes for the practitioner’s stories, supporting evidence, and further discussion. Reported results remain attributed to their authors. Where I extend an idea to my own interests, especially scientific work, I label that as an interpretation or a proposed application.</p>
+
+<h2 id="collection-index">Collection index</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Entry</th>
+      <th>Practitioner and setting</th>
+      <th>Main lesson</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a href="#lauren-tan">1. Building trust before scaling coding agents</a></td>
+      <td>Lauren Tan, describing her engineering work at Cursor</td>
+      <td>Invest in runtime verification, evaluated skills, and enforceable architecture before increasing autonomy.</td>
+    </tr>
+    <tr>
+      <td><a href="#matt-pocock">2. From a shared idea to an agent-ready backlog</a></td>
+      <td>Matt Pocock, demonstrating an AI coding workflow on a course platform</td>
+      <td>Resolve ambiguity with people, deliver small end-to-end changes, and preserve architectural understanding while delegating implementation.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><a id="lauren-tan"></a></p>
+
+<h2 id="1-lauren-tan-building-trust-before-scaling-coding-agents">1. Lauren Tan: building trust before scaling coding agents</h2>
+
+<h3 class="no_toc" id="sources-and-context">Sources and context</h3>
+
+<ul>
+  <li>
+<strong>Video:</strong> <a href="https://www.youtube.com/watch?v=KwOX7vJyoOk" rel="external nofollow noopener" target="_blank">SpaceXAI engineer Lauren Tan</a>.</li>
+  <li>
+<strong>Related implementation:</strong> <a href="https://github.com/cursor/plugins/tree/main/pstack" rel="external nofollow noopener" target="_blank">pstack in the official Cursor plugins repository</a>, the engineering skills collection discussed in the talk.</li>
+</ul>
+
+<p>Tan describes a progression from closely supervising a handful of agents to allowing some agent-written pull requests to merge automatically. Her explanation centers on the environment around those agents: how they investigate, how they check their work, and which mistakes the codebase makes difficult to introduce.</p>
+
+<p>The scale is striking. She reports landing roughly a thousand PRs in the preceding month and waking up to about twenty already-merged PRs on the day of the talk. But she also describes substantial preparation, including more than six hundred PRs during a refactoring effort. These numbers establish the scale of her experience; they do not establish a productivity multiplier or a defect rate. <a href="https://www.youtube.com/watch?v=KwOX7vJyoOk&amp;t=84s" rel="external nofollow noopener" target="_blank">Trust and throughput, 01:24–05:53</a>; <a href="https://www.youtube.com/watch?v=KwOX7vJyoOk&amp;t=2020s" rel="external nofollow noopener" target="_blank">refactoring investment, 33:40–35:18</a>.</p>
+
+<h3 class="no_toc" id="summary">Summary</h3>
+
+<p><strong>Key idea:</strong> reliable autonomy grows from the environment built around an agent: access to evidence, product knowledge, evaluated workflows, and enforceable engineering standards.</p>
+
+<ul>
+  <li>
+<strong>Let agents check their own work.</strong> Tan initially spent her time running the application and passing traces or screenshots back to agents. Giving them direct control of the application removed that repeated dependency on her attention. The lesson is to automate the observation-and-verification loop before adding more agents.</li>
+  <li>
+<strong>Give tools enough context to be useful.</strong> Her agents could click through the application but struggled to find the relevant features. A feature map connected bug reports to navigation steps, shortcuts, and selectors. Product knowledge made the control tools effective.</li>
+  <li>
+<strong>Build skills from observed failures, then evaluate them.</strong> Confident diagnoses sometimes hid the fact that an agent had not read the relevant code. Tan turned recurring failures into skills and evaluated whether those skills actually changed behavior, including the behavior of the verification tools themselves.</li>
+  <li>
+<strong>Make recurring standards enforceable.</strong> Clear feature boundaries, dependency checks, and CI rules reduced the need to repeat the same review comments. Her architectural choices aimed to make the convenient implementation path follow the intended design.</li>
+  <li>
+<strong>Scale after the workflow becomes dependable.</strong> Her bug-triage agent once established that a reported bug was already fixed, saving an unnecessary investigation. Useful output can be a resolved question. Cloud execution and automatic merging came after substantial preparation, refactoring, and token expenditure.</li>
+</ul>
+
+<p><strong>Lesson to carry forward:</strong> start with one recurring task, define what evidence would demonstrate success, and improve the agent’s ability to obtain and interpret that evidence. Tan’s unusually high PR volume is a personal report with substantial infrastructure behind it; it is not a general productivity benchmark.</p>
+
+<details class="no_toc_section border rounded p-3 my-4">
+  <summary class="font-weight-bold">Read the detailed notes: experiences, lessons, and supporting sources</summary>
+
+  <h3 id="verification-stop-making-the-human-carry-every-observation">Verification: stop making the human carry every observation</h3>
+
+  <p>One of the most useful stories comes from Tan’s first week working on Cursor’s agent window, a React application. With a launch approaching, she was investigating performance in an unfamiliar codebase. She would inspect a Chrome DevTools trace, send evidence to an agent, and receive a confident explanation. After trying the suggested fix, she would discover that it had identified the wrong cause.</p>
+
+  <p>This created a slow loop: the agent changed code, Tan ran the application, Tan collected the next screenshot or error, and the agent tried again. More agents would have increased the number of requests for her attention. The missing capability was a way for each agent to observe whether its own hypothesis survived contact with the running application.</p>
+
+  <p>She built a control skill that let agents launch and interact with the application and collect runtime evidence. In the talk, verification includes tools such as performance traces, heap snapshots, and simulator interaction. This gives an agent a way to reproduce a problem and check a change against the behavior that originally failed. <a href="https://www.youtube.com/watch?v=KwOX7vJyoOk&amp;t=356s" rel="external nofollow noopener" target="_blank">Verification and the performance investigation, 05:56–10:06</a>.</p>
+
+  <p><strong>Lesson learned:</strong> identify every point where a person must manually move evidence between the application and the agent. Automating that observation can remove a bottleneck from the whole investigation. Verification still has a scope: demonstrating that one reported interaction works does not establish that the implementation is maintainable or that unrelated behavior is unaffected.</p>
+
+  <h3 id="the-feature-map-tool-access-needs-product-knowledge">The feature map: tool access needs product knowledge</h3>
+
+  <p>The first control skill exposed another failure. An agent could operate the application, but it did not know how to reach the relevant feature. A report about a slow sidebar or a broken PR tab could send it searching through code and clicking around without making progress.</p>
+
+  <p>Tan added a <strong>feature map</strong>: a guide connecting user-facing concepts to the steps needed to exercise them. Her examples include where a feature appears, which subfeatures it contains, keyboard shortcuts, and DOM attributes useful for selecting controls. A separate maintenance skill helps keep this knowledge current.</p>
+
+  <p>Her anecdote about internal feedback makes the value concrete. A bug report might contain little more than a screenshot and a few question marks. With a feature map, an agent has a better chance of connecting that fragment to an actual product workflow. Without it, the agent has to rediscover the interface before it can investigate the bug. <a href="https://www.youtube.com/watch?v=KwOX7vJyoOk&amp;t=617s" rel="external nofollow noopener" target="_blank">Feature maps and sparse bug reports, 10:17–13:29</a>.</p>
+
+  <p><strong>Lesson learned:</strong> document the route from a user’s description to an observable behavior. An API reference explains which operations exist; a feature map explains how those operations relate to the product someone is using. This is particularly valuable when the person reporting a problem does not know the implementation vocabulary.</p>
+
+  <h3 id="skills-grew-out-of-specific-failures">Skills grew out of specific failures</h3>
+
+  <p>Tan says pstack emerged incrementally. She did not begin with a complete catalog of ideal agent behaviors. She watched agents fail, inspected their actions, and turned recurring problems into reusable instructions.</p>
+
+  <p>One example was an agent confidently diagnosing a bug without reading the code she expected to be involved. Looking at the tool calls revealed a gap between the explanation and the investigation. Her response was to encode a more disciplined investigation process, including examining the relevant code and gathering evidence before reaching a conclusion.</p>
+
+  <p>Her management analogy is useful here: imagine a capable programmer who joined the team seconds ago and has no business context. Technical ability does not automatically supply knowledge of the product, its history, or the team’s standards. A skill can preserve some of the guidance that an experienced colleague would otherwise repeat in every session. <a href="https://www.youtube.com/watch?v=KwOX7vJyoOk&amp;t=821s" rel="external nofollow noopener" target="_blank">How pstack developed, 13:41–17:04</a>.</p>
+
+  <p><strong>Lesson learned:</strong> a recurring correction is evidence about a missing part of the workflow. Before adding another broad instruction, name the actual failure: skipping the relevant code, confusing a hypothesis with a finding, or failing to reproduce the symptom. That makes the resulting skill easier to evaluate and revise.</p>
+
+  <h3 id="evaluate-the-skills-including-the-verification-skill">Evaluate the skills, including the verification skill</h3>
+
+  <p>Instructions can sound rigorous while producing little change in behavior. Tan describes evaluating skill changes with a coordinator that defines a rubric and launches agents in separate directories. She also runs evaluations across models and sometimes uses a different model to judge the results.</p>
+
+  <p>A memorable detail is her attempt to avoid making it obvious to the agents that they are being evaluated. She reports that agents can behave differently when they recognize an evaluation setting. Whether a particular evaluation successfully avoids that problem needs its own evidence, but her concern is worth preserving: performance in an artificial test may differ from ordinary work.</p>
+
+  <p>She applies this process to the control and verification skills themselves, iteratively improving them against an evaluation. She also emphasizes that maintenance takes close observation and judgment. A skill collection needs attention as the product and agent behavior change. <a href="https://www.youtube.com/watch?v=KwOX7vJyoOk&amp;t=1060s" rel="external nofollow noopener" target="_blank">Skill evaluation and iteration, 17:40–23:21</a>.</p>
+
+  <p><strong>Lesson learned:</strong> evaluate the behavior an instruction is supposed to change. For an investigation skill, useful questions include whether the agent examined the relevant implementation and connected its conclusion to evidence. For a verification skill, ask whether it exercised the intended behavior and detected a known failure.</p>
+
+  <p><strong>My interpretation:</strong> optimizing until a judge awards a perfect score can improve the evaluated workflow, but that score alone cannot establish general reliability. I would also want fresh cases that were not used to revise the skill, including cases where the correct response is to report insufficient evidence. A second model’s judgment adds another perspective; it does not replace execution evidence.</p>
+
+  <h3 id="autonomy-followed-reliable-local-work">Autonomy followed reliable local work</h3>
+
+  <p>Tan recommends starting locally, where a person can watch an agent operate the application and inspect how it uses the control interfaces. Once that loop is dependable, the same capabilities can support cloud agents and shared automations.</p>
+
+  <p>Her example is <strong>Benny</strong>, an agent that investigates incoming bug reports. It runs the application in its own environment and tries to reproduce the reported behavior. In one case, it established that the bug had already been fixed on the main branch, so the remaining action was to release a new build. That finding saved the team from doing another investigation or writing an unnecessary patch.</p>
+
+  <p>This is a useful way to judge automation: a successful run can resolve uncertainty without producing code. Tan also cautions against jumping directly from supervising a few unreliable agents to launching large numbers of cloud agents; that can consume many tokens without fixing the underlying workflow. <a href="https://www.youtube.com/watch?v=KwOX7vJyoOk&amp;t=1437s" rel="external nofollow noopener" target="_blank">Starting locally and the Benny example, 23:57–28:18</a>.</p>
+
+  <p><strong>Lesson learned:</strong> increase concurrency after establishing that one agent can complete the relevant observation-and-verification loop. Reusable verification also changes the economics of the initial investment: the same capability can support other engineers and automated triage across the team.</p>
+
+  <h3 id="architecture-makes-preferred-behavior-easier-to-repeat">Architecture makes preferred behavior easier to repeat</h3>
+
+  <p>The second half of the talk shifts from agent instructions to codebase structure. Tan argues that large engineering organizations already face a version of the problem: many contributors with different levels of context can introduce changes faster than a few experienced reviewers can inspect every detail.</p>
+
+  <p>In her account, established codebases with strong conventions may give agents a better starting point than quickly generated prototypes with few constraints. Agents tend to copy nearby patterns and choose convenient solutions. Those tendencies make the existing architecture consequential: each new change can reinforce either a useful convention or an accumulating shortcut. <a href="https://www.youtube.com/watch?v=KwOX7vJyoOk&amp;t=1769s" rel="external nofollow noopener" target="_blank">Refactoring and inherited constraints, 29:29–35:18</a>.</p>
+
+  <p>She describes an internal Electron application framework called <strong>Dune</strong>, with explicit structure and strict checks. Examples include colocating feature code, defining conventional extension points, and checking dependency boundaries between main-process and renderer code. The renderer-boundary example addresses a recurring performance failure: computational work entering the UI process and competing with rendering.</p>
+
+  <p>Some choices are deliberately opinionated. She reports banning <code class="language-plaintext highlighter-rouge">useEffect</code> in that application and restricting code comments after seeing agents turn local review feedback into misleading permanent explanations. These are examples of decisions for her environment, rather than universal rules for React or documentation. The transferable mechanism is to identify a repeated problem and encode an enforceable constraint around it. <a href="https://www.youtube.com/watch?v=KwOX7vJyoOk&amp;t=2275s" rel="external nofollow noopener" target="_blank">CI rules and architectural examples, 37:55–44:30</a>.</p>
+
+  <p>Tan distinguishes these hard constraints from softer guidance such as skills, review bots, and written rules. All can contribute, but a dependency check that fails CI gives a different guarantee from a paragraph an agent may overlook. Her recurring question is whether a repeated human review comment can become a lint rule, a CI failure, or an architectural change that removes the problem. <a href="https://www.youtube.com/watch?v=KwOX7vJyoOk&amp;t=2670s" rel="external nofollow noopener" target="_blank">Layers of enforcement, 44:30–47:05</a>.</p>
+
+  <p><strong>Lesson learned:</strong> design the repository so that a straightforward implementation follows the intended architecture. Human review remains useful for choices that require judgment; repeatedly correcting the same mechanically detectable violation is a signal that the tooling could do more.</p>
+
+  <h3 id="personal-working-habits-and-the-cost-behind-the-result">Personal working habits and the cost behind the result</h3>
+
+  <p>Several smaller observations make this account more useful than a list of agent tips:</p>
+
+  <ul>
+    <li>
+<strong>She watches behavior closely while developing a workflow.</strong> Reading tool calls exposed failures that a polished final answer hid. Her later autonomy grew out of a period of detailed supervision.</li>
+    <li>
+<strong>She favors PRs that each describe one coherent change.</strong> She gives no fixed size cap, but values Git history as context and wants regressions to be easier to locate and revert. <a href="https://www.youtube.com/watch?v=KwOX7vJyoOk&amp;t=2123s" rel="external nofollow noopener" target="_blank">PR size and history, 35:23–37:41</a>.</li>
+    <li>
+<strong>She uses a head-chef analogy.</strong> The engineer increasingly designs the environment, distributes work, and sets standards. This captures the work involved in making delegation reliable. <a href="https://www.youtube.com/watch?v=KwOX7vJyoOk&amp;t=1350s" rel="external nofollow noopener" target="_blank">The analogy, 22:30–23:21</a>.</li>
+    <li>
+<strong>She acknowledges unusually generous token access.</strong> Her workplace gives her effectively unlimited tokens, and she explicitly avoids presenting her exact approach as the right expenditure for everyone. The refactoring and verification infrastructure required substantial upfront effort. <a href="https://www.youtube.com/watch?v=KwOX7vJyoOk&amp;t=2863s" rel="external nofollow noopener" target="_blank">Costs and return on investment, 47:43–50:50</a>.</li>
+    <li>
+<strong>She sees benefits beyond her own output.</strong> She reports designers and product managers contributing changes successfully once the application has stronger conventions and checks. This is a reported team benefit, rather than evidence that all engineering judgment has become automatic. <a href="https://www.youtube.com/watch?v=KwOX7vJyoOk&amp;t=3143s" rel="external nofollow noopener" target="_blank">Other contributors, 52:23–55:01</a>.</li>
+  </ul>
+
+  <p>These details help explain why copying the visible endpoint, such as automatic merging, would miss much of the work that made it possible. Her account supports investing in a reliable process; it does not provide a controlled comparison of costs, defect rates, or long-term maintenance outcomes.</p>
+
+  <p>Related foundations in this series: <a href="/blog/2026/ai-agents-101-06-tools-mcp-skills-and-plugins/">Tools, MCP, Skills, and Plugins</a>, <a href="/blog/2026/ai-agents-101-10-evaluation-and-observability/">Evaluation and Observability</a>, and <a href="/blog/2026/ai-agents-101-13-coding-agents-as-a-case-study/">Coding Agents as a Case Study</a>.</p>
+
+</details>
+
+<p><a id="matt-pocock"></a></p>
+
+<h2 id="2-matt-pocock-from-a-shared-idea-to-an-agent-ready-backlog">2. Matt Pocock: from a shared idea to an agent-ready backlog</h2>
+
+<h3 class="no_toc" id="sources-and-context-1">Sources and context</h3>
+
+<ul>
+  <li>
+<strong>Video:</strong> <a href="https://www.youtube.com/watch?v=-QFHIoCo-Ko" rel="external nofollow noopener" target="_blank">Full Walkthrough: Workflow for AI Coding — Matt Pocock</a>, published by AI Engineer, approximately 96 minutes.</li>
+  <li>
+<strong>Related skills:</strong> <a href="https://github.com/mattpocock/skills" rel="external nofollow noopener" target="_blank">Matt Pocock’s skills repository</a>. The workshop uses skills for interviewing, writing a PRD, creating issues, test-driven development, and improving architecture. Names and behavior may have changed since the recording.</li>
+  <li>
+<strong>Related implementation:</strong> <a href="https://github.com/mattpocock/sandcastle" rel="external nofollow noopener" target="_blank">Sandcastle</a>, his library for orchestrating sandboxed coding agents, and <a href="https://github.com/mattpocock/course-video-manager" rel="external nofollow noopener" target="_blank">course-video-manager</a>, the application he discusses as a personal working example.</li>
+</ul>
+
+<p>Pocock walks through adding gamification to a course platform, starting with a vague request about student retention. He uses Claude Code in the demonstration, but presents the workflow as adaptable to other coding agents. His central claim is that familiar engineering practices—clarifying requirements, making small integrated changes, testing, and designing good interfaces—become especially valuable when implementation is delegated.</p>
+
+<p>This entry follows the English auto-generated transcript. It distinguishes his working preferences and live observations from general guarantees; in particular, his suggested context-size thresholds are heuristics, not measured limits that apply to every model.</p>
+
+<h3 class="no_toc" id="summary-1">Summary</h3>
+
+<p><strong>Key idea:</strong> spend human attention on shared understanding, task boundaries, architecture, and evaluation; give agents a backlog of work whose purpose and completion criteria are already clear.</p>
+
+<ul>
+  <li>
+<strong>Reach agreement before producing a plan.</strong> Pocock found that agents eagerly wrote plans before resolving important choices. His <code class="language-plaintext highlighter-rouge">grill-me</code> workflow asks questions one at a time, with recommendations, to establish a shared design. In the demo, it surfaces whether existing students should receive points retroactively.</li>
+  <li>
+<strong>Split work into visible, end-to-end results.</strong> A PRD describes the destination; dependent issues describe the route. He corrects an initial service-only task into awarding lesson-completion points that appear on the dashboard, so integration can be checked immediately.</li>
+  <li>
+<strong>Keep each implementation session focused.</strong> He prefers small tasks and fresh context, with persistent issues and recent commits carrying the needed state. He first observes a single run, then extends the workflow into unattended loops and parallel workers.</li>
+  <li>
+<strong>Build feedback into the codebase.</strong> Test-driven development, type checks, and modules with simple public interfaces make delegated work easier to verify. Yet the demo’s passing checks still miss a missing table in the running database, showing why exercising the real workflow matters.</li>
+  <li>
+<strong>Keep people responsible for judgment.</strong> He retains human QA and architectural direction, uses separate agent review, and feeds new findings back into the backlog. He also acknowledges that faster implementation creates more review work and does not claim to have solved that bottleneck.</li>
+</ul>
+
+<p><strong>Lesson to carry forward:</strong> make the next task small enough to understand, complete enough to exercise, and explicit enough for another session to pick up. The goal is to delegate implementation while retaining a usable mental model of the system.</p>
+
+<details class="no_toc_section border rounded p-3 my-4">
+  <summary class="font-weight-bold">Read the detailed notes: experiences, lessons, and supporting sources</summary>
+
+  <h3 id="start-with-a-shared-design-and-involve-the-people-who-know-the-answers">Start with a shared design, and involve the people who know the answers</h3>
+
+  <p>Pocock describes a frustration with planning modes: the agent would quickly decide it had enough information and generate a plan, while he still felt that they were imagining different things. He connects the missing element to Frederick Brooks’s idea of a shared design concept. The useful outcome of the conversation is agreement about what is being built and why.</p>
+
+  <p>His <code class="language-plaintext highlighter-rouge">grill-me</code> skill turns the agent into an interviewer. In the workshop version, it asks one question at a time, supplies a recommended answer, and investigates the codebase. The gamification exercise quickly reveals decisions that the original brief omitted: which actions earn points, whether previous completions count, how levels progress, whether streaks earn additional points, and where the interface appears. Retroactive points are a particularly useful example because an apparently small product choice changes the implementation and backfill requirements. <a href="https://www.youtube.com/watch?v=-QFHIoCo-Ko&amp;t=734s" rel="external nofollow noopener" target="_blank">The interview and its motivation, 12:14–21:47</a>.</p>
+
+  <p>He reports that these sessions can run to dozens of questions, and that he normally prefers dictation. He also makes the limits of the live demonstration visible: to save workshop time, he asks the agent to supply a list of recommendations and answer more of its own questions. That shortcut should not be mistaken for the human alignment process he normally advocates.</p>
+
+  <p><strong>Lesson learned:</strong> use the interview to expose decisions and find their owners. When a developer cannot answer a product question, Pocock recommends bringing the domain expert into the discussion with the agent. A confident recommendation does not establish the missing business requirement. <a href="https://www.youtube.com/watch?v=-QFHIoCo-Ko&amp;t=1499s" rel="external nofollow noopener" target="_blank">Team participation and human-in-the-loop work, 24:59–27:31</a>.</p>
+
+  <h3 id="treat-context-as-a-working-budget-and-make-tasks-resumable">Treat context as a working budget and make tasks resumable</h3>
+
+  <p>Pocock frames long conversations in terms of a useful working region and a region where the agent’s decisions become less dependable. He prefers a small amount of always-present instruction, bounded tasks, and a fresh start when moving between pieces of work. He dislikes repeatedly compacting one long session because he prefers the predictable starting state of a cleared conversation.</p>
+
+  <p>His rough marker of around 100,000 tokens is presented as his current rule of thumb. The workshop does not establish a universal threshold, and its attention analogy does not by itself prove when coding quality declines. The more transferable observation is that a large advertised context window does not tell a developer how much accumulated conversation will remain useful for a particular task. <a href="https://www.youtube.com/watch?v=-QFHIoCo-Ko&amp;t=180s" rel="external nofollow noopener" target="_blank">Context, task size, and compaction, 03:00–11:03</a>; <a href="https://www.youtube.com/watch?v=-QFHIoCo-Ko&amp;t=2244s" rel="external nofollow noopener" target="_blank">his long-context preference, 37:24–38:31</a>.</p>
+
+  <p>The live exploration also illustrates context isolation. A subagent uses roughly 94,000 tokens while exploring, then returns a summary to the parent. This keeps the exploration transcript out of the parent’s working context; it does not mean those tokens were never consumed. <a href="https://www.youtube.com/watch?v=-QFHIoCo-Ko&amp;t=1055s" rel="external nofollow noopener" target="_blank">Exploration in a separate context, 17:35–18:32</a>.</p>
+
+  <p><strong>Lesson learned:</strong> design the handoff so that a new session can recover the task, relevant decisions, and current state without inheriting the whole conversation. In his later implementation loop, issues and recent commits provide that durable starting point. Clearing context is useful only when the information needed to continue has somewhere else to live.</p>
+
+  <h3 id="separate-the-destination-from-the-route-then-review-the-task-boundaries">Separate the destination from the route, then review the task boundaries</h3>
+
+  <p>After the interview, Pocock creates a product requirements document, or PRD, containing the problem, proposed solution, user stories, implementation decisions, and testing decisions. It records the destination and definition of done. He then breaks the work into independently selectable issues with dependencies and labels indicating whether a human must remain involved. <a href="https://www.youtube.com/watch?v=-QFHIoCo-Ko&amp;t=1720s" rel="external nofollow noopener" target="_blank">Creating the PRD, 28:40–35:56</a>; <a href="https://www.youtube.com/watch?v=-QFHIoCo-Ko&amp;t=2372s" rel="external nofollow noopener" target="_blank">task dependencies, 39:32–41:43</a>.</p>
+
+  <p>His most instructive intervention concerns <strong>vertical slices</strong>. He observes that agents tend to divide work horizontally: database first, service or API second, interface last. That delays the first opportunity to check whether the layers work together. He wants an early task to cross the necessary layers and produce a small, usable behavior.</p>
+
+  <p>Even with vertical slicing written into the skill, the agent proposes building the gamification service first. He rejects that boundary. The revised task awards points for completing a lesson and displays the result on the dashboard. It is still bounded, but now there is a real flow to exercise. This is the workshop’s clearest example of a short human review changing the quality of everything that follows. <a href="https://www.youtube.com/watch?v=-QFHIoCo-Ko&amp;t=2507s" rel="external nofollow noopener" target="_blank">Vertical slices and the live correction, 41:47–46:56</a>.</p>
+
+  <p>Pocock makes an unusual distinction about review effort: he says he generally does not reread the generated PRD after a thorough interview, because he trusts the summarization step. He does inspect the task breakdown, where he can spot consequential mistakes quickly. That is his personal allocation of attention; a summary can still omit a constraint, especially when several stakeholders were involved.</p>
+
+  <p><strong>Lesson learned:</strong> review whether each task creates useful feedback, rather than judging a plan only by how organized it looks. Dependencies also reveal which tasks can run concurrently. A numbered list often hides that structure; explicit blocking relationships make it available to the person or agent assigning work.</p>
+
+  <h3 id="the-unattended-loop-runs-over-a-curated-backlog">The unattended loop runs over a curated backlog</h3>
+
+  <p>Pocock describes planning as the human’s day shift and implementation as work that can run during the night shift. His first demonstration is deliberately simple: a script provides the agent with local issue files, the last five commits, and an implementation prompt. The agent chooses an eligible task, explores the repository, implements with tests, runs checks, and produces a commit. The prompt distinguishes tasks suitable for unattended work from tasks that still need human participation. <a href="https://www.youtube.com/watch?v=-QFHIoCo-Ko&amp;t=3135s" rel="external nofollow noopener" target="_blank">The single-run script and prompt, 52:15–57:48</a>.</p>
+
+  <p>He recommends watching individual runs before repeating them automatically. That makes it possible to see where the prompt or environment needs adjustment. Later, he demonstrates a parallel setup using Sandcastle: a planner selects compatible issues, implementers work in separate sandboxed branches, reviewers inspect their commits, and a merger combines the results and addresses integration failures. This describes the setup shown in the recording, rather than every configuration of the current library. <a href="https://www.youtube.com/watch?v=-QFHIoCo-Ko&amp;t=5390s" rel="external nofollow noopener" target="_blank">Parallel implementation, review, and merging, 01:29:50–01:32:42</a>.</p>
+
+  <p>The human workflow continues around this loop. QA findings become new backlog issues, including blockers, while agents work on other eligible tasks. Pocock also explains that real projects can move back from research or prototypes into earlier design discussions; the neat sequence on his diagram is not a claim that product development is linear. <a href="https://www.youtube.com/watch?v=-QFHIoCo-Ko&amp;t=3631s" rel="external nofollow noopener" target="_blank">Team iteration, 01:00:31–01:03:48</a>; <a href="https://www.youtube.com/watch?v=-QFHIoCo-Ko&amp;t=5684s" rel="external nofollow noopener" target="_blank">QA feeding the backlog, 01:34:44–01:35:22</a>.</p>
+
+  <p><strong>Lesson learned:</strong> unattended implementation depends on the quality of the work queue. An unresolved product decision does not become an implementation task merely because it has been put in a ticket. Useful task boundaries, clear dependencies, and a way to return findings to the backlog are part of the automation.</p>
+
+  <h3 id="tests-provide-feedback-and-the-live-failure-shows-their-boundary">Tests provide feedback, and the live failure shows their boundary</h3>
+
+  <p>Pocock strongly favors test-driven development: write a failing test, implement enough to make it pass, then refactor. He reports that agents produce weaker tests when they write the entire implementation first and add tests afterward. The small red–green cycle gives the agent feedback while it builds, and makes it harder to justify an implementation solely with tests that mirror what it already wrote. <a href="https://www.youtube.com/watch?v=-QFHIoCo-Ko&amp;t=3998s" rel="external nofollow noopener" target="_blank">TDD in the demonstration, 01:06:38–01:08:34</a>.</p>
+
+  <p>After the first task, the agent runs the tests and type checks, fixes a type error, and reports completion. Pocock explains that his own review would start with the tests: are they checking reasonable behavior? Then he would inspect the implementation and try the dashboard. This ordering matters because a green test suite only establishes what its assertions actually cover.</p>
+
+  <p>The manual check immediately finds a problem. Completing a lesson fails with a SQLite error because the running database lacks the points-events table. He starts investigating the migration command, but does not demonstrate a completed fix before moving on. The recording therefore shows a successful automated check followed by a failed real interaction, rather than a fully verified finished feature. <a href="https://www.youtube.com/watch?v=-QFHIoCo-Ko&amp;t=4174s" rel="external nofollow noopener" target="_blank">Checks, test review, and the missing table, 01:09:34–01:12:27</a>.</p>
+
+  <p><strong>Lesson learned:</strong> include the application environment in the definition of completion. Service tests and type checks can pass while the actual database state prevents the user flow from working. This is also a concrete connection to Tan’s emphasis on runtime verification: the relevant question is whether the agent exercised the behavior under the conditions that matter.</p>
+
+  <h3 id="deep-modules-preserve-testability-and-a-human-mental-model">Deep modules preserve testability and a human mental model</h3>
+
+  <p>Pocock draws on John Ousterhout’s concept of deep modules: substantial behavior behind a small, understandable interface. He contrasts this with a web of tiny interconnected units whose dependencies are difficult to follow and whose tests become coupled to internal wiring. The distinction concerns how much complexity the interface hides, rather than simply how many lines a file contains. <a href="https://www.youtube.com/watch?v=-QFHIoCo-Ko&amp;t=4459s" rel="external nofollow noopener" target="_blank">Module boundaries and testability, 01:14:19–01:19:01</a>.</p>
+
+  <p>For agents, a useful boundary makes it easier to determine what a component promises and test that promise. For people, it offers a way to retain architectural understanding without memorizing every generated function. Pocock says he wants to design the interfaces, understand how the major components behave, and delegate more of their internal implementation. He describes this as a way to preserve his sense of the codebase while keeping the workload manageable. <a href="https://www.youtube.com/watch?v=-QFHIoCo-Ko&amp;t=4759s" rel="external nofollow noopener" target="_blank">Architectural understanding, 01:19:19–01:21:08</a>.</p>
+
+  <p>His personal example is the browser-based video editor in his course-video-manager application. He describes using his architecture-improvement skill to find a boundary around the frontend-to-backend flow, allowing it to be tested from the outside. He reports a substantial improvement in the agent’s ability to change that part of the application once it could observe and test the complete flow. This is an experience report, not a measured comparison of architectures. <a href="https://www.youtube.com/watch?v=-QFHIoCo-Ko&amp;t=4872s" rel="external nofollow noopener" target="_blank">The video-editor example, 01:21:12–01:23:07</a>.</p>
+
+  <p><strong>Lesson learned:</strong> when agents repeatedly struggle in an area, investigate whether the component boundaries make its behavior difficult to understand or test. A stronger prompt may help, but changing the interface and feedback available to the agent can address a more persistent cause.</p>
+
+  <h3 id="review-in-a-fresh-context-and-supply-the-review-criteria-explicitly">Review in a fresh context and supply the review criteria explicitly</h3>
+
+  <p>Pocock recommends an automated review step before human QA. He prefers a fresh context for that review so it is not appended to an already crowded implementation conversation. In the setup shown, he assigns different models to implementation and review, prioritizing reasoning ability for the latter. Those model choices are part of the recorded setup, rather than a permanent ranking. <a href="https://www.youtube.com/watch?v=-QFHIoCo-Ko&amp;t=3892s" rel="external nofollow noopener" target="_blank">Separate review context, 01:04:52–01:06:24</a>; <a href="https://www.youtube.com/watch?v=-QFHIoCo-Ko&amp;t=5543s" rel="external nofollow noopener" target="_blank">model roles, 01:32:23–01:32:42</a>.</p>
+
+  <p>He also distinguishes information an agent can retrieve from information supplied directly in its prompt. For implementation, he wants coding standards available on demand. For review, he wants the relevant standards explicitly included alongside the code, so the reviewer has a concrete basis for comparison. <a href="https://www.youtube.com/watch?v=-QFHIoCo-Ko&amp;t=5260s" rel="external nofollow noopener" target="_blank">Supplying standards to implementers and reviewers, 01:27:40–01:29:42</a>.</p>
+
+  <p><strong>Lesson learned:</strong> give the reviewer a defined job and the evidence needed to perform it. A new session alone does not establish independence or correctness. Pocock still reserves human attention for the behavior, design, and quality of the result, and candidly says he does not have a complete answer to the growing volume of code review. <a href="https://www.youtube.com/watch?v=-QFHIoCo-Ko&amp;t=3538s" rel="external nofollow noopener" target="_blank">The review bottleneck, 58:58–01:00:18</a>.</p>
+
+  <h3 id="own-the-workflow-and-retire-obsolete-planning-context">Own the workflow and retire obsolete planning context</h3>
+
+  <p>Several preferences reveal how Pocock adapts his process. He favors small, editable skills because he wants to understand and repair the workflow when it fails. He abandoned an earlier instruction to compress plans aggressively once he realized that an interactive design conversation was more useful to him than a shorter plan. For interface design, he suggests generating several throwaway prototypes and using human feedback to decide what should enter the real implementation. <a href="https://www.youtube.com/watch?v=-QFHIoCo-Ko&amp;t=1406s" rel="external nofollow noopener" target="_blank">Owning the process, 23:26–24:29</a>; <a href="https://www.youtube.com/watch?v=-QFHIoCo-Ko&amp;t=2875s" rel="external nofollow noopener" target="_blank">changing his planning habit, 47:55–49:15</a>; <a href="https://www.youtube.com/watch?v=-QFHIoCo-Ko&amp;t=3746s" rel="external nofollow noopener" target="_blank">prototype feedback, 01:02:26–01:03:48</a>.</p>
+
+  <p>He is also wary of completed PRDs remaining in the repository as if they still describe the current system. Names, structure, and requirements can change, leaving an agent to rediscover an obsolete document and treat it as authoritative. His normal GitHub-issue workflow marks completed work as closed: the history remains retrievable, but its status distinguishes it from active work. <a href="https://www.youtube.com/watch?v=-QFHIoCo-Ko&amp;t=5003s" rel="external nofollow noopener" target="_blank">Planning history and documentation decay, 01:23:23–01:25:05</a>.</p>
+
+  <p><strong>Lesson learned:</strong> preserve the useful decisions while making their status clear. A historical plan, an active requirement, and a maintained description of the current system serve different purposes. The workshop’s larger message is to keep adapting the process using observed failures, rather than assuming that a particular framework or prompt will remain sufficient.</p>
+
+  <p>Taken alongside <a href="#lauren-tan">Tan’s experience</a>, this account emphasizes a different allocation of human attention. Tan describes extensive investment in verification and enforceable constraints before allowing automatic merging. Pocock emphasizes human alignment, architectural understanding, and QA around delegated implementation. Both accounts make the surrounding engineering process central to the quality of agent output; their preferred levels of autonomy reflect their own settings and experience.</p>
+
+</details>
+
+
+
+    </div>
+  </article>
+
+
+  
+    
+    <br>
+    <hr>
+    <br>
+    <ul class="list-disc pl-8"></ul>
+
+    
+    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
+    <p class="mb-2">Here are some more articles you might like to read next:</p>
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/mit-multimodalai-2026-lec13/">Lecture 13 – Human-AI Interaction (MIT How to AI Almost Anything/Multimodal AI, Spring 2026)</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/mit-multimodalai-2026-lec12/">Lecture 12 – Self-Evolving AI (MIT How to AI Almost Anything/Multimodal AI, Spring 2026)</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/mit-multimodalai-2026-lec11/">Lecture 11 – Cross-Modal Transfer (MIT How to AI Almost Anything/Multimodal AI, Spring 2026)</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/mit-multimodalai-2026-lec10/">Lecture 10 – Multimodal Interaction (MIT How to AI Almost Anything/Multimodal AI, Spring 2026)</a>
+  </li>
+
+  
+
+  <li class="my-2">
+    <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2026/mit-multimodalai-2026-lec09/">Lecture 9 – Multimodal Reasoning (MIT How to AI Almost Anything/Multimodal AI, Spring 2026)</a>
+  </li>
+
+</div>
+
+      
+    </div>
+
+        
+    <footer class="fixed-bottom">
+      <div class="container mt-0">
+        © Copyright 2026 Tuan-Anh  Bui. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>.
+
+      </div>
+    </footer>
+
+    
+    
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha256-fgLAgv7fyCGopR/gBNq2iW3ZKIdqIcyshnUULC4vex8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+    
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <script defer src="/assets/js/masonry.js" type="text/javascript"></script>
+    
+  
+  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.8/dist/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/zoom.js"></script>
+
+  
+  <script defer src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+
+  
+  <script src="/assets/js/no_defer.js?d633890033921b33e0ceb13d22340a9c"></script>
+  <script defer src="/assets/js/common.js?70e5fea0186cc5650ed1f92c8c71c0e2"></script>
+  <script defer src="/assets/js/copy_code.js?c9d9dd48933de3831b3ee5ec9c209cac" type="text/javascript"></script>
+
+    
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+    
+  <script type="text/javascript">window.MathJax={tex:{tags:"ams"}};</script>
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+
+    
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7KGSMMS9MS"></script>
+  <script>function gtag(){window.dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","G-7KGSMMS9MS");</script>
+    
+
+
+<script type="text/javascript">function progressBarSetup(){"max"in document.createElement("progress")?(initializeProgressElement(),$(document).on("scroll",function(){progressBar.attr({value:getCurrentScrollPosition()})}),$(window).on("resize",initializeProgressElement)):(resizeProgressBar(),$(document).on("scroll",resizeProgressBar),$(window).on("resize",resizeProgressBar))}function getCurrentScrollPosition(){return $(window).scrollTop()}function initializeProgressElement(){let e=$("#navbar").outerHeight(!0);$("body").css({"padding-top":e}),$("progress-container").css({"padding-top":e}),progressBar.css({top:e}),progressBar.attr({max:getDistanceToScroll(),value:getCurrentScrollPosition()})}function getDistanceToScroll(){return $(document).height()-$(window).height()}function resizeProgressBar(){progressBar.css({width:getWidthPercentage()+"%"})}function getWidthPercentage(){return getCurrentScrollPosition()/getDistanceToScroll()*100}const progressBar=$("#progress");window.onload=function(){setTimeout(progressBarSetup,50)};</script>
+
+    
+  </body>
+</html>
