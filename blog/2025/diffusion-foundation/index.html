@@ -216,7 +216,14 @@
 <li class="toc-entry toc-h3"><a href="#intuition-recap">Intuition Recap</a></li>
 </ul>
 </li>
-<li class="toc-entry toc-h2"><a href="#latent-diffusion">Latent Diffusion</a></li>
+<li class="toc-entry toc-h2">
+<a href="#latent-diffusion">Latent Diffusion</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#perceptual-compression-before-generation">Perceptual Compression Before Generation</a></li>
+<li class="toc-entry toc-h3"><a href="#training-the-latent-denoiser">Training the Latent Denoiser</a></li>
+<li class="toc-entry toc-h3"><a href="#what-compression-buys-and-what-it-loses">What Compression Buys, and What It Loses</a></li>
+</ul>
+</li>
 <li class="toc-entry toc-h2">
 <a href="#conditional-diffusion">Conditional Diffusion</a>
 <ul>
@@ -231,7 +238,15 @@
 <li class="toc-entry toc-h3"><a href="#the-dit-architecture">The DiT Architecture</a></li>
 </ul>
 </li>
-<li class="toc-entry toc-h2"><a href="#diffusion-flux">Diffusion Flux</a></li>
+<li class="toc-entry toc-h2">
+<a href="#diffusion-flux">Diffusion Flux</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#from-image-latents-to-a-velocity-field">From Image Latents to a Velocity Field</a></li>
+<li class="toc-entry toc-h3"><a href="#the-two-text-pathways-and-image-tokens">The Two Text Pathways and Image Tokens</a></li>
+<li class="toc-entry toc-h3"><a href="#double-stream-and-single-stream-blocks">Double-Stream and Single-Stream Blocks</a></li>
+<li class="toc-entry toc-h3"><a href="#sampling-and-guidance-distillation">Sampling and Guidance Distillation</a></li>
+</ul>
+</li>
 <li class="toc-entry toc-h2">
 <a href="#image-inpainting-with-diffusion-models">Image Inpainting with Diffusion Models</a>
 <ul>
@@ -278,8 +293,25 @@
 <li class="toc-entry toc-h3"><a href="#qwen-vl">Qwen VL</a></li>
 </ul>
 </li>
-<li class="toc-entry toc-h2"><a href="#3d-diffusion-models">3D Diffusion Models</a></li>
-<li class="toc-entry toc-h2"><a href="#diffusion-language-models">Diffusion Language Models</a></li>
+<li class="toc-entry toc-h2">
+<a href="#3d-diffusion-models">3D Diffusion Models</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#point-e-diffusion-on-colored-point-clouds">Point-E: Diffusion on Colored Point Clouds</a></li>
+<li class="toc-entry toc-h3"><a href="#shap-e-denoising-the-parameters-of-a-3d-function">Shap-E: Denoising the Parameters of a 3D Function</a></li>
+<li class="toc-entry toc-h3"><a href="#dreamfusion-a-2d-diffusion-model-as-a-3d-learning-signal">DreamFusion: A 2D Diffusion Model as a 3D Learning Signal</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2">
+<a href="#diffusion-language-models">Diffusion Language Models</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#continuous-embeddings-or-discrete-tokens">Continuous Embeddings or Discrete Tokens?</a></li>
+<li class="toc-entry toc-h3"><a href="#forward-process-gradually-mask-the-sequence">Forward Process: Gradually Mask the Sequence</a></li>
+<li class="toc-entry toc-h3"><a href="#reverse-process-decide-when-and-what-to-reveal">Reverse Process: Decide When and What to Reveal</a></li>
+<li class="toc-entry toc-h3"><a href="#training-objective-weighted-masked-cross-entropy">Training Objective: Weighted Masked Cross-Entropy</a></li>
+<li class="toc-entry toc-h3"><a href="#implementation-training-and-ancestral-sampling">Implementation: Training and Ancestral Sampling</a></li>
+<li class="toc-entry toc-h3"><a href="#from-mdlm-to-llada-evidence-and-trade-offs">From MDLM to LLaDA: Evidence and Trade-offs</a></li>
+</ul>
+</li>
 </ul>
           
         </div>
@@ -2044,6 +2076,139 @@ I’ve explored a proposal linking this to <strong>Machine Unlearning</strong> (
 
 <h2 id="latent-diffusion">Latent Diffusion</h2>
 
+<p>Pixel-space diffusion repeatedly runs a large neural network over the full image. But many pixel-level details are expensive to represent without contributing much to the image’s meaning. <strong>Latent Diffusion Models (LDMs)</strong> separate the problem into two stages: learn a compact, reconstructable image representation, then learn the distribution of that representation through diffusion. The decoder converts the generated latent back into pixels only after sampling finishes. <a href="https://arxiv.org/abs/2112.10752" rel="external nofollow noopener" target="_blank">Rombach et al. (CVPR 2022)</a></p>
+
+<h3 id="perceptual-compression-before-generation">Perceptual Compression Before Generation</h3>
+
+<p>An encoder \(\mathcal{E}\) maps an image to a spatial latent, and a decoder \(\mathcal{D}\) reconstructs it:</p>
+
+<div class="overflow-auto">
+
+\[z_0 = \mathcal{E}(x), \qquad \hat{x} = \mathcal{D}(z_0),
+\qquad x \in \mathbb{R}^{H \times W \times 3},
+\quad z_0 \in \mathbb{R}^{H/f \times W/f \times C}.\]
+
+</div>
+
+<p>Here \(f\) is the spatial downsampling factor and \(C\) is the number of latent channels. For example, an autoencoder with \(f=8\) and \(C=4\) maps a \(512 \times 512 \times 3\) image to a \(64 \times 64 \times 4\) latent. There are \(64\) times fewer spatial positions, although this does <strong>not</strong> imply a \(64\times\) end-to-end speedup: channel widths, attention, and the autoencoder also contribute to the cost.</p>
+
+<p><strong>Why not compress as much as possible?</strong> The diffusion model can only generate information that the decoder can express. Aggressive compression makes the generative problem smaller, but it can destroy fine structures before diffusion even starts. LDM therefore uses relatively mild compression and trains the autoencoder with reconstruction, perceptual, and patch-level adversarial losses. A weak KL penalty or a vector-quantization regularizer keeps the latent representation well behaved. The paper studies both variants; latent diffusion does not require every autoencoder to be a VAE.</p>
+
+<p>The original method figure shows the separation: the encoder and decoder connect pixel space to latent space, while the repeated denoising operations stay inside the latent representation.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion-foundation/latent-diffusion-rombach-2022-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion-foundation/latent-diffusion-rombach-2022-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion-foundation/latent-diffusion-rombach-2022-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/diffusion-foundation/latent-diffusion-rombach-2022.png" class="img-fluid rounded z-depth-1" width="800" height="auto" alt="Latent diffusion encodes an image into a smaller spatial representation, performs conditioned denoising in latent space, and decodes the result into pixels." data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    The expensive iterative process runs in latent space; the decoder returns the final sample to pixel space. Figure 3 from Rombach et al., supplied in the <a href="https://github.com/CompVis/latent-diffusion/blob/main/assets/modelfigure.png" rel="external nofollow noopener" target="_blank">official repository</a>. Reproduced unchanged under its <a href="/assets/img/diffusion-foundation/latent-diffusion-figure-LICENSE.txt">MIT license</a>.
+</div>
+
+<h3 id="training-the-latent-denoiser">Training the Latent Denoiser</h3>
+
+<p>Once the autoencoder is trained, freeze it and replace the clean image \(x_0\) in the DDPM objective with its latent \(z_0\). Using the cumulative signal coefficient \(\bar{\alpha}_t = \prod_{s=1}^{t}(1-\beta_s)\):</p>
+
+<div class="overflow-auto">
+
+\[z_t = \sqrt{\bar{\alpha}_t}z_0 + \sqrt{1-\bar{\alpha}_t}\epsilon,
+\qquad \epsilon \sim \mathcal{N}(0,I).\]
+
+</div>
+
+<p>The noise predictor learns</p>
+
+<div class="overflow-auto">
+
+\[\mathcal{L}_{LDM}(\theta) =
+\mathbb{E}_{x,y,t,\epsilon}
+\left[\left\|\epsilon - \epsilon_\theta(z_t,t,c)\right\|_2^2\right],
+\qquad c = \tau(y),\]
+
+</div>
+
+<p>where \(y\) is a condition such as a text prompt and \(\tau\) is its encoder. The Gaussian corruption and noise-prediction objective are familiar; <strong>what changes is the representation being denoised</strong>. In particular, this objective does not run the image decoder at every training step.</p>
+
+<p><strong>How does text enter the image representation?</strong> At selected U-Net layers, flatten the image features into a sequence \(h\) and use them as attention queries. Text features provide the keys and values:</p>
+
+<div class="overflow-auto">
+
+\[Q=hW_Q, \qquad K=cW_K, \qquad V=cW_V,
+\qquad \operatorname{Attention}(Q,K,V)
+=\operatorname{softmax}\left(\frac{QK^\top}{\sqrt{d}}\right)V.\]
+
+</div>
+
+<p>Here \(d\) is the query/key dimension. Each image location retrieves relevant text features, while the U-Net’s spatial layers connect those local decisions into an image. Spatial conditions can also be concatenated to the input. These two interfaces explain how later methods add image prompts or structural controls to an LDM.</p>
+
+<p>The following pseudocode shows the second training stage and deterministic DDIM sampling. It assumes an already trained, frozen autoencoder and text encoder, as in a common Stable Diffusion setup. The original LDM paper also trains its conditioning encoder jointly. <code class="language-plaintext highlighter-rouge">encode_latent</code> and <code class="language-plaintext highlighter-rouge">decode_latent</code> include the checkpoint’s latent scaling and its inverse; for a KL autoencoder, encoding can sample from the encoder posterior.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="c1"># Pseudocode: alpha_bar[0] = 1; alpha_bar[T] is approximately zero.
+</span><span class="k">def</span> <span class="nf">latent_training_step</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="n">prompts</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">():</span>
+        <span class="n">z0</span> <span class="o">=</span> <span class="n">encode_latent</span><span class="p">(</span><span class="n">images</span><span class="p">)</span>
+        <span class="n">condition</span> <span class="o">=</span> <span class="n">text_encoder</span><span class="p">(</span><span class="n">prompts</span><span class="p">)</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">T</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">z0</span><span class="p">),),</span> <span class="n">device</span><span class="o">=</span><span class="n">z0</span><span class="p">.</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">alpha_bar</span><span class="p">[</span><span class="n">t</span><span class="p">].</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">noise</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">randn_like</span><span class="p">(</span><span class="n">z0</span><span class="p">)</span>
+    <span class="n">zt</span> <span class="o">=</span> <span class="n">a</span><span class="p">.</span><span class="n">sqrt</span><span class="p">()</span> <span class="o">*</span> <span class="n">z0</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">a</span><span class="p">).</span><span class="n">sqrt</span><span class="p">()</span> <span class="o">*</span> <span class="n">noise</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="p">(</span><span class="n">denoiser</span><span class="p">(</span><span class="n">zt</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">condition</span><span class="p">)</span> <span class="o">-</span> <span class="n">noise</span><span class="p">).</span><span class="n">square</span><span class="p">().</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">optimizer</span><span class="p">.</span><span class="n">zero_grad</span><span class="p">()</span>
+    <span class="n">loss</span><span class="p">.</span><span class="n">backward</span><span class="p">()</span>
+    <span class="n">optimizer</span><span class="p">.</span><span class="n">step</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">loss</span>
+
+
+<span class="o">@</span><span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">sample_latents</span><span class="p">(</span><span class="n">prompts</span><span class="p">,</span> <span class="n">latent_shape</span><span class="p">,</span> <span class="n">times</span><span class="p">):</span>
+    <span class="c1"># times is a decreasing list [T, ..., 0].
+</span>    <span class="n">denoiser</span><span class="p">.</span><span class="nb">eval</span><span class="p">()</span>
+    <span class="n">condition</span> <span class="o">=</span> <span class="n">text_encoder</span><span class="p">(</span><span class="n">prompts</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">randn</span><span class="p">(</span><span class="n">latent_shape</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">condition</span><span class="p">.</span><span class="n">device</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">times</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">times</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+        <span class="n">predicted_noise</span> <span class="o">=</span> <span class="n">denoiser</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">condition</span><span class="p">)</span>
+        <span class="n">clean</span> <span class="o">=</span> <span class="p">(</span><span class="n">z</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha_bar</span><span class="p">[</span><span class="n">t</span><span class="p">]).</span><span class="n">sqrt</span><span class="p">()</span> <span class="o">*</span> <span class="n">predicted_noise</span><span class="p">)</span>
+        <span class="n">clean</span> <span class="o">=</span> <span class="n">clean</span> <span class="o">/</span> <span class="n">alpha_bar</span><span class="p">[</span><span class="n">t</span><span class="p">].</span><span class="n">sqrt</span><span class="p">()</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">alpha_bar</span><span class="p">[</span><span class="n">s</span><span class="p">].</span><span class="n">sqrt</span><span class="p">()</span> <span class="o">*</span> <span class="n">clean</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">z</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha_bar</span><span class="p">[</span><span class="n">s</span><span class="p">]).</span><span class="n">sqrt</span><span class="p">()</span> <span class="o">*</span> <span class="n">predicted_noise</span>
+    <span class="k">return</span> <span class="n">decode_latent</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>The sampler requires \(\bar{\alpha}_t&gt;0\) at evaluated timesteps because it reconstructs the clean latent by division. Classifier-free guidance can replace <code class="language-plaintext highlighter-rouge">predicted_noise</code> with the guided prediction derived above; it does not change the encoder–diffusion–decoder decomposition.</p>
+
+<h3 id="what-compression-buys-and-what-it-loses">What Compression Buys, and What It Loses</h3>
+
+<p>The paper’s compression study compares \(f\in\{1,2,4,8,16,32\}\) on ImageNet and CelebA-HQ. With a fixed model size and a single A100, small factors leave expensive pixel detail to the denoiser; very large factors limit sample quality through reconstruction loss. Factors \(4\) and \(8\) provide a useful balance in those experiments. This is an empirical trade-off, not a universal optimal latent size. <a href="https://arxiv.org/html/2112.10752v2#S4.SS1" rel="external nofollow noopener" target="_blank">Section 4.1 and Figures 6–7</a></p>
+
+<p>The decoder remains a bottleneck for precise pixel reconstruction, tiny text, and fine geometry. Sampling also remains iterative: latent diffusion reduces the cost of each evaluation, while distillation and better solvers address the number of evaluations. Those improvements can be combined.</p>
+
+<p>References:</p>
+
+<ul>
+  <li>
+<a href="https://arxiv.org/abs/2112.10752" rel="external nofollow noopener" target="_blank">Rombach et al., High-Resolution Image Synthesis with Latent Diffusion Models, CVPR 2022</a>.</li>
+  <li>
+<a href="https://github.com/CompVis/latent-diffusion" rel="external nofollow noopener" target="_blank">Official LDM implementation</a>, especially the autoencoder and latent diffusion training modules.</li>
+  <li>
+<a href="https://github.com/CompVis/stable-diffusion/blob/main/Stable_Diffusion_v1_Model_Card.md" rel="external nofollow noopener" target="_blank">Stable Diffusion v1 model card</a>, for a concrete system built on this framework.</li>
+</ul>
+
 <h2 id="conditional-diffusion">Conditional Diffusion</h2>
 
 <h3 id="control-net">Control-Net</h3>
@@ -2381,12 +2546,182 @@ The model becomes the original Stable Diffusion when \(\lambda = 0\).</p>
 
 <h2 id="diffusion-flux">Diffusion Flux</h2>
 
+<p><strong>FLUX.1</strong> combines three ideas already introduced above: a compressed image latent, a transformer that exchanges information between text and image tokens, and a learned flow field for iterative generation. The discussion here concerns the original FLUX.1 architecture exposed by Black Forest Labs’ inference code. Its model cards describe a <strong>12-billion-parameter rectified flow transformer</strong>. The public code specifies the architecture and sampler; it does not provide the complete original training recipe. <a href="https://github.com/black-forest-labs/flux" rel="external nofollow noopener" target="_blank">Official implementation</a></p>
+
+<h3 id="from-image-latents-to-a-velocity-field">From Image Latents to a Velocity Field</h3>
+
+<p>We use the inference code’s time direction: \(t=1\) is noise and \(t=0\) is clean data. Let \(z_0\) be an encoded image, \(\epsilon\sim\mathcal{N}(0,I)\) be noise, and \(c\) denote text conditioning. The linear interpolation underlying the flow-matching explanation is</p>
+
+<div class="overflow-auto">
+
+\[z_t=(1-t)z_0+t\epsilon,
+\qquad \frac{d z_t}{dt}=\epsilon-z_0.\]
+
+</div>
+
+<p>A corresponding training objective is</p>
+
+<div class="overflow-auto">
+
+\[\mathcal{L}_{FM}(\theta)=
+\mathbb{E}_{z_0,\epsilon,t,c}
+\left[\left\|v_\theta(z_t,t,c)-(\epsilon-z_0)\right\|_2^2\right].\]
+
+</div>
+
+<p>This states the underlying learning problem, rather than reconstructing FLUX’s undisclosed data mixture, timestep weighting, or distillation recipe. It also explains the sign of the sampling update: because generation integrates from \(1\) down to \(0\), the timestep difference is <strong>negative</strong>. The straight conditional interpolation does not guarantee that every trajectory of the learned marginal velocity field is straight.</p>
+
+<h3 id="the-two-text-pathways-and-image-tokens">The Two Text Pathways and Image Tokens</h3>
+
+<p>The original FLUX.1 autoencoder reduces spatial resolution by \(8\) and produces \(16\) latent channels. Packing each \(2\times2\) latent patch gives an image token with \(2\times2\times16=64\) values before projection into the transformer’s hidden dimension. For a \(1024\times1024\) image, this produces a \(128\times128\times16\) latent and then \(64\times64=4096\) image tokens. Packing rearranges the latent values; it does not introduce another learned compression stage.</p>
+
+<p>Text enters through two routes:</p>
+
+<ul>
+  <li>
+<strong>T5 token embeddings</strong> provide a sequence of contextual text features. They become text tokens that participate in joint attention with image tokens.</li>
+  <li>
+<strong>A pooled CLIP embedding</strong> provides a global condition. The model combines it with the timestep embedding, and with a guidance embedding in the guidance-distilled variant, to modulate the transformer blocks.</li>
+</ul>
+
+<p>The figure shows the complete transformer sequence. Its <code class="language-plaintext highlighter-rouge">hidden states</code> are packed image latents, while <code class="language-plaintext highlighter-rouge">encoder hidden states</code> are the text encoder’s token features.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion-foundation/flux-transformer-greenberg-2025-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion-foundation/flux-transformer-greenberg-2025-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion-foundation/flux-transformer-greenberg-2025-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/diffusion-foundation/flux-transformer-greenberg-2025.jpg" class="img-fluid rounded z-depth-1" width="800" height="auto" alt="FLUX projects packed image latents and text embeddings, applies 19 double-stream blocks followed by 38 single-stream blocks, and projects image tokens into a velocity prediction." data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Text and image features first use separate parameter streams with joint attention, then share a single token stream. Figure 6 from Or Greenberg, <a href="https://arxiv.org/abs/2507.09595" rel="external nofollow noopener" target="_blank">Demystifying Flux Architecture</a> (2025), reproduced unchanged under <a href="https://creativecommons.org/licenses/by/4.0/" rel="external nofollow noopener" target="_blank">CC BY 4.0</a>. This is an independent technical report; the architecture is cross-checked against Black Forest Labs' code.
+</div>
+
+<h3 id="double-stream-and-single-stream-blocks">Double-Stream and Single-Stream Blocks</h3>
+
+<p><strong>Double-stream blocks</strong> maintain separate image and text weights for normalization, projections, and feed-forward processing. However, their attention is already joint. If \(Q_i,K_i,V_i\) are image projections and \(Q_c,K_c,V_c\) are text projections, attention operates on</p>
+
+<div class="overflow-auto">
+
+\[Q=[Q_c;Q_i],\qquad K=[K_c;K_i],\qquad V=[V_c;V_i],
+\qquad A=\operatorname{softmax}\left(\frac{QK^\top}{\sqrt{d}}\right)V,\]
+
+</div>
+
+<p>where the semicolon concatenates the token sequences. The output is split back into text and image streams for their separate residual updates and MLPs. Thus, separate parameters do not mean isolated modalities. The equation omits the implementation’s query/key normalization and rotary position transforms for clarity.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion-foundation/flux-double-stream-greenberg-2025-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion-foundation/flux-double-stream-greenberg-2025-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion-foundation/flux-double-stream-greenberg-2025-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/diffusion-foundation/flux-double-stream-greenberg-2025.jpg" class="img-fluid rounded z-depth-1" width="1000" height="auto" alt="A FLUX double-stream block separately modulates image and text features, mixes them through joint attention, and applies separate residual and feed-forward updates." data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Double-stream attention mixes modalities while retaining their separate transformations. Figure 8(a) from Greenberg (2025), reproduced unchanged under <a href="https://creativecommons.org/licenses/by/4.0/" rel="external nofollow noopener" target="_blank">CC BY 4.0</a>.
+</div>
+
+<p><strong>Single-stream blocks</strong> concatenate the text and image representations and use shared weights. Attention and an MLP branch process the same modulated input in parallel; their results are combined by an output projection and a gated residual connection. This differs from placing an MLP strictly after the attention residual, as in the double-stream block.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion-foundation/flux-single-stream-greenberg-2025-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion-foundation/flux-single-stream-greenberg-2025-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion-foundation/flux-single-stream-greenberg-2025-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/diffusion-foundation/flux-single-stream-greenberg-2025.jpg" class="img-fluid rounded z-depth-1" width="1000" height="auto" alt="A FLUX single-stream block processes concatenated text and image tokens with parallel attention and MLP branches, then combines them into one gated residual update." data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    The single-stream block shares parameters across modalities and combines parallel attention and MLP branches. Figure 10(a) from Greenberg (2025), reproduced unchanged under <a href="https://creativecommons.org/licenses/by/4.0/" rel="external nofollow noopener" target="_blank">CC BY 4.0</a>.
+</div>
+
+<p>The original configuration uses <strong>19 double-stream blocks and 38 single-stream blocks</strong>, with hidden width \(3072\) and \(24\) attention heads. Multi-axis rotary embeddings encode image-token coordinates. After the last block, the model removes the text portion and projects image tokens back to \(64\) values each: a velocity prediction with the same shape as the packed latent. These details can be traced through <code class="language-plaintext highlighter-rouge">Flux.forward</code>, <code class="language-plaintext highlighter-rouge">DoubleStreamBlock</code>, <code class="language-plaintext highlighter-rouge">SingleStreamBlock</code>, and the configurations in <code class="language-plaintext highlighter-rouge">util.py</code>.</p>
+
+<h3 id="sampling-and-guidance-distillation">Sampling and Guidance Distillation</h3>
+
+<p>For decreasing times \(t&gt;s\), the official sampler uses an Euler update:</p>
+
+<div class="overflow-auto">
+
+\[z_s=z_t+(s-t)v_\theta(z_t,t,c,g),\]
+
+</div>
+
+<p>where \(g\) is an additional guidance-strength input when supported by the checkpoint. The following pseudocode exposes the FLUX.1-dev sampling loop; <code class="language-plaintext highlighter-rouge">pack</code>, <code class="language-plaintext highlighter-rouge">unpack</code>, and the autoencoder wrappers perform the shape changes and latent normalization described above.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="o">@</span><span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">sample_flux_dev</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">latent_shape</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">guidance</span><span class="p">):</span>
+    <span class="n">text_tokens</span> <span class="o">=</span> <span class="n">t5_encoder</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
+    <span class="n">pooled_text</span> <span class="o">=</span> <span class="n">clip_encoder</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">randn</span><span class="p">(</span><span class="n">latent_shape</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">text_tokens</span><span class="p">.</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">tokens</span> <span class="o">=</span> <span class="n">pack</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>  <span class="c1"># [B, 16, h, w] -&gt; [B, h*w/4, 64]
+</span>    <span class="n">image_ids</span><span class="p">,</span> <span class="n">text_ids</span> <span class="o">=</span> <span class="n">make_position_ids</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">text_tokens</span><span class="p">)</span>
+    <span class="c1"># Use the checkpoint's schedule; FLUX.1-dev shifts it by image length.
+</span>    <span class="n">times</span> <span class="o">=</span> <span class="n">get_schedule</span><span class="p">(</span><span class="n">steps</span><span class="p">,</span> <span class="n">image_seq_len</span><span class="o">=</span><span class="n">tokens</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">times</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">times</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+        <span class="n">velocity</span> <span class="o">=</span> <span class="n">transformer</span><span class="p">(</span>
+            <span class="n">img</span><span class="o">=</span><span class="n">tokens</span><span class="p">,</span> <span class="n">img_ids</span><span class="o">=</span><span class="n">image_ids</span><span class="p">,</span>
+            <span class="n">txt</span><span class="o">=</span><span class="n">text_tokens</span><span class="p">,</span> <span class="n">txt_ids</span><span class="o">=</span><span class="n">text_ids</span><span class="p">,</span>
+            <span class="n">timesteps</span><span class="o">=</span><span class="n">batch_scalar</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)),</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">pooled_text</span><span class="p">,</span>
+            <span class="n">guidance</span><span class="o">=</span><span class="n">batch_scalar</span><span class="p">(</span><span class="n">guidance</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)),</span>
+        <span class="p">)</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="n">tokens</span> <span class="o">+</span> <span class="p">(</span><span class="n">s</span> <span class="o">-</span> <span class="n">t</span><span class="p">)</span> <span class="o">*</span> <span class="n">velocity</span>
+    <span class="k">return</span> <span class="n">decode_latent</span><span class="p">(</span><span class="n">unpack</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">latent_shape</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p>In <strong>FLUX.1 [dev]</strong>, guidance is distilled into the model and passed as an embedding. This is different from computing conditional and unconditional predictions and combining them with CFG on every step. <strong>FLUX.1 [schnell]</strong> uses latent adversarial diffusion distillation to support <strong>1–4 sampling steps</strong>; its original configuration disables the guidance embedding and uses an unshifted schedule. The two checkpoints therefore require their own sampling settings. <a href="https://huggingface.co/black-forest-labs/FLUX.1-dev" rel="external nofollow noopener" target="_blank">FLUX.1-dev model card</a>, <a href="https://huggingface.co/black-forest-labs/FLUX.1-schnell" rel="external nofollow noopener" target="_blank">FLUX.1-schnell model card</a></p>
+
+<p>The architecture makes the interaction between words and image regions explicit, but does not guarantee correct spelling, counting, or spatial relationships. Increasing resolution also increases the token count: dense attention couples all text and image positions, so memory and computation remain substantial even when the number of sampling steps is small. Neither the transformer architecture nor a linear training interpolation alone accounts for a distilled model’s few-step behavior.</p>
+
 <p>References:</p>
 
 <ul>
-  <li><a href="https://arxiv.org/pdf/2507.09595v1" rel="external nofollow noopener" target="_blank">Demystifying Flux Architecture</a></li>
-  <li>Flux official implementation: <a href="https://github.com/black-forest-labs/flux" rel="external nofollow noopener" target="_blank">https://github.com/black-forest-labs/flux</a>
-</li>
+  <li>
+<a href="https://github.com/black-forest-labs/flux" rel="external nofollow noopener" target="_blank">Black Forest Labs, official FLUX.1 implementation</a>, especially <code class="language-plaintext highlighter-rouge">model.py</code>, <code class="language-plaintext highlighter-rouge">modules/layers.py</code>, <code class="language-plaintext highlighter-rouge">sampling.py</code>, and <code class="language-plaintext highlighter-rouge">util.py</code>.</li>
+  <li>
+<a href="https://huggingface.co/black-forest-labs/FLUX.1-dev" rel="external nofollow noopener" target="_blank">FLUX.1-dev model card</a> and <a href="https://huggingface.co/black-forest-labs/FLUX.1-schnell" rel="external nofollow noopener" target="_blank">FLUX.1-schnell model card</a>.</li>
+  <li>
+<a href="https://arxiv.org/pdf/2507.09595v1" rel="external nofollow noopener" target="_blank">Greenberg, Demystifying Flux Architecture, 2025</a>, an independent analysis of the public architecture.</li>
+  <li>
+<a href="https://arxiv.org/abs/2209.03003" rel="external nofollow noopener" target="_blank">Liu et al., Flow Straight and Fast: Learning to Generate and Transfer Data with Rectified Flow, ICLR 2023</a>, for the underlying flow formulation.</li>
 </ul>
 
 <h2 id="image-inpainting-with-diffusion-models">Image Inpainting with Diffusion Models</h2>
@@ -2403,7 +2738,21 @@ The model becomes the original Stable Diffusion when \(\lambda = 0\).</p>
 
 <p><strong>Initialization of the model</strong></p>
 
+<p>Start from a pretrained text-to-image denoiser and extend its input to include the visible image and mask. For a Stable Diffusion v1 inpainting model, the input has <strong>9 channels</strong>: 4 noisy latent channels, 4 channels encoding the masked image, and 1 resized mask channel. Copy the pretrained input-convolution weights for the noisy latent and initialize the weights for the 5 new channels to zero. Initially the added inputs contribute nothing; fine-tuning then learns how to use them. <a href="https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-inpainting#training" rel="external nofollow noopener" target="_blank">Stable Diffusion inpainting model card</a></p>
+
+<p>Let \(m=1\) indicate the region to regenerate, and let \(m_z\) be the mask resized to the latent grid. A noise-prediction training example uses</p>
+
+<div class="overflow-auto">
+
+\[\epsilon_\theta\!\left([z_t;\mathcal{E}((1-m)\odot x);m_z],t,c\right)\]
+
+</div>
+
+<p>as the prediction, with the sampled Gaussian noise as its target. Here the semicolon concatenates channels and \(\odot\) denotes element-wise multiplication. Masking occurs <strong>before encoding</strong> the visible image; the noisy target latent still comes from the complete training image.</p>
+
 <p><strong>Single small mask at a time</strong></p>
+
+<p>A small mask leaves more visual context available, making it a useful starting point for a localized edit. It is not a general training requirement: a model trained only on small holes will see a different task when asked to replace most of an image. The Stable Diffusion inpainting recipe uses synthetic masks and masks the entire image in <strong>25%</strong> of training examples, exposing the model to both context-based completion and generation with no visible image context. For multiple edits at inference time, processing regions one at a time is a practical option, but later edits can depend on earlier outputs and should be checked for consistency. <a href="https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-inpainting#training" rel="external nofollow noopener" target="_blank">Model card</a></p>
 
 <p><strong>Consistency between Mask-Prompt-Context</strong> How to ensure the consistency between the masked region, the prompt, and the context? Groundtruth image can be generated from the original model rather than the real image, which can has a better correlation with the prompt.
 Data augmentation like adding target object to the background can also help to create controllable training data.</p>
@@ -2953,7 +3302,71 @@ The train loop is defined in the <code class="language-plaintext highlighter-rou
 
 <h4 id="progressive-distillation">Progressive Distillation</h4>
 
-<p>The idea of progressive distillation is to</p>
+<p>The idea of <strong>progressive distillation</strong> is to teach a student model to perform <strong>two teacher sampling steps in one step</strong>, then repeat the process. A 64-step teacher becomes a 32-step student, that student becomes the next teacher, and the sequence continues: \(64 \rightarrow 32 \rightarrow 16 \rightarrow \cdots\). The model learns to make a larger denoising move at each evaluation. Its architecture can remain the same.</p>
+
+<p><strong>From Two DDIM Steps to One Student Target</strong></p>
+
+<p>Consider the forward process</p>
+
+<div class="overflow-auto">
+
+\[z_t = \alpha_t x_0 + \sigma_t \epsilon, \qquad \epsilon \sim \mathcal{N}(0,I),\]
+
+</div>
+
+<p>where \(t=0\) denotes clean data and \(t=1\) denotes noise. Here \(\alpha_t\) and \(\sigma_t\) are the signal and noise amplitudes; in DDPM notation they correspond to \(\sqrt{\bar\alpha_t}\) and \(\sqrt{1-\bar\alpha_t}\). Let \(\hat{x}_{\phi}(z_t,t)\) be the frozen teacher’s clean-data prediction. A deterministic DDIM step from \(t\) to an earlier time \(s&lt;t\) is</p>
+
+<div class="overflow-auto">
+
+\[D_{\phi}(z_t;t,s)
+= \alpha_s\hat{x}_{\phi}(z_t,t)
++\frac{\sigma_s}{\sigma_t}\left(z_t-\alpha_t\hat{x}_{\phi}(z_t,t)\right).\]
+
+</div>
+
+<p>The first term carries the predicted signal to the new noise level; the second carries the noise implied by that prediction. There is no fresh noise draw during this update, so a fixed starting state gives a fixed teacher target.</p>
+
+<p>Suppose the student will use \(N\) steps. Sample \(t=i/N\) with \(i\in\{1,\ldots,N\}\), and define \(t'=t-1/(2N)\) and \(s=t-1/N\). The teacher takes two half-steps:</p>
+
+<div class="overflow-auto">
+
+\[z_{t'}=D_{\phi}(z_t;t,t'), \qquad
+z_s^{\mathrm{teacher}}=D_{\phi}(z_{t'};t',s).\]
+
+</div>
+
+<p>What should the student predict to reach that same endpoint in one DDIM step? Substitute an unknown prediction \(\tilde{x}_0\) into the update and solve:</p>
+
+<div class="overflow-auto">
+
+\[z_s^{\mathrm{teacher}}
+=\left(\alpha_s-\frac{\sigma_s}{\sigma_t}\alpha_t\right)\tilde{x}_0
++\frac{\sigma_s}{\sigma_t}z_t,\]
+
+</div>
+
+<div class="overflow-auto">
+
+\[\boxed{
+\tilde{x}_0=
+\frac{z_s^{\mathrm{teacher}}-(\sigma_s/\sigma_t)z_t}
+{\alpha_s-(\sigma_s/\sigma_t)\alpha_t}
+}.\]
+
+</div>
+
+<p>This is a <strong>distillation target</strong>, which need not equal the original training image \(x_0\). Matching the teacher’s clean-data prediction at \(t\) alone would reproduce its first step; matching \(\tilde{x}_0\) reproduces the result after both steps. We train with</p>
+
+<div class="overflow-auto">
+
+\[\mathcal{L}_{\mathrm{PD}}(\theta)
+=\mathbb{E}_{x_0,\epsilon,i}
+\left[w(t)\left\|\hat{x}_{\theta}(z_t,t)
+-\operatorname{stopgrad}(\tilde{x}_0)\right\|_2^2\right].\]
+
+</div>
+
+<p>The paper’s side-by-side algorithms show precisely where this teacher-derived target replaces the clean image used in ordinary diffusion training.</p>
 
 <div class="row mt-3">
     <div class="col-sm mt-3 mt-md-0 text-center">
@@ -2967,39 +3380,236 @@ The train loop is defined in the <code class="language-plaintext highlighter-rou
     
 
     
-    <img src="/assets/img/diffusion-foundation/2025-10-06-12-36-31.png" class="img-fluid rounded z-depth-1" width="600" height="auto" data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+    <img src="/assets/img/diffusion-foundation/2025-10-06-12-36-31.png" class="img-fluid rounded z-depth-1" width="600" height="auto" alt="Algorithms for ordinary diffusion training and progressive distillation side by side. Distillation replaces the clean-image target with a target obtained by inverting one DDIM step to match two frozen teacher steps, then makes the student the next teacher." data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
   </picture>
 
 </figure>
 
     </div>
 </div>
+<div class="caption">
+    Standard diffusion training and progressive distillation, Algorithms 1–2 of Salimans and Ho (2022). The highlighted changes construct a target from two teacher DDIM steps, then promote the trained student to teacher for the next round.
+</div>
+
+<p><strong>Implementation Overview</strong></p>
+
+<p>The following pseudocode uses direct clean-data prediction and a cosine schedule. Time coefficients are scalars shared by a minibatch for readability; a real implementation can sample a separate time for every example.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="k">def</span> <span class="nf">alpha</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">math</span><span class="p">.</span><span class="n">cos</span><span class="p">(</span><span class="n">math</span><span class="p">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">t</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">sigma</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">math</span><span class="p">.</span><span class="n">sin</span><span class="p">(</span><span class="n">math</span><span class="p">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">t</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">ddim_step</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+    <span class="n">x0</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>  <span class="c1"># model predicts clean data directly
+</span>    <span class="n">eps</span> <span class="o">=</span> <span class="p">(</span><span class="n">z</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">*</span> <span class="n">x0</span><span class="p">)</span> <span class="o">/</span> <span class="n">sigma</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">alpha</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">*</span> <span class="n">x0</span> <span class="o">+</span> <span class="n">sigma</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">*</span> <span class="n">eps</span>
+
+<span class="c1"># The initial teacher was trained for teacher_steps DDIM steps.
+</span><span class="k">while</span> <span class="n">teacher_steps</span> <span class="o">&gt;</span> <span class="n">desired_steps</span><span class="p">:</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">teacher_steps</span> <span class="o">//</span> <span class="mi">2</span>  <span class="c1"># number of student sampling steps
+</span>    <span class="n">teacher</span><span class="p">.</span><span class="nb">eval</span><span class="p">().</span><span class="n">requires_grad_</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">student</span> <span class="o">=</span> <span class="n">copy</span><span class="p">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">teacher</span><span class="p">).</span><span class="n">train</span><span class="p">().</span><span class="n">requires_grad_</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">optimizer</span> <span class="o">=</span> <span class="n">make_optimizer</span><span class="p">(</span><span class="n">student</span><span class="p">.</span><span class="n">parameters</span><span class="p">())</span>
+
+    <span class="k">for</span> <span class="n">x0</span> <span class="ow">in</span> <span class="n">training_batches</span><span class="p">():</span>  <span class="c1"># train this stage to convergence
+</span>        <span class="n">t</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">()).</span><span class="n">item</span><span class="p">()</span> <span class="o">/</span> <span class="n">N</span>
+        <span class="n">mid</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="n">t</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">/</span> <span class="n">N</span><span class="p">,</span> <span class="n">t</span> <span class="o">-</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">N</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">alpha</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">*</span> <span class="n">x0</span> <span class="o">+</span> <span class="n">sigma</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="n">randn_like</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="n">z_mid</span> <span class="o">=</span> <span class="n">ddim_step</span><span class="p">(</span><span class="n">teacher</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">mid</span><span class="p">)</span>
+            <span class="n">z_end</span> <span class="o">=</span> <span class="n">ddim_step</span><span class="p">(</span><span class="n">teacher</span><span class="p">,</span> <span class="n">z_mid</span><span class="p">,</span> <span class="n">mid</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">sigma</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">/</span> <span class="n">sigma</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="p">(</span><span class="n">z_end</span> <span class="o">-</span> <span class="n">r</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">alpha</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">-</span> <span class="n">r</span> <span class="o">*</span> <span class="n">alpha</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+
+        <span class="c1"># Truncated SNR keeps a nonzero weight even at pure noise.
+</span>        <span class="n">weight</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">alpha</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">sigma</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">weight</span> <span class="o">*</span> <span class="p">(</span><span class="n">student</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span> <span class="o">-</span> <span class="n">target</span><span class="p">).</span><span class="n">square</span><span class="p">().</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">optimizer</span><span class="p">.</span><span class="n">zero_grad</span><span class="p">()</span>
+        <span class="n">loss</span><span class="p">.</span><span class="n">backward</span><span class="p">()</span>
+        <span class="n">optimizer</span><span class="p">.</span><span class="n">step</span><span class="p">()</span>
+
+    <span class="n">teacher</span><span class="p">,</span> <span class="n">teacher_steps</span> <span class="o">=</span> <span class="n">student</span><span class="p">,</span> <span class="n">N</span>
+
+<span class="c1"># Sample with the final student on its trained time grid.
+</span><span class="n">teacher</span><span class="p">.</span><span class="nb">eval</span><span class="p">()</span>
+<span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">randn</span><span class="p">(</span><span class="n">sample_shape</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">teacher_steps</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">ddim_step</span><span class="p">(</span><span class="n">teacher</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">i</span> <span class="o">/</span> <span class="n">teacher_steps</span><span class="p">,</span>
+                      <span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">teacher_steps</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>Why the Prediction Type Matters</strong></p>
+
+<p>At pure noise, \(\alpha_1=0\). Recovering clean data from an \(\epsilon\)-predictor via \((z_t-\sigma_t\hat\epsilon)/\alpha_t\) becomes singular. Direct \(x_0\)-prediction avoids this division. Another option from the paper is the VP parameterization \(v=\alpha_t\epsilon-\sigma_t x_0\), for which \(\hat{x}_0=\alpha_t z_t-\sigma_t\hat v\) when \(\alpha_t^2+\sigma_t^2=1\). Its \(v\) is schedule-dependent and should not be confused with the constant endpoint displacement used in linear flow matching.</p>
+
+<p><strong>Results and Trade-offs</strong></p>
+
+<p>On CIFAR-10, Salimans and Ho report FID <strong>3.00 with 4 evaluations</strong>, compared with <strong>4.51 at 2</strong> and <strong>9.12 at 1</strong>. This makes the quality cost of extreme compression visible: one-step generation is possible, but the best few-step result is not preserved automatically. Each halving also requires training; inference savings come from fewer evaluations, not fewer parameters. The distilled model is trained for a particular deterministic sampler and time grid, so changing either needs validation. The original study covers unconditional and class-conditional generation; guided text-to-image distillation adds the treatment of CFG described by Meng et al.</p>
 
 <p>References:</p>
 
 <ul>
-  <li><a href="https://arxiv.org/pdf/2202.00512" rel="external nofollow noopener" target="_blank">PROGRESSIVE DISTILLATION FOR FAST SAMPLING OF DIFFUSION MODELS, ICLR 2022</a></li>
-  <li><a href="https://openaccess.thecvf.com/content/CVPR2023/papers/Meng_On_Distillation_of_Guided_Diffusion_Models_CVPR_2023_paper.pdf" rel="external nofollow noopener" target="_blank">On Distillation of Guided Diffusion Models, CVPR 2023</a></li>
-  <li><a href="https://openreview.net/forum?id=1k4yZbbDqX" rel="external nofollow noopener" target="_blank">InstaFlow: One Step is Enough for High-Quality Diffusion-Based Text-to-Image Generation, ICLR 2024</a></li>
-  <li><a href="https://arxiv.org/pdf/2311.17042" rel="external nofollow noopener" target="_blank">Adversarial Diffusion Distillation</a></li>
-  <li><a href="https://arxiv.org/pdf/2405.14867" rel="external nofollow noopener" target="_blank">Improved Distribution Matching Distillation for Fast Image Synthesis</a></li>
+  <li>
+<a href="https://arxiv.org/abs/2202.00512" rel="external nofollow noopener" target="_blank">Salimans and Ho. Progressive Distillation for Fast Sampling of Diffusion Models, ICLR 2022</a> — Section 3, Algorithm 2, Appendix G, and Table 2.</li>
+  <li>
+<a href="https://github.com/google-research/google-research/tree/master/diffusion_distillation" rel="external nofollow noopener" target="_blank">Official implementation: Google Research diffusion_distillation</a>.</li>
+  <li>
+<a href="https://openaccess.thecvf.com/content/CVPR2023/papers/Meng_On_Distillation_of_Guided_Diffusion_Models_CVPR_2023_paper.pdf" rel="external nofollow noopener" target="_blank">On Distillation of Guided Diffusion Models, CVPR 2023</a>.</li>
+</ul>
+
+<p>Further distillation approaches:</p>
+
+<ul>
+  <li>
+<a href="https://openreview.net/forum?id=1k4yZbbDqX" rel="external nofollow noopener" target="_blank">InstaFlow: One Step is Enough for High-Quality Diffusion-Based Text-to-Image Generation, ICLR 2024</a>.</li>
+  <li>
+<a href="https://arxiv.org/pdf/2311.17042" rel="external nofollow noopener" target="_blank">Adversarial Diffusion Distillation</a>.</li>
+  <li>
+<a href="https://arxiv.org/pdf/2405.14867" rel="external nofollow noopener" target="_blank">Improved Distribution Matching Distillation for Fast Image Synthesis</a>.</li>
 </ul>
 
 <h3 id="rectified-diffusion">Rectified Diffusion</h3>
 
-<p>Rectified Flows define the forward process as straight paths between the data distribution and a standard normal distribution [2], i.e.,</p>
+<p><strong>Rectified Flow</strong> and <strong>Rectified Diffusion</strong> are closely related, but the distinction matters. Rectified flow learns transport using linear interpolation between endpoint pairs. <strong>Rectified Diffusion</strong> extends the <em>retraining on matched endpoints</em> idea to diffusion models with other noise schedules and prediction types. Its central question is: can we make an existing diffusion sampler easier to integrate without converting it into a flow-matching model?</p>
 
-\[z_t = (1 - t) x_0 + t \epsilon\]
+<p><strong>Starting Point: Rectified Flow and Reflow</strong></p>
 
-<p>where \(\epsilon\) is a standard normal random variable and \(t\) is the time step in [0, 1].</p>
+<p>Using \(t=0\) for data and \(t=1\) for noise, a linear conditional path is</p>
+
+<div class="overflow-auto">
+
+\[z_t=(1-t)x_0+t\epsilon, \qquad
+\frac{d z_t}{dt}=\epsilon-x_0.\]
+
+</div>
+
+<p>The flow-matching objective in this time convention is</p>
+
+<div class="overflow-auto">
+
+\[\mathcal{L}_{\mathrm{RF}}(\theta)
+=\mathbb{E}_{x_0,\epsilon,t}
+\left[\left\|u_\theta(z_t,t)-(\epsilon-x_0)\right\|_2^2\right].\]
+
+</div>
+
+<p>Sampling integrates \(d z_t/dt=u_\theta(z_t,t)\) from \(1\) down to \(0\). The minus sign is therefore already supplied by the negative time increment. Some papers instead predict the denoising direction \(x_0-\epsilon\); their update must use the corresponding opposite sign.</p>
+
+<p>Although every <em>conditional training path</em> is straight, the learned ODE trajectory need not be: the squared-error predictor averages the directions of different endpoint pairs compatible with a noisy state. <strong>Reflow</strong> changes those pairings. Run a deterministic teacher from noise \(\epsilon\) to a generated sample \(\tilde{x}_0=G_\phi(\epsilon)\), then retrain using the pair \((\tilde{x}_0,\epsilon)\). The generated sample is now tied to the noise that produced it.</p>
+
+<p><strong>The Generalization: Keep the Diffusion Schedule</strong></p>
+
+<p>Wang et al.’s <a href="https://arxiv.org/abs/2410.07303" rel="external nofollow noopener" target="_blank">Rectified Diffusion</a> applies this pairing operation to the general path</p>
+
+<div class="overflow-auto">
+
+\[z_t=\alpha_t\tilde{x}_0+\sigma_t\epsilon,
+\qquad \tilde{x}_0=G_\phi(\epsilon,c),\]
+
+</div>
+
+<p>where \(\alpha_t\) and \(\sigma_t\) are the signal and noise amplitudes, \(c\) is an optional text condition, and \(G_\phi\) is the fixed teacher sampler, including its guidance settings. For DDPM, these amplitudes are \(\sqrt{\bar\alpha_t}\) and \(\sqrt{1-\bar\alpha_t}\). For an existing noise-prediction model, retraining is simply</p>
+
+<div class="overflow-auto">
+
+\[\mathcal{L}_{\mathrm{RD}}(\theta)
+=\mathbb{E}_{(\tilde{x}_0,\epsilon,c),t}
+\left[w(t)\left\|\epsilon_\theta(z_t,t,c)-\epsilon\right\|_2^2\right].\]
+
+</div>
+
+<p>The key change is <strong>which noise goes with which image</strong>, not the appearance of the mean-squared-error loss. In ordinary diffusion training, data and noise are independent. Here, they form a coupled teacher-generated dataset. Replacing the saved noise with a fresh random draw would remove the rectification mechanism.</p>
+
+<p>The diagram follows one saved noise seed through teacher generation and student training. The same seed appears in both the interpolated input and the regression target.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <img src="/assets/img/diffusion-foundation/rectified-diffusion-pairs.svg" class="img-fluid rounded z-depth-1" width="800" alt="A fixed noise seed passes through a frozen teacher to produce a sample. That sample, its original noise, and its condition are saved as one pair. Student training mixes the saved endpoints with the existing diffusion schedule and predicts the same saved noise." loading="lazy" data-zoomable="">
+    </div>
+</div>
+<div class="caption">
+    Rectification preserves the noise–sample pairing made by the teacher, then reuses it for diffusion training. Original diagram explaining Section 2.1 and Algorithm 4 of Wang et al. (2024).
+</div>
+
+<p><strong>Why Straightness Is Not Required</strong></p>
+
+<p>Suppose an ideal retrained model predicts the same \(\epsilon\) everywhere along one paired path. Its clean-data prediction is then also fixed at \(\tilde{x}_0\). For \(s&lt;t\), a DDIM update gives</p>
+
+<div class="overflow-auto">
+
+\[z_s=\frac{\alpha_s}{\alpha_t}z_t
++\left(\sigma_s-\frac{\alpha_s}{\alpha_t}\sigma_t\right)\epsilon
+=\alpha_s\tilde{x}_0+\sigma_s\epsilon.\]
+
+</div>
+
+<p>Thus one update reaches exactly the same paired path at the next time, even when that path is curved in the original coordinates. The displayed form assumes \(\alpha_t&gt;0\), as in the finite terminal schedule of the noise-prediction model used here. A VP schedule with \(\alpha_t^2+\sigma_t^2=1\) generally traces a curve between the endpoints; setting \(\alpha_t=1-t\) and \(\sigma_t=t\) recovers the straight flow-matching path.</p>
+
+<p>The paper calls this a <strong>first-order ODE path</strong>: it means the first-order diffusion solver is exact under constant noise prediction, not that other diffusion ODEs involve higher-order derivatives. Exactness is an ideal condition requiring consistent predictions and compatible paths. Finite models, intersecting interpolations, and optimization errors prevent it from being a universal one-step guarantee.</p>
+
+<p><strong>Implementation Overview</strong></p>
+
+<p>This pseudocode describes basic rectification for a text-conditioned, noise-predicting latent diffusion model. The teacher’s final latents, original starting noise, and conditions are stored together.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="c1"># Stage 1: collect matched endpoints with a frozen teacher.
+</span><span class="n">teacher</span><span class="p">.</span><span class="nb">eval</span><span class="p">().</span><span class="n">requires_grad_</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">condition</span> <span class="ow">in</span> <span class="n">training_conditions</span><span class="p">:</span>
+    <span class="n">eps</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">randn</span><span class="p">(</span><span class="n">latent_shape</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">():</span>
+        <span class="n">x0</span> <span class="o">=</span> <span class="n">deterministic_teacher_sample</span><span class="p">(</span>
+            <span class="n">teacher</span><span class="p">,</span> <span class="n">initial_noise</span><span class="o">=</span><span class="n">eps</span><span class="p">,</span> <span class="n">condition</span><span class="o">=</span><span class="n">condition</span><span class="p">,</span>
+            <span class="n">steps</span><span class="o">=</span><span class="n">teacher_steps</span><span class="p">,</span> <span class="n">guidance_scale</span><span class="o">=</span><span class="n">teacher_cfg</span><span class="p">,</span>
+        <span class="p">)</span>  <span class="c1"># return the clean latent, before VAE decoding
+</span>    <span class="n">pair_store</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">x0</span><span class="p">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">eps</span><span class="p">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">condition</span><span class="p">)</span>
+
+<span class="c1"># Stage 2: initialize from the teacher and keep its parameterization.
+</span><span class="n">student</span> <span class="o">=</span> <span class="n">copy</span><span class="p">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">teacher</span><span class="p">).</span><span class="n">train</span><span class="p">().</span><span class="n">requires_grad_</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">make_optimizer</span><span class="p">(</span><span class="n">student</span><span class="p">.</span><span class="n">parameters</span><span class="p">())</span>
+<span class="k">for</span> <span class="n">x0</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="n">condition</span> <span class="ow">in</span> <span class="n">pair_loader</span><span class="p">:</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">sample_training_times</span><span class="p">(</span><span class="n">x0</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="n">x0</span><span class="p">.</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="n">broadcast_schedule</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x0</span><span class="p">)</span>  <span class="c1"># original alpha_t, sigma_t
+</span>    <span class="n">z</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="n">x0</span> <span class="o">+</span> <span class="n">s</span> <span class="o">*</span> <span class="n">eps</span>            <span class="c1"># saved noise, not fresh noise
+</span>    <span class="n">prediction</span> <span class="o">=</span> <span class="n">student</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">condition</span><span class="p">)</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="p">(</span><span class="n">prediction</span> <span class="o">-</span> <span class="n">eps</span><span class="p">).</span><span class="n">square</span><span class="p">().</span><span class="n">mean</span><span class="p">()</span>  <span class="c1"># w(t) = 1 here
+</span>    <span class="n">optimizer</span><span class="p">.</span><span class="n">zero_grad</span><span class="p">()</span>
+    <span class="n">loss</span><span class="p">.</span><span class="n">backward</span><span class="p">()</span>
+    <span class="n">optimizer</span><span class="p">.</span><span class="n">step</span><span class="p">()</span>
+
+<span class="c1"># Inference uses fresh noise and the retrained model.
+</span><span class="n">student</span><span class="p">.</span><span class="nb">eval</span><span class="p">()</span>
+<span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="n">latent</span> <span class="o">=</span> <span class="n">deterministic_sample</span><span class="p">(</span>
+        <span class="n">student</span><span class="p">,</span> <span class="n">initial_noise</span><span class="o">=</span><span class="n">torch</span><span class="p">.</span><span class="n">randn</span><span class="p">(</span><span class="n">latent_shape</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">),</span>
+        <span class="n">condition</span><span class="o">=</span><span class="n">prompt_embedding</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="n">few_steps</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">vae</span><span class="p">.</span><span class="n">decode</span><span class="p">(</span><span class="n">latent</span> <span class="o">/</span> <span class="n">vae_scaling_factor</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>Results and Trade-offs</strong></p>
+
+<p>In the paper’s COCO-2017 validation comparison at \(512\times512\) resolution, basic Rectified Diffusion achieves <strong>FID 27.26 in one step</strong>, versus <strong>47.91</strong> for its rectified-flow baseline. The separate version with subsequent consistency distillation reaches <strong>22.83</strong>; that number should not be attributed to paired retraining alone. The teacher still determines the training samples, and producing those pairs has an offline cost. The paper also studies <em>phased rectification</em>, which fits the solver property over shorter time intervals, and consistency distillation for further improvements at very low step counts. Those are additional procedures beyond the basic algorithm above.</p>
 
 <p>References:</p>
 
 <ul>
-  <li>[1] <a href="https://arxiv.org/pdf/2209.03003" rel="external nofollow noopener" target="_blank">Flow straight and fast: Learning to generate and transfer data with rectified flow</a>
-</li>
-  <li>[2] <a href="https://arxiv.org/pdf/2403.03206" rel="external nofollow noopener" target="_blank">Scaling Rectified Flow Transformers for High-Resolution Image Synthesis</a>
-</li>
+  <li>
+<a href="https://arxiv.org/abs/2410.07303" rel="external nofollow noopener" target="_blank">Wang et al. Rectified Diffusion: Straightness Is Not Your Need in Rectified Flow, 2024; ICLR 2025</a> — Sections 2.1–2.4, Algorithm 4, and Table 1.</li>
+  <li>
+<a href="https://github.com/G-U-N/Rectified-Diffusion" rel="external nofollow noopener" target="_blank">Official implementation: Rectified-Diffusion</a>.</li>
+  <li>
+<a href="https://arxiv.org/abs/2209.03003" rel="external nofollow noopener" target="_blank">Liu, Gong, and Liu. Flow Straight and Fast: Learning to Generate and Transfer Data with Rectified Flow, ICLR 2023</a>.</li>
+  <li>
+<a href="https://arxiv.org/abs/2403.03206" rel="external nofollow noopener" target="_blank">Esser et al. Scaling Rectified Flow Transformers for High-Resolution Image Synthesis, ICML 2024</a>.</li>
 </ul>
 
 <h3 id="caching-in-diffusion-models">Caching in Diffusion Models</h3>
@@ -3380,7 +3990,520 @@ To link textual descriptions with corresponding regions, additional tokens <code
 
 <h2 id="3d-diffusion-models">3D Diffusion Models</h2>
 
+<p>An image describes how an object looks from one camera. A <strong>3D representation</strong> must also describe what happens when we move that camera: which surfaces become visible, what lies behind the object, and how its shape changes the shading. The diffusion machinery remains useful, but we first need to decide <strong>what the model denoises</strong>.</p>
+
+<p>There are two useful routes:</p>
+
+<ul>
+  <li>
+<strong>Learn a distribution of 3D objects</strong>: train diffusion on point clouds or learned 3D representations, then sample a new object with the trained model. Point-E and Shap-E follow this route.</li>
+  <li>
+<strong>Use a 2D diffusion model to optimize a 3D object</strong>: render the current object, ask a frozen image model for an improvement direction, and update the object through a differentiable renderer. DreamFusion follows this route.</li>
+</ul>
+
+<p>The distinction matters: in the first route, training is shared across future samples; in the second, generating each object requires a new optimization process. These foundational methods illustrate the design choices rather than a ranking of current 3D generators.</p>
+
+<h3 id="point-e-diffusion-on-colored-point-clouds">Point-E: Diffusion on Colored Point Clouds</h3>
+
+<p><strong>Representation and forward process</strong></p>
+
+<p><a href="https://arxiv.org/abs/2212.08751" rel="external nofollow noopener" target="_blank">Point-E (Nichol et al., 2022)</a> represents an object as a tensor \(P_0 \in \mathbb{R}^{N \times 6}\). Each row contains a point’s three coordinates and RGB color, normalized to \([-1,1]\). We can corrupt this tensor using exactly the Gaussian process used for images:</p>
+
+<div class="overflow-auto">
+
+\[P_t = \sqrt{\bar{\alpha}_t}P_0 + \sqrt{1-\bar{\alpha}_t}\epsilon,
+\qquad \epsilon \sim \mathcal{N}(0,I).\]
+
+</div>
+
+<p>Here \(\bar{\alpha}_t\) is the cumulative signal-retention factor, with clean data at \(t=0\). A transformer predicts the noise in all six channels, conditioned on a reference image \(c\). The simplified noise-prediction objective is</p>
+
+<div class="overflow-auto">
+
+\[\mathcal{L}_{\mathrm{points}}(\theta)
+= \mathbb{E}_{P_0,c,t,\epsilon}
+\left[\left\|\epsilon_\theta(P_t,t,c)-\epsilon\right\|_F^2\right],\]
+
+</div>
+
+<p>where the Frobenius norm sums over points and channels. Point-E also learns the reverse-process variance; this expression isolates the denoising component.</p>
+
+<p><strong>How does an image guide an unordered set?</strong></p>
+
+<p>The transformer receives point embeddings, a timestep embedding, and <strong>256 image-grid embeddings</strong> from a frozen CLIP ViT-L/14. Point tokens have no positional encoding based on their row index: swapping two input points swaps the corresponding predictions. This is <strong>permutation equivariance</strong>, which preserves the interpretation of the tensor as a set while retaining pointwise noise targets.</p>
+
+<p>The full pipeline first generates a synthetic view using a GLIDE model fine-tuned on 3D renderings. A base point-cloud diffusion model generates <strong>1,024 points</strong> conditioned on that image. A second diffusion model keeps these points as conditioning and generates <strong>3,072 additional points</strong>, producing 4,096 points in total. The diagram highlights where diffusion acts and why upsampling adds new points instead of replacing the initial set.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <img src="/assets/img/diffusion-foundation/point-e-point-generation.svg" class="img-fluid rounded z-depth-1" width="760" alt="Point-E first generates a reference image from text, denoises 1,024 colored points conditioned on that image, then denoises 3,072 extra points conditioned on both the image and the initial points. Concatenating the point sets gives 4,096 points." loading="lazy" data-zoomable="">
+    </div>
+</div>
+<div class="caption">
+    Point-E generates a coarse point set, then adds points through a second conditional diffusion model. Original diagram based on Sections 4.2–4.4 of <a href="https://arxiv.org/abs/2212.08751" rel="external nofollow noopener" target="_blank">Point-E</a>.
+</div>
+
+<p><strong>Simplified training and sampling</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># P0: normalized XYZRGB points, shape [batch, N, 6].
+# schedule.add_noise implements the forward equation above.
+</span><span class="n">t</span> <span class="o">=</span> <span class="n">schedule</span><span class="p">.</span><span class="n">sample_timesteps</span><span class="p">(</span><span class="n">P0</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="n">P0</span><span class="p">.</span><span class="n">device</span><span class="p">)</span>
+<span class="n">eps</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">randn_like</span><span class="p">(</span><span class="n">P0</span><span class="p">)</span>
+<span class="n">Pt</span> <span class="o">=</span> <span class="n">schedule</span><span class="p">.</span><span class="n">add_noise</span><span class="p">(</span><span class="n">P0</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+<span class="n">eps_hat</span> <span class="o">=</span> <span class="n">point_model</span><span class="p">(</span><span class="n">Pt</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">image_features</span><span class="p">)</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="p">(</span><span class="n">eps_hat</span> <span class="o">-</span> <span class="n">eps</span><span class="p">).</span><span class="n">square</span><span class="p">().</span><span class="n">mean</span><span class="p">()</span>  <span class="c1"># Variance loss omitted.
+</span><span class="n">optimizer</span><span class="p">.</span><span class="n">zero_grad</span><span class="p">()</span>
+<span class="n">loss</span><span class="p">.</span><span class="n">backward</span><span class="p">()</span>
+<span class="n">optimizer</span><span class="p">.</span><span class="n">step</span><span class="p">()</span>
+
+<span class="o">@</span><span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">generate_points</span><span class="p">(</span><span class="n">prompt</span><span class="p">):</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">text_to_image</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>             <span class="c1"># GLIDE in Point-E.
+</span>    <span class="n">image_features</span> <span class="o">=</span> <span class="n">frozen_clip_grid</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+    <span class="c1"># Each helper runs a complete reverse diffusion trajectory.
+</span>    <span class="n">coarse</span> <span class="o">=</span> <span class="n">sample_point_diffusion</span><span class="p">(</span>
+        <span class="n">base_model</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1024</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">image</span><span class="o">=</span><span class="n">image_features</span>
+    <span class="p">)</span>
+    <span class="n">extra</span> <span class="o">=</span> <span class="n">sample_point_diffusion</span><span class="p">(</span>
+        <span class="n">upsampler</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3072</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">image</span><span class="o">=</span><span class="n">image_features</span><span class="p">,</span>
+        <span class="n">fixed_points</span><span class="o">=</span><span class="n">coarse</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">torch</span><span class="p">.</span><span class="n">cat</span><span class="p">([</span><span class="n">coarse</span><span class="p">,</span> <span class="n">extra</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>These are conceptual helpers, not the package’s exact API. The <a href="https://github.com/openai/point-e" rel="external nofollow noopener" target="_blank">official notebooks</a> provide runnable sampling examples. A point cloud has no mesh connectivity; Point-E uses a separate model to regress a <strong>signed distance field</strong>, extracts its zero surface with marching cubes, and transfers colors from nearby points. This conversion can lose thin structures or amplify gaps already present in the points.</p>
+
+<h3 id="shap-e-denoising-the-parameters-of-a-3d-function">Shap-E: Denoising the Parameters of a 3D Function</h3>
+
+<p>A point set explicitly lists a finite collection of samples. An <strong>implicit representation</strong> instead answers a query at a 3D coordinate: what is the density, surface distance, or color here?</p>
+
+<p><a href="https://arxiv.org/abs/2305.02463" rel="external nofollow noopener" target="_blank">Shap-E (Jun and Nichol, 2023)</a> trains an encoder on point clouds and rendered views to produce latents \(z_0=E(\text{asset})\). A learned projection turns these latents into parameters \(\psi\) of an MLP representing the object. The MLP supports both a radiance-field representation and a signed-distance-and-texture representation, so the generated asset can be rendered as a NeRF or extracted as a textured mesh.</p>
+
+<p>After learning this representation, Shap-E trains diffusion on the encoded assets. Its denoiser predicts the <strong>clean latent</strong> \(\hat z_0\) rather than noise:</p>
+
+<div class="overflow-auto">
+
+\[z_t = \sqrt{\bar{\alpha}_t}z_0 + \sqrt{1-\bar{\alpha}_t}\epsilon,
+\qquad
+\mathcal{L}_{\mathrm{latent}}(\theta)
+= \mathbb{E}\left[\left\|f_\theta(z_t,t,c)-z_0\right\|_2^2\right].\]
+
+</div>
+
+<p>Here \(c\) is text or image conditioning. The latents have shape \(1024 \times 1024\), so “latent” does not necessarily mean lower-dimensional than a point cloud. The benefit is a learned representation whose decoded function supports multiple rendering methods.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <img src="/assets/img/diffusion-foundation/shap-e-implicit-generation.svg" class="img-fluid rounded z-depth-1" width="760" alt="During representation learning, an encoder maps a known 3D asset to latent vectors. At generation time, conditional diffusion generates vectors in that learned space. Projected vectors supply an implicit neural function that can be rendered as a radiance field or extracted as a textured mesh." loading="lazy" data-zoomable="">
+    </div>
+</div>
+<div class="caption">
+    Shap-E samples a learned representation that supplies the parameters of an implicit 3D function. Original diagram based on Section 4 of <a href="https://arxiv.org/abs/2305.02463" rel="external nofollow noopener" target="_blank">Shap-E</a>.
+</div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Conceptual inference; no per-object optimization is required.
+</span><span class="n">z</span> <span class="o">=</span> <span class="n">sample_latent_diffusion</span><span class="p">(</span><span class="n">condition</span><span class="p">,</span> <span class="n">prediction_type</span><span class="o">=</span><span class="s">"x0"</span><span class="p">)</span>
+<span class="n">implicit_parameters</span> <span class="o">=</span> <span class="n">project_latents_to_mlp</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+<span class="n">image</span> <span class="o">=</span> <span class="n">render_nerf</span><span class="p">(</span><span class="n">implicit_parameters</span><span class="p">,</span> <span class="n">camera</span><span class="p">)</span>
+<span class="n">mesh</span> <span class="o">=</span> <span class="n">extract_textured_mesh</span><span class="p">(</span><span class="n">implicit_parameters</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Changing the representation does not solve all conditioning problems. In the paper’s comparison of 300M-parameter models, text-conditional Shap-E improves on Point-E’s CLIP-based metrics, while image-conditional versions reach similar performance and share failure cases. Missing information in the conditioning image and limits of the training data still matter.</p>
+
+<h3 id="dreamfusion-a-2d-diffusion-model-as-a-3d-learning-signal">DreamFusion: A 2D Diffusion Model as a 3D Learning Signal</h3>
+
+<p><strong>Why optimize through rendered views?</strong></p>
+
+<p><a href="https://arxiv.org/abs/2209.14988" rel="external nofollow noopener" target="_blank">DreamFusion (Poole et al., 2022)</a> uses a pretrained text-to-image model without training a diffusion model on 3D data. Let \(\theta\) describe a NeRF-like scene, and let</p>
+
+<div class="overflow-auto">
+
+\[x=g_\theta(v,\ell)\]
+
+</div>
+
+<p>be its rendered image from camera \(v\) under lighting \(\ell\). DreamFusion’s scene network predicts density and albedo; differentiable volume rendering and shading connect these properties to image pixels. Updating a visible pixel can therefore update the underlying geometry and appearance.</p>
+
+<p>Each iteration samples a camera, renders the scene, and corrupts that rendering:</p>
+
+<div class="overflow-auto">
+
+\[x_t=a_t x+\sigma_t\epsilon,
+\qquad a_t=\sqrt{\bar{\alpha}_t},
+\qquad \sigma_t=\sqrt{1-\bar{\alpha}_t}.\]
+
+</div>
+
+<p>The frozen image denoiser returns a classifier-free-guided prediction \(\hat\epsilon_\phi(x_t,t,y)\) for prompt \(y\). It never directly predicts a 3D object. The renderer is the bridge between its image-space knowledge and the scene parameters.</p>
+
+<p><strong>Score Distillation Sampling (SDS)</strong></p>
+
+<p>A useful starting point is to make noisy renders agree with the image model’s noisy conditional distribution:</p>
+
+<div class="overflow-auto">
+
+\[\mathcal{L}_{\mathrm{KL}}(\theta)
+=\mathbb{E}_{v,\ell,t}
+\left[k(t)\,D_{\mathrm{KL}}\left(
+q_t(\cdot\mid g_\theta(v,\ell))\,\|\,p_\phi(\cdot\mid y,t)
+\right)\right].\]
+
+</div>
+
+<p>Here \(q_t=\mathcal{N}(a_t x,\sigma_t^2I)\) and \(k(t)\) weights noise levels. Using the diffusion score \(s_\phi=-\hat\epsilon_\phi/\sigma_t\) gives the SDS gradient estimator</p>
+
+<div class="overflow-auto">
+
+\[\nabla_\theta\mathcal{L}_{\mathrm{SDS}}
+=\mathbb{E}_{v,\ell,t,\epsilon}
+\left[
+\underbrace{w(t)\left(\hat\epsilon_\phi(x_t,t,y)-\epsilon\right)}_{\text{image-space gradient}}
+\frac{\partial g_\theta(v,\ell)}{\partial\theta}
+\right],
+\qquad w(t)=k(t)\frac{a_t}{\sigma_t}.\]
+
+</div>
+
+<p>The subtracted noise is a zero-mean control variate that reduces variance. The relation between \(w(t)\) and \(k(t)\) also explains why implementations can show different apparent factors of \(a_t\) or \(\sigma_t\): they may absorb them into their weighting convention. DreamFusion uses the final gradient weight \(w(t)=\sigma_t^2\).</p>
+
+<p>👉 The crucial detail is <strong>where gradients flow</strong>. SDS uses the predicted residual as a fixed image-space gradient and backpropagates it <strong>through the renderer</strong>. It does not differentiate through the denoiser. Freezing the denoiser’s parameters alone would not enforce this: computing a noise-prediction squared error and backpropagating through its input would still introduce the denoiser Jacobian, giving a different update.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <img src="/assets/img/diffusion-foundation/dreamfusion-sds-gradient.svg" class="img-fluid rounded z-depth-1" width="760" alt="A trainable 3D scene produces an image through a differentiable renderer. A frozen image denoiser reads its noisy version and returns a noise residual. The residual is detached and supplied as an image gradient, which flows backward through the renderer to update the scene. No gradient passes through the denoiser." loading="lazy" data-zoomable="">
+    </div>
+</div>
+<div class="caption">
+    SDS turns a frozen image denoiser's residual into a scene update by differentiating through rendering. Original diagram based on Equations 3–4 and Figure 8 of <a href="https://arxiv.org/abs/2209.14988" rel="external nofollow noopener" target="_blank">DreamFusion</a>.
+</div>
+
+<p><strong>Implementation of the SDS update</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># PyTorch-style pseudocode. The optimizer contains scene parameters only.
+# The denoiser is an epsilon predictor; images use its expected scaling.
+</span><span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_optimization_steps</span><span class="p">):</span>
+    <span class="n">camera</span><span class="p">,</span> <span class="n">light</span> <span class="o">=</span> <span class="n">sample_camera_and_light</span><span class="p">()</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">render</span><span class="p">(</span><span class="n">scene</span><span class="p">,</span> <span class="n">camera</span><span class="p">,</span> <span class="n">light</span><span class="p">)</span>  <span class="c1"># Keep this computation graph!
+</span>    <span class="n">t</span> <span class="o">=</span> <span class="n">sample_uniform_time</span><span class="p">(</span><span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.98</span><span class="p">)</span>
+    <span class="n">a_t</span><span class="p">,</span> <span class="n">sigma_t</span> <span class="o">=</span> <span class="n">diffusion_coefficients</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+    <span class="n">eps</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">randn_like</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">():</span>
+        <span class="n">noisy_image</span> <span class="o">=</span> <span class="n">a_t</span> <span class="o">*</span> <span class="n">image</span><span class="p">.</span><span class="n">detach</span><span class="p">()</span> <span class="o">+</span> <span class="n">sigma_t</span> <span class="o">*</span> <span class="n">eps</span>
+        <span class="n">eps_u</span> <span class="o">=</span> <span class="n">denoiser</span><span class="p">(</span><span class="n">noisy_image</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">null_condition</span><span class="p">)</span>
+        <span class="n">eps_c</span> <span class="o">=</span> <span class="n">denoiser</span><span class="p">(</span><span class="n">noisy_image</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">view_condition</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">camera</span><span class="p">))</span>
+        <span class="n">eps_guided</span> <span class="o">=</span> <span class="n">eps_u</span> <span class="o">+</span> <span class="n">guidance_scale</span> <span class="o">*</span> <span class="p">(</span><span class="n">eps_c</span> <span class="o">-</span> <span class="n">eps_u</span><span class="p">)</span>
+        <span class="n">image_gradient</span> <span class="o">=</span> <span class="n">sigma_t</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">eps_guided</span> <span class="o">-</span> <span class="n">eps</span><span class="p">)</span>
+
+    <span class="c1"># A surrogate scalar whose image gradient is exactly the SDS signal.
+</span>    <span class="c1"># Sum pixels/channels, average the sampled views in the batch.
+</span>    <span class="n">loss_sds</span> <span class="o">=</span> <span class="p">(</span><span class="n">image_gradient</span><span class="p">.</span><span class="n">detach</span><span class="p">()</span> <span class="o">*</span> <span class="n">image</span><span class="p">).</span><span class="n">flatten</span><span class="p">(</span><span class="mi">1</span><span class="p">).</span><span class="nb">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">).</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_sds</span> <span class="o">+</span> <span class="n">geometry_regularization</span><span class="p">(</span><span class="n">scene</span><span class="p">,</span> <span class="n">camera</span><span class="p">)</span>
+    <span class="n">optimizer</span><span class="p">.</span><span class="n">zero_grad</span><span class="p">()</span>
+    <span class="n">loss</span><span class="p">.</span><span class="n">backward</span><span class="p">()</span>
+    <span class="n">optimizer</span><span class="p">.</span><span class="n">step</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>The surrogate’s numerical value is not a denoising error or an estimate of the KL itself; its purpose is to produce the desired gradient. Random cameras couple observations through the same scene. DreamFusion also uses randomized lighting, textureless renders, view-dependent text conditioning, and opacity/orientation penalties to discourage flat, painted solutions.</p>
+
+<p><strong>Evidence and limitations</strong></p>
+
+<p>DreamFusion’s original implementation uses Imagen’s <strong>64 × 64 base model</strong>, with 15,000 optimization iterations taking about <strong>1.5 hours on four TPUv4 chips</strong>. On 153 object-centric COCO prompts, it reports CLIP ViT-L/14 R-Precision of <strong>79.7% for color renders</strong> and <strong>58.5% for textureless renders</strong>. The latter tests whether geometry remains recognizable without texture, but neither metric certifies geometric correctness.</p>
+
+<p>Point-E reports <strong>1–2 minutes on one GPU</strong>, with lower sample quality in its original evaluation; hardware and rendering protocols differ, so these are reported operating points rather than a controlled speed ratio. Shap-E improves representation flexibility but still needs a learned 3D dataset. DreamFusion avoids that requirement for its optimization procedure, yet remains vulnerable to ambiguous views, flat geometry, oversmoothing, saturated colors, and limited diversity. A plausible image from several views is useful evidence for a 3D object, but it is not a unique specification of its shape.</p>
+
+<p>References:</p>
+
+<ul>
+  <li>[1] Nichol et al. <a href="https://arxiv.org/abs/2212.08751" rel="external nofollow noopener" target="_blank">Point-E: A System for Generating 3D Point Clouds from Complex Prompts</a>, 2022. <a href="https://github.com/openai/point-e" rel="external nofollow noopener" target="_blank">Official implementation</a>.</li>
+  <li>[2] Jun and Nichol. <a href="https://arxiv.org/abs/2305.02463" rel="external nofollow noopener" target="_blank">Shap-E: Generating Conditional 3D Implicit Functions</a>, 2023. <a href="https://github.com/openai/shap-e" rel="external nofollow noopener" target="_blank">Official implementation</a>.</li>
+  <li>[3] Poole et al. <a href="https://arxiv.org/abs/2209.14988" rel="external nofollow noopener" target="_blank">DreamFusion: Text-to-3D using 2D Diffusion</a>, ICLR 2023. <a href="https://dreamfusion3d.github.io/" rel="external nofollow noopener" target="_blank">Project and generated examples</a>.</li>
+</ul>
+
 <h2 id="diffusion-language-models">Diffusion Language Models</h2>
+
+<p>An autoregressive language model generates a sequence \(x_0=(x_0^1,\ldots,x_0^L)\) by predicting the next token from its prefix:</p>
+
+<div class="overflow-auto">
+
+\[p_\theta(x_0)=\prod_{i=1}^{L}p_\theta(x_0^i\mid x_0^{&lt;i}).\]
+
+</div>
+
+<p><strong>Diffusion language models</strong> instead learn to recover text from corrupted text or corrupted text representations. At generation time, they repeatedly denoise an entire sequence, allowing predictions to use the visible context on both sides of a missing token. The main design question is <strong>what should noise mean for text?</strong> Adding Gaussian noise to an integer token ID would introduce an arbitrary geometry: neighboring IDs need not represent similar words.</p>
+
+<h3 id="continuous-embeddings-or-discrete-tokens">Continuous Embeddings or Discrete Tokens?</h3>
+
+<p>There are two useful starting points:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Approach</th>
+      <th>What is corrupted?</th>
+      <th>What does the model predict?</th>
+      <th>How does generation finish?</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+<strong>Continuous diffusion</strong>, e.g., Diffusion-LM</td>
+      <td>A sequence of real-valued word embeddings</td>
+      <td>Clean embeddings or a related denoising target</td>
+      <td>Convert denoised vectors into vocabulary tokens</td>
+    </tr>
+    <tr>
+      <td>
+<strong>Discrete diffusion</strong>, e.g., D3PM and MDLM</td>
+      <td>Tokens through categorical transitions, including replacement by a mask</td>
+      <td>Probabilities over clean vocabulary tokens</td>
+      <td>Sample tokens directly from the reverse process</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Diffusion-LM</strong> (<a href="https://arxiv.org/abs/2205.14217" rel="external nofollow noopener" target="_blank">Li et al., 2022</a>) learns an embedding function \(E\) and performs Gaussian diffusion over its outputs. Writing \(z_0\approx E(x_0)\in\mathbb{R}^{L\times d}\), the familiar forward marginal becomes</p>
+
+<div class="overflow-auto">
+
+\[z_t=\sqrt{\bar\alpha_t}z_0+\sqrt{1-\bar\alpha_t}\epsilon,
+\qquad \epsilon\sim\mathcal{N}(0,I).\]
+
+</div>
+
+<p>Here \(d\) is the embedding dimension. The approximation in \(z_0\approx E(x_0)\) omits the paper’s small initial Gaussian perturbation around the learned embeddings. A Transformer denoises these continuous variables, while a learned token decoder rounds the final vectors into text. The embeddings and denoiser are trained jointly; predicting \(z_0\) and clamping intermediate predictions toward nearby word embeddings help reduce rounding errors.</p>
+
+<p>The continuous intermediate states also provide a place to apply <strong>classifier guidance</strong>: gradients of a control model can steer the latent sequence toward a requested attribute, such as a syntactic structure. The paper’s figure shows this connection between the diffusion trajectory and the control signal.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion-foundation/diffusion-lm-overview-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion-foundation/diffusion-lm-overview-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion-foundation/diffusion-lm-overview-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/diffusion-foundation/diffusion-lm-overview.png" class="img-fluid rounded z-depth-1 bg-white" width="800" height="auto" alt="Diffusion-LM denoises Gaussian vectors into word vectors and then text. A parse-tree control model supplies gradient updates to the intermediate continuous representations." data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Continuous text representations let Diffusion-LM apply gradient-based control before rounding vectors into words. Figure 1 from <a href="https://arxiv.org/abs/2205.14217" rel="external nofollow noopener" target="_blank">Li et al., 2022</a>, reproduced unchanged under <a href="https://creativecommons.org/licenses/by/4.0/" rel="external nofollow noopener" target="_blank">CC BY 4.0</a>. The figure uses x for continuous states and w for text; the explanation above uses z and x, respectively. <a href="/assets/img/diffusion-foundation/diffusion-lm-overview.png">View the full-size figure.</a>
+</div>
+
+<p><strong>D3PM</strong> (<a href="https://arxiv.org/abs/2107.03006" rel="external nofollow noopener" target="_blank">Austin et al., 2021</a>) takes the other route: it defines a transition matrix whose entries give the probability of changing one token into another. Corruption can be uniform, structured by embedding similarity, or directed into an <strong>absorbing mask state</strong>. Absorbing-state diffusion gives an especially simple language model, which we derive next using <strong>MDLM</strong> (<a href="https://arxiv.org/abs/2406.07524" rel="external nofollow noopener" target="_blank">Sahoo et al., 2024</a>).</p>
+
+<h3 id="forward-process-gradually-mask-the-sequence">Forward Process: Gradually Mask the Sequence</h3>
+
+<p>Let \(m\) denote a special <code class="language-plaintext highlighter-rouge">[MASK]</code> token that never appears in clean text. Use continuous time \(t\in[0,1]\), where \(t=0\) is clean text and \(t=1\) is fully masked. Define \(\alpha_t\) as the probability that a token remains visible, with \(\alpha_0=1\) and \(\alpha_1=0\). For each position \(i\),</p>
+
+<div class="overflow-auto">
+
+\[q(x_t^i\mid x_0^i)
+=\alpha_t\,\delta_{x_0^i}+(1-\alpha_t)\,\delta_m,\]
+
+</div>
+
+<p>where \(\delta_a\) is a point mass on token \(a\). Tokens are masked independently <strong>conditional on the same sampled time</strong>. Once masked along a forward trajectory, a token stays masked. For the simple schedule \(\alpha_t=1-t\), each position is masked with probability \(t\).</p>
+
+<p>👉 The denoising problem changes with the noise level: a lightly masked sentence mostly asks for local reconstruction; an almost fully masked sentence requires the model to construct much more of the sentence from its learned language distribution. Training must cover both regimes.</p>
+
+<p>The MDLM figure connects this variable masking process to its weighted reconstruction objective. The benchmark panel is historical evidence from that paper, with diffusion perplexities evaluated through likelihood bounds.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0 text-center">
+        <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/diffusion-foundation/mdlm-overview-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/diffusion-foundation/mdlm-overview-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/diffusion-foundation/mdlm-overview-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/diffusion-foundation/mdlm-overview.png" class="img-fluid rounded z-depth-1 bg-white" width="800" height="auto" alt="MDLM trains a Transformer to reconstruct masked tokens at different masking levels using weighted cross-entropy. The figure contrasts this generative objective with masked language modeling and compares reported LM1B perplexities." data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+    </div>
+</div>
+<div class="caption">
+    Masked diffusion combines reconstruction at many corruption levels with a probabilistic reverse process for generation. Figure 1 from <a href="https://arxiv.org/abs/2406.07524" rel="external nofollow noopener" target="_blank">Sahoo et al., 2024</a>, reproduced unchanged under <a href="https://creativecommons.org/licenses/by/4.0/" rel="external nofollow noopener" target="_blank">CC BY 4.0</a>. <a href="/assets/img/diffusion-foundation/mdlm-overview.png">View the full-size figure.</a>
+</div>
+
+<h3 id="reverse-process-decide-when-and-what-to-reveal">Reverse Process: Decide When and What to Reveal</h3>
+
+<p>Consider a reverse step from \(t\) to \(s&lt;t\). If \(x_t^i\neq m\), its original identity is already known, so the reverse step simply copies it. If \(x_t^i=m\), there are two possibilities: it was already masked at \(s\), or it became masked between \(s\) and \(t\). Therefore,</p>
+
+<div class="overflow-auto">
+
+\[\begin{aligned}
+q(x_s^i=m\mid x_t^i=m,x_0^i)
+&amp;=\frac{1-\alpha_s}{1-\alpha_t},\\
+q(x_s^i=x_0^i\mid x_t^i=m,x_0^i)
+&amp;=\frac{\alpha_s-\alpha_t}{1-\alpha_t}.
+\end{aligned}\]
+
+</div>
+
+<p>The denominator is the probability that the position is masked at \(t\). The second numerator is the probability mass that was still visible at \(s\) but has disappeared by \(t\). These two probabilities sum to one.</p>
+
+<p>During generation, \(x_0\) is unknown. A bidirectional Transformer predicts a clean-token distribution \(\pi_\theta^i(v\mid x_t,t)\) over ordinary vocabulary tokens \(v\neq m\). Substituting this prediction into the posterior gives</p>
+
+<div class="overflow-auto">
+
+\[p_\theta(x_s^i\mid x_t)=
+\begin{cases}
+\delta_{x_t^i}, &amp; x_t^i\neq m,\\[2mm]
+\displaystyle
+\frac{1-\alpha_s}{1-\alpha_t}\delta_m+
+\frac{\alpha_s-\alpha_t}{1-\alpha_t}\pi_\theta^i(\cdot\mid x_t,t),
+&amp; x_t^i=m.
+\end{cases}\]
+
+</div>
+
+<p>MDLM calls its construction <strong>SUBS</strong>, for substitution: exclude <code class="language-plaintext highlighter-rouge">[MASK]</code> from clean-token predictions, and carry over already visible tokens. With \(\alpha_t=1-t\), a masked position stays masked with probability \(s/t\) and is revealed with probability \((t-s)/t\).</p>
+
+<p><strong>Two different decisions are involved:</strong> the schedule determines <em>when</em> a position is revealed; the network determines <em>what token</em> appears there. The model uses the whole visible sequence when predicting each position, even though the usual finite-step reverse kernel samples positions independently conditional on that sequence. Taking large reverse steps therefore approximates dependencies among tokens that become visible simultaneously.</p>
+
+<h3 id="training-objective-weighted-masked-cross-entropy">Training Objective: Weighted Masked Cross-Entropy</h3>
+
+<p>The same reverse probabilities explain the loss. For a masked position, the true and learned reverse kernels assign identical probability to staying masked. Their KL divergence reduces to the reveal probability multiplied by the clean token’s negative log-probability:</p>
+
+<div class="overflow-auto">
+
+\[D_{\mathrm{KL}}(q\Vert p_\theta)
+=\frac{\alpha_s-\alpha_t}{1-\alpha_t}
+\left[-\log\pi_\theta^i(x_0^i\mid x_t,t)\right].\]
+
+</div>
+
+<p>Visible positions contribute zero. Summing over positions and steps, then taking the continuous-time limit, yields the MDLM negative evidence lower bound:</p>
+
+<div class="overflow-auto">
+
+\[\mathcal{L}_{\mathrm{MDLM}}(\theta)=
+\mathbb{E}_{x_0,t,x_t}
+\left[
+\frac{-\alpha'_t}{1-\alpha_t}
+\sum_{i=1}^{L}\mathbf{1}[x_t^i=m]
+\left(-\log\pi_\theta^i(x_0^i\mid x_t,t)\right)
+\right].\]
+
+</div>
+
+<p>Here \(t\sim\mathcal{U}(0,1)\) and \(\alpha'_t=d\alpha_t/dt&lt;0\). With the clean and fully masked endpoints and the SUBS construction, the endpoint reconstruction and prior terms vanish. For \(\alpha_t=1-t\), the weight simplifies to \(1/t\). This is a mixture of masked language modeling losses across noise levels, tied to a generative likelihood bound; using a fixed masking ratio alone does not supply this construction.</p>
+
+<p>For conditional generation, keep the prompt visible and corrupt only the response. The network receives both the prompt and the partially masked response, while the loss covers masked response positions.</p>
+
+<h3 id="implementation-training-and-ancestral-sampling">Implementation: Training and Ancestral Sampling</h3>
+
+<p>The following is <strong>educational PyTorch pseudocode</strong> for the linear schedule. <code class="language-plaintext highlighter-rouge">model(tokens, t)</code> returns vocabulary logits of shape <code class="language-plaintext highlighter-rouge">[batch, length, vocabulary]</code> using bidirectional attention. Clean inputs contain no <code class="language-plaintext highlighter-rouge">[MASK]</code> tokens. <code class="language-plaintext highlighter-rouge">train_positions</code> marks valid positions to corrupt and supervise: all text positions for pretraining, or response positions for instruction tuning. Padding must also be excluded from attention by the model wrapper.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="n">F</span>
+
+
+<span class="k">def</span> <span class="nf">masked_diffusion_loss</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">clean</span><span class="p">,</span> <span class="n">train_positions</span><span class="p">,</span> <span class="n">mask_id</span><span class="p">):</span>
+    <span class="n">batch_size</span> <span class="o">=</span> <span class="n">clean</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="c1"># A small endpoint cutoff avoids division by zero in finite precision.
+</span>    <span class="n">eps</span> <span class="o">=</span> <span class="mf">1e-5</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">eps</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">eps</span><span class="p">)</span> <span class="o">*</span> <span class="n">torch</span><span class="p">.</span><span class="n">rand</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">clean</span><span class="p">.</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">masked</span> <span class="o">=</span> <span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="n">rand</span><span class="p">(</span><span class="n">clean</span><span class="p">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">clean</span><span class="p">.</span><span class="n">device</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">t</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">])</span>
+    <span class="n">masked</span> <span class="o">=</span> <span class="n">masked</span> <span class="o">&amp;</span> <span class="n">train_positions</span>
+    <span class="n">noisy</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">where</span><span class="p">(</span><span class="n">masked</span><span class="p">,</span> <span class="n">mask_id</span><span class="p">,</span> <span class="n">clean</span><span class="p">)</span>
+
+    <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">noisy</span><span class="p">,</span> <span class="n">t</span><span class="p">).</span><span class="nb">float</span><span class="p">()</span>
+    <span class="n">logits</span> <span class="o">=</span> <span class="n">logits</span><span class="p">.</span><span class="n">clone</span><span class="p">()</span>
+    <span class="n">logits</span><span class="p">[...,</span> <span class="n">mask_id</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">torch</span><span class="p">.</span><span class="n">inf</span>  <span class="c1"># Clean data cannot be a mask.
+</span>    <span class="n">nll</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="n">cross_entropy</span><span class="p">(</span><span class="n">logits</span><span class="p">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">clean</span><span class="p">,</span> <span class="n">reduction</span><span class="o">=</span><span class="s">"none"</span><span class="p">)</span>
+
+    <span class="n">weighted</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">where</span><span class="p">(</span><span class="n">masked</span><span class="p">,</span> <span class="n">nll</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">/</span> <span class="n">t</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">]</span>
+    <span class="c1"># Normalize by eligible length, not the realized number of masks.
+</span>    <span class="n">lengths</span> <span class="o">=</span> <span class="n">train_positions</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">).</span><span class="n">clamp_min</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">weighted</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">lengths</span><span class="p">).</span><span class="n">mean</span><span class="p">()</span>
+
+
+<span class="c1"># clean and train_positions come from the data loader.
+</span><span class="n">optimizer</span><span class="p">.</span><span class="n">zero_grad</span><span class="p">()</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">masked_diffusion_loss</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">clean</span><span class="p">,</span> <span class="n">train_positions</span><span class="p">,</span> <span class="n">mask_id</span><span class="p">)</span>
+<span class="n">loss</span><span class="p">.</span><span class="n">backward</span><span class="p">()</span>
+<span class="n">optimizer</span><span class="p">.</span><span class="n">step</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>This code averages the sequence objective per eligible token and omits the tiny interval \(t&lt;\epsilon\). It samples one corrupted sequence per example; training does <strong>not</strong> run the entire reverse chain. Dividing by the realized mask count instead of the eligible sequence length would change the estimator, particularly for examples with very few masks.</p>
+
+<p>For sampling, start with a fixed prompt and an all-mask response. The code below samples the specified factorized reverse kernel, using the exact reveal probability for each step. It remains a finite-step approximation to the continuous-time generative process.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">@</span><span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">sample_masked_diffusion</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">prompt</span><span class="p">,</span> <span class="n">response_length</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">mask_id</span><span class="p">):</span>
+    <span class="n">model</span><span class="p">.</span><span class="nb">eval</span><span class="p">()</span>
+    <span class="n">batch_size</span><span class="p">,</span> <span class="n">prompt_length</span> <span class="o">=</span> <span class="n">prompt</span><span class="p">.</span><span class="n">shape</span>
+    <span class="k">assert</span> <span class="n">steps</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">response_length</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">prompt</span><span class="p">.</span><span class="n">eq</span><span class="p">(</span><span class="n">mask_id</span><span class="p">).</span><span class="nb">any</span><span class="p">()</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">full</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">response_length</span><span class="p">),</span> <span class="n">mask_id</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">prompt</span><span class="p">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">prompt</span><span class="p">.</span><span class="n">device</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">tokens</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">cat</span><span class="p">([</span><span class="n">prompt</span><span class="p">,</span> <span class="n">response</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">steps</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">full</span><span class="p">((</span><span class="n">batch_size</span><span class="p">,),</span> <span class="n">k</span> <span class="o">/</span> <span class="n">steps</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">tokens</span><span class="p">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">steps</span>
+        <span class="n">masked</span> <span class="o">=</span> <span class="n">tokens</span><span class="p">.</span><span class="n">eq</span><span class="p">(</span><span class="n">mask_id</span><span class="p">)</span>
+        <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">t</span><span class="p">).</span><span class="nb">float</span><span class="p">()</span>
+        <span class="n">logits</span><span class="p">[...,</span> <span class="n">mask_id</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">torch</span><span class="p">.</span><span class="n">inf</span>
+        <span class="n">candidates</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">distributions</span><span class="p">.</span><span class="n">Categorical</span><span class="p">(</span><span class="n">logits</span><span class="o">=</span><span class="n">logits</span><span class="p">).</span><span class="n">sample</span><span class="p">()</span>
+
+        <span class="c1"># (t - s) / t = 1 / k: reveal each remaining mask independently.
+</span>        <span class="n">reveal_probability</span> <span class="o">=</span> <span class="p">(</span><span class="n">t</span> <span class="o">-</span> <span class="n">s</span><span class="p">)</span> <span class="o">/</span> <span class="n">t</span>
+        <span class="n">reveal</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">rand</span><span class="p">(</span><span class="n">tokens</span><span class="p">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">tokens</span><span class="p">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">reveal</span> <span class="o">=</span> <span class="n">masked</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">reveal</span> <span class="o">&lt;</span> <span class="n">reveal_probability</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">])</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">where</span><span class="p">(</span><span class="n">reveal</span><span class="p">,</span> <span class="n">candidates</span><span class="p">,</span> <span class="n">tokens</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">tokens</span><span class="p">[:,</span> <span class="n">prompt_length</span><span class="p">:]</span>  <span class="c1"># At the final step every mask is revealed.
+</span></code></pre></div></div>
+
+<p>Already revealed tokens and the prompt are preserved. This absorbing-mask sampler cannot revise a committed token; repeated denoising does not automatically imply unrestricted editing.</p>
+
+<h3 id="from-mdlm-to-llada-evidence-and-trade-offs">From MDLM to LLaDA: Evidence and Trade-offs</h3>
+
+<p>MDLM’s LM1B experiment compares 110M-parameter models trained for 327B tokens: its reported perplexity upper bound is <strong>23.00</strong>, versus <strong>20.86</strong> exact perplexity for the retrained autoregressive Transformer. This is evidence that a simple masking process can narrow the language-modeling gap. It is not evidence that the diffusion model has lower perplexity; the diffusion result is a bound. (<a href="https://arxiv.org/html/2406.07524v2#S5.T1" rel="external nofollow noopener" target="_blank">Sahoo et al., 2024, Table 1</a>)</p>
+
+<p><strong>LLaDA</strong> scales masked diffusion to <strong>8B parameters</strong>, pretraining on <strong>2.3 trillion tokens</strong> and instruction tuning on <strong>4.5 million prompt-response pairs</strong>. Its Transformer uses bidirectional attention and a time-independent mask predictor. Prompt tokens remain unmasked during instruction tuning. These results show that next-token factorization is not required for the demonstrated language and instruction-following capabilities. The paper’s matched-data autoregressive comparisons cover smaller compute budgets; comparisons with external 8B models also involve different training data. (<a href="https://arxiv.org/abs/2502.09992v1" rel="external nofollow noopener" target="_blank">Nie et al., 2025</a>)</p>
+
+<p>LLaDA also explores <strong>low-confidence remasking</strong>: predict candidates at masked positions, keep a scheduled number of confident predictions, and leave the others masked. A further option fills blocks from left to right while denoising within each block. These are useful decoding strategies, but confidence-based selection changes the random reveal kernel derived above. It should not be presented as exact ancestral sampling. (<a href="https://arxiv.org/html/2502.09992v1#S2.SS4" rel="external nofollow noopener" target="_blank">LLaDA, Section 2.4</a>)</p>
+
+<p>The remaining practical trade-offs are:</p>
+
+<ul>
+  <li>
+<strong>Parallel predictions still require repeated computation.</strong> An autoregressive decoder reuses cached keys and values for its unchanged prefix. Bidirectional denoising changes the context seen by earlier positions, so ordinary autoregressive KV caching does not directly apply. Fewer decoding rounds alone do not establish a wall-clock speedup.</li>
+  <li>
+<strong>Generation length needs a policy.</strong> The example allocates a fixed response length. Variable-length output requires an end-of-sequence convention, a length choice, or blockwise extension. MDLM explicitly develops semi-autoregressive generation for this purpose.</li>
+  <li>
+<strong>Speed, dependence, and quality interact.</strong> Revealing many tokens in one pass reduces network calls but commits more tokens without conditioning on each other’s sampled identities. Smaller steps permit more conditioning on newly revealed context, at higher cost. Quality and latency must be measured together for the chosen sampler and hardware. (<a href="https://arxiv.org/html/2406.07524v2#S4" rel="external nofollow noopener" target="_blank">MDLM, Sections 4 and 5</a>)</li>
+</ul>
+
+<p>References:</p>
+
+<ul>
+  <li>[1] Austin et al. <a href="https://arxiv.org/abs/2107.03006" rel="external nofollow noopener" target="_blank">Structured Denoising Diffusion Models in Discrete State-Spaces</a>, NeurIPS 2021.</li>
+  <li>[2] Li et al. <a href="https://arxiv.org/abs/2205.14217" rel="external nofollow noopener" target="_blank">Diffusion-LM Improves Controllable Text Generation</a>, NeurIPS 2022. <a href="https://github.com/XiangLi1999/Diffusion-LM" rel="external nofollow noopener" target="_blank">Official implementation</a>.</li>
+  <li>[3] Sahoo et al. <a href="https://arxiv.org/abs/2406.07524" rel="external nofollow noopener" target="_blank">Simple and Effective Masked Diffusion Language Models</a>, NeurIPS 2024. <a href="https://github.com/kuleshov-group/mdlm" rel="external nofollow noopener" target="_blank">Official implementation</a>.</li>
+  <li>[4] Nie et al. <a href="https://arxiv.org/abs/2502.09992v1" rel="external nofollow noopener" target="_blank">Large Language Diffusion Models</a>, 2025. <a href="https://github.com/ML-GSAI/LLaDA" rel="external nofollow noopener" target="_blank">Official implementation</a>.</li>
+</ul>
 
 
 
