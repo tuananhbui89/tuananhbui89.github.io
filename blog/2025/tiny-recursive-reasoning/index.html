@@ -153,6 +153,7 @@
 <li class="toc-entry toc-h2">
 <a href="#about-the-paper">About the paper</a>
 <ul>
+<li class="toc-entry toc-h3"><a href="#tldr">TL;DR</a></li>
 <li class="toc-entry toc-h3"><a href="#from-hrm-to-trm">From HRM to TRM</a></li>
 <li class="toc-entry toc-h3"><a href="#one-reasoning-cycle-think-then-revise">One Reasoning Cycle: Think, Then Revise</a></li>
 <li class="toc-entry toc-h3"><a href="#deep-recursion-and-deep-supervision">Deep Recursion and Deep Supervision</a></li>
@@ -168,7 +169,6 @@
 <li class="toc-entry toc-h3"><a href="#looplm-learning-how-many-iterations-to-use">LoopLM: Learning How Many Iterations to Use</a></li>
 <li class="toc-entry toc-h3"><a href="#pseudocode-shared-depth-weighted-loss-and-exit">Pseudocode: Shared Depth, Weighted Loss, and Exit</a></li>
 <li class="toc-entry toc-h3"><a href="#trm-and-looplm-shared-principle-different-algorithms">TRM and LoopLM: Shared Principle, Different Algorithms</a></li>
-<li class="toc-entry toc-h3"><a href="#what-the-comparison-doesand-does-notestablish">What the Comparison Does—and Does Not—Establish</a></li>
 </ul>
 </li>
 <li class="toc-entry toc-h2">
@@ -209,13 +209,32 @@
     <div id="markdown-content">
       <h2 id="about-the-paper">About the paper</h2>
 
-<p><a href="https://arxiv.org/abs/2510.04871v1" rel="external nofollow noopener" target="_blank"><strong>Less is More: Recursive Reasoning with Tiny Networks</strong></a>, by Alexia Jolicoeur-Martineau, studies a different way to spend computation on difficult prediction problems: repeatedly reuse a small network to revise an answer. The resulting <strong>Tiny Recursive Model (TRM)</strong> is trained from scratch on paired inputs and solutions. It does not require written reasoning traces, and its intermediate reasoning takes place in continuous hidden states rather than generated text.</p>
+<p><a href="https://arxiv.org/abs/2510.04871v1" rel="external nofollow noopener" target="_blank"><strong>Less is More: Recursive Reasoning with Tiny Networks</strong></a>, by Alexia Jolicoeur-Martineau, introduces this <strong>Tiny Recursive Model (TRM)</strong>. It learns from paired problems and solutions, without intermediate reasoning labels. The idea matters because it separates <strong>how many parameters a model stores</strong> from <strong>how much computation it performs</strong>: a small learned module can support a long process of refinement. Its intermediate work takes place in continuous hidden states, and training teaches those updates through their effect on the predicted answer. The paper shows an impressive result: a tiny model with only 5-million-parameters can achive 87.4% of Sudoku-Extreme dataset, a significant boost from 55.0% with 27-million-parameter model (HRM).</p>
 
-<p>The central distinction is between <strong>parameter count</strong> and <strong>amount of computation</strong>. A two-layer network can be applied many times, allowing later updates to depend on earlier attempts without allocating a different set of parameters to every step. For a Sudoku puzzle, for example, the model maintains a candidate solution while repeatedly updating features that can incorporate constraints from across the grid. Repeated refinement is learned from final solutions; the training data does not specify which deduction to make at each iteration.</p>
+<p>This post follows that computation from input embeddings to answer predictions, explains how deep supervision trains repeated refinement, and connects the equations to the implementation. Along the way, we will see what TRM changes from HRM, how it relates to looped Transformers such as LoopLM, and what would need to change to apply it to biomedical relation extraction.</p>
+
+<h3 id="tldr">TL;DR</h3>
+
+<ul>
+  <li>
+<strong>Architecture: reuse a small network to refine an answer.</strong> TRM maintains an embedded input \(x\), a candidate-answer state \(y\), and an auxiliary reasoning state \(z\). One shared two-layer network repeatedly updates \(z\), then revises \(y\); an output head reads \(y\) to predict all output positions in parallel. The network can use self-attention or token-mixing MLPs.</li>
+  <li>
+<strong>Training: supervise refinement in manageable steps.</strong> Each supervision step runs several reasoning cycles, retaining gradients through the final complete cycle. The model receives an answer loss and carries detached states into the next step, allowing repeated refinement without backpropagating through the entire history.</li>
+  <li>
+<strong>Halt prediction: learn when an example has received enough computation.</strong> The default halt head predicts whether every supervised output token is correct, using binary classification rather than a bootstrapped Q-learning continue target. Learned halting controls training; evaluation uses the full configured budget, normally 16 supervision steps.</li>
+  <li>
+<strong>Batch slots: different example lifetimes, synchronized GPU work.</strong> Each training iteration runs one supervision step for every slot in a fixed-size batch, followed by a shared optimizer update. Previously halted slots accept new examples and reset their states; unfinished examples retain their inputs, labels, and states. Examples can therefore receive different numbers of updates while GPU execution stays batched. The benefit is earlier admission of new examples, rather than a shorter inner computation for each batch step.</li>
+</ul>
+
+<p><em>Sources: <a href="https://arxiv.org/html/2510.04871v1#S4" rel="external nofollow noopener" target="_blank">TRM method</a>, <a href="https://github.com/SamsungSAILMontreal/TinyRecursiveModels/blob/c01103738605ba39d1430519b1ee0c62f4c707f8/models/recursive_reasoning/trm.py" rel="external nofollow noopener" target="_blank">halting and batch-slot implementation</a>, and <a href="https://github.com/SamsungSAILMontreal/TinyRecursiveModels/blob/c01103738605ba39d1430519b1ee0c62f4c707f8/pretrain.py#L289-L324" rel="external nofollow noopener" target="_blank">batched training loop</a>.</em></p>
 
 <h3 id="from-hrm-to-trm">From HRM to TRM</h3>
 
-<p>TRM builds on the <a href="https://arxiv.org/abs/2506.21734" rel="external nofollow noopener" target="_blank">Hierarchical Reasoning Model (HRM)</a>. HRM carries two hidden states through recurrent computation, using separate networks for their updates. TRM keeps two states but gives them a simpler interpretation:</p>
+<p>TRM builds on the <a href="https://arxiv.org/abs/2506.21734v3" rel="external nofollow noopener" target="_blank">Hierarchical Reasoning Model (HRM)</a>, whose distinctive feature is <strong>two recurrent modules operating at different timescales</strong>. A low-level module updates its hidden state several times while the high-level state stays fixed. The high-level module then incorporates the low-level result and supplies context for the next cycle. The two modules have <strong>separate networks</strong> and weights; predictions are read from the high-level state. The authors interpret these roles as detailed processing and higher-level planning, although the hidden states are not explicit, readable plans. <a href="https://arxiv.org/html/2506.21734v3#S2" rel="external nofollow noopener" target="_blank">HRM, Section 2</a></p>
+
+<p>HRM made this approach worth studying through its task-specific Sudoku, maze, and ARC results with roughly 27M parameters, trained without language-model pretraining or intermediate reasoning labels. It showed that substantial computation could happen inside a compact recurrent model. TRM investigates how much of HRM’s machinery is needed: it preserves repeated refinement and supervision across steps while simplifying the networks, gradient computation, and halting objective. <a href="https://arxiv.org/html/2506.21734v3#S3.SS2" rel="external nofollow noopener" target="_blank">HRM, Section 3.2</a>; <a href="https://arxiv.org/html/2510.04871v1#S3" rel="external nofollow noopener" target="_blank">TRM, Sections 3–4</a></p>
+
+<p>TRM keeps two states but gives them a simpler interpretation:</p>
 
 <table>
   <thead>
@@ -270,7 +289,11 @@
 
 <p>All three tensors have compatible shape \([B,L+P,D]\): batch size \(B\), token length \(L\), puzzle-prefix length \(P\), and hidden width \(D\). The additions are elementwise; the network’s attention or token-mixing layers exchange information between positions. The input \(x\) is explicitly injected during the reasoning updates. Its influence reaches the answer update through \(z\), even though \(x\) is not added again at that point.</p>
 
-<p><strong>Why retain both states?</strong> The answer state provides a persistent candidate to improve, while the reasoning state provides additional memory that does not have to be immediately decodable into an answer. This division is an architectural choice, not a guarantee that each hidden vector corresponds to a human-interpretable deduction.</p>
+<p><strong>Why retain both states?</strong> The answer state \(y\) provides a persistent candidate to improve, while the reasoning state \(z\) provides additional memory that does not have to be immediately decodable into an answer. This division is an architectural choice, not a guarantee that each hidden vector corresponds to a human-interpretable deduction.</p>
+
+<p><strong>Why can one network update both states?</strong> Both operations transform a hidden-width tensor into another tensor of the same shape, and their inputs already differ: refining \(z\) uses \(x+y+z\), while revising \(y\) uses \(y+z\). The author’s rationale is that this different conditioning may let one network learn both operations. The two states retain distinct roles even when their updates share parameters; information about \(x\) still reaches the answer update through the states.</p>
+
+<p>The paper tests this choice in a Sudoku-Extreme ablation. The shared MLP model reaches <strong>87.4% accuracy with 5M parameters</strong>, compared with <strong>82.4% with 10M parameters</strong> for separate networks at the same effective depth. Sharing therefore reduces parameter count and improves generalization in that experiment, while keeping the number of network applications unchanged. The comparison supports this design choice for the tested setting; it does not isolate why sharing helps or establish that separate modules are always worse. <a href="https://arxiv.org/html/2510.04871v1#S4.SS3" rel="external nofollow noopener" target="_blank">Section 4.3 and Table 1</a></p>
 
 <p>In the code below, <code class="language-plaintext highlighter-rouge">net</code> represents the shared reasoning module, including its position handling. This is the same computation as <code class="language-plaintext highlighter-rouge">L_level(z_L, z_H + input_embeddings)</code> followed by <code class="language-plaintext highlighter-rouge">L_level(z_H, z_L)</code> in the official implementation.</p>
 
@@ -281,7 +304,27 @@
     <span class="k">return</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span>
 </code></pre></div></div>
 
-<p>The output head maps the answer state to vocabulary logits at every position. Taking an argmax gives the whole proposed output in parallel. The original TRM therefore performs supervised structured prediction; calling its output a generated answer does not imply autoregressive text generation. The later relation-extraction example adapts this interface by supervising a relation-label token.</p>
+<p><strong>How does a hidden answer become a prediction?</strong> The recursion above returns continuous vectors. An <strong>output head</strong> is a separate learned linear layer that reads each answer vector and produces one score for every possible output token. These unnormalized scores are called <strong>logits</strong>. In the official implementation, this layer is named <code class="language-plaintext highlighter-rouge">lm_head</code>; it maps hidden width \(D\) to vocabulary size \(V\) using a weight matrix \(W_{\mathrm{out}}\in\mathbb R^{V\times D}\) and no bias.</p>
+
+<p>For example \(b\) and output position \(i\in\{0,\ldots,L-1\}\), the readout after a reasoning cycle is</p>
+
+<div class="overflow-auto">
+
+\[\begin{aligned}
+a_{bi} &amp;= W_{\mathrm{out}}\,y^+_{b,P+i}\in\mathbb R^V,\\
+\hat t_{bi} &amp;= \underset{v\in\{0,\ldots,V-1\}}{\arg\max}\;a_{bi,v}.
+\end{aligned}\]
+
+</div>
+
+<p>Here \(P\) skips the puzzle-prefix positions, \(a_{bi,v}\) is the score for token \(v\), and \(\hat t_{bi}\) is the token with the highest score. The same output-head weights are used at every position. In Sudoku, this produces scores for all cells at once; selecting the largest score at each cell yields the proposed grid. The code below reads the current \(y\) after the refinement cycles, with <code class="language-plaintext highlighter-rouge">output_head</code> standing for the implementation’s <code class="language-plaintext highlighter-rouge">lm_head</code>:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># y: [B, L + P, D]; prefix_len is P.
+</span><span class="n">logits</span> <span class="o">=</span> <span class="n">output_head</span><span class="p">(</span><span class="n">y</span><span class="p">)[:,</span> <span class="n">prefix_len</span><span class="p">:]</span>  <span class="c1"># [B, L, V]
+</span><span class="n">predicted_tokens</span> <span class="o">=</span> <span class="n">logits</span><span class="p">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># [B, L]
+</span></code></pre></div></div>
+
+<p>The prediction loss is computed from the logits, allowing gradients to reach the output head and the reasoning network. The discrete <code class="language-plaintext highlighter-rouge">argmax</code> is used to inspect predictions and measure correctness; it is not the path through which the answer loss backpropagates. Further refinement carries the continuous \(y,z\) states forward. This is supervised structured prediction with all output positions decoded in parallel. The later relation-extraction example adapts the readout by supervising a relation-label position. <a href="https://github.com/SamsungSAILMontreal/TinyRecursiveModels/blob/c01103738605ba39d1430519b1ee0c62f4c707f8/models/recursive_reasoning/trm.py" rel="external nofollow noopener" target="_blank">Output-head definition and readout</a></p>
 
 <h3 id="deep-recursion-and-deep-supervision">Deep Recursion and Deep Supervision</h3>
 
@@ -343,6 +386,8 @@
 <p>For the layer count, use the <a href="https://github.com/SamsungSAILMontreal/TinyRecursiveModels/blob/c01103738605ba39d1430519b1ee0c62f4c707f8/config/arch/trm.yaml" rel="external nofollow noopener" target="_blank">released TRM configuration</a>: it sets <code class="language-plaintext highlighter-rouge">L_layers=2</code>. The existing architecture illustration in Main process is labeled <code class="language-plaintext highlighter-rouge">4x</code>, which does not match this two-layer configuration.</p>
 
 <h3 id="learning-the-answer-and-when-to-halt">Learning the Answer and When to Halt</h3>
+
+<p><strong>Halting controls how many supervision steps a training example receives.</strong> The equations above describe the work inside <strong>one supervision step</strong>: \(d\), \(T\), and \(n\) are fixed, so each active example incurs \(dT(n+1)\) forward reasoning-layer applications, with \(d(n+1)\) tracked for gradients. If example \(b\) remains active for \(S_b\) supervision steps, its total counts are \(S_b dT(n+1)\) and \(S_b d(n+1)\), respectively. It participates in \(S_b\) separate batch-level backward passes and optimizer updates; the model does not backpropagate through that example’s entire history as one graph. For \(d=2,T=3,n=6\), stopping after two steps gives 84 forward layer applications, while running all 16 gives 672. The halt predictor decides when to stop revisiting an example and release its batch slot for new data, subject to exploration and the step limit. This matters because always using the maximum budget can spend many updates on already-correct answers, reducing the number of distinct examples seen within a fixed training budget. Halting changes how long an example occupies its slot, while each supervision step retains the same inner-loop computation. <a href="https://github.com/SamsungSAILMontreal/TinyRecursiveModels/blob/c01103738605ba39d1430519b1ee0c62f4c707f8/models/recursive_reasoning/trm.py" rel="external nofollow noopener" target="_blank">Training halting and batch-slot replacement</a></p>
 
 <p>Let \(\tilde{y}_{bi}\) be the correct token at position \(i\) of example \(b\), and let \(m_{bi}\) indicate whether that position is supervised. A token-prediction loss averages the negative log-probability across each example’s valid positions:</p>
 
@@ -472,7 +517,7 @@
 
 <p><em>Literature update, September 2026. This section includes papers released after the original post.</em></p>
 
-<p><strong>The attention-based TRM is a form of looped Transformer:</strong> it repeatedly applies the same Transformer module to evolving hidden states. The broader idea is to increase the amount of computation without assigning new parameters to every layer application. However, TRM and the <strong>LoopLM</strong> architecture behind the <strong>Ouro</strong> language models organize that computation differently. TRM refines a complete candidate answer and a separate reasoning state; LoopLM refines the hidden representations used for next-token prediction. TRM also has an attention-free MLP variant, so the name TRM does not always imply a Transformer.</p>
+<p><strong>The attention-based TRM is a form of looped Transformer:</strong> it repeatedly applies the same Transformer module to evolving hidden states. The <strong>broader idea is to increase the amount of computation without assigning new parameters to every layer application</strong>. However, TRM and the <strong>LoopLM</strong> architecture behind the <strong>Ouro</strong> language models organize that computation differently. TRM refines a complete candidate answer and a separate reasoning state; LoopLM refines the hidden representations used for next-token prediction. TRM also has an attention-free MLP variant, so the name TRM does not always imply a Transformer.</p>
 
 <h3 id="what-does-a-transformer-loop-over">What Does a Transformer Loop Over?</h3>
 
@@ -740,14 +785,6 @@ S_{i,R_{\max}-1}, &amp; r=R_{\max}.
 <p><em>Sources: <a href="https://arxiv.org/html/2510.04871v1#S4" rel="external nofollow noopener" target="_blank">TRM, Section 4 and algorithm</a>, <a href="https://github.com/SamsungSAILMontreal/TinyRecursiveModels/blob/c01103738605ba39d1430519b1ee0c62f4c707f8/models/recursive_reasoning/trm.py" rel="external nofollow noopener" target="_blank">official TRM implementation</a>, and <a href="https://arxiv.org/html/2510.25741v5#S3" rel="external nofollow noopener" target="_blank">LoopLM, Sections 3–4</a>. LoopLM’s method description does not prescribe TRM’s no-gradient-prefix schedule; the shared architectural idea should not be taken to imply an identical backward pass.</em></p>
 
 <p>The most precise description is that <strong>attention-based TRM belongs to the broader recurrent-depth Transformer family</strong>, with a specialized two-state update and supervision scheme. Its MLP variant retains the recurrence but removes the Transformer attention mechanism. This is an architectural connection: LoopLM’s <a href="https://arxiv.org/html/2510.25741v5#S2" rel="external nofollow noopener" target="_blank">related-work discussion</a> places Ouro among earlier looped and recurrent-depth models and does not identify TRM as its precursor.</p>
-
-<h3 id="what-the-comparison-doesand-does-notestablish">What the Comparison Does—and Does Not—Establish</h3>
-
-<p>Both approaches separate <strong>stored parameters</strong> from <strong>executed computation</strong>. However, their reported results do not form a controlled TRM-versus-Ouro experiment: they use different objectives, data, model sizes, and benchmarks. A small puzzle solver’s accuracy cannot be compared directly with a pretrained language model’s reasoning scores.</p>
-
-<p>Looping also does not make additional depth free. For a fixed sequence length, repeating a stack roughly repeats its computation; training must manage activations, and autoregressive inference must manage keys and values at different recurrent depths. LoopLM studies cache-sharing strategies separately because shared weights alone do not make these caches interchangeable. <a href="https://arxiv.org/html/2510.25741v5#S5.SS4.SSS2" rel="external nofollow noopener" target="_blank">LoopLM, Section 5.4.2</a></p>
-
-<p>For the relation-extraction adaptation later in this post, the distinction suggests a concrete design decision. A TRM-style system would repeatedly refine a fixed set of entity-pair predictions conditioned on a document. An autoregressive LoopLM would retain language modeling and express the extraction as generated output. Choosing between them requires task-specific evaluation; the shared recurrence does not determine the better output formulation.</p>
 
 <h2 id="trm-implementation">TRM Implementation</h2>
 
