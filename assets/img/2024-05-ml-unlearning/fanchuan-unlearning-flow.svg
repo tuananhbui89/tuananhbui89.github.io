@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="815" viewBox="0 0 640 815" role="img" aria-labelledby="title desc">
+  <title id="title">Fanchuan's two-stage unlearning</title>
+  <desc id="desc">Start from the original model, train one pass on forget examples toward uniform class predictions, then repeat eight cycles of equalizing similarities to detached retain logits followed by supervised training on retain labels. Return the updated model.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="11" markerHeight="10" refX="11" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,5 L0,10 Z" fill="#344256"/></marker>
+    <marker id="loop-arrow" markerWidth="11" markerHeight="10" refX="11" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,5 L0,10 Z" fill="#2767a8"/></marker>
+  </defs>
+  <rect width="640" height="815" fill="#fff"/>
+  <g font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" fill="#1e293b" text-anchor="middle">
+    <g id="original-model">
+      <rect x="100" y="20" width="440" height="65" rx="14" fill="#f2f5f8" stroke="#69798c" stroke-width="2"/>
+      <text x="320" y="62" font-size="26" font-weight="650">Original trained model</text>
+    </g>
+    <g id="uniformization">
+      <rect x="65" y="125" width="510" height="145" rx="16" fill="#fff8ec" stroke="#96703b" stroke-width="2.5" stroke-dasharray="9 6"/>
+      <text x="320" y="158" font-size="21" fill="#705126" font-weight="600">INITIAL ERASE · 1 PASS</text>
+      <text x="320" y="196" font-size="25" font-weight="650">Uniform predictions on forget set</text>
+      <text x="320" y="233" font-size="22">Minimize KL(U || p) over classes</text>
+    </g>
+    <g id="alternating-cycles">
+      <rect x="35" y="320" width="570" height="370" rx="20" fill="#edf5fe" stroke="#8db2d8" stroke-width="2"/>
+      <text x="320" y="356" font-size="27" font-weight="700" fill="#215b96">Repeat 8 times</text>
+      <g id="forget-round">
+        <rect x="65" y="380" width="465" height="130" rx="14" fill="#fff8ec" stroke="#96703b" stroke-width="2.5" stroke-dasharray="9 6"/>
+        <text x="297.5" y="414" font-size="25" font-weight="650">Equalize similarities</text>
+        <text x="297.5" y="449" font-size="20">Forget logits → retain-batch references</text>
+        <text x="297.5" y="484" font-size="20" fill="#61471f">Retain reference logits: stop gradient</text>
+      </g>
+      <g id="retain-round">
+        <rect x="65" y="555" width="465" height="100" rx="14" fill="#daeafa" stroke="#2767a8" stroke-width="2.5"/>
+        <text x="297.5" y="593" font-size="25" font-weight="650">Repair on retain set</text>
+        <text x="297.5" y="628" font-size="22">Predict the true class labels</text>
+      </g>
+    </g>
+    <g id="updated-model">
+      <rect x="100" y="735" width="440" height="60" rx="14" fill="#f2f5f8" stroke="#69798c" stroke-width="2"/>
+      <text x="320" y="774" font-size="26" font-weight="650">Updated model</text>
+    </g>
+  </g>
+  <g fill="none" stroke="#344256" stroke-width="3" stroke-linecap="round" marker-end="url(#arrow)">
+    <path d="M320,85 L320,125"/>
+    <path d="M320,270 L320,320"/>
+    <path d="M297.5,510 L297.5,555"/>
+    <path d="M320,690 L320,735"/>
+  </g>
+  <path d="M530,605 L575,605 L575,445 L530,445" fill="none" stroke="#2767a8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#loop-arrow)"/>
+</svg>

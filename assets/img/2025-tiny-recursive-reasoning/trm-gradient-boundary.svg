@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="1200" viewBox="0 0 760 1200" role="img" aria-labelledby="trm-title trm-desc">
+  <title id="trm-title">TRM: 21 forward calls, gradients through the final seven</title>
+  <desc id="trm-desc">In one supervision step with n equal to six and T equal to three, one shared two-layer reasoning network performs six latent updates and then one answer update per cycle. Cycles one and two have no gradient tracking. Cycle three tracks all seven recurrent calls. Output heads and the loss read the final answer, and backpropagation traverses only cycle three. Detached copies of answer and latent are carried to the next supervision step. Counts exclude the output heads.</desc>
+  <defs>
+    <marker id="forward-head" viewBox="0 0 12 12" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="auto" markerUnits="userSpaceOnUse"><path d="M1 1 L11 6 L1 11" fill="none" stroke="#475569" stroke-width="2.2" stroke-linejoin="round"/></marker>
+    <marker id="gradient-head" viewBox="0 0 12 12" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="auto" markerUnits="userSpaceOnUse"><path d="M1 1 L11 6 L1 11" fill="none" stroke="#a84309" stroke-width="2.8" stroke-linejoin="round"/></marker>
+  </defs>
+  <rect width="760" height="1200" rx="18" fill="#f8fafc"/>
+  <g font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" fill="#172033">
+    <text x="380" y="47" font-size="34" font-weight="750" text-anchor="middle">21 forward calls. Gradients through 7.</text>
+    <text x="380" y="88" font-size="25" text-anchor="middle" fill="#475569">One supervision step · example n = 6, T = 3</text>
+
+    <g id="shared-cycle-definition">
+      <rect x="60" y="122" width="640" height="127" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+      <text x="380" y="157" font-size="27" font-weight="700" text-anchor="middle">Same two-layer fθ in every cycle</text>
+      <text x="380" y="195" font-size="28" text-anchor="middle">6 × z ← fθ(x + y + z)</text>
+      <text x="380" y="232" font-size="28" text-anchor="middle">then y ← fθ(y + z)</text>
+    </g>
+
+    <g id="input-and-carried-states">
+      <rect x="90" y="291" width="580" height="88" rx="12" fill="#ffffff" stroke="#64748b" stroke-width="2"/>
+      <text x="380" y="325" font-size="28" font-weight="650" text-anchor="middle">Input x</text>
+      <text x="380" y="361" font-size="26" text-anchor="middle">Carried answer y and latent z</text>
+    </g>
+
+    <g id="no-gradient-cycles">
+      <rect x="60" y="427" width="640" height="153" rx="14" fill="#e8edf3" stroke="#64748b" stroke-width="2"/>
+      <text x="380" y="465" font-size="30" font-weight="750" text-anchor="middle">Cycles 1–2: no_grad</text>
+      <rect x="88" y="481" width="253" height="47" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+      <rect x="420" y="481" width="253" height="47" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+      <text x="214.5" y="514" font-size="26" font-weight="600" text-anchor="middle">Cycle 1 · 7 calls</text>
+      <text x="546.5" y="514" font-size="26" font-weight="600" text-anchor="middle">Cycle 2 · 7 calls</text>
+      <text x="380" y="562" font-size="25" text-anchor="middle">14 forward calls · no gradient graph</text>
+    </g>
+
+    <g id="gradient-boundary" fill="#9a3f0c">
+      <text x="60" y="621" font-size="25" font-weight="650">Gradient boundary</text>
+      <path d="M60 636 H347 M413 636 H700" fill="none" stroke="#b45309" stroke-width="2.5" stroke-dasharray="8 7"/>
+    </g>
+
+    <g id="tracked-final-cycle">
+      <rect x="60" y="680" width="640" height="138" rx="14" fill="#dbeafe" stroke="#1d4ed8" stroke-width="3"/>
+      <text x="380" y="721" font-size="31" font-weight="750" text-anchor="middle" fill="#1e3a8a">Cycle 3: track gradients</text>
+      <text x="380" y="760" font-size="29" font-weight="700" text-anchor="middle" fill="#1e3a8a">All 7 calls belong to the graph</text>
+      <text x="380" y="796" font-size="25" text-anchor="middle" fill="#1e3a8a">6 latent updates + 1 answer update</text>
+    </g>
+
+    <g id="prediction-loss">
+      <rect x="60" y="891" width="310" height="99" rx="12" fill="#fff7ed" stroke="#a84309" stroke-width="2"/>
+      <text x="215" y="931" font-size="27" font-weight="700" text-anchor="middle">Prediction + loss</text>
+      <text x="215" y="968" font-size="26" text-anchor="middle">from final y</text>
+    </g>
+
+    <g id="detached-carry">
+      <rect x="420" y="891" width="280" height="99" rx="12" fill="#ffffff" stroke="#64748b" stroke-width="2"/>
+      <text x="560" y="931" font-size="29" font-weight="700" text-anchor="middle">Detach y, z</text>
+      <text x="560" y="968" font-size="25" text-anchor="middle">carry state only</text>
+    </g>
+
+    <g id="next-supervision-step">
+      <rect x="420" y="1049" width="280" height="86" rx="12" fill="#ffffff" stroke="#64748b" stroke-width="2" stroke-dasharray="7 5"/>
+      <text x="560" y="1084" font-size="25" font-weight="650" text-anchor="middle">Next supervision</text>
+      <text x="560" y="1117" font-size="25" font-weight="650" text-anchor="middle">step</text>
+    </g>
+
+    <g id="connectors" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M380 379 V427" stroke="#475569" stroke-width="2.7" marker-end="url(#forward-head)"/>
+      <path d="M341 504.5 H420" stroke="#475569" stroke-width="2.7" marker-end="url(#forward-head)"/>
+      <path d="M380 580 V680" stroke="#475569" stroke-width="2.7" marker-end="url(#forward-head)"/>
+      <path d="M215 818 V891" stroke="#475569" stroke-width="2.7" marker-end="url(#forward-head)"/>
+      <path d="M560 818 V891" stroke="#475569" stroke-width="2.7" marker-end="url(#forward-head)"/>
+      <path d="M60 940 H20 V749 H60" stroke="#a84309" stroke-width="3.7" marker-end="url(#gradient-head)"/>
+      <path d="M560 990 V1049" stroke="#475569" stroke-width="2.7" stroke-dasharray="7 5" marker-end="url(#forward-head)"/>
+    </g>
+    <text x="38" y="865" font-size="25" font-weight="650" fill="#a84309">backward</text>
+    <text x="90" y="1052" font-size="25" fill="#9a3f0c">No gradient reaches</text>
+    <text x="90" y="1087" font-size="25" fill="#9a3f0c">cycles 1–2 or the</text>
+    <text x="90" y="1122" font-size="25" fill="#9a3f0c">previous step.</text>
+    <text x="380" y="1174" font-size="24" text-anchor="middle" fill="#475569">Counts refer to fθ calls; output heads are separate.</text>
+  </g>
+</svg>

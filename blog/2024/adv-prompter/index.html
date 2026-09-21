@@ -349,7 +349,251 @@ Further, we denote by \([x,q,y]\) the full prompt with response \(y\) embedded i
 
 <h3 id="generating-adversarial-targets">Generating Adversarial Targets</h3>
 
+<p><code class="language-plaintext highlighter-rouge">AdvPrompterOpt</code> produces the training label for the generator: an improved suffix \(q^*\) for each instruction-response pair \((x,y)\). Here, <strong>target suffix</strong> means the label learned by AdvPrompter; \(y\) remains the desired response of the TargetLLM. Algorithm 2 above expands suffixes one token at a time, using the current generator to propose continuations and two frozen models to evaluate them. This section follows <a href="https://arxiv.org/html/2404.16873v1#S3" rel="external nofollow noopener" target="_blank">Paulus et al. (2024), version 1, Sections 3.1–3.3</a>.</p>
+
+<p><strong>Three probability distributions have different jobs.</strong> In the minimization objectives above, \(\ell\) denotes a <strong>negative</strong> log-likelihood. Thus, reducing the target loss increases the probability of the desired response. More precisely, the paper defines</p>
+
+<div class="overflow-auto">
+
+\[\begin{aligned}
+\ell_\phi(y\mid[x,q])
+&amp;=-\sum_{t=1}^{|y|}\frac{1}{t}
+\log p_\phi(y_t\mid[x,q,y_{&lt;t}]),\\
+\ell_\eta(q\mid x)
+&amp;=-\sum_{j=1}^{|q|}
+\log p_\eta(q_j\mid[x,q_{&lt;j}]),\\
+\mathcal L(x,q,y)&amp;=\ell_\phi(y\mid[x,q])+\lambda\ell_\eta(q\mid x).
+\end{aligned}\]
+
+</div>
+
+<p>The target response is evaluated with <strong>teacher forcing</strong>: at position \(t\), the model receives the preceding ground-truth response tokens \(y_{&lt;t}\). The factor \(1/t\) emphasizes the beginning of the response. This is a differentiable score for a <em>fixed</em> suffix, but search only reads its value.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Distribution</th>
+      <th>Role during the \(q\)-step</th>
+      <th>Parameters</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>\(p_\phi(y\mid[x,q])\)</td>
+      <td>Score how well the target predicts the specified response</td>
+      <td>Frozen TargetLLM</td>
+    </tr>
+    <tr>
+      <td>\(p_\eta(q\mid x)\)</td>
+      <td>Penalize suffixes unlikely under an ordinary language model</td>
+      <td>Frozen BaseLLM</td>
+    </tr>
+    <tr>
+      <td>\(p_\theta(q\mid x)\)</td>
+      <td>Propose promising next suffix tokens</td>
+      <td>AdvPrompter, updated between searches</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The BaseLLM provides the fluency constraint. AdvPrompter gradually learns which fluent continuations also reduce target loss. A low base-model perplexity is a readability proxy; it does not prove that a suffix is interpretable or preserves the instruction’s meaning.</p>
+
+<p><strong>Proposal, scoring, and beam selection.</strong> Starting from an empty suffix, Algorithm 2 repeats three operations:</p>
+
+<ol>
+  <li>
+<strong>Propose:</strong> sample distinct next-token candidates from \(p_\theta(\cdot\mid[x,q])\) for each retained prefix.</li>
+  <li>
+<strong>Score:</strong> append each candidate token, then evaluate the desired response \(y\) and the extended suffix’s base-model likelihood. The target predicts \(y\) after the candidate suffix; it does not supply the suffix-token proposal distribution.</li>
+  <li>
+<strong>Retain:</strong> pool the extensions and select \(b\) beams. The paper samples beams with probabilities proportional to \(\exp(-\mathcal L/\tau)\), preserving alternatives while favoring lower loss. After reaching the length limit, return the best final suffix.</li>
+</ol>
+
+<p>Several beams allow a temporarily weaker prefix to develop into a better complete sequence. However, this remains approximate search: pruning and a restricted proposal set can discard the best continuation. The extra \(\ell_\theta\) in the preceding formal \(q\)-step motivates staying near the learned generator. Algorithm 2 implements this preference through <strong>proposal sampling</strong>, while its explicit candidate score is \(\mathcal L\). It does not exactly solve the displayed global optimization or add a second learned-prompter likelihood to every beam score.</p>
+
+<p><strong>Reading the released implementation.</strong> The official <a href="https://github.com/facebookresearch/advprompter/blob/802a500c91f1dcd7c8b76869d3e39bf8e40ed7d7/advprompteropt.py" rel="external nofollow noopener" target="_blank"><code class="language-plaintext highlighter-rouge">advprompteropt.py</code></a> maintains a score to <strong>maximize</strong>. Write \(q'=[q,a]\) and let \(\kappa\) denote the configuration’s <code class="language-plaintext highlighter-rouge">lambda_val</code>. Its update is</p>
+
+<div class="overflow-auto">
+
+\[S(q')=S(q)+\log p_\eta(a\mid[x,q])
+-\kappa\left[\ell_\phi(y\mid[x,q'])-\ell_\phi(y\mid[x,q])\right].\]
+
+</div>
+
+<p>Starting with \(S(\varnothing)=0\), the target-loss differences telescope:</p>
+
+<div class="overflow-auto">
+
+\[S(q)=\log p_\eta(q\mid x)
+-\kappa\left[\ell_\phi(y\mid[x,q])-\ell_\phi(y\mid x)\right].\]
+
+</div>
+
+<p>Consequently, maximizing this score minimizes \(\kappa\ell_\phi+\ell_\eta\) up to an instruction-dependent constant. <strong>The code’s <code class="language-plaintext highlighter-rouge">lambda_val</code> weights the target loss</strong>, whereas \(\lambda\) in the paper’s displayed objective weights fluency. Their numerical values are not directly interchangeable: <a href="https://github.com/facebookresearch/advprompter/blob/802a500c91f1dcd7c8b76869d3e39bf8e40ed7d7/utils.py" rel="external nofollow noopener" target="_blank"><code class="language-plaintext highlighter-rouge">utils.py</code></a> also divides the weighted target-token loss by the number of valid response tokens. With repetition penalties enabled, the accumulated base log-probabilities come from the adjusted next-token distributions.</p>
+
+<p>Candidate accounting also differs from the literal per-beam loop in Algorithm 2. With <code class="language-plaintext highlighter-rouge">top_k=48</code> and four beams, the code evaluates <strong>48 extensions in total per instruction per position</strong>: 48 from the initial empty prefix, then 12 from each of four prefixes. <code class="language-plaintext highlighter-rouge">num_chunks</code> divides these evaluations into smaller batches. These are candidate-scoring counts, not counts of generated target responses or successful attempts.</p>
+
+<p>The following educational pseudocode isolates the score update. <code class="language-plaintext highlighter-rouge">propose</code> samples unique tokens from the learned prompter; the two scoring callbacks return ordinary numerical values. Beam selection is simplified to deterministic top-\(b\) selection. The released defaults use stochastic selection while retaining the best candidate; batching, chat templates, and repetition penalties are omitted here.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">search_suffix</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">propose</span><span class="p">,</span> <span class="n">target_nll</span><span class="p">,</span> <span class="n">base_logp</span><span class="p">,</span>
+                  <span class="n">max_length</span><span class="p">,</span> <span class="n">beam_width</span><span class="p">,</span> <span class="n">budget</span><span class="p">,</span> <span class="n">kappa</span><span class="p">):</span>
+    <span class="c1"># Each record contains (suffix_tokens, target_loss, beam_score).
+</span>    <span class="n">empty_loss</span> <span class="o">=</span> <span class="n">target_nll</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(),</span> <span class="n">y</span><span class="p">)</span>
+    <span class="n">beams</span> <span class="o">=</span> <span class="p">[((),</span> <span class="n">empty_loss</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)]</span>
+
+    <span class="k">for</span> <span class="n">position</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_length</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">budget</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">beams</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="n">per_beam</span> <span class="o">=</span> <span class="n">budget</span> <span class="o">//</span> <span class="nb">len</span><span class="p">(</span><span class="n">beams</span><span class="p">)</span>
+        <span class="n">extensions</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">old_loss</span><span class="p">,</span> <span class="n">old_score</span> <span class="ow">in</span> <span class="n">beams</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">propose</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">per_beam</span><span class="p">):</span>
+                <span class="n">suffix</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="p">(</span><span class="n">token</span><span class="p">,)</span>
+                <span class="n">new_loss</span> <span class="o">=</span> <span class="n">target_nll</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">suffix</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+                <span class="n">score</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">old_score</span> <span class="o">+</span> <span class="n">base_logp</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">token</span><span class="p">)</span>
+                    <span class="o">-</span> <span class="n">kappa</span> <span class="o">*</span> <span class="p">(</span><span class="n">new_loss</span> <span class="o">-</span> <span class="n">old_loss</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">extensions</span><span class="p">.</span><span class="n">append</span><span class="p">((</span><span class="n">suffix</span><span class="p">,</span> <span class="n">new_loss</span><span class="p">,</span> <span class="n">score</span><span class="p">))</span>
+
+        <span class="n">keep</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">position</span> <span class="o">==</span> <span class="n">max_length</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">beam_width</span>
+        <span class="n">beams</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">extensions</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                       <span class="n">reverse</span><span class="o">=</span><span class="bp">True</span><span class="p">)[:</span><span class="n">keep</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">beams</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>The displayed Algorithms 1 and 2 are from Paulus et al., <em>AdvPrompter: Fast Adaptive Adversarial Prompting for LLMs</em>, <a href="https://arxiv.org/abs/2404.16873v1" rel="external nofollow noopener" target="_blank">arXiv:2404.16873v1</a>, licensed under <a href="https://creativecommons.org/licenses/by/4.0/" rel="external nofollow noopener" target="_blank">CC BY 4.0</a>. The Python sketches here are explanatory implementations of the method.</p>
+
 <h2 id="implementation">Implementation</h2>
+
+<p><strong>Alternate discrete search and supervised learning.</strong> Algorithm 1 above turns optimized suffixes into training data. For a neutral toy example, \(x\) could be <code class="language-plaintext highlighter-rouge">Describe the water cycle</code>, with \(y\) a chosen reference explanation. The same learning loop searches for an input-conditioned suffix, then trains the generator to reproduce it.</p>
+
+<p>The official <a href="https://github.com/facebookresearch/advprompter/blob/802a500c91f1dcd7c8b76869d3e39bf8e40ed7d7/main.py" rel="external nofollow noopener" target="_blank"><code class="language-plaintext highlighter-rouge">main.py</code></a> first samples an ordinary suffix \(q_0\sim p_\theta(\cdot\mid x)\) and measures its target loss. It then runs <code class="language-plaintext highlighter-rouge">AdvPrompterOpt</code> <strong>from an empty prefix</strong> to obtain \(q^*\). The ordinary sample is a baseline for measuring improvement; it is not a complete string edited in place by the optimizer.</p>
+
+<p>The released replay buffer prioritizes an optimized example using</p>
+
+<div class="overflow-auto">
+
+\[r(x,q^*,y)=
+a\max\left(0,\ell_\phi(y\mid[x,q_0])-\ell_\phi(y\mid[x,q^*])\right)
++c\,\mathbf 1\{\text{generated response passes the success checker}\}.\]
+
+</div>
+
+<p>Only positive-priority examples enter the buffer. This retains suffixes that improve the prediction loss or receive a positive evaluation on an actual generated response. The implementation’s checker uses refusal-keyword matching, so this signal is an imperfect estimate of success. Prioritized sampling favors useful examples while replay allows several updates from previously collected suffixes.</p>
+
+<p>The \(\theta\)-step is <strong>supervised suffix-token cross-entropy</strong>:</p>
+
+<div class="overflow-auto">
+
+\[\mathcal J(\theta)=
+\mathbb E_{(x,q^*)\sim\mathcal R}
+\left[-\frac{1}{|q^*|}\sum_{j=1}^{|q^*|}
+\log p_\theta(q_j^*\mid[x,q^*_{&lt;j}])\right].\]
+
+</div>
+
+<p>Here \(\mathcal R\) is the replay sampling distribution. Instruction and padding positions are excluded from the loss. The paper uses LoRA to update the prompter efficiently. Although the code calls this stage “regression,” its labels are discrete tokens: it is ordinary teacher-forced language-model fine-tuning. Replay priority controls sampling; the displayed training step does not multiply each token loss by the success reward.</p>
+
+<p>The following sketch makes the gradient boundary explicit. Model and buffer interfaces are abstract, and the examples in <code class="language-plaintext highlighter-rouge">batch</code> can be neutral instruction-response pairs. <code class="language-plaintext highlighter-rouge">optimize_suffix</code> wraps the preceding search with the current proposal model and frozen scoring models.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">torch</span>
+
+
+<span class="k">def</span> <span class="nf">train_minibatch</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">prompter</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">replay</span><span class="p">,</span>
+                    <span class="n">optimize_suffix</span><span class="p">,</span> <span class="n">target_nll</span><span class="p">,</span> <span class="n">check_response</span><span class="p">,</span>
+                    <span class="n">batch_size</span><span class="p">,</span> <span class="n">updates</span><span class="p">,</span> <span class="n">improvement_weight</span><span class="p">,</span>
+                    <span class="n">success_weight</span><span class="p">):</span>
+    <span class="c1"># q-step: all search and evaluation results are fixed labels.
+</span>    <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">:</span>
+            <span class="n">baseline</span> <span class="o">=</span> <span class="n">prompter</span><span class="p">.</span><span class="n">sample_suffix</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">baseline_loss</span> <span class="o">=</span> <span class="n">target_nll</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">baseline</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+            <span class="n">suffix</span> <span class="o">=</span> <span class="n">optimize_suffix</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+            <span class="n">optimized_loss</span> <span class="o">=</span> <span class="n">target_nll</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">suffix</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+            <span class="n">success</span> <span class="o">=</span> <span class="n">check_response</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">suffix</span><span class="p">)</span>
+            <span class="n">priority</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">improvement_weight</span>
+                <span class="o">*</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">baseline_loss</span> <span class="o">-</span> <span class="n">optimized_loss</span><span class="p">)</span>
+                <span class="o">+</span> <span class="n">success_weight</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="n">success</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">priority</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">replay</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="n">priority</span><span class="p">)</span>
+
+    <span class="c1"># theta-step: gradients flow through the prompter only.
+</span>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">replay</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">batch_size</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">updates</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">replay</span><span class="p">)</span> <span class="o">//</span> <span class="n">batch_size</span><span class="p">)):</span>
+        <span class="n">examples</span> <span class="o">=</span> <span class="n">replay</span><span class="p">.</span><span class="n">sample</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span>  <span class="c1"># Prioritized sampling.
+</span>        <span class="n">optimizer</span><span class="p">.</span><span class="n">zero_grad</span><span class="p">()</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">prompter</span><span class="p">.</span><span class="n">suffix_cross_entropy</span><span class="p">(</span><span class="n">examples</span><span class="p">)</span>
+        <span class="n">loss</span><span class="p">.</span><span class="n">backward</span><span class="p">()</span>
+        <span class="n">optimizer</span><span class="p">.</span><span class="n">step</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><strong>Tokenization and model access matter.</strong> The prompter and target can use different tokenizers. The code decodes the instruction and suffix into text, retokenizes for the target, and applies the target’s chat template. Passing token IDs directly between unrelated vocabularies would score a different input. <a href="https://github.com/facebookresearch/advprompter/blob/802a500c91f1dcd7c8b76869d3e39bf8e40ed7d7/llm.py" rel="external nofollow noopener" target="_blank"><code class="language-plaintext highlighter-rouge">llm.py</code></a> obtains the frozen BaseLLM distribution by disabling the prompter’s adapters; its base checkpoint remains fixed while the adapters learn.</p>
+
+<p>The \(q\)-step needs target probabilities for the specified response tokens under teacher forcing. This is <strong>gray-box access</strong>, even though the experiments run local models whose weights are available. Output text alone, or a restricted list of top-token probabilities, need not supply these scores. Once training finishes, generating \(q_\theta(x)\) needs neither \(y\) nor target-model scores. The paper’s black-box transfer experiments train against a surrogate, then use the learned generator on another target. They do not perform the same probability-based optimization directly against a text-only API.</p>
+
+<p><strong>Read evaluation together with the query budget.</strong> For a binary evaluator \(E\), attack success after up to \(k\) suffixes is</p>
+
+<div class="overflow-auto">
+
+\[\operatorname{ASR}@k=
+\frac{1}{N}\sum_{i=1}^{N}
+\mathbf 1\!\left\{\max_{1\le j\le k}
+E(x_i,\operatorname{TargetLLM}([x_i,q_{ij}]))=1\right\}.\]
+
+</div>
+
+<p>This measures whether any attempt succeeds for each instruction. ASR@10 permits ten target attempts, whereas ASR@1 permits one. A higher ASR@10 does not by itself demonstrate stronger performance per query. The generation policy, evaluator, target version, and data split must also match for a comparison to be meaningful.</p>
+
+<p>The April 2024 paper divides AdvBench’s 520 examples into 312 training, 104 validation, and 104 test examples. It trains a non-chat Llama2-7b prompter. The following results are the plain AdvPrompter rows from <strong>version 1, Table 2</strong>, without the separate warm-start variant:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Target</th>
+      <th style="text-align: right">Keyword ASR@1</th>
+      <th style="text-align: right">Keyword ASR@10</th>
+      <th style="text-align: right">StrongREJECT score@1</th>
+      <th style="text-align: right">StrongREJECT score@10</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Vicuna-7b</td>
+      <td style="text-align: right">33.4%</td>
+      <td style="text-align: right">87.5%</td>
+      <td style="text-align: right">22.7</td>
+      <td style="text-align: right">72.8</td>
+    </tr>
+    <tr>
+      <td>Mistral-7b</td>
+      <td style="text-align: right">54.3%</td>
+      <td style="text-align: right">96.1%</td>
+      <td style="text-align: right">35.1</td>
+      <td style="text-align: right">85.5</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The StrongREJECT columns report mean judge scores on a 0–100 scale, taking the maximum score across attempts for @10. These are <strong>soft scores</strong>, not binary success percentages. Keyword matching can count an unhelpful answer without a refusal phrase as successful, while also rejecting an answer that contains a refusal phrase alongside other content. Judge-based evaluation tests response quality more directly, but still introduces evaluator uncertainty. <a href="https://arxiv.org/html/2404.16873v1#S4" rel="external nofollow noopener" target="_blank">Source: Sections 4–4.1 and Table 2</a>.</p>
+
+<p>The fluency measurement is \(\operatorname{PPL}(q\mid x)=\exp(\ell_\eta(q\mid x)/\lvert q\rvert)\). Version 1 reports Vicuna-7b suffix perplexity of 12.09 for AdvPrompter, compared with 76.33 for AutoDAN-universal and 91,473.10 for GCG-universal under the same reference model. This supports the fluency motivation, but the target and evaluator still determine whether the suffix succeeds. The reported 1–2-second suffix generation concerns the <strong>trained generator</strong>; collecting search targets and training it took many hours on two A100 GPUs. Training cost and target-response evaluation cost belong alongside inference latency in an efficiency comparison. <a href="https://arxiv.org/html/2404.16873v1#S4" rel="external nofollow noopener" target="_blank">Source: Section 4 and Figure 2</a>.</p>
+
+<p><strong>Scope and limitations.</strong> Transfer in Section 4.2 uses a Vicuna-13b surrogate and historical targets including <code class="language-plaintext highlighter-rouge">gpt-3.5-turbo-0301</code> and <code class="language-plaintext highlighter-rouge">gpt-4-0613</code>; Figure 3 reports validation-set results. These observations do not establish performance on later models. Teacher-forced likelihood also remains a surrogate: making a chosen response prefix probable does not ensure that free generation continues with the desired answer.</p>
+
+<p>For defense, Figure 4 reports that adversarial fine-tuning reduces Mistral-7b validation keyword ASR@6 from 93.3% to 1.9%, with five-shot MMLU changing from 59.4% to 59.1%. This is evidence for improvement against the evaluated attacks, with limited change on that utility benchmark. It does not certify general robustness: the paper also retrains AdvPrompter against the defended model and finds residual vulnerability. The small evaluation split, approximate search, proxy metrics, and dependence on the attacker family remain practical limits. <a href="https://arxiv.org/html/2404.16873v1#S4.SS2" rel="external nofollow noopener" target="_blank">Source: Sections 4.2–4.3 and Figures 3–4</a>.</p>
+
+<p><strong>References and source code:</strong></p>
+
+<ul>
+  <li>Paulus, A., Zharmagambetov, A., Guo, C., Amos, B., and Tian, Y. (2024). <a href="https://arxiv.org/abs/2404.16873v1" rel="external nofollow noopener" target="_blank"><em>AdvPrompter: Fast Adaptive Adversarial Prompting for LLMs</em>, version 1</a>. Equations 2–3 and 9–13, Algorithms 1–2, and Section 4.</li>
+  <li>
+<a href="https://github.com/facebookresearch/advprompter/tree/802a500c91f1dcd7c8b76869d3e39bf8e40ed7d7" rel="external nofollow noopener" target="_blank">Official implementation, commit <code class="language-plaintext highlighter-rouge">802a500</code></a>: <code class="language-plaintext highlighter-rouge">advprompteropt.py</code> for candidate search, <code class="language-plaintext highlighter-rouge">main.py</code> for replay and training, <code class="language-plaintext highlighter-rouge">utils.py</code> for loss normalization, and <code class="language-plaintext highlighter-rouge">conf/train.yaml</code> for released defaults.</li>
+</ul>
 
     </div>
   </article>

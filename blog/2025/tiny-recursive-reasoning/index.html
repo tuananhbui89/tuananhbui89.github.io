@@ -150,9 +150,29 @@
         <div class="floating-toc__content">
           
           <ul id="toc" class="section-nav">
-<li class="toc-entry toc-h2"><a href="#about-the-paper">About the paper</a></li>
 <li class="toc-entry toc-h2">
-<a href="#implementation">Implementation</a>
+<a href="#about-the-paper">About the paper</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#from-hrm-to-trm">From HRM to TRM</a></li>
+<li class="toc-entry toc-h3"><a href="#one-reasoning-cycle-think-then-revise">One Reasoning Cycle: Think, Then Revise</a></li>
+<li class="toc-entry toc-h3"><a href="#deep-recursion-and-deep-supervision">Deep Recursion and Deep Supervision</a></li>
+<li class="toc-entry toc-h3"><a href="#learning-the-answer-and-when-to-halt">Learning the Answer and When to Halt</a></li>
+<li class="toc-entry toc-h3"><a href="#what-the-experiments-establish">What the Experiments Establish</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2">
+<a href="#looped-transformers-and-the-connection-to-trm">Looped Transformers and the Connection to TRM</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#what-does-a-transformer-loop-over">What Does a Transformer Loop Over?</a></li>
+<li class="toc-entry toc-h3"><a href="#a-short-research-lineage">A Short Research Lineage</a></li>
+<li class="toc-entry toc-h3"><a href="#looplm-learning-how-many-iterations-to-use">LoopLM: Learning How Many Iterations to Use</a></li>
+<li class="toc-entry toc-h3"><a href="#pseudocode-shared-depth-weighted-loss-and-exit">Pseudocode: Shared Depth, Weighted Loss, and Exit</a></li>
+<li class="toc-entry toc-h3"><a href="#trm-and-looplm-shared-principle-different-algorithms">TRM and LoopLM: Shared Principle, Different Algorithms</a></li>
+<li class="toc-entry toc-h3"><a href="#what-the-comparison-doesand-does-notestablish">What the Comparison Does—and Does Not—Establish</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2">
+<a href="#trm-implementation">TRM Implementation</a>
 <ul>
 <li class="toc-entry toc-h3"><a href="#data-preparation">Data preparation</a></li>
 <li class="toc-entry toc-h3">
@@ -189,9 +209,642 @@
     <div id="markdown-content">
       <h2 id="about-the-paper">About the paper</h2>
 
-<h2 id="implementation">Implementation</h2>
+<p><a href="https://arxiv.org/abs/2510.04871v1" rel="external nofollow noopener" target="_blank"><strong>Less is More: Recursive Reasoning with Tiny Networks</strong></a>, by Alexia Jolicoeur-Martineau, studies a different way to spend computation on difficult prediction problems: repeatedly reuse a small network to revise an answer. The resulting <strong>Tiny Recursive Model (TRM)</strong> is trained from scratch on paired inputs and solutions. It does not require written reasoning traces, and its intermediate reasoning takes place in continuous hidden states rather than generated text.</p>
+
+<p>The central distinction is between <strong>parameter count</strong> and <strong>amount of computation</strong>. A two-layer network can be applied many times, allowing later updates to depend on earlier attempts without allocating a different set of parameters to every step. For a Sudoku puzzle, for example, the model maintains a candidate solution while repeatedly updating features that can incorporate constraints from across the grid. Repeated refinement is learned from final solutions; the training data does not specify which deduction to make at each iteration.</p>
+
+<h3 id="from-hrm-to-trm">From HRM to TRM</h3>
+
+<p>TRM builds on the <a href="https://arxiv.org/abs/2506.21734" rel="external nofollow noopener" target="_blank">Hierarchical Reasoning Model (HRM)</a>. HRM carries two hidden states through recurrent computation, using separate networks for their updates. TRM keeps two states but gives them a simpler interpretation:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Symbol</th>
+      <th>Meaning</th>
+      <th>Connection to the implementation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>\(x\)</td>
+      <td>Embedded input question; available throughout refinement</td>
+      <td>Token, puzzle, and position information</td>
+    </tr>
+    <tr>
+      <td>\(y\)</td>
+      <td>Current answer representation; the output head reads this state</td>
+      <td><code class="language-plaintext highlighter-rouge">z_H</code></td>
+    </tr>
+    <tr>
+      <td>\(z\)</td>
+      <td>Auxiliary reasoning state; carries information used to revise the answer</td>
+      <td><code class="language-plaintext highlighter-rouge">z_L</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Here \(y\) is a continuous tensor, <strong>not the ground-truth answer and not a sequence of sampled tokens</strong>. Decoding it produces the current prediction. The two recurrent states start from initialization vectors and are then carried across refinement steps. In the official implementation, those initialization vectors are fixed random buffers broadcast across positions; they contain no solution information.</p>
+
+<p>The important architectural change is that <strong>one shared network updates both states</strong>. TRM also backpropagates through a complete final reasoning cycle, simplifies the halt predictor, and uses an exponential moving average of the weights. These choices separate the method from the biological hierarchy and fixed-point interpretation used to motivate HRM. <a href="https://arxiv.org/html/2510.04871v1#S4" rel="external nofollow noopener" target="_blank">Paper, Section 4</a></p>
+
+<h3 id="one-reasoning-cycle-think-then-revise">One Reasoning Cycle: Think, Then Revise</h3>
+
+<p>Let \(f_\theta\) be the shared network and let \(n\) denote the number of reasoning-state updates. One cycle first holds the current answer \(y\) fixed while updating \(z\):</p>
+
+<div class="overflow-auto">
+
+\[z^{(j+1)} = f_\theta\!\left(x+y+z^{(j)}\right),
+\qquad j=0,\ldots,n-1.\]
+
+</div>
+
+<p>The cycle then revises the answer using the resulting reasoning state:</p>
+
+<div class="overflow-auto">
+
+\[y^+ = f_\theta\!\left(y+z^{(n)}\right),
+\qquad z^+ = z^{(n)}.\]
+
+</div>
+
+<p>All three tensors have compatible shape \([B,L+P,D]\): batch size \(B\), token length \(L\), puzzle-prefix length \(P\), and hidden width \(D\). The additions are elementwise; the network’s attention or token-mixing layers exchange information between positions. The input \(x\) is explicitly injected during the reasoning updates. Its influence reaches the answer update through \(z\), even though \(x\) is not added again at that point.</p>
+
+<p><strong>Why retain both states?</strong> The answer state provides a persistent candidate to improve, while the reasoning state provides additional memory that does not have to be immediately decodable into an answer. This division is an architectural choice, not a guarantee that each hidden vector corresponds to a human-interpretable deduction.</p>
+
+<p>In the code below, <code class="language-plaintext highlighter-rouge">net</code> represents the shared reasoning module, including its position handling. This is the same computation as <code class="language-plaintext highlighter-rouge">L_level(z_L, z_H + input_embeddings)</code> followed by <code class="language-plaintext highlighter-rouge">L_level(z_H, z_L)</code> in the official implementation.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">reasoning_cycle</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">+</span> <span class="n">z</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">y</span> <span class="o">+</span> <span class="n">z</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span>
+</code></pre></div></div>
+
+<p>The output head maps the answer state to vocabulary logits at every position. Taking an argmax gives the whole proposed output in parallel. The original TRM therefore performs supervised structured prediction; calling its output a generated answer does not imply autoregressive text generation. The later relation-extraction example adapts this interface by supervising a relation-label token.</p>
+
+<h3 id="deep-recursion-and-deep-supervision">Deep Recursion and Deep Supervision</h3>
+
+<p>There are three different loop counts to keep separate:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Loop</th>
+      <th>What happens?</th>
+      <th>Configuration name</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>\(n\) reasoning updates</td>
+      <td>Revise \(z\) repeatedly before one revision of \(y\)</td>
+      <td><code class="language-plaintext highlighter-rouge">L_cycles</code></td>
+    </tr>
+    <tr>
+      <td>\(T\) complete cycles</td>
+      <td>Repeat the entire think–revise operation within one supervision step</td>
+      <td><code class="language-plaintext highlighter-rouge">H_cycles</code></td>
+    </tr>
+    <tr>
+      <td>Up to \(N_{sup}\) supervision steps</td>
+      <td>Carry the states forward and apply another prediction loss</td>
+      <td><code class="language-plaintext highlighter-rouge">halt_max_steps</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>During training, the first \(T-1\) cycles run under <code class="language-plaintext highlighter-rouge">torch.no_grad()</code>. They produce a more developed starting state without retaining their activation graphs. The final cycle runs with gradients through <strong>all \(n+1\) network calls</strong>. A loss then supervises the decoded answer. Before the next supervision step, both recurrent states are detached, preserving their values while cutting the gradient connection to earlier steps.</p>
+
+<p>This is a deliberately truncated gradient computation. It does not differentiate through the complete history, and it does not require the states to reach a mathematical fixed point. The model learns to improve the states encountered at the start of the gradient-tracked cycle. Improvement is the training objective; individual refinements are not guaranteed to increase accuracy.</p>
+
+<p>The diagram shows these boundaries for the Sudoku setting \(n=6,T=3\). The same weights are used throughout; only the last cycle retains an activation graph for backpropagation.</p>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <img src="/assets/img/2025-tiny-recursive-reasoning/trm-gradient-boundary.svg" class="img-fluid rounded z-depth-1" width="760" height="1200" loading="lazy" data-zoomable="" alt="One TRM supervision step runs two complete reasoning cycles without gradients, followed by a third complete cycle with gradients through six reasoning updates and one answer update. The answer feeds the loss, while detached answer and reasoning states carry into the next supervision step.">
+    </div>
+</div>
+<div class="caption text-center">
+    Gradient boundaries in TRM. Original diagram based on <a href="https://arxiv.org/html/2510.04871v1#S4.SS1" rel="external nofollow noopener" target="_blank">Section 4.1 and Figure 3 of the paper</a> and the <a href="https://github.com/SamsungSAILMontreal/TinyRecursiveModels/blob/c01103738605ba39d1430519b1ee0c62f4c707f8/models/recursive_reasoning/trm.py" rel="external nofollow noopener" target="_blank">official implementation</a>. The architecture figure in the Main process section shows how the two state updates connect.
+</div>
+
+<p>For a network with \(d\) layers, the number of layer applications in one supervision step is</p>
+
+<div class="overflow-auto">
+
+\[D_{\mathrm{forward}} = dT(n+1),
+\qquad D_{\mathrm{gradient}} = d(n+1).\]
+
+</div>
+
+<p>With \(d=2,n=6,T=3\), this gives <strong>42 forward layer applications</strong>, of which <strong>14 belong to the gradient-tracked final cycle</strong>. Running all 16 supervision steps gives up to 672 layer applications. These are repeated uses of the same two layers, not 672 independently parameterized layers. Increasing \(T\) adds forward computation; increasing \(n\) also lengthens the graph that must be retained during the last cycle. This explains why a tiny model can still have substantial runtime and activation-memory costs.</p>
+
+<p>For the layer count, use the <a href="https://github.com/SamsungSAILMontreal/TinyRecursiveModels/blob/c01103738605ba39d1430519b1ee0c62f4c707f8/config/arch/trm.yaml" rel="external nofollow noopener" target="_blank">released TRM configuration</a>: it sets <code class="language-plaintext highlighter-rouge">L_layers=2</code>. The existing architecture illustration in Main process is labeled <code class="language-plaintext highlighter-rouge">4x</code>, which does not match this two-layer configuration.</p>
+
+<h3 id="learning-the-answer-and-when-to-halt">Learning the Answer and When to Halt</h3>
+
+<p>Let \(\tilde{y}_{bi}\) be the correct token at position \(i\) of example \(b\), and let \(m_{bi}\) indicate whether that position is supervised. A token-prediction loss averages the negative log-probability across each example’s valid positions:</p>
+
+<div class="overflow-auto">
+
+\[\mathcal{L}_{\mathrm{answer}}
+=-\frac{1}{B}\sum_{b=1}^{B}
+\frac{\sum_i m_{bi}\log p_\theta(\tilde{y}_{bi}\mid y_b)}
+{\max(1,\sum_i m_{bi})}.\]
+
+</div>
+
+<p>The halt head predicts whether <strong>every supervised token is already correct</strong>. If \(c_b\) is that binary correctness target and \(q_b\) is the halt logit, the default implementation uses</p>
+
+<div class="overflow-auto">
+
+\[\mathcal{L}
+=\mathcal{L}_{\mathrm{answer}}
++\frac{0.5}{B}\sum_{b=1}^{B}
+\operatorname{BCEWithLogits}(q_b,c_b).\]
+
+</div>
+
+<p>The correctness target is computed from detached argmax predictions. It provides supervision for the halt head; gradients do not propagate through the discrete correctness test. During training, a positive halt logit can release an example’s batch slot for a new problem, subject to exploration and the maximum step count. During evaluation, the reference code always runs the configured maximum number of steps, normally 16. <a href="https://arxiv.org/html/2510.04871v1#S4.SS6" rel="external nofollow noopener" target="_blank">Paper, Section 4.6</a>; <a href="https://github.com/SamsungSAILMontreal/TinyRecursiveModels/blob/c01103738605ba39d1430519b1ee0c62f4c707f8/models/recursive_reasoning/trm.py" rel="external nofollow noopener" target="_blank">model and ACT wrapper</a></p>
+
+<p><strong>A terminology note for the Q-Learning walkthrough below:</strong> the code retains HRM names such as <code class="language-plaintext highlighter-rouge">q_head</code> and <code class="language-plaintext highlighter-rouge">q_continue_logits</code>. However, TRM’s default <code class="language-plaintext highlighter-rouge">no_ACT_continue=True</code> removes the bootstrapped continue target and its extra model pass. The default halt objective above is supervised binary classification. The halt-versus-continue discussion describes the HRM-style alternative retained in the implementation, rather than a requirement for TRM.</p>
+
+<p>The following educational PyTorch pseudocode shows one supervision step. <code class="language-plaintext highlighter-rouge">embed_inputs</code>, <code class="language-plaintext highlighter-rouge">net</code>, <code class="language-plaintext highlighter-rouge">output_head</code>, and <code class="language-plaintext highlighter-rouge">q_head</code> are adapters for the corresponding model components; <code class="language-plaintext highlighter-rouge">prefix_len</code> removes puzzle-prefix positions from token predictions. The example uses ordinary softmax cross-entropy to expose the training flow. The released configuration instead selects <strong>Stablemax cross-entropy</strong>, which normalizes a positive piecewise transformation of logits rather than their exponentials; reproducing the experiments requires that configured loss. <a href="https://github.com/SamsungSAILMontreal/TinyRecursiveModels/blob/c01103738605ba39d1430519b1ee0c62f4c707f8/models/losses.py" rel="external nofollow noopener" target="_blank">Loss implementation</a></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="n">F</span>
+
+
+<span class="k">def</span> <span class="nf">supervision_step</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+    <span class="c1"># Recompute embeddings each step: their parameters are trainable.
+</span>    <span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">embed_inputs</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="s">"inputs"</span><span class="p">],</span> <span class="n">batch</span><span class="p">[</span><span class="s">"puzzle_identifiers"</span><span class="p">])</span>
+    <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span><span class="p">.</span><span class="n">detach</span><span class="p">()</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">state</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">T</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">reasoning_cycle</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">net</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+
+    <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">reasoning_cycle</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">net</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">output_head</span><span class="p">(</span><span class="n">y</span><span class="p">)[:,</span> <span class="n">model</span><span class="p">.</span><span class="n">prefix_len</span><span class="p">:]</span>
+    <span class="n">q_halt</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">q_head</span><span class="p">(</span><span class="n">y</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])[:,</span> <span class="mi">0</span><span class="p">].</span><span class="nb">float</span><span class="p">()</span>
+
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="s">"labels"</span><span class="p">].</span><span class="nb">long</span><span class="p">()</span>
+    <span class="n">valid</span> <span class="o">=</span> <span class="n">labels</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">100</span>
+    <span class="n">counts</span> <span class="o">=</span> <span class="n">valid</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="n">counts</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">).</span><span class="nb">all</span><span class="p">()</span>  <span class="c1"># Real training examples need a target.
+</span>    <span class="n">token_loss</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="n">cross_entropy</span><span class="p">(</span>
+        <span class="n">logits</span><span class="p">.</span><span class="nb">float</span><span class="p">().</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">labels</span><span class="p">,</span>
+        <span class="n">ignore_index</span><span class="o">=-</span><span class="mi">100</span><span class="p">,</span> <span class="n">reduction</span><span class="o">=</span><span class="s">"none"</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">answer_loss</span> <span class="o">=</span> <span class="p">(</span><span class="n">token_loss</span><span class="p">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">counts</span><span class="p">).</span><span class="n">mean</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">():</span>
+        <span class="n">correct</span> <span class="o">=</span> <span class="p">((</span><span class="n">logits</span><span class="p">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">labels</span><span class="p">)</span> <span class="o">|</span> <span class="o">~</span><span class="n">valid</span><span class="p">).</span><span class="nb">all</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">halt_loss</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="n">binary_cross_entropy_with_logits</span><span class="p">(</span><span class="n">q_halt</span><span class="p">,</span> <span class="n">correct</span><span class="p">.</span><span class="nb">float</span><span class="p">())</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">answer_loss</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">halt_loss</span>
+
+    <span class="c1"># Heads above keep their graph; only the carry is detached.
+</span>    <span class="n">next_state</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span><span class="p">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">z</span><span class="p">.</span><span class="n">detach</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">loss</span><span class="p">,</span> <span class="n">next_state</span><span class="p">,</span> <span class="n">q_halt</span><span class="p">.</span><span class="n">detach</span><span class="p">()</span>
+
+
+<span class="c1"># The caller keeps each state paired with the same example until it halts.
+</span><span class="n">optimizer</span><span class="p">.</span><span class="n">zero_grad</span><span class="p">()</span>
+<span class="n">loss</span><span class="p">,</span> <span class="n">next_state</span><span class="p">,</span> <span class="n">halt_logits</span> <span class="o">=</span> <span class="n">supervision_step</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
+<span class="n">loss</span><span class="p">.</span><span class="n">backward</span><span class="p">()</span>
+<span class="n">optimizer</span><span class="p">.</span><span class="n">step</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>The outer training loop handles per-example replacement and exploration; the code above deliberately stops at the supervision-step boundary. Across steps, the optimizer updates the shared weights, and the numerical values in <code class="language-plaintext highlighter-rouge">next_state</code> become the next starting point. The paper also uses an EMA decay of \(0.999\) for evaluation weights. This averaging smooths parameter updates; it is separate from carrying the recurrent states.</p>
+
+<h3 id="what-the-experiments-establish">What the Experiments Establish</h3>
+
+<p>The paper reports the following results for separately trained task-specific models. Sudoku and Maze require an entirely correct solution; ARC uses public evaluation tasks and allows two candidate outputs per query.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Benchmark</th>
+      <th>HRM</th>
+      <th>TRM variant</th>
+      <th>TRM accuracy</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Sudoku-Extreme</td>
+      <td>55.0%</td>
+      <td>Token-mixing MLP, 5M parameters</td>
+      <td><strong>87.4%</strong></td>
+    </tr>
+    <tr>
+      <td>Maze-Hard</td>
+      <td>74.5%</td>
+      <td>Self-attention, 7M parameters</td>
+      <td><strong>85.3%</strong></td>
+    </tr>
+    <tr>
+      <td>ARC-AGI-1</td>
+      <td>40.3%</td>
+      <td>Self-attention, 7M parameters</td>
+      <td><strong>44.6%</strong></td>
+    </tr>
+    <tr>
+      <td>ARC-AGI-2</td>
+      <td>5.0%</td>
+      <td>Self-attention, 7M parameters</td>
+      <td><strong>7.8%</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<p><em>Reported results from <a href="https://arxiv.org/html/2510.04871v1#S5" rel="external nofollow noopener" target="_blank">Section 5, Tables 4–5</a>. These are benchmark-specific comparisons, not a claim that a single tiny model replaces a general-purpose language model.</em></p>
+
+<p>The architecture choice matters. The 7M attention model reaches 74.7% on Sudoku, while the smaller MLP variant reaches 87.4%; the same MLP approach performs poorly on the larger Maze and ARC grids. Sudoku has only 81 positions, making fixed token mixing practical. The best result on one task therefore should not be attributed to every TRM configuration.</p>
+
+<p>The Sudoku ablations also show why recursion alone is an incomplete explanation. Replacing the complete-cycle gradient with the one-step approximation reduces accuracy from 87.4% to 56.5%. Removing EMA gives 79.9%, and using separate networks gives 82.4%. A four-layer configuration with fewer recursions reaches 79.5% despite a similar amount of forward depth. These are empirical comparisons within a small-data setting, not a proof that smaller networks always generalize better. <a href="https://arxiv.org/html/2510.04871v1#S4" rel="external nofollow noopener" target="_blank">Tables 1–3</a></p>
+
+<p><strong>Small data does not mean little computation.</strong> Sudoku uses 1,000 base training puzzles with 1,000 augmentations per example. The paper’s ARC setup adds 160 ConceptARC tasks and uses 1,000 augmentations per example; evaluation votes over 1,000 transformed inputs under the two-attempt metric. These scores therefore include substantial computation beyond a single refinement trajectory. The reported ARC experiments take roughly three days on four H100 GPUs. Parameter efficiency, training cost, and inference cost should therefore be assessed separately.</p>
+
+<p>Finally, the work does not establish a general theory of why recursive weight sharing improves generalization, nor a guarantee that more iterations help. Its experiments concern structured puzzles with explicit input–solution supervision. Applying the idea to BioRED is a proposed task adaptation: language representations, entity-pair conditioning, class imbalance, and document-level evaluation still need to be addressed and tested. The puzzle results alone do not establish biomedical relation-extraction performance.</p>
+
+<h2 id="looped-transformers-and-the-connection-to-trm">Looped Transformers and the Connection to TRM</h2>
+
+<p><em>Literature update, September 2026. This section includes papers released after the original post.</em></p>
+
+<p><strong>The attention-based TRM is a form of looped Transformer:</strong> it repeatedly applies the same Transformer module to evolving hidden states. The broader idea is to increase the amount of computation without assigning new parameters to every layer application. However, TRM and the <strong>LoopLM</strong> architecture behind the <strong>Ouro</strong> language models organize that computation differently. TRM refines a complete candidate answer and a separate reasoning state; LoopLM refines the hidden representations used for next-token prediction. TRM also has an attention-free MLP variant, so the name TRM does not always imply a Transformer.</p>
+
+<h3 id="what-does-a-transformer-loop-over">What Does a Transformer Loop Over?</h3>
+
+<p>A conventional Transformer processes hidden states through a sequence of separately parameterized layers. A looped Transformer instead reuses a layer or a stack of layers across <strong>depth</strong>. Let \(G_\theta\) be a stack containing \(d\) Transformer layers. The simplest recurrence is</p>
+
+<div class="overflow-auto">
+
+\[h^{(0)} = E(x), \qquad
+h^{(r+1)} = G_\theta\!\left(h^{(r)}\right),
+\qquad r=0,\ldots,R-1.\]
+
+</div>
+
+<p>The stack’s weights are shared across iterations. Its internal layers can still have different weights: looping a 24-layer stack does not mean tying all 24 layers to one another. Applying that stack four times gives 96 layer applications while retaining only one stack’s parameters. This is the configuration of Ouro-1.4B at four loops. <a href="https://arxiv.org/html/2510.25741v5#S3.SS1" rel="external nofollow noopener" target="_blank">LoopLM, Sections 3.1 and 4.1</a></p>
+
+<p>The loop operates on continuous tensors of the same shape; it need not generate an intermediate word. In an autoregressive language model, this creates two distinct axes of computation: <strong>inner iterations refine the current hidden representation</strong>, while the <strong>outer decoding process appends output tokens</strong>. A model can use both recurrent depth and a written chain of thought. The Ouro-Thinking variants, for example, add reasoning supervised fine-tuning to the looped base models. <a href="https://arxiv.org/html/2510.25741v5#S4" rel="external nofollow noopener" target="_blank">LoopLM, Section 4</a></p>
+
+<p>Weight sharing and adaptive depth are separate choices. A model can always run exactly four loops, or learn when to stop. Neither choice guarantees that every extra iteration improves the answer: the transition must learn useful refinement, and the training procedure must make repeated application stable.</p>
+
+<h3 id="a-short-research-lineage">A Short Research Lineage</h3>
+
+<p>The idea predates TRM and Ouro. The following papers isolate different questions: whether depth can share parameters, whether recurrence enables useful computation, and how to allocate iterations to individual tokens. Dates below refer to the first preprint; this is a selective reading path rather than a claim that each paper directly builds on the preceding one.</p>
+
+<div class="overflow-auto">
+
+  <table>
+    <thead>
+      <tr>
+        <th>First preprint</th>
+        <th>Paper</th>
+        <th>Contribution to the idea</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>2018</td>
+        <td>Dehghani et al., <a href="https://arxiv.org/html/1807.03819v3" rel="external nofollow noopener" target="_blank">Universal Transformers</a>
+</td>
+        <td>Repeatedly apply a shared attention-and-transition module across depth. Optional Adaptive Computation Time lets different positions stop after different numbers of updates.</td>
+      </tr>
+      <tr>
+        <td>2019</td>
+        <td>Lan et al., <a href="https://arxiv.org/html/1909.11942v6" rel="external nofollow noopener" target="_blank">ALBERT</a>
+</td>
+        <td>Use cross-layer parameter sharing to reduce the parameter cost of depth. This establishes an efficiency connection; its standard setup does not learn an inference-time loop budget.</td>
+      </tr>
+      <tr>
+        <td>February 2025</td>
+        <td>Geiping et al., <a href="https://arxiv.org/html/2502.05171v2" rel="external nofollow noopener" target="_blank">Scaling up Test-Time Compute with Latent Reasoning: A Recurrent Depth Approach</a>
+</td>
+        <td>Train a language model with a shared recurrent core, input reinjection, and varying recurrence counts. More inference computation can occur inside the latent state; training truncates gradients to a final window of iterations.</td>
+      </tr>
+      <tr>
+        <td>February 2025</td>
+        <td>Saunshi et al., <a href="https://arxiv.org/html/2502.17416v1" rel="external nofollow noopener" target="_blank">Reasoning with Latent Thoughts: On the Power of Looped Transformers</a>
+</td>
+        <td>Compare shallow, deep, and looped models on reasoning tasks and study their computational expressivity. Its theoretical constructions support what looped models can represent under stated assumptions, not what every trained model will learn.</td>
+      </tr>
+      <tr>
+        <td>July 2025</td>
+        <td>Bae et al., <a href="https://arxiv.org/html/2507.10524v3" rel="external nofollow noopener" target="_blank">Mixture-of-Recursions</a>
+</td>
+        <td>Combine shared parameters with routing that allocates different recursive depths to different tokens. The work also treats inference-cache design as a separate efficiency problem.</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<p>An adjacent line is <a href="https://arxiv.org/html/2412.06769v3" rel="external nofollow noopener" target="_blank">Coconut: Training Large Language Models to Reason in a Continuous Latent Space</a>. Coconut feeds a hidden state into the <strong>next sequence position</strong> as a continuous thought. That differs from repeatedly updating the existing positions across depth, even though both approaches use continuous states without decoding an intermediate word.</p>
+
+<p>These approaches also differ from simply feeding an answer back into a chat model as text. The recurrent state can preserve information that has not been decoded into words. But calling that state a “latent thought” does not establish that it contains a readable chain of deductions.</p>
+
+<h3 id="looplm-learning-how-many-iterations-to-use">LoopLM: Learning How Many Iterations to Use</h3>
+
+<p><a href="https://arxiv.org/html/2510.25741v5" rel="external nofollow noopener" target="_blank"><strong>Scaling Latent Reasoning via Looped Language Models</strong></a>, by Zhu et al., studies this approach at language-model scale. Its Ouro models contain 1.4B or 2.6B parameters and use a reported training budget of 7.7T tokens. The shared module is a causal Transformer stack, and a language-model head can read the representation after each loop.</p>
+
+<figure>
+  <img src="/assets/img/2025-tiny-recursive-reasoning/looplm-architecture.png" class="img-fluid rounded z-depth-1" width="3200" height="1352" loading="lazy" alt="LoopLM architecture: training repeats one shared Transformer stack and combines losses from every loop; inference accumulates exit probabilities and can skip later loops." data-zoomable="">
+  <figcaption class="caption">LoopLM's original architecture figure. Each repeated column uses the same stack parameters. Training combines predictions across depths; inference may stop once accumulated exit probability reaches its threshold. Figure 3 from Zhu et al., <a href="https://arxiv.org/html/2510.25741v5#S3.F3" rel="external nofollow noopener" target="_blank">Scaling Latent Reasoning via Looped Language Models</a>, licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="external nofollow noopener" target="_blank">CC BY-SA 4.0</a>. Rendered from the paper's figure PDF without content changes. <a href="/assets/img/2025-tiny-recursive-reasoning/looplm-architecture.png">View full-size image</a> · <a href="/assets/img/2025-tiny-recursive-reasoning/looplm-architecture.pdf">Original vector PDF</a>.</figcaption>
+</figure>
+
+<p><strong>1. Predict at every loop.</strong> For token position \(i\), the representation after loop \(r\) gives a next-token loss</p>
+
+<div class="overflow-auto">
+
+\[\ell_i^{(r)}
+= -\log\operatorname{softmax}\!\left(W_o h_i^{(r)}\right)_{x_{i+1}}.\]
+
+</div>
+
+<p>All loop depths therefore have a possible readout. The training question is how much weight to assign to each one.</p>
+
+<p><strong>2. Turn exit gates into a distribution over depth.</strong> A sigmoid gate produces \(\lambda_{i,r}\), the conditional probability of exiting at loop \(r\) given that computation has reached it. Define the probability of surviving the first \(r\) loops as</p>
+
+<div class="overflow-auto">
+
+\[\lambda_{i,r}=\sigma\!\left(w_g^\top h_i^{(r)}+b_g\right),
+\qquad
+S_{i,r}=\prod_{j=1}^{r}(1-\lambda_{i,j}),
+\qquad S_{i,0}=1.\]
+
+</div>
+
+<p>The probability of first exiting at a particular depth is then</p>
+
+<div class="overflow-auto">
+
+\[\pi_{i,r}=
+\begin{cases}
+S_{i,r-1}\lambda_{i,r}, &amp; r&lt;R_{\max},\\
+S_{i,R_{\max}-1}, &amp; r=R_{\max}.
+\end{cases}
+\qquad
+\sum_{r=1}^{R_{\max}}\pi_{i,r}=1.\]
+
+</div>
+
+<p>The last loop receives all remaining probability mass. Without this boundary condition, some probability would describe computation continuing beyond the permitted budget.</p>
+
+<p><strong>3. Train the model and gates jointly.</strong> Using a token-level form of the paper’s objective, with \(\mathcal V\) the valid prediction positions,</p>
+
+<div class="overflow-auto">
+
+\[\mathcal L_{\mathrm{joint}}
+=\frac{1}{|\mathcal V|}\sum_{i\in\mathcal V}
+\left[
+\sum_{r=1}^{R_{\max}}\pi_{i,r}\ell_i^{(r)}
++\beta\sum_{r=1}^{R_{\max}}\pi_{i,r}\log\pi_{i,r}
+\right].\]
+
+</div>
+
+<p>The first term is an expected prediction loss. The second is <strong>negative entropy</strong>, so minimizing it encourages the gate distribution to retain several possible exit depths instead of prematurely concentrating on one. Equivalently, it is a KL penalty toward a uniform depth prior, up to an additive constant. It does not itself impose a preference for the shortest computation. <a href="https://arxiv.org/html/2510.25741v5#S3" rel="external nofollow noopener" target="_blank">LoopLM, Sections 3.1–3.3</a></p>
+
+<p><strong>4. Calibrate stopping separately.</strong> The second gate-training stage freezes the language model. It measures the positive reduction in each token’s loss from loop \(r-1\) to \(r\) and converts that detached improvement into a soft continuation target. Binary cross-entropy then trains the gate to predict whether refinement is still making progress. This is a local improvement signal, not knowledge of the token’s optimal future exit depth. <a href="https://arxiv.org/html/2510.25741v5#S3.SS4" rel="external nofollow noopener" target="_blank">LoopLM, Section 3.4</a></p>
+
+<p>At inference, <strong>Q-exit means quantile exit</strong>. Accumulate the learned exit probabilities and stop at the first depth whose cumulative mass reaches a chosen threshold \(q\):</p>
+
+<div class="overflow-auto">
+
+\[r_{\mathrm{exit}}
+=\min\left\{r:\sum_{j=1}^{r}\pi_{i,j}\ge q\right\},
+\qquad q\in[0,1].\]
+
+</div>
+
+<p>A larger threshold permits more loops for the same gate outputs. The final depth always exits because its cumulative mass is one. This is a deterministic stopping rule over a probability distribution; the “Q” here does not denote a Q-learning action value. <a href="https://arxiv.org/html/2510.25741v5#S3.SS2" rel="external nofollow noopener" target="_blank">LoopLM, Section 3.2</a></p>
+
+<h3 id="pseudocode-shared-depth-weighted-loss-and-exit">Pseudocode: Shared Depth, Weighted Loss, and Exit</h3>
+
+<p>The following PyTorch-style sketch is a pedagogical token-level realization of the joint objective. <code class="language-plaintext highlighter-rouge">tokens</code> and <code class="language-plaintext highlighter-rouge">targets</code> are already shifted for next-token prediction, both with shape <code class="language-plaintext highlighter-rouge">[B, L]</code>; the boolean mask <code class="language-plaintext highlighter-rouge">valid</code> selects supervised positions. <code class="language-plaintext highlighter-rouge">shared_stack</code> includes causal masking and position handling, and the <strong>same instance</strong> is called at every loop. Training evaluates all candidate depths to form the expected loss.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="n">F</span>
+
+
+<span class="k">def</span> <span class="nf">looplm_joint_loss</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tokens</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">valid</span><span class="p">,</span> <span class="n">loops</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">loops</span> <span class="o">&gt;=</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">valid</span><span class="p">.</span><span class="nb">any</span><span class="p">()</span>
+    <span class="n">targets</span> <span class="o">=</span> <span class="n">targets</span><span class="p">.</span><span class="n">masked_fill</span><span class="p">(</span><span class="o">~</span><span class="n">valid</span><span class="p">,</span> <span class="o">-</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">embed</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
+    <span class="n">survival</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="p">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">objective</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">survival</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">loops</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">shared_stack</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>              <span class="c1"># Reuse the same weights.
+</span>        <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">lm_head</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>              <span class="c1"># [B, L, vocabulary]
+</span>        <span class="n">ce</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="n">cross_entropy</span><span class="p">(</span>
+            <span class="n">logits</span><span class="p">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">targets</span><span class="p">,</span> <span class="n">reduction</span><span class="o">=</span><span class="s">"none"</span>
+        <span class="p">)</span>                                     <span class="c1"># [B, L]
+</span>
+        <span class="k">if</span> <span class="n">r</span> <span class="o">==</span> <span class="n">loops</span><span class="p">:</span>
+            <span class="n">exit_mass</span> <span class="o">=</span> <span class="n">survival</span>              <span class="c1"># Force the final exit.
+</span>        <span class="k">else</span><span class="p">:</span>
+            <span class="n">hazard</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="n">exit_gate</span><span class="p">(</span><span class="n">h</span><span class="p">).</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">).</span><span class="n">sigmoid</span><span class="p">()</span>
+            <span class="n">exit_mass</span> <span class="o">=</span> <span class="n">survival</span> <span class="o">*</span> <span class="n">hazard</span>
+            <span class="n">survival</span> <span class="o">=</span> <span class="n">survival</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">hazard</span><span class="p">)</span>
+
+        <span class="n">negative_entropy</span> <span class="o">=</span> <span class="n">exit_mass</span> <span class="o">*</span> <span class="n">exit_mass</span><span class="p">.</span><span class="n">clamp_min</span><span class="p">(</span><span class="mf">1e-8</span><span class="p">).</span><span class="n">log</span><span class="p">()</span>
+        <span class="n">objective</span> <span class="o">=</span> <span class="n">objective</span> <span class="o">+</span> <span class="n">exit_mass</span> <span class="o">*</span> <span class="n">ce</span> <span class="o">+</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">negative_entropy</span>
+
+    <span class="k">return</span> <span class="n">objective</span><span class="p">[</span><span class="n">valid</span><span class="p">].</span><span class="n">mean</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">quantile_exit</span><span class="p">(</span><span class="n">exit_masses</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+    <span class="c1"># One token's normalized distribution, including final residual mass.
+</span>    <span class="n">cumulative</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">for</span> <span class="n">depth</span><span class="p">,</span> <span class="n">mass</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">exit_masses</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">cumulative</span> <span class="o">+=</span> <span class="n">mass</span>
+        <span class="k">if</span> <span class="n">cumulative</span> <span class="o">&gt;=</span> <span class="n">q</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">depth</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">exit_masses</span><span class="p">)</span>                    <span class="c1"># Floating-point safeguard.
+</span></code></pre></div></div>
+
+<p>For example, conditional exit probabilities of 0.2, 0.5, and 0.5, followed by a forced fourth exit, give masses <code class="language-plaintext highlighter-rouge">[0.2, 0.4, 0.2, 0.2]</code>. Threshold \(q=0.5\) exits at depth 2; \(q=0.9\) exits at depth 4. A real decoder accumulates these masses as it runs and can stop before evaluating later loops; <code class="language-plaintext highlighter-rouge">quantile_exit</code> isolates the decision rule for inspection. Per-token exit decisions still need an execution policy for attention, batching, and caches. The sketch omits that policy and the separate gate-calibration stage.</p>
+
+<h3 id="trm-and-looplm-shared-principle-different-algorithms">TRM and LoopLM: Shared Principle, Different Algorithms</h3>
+
+<p>At the level of state transitions, both reuse a learned computation:</p>
+
+<div class="overflow-auto">
+
+\[\begin{aligned}
+\text{LoopLM:}\quad &amp;h^{(r+1)}=G_\theta(h^{(r)}),\\
+\text{TRM:}\quad &amp;(y^{(k+1)},z^{(k+1)})
+=\mathcal R_\theta(x,y^{(k)},z^{(k)}).
+\end{aligned}\]
+
+</div>
+
+<p>Here \(\mathcal R_\theta\) is the complete TRM cycle defined earlier: \(n\) updates to \(z\) followed by one update to \(y\), all using the same \(f_\theta\). Thus one TRM cycle contains several network calls; it is not equivalent to one pass through LoopLM’s stack.</p>
+
+<div class="overflow-auto">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Design choice</th>
+        <th>TRM in <em>Less is More</em>
+</th>
+        <th>LoopLM / Ouro</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Prediction task</td>
+        <td>Supervised structured input–solution pairs; output positions predicted in parallel</td>
+        <td>Autoregressive next-token prediction on language-model corpora</td>
+      </tr>
+      <tr>
+        <td>Persistent state</td>
+        <td>Answer representation \(y\) and auxiliary reasoning state \(z\)</td>
+        <td>Hidden representation \(h\) at each token position</td>
+      </tr>
+      <tr>
+        <td>Reused module</td>
+        <td>A tiny network, typically two layers; non-causal self-attention or token-mixing MLP</td>
+        <td>A causal Transformer stack: 24 layers for Ouro-1.4B, 48 for Ouro-2.6B</td>
+      </tr>
+      <tr>
+        <td>Input conditioning</td>
+        <td>Embedded question \(x\) is added during each reasoning-state update</td>
+        <td>Token embeddings initialize the recurrence in the paper’s formulation</td>
+      </tr>
+      <tr>
+        <td>Supervision</td>
+        <td>Answer loss after each supervision step, plus a correctness-based halt loss</td>
+        <td>Next-token losses across loop depths, weighted by learned exit probabilities, plus entropy regularization</td>
+      </tr>
+      <tr>
+        <td>Gradient schedule</td>
+        <td>First \(T-1\) complete cycles without gradients; final cycle tracked; carried states detached between supervision steps</td>
+        <td>Joint loop-weighted objective, then a separate stage that freezes the LM and trains gates</td>
+      </tr>
+      <tr>
+        <td>Halting in the reported setup</td>
+        <td>Learned early halting during training; full supervision-step budget at evaluation</td>
+        <td>Quantile-based early exit explicitly studied at inference</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<p><em>Sources: <a href="https://arxiv.org/html/2510.04871v1#S4" rel="external nofollow noopener" target="_blank">TRM, Section 4 and algorithm</a>, <a href="https://github.com/SamsungSAILMontreal/TinyRecursiveModels/blob/c01103738605ba39d1430519b1ee0c62f4c707f8/models/recursive_reasoning/trm.py" rel="external nofollow noopener" target="_blank">official TRM implementation</a>, and <a href="https://arxiv.org/html/2510.25741v5#S3" rel="external nofollow noopener" target="_blank">LoopLM, Sections 3–4</a>. LoopLM’s method description does not prescribe TRM’s no-gradient-prefix schedule; the shared architectural idea should not be taken to imply an identical backward pass.</em></p>
+
+<p>The most precise description is that <strong>attention-based TRM belongs to the broader recurrent-depth Transformer family</strong>, with a specialized two-state update and supervision scheme. Its MLP variant retains the recurrence but removes the Transformer attention mechanism. This is an architectural connection: LoopLM’s <a href="https://arxiv.org/html/2510.25741v5#S2" rel="external nofollow noopener" target="_blank">related-work discussion</a> places Ouro among earlier looped and recurrent-depth models and does not identify TRM as its precursor.</p>
+
+<h3 id="what-the-comparison-doesand-does-notestablish">What the Comparison Does—and Does Not—Establish</h3>
+
+<p>Both approaches separate <strong>stored parameters</strong> from <strong>executed computation</strong>. However, their reported results do not form a controlled TRM-versus-Ouro experiment: they use different objectives, data, model sizes, and benchmarks. A small puzzle solver’s accuracy cannot be compared directly with a pretrained language model’s reasoning scores.</p>
+
+<p>Looping also does not make additional depth free. For a fixed sequence length, repeating a stack roughly repeats its computation; training must manage activations, and autoregressive inference must manage keys and values at different recurrent depths. LoopLM studies cache-sharing strategies separately because shared weights alone do not make these caches interchangeable. <a href="https://arxiv.org/html/2510.25741v5#S5.SS4.SSS2" rel="external nofollow noopener" target="_blank">LoopLM, Section 5.4.2</a></p>
+
+<p>For the relation-extraction adaptation later in this post, the distinction suggests a concrete design decision. A TRM-style system would repeatedly refine a fixed set of entity-pair predictions conditioned on a document. An autoregressive LoopLM would retain language modeling and express the extraction as generated output. Choosing between them requires task-specific evaluation; the shared recurrence does not determine the better output formulation.</p>
+
+<h2 id="trm-implementation">TRM Implementation</h2>
 
 <h3 id="data-preparation">Data preparation</h3>
+
+<p>Before following the recursive computation, we need to define what one training example contains. In the original puzzle implementation, the input is a grid and the target is its completed or transformed grid. The model predicts the output positions in parallel. The ground-truth output supplies supervision; it is not the initial answer state \(y\) fed into the recursion.</p>
+
+<p><strong>1. Convert grids into fixed-length token sequences</strong></p>
+
+<p>The official builders use small task-specific vocabularies and flatten grids in row-major order:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Dataset</th>
+      <th>Sequence length</th>
+      <th>Token conventions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Sudoku</td>
+      <td>\(9\times9=81\)</td>
+      <td>
+<code class="language-plaintext highlighter-rouge">0</code>: padding; <code class="language-plaintext highlighter-rouge">1</code>: empty cell; <code class="language-plaintext highlighter-rouge">2</code>–<code class="language-plaintext highlighter-rouge">10</code>: digits 1–9</td>
+    </tr>
+    <tr>
+      <td>ARC</td>
+      <td>\(30\times30=900\)</td>
+      <td>
+<code class="language-plaintext highlighter-rouge">0</code>: padding; <code class="language-plaintext highlighter-rouge">1</code>: grid boundary (<code class="language-plaintext highlighter-rouge">&lt;eos&gt;</code>); <code class="language-plaintext highlighter-rouge">2</code>–<code class="language-plaintext highlighter-rouge">11</code>: colors 0–9</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>For Sudoku, the builder reads the incomplete board and its solution from the source CSV, converts <code class="language-plaintext highlighter-rouge">.</code> to zero, then adds one to every cell. A raw row beginning <code class="language-plaintext highlighter-rouge">[0, 5, 0]</code> becomes <code class="language-plaintext highlighter-rouge">[1, 6, 1]</code>. The label contains the full solved board, including the positions already given in the input. Consequently, an empty input cell is a valid token, not a position to ignore in the loss. <a href="https://github.com/SamsungSAILMontreal/TinyRecursiveModels/blob/c01103738605ba39d1430519b1ee0c62f4c707f8/dataset/build_sudoku_dataset.py#L60-L141" rel="external nofollow noopener" target="_blank">Sudoku builder</a></p>
+
+<p>ARC inputs and outputs may have different dimensions. Each grid is placed on a separate \(30\times30\) canvas. The builder adds a row of boundary tokens immediately below the grid and a column immediately to its right, wherever the canvas has space. This <code class="language-plaintext highlighter-rouge">&lt;eos&gt;</code> is a spatial boundary, rather than a single token appended to a sentence. Original black pixels become token <code class="language-plaintext highlighter-rouge">2</code>, so they remain distinguishable from padding. Training translations move an input/output pair by the same offset. <a href="https://github.com/SamsungSAILMontreal/TinyRecursiveModels/blob/c01103738605ba39d1430519b1ee0c62f4c707f8/dataset/build_arc_dataset.py#L39-L74" rel="external nofollow noopener" target="_blank">ARC encoding</a></p>
+
+<p><strong>2. Keep examples, puzzle identities, and augmentation groups separate</strong></p>
+
+<p>Each split saves <code class="language-plaintext highlighter-rouge">all__inputs.npy</code>, <code class="language-plaintext highlighter-rouge">all__labels.npy</code>, <code class="language-plaintext highlighter-rouge">all__puzzle_identifiers.npy</code>, <code class="language-plaintext highlighter-rouge">all__puzzle_indices.npy</code>, and <code class="language-plaintext highlighter-rouge">all__group_indices.npy</code>, together with <code class="language-plaintext highlighter-rouge">dataset.json</code>. The two offset arrays describe this hierarchy:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>original puzzle / group
+  └── original version and augmented versions
+        └── input/output examples belonging to each version
+</code></pre></div></div>
+
+<p>A Sudoku version has one example and always uses identifier <code class="language-plaintext highlighter-rouge">0</code>. An ARC version can contain several examples and receives its own nonzero identifier. Its demonstrations and held-out queries share that identifier across splits. The model uses this ID to look up a trainable puzzle embedding. Each demonstration is stored as an individual input/output pair; the builder does not concatenate all demonstrations into a textual prompt. The loader expands the stored identifier to one ID per selected example. <a href="https://github.com/SamsungSAILMontreal/TinyRecursiveModels/blob/c01103738605ba39d1430519b1ee0c62f4c707f8/dataset/build_arc_dataset.py#L225-L320" rel="external nofollow noopener" target="_blank">ARC serialization</a>, <a href="https://github.com/SamsungSAILMontreal/TinyRecursiveModels/blob/c01103738605ba39d1430519b1ee0c62f4c707f8/models/recursive_reasoning/trm.py#L162-L182" rel="external nofollow noopener" target="_blank">input embeddings</a></p>
+
+<p><strong>3. Augment without mixing supervision across splits</strong></p>
+
+<p>Sudoku subsampling happens on the original training boards before augmentation. Each transformation is applied identically to the board and solution: relabel digits, optionally transpose, and permute rows within bands, columns within stacks, and the bands/stacks themselves. The documented <code class="language-plaintext highlighter-rouge">--subsample-size 1000 --num-aug 1000</code> retains 1,000 original boards, each with its original version plus 1,000 transformed versions. The test boards receive no augmentation. <a href="https://github.com/SamsungSAILMontreal/TinyRecursiveModels/blob/c01103738605ba39d1430519b1ee0c62f4c707f8/dataset/build_sudoku_dataset.py#L27-L112" rel="external nofollow noopener" target="_blank">Sudoku augmentation</a></p>
+
+<p>For ARC, a rotation/reflection and color permutation are shared across every example of a task; black stays black. Duplicate transformed tasks are filtered, so the requested augmentation count is an upper bound. Spatial/color variants are built for both splits; translation is enabled only for training, with one example per version kept at the top-left origin. <a href="https://github.com/SamsungSAILMontreal/TinyRecursiveModels/blob/c01103738605ba39d1430519b1ee0c62f4c707f8/dataset/build_arc_dataset.py#L98-L164" rel="external nofollow noopener" target="_blank">ARC augmentation</a></p>
+
+<p>The ARC split deserves care: demonstrations from evaluation tasks deliberately enter training, while their query outputs go to the test split. This is a protocol with access to each evaluation task’s demonstrations, not an unseen-task holdout. Keep query answers out of training labels when reproducing it. The builder substitutes <code class="language-plaintext highlighter-rouge">[[0]]</code> when solutions are missing; those placeholders cannot support accuracy measurements. The README also warns that ARC-2 training contains some ARC-1 evaluation tasks, so combining the two training sets compromises an ARC-1 evaluation. <a href="https://github.com/SamsungSAILMontreal/TinyRecursiveModels/blob/c01103738605ba39d1430519b1ee0c62f4c707f8/dataset/build_arc_dataset.py#L167-L218" rel="external nofollow noopener" target="_blank">Split routing</a>, <a href="https://github.com/SamsungSAILMontreal/TinyRecursiveModels/blob/c01103738605ba39d1430519b1ee0c62f4c707f8/README.md#dataset-preparation" rel="external nofollow noopener" target="_blank">dataset instructions</a></p>
+
+<p><strong>4. Construct a batch and preserve its labels through recursion</strong></p>
+
+<p>The loader shuffles original groups, samples one version per visited group, and packs that version’s examples into a global batch. It samples only as many examples as the remaining capacity permits, then partitions the batch across devices. Training drops an incomplete final batch; evaluation pads it. Thus, one group traversal does not enumerate every stored augmentation. <a href="https://github.com/SamsungSAILMontreal/TinyRecursiveModels/blob/c01103738605ba39d1430519b1ee0c62f4c707f8/puzzle_dataset.py#L16-L40" rel="external nofollow noopener" target="_blank">Batch sampling</a></p>
+
+<p>The following simplified pseudocode shows the encoding and batch contract; split routing, augmentation selection, and distributed sampling are omitted:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="k">def</span> <span class="nf">encode_sudoku</span><span class="p">(</span><span class="n">grid</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="p">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="p">.</span><span class="n">int32</span><span class="p">).</span><span class="n">reshape</span><span class="p">(</span><span class="mi">81</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+
+<span class="k">def</span> <span class="nf">encode_arc</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)):</span>
+    <span class="n">grid</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="p">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">h</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="n">grid</span><span class="p">.</span><span class="n">shape</span>
+    <span class="n">r</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">offset</span>  <span class="c1"># Use the same valid offset for input and output.
+</span>    <span class="k">assert</span> <span class="n">r</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">c</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">r</span> <span class="o">+</span> <span class="n">h</span> <span class="o">&lt;=</span> <span class="mi">30</span> <span class="ow">and</span> <span class="n">c</span> <span class="o">+</span> <span class="n">w</span> <span class="o">&lt;=</span> <span class="mi">30</span>
+    <span class="n">canvas</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">30</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="p">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">canvas</span><span class="p">[</span><span class="n">r</span><span class="p">:</span><span class="n">r</span><span class="o">+</span><span class="n">h</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span><span class="n">c</span><span class="o">+</span><span class="n">w</span><span class="p">]</span> <span class="o">=</span> <span class="n">grid</span> <span class="o">+</span> <span class="mi">2</span>
+    <span class="k">if</span> <span class="n">r</span> <span class="o">+</span> <span class="n">h</span> <span class="o">&lt;</span> <span class="mi">30</span><span class="p">:</span>
+        <span class="n">canvas</span><span class="p">[</span><span class="n">r</span><span class="o">+</span><span class="n">h</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span><span class="n">c</span><span class="o">+</span><span class="n">w</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">c</span> <span class="o">+</span> <span class="n">w</span> <span class="o">&lt;</span> <span class="mi">30</span><span class="p">:</span>
+        <span class="n">canvas</span><span class="p">[</span><span class="n">r</span><span class="p">:</span><span class="n">r</span><span class="o">+</span><span class="n">h</span><span class="p">,</span> <span class="n">c</span><span class="o">+</span><span class="n">w</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">canvas</span><span class="p">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">900</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">collate</span><span class="p">(</span><span class="n">encoded_inputs</span><span class="p">,</span> <span class="n">encoded_outputs</span><span class="p">,</span> <span class="n">puzzle_ids</span><span class="p">):</span>
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">stack</span><span class="p">(</span><span class="n">encoded_inputs</span><span class="p">).</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">stack</span><span class="p">(</span><span class="n">encoded_outputs</span><span class="p">).</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="n">labels</span><span class="p">[</span><span class="n">labels</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">100</span>  <span class="c1"># Ignore output padding only.
+</span>    <span class="k">return</span> <span class="p">{</span>
+        <span class="s">"inputs"</span><span class="p">:</span> <span class="n">torch</span><span class="p">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">inputs</span><span class="p">),</span>       <span class="c1"># [B, L]
+</span>        <span class="s">"labels"</span><span class="p">:</span> <span class="n">torch</span><span class="p">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">labels</span><span class="p">),</span>       <span class="c1"># [B, L]
+</span>        <span class="s">"puzzle_identifiers"</span><span class="p">:</span> <span class="n">torch</span><span class="p">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">puzzle_ids</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="p">.</span><span class="n">int32</span><span class="p">),</span>
+    <span class="p">}</span>                                             <span class="c1"># IDs: [B]
+</span></code></pre></div></div>
+
+<p>The actual key is <code class="language-plaintext highlighter-rouge">labels</code>. The loss excludes <code class="language-plaintext highlighter-rouge">-100</code>, averages over valid positions per example, and supervises ARC boundary tokens as well as colors. Labels are retained in <code class="language-plaintext highlighter-rouge">carry.current_data</code>: only previously halted slots accept new examples and reset their states; unfinished slots keep their existing inputs, identifiers, and labels. The loss reads these retained labels, ensuring supervision stays aligned with the puzzle being refined. <a href="https://github.com/SamsungSAILMontreal/TinyRecursiveModels/blob/c01103738605ba39d1430519b1ee0c62f4c707f8/puzzle_dataset.py#L147-L166" rel="external nofollow noopener" target="_blank">Collation</a>, <a href="https://github.com/SamsungSAILMontreal/TinyRecursiveModels/blob/c01103738605ba39d1430519b1ee0c62f4c707f8/models/recursive_reasoning/trm.py#L237-L259" rel="external nofollow noopener" target="_blank">carry update</a>, <a href="https://github.com/SamsungSAILMontreal/TinyRecursiveModels/blob/c01103738605ba39d1430519b1ee0c62f4c707f8/models/losses.py#L58-L88" rel="external nofollow noopener" target="_blank">loss</a></p>
+
+<p>The relation-extraction adaptation later in this post changes this contract: it tokenizes text and supervises an answer position. Its vocabulary, sequence length, and label mask must therefore be designed for that task; the original grid encodings do not establish its performance.</p>
 
 <h3 id="main-process">Main process</h3>
 

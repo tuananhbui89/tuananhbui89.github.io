@@ -144,6 +144,13 @@
           <ul id="toc" class="section-nav">
 <li class="toc-entry toc-h2"><a href="#about-the-paper">About the paper</a></li>
 <li class="toc-entry toc-h2"><a href="#introduction">Introduction</a></li>
+<li class="toc-entry toc-h2"><a href="#from-the-gaussian-transformation-to-a-velocity">From the Gaussian transformation to a velocity</a></li>
+<li class="toc-entry toc-h2"><a href="#why-conditional-training-learns-the-marginal-flow">Why conditional training learns the marginal flow</a></li>
+<li class="toc-entry toc-h2"><a href="#optimal-transport-conditional-paths">Optimal Transport conditional paths</a></li>
+<li class="toc-entry toc-h2"><a href="#how-does-this-compare-with-diffusion-paths">How does this compare with diffusion paths?</a></li>
+<li class="toc-entry toc-h2"><a href="#training-and-sampling">Training and sampling</a></li>
+<li class="toc-entry toc-h2"><a href="#what-do-the-experiments-show">What do the experiments show?</a></li>
+<li class="toc-entry toc-h2"><a href="#references">References</a></li>
 </ul>
           
         </div>
@@ -234,7 +241,312 @@ Now the question is how can we obtain \(u_t(x \mid x_1)\)?</p>
 
 <p>where \(\psi_t (x)\) is the canonical transformation of \(p_t(x \mid x_1)\), and \(\odot\) is the element-wise multiplication.</p>
 
-<p>to be continued…</p>
+<h2 id="from-the-gaussian-transformation-to-a-velocity">From the Gaussian transformation to a velocity</h2>
+
+<p>Let us make the notation precise before differentiating. We use \(x_0\sim\mathcal{N}(0,I)\) for noise and \(x_1\sim q\) for a data sample, drawn independently. Thus \(q\) is the <strong>data distribution</strong>; \(p_0\) is the noise prior. The conditioning variable in the formulas above is the endpoint \(x_1\), including in Theorem 1, rather than the current point \(x_t\). Also, \(\sigma_t\) denotes a standard deviation, so the covariance is \(\sigma_t^2 I\). A flow map transforms individual points; the collection of transformed points has density \(p_t\).</p>
+
+<p>For a fixed \(x_1\), the Gaussian transformation gives us a point anywhere along the conditional path:</p>
+
+<div class="overflow-auto">
+
+\[x_t=\psi_t(x_0\mid x_1)=\mu_t(x_1)+\sigma_t(x_1)x_0.\]
+
+</div>
+
+<p>We can differentiate this expression while holding the sampled pair fixed:</p>
+
+<div class="overflow-auto">
+
+\[\frac{d}{dt}\psi_t(x_0\mid x_1)=\dot\mu_t(x_1)+\dot\sigma_t(x_1)x_0.\]
+
+</div>
+
+<p>The dot denotes a time derivative. This already supplies a training target, but a vector field takes the <strong>current location</strong> \(x\) as input. Since \(\sigma_t&gt;0\), we can recover the starting noise through</p>
+
+<div class="overflow-auto">
+
+\[x_0=\frac{x-\mu_t(x_1)}{\sigma_t(x_1)}.\]
+
+</div>
+
+<p>Substituting gives the conditional velocity:</p>
+
+<div class="overflow-auto">
+
+\[\boxed{u_t(x\mid x_1)=\dot\mu_t(x_1)+\frac{\dot\sigma_t(x_1)}{\sigma_t(x_1)}\big(x-\mu_t(x_1)\big).}\]
+
+</div>
+
+<p>The first term moves the Gaussian’s center; the second expands or contracts points around that center. This is the velocity of the specified affine flow. Other flows can produce the same density path, so this construction does not claim that a Gaussian distribution has only one possible velocity field. This is <a href="https://arxiv.org/html/2210.02747v2#S4" rel="external nofollow noopener" target="_blank">Theorem 3 of the paper</a>.</p>
+
+<h2 id="why-conditional-training-learns-the-marginal-flow">Why conditional training learns the marginal flow</h2>
+
+<p>The paper’s equivalence result uses <strong>squared Euclidean distance</strong>. The two objectives written earlier therefore need their squared-L2 form for the following argument:</p>
+
+<div class="overflow-auto">
+
+\[\mathcal{L}_{FM}(\theta)=\mathbb{E}_{t,x\sim p_t}\|v_t(x;\theta)-u_t(x)\|_2^2,\]
+
+</div>
+
+<div class="overflow-auto">
+
+\[\mathcal{L}_{CFM}(\theta)=\mathbb{E}_{t,x_1\sim q,x\sim p_t(\cdot\mid x_1)}\|v_t(x;\theta)-u_t(x\mid x_1)\|_2^2.\]
+
+</div>
+
+<p>Here \(t\sim\mathcal{U}[0,1]\). We can sample the second objective even though the first contains the unknown marginal velocity. To understand why this works, consider all endpoints that could have produced the same location at the same time. Their conditional velocities need not agree. The marginal velocity averages them using the posterior probability of each endpoint:</p>
+
+<div class="overflow-auto">
+
+\[u_t(x)=\mathbb{E}[u_t(x\mid X_1)\mid X_t=x,t].\]
+
+</div>
+
+<p>This is exactly the weighted integral introduced above. The weights depend on both the data distribution and how likely each endpoint’s conditional path is to visit \(x\).</p>
+
+<p>Write the regression error as</p>
+
+<div class="overflow-auto">
+
+\[v_t(x;\theta)-u_t(x\mid x_1)=\big(v_t(x;\theta)-u_t(x)\big)+\big(u_t(x)-u_t(x\mid x_1)\big).\]
+
+</div>
+
+<p>After squaring and taking expectations, the cross term vanishes: conditioned on \(t,x\), the second bracket has mean zero. Consequently,</p>
+
+<div class="overflow-auto">
+
+\[\mathcal{L}_{CFM}(\theta)=\mathcal{L}_{FM}(\theta)+\underbrace{\mathbb{E}\|u_t(X_t\mid X_1)-u_t(X_t)\|_2^2}_{C\text{, independent of }\theta},\]
+
+</div>
+
+<p>and therefore</p>
+
+<div class="overflow-auto">
+
+\[\boxed{\nabla_\theta\mathcal{L}_{CFM}=\nabla_\theta\mathcal{L}_{FM}.}\]
+
+</div>
+
+<p>This assumes fixed target paths independent of \(\theta\) and sufficient regularity to exchange differentiation and expectation. The paper states the result for positive marginal densities. The gradients agree <strong>in expectation</strong>; individual minibatch gradients can differ. Moreover, a perfect marginal model can still have positive CFM loss because different conditional targets disagree at the same input. <a href="https://arxiv.org/html/2210.02747v2#S3.SS2" rel="external nofollow noopener" target="_blank">Theorem 2 and Appendix A</a> establish the equivalence.</p>
+
+<p>This also resolves an apparent problem: the model does not need to know the future data sample during generation. We train \(v_t(x;\theta)\) on conditional targets, but it receives only \(t,x\) and learns their conditional mean. Conditioning on a class label or a low-resolution image would be a separate, optional input.</p>
+
+<h2 id="optimal-transport-conditional-paths">Optimal Transport conditional paths</h2>
+
+<p>The general Gaussian formula allows many schedules. The paper’s particularly simple choice is</p>
+
+<div class="overflow-auto">
+
+\[\mu_t(x_1)=tx_1,\qquad \sigma_t=1-(1-\sigma_{\min})t,\qquad 0&lt;\sigma_{\min}&lt;1.\]
+
+</div>
+
+<p>Let \(a=1-\sigma_{\min}\). The sampled path and its velocity become</p>
+
+<div class="overflow-auto">
+
+\[x_t=(1-at)x_0+tx_1,\qquad \frac{dx_t}{dt}=x_1-ax_0.\]
+
+</div>
+
+<p>For each fixed pair, the velocity is constant: the point travels along a straight line. Substitution into the Gaussian velocity formula gives</p>
+
+<div class="overflow-auto">
+
+\[u_t(x\mid x_1)=x_1-\frac{a}{1-at}(x-tx_1)=\frac{x_1-ax}{1-at}.\]
+
+</div>
+
+<p>At a fixed location this field can vary with time. Its value is constant <strong>along a particular conditional trajectory</strong>, as the expression \(x_1-ax_0\) shows.</p>
+
+<p>The endpoints deserve attention:</p>
+
+<div class="overflow-auto">
+
+\[\psi_0(x_0\mid x_1)=x_0,\qquad \psi_1(x_0\mid x_1)=x_1+\sigma_{\min}x_0.\]
+
+</div>
+
+<p>Thus the final conditional distribution is \(\mathcal{N}(x_1,\sigma_{\min}^2I)\), and the marginal endpoint is the data distribution convolved with that small Gaussian:</p>
+
+<div class="overflow-auto">
+
+\[p_1=q*\mathcal{N}(0,\sigma_{\min}^2I).\]
+
+</div>
+
+<p>It approximates the data distribution; it is not exactly \(q\) when \(\sigma_{\min}&gt;0\). In the limit \(\sigma_{\min}\to0\) we obtain the familiar interpolation \(x_t=(1-t)x_0+tx_1\) and target \(x_1-x_0\). Setting it exactly to zero makes the conditional endpoint a point mass and the location-based formula singular at \(t=1\). The sampled-pair velocity remains well defined, but the positive-density argument needs an endpoint limit.</p>
+
+<p>Why call this <em>Optimal Transport</em>? For a fixed endpoint \(x_1\), the map \(x_0\mapsto x_1+\sigma_{\min}x_0\) is the quadratic-cost optimal transport map between the two conditional Gaussians. Interpolating between the identity and that map yields precisely the path above. However, independent noise–data pairing does not solve a global optimal coupling between \(p_0\) and \(q\). The paper explicitly distinguishes these claims in <a href="https://arxiv.org/html/2210.02747v2#S4.SS1" rel="external nofollow noopener" target="_blank">Section 4.1</a>.</p>
+
+<div class="row mt-3">
+    <div class="col-sm-10 mt-3 mt-md-0 mx-auto">
+        <figure>
+            <img src="/assets/img/2023-flowmatching/conditional-targets-marginal-velocity.svg" class="img-fluid rounded z-depth-1" width="760" height="650" alt="Two straight conditional paths meet at the same time and location but have different velocities. With equally likely endpoints, their horizontal components cancel and their mean points upward. The model learns this mean from time and location alone." loading="lazy" data-zoomable="">
+            <figcaption class="caption">Straight conditional paths can give different targets at the same input. Squared-error training learns their posterior-weighted mean velocity. Original schematic for two equally likely endpoints at t = 1/2, in the zero endpoint-noise limit.</figcaption>
+        </figure>
+    </div>
+</div>
+
+<p>The figure shows why the learned marginal trajectories need not be straight. Their direction changes as the posterior weights change along the path. The crossing lines belong to different conditional fields; they are not two trajectories crossing under one smooth marginal ODE at the same time. Conditional straightness therefore does not guarantee exact generation in one Euler step.</p>
+
+<h2 id="how-does-this-compare-with-diffusion-paths">How does this compare with diffusion paths?</h2>
+
+<p>Flow Matching is a training objective; the probability path is a separate choice. A diffusion path can also supply the Gaussian means and standard deviations used in the derivation above.</p>
+
+<p>For example, let \(s\) denote forward diffusion time and define a variance-preserving schedule</p>
+
+<div class="overflow-auto">
+
+\[\alpha_s=\exp\left(-\frac12\int_0^s\beta(r)dr\right),\qquad \beta(s)&gt;0.\]
+
+</div>
+
+<p>Reversing time with \(s=1-t\) gives the noise-to-data conditional path</p>
+
+<div class="overflow-auto">
+
+\[x_t=\alpha_{1-t}x_1+\sqrt{1-\alpha_{1-t}^2}\,x_0.\]
+
+</div>
+
+<p>Using \(\mu_t=\alpha_{1-t}x_1\) and \(\sigma_t=\sqrt{1-\alpha_{1-t}^2}\) in our general formula yields its conditional velocity. Unlike the linear OT schedule, its two coefficients generally change nonlinearly, so conditional trajectories can curve and their speeds vary. With a finite diffusion schedule, \(\alpha_1\) is small but usually nonzero: the initial distribution only approximates pure Gaussian noise. The OT construction above starts at the specified Gaussian exactly.</p>
+
+<p>The conditional score for a Gaussian path is</p>
+
+<div class="overflow-auto">
+
+\[\nabla_x\log p_t(x\mid x_1)=-\frac{x-\mu_t(x_1)}{\sigma_t^2},\]
+
+</div>
+
+<p>so its velocity can also be written as</p>
+
+<div class="overflow-auto">
+
+\[u_t(x\mid x_1)=\dot\mu_t(x_1)-\sigma_t\dot\sigma_t\,\nabla_x\log p_t(x\mid x_1).\]
+
+</div>
+
+<p>This connects score prediction and velocity prediction without making their unweighted training losses identical: changing the prediction target also changes the effective time weighting. For the VP and VE paths considered in the paper, the construction agrees with the corresponding probability-flow ODE. That ODE shares time marginals with the diffusion process; its deterministic trajectories are not stochastic diffusion sample paths. See <a href="https://arxiv.org/html/2210.02747v2#A4" rel="external nofollow noopener" target="_blank">Appendix D</a> and <a href="https://arxiv.org/abs/2011.13456v2" rel="external nofollow noopener" target="_blank">Song et al.</a>.</p>
+
+<h2 id="training-and-sampling">Training and sampling</h2>
+
+<p>With the OT schedule, one training example requires a data sample, fresh Gaussian noise, and a uniformly sampled time. Both the location and velocity target are available directly:</p>
+
+<div class="overflow-auto">
+
+\[\mathcal{L}_{CFM}(\theta)=\mathbb{E}_{t,x_0,x_1}\left\|v_t\big((1-at)x_0+tx_1;\theta\big)-(x_1-ax_0)\right\|_2^2.\]
+
+</div>
+
+<p>The following PyTorch-style pseudocode implements this loss. The model accepts one time value per batch item and predicts a tensor with the same shape as the input. The standard deviation below is an illustrative hyperparameter.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="k">def</span> <span class="nf">train_step</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">sigma_min</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">):</span>
+    <span class="c1"># x1: a batch of preprocessed data, shape [batch, ...]
+</span>    <span class="n">model</span><span class="p">.</span><span class="n">train</span><span class="p">()</span>
+    <span class="n">batch</span> <span class="o">=</span> <span class="n">x1</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">x0</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">randn_like</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">rand</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">x1</span><span class="p">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">x1</span><span class="p">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">time_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">batch</span><span class="p">,)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)</span> <span class="o">*</span> <span class="p">(</span><span class="n">x1</span><span class="p">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">t_broadcast</span> <span class="o">=</span> <span class="n">t</span><span class="p">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">time_shape</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">sigma_min</span>
+
+    <span class="n">xt</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">a</span> <span class="o">*</span> <span class="n">t_broadcast</span><span class="p">)</span> <span class="o">*</span> <span class="n">x0</span> <span class="o">+</span> <span class="n">t_broadcast</span> <span class="o">*</span> <span class="n">x1</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">x1</span> <span class="o">-</span> <span class="n">a</span> <span class="o">*</span> <span class="n">x0</span>
+    <span class="n">prediction</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">xt</span><span class="p">)</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="p">(</span><span class="n">prediction</span> <span class="o">-</span> <span class="n">target</span><span class="p">).</span><span class="n">square</span><span class="p">().</span><span class="n">flatten</span><span class="p">(</span><span class="mi">1</span><span class="p">).</span><span class="nb">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">).</span><span class="n">mean</span><span class="p">()</span>
+
+    <span class="n">optimizer</span><span class="p">.</span><span class="n">zero_grad</span><span class="p">()</span>
+    <span class="n">loss</span><span class="p">.</span><span class="n">backward</span><span class="p">()</span>
+    <span class="n">optimizer</span><span class="p">.</span><span class="n">step</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">loss</span><span class="p">.</span><span class="n">detach</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>There is no ODE solve, trajectory rollout, or divergence estimate inside this training step. This is the meaning of <em>simulation-free training</em>. It does not remove the integration needed to generate a sample.</p>
+
+<p>After training, draw \(z_0\sim\mathcal{N}(0,I)\) and integrate</p>
+
+<div class="overflow-auto">
+
+\[\frac{dz_t}{dt}=v_t(z_t;\theta),\qquad t:0\longrightarrow1.\]
+
+</div>
+
+<p>Here is a fixed-step midpoint solver. Each step evaluates the network twice: once to estimate the midpoint, then again to move using the velocity there.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">@</span><span class="n">torch</span><span class="p">.</span><span class="n">no_grad</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="p">.</span><span class="n">float32</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">steps</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="n">model</span><span class="p">.</span><span class="nb">eval</span><span class="p">()</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">randn</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">batch</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">steps</span>
+
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">steps</span><span class="p">):</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">full</span><span class="p">((</span><span class="n">batch</span><span class="p">,),</span> <span class="n">k</span> <span class="o">*</span> <span class="n">dt</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">first_velocity</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+        <span class="n">midpoint</span> <span class="o">=</span> <span class="n">z</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">*</span> <span class="n">first_velocity</span>
+        <span class="n">midpoint_velocity</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">t</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">dt</span><span class="p">,</span> <span class="n">midpoint</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">z</span> <span class="o">+</span> <span class="n">dt</span> <span class="o">*</span> <span class="n">midpoint_velocity</span>
+
+    <span class="k">return</span> <span class="n">z</span>  <span class="c1"># Apply the inverse of the training data preprocessing.
+</span></code></pre></div></div>
+
+<p>This sampler uses \(2\times\texttt{steps}\) network evaluations. The step count is a numerical-accuracy choice, not a consequence of the number of training times. Adaptive solvers instead adjust their steps using error tolerances. Neither solver has access to a target data endpoint.</p>
+
+<h2 id="what-do-the-experiments-show">What do the experiments show?</h2>
+
+<p>The paper separates the effect of the loss from the effect of the path. Its ImageNet-64 ablation uses the same U-Net architecture across the methods below. These are <strong>unconditional</strong> generation results from <a href="https://arxiv.org/html/2210.02747v2#S6.T1" rel="external nofollow noopener" target="_blank">Table 1</a>; lower values are better.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Training method</th>
+      <th style="text-align: right">NLL (bits/dimension)</th>
+      <th style="text-align: right">FID</th>
+      <th style="text-align: right">Mean NFE</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>DDPM baseline</td>
+      <td style="text-align: right">3.32</td>
+      <td style="text-align: right">17.36</td>
+      <td style="text-align: right">264</td>
+    </tr>
+    <tr>
+      <td>Flow Matching with diffusion path</td>
+      <td style="text-align: right">3.33</td>
+      <td style="text-align: right">16.88</td>
+      <td style="text-align: right">187</td>
+    </tr>
+    <tr>
+      <td>Flow Matching with OT path</td>
+      <td style="text-align: right">3.31</td>
+      <td style="text-align: right">14.45</td>
+      <td style="text-align: right">138</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>NFE is the number of vector-field evaluations made by the adaptive ODE solver, averaged over 50,000 samples. These results use <code class="language-plaintext highlighter-rouge">dopri5</code> with absolute and relative tolerances of \(10^{-5}\), including for the diffusion baselines. Thus the DDPM row should not be read as an ancestral sampler with 264 prescribed diffusion steps.</p>
+
+<p>In this comparison, changing to velocity regression reduces sampling work, and changing the path to conditional OT improves the reported metrics further. The separate ImageNet-32 fixed-step experiment also reports lower numerical error at a given evaluation budget. These are empirical results for the architectures, training budgets, and solvers studied, rather than a guarantee that OT paths outperform every diffusion model.</p>
+
+<p>Several limitations remain visible in the construction. The target path is a design choice; finite network capacity may fit some parts better than others. The endpoint variance introduces smoothing. Approximate velocity prediction and numerical integration both affect samples, and fewer solver steps can reduce quality. Finally, the conditional OT argument does not establish globally optimal or straight marginal transport. What the method provides is a tractable regression objective for learning the vector field of a chosen probability path.</p>
+
+<h2 id="references">References</h2>
+
+<ul>
+  <li>Lipman, Y., Chen, R. T. Q., Ben-Hamu, H., Nickel, M., and Le, M. <a href="https://arxiv.org/abs/2210.02747v2" rel="external nofollow noopener" target="_blank">Flow Matching for Generative Modeling</a>. ICLR 2023. Theorems 1–3, Section 4, Table 1, and Appendices A, D, E provide the derivations and experimental details used here.</li>
+  <li>Song, Y. et al. <a href="https://arxiv.org/abs/2011.13456v2" rel="external nofollow noopener" target="_blank">Score-Based Generative Modeling through Stochastic Differential Equations</a>. ICLR 2021. The probability-flow ODE connection underlying the diffusion comparison.</li>
+  <li>Chen, R. T. Q., Rubanova, Y., Bettencourt, J., and Duvenaud, D. <a href="https://arxiv.org/abs/1806.07366" rel="external nofollow noopener" target="_blank">Neural Ordinary Differential Equations</a>. NeurIPS 2018. Background on continuous normalizing flows and numerical ODE evaluation.</li>
+</ul>
 
     </div>
   </article>

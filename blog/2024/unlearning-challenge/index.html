@@ -155,7 +155,16 @@
 <li class="toc-entry toc-h2"><a href="#about-the-challenge">About the challenge</a></li>
 <li class="toc-entry toc-h2"><a href="#define-machine-unlearning">Define Machine Unlearning</a></li>
 <li class="toc-entry toc-h2"><a href="#define-the-evaluation-metric">Define the Evaluation Metric</a></li>
-<li class="toc-entry toc-h2"><a href="#winning-solutions">Winning solutions</a></li>
+<li class="toc-entry toc-h2">
+<a href="#winning-solutions">Winning solutions</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#first-stage-weaken-class-specific-predictions-on-the-forget-set">First stage: weaken class-specific predictions on the forget set</a></li>
+<li class="toc-entry toc-h3"><a href="#second-stage-alternate-similarity-equalization-and-retain-training">Second stage: alternate similarity equalization and retain training</a></li>
+<li class="toc-entry toc-h3"><a href="#pseudocode-and-implementation-details">Pseudocode and implementation details</a></li>
+<li class="toc-entry toc-h3"><a href="#what-the-other-leading-solutions-and-later-evaluation-teach-us">What the other leading solutions and later evaluation teach us</a></li>
+<li class="toc-entry toc-h3"><a href="#a-winning-score-is-empirical-evidence-not-a-deletion-certificate">A winning score is empirical evidence, not a deletion certificate</a></li>
+</ul>
+</li>
 <li class="toc-entry toc-h2"><a href="#references">References</a></li>
 </ul>
           
@@ -316,7 +325,17 @@ In Kairouz et al. (2015), the authors proposed an estimation of \(\epsilon\) at 
 \[\hat{\epsilon} = \max \left\{ \log \frac{1 - \delta - \hat{\text{FPR}}}{\hat{\text{FNR}}}, \log \frac{1 - \delta - \hat{\text{FNR}}}{\hat{\text{FPR}}} \right\}\]
 
 <p>where \(\hat{\text{FPR}}\) and \(\hat{\text{FNR}}\) are the false positive rate and false negative rate of the membership inference attack, respectively.
-The FPR and FNR can be estimated by</p>
+The FPR and FNR can be estimated by repeating unlearning and retraining, then testing whether their outputs can be distinguished for each fixed forget example \(s=(x,y)\). In the unlearning test, the two hypotheses are <strong>unlearned</strong> versus <strong>retrained without the forget set</strong>. Let \(t_i^U=h(U_i(x))\) and \(t_i^R=h(R_i(x))\) be the scalar outputs from \(N\) runs of each procedure. The released evaluator uses \(h(M(x))=\log[p_M(y\mid x)/(1-p_M(y\mid x))]\), with numerical stabilization. For a decision rule \(g\), choose the convention \(g(t)=1\) meaning “retrained.” Then</p>
+
+<div class="overflow-auto">
+
+\[\widehat{\mathrm{FPR}}_s(g)=\frac{1}{N}\sum_{i=1}^{N}\mathbf{1}\{g(t_i^U)=1\},
+\qquad
+\widehat{\mathrm{FNR}}_s(g)=\frac{1}{N}\sum_{i=1}^{N}\mathbf{1}\{g(t_i^R)=0\}.\]
+
+</div>
+
+<p>The evaluator searches single- and double-threshold rules and retains the largest estimated \(\epsilon_s\) among the tested attacks, using \(\delta=10^{-5}\). The implementation can reverse which distribution receives the positive label; exchanging the two labels exchanges FPR and FNR without changing the symmetric \(\hat\epsilon\) formula above. These error rates are estimated <strong>across model runs for one fixed example</strong>, then per-example forgetting scores are aggregated. They are not obtained by mixing different forget examples into one confusion matrix. The competition used 512 unlearning runs from the same original checkpoint and 512 retrained models. Small estimated errors indicate distinguishability; large errors under the tested attacks remain empirical evidence rather than a certified guarantee. <a href="https://github.com/google-deepmind/unlearning_evaluation/blob/ffae0fff4c3e9523b22618c47df6c26e4eebe0df/metric.py" rel="external nofollow noopener" target="_blank">Official metric implementation</a>, <a href="https://arxiv.org/html/2406.09073v1#A1.SS3" rel="external nofollow noopener" target="_blank">organizer protocol</a></p>
 
 <p>The final evaluation metric as follow:</p>
 
@@ -327,7 +346,205 @@ Intuitively, the above formula adjusts the forgetting quality F based on utility
 
 <h2 id="winning-solutions">Winning solutions</h2>
 
-<p>to be updated</p>
+<p><strong>Fanchuan is the winner on the final private leaderboard.</strong> The author’s write-up still has the title <a href="https://www.kaggle.com/competitions/neurips-2023-machine-unlearning/writeups/fanchuan-2nd-place-solution" rel="external nofollow noopener" target="_blank">“2nd place solution”</a>, while Kaggle identifies it as the first-place entry. These labels should not be confused with the public leaderboard used during development. The organizers explain that prizes used the final private leaderboard, obtained by evaluating submissions on a fresh dataset split. Their subsequent experiments used another split and a more extensive evaluation, so the ranking in those experiments is not the competition ranking. <a href="https://www.kaggle.com/competitions/neurips-2023-machine-unlearning/leaderboard" rel="external nofollow noopener" target="_blank">Official leaderboard</a>, <a href="https://arxiv.org/html/2406.09073v1#A1.SS3" rel="external nofollow noopener" target="_blank">organizer report, Appendix A.3</a></p>
+
+<p>Fanchuan’s method starts with the trained model and changes its weights in two stages: one pass that makes predictions on forget examples more uniform, followed by eight cycles alternating a forget objective and ordinary supervised learning on the retain set. It is an example of <strong>erase and repair</strong>: deliberately disrupt the behavior associated with the forget set, then recover useful prediction behavior from retained data. The equations below follow the <a href="https://www.kaggle.com/code/fanchuan/2nd-place-machine-unlearning-solution" rel="external nofollow noopener" target="_blank">released notebook</a>, including its loss signs and KL argument order.</p>
+
+<div class="row mt-3 text-center">
+    <div class="col-sm mt-3 mt-md-0">
+        <img src="/assets/img/2024-05-ml-unlearning/fanchuan-unlearning-flow.svg" class="img-fluid rounded z-depth-1" width="640" height="815" alt="Flowchart of Fanchuan's method: one uniform-label pass on forget examples, then eight cycles of equalizing similarities to detached retain logits and supervised training on retain labels." loading="lazy" data-zoomable="">
+    </div>
+</div>
+<div class="caption text-center">
+    Fanchuan first softens predictions on the forget set, then alternates equalizing forget-to-retain similarities with restoring prediction accuracy on retained examples. Original illustration based on the author's released implementation.
+</div>
+
+<h3 id="first-stage-weaken-class-specific-predictions-on-the-forget-set">First stage: weaken class-specific predictions on the forget set</h3>
+
+<p>Let \(z_\theta(x)\in\mathbb{R}^{C}\) be the classifier’s <strong>logits</strong>, \(p_\theta(x)=\operatorname{softmax}(z_\theta(x))\) its class probabilities, and \(u_c=1/C\) a uniform target over the \(C\) classes. Starting from the original parameters, the first stage minimizes</p>
+
+<div class="overflow-auto">
+
+\[\mathcal{L}_{\mathrm{uniform}}(\theta)
+=\frac{1}{|B_F|}\sum_{x\in B_F}
+D_{\mathrm{KL}}\left(u\,\|\,p_\theta(x)\right)
+=-\frac{1}{|B_F|C}\sum_{x\in B_F}\sum_{c=1}^{C}\log p_\theta(x)_c-\log C,\]
+
+</div>
+
+<p>where \(B_F\) is a minibatch from the forget set. The ground-truth labels of these examples are not needed for this update. Instead, all classes receive equal target probability.</p>
+
+<p>The direction of the gradient makes the mechanism concrete. For one example, the derivative with respect to logit \(z_c\) is \(p_c-1/C\). Gradient descent reduces logits whose probabilities exceed the uniform target and raises those below it. For a ten-class prediction with \(p_c=0.9\), that component contributes a positive gradient of \(0.8\); the update pushes its logit downward.</p>
+
+<p>The notebook implements <strong>\(D_{\mathrm{KL}}(u\|p)\)</strong>, because PyTorch receives log model probabilities as its first argument and uniform target probabilities as its second. This matters: \(D_{\mathrm{KL}}(p\|u)\) has the same uniform optimum but different gradients. The helper’s name, <code class="language-plaintext highlighter-rouge">kl_loss_sym</code>, also does not make the implemented loss symmetric. <a href="https://www.kaggle.com/code/fanchuan/2nd-place-machine-unlearning-solution" rel="external nofollow noopener" target="_blank">Winner’s notebook</a></p>
+
+<p>Uniform predictions are an intermediate intervention, not the definition of successful unlearning. A model retrained without a particular face can still predict its age correctly from other faces. Making every forget example maximally uncertain could itself make the updated model distinguishable from retraining.</p>
+
+<h3 id="second-stage-alternate-similarity-equalization-and-retain-training">Second stage: alternate similarity equalization and retain training</h3>
+
+<p><strong>The forget round</strong> draws a forget minibatch \(B_F\) and a retain minibatch \(B_R\). It computes the two sets of logits with the same current model, then stops gradients through the retain logits. Write</p>
+
+<div class="overflow-auto">
+
+\[a_{ij}=\frac{z_\theta(x_i^F)^\top\operatorname{sg}\!\left(z_\theta(x_j^R)\right)}{\tau},
+\qquad
+q_{ij}=\frac{\exp(a_{ij})}{\sum_{k=1}^{|B_R|}\exp(a_{ik})},\]
+
+</div>
+
+<p>where \(\operatorname{sg}\) means stop-gradient and the notebook uses \(\tau=1.15\). For each forget example, \(q_{i,:}\) is a distribution over the <strong>retain examples in that minibatch</strong>, not over age classes. The implemented loss is</p>
+
+<div class="overflow-auto">
+
+\[\mathcal{L}_{\mathrm{similarity}}
+=-\frac{1}{|B_F||B_R|}\sum_i\sum_j\log q_{ij}
+=\frac{1}{|B_F|}\sum_i D_{\mathrm{KL}}\left(u_{|B_R|}\|q_{i,:}\right)+\log|B_R|.\]
+
+</div>
+
+<p>This is uniform-target cross-entropy over a row of similarities. Its gradient with respect to \(a_{ij}\) is \((q_{ij}-1/\lvert B_R\rvert)/\lvert B_F\rvert\). The update therefore reduces unusually strong associations and raises unusually weak ones. At the optimum, each retain example receives equal probability within that row.</p>
+
+<p>That interpretation is more precise than saying “push forget examples away from everything.” Softmax is unchanged if the same constant is added to every similarity in a row, so this loss does not directly constrain their common absolute value. Nor does it select a positive pair as standard contrastive learning would. The code uses <strong>raw output logits</strong>, with no cosine normalization or separate feature encoder. Stopping the retain branch prevents this loss from backpropagating through those reference computations; the shared model’s parameters still change through the forget branch. <a href="https://www.kaggle.com/code/fanchuan/2nd-place-machine-unlearning-solution" rel="external nofollow noopener" target="_blank">Winner’s implementation</a></p>
+
+<p><strong>The retain round</strong> then makes a full pass over the retained examples using their true labels:</p>
+
+<div class="overflow-auto">
+
+\[\mathcal{L}_{\mathrm{retain}}(\theta)
+=-\frac{1}{|B_R|}\sum_{(x,y)\in B_R}\log p_\theta(x)_y.\]
+
+</div>
+
+<p>This repairs accuracy affected by the preceding forget round. Repeating the pair of operations lets the method revisit the forgetting objective after retained-data learning changes the same weights. There is no retrained oracle inside the algorithm: the secret model is used by the evaluator, not as a training target.</p>
+
+<h3 id="pseudocode-and-implementation-details">Pseudocode and implementation details</h3>
+
+<p>The following pseudocode preserves the objective and update order. It omits device transfers, logging, and checkpoint packaging; loaders are shuffled, and batches contain images and age-group labels as in the challenge notebook.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="n">F</span>
+
+<span class="k">def</span> <span class="nf">fanchuan_unlearn</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">forget_loader</span><span class="p">,</span> <span class="n">retain_loader</span><span class="p">):</span>
+    <span class="c1"># Rebuild retain loaders with batch size 256 and independent shuffling.
+</span>    <span class="n">retain_train</span> <span class="o">=</span> <span class="n">shuffled_loader</span><span class="p">(</span><span class="n">retain_loader</span><span class="p">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span>
+    <span class="n">retain_refs</span> <span class="o">=</span> <span class="n">shuffled_loader</span><span class="p">(</span><span class="n">retain_loader</span><span class="p">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span>
+
+    <span class="c1"># Separate optimizer objects retain separate momentum histories.
+</span>    <span class="n">initial_opt</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">optim</span><span class="p">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.005</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
+    <span class="n">forget_opt</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">optim</span><span class="p">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">3e-4</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
+    <span class="n">retain_opt</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">optim</span><span class="p">.</span><span class="n">SGD</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.004</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">0.01</span>
+    <span class="p">)</span>
+    <span class="n">schedule</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">optim</span><span class="p">.</span><span class="n">lr_scheduler</span><span class="p">.</span><span class="n">CosineAnnealingLR</span><span class="p">(</span>
+        <span class="n">forget_opt</span><span class="p">,</span> <span class="n">T_max</span><span class="o">=</span><span class="mi">8</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">forget_loader</span><span class="p">),</span> <span class="n">eta_min</span><span class="o">=</span><span class="mf">1e-6</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">loss</span><span class="p">):</span>
+        <span class="n">optimizer</span><span class="p">.</span><span class="n">zero_grad</span><span class="p">()</span>
+        <span class="n">loss</span><span class="p">.</span><span class="n">backward</span><span class="p">()</span>
+        <span class="n">optimizer</span><span class="p">.</span><span class="n">step</span><span class="p">()</span>
+
+    <span class="n">model</span><span class="p">.</span><span class="n">train</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">forget_loader</span><span class="p">:</span>  <span class="c1"># Initial stage: one pass.
+</span>        <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="s">"image"</span><span class="p">])</span>
+        <span class="n">uniform</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">logits</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="n">kl_div</span><span class="p">(</span><span class="n">F</span><span class="p">.</span><span class="n">log_softmax</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span>
+                        <span class="n">uniform</span><span class="p">,</span> <span class="n">reduction</span><span class="o">=</span><span class="s">"batchmean"</span><span class="p">)</span>
+        <span class="n">update</span><span class="p">(</span><span class="n">initial_opt</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">):</span>
+        <span class="c1"># zip follows the released code: stop when either loader ends.
+</span>        <span class="k">for</span> <span class="n">forgotten</span><span class="p">,</span> <span class="n">retained</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">forget_loader</span><span class="p">,</span> <span class="n">retain_refs</span><span class="p">):</span>
+            <span class="n">z_forget</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">forgotten</span><span class="p">[</span><span class="s">"image"</span><span class="p">])</span>
+            <span class="n">z_retain</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">retained</span><span class="p">[</span><span class="s">"image"</span><span class="p">]).</span><span class="n">detach</span><span class="p">()</span>
+            <span class="n">similarities</span> <span class="o">=</span> <span class="n">z_forget</span> <span class="o">@</span> <span class="n">z_retain</span><span class="p">.</span><span class="n">T</span> <span class="o">/</span> <span class="mf">1.15</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">F</span><span class="p">.</span><span class="n">log_softmax</span><span class="p">(</span><span class="n">similarities</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">).</span><span class="n">mean</span><span class="p">()</span>
+            <span class="n">update</span><span class="p">(</span><span class="n">forget_opt</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>
+            <span class="n">schedule</span><span class="p">.</span><span class="n">step</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">retained</span> <span class="ow">in</span> <span class="n">retain_train</span><span class="p">:</span>
+            <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">retained</span><span class="p">[</span><span class="s">"image"</span><span class="p">])</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="n">cross_entropy</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">retained</span><span class="p">[</span><span class="s">"age_group"</span><span class="p">])</span>
+            <span class="n">update</span><span class="p">(</span><span class="n">retain_opt</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span>
+</code></pre></div></div>
+
+<p>All three SGD optimizers use momentum \(0.9\). The initial and similarity stages have zero weight decay; the retain stage uses \(0.01\). Its learning rate is \(0.001\times256/64=0.004\) in the released recipe. The cosine schedule advances after each similarity update, not after each retain epoch. Keeping separate optimizers also keeps their momentum buffers separate; merging the losses into one optimizer would change the recipe. These are competition settings rather than universal defaults. <a href="https://www.kaggle.com/code/fanchuan/2nd-place-machine-unlearning-solution" rel="external nofollow noopener" target="_blank">Released code</a></p>
+
+<p>The author’s write-up reports that adding cosine annealing to forget rounds improved the <strong>public</strong> score from \(0.084\) to \(0.091\). This is a development observation, not an isolated, repeated ablation or the final winning score. The larger retain batch enabled eight repair epochs within the available runtime. The competition required producing 512 unlearned checkpoints within eight hours, so runtime constrained how much repair could be performed. <a href="https://www.kaggle.com/competitions/neurips-2023-machine-unlearning/writeups/fanchuan-2nd-place-solution" rel="external nofollow noopener" target="_blank">Author’s write-up</a>, <a href="https://arxiv.org/html/2406.09073v1#A1.SS3" rel="external nofollow noopener" target="_blank">competition setup</a></p>
+
+<h3 id="what-the-other-leading-solutions-and-later-evaluation-teach-us">What the other leading solutions and later evaluation teach us</h3>
+
+<p>The organizers’ <strong>June 2024 retrospective</strong>, published after this post’s original date, places Fanchuan alongside other leading methods. They share the erase/repair pattern but implement it differently:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Entry</th>
+      <th>Erase operation</th>
+      <th>Repair operation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Fanchuan</td>
+      <td>Uniform class targets, then equalized forget-to-retain similarities</td>
+      <td>Cross-entropy on retain labels between forget rounds</td>
+    </tr>
+    <tr>
+      <td>Kookmin</td>
+      <td>Reinitialize convolutional parameters with the lowest 30% gradient magnitudes under its selection objective</td>
+      <td>Retain training, with smaller gradient multipliers for unchanged parameters</td>
+    </tr>
+    <tr>
+      <td>Seif</td>
+      <td>Perturb convolutional weights with Gaussian noise</td>
+      <td>Retain training with a batch-dependent weighting rule</td>
+    </tr>
+    <tr>
+      <td>Sebastian</td>
+      <td>Replace 99% of convolutional/linear weights selected by small magnitude</td>
+      <td>Retain cross-entropy plus a penalty matching the original model’s prediction entropy</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>These are distinct submissions; weight reinitialization, parameter noise, and entropy matching should not be attributed to Fanchuan. <a href="https://arxiv.org/html/2406.09073v1#A1.SS4" rel="external nofollow noopener" target="_blank">Organizer method descriptions</a></p>
+
+<p>The retrospective’s comparison separates forgetting quality from the utility-adjusted score. It shows why a strong forgetting score can coexist with substantial loss of useful behavior.</p>
+
+<div class="row mt-3">
+    <div class="col-sm mt-3 mt-md-0" style="overflow-x: auto;">
+        <div style="min-width: 760px;">
+            <figure>
+
+  <picture>
+    
+    <source class="responsive-img-srcset" media="(max-width: 480px)" srcset="/assets/img/2024-05-ml-unlearning/challenge-retrospective-comparison-480.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 800px)" srcset="/assets/img/2024-05-ml-unlearning/challenge-retrospective-comparison-800.webp"></source>
+    <source class="responsive-img-srcset" media="(max-width: 1400px)" srcset="/assets/img/2024-05-ml-unlearning/challenge-retrospective-comparison-1400.webp"></source>
+    
+
+    
+    <img src="/assets/img/2024-05-ml-unlearning/challenge-retrospective-comparison.png" class="img-fluid rounded z-depth-1" width="auto" height="auto" alt="Organizer retrospective box plots comparing forgetting quality and utility-adjusted scores. Sebastian's larger forgetting score comes with a larger utility penalty; several challenge methods outperform the finetuning baseline." data-zoomable="" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+</figure>
+
+        </div>
+    </div>
+</div>
+<div class="caption">
+    Figure 5 from Triantafillou et al. (June 2024), reproduced under <a href="https://creativecommons.org/licenses/by/4.0/" rel="external nofollow noopener" target="_blank">CC BY 4.0</a>. Orange measures forgetting quality; blue includes the utility adjustment. These are later experiments using the report's Full setup with 1,024 models per distribution and 10 repetitions, not the private leaderboard scores. <a href="https://arxiv.org/html/2406.09073v1#S6.F5" rel="external nofollow noopener" target="_blank">Source and original caption</a>; <a href="/assets/img/2024-05-ml-unlearning/challenge-retrospective-comparison.png">open full-size figure</a>.
+</div>
+
+<p>Sebastian achieved the strongest forgetting score in that experiment but paid a larger utility penalty after replacing most weights. Fanchuan was more sensitive to whether repeated unlearning runs started from one original checkpoint or different independently trained checkpoints. The cheaper single-checkpoint setup used during the competition underestimated its forgetting score in the report’s comparison. On FEMNIST, transferring the same hyperparameters or only lightly tuning them did not preserve all of the competition methods’ advantages. These observations support evaluating utility, initialization sensitivity, and transfer separately rather than treating a single rank as a universal recommendation. <a href="https://arxiv.org/html/2406.09073v1#S6" rel="external nofollow noopener" target="_blank">Retrospective experiments</a></p>
+
+<h3 id="a-winning-score-is-empirical-evidence-not-a-deletion-certificate">A winning score is empirical evidence, not a deletion certificate</h3>
+
+<p>The evaluator compares distributions of a scalar statistic—the log-odds of the correct-class probability—across unlearned and retrained models, separately for each forget example. It searches single- and double-threshold attacks, estimates an \(\epsilon\) from their errors, then aggregates scores across examples. This is stronger evidence than simply checking that forget-set accuracy fell: matching the retrained model’s accuracy can still leave distinguishable confidence distributions. <a href="https://github.com/google-deepmind/unlearning_evaluation/blob/ffae0fff4c3e9523b22618c47df6c26e4eebe0df/metric.py" rel="external nofollow noopener" target="_blank">Official evaluation code</a></p>
+
+<p>The formal definition earlier in this post quantifies over all measurable regions of model outputs. A finite collection of attacks on one scalar statistic cannot establish that requirement. Small empirical \(\hat\epsilon\) values mean those tested attacks failed to distinguish the sampled distributions strongly; they do not supply a certified upper bound on every possible attack. Finite samples, threshold selection, averaging across easy and difficult forget examples, and the chosen data split all affect the result. Fanchuan’s contribution is a concrete, efficient recipe that performed well under the challenge’s empirical protocol. Its success motivates careful reuse and further evaluation, rather than a claim that every trace of a subject has been provably removed. <a href="https://arxiv.org/html/2406.09073v1#A1.SS2" rel="external nofollow noopener" target="_blank">Evaluation framework and limitations</a></p>
 
 <h2 id="references">References</h2>
 
