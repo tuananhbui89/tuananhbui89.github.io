@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Building a Harness with Jev</title>
+  <style>
+    :root { color-scheme: light dark; --page:#fff; --ink:#172033; --muted:#596579; --card:#f5f7fb; --line:#dbe1eb; }
+    @media (prefers-color-scheme:dark) { :root { --page:#111827; --ink:#eef2ff; --muted:#b5bfd0; --card:#1f2937; --line:#374151; } }
+    * { box-sizing:border-box } body { margin:0; background:var(--page); color:var(--ink); font:17px/1.65 system-ui,sans-serif }
+    main { width:min(960px,calc(100% - 2rem)); margin:2rem auto 5rem } h1,h2 { line-height:1.2 }
+    .video { position:relative; aspect-ratio:16/9; margin:2rem 0 } .video iframe { position:absolute; inset:0; width:100%; height:100%; border:0 }
+    .mindmap,.lecture-section { padding:1.25rem; margin:1.5rem 0; border:1px solid var(--line); border-radius:14px; background:var(--card) }
+    .mindmap { overflow:auto } .lecture-section img { display:block; max-width:100%; height:auto; margin:1rem auto; border-radius:10px }
+    .timestamp { color:var(--muted) } a { color:#3976d8 } code { overflow-wrap:anywhere }
+  </style>
+</head>
+<body><main>
+  <h1>Building a Harness with Jev</h1>
+  <div class="video"><iframe src="https://www.youtube.com/embed/VE5dsWll06M" title="YouTube video player" allowfullscreen></iframe></div>
+  <div class="mindmap"><pre class="mermaid">mindmap
+  root((Building a harness with Jev))
+    Agent loop
+      Tool calls request actions
+      Structured outputs shape answers
+    Typed decisions
+      State and named questions
+      Choice selects a category
+      Score uses an ordered scale
+      Boolean returns a probability
+    LangChain integration
+      TypeSafeClassifier
+      One state with multiple questions
+      Application policy consumes results
+    Model routing
+      Assess task complexity
+      Select the model for the work
+      Check total cost and quality
+    Tool risk checks
+      Inspect before execution
+      Middleware enforces the policy
+      Handle uncertainty and failures
+    Online evaluation
+      Answer and context plus rubric
+      Grade distinct criteria
+      Separate consistency from accuracy</pre></div>
+  <section class="lecture-section">
+  <h2>Tool calling and structured outputs connect the agent loop to software</h2>
+  <a class="timestamp" href="https://www.youtube.com/watch?v=VE5dsWll06M&amp;t=0s">00:00:00–00:01:38</a>
+  <img src="frames/00-00-49.jpg" alt="Representative lecture frame for 00:00:00–00:01:38" loading="lazy">
+  <div class="discussion"><p>An agent becomes useful when it can act on a request and inspect the result. Sydney starts with the familiar loop: send a request to a language model, let it request a tool, return the tool&#x27;s result to the model, and repeat until the model finishes. The surrounding software must represent both requests and results in a form that code can use.</p>
+<p>Two interfaces provide that structure:</p>
+<ul>
+<li><strong>Tool calling</strong> gives a model a structured way to request an operation. The tutorial uses an order lookup with an identifier as its example.</li>
+<li><strong>Structured outputs</strong> constrain the final answer to an expected schema, so downstream code can consume named fields instead of interpreting a prose response.</li>
+</ul>
+<p>These interfaces explain the starting point for Jev: some steps inside an agent system ask for a bounded decision, such as a category or an urgency probability. The tutorial explores moving those steps to a model designed for that output. The open-ended language model still drives the main task.</p></div>
+</section><section class="lecture-section">
+  <h2>Jev handles bounded decisions without generating a text response</h2>
+  <a class="timestamp" href="https://www.youtube.com/watch?v=VE5dsWll06M&amp;t=98s">00:01:38–00:04:11</a>
+  <img src="frames/00-02-54.jpg" alt="Representative lecture frame for 00:01:38–00:04:11" loading="lazy">
+  <div class="discussion"><p>Jev receives a state to examine and questions about that state, then returns typed decisions and probabilities. It does not produce a free-form text response. That makes its role narrower than the language model that writes a solution, explains an answer, or chooses a sequence of actions.</p>
+<p>TypeSafe calls this a <strong>System 1 model</strong>, borrowing the fast-intuition versus deliberate-reasoning analogy from Daniel Kahneman. In this tutorial the label describes an intended division of work; it is not evidence that either kind of model reproduces human cognition.</p>
+<p>Sydney reports classification speedups of 20–200 times and cost reductions of 40–400 times relative to LLMs. Those are reported comparisons, not measurements reproduced in this recording. The visible PII example contrasts an LLM response taking about five seconds with Jev quickly returning a probability of 0.98 that personal information is present. That output describes the model&#x27;s estimate for this example; it does not mean the model has 98% accuracy across a dataset.</p>
+<p>The useful architectural idea is to retain generation where the task needs it and use a typed decision interface where the next operation depends on a bounded judgment.</p></div>
+</section><section class="lecture-section">
+  <h2>Choice, score, and boolean questions share one input state</h2>
+  <a class="timestamp" href="https://www.youtube.com/watch?v=VE5dsWll06M&amp;t=251s">00:04:11–00:05:35</a>
+  <img src="frames/00-04-53.jpg" alt="Representative lecture frame for 00:04:11–00:05:35" loading="lazy">
+  <div class="discussion"><p>The support-ticket example makes the input/output contract concrete. A customer has repeatedly failed to connect a Stripe account, is losing sales, and asks for immediate assistance. The same message supports several different decisions:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Answer shape</th>
+<th>Value described in the demo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Which team should handle the ticket?</td>
+<td>One choice from named alternatives</td>
+<td>Billing has 0.84; a separate confidence field is 0.596.</td>
+</tr>
+<tr>
+<td>How frustrated does the customer seem?</td>
+<td>A value on an ordered scale</td>
+<td>1.035, interpreted as frustrated rather than very angry.</td>
+</tr>
+<tr>
+<td>Does the message convey urgency?</td>
+<td>A yes/no probability</td>
+<td>0.999, strongly favoring urgent.</td>
+</tr>
+</tbody>
+</table>
+<p>A score on a frustration scale is not a probability, and the choice confidence is not the same field as the probability assigned to billing. The tutorial shows the values but does not derive the confidence calculation. It also describes the third question as boolean even though the returned number is a probability; application code still needs a rule for turning that estimate into an action.</p>
+<p>Multiple questions can accompany one state. This lets the application request routing, urgency, and sentiment information together. Sydney describes efficient parallel evaluation of those questions, rather than making a separate generation call for each one.</p></div>
+</section><section class="lecture-section">
+  <h2>The LangChain classifier accepts state and named questions</h2>
+  <a class="timestamp" href="https://www.youtube.com/watch?v=VE5dsWll06M&amp;t=335s">00:05:35–00:06:00</a>
+  <img src="frames/00-05-47.jpg" alt="Representative lecture frame for 00:05:35–00:06:00" loading="lazy">
+  <div class="discussion"><p>The integration point is <code>TypeSafeClassifier</code> in <code>langchain-typesafe</code>. An application configures a TypeSafe API key, supplies a state and named questions to the classifier, then reads the answers from the response. It can use those answers in ordinary branching logic or an agent middleware hook.</p>
+<p>The data flow is:</p>
+<ol>
+<li>Assemble the context relevant to the decision.</li>
+<li>Define a bounded question and its answer type.</li>
+<li>Invoke the classifier with the state and questions.</li>
+<li>Read the typed result and let application logic choose the next step.</li>
+</ol>
+<p>The closing slide gives <code>uv pip install langchain-typesafe</code> as the installation command. The tutorial&#x27;s important API distinction is that this call returns classification answers rather than a chat message. For executable examples and current field names, consult the <a href="https://docs.langchain.com/oss/python/integrations/providers/typesafe">official LangChain integration documentation</a>, since the recording captures a newly released integration.</p></div>
+</section><section class="lecture-section">
+  <h2>Model routing assigns expensive reasoning only where it is useful</h2>
+  <a class="timestamp" href="https://www.youtube.com/watch?v=VE5dsWll06M&amp;t=360s">00:06:00–00:06:47</a>
+  <img src="frames/00-06-23.jpg" alt="Representative lecture frame for 00:06:00–00:06:47" loading="lazy">
+  <div class="discussion"><p>Model routing makes the classification result affect the next expensive operation. Sydney describes coding-agent tasks that range from simple requests to difficult debugging or implementation work. The application can ask Jev to assess the request against chosen complexity criteria, then select an inexpensive model or a more capable one.</p>
+<p>This places a decision before the main language-model call: request, complexity assessment, model selection, task execution. The criteria are part of the harness design. A team must decide what evidence in a request justifies the more capable route.</p>
+<p>The video presents LangChain&#x27;s exploration of this pattern without a comparison of complete routed-agent runs. The practical implication is that the classifier&#x27;s speed is only one part of the result. A router is useful when the combined system preserves acceptable task quality while improving overall cost or latency; a fast decision that sends a difficult task to an unsuitable model can increase retries.</p></div>
+</section><section class="lecture-section">
+  <h2>A tool risk check sits between a proposed action and execution</h2>
+  <a class="timestamp" href="https://www.youtube.com/watch?v=VE5dsWll06M&amp;t=407s">00:06:47–00:07:28</a>
+  <img src="frames/00-07-07.jpg" alt="Representative lecture frame for 00:06:47–00:07:28" loading="lazy">
+  <div class="discussion"><p>A risk check needs to run after the agent proposes a tool call and before the tool produces side effects. The tutorial places Jev at that boundary through auto mode middleware: inspect the intended action, classify its risk, and block a call that the policy considers risky. Deleting a database or important files is the motivating example.</p>
+<p>Sydney reports disabling an earlier risk-classification step because it made her coding agent feel slow, then enabling it again when Jev reduced the delay. This illustrates why the latency of repeated checks can affect whether developers keep them in their workflow. It is a personal observation, not a measured safety evaluation.</p>
+<p>The classifier provides evidence for an enforcement decision; the runtime performs the blocking. The example should therefore be read as a design pattern, not a guarantee that every destructive command will be recognized. An implementation needs a defined policy for ambiguous results and failed checks as well as clear boundaries around the tools it can execute.</p></div>
+</section><section class="lecture-section">
+  <h2>Online evaluation applies a rubric to an agent answer</h2>
+  <a class="timestamp" href="https://www.youtube.com/watch?v=VE5dsWll06M&amp;t=448s">00:07:28–00:09:09</a>
+  <img src="frames/00-08-18.jpg" alt="Representative lecture frame for 00:07:28–00:09:09" loading="lazy">
+  <div class="discussion"><p>Online evaluation asks whether an agent&#x27;s output meets a rubric. In the tutorial, the evaluator receives the original question and agent answer, together with criteria such as correctness, agreement with a reference, grounding, and whether a source was cited. These are distinct questions: the presence of a citation alone does not establish that the citation supports the answer.</p>
+<p>Sydney motivates this with the limits of reviewing every production trace manually and the expense of using a generative language model as the judge. A fast classifier can make it practical to inspect more traces or apply more criteria to each one. Code-based checks remain useful where the property can be verified directly.</p>
+<p>She points to a separate LangChain evaluation for claims about cost, speed, reliability, and consistency. This recording does not establish the experiment&#x27;s dataset, sample size, or generality. Repeatedly returning the same judgment and agreeing with an expert are different properties, so both matter when assessing a judge.</p>
+<p>The tutorial closes with the package installation command, a link to the companion blog, and instructions to obtain a TypeSafe API key. Its three applications all share the same pattern: expose a bounded decision inside the harness, give that decision a typed interface, and let runtime code act on the result.</p></div>
+</section>
+</main>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({startOnLoad:true,securityLevel:"strict",mindmap:{useMaxWidth:false,padding:20}});
+</script>
+</body></html>
