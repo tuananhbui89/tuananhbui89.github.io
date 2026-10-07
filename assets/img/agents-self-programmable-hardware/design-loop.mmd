@@ -1,0 +1,23 @@
+flowchart TB
+  accTitle: Two loops for self-programmable hardware
+  accDescr: An active sensor pipeline supplies application results and telemetry. A slower agent proposes a design, tools compile it, and independent validation decides whether to accept it. A deployment controller installs compatible accepted candidates and can restore a known-good image.
+  subgraph RUN["APPLICATION"]
+    S["Sensor stream"] --> F["Active FPGA pipeline"]
+    F --> O["Results + telemetry"]
+  end
+  O -. "evidence" .-> A
+  subgraph DESIGN["DESIGN"]
+    A["Propose a change"] --> T["Compile + inspect"]
+    T --> V["Validate independently"]
+    V -. "reject / revise" .-> A
+  end
+  V -->|"accept"| D["Deploy / recover"]
+  D -->|"activate"| F
+  classDef active fill:#e8f3f4,stroke:#26727c,color:#163c43,stroke-width:1.5px
+  classDef design fill:#edf0fb,stroke:#596baf,color:#253266,stroke-width:1.5px
+  classDef control fill:#fff2dc,stroke:#a46920,color:#67400f,stroke-width:1.5px
+  class S,F,O active
+  class A,T,V design
+  class D control
+  style RUN fill:#f7fbfb,stroke:#87afb5,color:#163c43
+  style DESIGN fill:#f8f9fe,stroke:#9aa7ce,color:#253266
