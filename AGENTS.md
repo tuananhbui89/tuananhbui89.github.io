@@ -6,3 +6,4 @@
 ## Writing for this website
 
 - Before creating or revising website prose, read [the example-based writing guide](.bad_examples/avoid_bad_examples.md). It is the maintained source of detailed writing rules and before/after evidence. Scale its guidance to the content: a long technical tutorial needs more orientation than a short news item.
+
